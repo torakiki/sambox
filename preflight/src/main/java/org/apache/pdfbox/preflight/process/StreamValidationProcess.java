@@ -21,6 +21,7 @@
 
 package org.apache.pdfbox.preflight.process;
 
+import static org.apache.commons.io.IOUtils.closeQuietly;
 import static org.apache.pdfbox.preflight.PreflightConstants.ERROR_SYNTAX_STREAM_DAMAGED;
 import static org.apache.pdfbox.preflight.PreflightConstants.ERROR_SYNTAX_STREAM_FX_KEYS;
 import static org.apache.pdfbox.preflight.PreflightConstants.ERROR_SYNTAX_STREAM_INVALID_FILTER;
@@ -32,15 +33,15 @@ import java.io.InputStream;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
-import static org.apache.commons.io.IOUtils.closeQuietly;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSObject;
-import org.apache.pdfbox.cos.COSStream;
-import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.cos.COSObjectKey;
+import org.apache.pdfbox.cos.COSStream;
+import org.apache.pdfbox.pdfparser.xref.XrefEntry;
+import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.preflight.PreflightContext;
 import org.apache.pdfbox.preflight.ValidationResult.ValidationError;
 import org.apache.pdfbox.preflight.exception.ValidationException;
@@ -206,15 +207,16 @@ public class StreamValidationProcess extends AbstractProcess
         try
         {
             ra = context.getSource().getInputStream();
-            Long offset = context.getDocument().getDocument().getXrefTable().get(new COSObjectKey(cObj));
+            XrefEntry entry = context.getDocument().getDocument().getXRefTable()
+                    .get(new COSObjectKey(cObj));
 
             // ---- go to the beginning of the object
             long skipped = 0;
-            if (offset != null)
+            if (entry != null)
             {
-                while (skipped != offset)
+                while (skipped != entry.getByteOffset())
                 {
-                    long curSkip = ra.skip(offset - skipped);
+                    long curSkip = ra.skip(entry.getByteOffset() - skipped);
                     if (curSkip < 0)
                     {
                         closeQuietly(ra);

@@ -29,7 +29,7 @@ import java.util.Map;
 import javax.activation.DataSource;
 
 import org.apache.pdfbox.cos.COSBase;
-import org.apache.pdfbox.pdfparser.XrefTrailerResolver;
+import org.apache.pdfbox.pdfparser.xref.TrailerMerger;
 import org.apache.pdfbox.preflight.ValidationResult.ValidationError;
 import org.apache.pdfbox.preflight.font.container.FontContainer;
 import org.apache.pdfbox.preflight.graphic.ICCProfileWrapper;
@@ -53,10 +53,7 @@ public class PreflightContext implements Closeable
      */
     protected DataSource source = null;
 
-    /**
-     * Contains all Xref/trailer objects and resolves them into single object using startxref reference.
-     */
-    private XrefTrailerResolver xrefTrailerResolver;
+    private TrailerMerger trailerMerger;
 
     /**
      * This wrapper contains the ICCProfile used by the PDF file.
@@ -119,14 +116,14 @@ public class PreflightContext implements Closeable
         return document;
     }
 
-    public XrefTrailerResolver getXrefTrailerResolver()
+    public TrailerMerger getTrailerMerger()
     {
-        return xrefTrailerResolver;
+        return trailerMerger;
     }
 
-    public void setXrefTrailerResolver(XrefTrailerResolver xrefTrailerResolver)
+    public void setTrailerMerger(TrailerMerger trailerMerger)
     {
-        this.xrefTrailerResolver = xrefTrailerResolver;
+        this.trailerMerger = trailerMerger;
     }
 
     /**

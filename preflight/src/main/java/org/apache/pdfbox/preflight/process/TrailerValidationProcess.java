@@ -45,9 +45,10 @@ import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSObject;
-import org.apache.pdfbox.cos.COSString;
-import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.cos.COSObjectKey;
+import org.apache.pdfbox.cos.COSString;
+import org.apache.pdfbox.pdfparser.xref.XrefEntry;
+import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.preflight.PreflightConstants;
 import org.apache.pdfbox.preflight.PreflightContext;
 import org.apache.pdfbox.preflight.ValidationResult.ValidationError;
@@ -95,14 +96,14 @@ public class TrailerValidationProcess extends AbstractProcess
      */
     protected void checkTrailersForLinearizedPDF14(PreflightContext ctx)
     {
-        COSDictionary first = ctx.getXrefTrailerResolver().getFirstTrailer();
+        COSDictionary first = ctx.getTrailerMerger().getFirstTrailer();
         if (first == null)
         {
             addValidationError(ctx, new ValidationError(ERROR_SYNTAX_TRAILER, "There are no trailer in the PDF file"));
         }
         else
         {
-            COSDictionary last = ctx.getXrefTrailerResolver().getLastTrailer();
+            COSDictionary last = ctx.getTrailerMerger().getLastTrailer();
             COSDocument cosDoc = new COSDocument();
             checkMainTrailer(ctx, first);
             if (!compareIds(first, last, cosDoc))
@@ -142,16 +143,16 @@ public class TrailerValidationProcess extends AbstractProcess
                 // Search First and Last trailers according to offset position.
                 for (COSObject co : xrefs)
                 {
-                    long offset = cosDocument.getXrefTable().get(new COSObjectKey(co));
-                    if (offset < min)
+                    XrefEntry entry = cosDocument.getXRefTable().get(new COSObjectKey(co));
+                    if (entry.getByteOffset() < min)
                     {
-                        min = offset;
+                        min = entry.getByteOffset();
                         firstTrailer = (COSDictionary) co.getObject();
                     }
 
-                    if (offset > max)
+                    if (entry.getByteOffset() > max)
                     {
-                        max = offset;
+                        max = entry.getByteOffset();
                         lastTrailer = (COSDictionary) co.getObject();
                     }
 

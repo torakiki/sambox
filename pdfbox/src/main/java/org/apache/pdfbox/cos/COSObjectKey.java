@@ -25,7 +25,7 @@ package org.apache.pdfbox.cos;
 public class COSObjectKey implements Comparable<COSObjectKey>
 {
     private long number;
-    private long generation;
+    private int generation;
 
     /**
      * PDFObjectKey constructor comment.
@@ -34,7 +34,7 @@ public class COSObjectKey implements Comparable<COSObjectKey>
      */
     public COSObjectKey(COSObject object)
     {
-        this( object.getObjectNumber().longValue(), object.getGenerationNumber().longValue() );
+        this(object.getObjectNumber().longValue(), object.getGenerationNumber().intValue());
     }
 
     /**
@@ -43,15 +43,12 @@ public class COSObjectKey implements Comparable<COSObjectKey>
      * @param num The object number.
      * @param gen The object generation number.
      */
-    public COSObjectKey(long num, long gen)
+    public COSObjectKey(long num, int gen)
     {
         number = num;
         generation = gen;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean equals(Object obj)
     {
@@ -65,7 +62,7 @@ public class COSObjectKey implements Comparable<COSObjectKey>
      *
      * @return The objects generation number.
      */
-    public long getGeneration()
+    public int getGeneration()
     {
         return generation;
     }
@@ -79,9 +76,6 @@ public class COSObjectKey implements Comparable<COSObjectKey>
         return number;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int hashCode()
     {
@@ -92,7 +86,7 @@ public class COSObjectKey implements Comparable<COSObjectKey>
      *
      * @param newGeneration The objects generation number.
      */
-    public void setGeneration(long newGeneration)
+    public void setGeneration(int newGeneration)
     {
         generation = newGeneration;
     }
@@ -106,42 +100,21 @@ public class COSObjectKey implements Comparable<COSObjectKey>
         number = newNumber;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString()
     {
         return "" + getNumber() + " " + getGeneration() + " R";
     }
 
-    /** {@inheritDoc} */
     @Override
     public int compareTo(COSObjectKey other)
     {
-        if (getNumber() < other.getNumber())
+        int compareNumber = Long.compare(getNumber(), other.getNumber());
+        if (compareNumber == 0)
         {
-            return -1;
+            return Integer.compare(getGeneration(), other.getGeneration());
         }
-        else if (getNumber() > other.getNumber())
-        {
-            return 1;
-        }
-        else
-        {
-            if (getGeneration() < other.getGeneration())
-            {
-                return -1;
-            }
-            else if (getGeneration() > other.getGeneration())
-            {
-                return 1;
-            }
-            else
-            {
-                return 0;
-            }
-        }
+        return compareNumber;
     }
 
 }

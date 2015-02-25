@@ -38,7 +38,7 @@ import org.apache.pdfbox.pdfwriter.COSWriterXRefEntry;
 /**
  * @author Alexander Funk
  */
-public class PDFXRefStream implements PDFXRef
+public class PDFXRefStream
 {
 
     private static final int ENTRY_OBJSTREAM = 2;

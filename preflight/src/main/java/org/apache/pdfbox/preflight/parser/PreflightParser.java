@@ -46,9 +46,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -64,15 +61,18 @@ import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSNull;
 import org.apache.pdfbox.cos.COSNumber;
 import org.apache.pdfbox.cos.COSObject;
+import org.apache.pdfbox.cos.COSObjectKey;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.pdfparser.BaseParser;
 import org.apache.pdfbox.pdfparser.COSParser;
 import org.apache.pdfbox.pdfparser.PDFObjectStreamParser;
 import org.apache.pdfbox.pdfparser.PDFParser;
-import org.apache.pdfbox.pdfparser.XrefTrailerResolver.XRefType;
+import org.apache.pdfbox.pdfparser.xref.CompressedXrefEntry;
+import org.apache.pdfbox.pdfparser.xref.Xref;
+import org.apache.pdfbox.pdfparser.xref.XrefEntry;
+import org.apache.pdfbox.pdfparser.xref.XrefType;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.cos.COSObjectKey;
 import org.apache.pdfbox.preflight.Format;
 import org.apache.pdfbox.preflight.PreflightConfiguration;
 import org.apache.pdfbox.preflight.PreflightConstants;
@@ -211,7 +211,7 @@ public class PreflightParser extends PDFParser
         this.ctx = new PreflightContext(this.originalDocument);
         ctx.setDocument(preflightDocument);
         preflightDocument.setContext(ctx);
-        ctx.setXrefTrailerResolver(xrefTrailerResolver);
+        ctx.setTrailerMerger(getTrailerMerger());
     }
 
     @Override
@@ -240,10 +240,10 @@ public class PreflightParser extends PDFParser
         super.initialParse();
         // For each ObjectKey, we check if the object has been loaded
         // useful for linearized PDFs
-        Map<COSObjectKey, Long> xrefTable = document.getXrefTable();
-        for (Entry<COSObjectKey, Long> entry : xrefTable.entrySet())
+        Xref xrefTable = document.getXRefTable();
+        for (XrefEntry entry : xrefTable.values())
         {
-            COSObject co = document.getObjectFromPool(entry.getKey());
+            COSObject co = document.getObjectFromPool(entry.key());
             if (co.getObject() == null)
             {
                 // object isn't loaded - parse the object to load its content
@@ -317,8 +317,7 @@ public class PreflightParser extends PDFParser
         {
             return false;
         }
-        String xref = readString();
-        if (!xref.equals("xref"))
+        if (!readString().equals("xref"))
         {
             addValidationError(new ValidationError(PreflightConstants.ERROR_SYNTAX_CROSS_REF,
                     "xref must be followed by a EOL character"));
@@ -329,9 +328,6 @@ public class PreflightParser extends PDFParser
             addValidationError(new ValidationError(PreflightConstants.ERROR_SYNTAX_CROSS_REF,
                     "xref must be followed by EOL"));
         }
-
-        // signal start of new XRef
-        xrefTrailerResolver.nextXrefObj(startByteOffset,XRefType.TABLE);
 
         /*
          * Xref tables can have multiple sections. Each starts with a starting object id and a count.
@@ -390,10 +386,9 @@ public class PreflightParser extends PDFParser
                 {
                     try
                     {
-                        long currOffset = Long.parseLong(splitString[0]);
-                        int currGenID = Integer.parseInt(splitString[1]);
-                        COSObjectKey objKey = new COSObjectKey(currObjID, currGenID);
-                        xrefTrailerResolver.setXRef(objKey, currOffset);
+                        getXref().add(
+                                XrefEntry.inUseEntry(currObjID, Long.parseLong(splitString[0]),
+                                Integer.parseInt(splitString[1])));
                     }
                     catch (NumberFormatException e)
                     {
@@ -618,7 +613,8 @@ public class PreflightParser extends PDFParser
     }
 
     @Override
-    protected COSBase parseObjectDynamically(int objNr, int objGenNr, boolean requireExistingNotCompressedObj)
+    protected COSBase parseObjectDynamically(long objNr, int objGenNr,
+            boolean requireExistingNotCompressedObj)
             throws IOException
     {
         // ---- create object key and get object (container) from pool
@@ -629,10 +625,10 @@ public class PreflightParser extends PDFParser
         {
             // not previously parsed
             // ---- read offset or object stream object number from xref table
-            Long offsetOrObjstmObNr = xrefTrailerResolver.getXrefTable().get(objKey);
+            XrefEntry xrefEntry = getXref().get(objKey);
 
             // sanity test to circumvent loops with broken documents
-            if (requireExistingNotCompressedObj && ((offsetOrObjstmObNr == null)))
+            if (requireExistingNotCompressedObj && (xrefEntry == null))
             {
                 addValidationError(new ValidationError(ERROR_SYNTAX_MISSING_OFFSET,
                         "Object must be defined and must not be compressed object: " + objKey.getNumber() + ":"
@@ -641,21 +637,21 @@ public class PreflightParser extends PDFParser
                         + objKey.getNumber() + ":" + objKey.getGeneration(), validationResult);
             }
 
-            if (offsetOrObjstmObNr == null)
+            if (xrefEntry == null)
             {
                 // not defined object -> NULL object (Spec. 1.7, chap. 3.2.9)
                 pdfObject.setObject(COSNull.NULL);
             }
-            else if (offsetOrObjstmObNr == 0)
+            else if (xrefEntry.getByteOffset() == 0)
             {
                 addValidationError(new ValidationError(ERROR_SYNTAX_INVALID_OFFSET, "Object {" + objKey.getNumber()
                         + ":" + objKey.getGeneration() + "} has an offset of 0"));
             }
-            else if (offsetOrObjstmObNr > 0)
+            else if (xrefEntry.getType() != XrefType.COMPRESSED)
             {
                 // offset of indirect object in file
                 // ---- go to object start
-                pdfSource.seek(offsetOrObjstmObNr);
+                pdfSource.seek(xrefEntry.getByteOffset());
                 // ---- we must have an indirect object
                 long readObjNr;
                 int readObjGen;
@@ -672,7 +668,10 @@ public class PreflightParser extends PDFParser
                 else
                 {
 
-                    addValidationError(new ValidationError(ERROR_SYNTAX_OBJ_DELIMITER, "Single space expected [offset="+offset+"; key="+offsetOrObjstmObNr.toString()+"; line="+line+"; object="+pdfObject.toString()+"]"));
+                    addValidationError(new ValidationError(ERROR_SYNTAX_OBJ_DELIMITER,
+                            "Single space expected [offset=" + offset + "; key="
+                                    + xrefEntry.getByteOffset() + "; line=" + line + "; object="
+                                    + pdfObject.toString() + "]"));
 
                     // reset pdfSource cursor to read object information
                     pdfSource.seek(offset);
@@ -720,7 +719,7 @@ public class PreflightParser extends PDFParser
                     {
                         // this is not legal
                         // the combination of a dict and the stream/endstream forms a complete stream object
-                        throw new IOException("Stream not preceded by dictionary (offset: " + offsetOrObjstmObNr + ").");
+                        throw new IOException("Stream not preceded by dictionary (offset: " + xrefEntry.getByteOffset() + ").");
                     }
                     skipSpaces();
                     endObjectOffset = pdfSource.getOffset();
@@ -750,7 +749,7 @@ public class PreflightParser extends PDFParser
                 if (!endObjectKey.startsWith("endobj"))
                 {
                     throw new IOException("Object (" + readObjNr + ":" + readObjGen + ") at offset "
-                            + offsetOrObjstmObNr + " does not end with 'endobj'.");
+                            + xrefEntry.getByteOffset() + " does not end with 'endobj'.");
                 }
                 else
                 {
@@ -772,28 +771,27 @@ public class PreflightParser extends PDFParser
             }
             else
             {
-                // xref value is object nr of object stream containing object to be parsed;
-                // since our object was not found it means object stream was not parsed so far
-                final int objstmObjNr = (int) (-offsetOrObjstmObNr);
-                final COSBase objstmBaseObj = parseObjectDynamically(objstmObjNr, 0, true);
+                XrefEntry containingStreamEntry = getXref().get(new COSObjectKey(
+                        ((CompressedXrefEntry) xrefEntry).getObjectStreamNumber(), 0));
+                final COSBase objstmBaseObj = parseObjectDynamically(
+                        containingStreamEntry.getObjectNumber(),
+                        containingStreamEntry.getGenerationNumber(), true);
                 if (objstmBaseObj instanceof COSStream)
                 {
                     // parse object stream
-                    PDFObjectStreamParser parser = new PDFObjectStreamParser((COSStream) objstmBaseObj, document);
+                    PDFObjectStreamParser parser = new PDFObjectStreamParser(
+                            (COSStream) objstmBaseObj, document);
                     parser.parse();
                     parser.close();
 
-                    // get set of object numbers referenced for this object stream
-                    final Set<Long> refObjNrs = xrefTrailerResolver.getContainedObjectNumbers(objstmObjNr);
-
-                    // register all objects which are referenced to be contained in object stream
+                    // register all objects which are referenced to be contained
+                    // in object stream
                     for (COSObject next : parser.getObjects())
                     {
                         COSObjectKey stmObjKey = new COSObjectKey(next);
-                        if (refObjNrs.contains(stmObjKey.getNumber()))
+                        if (getXref().contains(stmObjKey))
                         {
-                            COSObject stmObj = document.getObjectFromPool(stmObjKey);
-                            stmObj.setObject(next.getObject());
+                            document.getObjectFromPool(stmObjKey).setObject(next.getObject());
                         }
                     }
                 }

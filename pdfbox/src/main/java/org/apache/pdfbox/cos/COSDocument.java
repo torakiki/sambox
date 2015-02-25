@@ -16,6 +16,8 @@
  */
 package org.apache.pdfbox.cos;
 
+import static org.apache.pdfbox.util.RequireUtils.requireNotNullArg;
+
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -29,6 +31,8 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.pdfparser.PDFObjectStreamParser;
+import org.apache.pdfbox.pdfparser.xref.Xref;
+import org.apache.pdfbox.pdfparser.xref.XrefEntry;
 
 /**
  * This is the in-memory representation of the PDF document.  You need to call
@@ -54,11 +58,7 @@ public class COSDocument extends COSBase implements Closeable
     private final Map<COSObjectKey, COSObject> objectPool =
         new HashMap<COSObjectKey, COSObject>();
 
-    /**
-     * Maps object and generation id to object byte offsets.
-     */
-    private final Map<COSObjectKey, Long> xrefTable =
-        new HashMap<COSObjectKey, Long>();
+    private Xref xref = new Xref();
 
     /**
      * Document trailer dictionary.
@@ -536,6 +536,7 @@ public class COSDocument extends COSBase implements Closeable
      *
      * @throws IOException If there is an error parsing the stream.
      */
+    // TODO this is never used
     public void dereferenceObjectStreams() throws IOException
     {
         for( COSObject objStream : getObjectsByType( COSName.OBJ_STM ) )
@@ -543,12 +544,12 @@ public class COSDocument extends COSBase implements Closeable
             COSStream stream = (COSStream)objStream.getObject();
             PDFObjectStreamParser parser = new PDFObjectStreamParser(stream, this);
             parser.parse();
+            COSObjectKey streamKey = new COSObjectKey(objStream);
             for( COSObject next : parser.getObjects() )
             {
                 COSObjectKey key = new COSObjectKey( next );
-                if ( objectPool.get(key) == null || objectPool.get(key).getObject() == null ||
-                     // xrefTable stores negated objNr of objStream for objects in objStreams
-                     (xrefTable.containsKey(key) && xrefTable.get(key) == -objStream.getObjectNumber().longValue()) )
+                if (objectPool.get(key) == null || objectPool.get(key).getObject() == null
+                        || (xref.contains(streamKey) && xref.get(streamKey).owns(xref.get(key))))
                 {
                     COSObject obj = getObjectFromPool(key);
                     obj.setObject(next.getObject());
@@ -598,23 +599,39 @@ public class COSDocument extends COSBase implements Closeable
     }
 
     /**
-     * Populate XRef HashMap with given values.
-     * Each entry maps ObjectKeys to byte offsets in the file.
-     * @param xrefTableValues  xref table entries to be added
+     * Adds all the entries of the given xref to the document xref.
+     * 
+     * @param xref xref to read entries from
      */
-    public void addXRefTable( Map<COSObjectKey, Long> xrefTableValues )
+    public void addXRefTable(Xref xref)
     {
-        xrefTable.putAll( xrefTableValues );
+        for (XrefEntry entry : xref.values())
+        {
+            this.xref.add(entry);
+        }
     }
 
     /**
-     * Returns the xrefTable which is a mapping of ObjectKeys
-     * to byte offsets in the file.
-     * @return mapping of ObjectsKeys to byte offsets
+     * Adds the given entry to the document xref
+     * 
+     * @param entry
      */
-    public Map<COSObjectKey, Long> getXrefTable()
+    public void addXRefEntry(XrefEntry entry)
     {
-        return xrefTable;
+        this.xref.add(entry);
+    }
+
+    public void setXRefTable(Xref xref)
+    {
+        this.xref = xref;
+    }
+
+    /**
+     * @return the document xref
+     */
+    public Xref getXRefTable()
+    {
+        return xref;
     }
 
     /**

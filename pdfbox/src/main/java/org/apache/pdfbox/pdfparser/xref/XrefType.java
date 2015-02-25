@@ -14,23 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.pdfbox.pdfparser;
-
-import org.apache.pdfbox.cos.COSObject;
+package org.apache.pdfbox.pdfparser.xref;
 
 /**
- * @author Alexander Funk
- * @version $Revision: $
+ * Possible types of xref entry
+ * 
+ * @author Andrea Vacondio
+ *
  */
-public interface PDFXRef
+public enum XrefType
 {
-
-    /**
-     * Returns the object referenced by the given object number.
-     * 
-     * @param objectNumber the object to be returned
-     * @return the object corresponding to the given object number
-     */
-    
-    COSObject getObject(int objectNumber);
+    FREE, IN_USE, COMPRESSED;
 }

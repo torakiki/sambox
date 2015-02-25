@@ -26,8 +26,6 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSDictionary;
@@ -35,10 +33,11 @@ import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.cos.COSFloat;
 import org.apache.pdfbox.cos.COSInteger;
 import org.apache.pdfbox.cos.COSObject;
+import org.apache.pdfbox.cos.COSObjectKey;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.cos.COSString;
+import org.apache.pdfbox.pdfparser.xref.XrefEntry;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.cos.COSObjectKey;
 import org.junit.Test;
 
 public class TestCOSUtils
@@ -203,9 +202,7 @@ public class TestCOSUtils
 
     protected void addToXref(COSDocument doc, COSObjectKey key, long value)
     {
-        Map<COSObjectKey, Long> xrefTable = new HashMap<COSObjectKey, Long>(1);
-        xrefTable.put(key, value);
-        doc.addXRefTable(xrefTable);
+        doc.addXRefEntry(XrefEntry.inUseEntry(key.getNumber(), value, key.getGeneration()));
     }
 
     /**

@@ -29,6 +29,7 @@ import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashSet;
@@ -53,16 +54,17 @@ import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSNull;
 import org.apache.pdfbox.cos.COSNumber;
 import org.apache.pdfbox.cos.COSObject;
+import org.apache.pdfbox.cos.COSObjectKey;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.cos.ICOSVisitor;
 import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.pdfparser.PDFXRefStream;
+import org.apache.pdfbox.pdfparser.xref.XrefEntry;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.encryption.SecurityHandler;
 import org.apache.pdfbox.pdmodel.fdf.FDFDocument;
 import org.apache.pdfbox.pdmodel.interactive.digitalsignature.SignatureInterface;
-import org.apache.pdfbox.cos.COSObjectKey;
 import org.apache.pdfbox.util.Charsets;
 import org.apache.pdfbox.util.Hex;
 
@@ -262,11 +264,11 @@ public class COSWriter implements ICOSVisitor, Closeable
         {
           COSDocument cosDoc = doc.getDocument();
           
-          Map<COSObjectKey, Long> xrefTable = cosDoc.getXrefTable();
-          Set<COSObjectKey> keySet = xrefTable.keySet();
+                Collection<XrefEntry> entries = cosDoc.getXRefTable().values();
           long highestNumber=0;
-          for ( COSObjectKey cosObjectKey : keySet ) 
+                for (XrefEntry entry : entries)
           {
+                    COSObjectKey cosObjectKey = entry.key();
             COSBase object = cosDoc.getObjectFromPool(cosObjectKey).getObject();
             if (object != null && cosObjectKey!= null && !(object instanceof COSNumber))
             {
