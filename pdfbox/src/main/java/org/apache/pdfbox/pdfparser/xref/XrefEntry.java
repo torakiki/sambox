@@ -17,7 +17,6 @@
 package org.apache.pdfbox.pdfparser.xref;
 
 import static org.apache.pdfbox.util.RequireUtils.requireArg;
-import static org.apache.pdfbox.util.RequireUtils.requireNotNullArg;
 
 import org.apache.pdfbox.cos.COSObjectKey;
 
@@ -38,8 +37,8 @@ public class XrefEntry
 
     XrefEntry(XrefType type, long objectNumber, long byteOffset, int generationNumber)
     {
-        requireNotNullArg(type, "The type for the XrefEntry cannot be null");
-        requireArg(objectNumber >= 0, "object number cannot be negative");
+        requireArg(objectNumber >= 0 && generationNumber >= 0,
+                "Object number and generation number cannot be negative");
         this.type = type;
         this.key = new COSObjectKey(objectNumber, generationNumber);
         this.byteOffset = byteOffset;
@@ -72,7 +71,7 @@ public class XrefEntry
 
     public boolean isUnknownOffset()
     {
-        return this.byteOffset == UNKNOWN_OFFSET;
+        return this.byteOffset <= UNKNOWN_OFFSET;
     }
 
     public COSObjectKey key()
@@ -108,18 +107,6 @@ public class XrefEntry
     public static XrefEntry inUseEntry(long objectNumber, long byteOffset, int generationNumber)
     {
         return new XrefEntry(XrefType.IN_USE, objectNumber, byteOffset, generationNumber);
-    }
-
-    /**
-     * Factory method for an in use xref entry/table which has not been written yet and has an unknown offset
-     * 
-     * @param objectNumber object number of the next free object
-     * @param generationNumber
-     * @return the newly created instance
-     */
-    public static XrefEntry inUseEntry(long objectNumber, int generationNumber)
-    {
-        return new XrefEntry(XrefType.IN_USE, objectNumber, UNKNOWN_OFFSET, generationNumber);
     }
 
     /**

@@ -16,8 +16,6 @@
  */
 package org.apache.pdfbox.cos;
 
-import static org.apache.pdfbox.util.RequireUtils.requireNotNullArg;
-
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;

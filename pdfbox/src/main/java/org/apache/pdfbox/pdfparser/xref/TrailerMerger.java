@@ -16,12 +16,9 @@
  */
 package org.apache.pdfbox.pdfparser.xref;
 
-import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
-import org.apache.pdfbox.cos.COSName;
 
 /**
  * Component that can merge multiple trailers keeping a history of the merged ones.
@@ -32,7 +29,7 @@ import org.apache.pdfbox.cos.COSName;
 public final class TrailerMerger
 {
     private TreeMap<Long, COSDictionary> history = new TreeMap<>();
-    private COSDictionary trailer;
+    private COSDictionary trailer = new COSDictionary();
 
     /**
      * Merge the given dictionary to the current trailer. It doesn't overwrite values previously set.
@@ -42,24 +39,8 @@ public final class TrailerMerger
      */
     public void mergeTrailerWithoutOverwriting(long offset, COSDictionary toMerge)
     {
-        if (trailer == null)
-        {
-            trailer = new COSDictionary();
-        }
-        // TODO check what happens to existing INFO, PREV...
-        for (Map.Entry<COSName, COSBase> entry : toMerge.entrySet())
-        {
-            if (!trailer.containsKey(entry.getKey()))
-            {
-                trailer.setItem(entry.getKey(), entry.getValue());
-            }
-        }
+        trailer.mergeInto(toMerge);
         history.put(offset, toMerge);
-    }
-
-    public boolean hasTrailer()
-    {
-        return trailer != null;
     }
 
     public COSDictionary getTrailer()
@@ -67,11 +48,17 @@ public final class TrailerMerger
         return trailer;
     }
 
+    /**
+     * @return the first trailer that has been merged
+     */
     public COSDictionary getFirstTrailer()
     {
         return history.firstEntry().getValue();
     }
 
+    /**
+     * @return the last trailer that has been merged
+     */
     public COSDictionary getLastTrailer()
     {
         return history.lastEntry().getValue();
@@ -82,7 +69,7 @@ public final class TrailerMerger
      */
     public void reset()
     {
-        trailer = null;
+        trailer.clear();
         history.clear();
     }
 }
