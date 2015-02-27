@@ -148,15 +148,15 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <showDeprecation>true</showDeprecation>
-                    <target>1.7</target>
-                    <source>1.7</source>
+                    <target>1.6</target>
+                    <source>1.6</source>
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
             <plugin>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
-                    <source>1.7</source>
+                    <source>1.6</source>
                     <links>
                         <link>http://docs.oracle.com/javase/7/docs/api/</link>
                     </links>

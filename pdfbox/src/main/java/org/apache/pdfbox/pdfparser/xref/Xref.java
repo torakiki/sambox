@@ -30,7 +30,7 @@ import org.apache.pdfbox.cos.COSObjectKey;
  */
 public class Xref
 {
-    private HashMap<COSObjectKey, XrefEntry> data = new HashMap<>();
+    private HashMap<COSObjectKey, XrefEntry> data = new HashMap<COSObjectKey, XrefEntry>();
 
     /**
      * Adds the given entry to the {@link Xref} if an entry with the given object number is not already present.
@@ -41,8 +41,13 @@ public class Xref
      */
     public XrefEntry add(XrefEntry entry)
     {
-        return data.putIfAbsent(
-                new COSObjectKey(entry.getObjectNumber(), entry.getGenerationNumber()), entry);
+        XrefEntry current = data.get(entry.key());
+        if (current == null)
+        {
+            data.put(new COSObjectKey(entry.getObjectNumber(), entry.getGenerationNumber()), entry);
+        }
+        return current;
+        // JDK7 return data.putIfAbsent(new COSObjectKey(entry.getObjectNumber(), entry.getGenerationNumber()), entry);
     }
 
     /**

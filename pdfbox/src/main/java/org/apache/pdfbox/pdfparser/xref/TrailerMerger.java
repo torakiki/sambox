@@ -18,6 +18,8 @@ package org.apache.pdfbox.pdfparser.xref;
 
 import java.util.TreeMap;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSDictionary;
 
 /**
@@ -28,7 +30,9 @@ import org.apache.pdfbox.cos.COSDictionary;
  */
 public final class TrailerMerger
 {
-    private TreeMap<Long, COSDictionary> history = new TreeMap<>();
+    private static final Log LOG = LogFactory.getLog(TrailerMerger.class);
+
+    private TreeMap<Long, COSDictionary> history = new TreeMap<Long, COSDictionary>();
     private COSDictionary trailer = new COSDictionary();
 
     /**
@@ -39,6 +43,7 @@ public final class TrailerMerger
      */
     public void mergeTrailerWithoutOverwriting(long offset, COSDictionary toMerge)
     {
+        LOG.debug("Merging trailer at offset " + offset);
         trailer.mergeInto(toMerge);
         history.put(offset, toMerge);
     }
