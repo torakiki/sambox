@@ -158,15 +158,13 @@ public class PDNameTreeNode implements COSObjectable
             // root nodes with kids don't have Names
             if (isRootNode())
             {
-                node.setItem(COSName.NAMES, null);
+                node.removeItem(COSName.NAMES);
             }
         }
         else 
         {
-            // remove kids
-            node.setItem(COSName.KIDS, null);
-            // remove Limits 
-            node.setItem(COSName.LIMITS, null);
+            node.removeItem(COSName.KIDS);
+            node.removeItem(COSName.LIMITS);
         }
         calculateLimits();
     }
@@ -175,7 +173,7 @@ public class PDNameTreeNode implements COSObjectable
     {
         if (isRootNode())
         {
-            node.setItem(COSName.LIMITS, null);
+            node.removeItem(COSName.LIMITS);
         }
         else
         {
@@ -204,12 +202,12 @@ public class PDNameTreeNode implements COSObjectable
                     }
                     else
                     {
-                        node.setItem(COSName.LIMITS, null);
+                        node.removeItem(COSName.LIMITS);
                     }
                 }
                 catch (IOException exception)
                 {
-                    node.setItem(COSName.LIMITS, null);
+                    node.removeItem(COSName.LIMITS);
                     LOG.error("Error while calculating the Limits of a PageNameTreeNode:", exception);
                 }
             }

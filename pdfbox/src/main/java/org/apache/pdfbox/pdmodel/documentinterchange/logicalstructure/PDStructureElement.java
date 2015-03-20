@@ -285,7 +285,7 @@ public class PDStructureElement extends PDStructureNode
             }
             if (attributeObject.getCOSObject().equals(directA))
             {
-                this.getCOSDictionary().setItem(key, null);
+                this.getCOSDictionary().removeItem(key);
             }
         }
         attributeObject.setStructureElement(null);
@@ -459,7 +459,7 @@ public class PDStructureElement extends PDStructureNode
             }
             if (name.equals(directC))
             {
-                this.getCOSDictionary().setItem(key, null);
+                this.getCOSDictionary().removeItem(key);
             }
         }
     }

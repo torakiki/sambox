@@ -131,7 +131,7 @@ public class PDNumberTreeNode implements COSObjectable
         else if ( node.getDictionaryObject( COSName.NUMS ) == null )
         {
             // Remove limits if there are no kids and no numbers set.
-            node.setItem( COSName.LIMITS, null);
+            node.removeItem(COSName.LIMITS);
         }
         node.setItem( COSName.KIDS, COSArrayList.converterToCOSArray( kids ) );
     }

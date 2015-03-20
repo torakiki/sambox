@@ -23,9 +23,11 @@ import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
+
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.graphics.color.PDJPXColorSpace;
@@ -96,7 +98,7 @@ public final class JPXFilter extends Filter
             // "Decode shall be ignored, except in the case where the image is treated as a mask"
             if (!parameters.getBoolean(COSName.IMAGE_MASK, false))
             {
-                parameters.setItem(COSName.DECODE, null);
+                parameters.removeItem(COSName.DECODE);
             }
 
             // override dimensions, see PDFBOX-1735
