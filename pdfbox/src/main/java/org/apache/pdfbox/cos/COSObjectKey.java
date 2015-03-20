@@ -24,8 +24,8 @@ package org.apache.pdfbox.cos;
  */
 public class COSObjectKey implements Comparable<COSObjectKey>
 {
-    private long number;
-    private int generation;
+    private final long number;
+    private final int generation;
 
     /**
      * PDFObjectKey constructor comment.
@@ -34,7 +34,7 @@ public class COSObjectKey implements Comparable<COSObjectKey>
      */
     public COSObjectKey(COSObject object)
     {
-        this(object.getObjectNumber().longValue(), object.getGenerationNumber().intValue());
+        this(object.getObjectNumber(), object.getGenerationNumber());
     }
 
     /**
@@ -79,31 +79,13 @@ public class COSObjectKey implements Comparable<COSObjectKey>
     @Override
     public int hashCode()
     {
-        return (int)(number + generation);
-    }
-    /**
-     * This will set the objects generation number.
-     *
-     * @param newGeneration The objects generation number.
-     */
-    public void setGeneration(int newGeneration)
-    {
-        generation = newGeneration;
-    }
-    /**
-     * This will set the objects id.
-     *
-     * @param newNumber The objects number.
-     */
-    public void setNumber(long newNumber)
-    {
-        number = newNumber;
+        return Long.valueOf(number+generation).hashCode();
     }
 
     @Override
     public String toString()
     {
-        return "" + getNumber() + " " + getGeneration() + " R";
+        return Long.toString(number) + " " +  Integer.toString(generation) + " R";
     }
 
     @Override

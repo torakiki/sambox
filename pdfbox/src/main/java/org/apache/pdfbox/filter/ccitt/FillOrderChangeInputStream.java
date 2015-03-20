@@ -25,7 +25,6 @@ import java.io.InputStream;
 
 /**
  * This filtering input stream does a fill order change required for certain TIFF images.
- * @version $Revision$
  */
 public final class FillOrderChangeInputStream extends FilterInputStream
 {
@@ -39,6 +38,7 @@ public final class FillOrderChangeInputStream extends FilterInputStream
     }
 
     /** {@inheritDoc} */
+    @Override
     public int read(byte[] b, int off, int len) throws IOException
     {
         int result = super.read(b, off, len);
@@ -54,6 +54,7 @@ public final class FillOrderChangeInputStream extends FilterInputStream
     }
 
     /** {@inheritDoc} */
+    @Override
     public int read() throws IOException
     {
         int b = super.read();

@@ -22,8 +22,7 @@ import java.io.OutputStream;
 /**
  * This class represents a null PDF object.
  *
- * @author <a href="mailto:ben@benlitchfield.com">Ben Litchfield</a>
- * @version $Revision: 1.13 $
+ * @author Ben Litchfield
  */
 public final class COSNull extends COSBase
 {
@@ -64,7 +63,7 @@ public final class COSNull extends COSBase
      * @param output The stream to write to.
      * @throws IOException If there is an error writing to the stream.
      */
-    public void writePDF( OutputStream output ) throws IOException
+    public static void writePDF( OutputStream output ) throws IOException
     {
         output.write(NULL_BYTES);
     }

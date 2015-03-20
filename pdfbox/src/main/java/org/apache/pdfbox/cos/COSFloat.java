@@ -23,7 +23,7 @@ import java.math.BigDecimal;
 /**
  * This class represents a floating point number in a PDF document.
  *
- * @author <a href="mailto:ben@benlitchfield.com">Ben Litchfield</a>
+ * @author Ben Litchfield
  * 
  */
 public class COSFloat extends COSNumber
@@ -64,7 +64,7 @@ public class COSFloat extends COSNumber
         }
     }
 
-    private String removeNullDigits(String plainStringValue)
+    private static String removeNullDigits(String plainStringValue)
     {
         // remove fraction digit "0" only
         if (plainStringValue.indexOf('.') > -1 && !plainStringValue.endsWith(".0"))

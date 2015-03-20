@@ -216,7 +216,7 @@ public class PreflightContext implements Closeable
      */
     public void addValidationError(ValidationError error)
     {
-        PreflightDocument pfDoc = (PreflightDocument) this.document;
+        PreflightDocument pfDoc = this.document;
         error.setPageNumber(currentPageNumber);
         pfDoc.addValidationError(error);
     }
@@ -228,7 +228,7 @@ public class PreflightContext implements Closeable
      */
     public void addValidationErrors(List<ValidationError> errors)
     {
-        PreflightDocument pfDoc = (PreflightDocument) this.document;
+        PreflightDocument pfDoc = this.document;
         for (ValidationError error : errors)
         {
             pfDoc.addValidationError(error);

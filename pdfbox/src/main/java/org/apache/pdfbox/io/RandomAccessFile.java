@@ -25,8 +25,7 @@ import java.io.IOException;
  * An interface to allow temp PDF data to be stored in a scratch
  * file on the disk to reduce memory consumption.
  *
- * @author <a href="mailto:ben@benlitchfield.com">Ben Litchfield</a>
- * @version $Revision: 1.2 $
+ * @author Ben Litchfield
  */
 public class RandomAccessFile implements RandomAccess, Closeable
 {
@@ -68,7 +67,8 @@ public class RandomAccessFile implements RandomAccess, Closeable
      * {@inheritDoc}
      */
     @Override
-    public long getPosition() throws IOException {
+    public long getPosition() throws IOException
+    {
         return ras.getFilePointer();
     }
     

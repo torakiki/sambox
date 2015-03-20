@@ -28,14 +28,11 @@ import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSObject;
 import org.apache.pdfbox.pdmodel.common.COSArrayList;
 import org.apache.pdfbox.pdmodel.common.COSObjectable;
-import org.apache.pdfbox.pdmodel.graphics.PDXObject;
-import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotation;
 
 /**
  * A node in the structure tree.
  * 
- * @author Koch
- * @version $Revision: $
+ * @author Johannes Koch
  */
 public abstract class PDStructureNode implements COSObjectable
 {
@@ -124,7 +121,7 @@ public abstract class PDStructureNode implements COSObjectable
             while (kids.hasNext())
             {
                 COSBase kid = kids.next();
-                Object kidObject = this.createObject(kid);
+                Object kidObject = PDStructureNode.createObject(kid);
                 if (kidObject != null)
                 {
                     kidObjects.add(kidObject);
@@ -133,7 +130,7 @@ public abstract class PDStructureNode implements COSObjectable
         }
         else
         {
-            Object kidObject = this.createObject(k);
+            Object kidObject = PDStructureNode.createObject(k);
             if (kidObject != null)
             {
                 kidObjects.add(kidObject);
@@ -245,7 +242,7 @@ public abstract class PDStructureNode implements COSObjectable
      */
     protected void insertBefore(COSBase newKid, Object refKid)
     {
-        if ((newKid == null) || (refKid == null))
+        if (newKid == null || refKid == null)
         {
             return;
         }
@@ -261,7 +258,7 @@ public abstract class PDStructureNode implements COSObjectable
         }
         else if (refKid instanceof COSInteger)
         {
-            refKidBase = (COSInteger) refKid;
+            refKidBase = (COSBase) refKid;
         }
         if (k instanceof COSArray)
         {
@@ -380,7 +377,7 @@ public abstract class PDStructureNode implements COSObjectable
      * @param kid the kid
      * @return the object
      */
-    protected Object createObject(COSBase kid)
+    protected static Object createObject(COSBase kid)
     {
         COSDictionary kidDic = null;
         if (kid instanceof COSDictionary)

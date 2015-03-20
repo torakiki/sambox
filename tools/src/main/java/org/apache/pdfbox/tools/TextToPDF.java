@@ -35,8 +35,7 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font;
 /**
  * This will take a text file and ouput a pdf with that text.
  *
- * @author <a href="ben@benlitchfield.com">Ben Litchfield</a>
- * @version $Revision: 1.4 $
+ * @author Ben Litchfield
  */
 public class TextToPDF
 {
@@ -152,7 +151,6 @@ public class TextToPDF
                                 margin, y);
 
                     }
-                    //System.out.println( "Drawing string at " + x + "," + y );
 
                     if( contentStream == null )
                     {

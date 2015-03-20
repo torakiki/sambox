@@ -17,7 +17,6 @@
 package org.apache.pdfbox.pdfparser;
 
 import java.io.IOException;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -35,8 +34,7 @@ import org.apache.pdfbox.pdfparser.xref.XrefEntry;
  * This will parse a PDF 1.5 (or better) Xref stream and
  * extract the xref information from the stream.
  *
- *  @author <a href="mailto:justinl@basistech.com">Justin LeFebvre</a>
- *  @version $Revision: 1.0 $
+ *  @author Justin LeFebvre
  */
 public class PDFXrefStreamParser extends BaseParser
 {
@@ -82,7 +80,7 @@ public class PDFXrefStreamParser extends BaseParser
                 indexArray.add(stream.getDictionaryObject(COSName.SIZE));
             }
 
-            ArrayList<Integer> objNums = new ArrayList<Integer>();
+            ArrayList<Long> objNums = new ArrayList<Long>();
 
             /*
              * Populates objNums with all object numbers available
@@ -90,14 +88,14 @@ public class PDFXrefStreamParser extends BaseParser
             Iterator<COSBase> indexIter = indexArray.iterator();
             while(indexIter.hasNext())
             {
-                int objID = ((COSInteger)indexIter.next()).intValue();
+                long objID = ((COSInteger)indexIter.next()).longValue();
                 int size = ((COSInteger)indexIter.next()).intValue();
                 for(int i = 0; i < size; i++)
                 {
                     objNums.add(objID + i);
                 }
             }
-            Iterator<Integer> objIter = objNums.iterator();
+            Iterator<Long> objIter = objNums.iterator();
             // TODO END Refactor all this is just to get object numbers
             /*
              * Calculating the size of the line in bytes
@@ -113,7 +111,7 @@ public class PDFXrefStreamParser extends BaseParser
                 pdfSource.read(currLine);
 
                 // Need to remember the current objID
-                Integer objID = objIter.next();
+                Long objID = objIter.next();
 
                 int type = 0;
                 /*

@@ -23,17 +23,20 @@ import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.pdfbox.cos.COSDictionary;
-import org.w3c.dom.Element;
+import java.lang.reflect.Field;
 
 import javax.imageio.IIOException;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.metadata.IIOMetadata;
+import javax.imageio.metadata.IIOMetadataNode;
 import javax.imageio.stream.ImageInputStream;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.pdfbox.cos.COSDictionary;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 /**
  * Decompresses data encoded using a DCT (discrete cosine transform)
@@ -46,7 +49,7 @@ final class DCTFilter extends Filter
     private static final Log LOG = LogFactory.getLog(DCTFilter.class);
 
     @Override
-    public final DecodeResult decode(InputStream encoded, OutputStream decoded,
+    public DecodeResult decode(InputStream encoded, OutputStream decoded,
                                          COSDictionary parameters, int index) throws IOException
     {
         ImageReader reader = findImageReader("JPEG", "a suitable JAI I/O image filter is not installed");
@@ -62,17 +65,32 @@ final class DCTFilter extends Filter
             }
             
             reader.setInput(iis);
+            
+            String numChannels = getNumChannels(reader);
 
             // get the raster using horrible JAI workarounds
             ImageIO.setUseCache(false);
             Raster raster;
-            try
+
+            // Strategy: use read() for RGB or "can't get metadata"
+            // use readRaster() for CMYK and gray and as fallback if read() fails 
+            // after "can't get metadata" because "no meta" file was CMYK
+            if ("3".equals(numChannels) || numChannels.isEmpty())
             {
-                // I'd like to use ImageReader#readRaster but it is buggy and can't read RGB correctly
-                BufferedImage image = reader.read(0);
-                raster = image.getRaster();
+                try
+                {
+                    // I'd like to use ImageReader#readRaster but it is buggy and can't read RGB correctly
+                    BufferedImage image = reader.read(0);
+                    raster = image.getRaster();
+                }
+                catch (IIOException e)
+                {
+                    // JAI can't read CMYK JPEGs using ImageReader#read or ImageIO.read but
+                    // fortunately ImageReader#readRaster isn't buggy when reading 4-channel files
+                    raster = reader.readRaster(0, null);
+                }
             }
-            catch (IIOException e)
+            else
             {
                 // JAI can't read CMYK JPEGs using ImageReader#read or ImageIO.read but
                 // fortunately ImageReader#readRaster isn't buggy when reading 4-channel files
@@ -91,18 +109,59 @@ final class DCTFilter extends Filter
                 catch (IIOException e)
                 {
                     // catches the error "Inconsistent metadata read from stream"
-                    // which seems to be present indicate a YCCK image, but who knows?
-                    LOG.warn("Inconsistent metadata read from JPEG stream");
-                    transform = 2; // YCCK
+                    // if we're using the Sun decoder then can be caused by either a YCCK
+                    // image or by a CMYK image which the decoder has problems reading
+                    try
+                    {
+                        // if this is Sun's decoder, use reflection to determine if the 
+                        // color space is CMYK or YCCK
+                        Field field = reader.getClass().getDeclaredField("colorSpaceCode");
+                        field.setAccessible(true);
+                        int colorSpaceCode = field.getInt(reader);
+                        
+                        if (colorSpaceCode == 7 || colorSpaceCode == 8 || colorSpaceCode == 9 || colorSpaceCode == 11)
+                        {
+                            // YCCK
+                            transform = 2;
+                        }
+                        else if (colorSpaceCode == 4)
+                        {
+                            // CMYK
+                            transform = 0;
+                        }
+                        else
+                        {
+                            throw new IOException("Unexpected color space: " + colorSpaceCode);
+                        }
+                    }
+                    catch (NoSuchFieldException e1)
+                    {
+                        // error from non-Sun JPEG decoder
+                        throw e;
+                    }
+                    catch (IllegalAccessException e1)
+                    {
+                        // error from non-Sun JPEG decoder
+                        throw e;
+                    }
                 }
                 int colorTransform = transform != null ? transform : 0;
 
                 // 0 = Unknown (RGB or CMYK), 1 = YCbCr, 2 = YCCK
                 switch (colorTransform)
                 {
-                    case 0: break; // already CMYK
-                    case 1: LOG.warn("YCbCr JPEGs not implemented"); break; // TODO YCbCr
-                    case 2: raster = fromYCCKtoCMYK(raster); break;
+                    case 0:
+                        // already CMYK
+                        break;
+                    case 1:
+                        // TODO YCbCr
+                        LOG.warn("YCbCr JPEGs not implemented");
+                        break;
+                    case 2:
+                        raster = fromYCCKtoCMYK(raster);
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Unknown colorTransform");
                 }
             }
             else if (raster.getNumBands() == 3)
@@ -125,24 +184,24 @@ final class DCTFilter extends Filter
         return new DecodeResult(parameters);
     }
 
-    // reads the APP14 Adobe transform tag
-    private Integer getAdobeTransform(IIOMetadata metadata)
+    // reads the APP14 Adobe transform tag and returns its value, or 0 if unknown
+    private static Integer getAdobeTransform(IIOMetadata metadata)
     {
         Element tree = (Element)metadata.getAsTree("javax_imageio_jpeg_image_1.0");
         Element markerSequence = (Element)tree.getElementsByTagName("markerSequence").item(0);
-
-        if (markerSequence.getElementsByTagName("app14Adobe") != null)
+        NodeList app14AdobeNodeList = markerSequence.getElementsByTagName("app14Adobe");
+        if (app14AdobeNodeList != null && app14AdobeNodeList.getLength() > 0)
         {
-            Element adobe = (Element)markerSequence.getElementsByTagName("app14Adobe").item(0);
+            Element adobe = (Element) app14AdobeNodeList.item(0);
             return Integer.parseInt(adobe.getAttribute("transform"));
         }
-        return 0; // Unknown
+        return 0;
     }
 
     // converts YCCK image to CMYK. YCCK is an equivalent encoding for
     // CMYK data, so no color management code is needed here, nor does the
     // PDF color space have to be consulted
-    private WritableRaster fromYCCKtoCMYK(Raster raster) throws IOException
+    private static WritableRaster fromYCCKtoCMYK(Raster raster)
     {
         WritableRaster writableRaster = raster.createCompatibleWritableRaster();
 
@@ -181,7 +240,7 @@ final class DCTFilter extends Filter
     }
 
     // converts from BGR to RGB
-    private WritableRaster fromBGRtoRGB(Raster raster) throws IOException
+    private static WritableRaster fromBGRtoRGB(Raster raster)
     {
         WritableRaster writableRaster = raster.createCompatibleWritableRaster();
 
@@ -203,15 +262,39 @@ final class DCTFilter extends Filter
         }
         return writableRaster;
     }
+    
+    // returns the number of channels as a string, or an empty string if there is an error getting the meta data
+    private static String getNumChannels(ImageReader reader)
+    {
+        try
+        {
+            IIOMetadata imageMetadata = reader.getImageMetadata(0);
+            if (imageMetadata == null)
+            {
+                return "";
+            }
+            IIOMetadataNode metaTree = (IIOMetadataNode) imageMetadata.getAsTree("javax_imageio_1.0");
+            Element numChannelsItem = (Element) metaTree.getElementsByTagName("NumChannels").item(0);
+            if (numChannelsItem == null)
+            {
+                return "";
+            }
+            return numChannelsItem.getAttribute("value");
+        }
+        catch (IOException e)
+        {
+            return "";
+        }
+    }    
 
     // clamps value to 0-255 range
-    private int clamp(float value)
+    private static int clamp(float value)
     {
         return (int)((value < 0) ? 0 : ((value > 255) ? 255 : value));
     }
 
     @Override
-    protected final void encode(InputStream input, OutputStream encoded, COSDictionary parameters)
+    protected void encode(InputStream input, OutputStream encoded, COSDictionary parameters)
             throws IOException
     {
         LOG.warn("DCTFilter#encode is not implemented yet, skipping this stream.");

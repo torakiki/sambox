@@ -296,7 +296,8 @@ public class StreamValidationProcess extends AbstractProcess
                     }
                     else
                     {
-                        if (!endStream.startsWith("endStream")) {
+                        if (!endStream.startsWith("endStream"))
+                        {
                              addStreamLengthValidationError(context, cObj, length, endStream);
                         }
                     }

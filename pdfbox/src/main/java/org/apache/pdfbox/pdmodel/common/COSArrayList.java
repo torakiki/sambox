@@ -36,13 +36,12 @@ import org.apache.pdfbox.cos.COSObject;
 /**
  * This is an implementation of a List that will sync its contents to a COSArray.
  *
- * @author <a href="mailto:ben@benlitchfield.com">Ben Litchfield</a>
- * @version $Revision: 1.15 $
+ * @author Ben Litchfield
  */
 public class COSArrayList<E> implements List<E>
 {
-    private COSArray array;
-    private List<E> actual;
+    private final COSArray array;
+    private final List<E> actual;
 
     private COSDictionary parentDict;
     private COSName dictKey;

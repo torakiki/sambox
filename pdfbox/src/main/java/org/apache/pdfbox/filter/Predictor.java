@@ -18,6 +18,7 @@ package org.apache.pdfbox.filter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
 import org.apache.pdfbox.io.IOUtils;
 
 /**
@@ -56,16 +57,14 @@ public final class Predictor
                 if (predictor >= 10)
                 {
                     // PNG predictor; each row starts with predictor type (0, 1, 2, 3, 4)
-                    linepredictor = in.read();// read per line predictor
+                    // read per line predictor
+                    linepredictor = in.read();
                     if (linepredictor == -1)
                     {
                         return;
                     }
-                    else
-                    {
-                        // add 10 to tread value 0 as 10, 1 as 11, ...
-                        linepredictor += 10;
-                    }
+                    // add 10 to tread value 0 as 10, 1 as 11, ...
+                    linepredictor += 10;
                 }
 
                 // read line

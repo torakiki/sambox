@@ -27,8 +27,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * The standard structure types.
  * 
- * @author <a href="mailto:Johannes%20Koch%20%3Ckoch@apache.org%3E">Johannes Koch</a>
- * @version $Revision: $
+ * @author Johannes Koch
  */
 public class StandardStructureTypes
 {
@@ -310,10 +309,12 @@ public class StandardStructureTypes
                 try
                 {
                     types.add(field.get(null).toString());
-                }catch (IllegalArgumentException e)
+                }
+                catch (IllegalArgumentException e)
                 {
                     LOG.error(e,e);
-                }catch (IllegalAccessException e)
+                }
+                catch (IllegalAccessException e)
                 {
                     LOG.error(e,e);
                 }

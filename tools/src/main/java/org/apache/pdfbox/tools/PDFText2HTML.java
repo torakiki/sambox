@@ -25,14 +25,14 @@ import java.util.Set;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.font.PDFontDescriptor;
-import org.apache.pdfbox.util.PDFTextStripper;
+import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.text.TextPosition;
 
 /**
  * Wrap stripped text in simple HTML, trying to form HTML paragraphs. Paragraphs
  * broken by pages, columns, or figures are not mended.
  *
- * @author jjb - http://www.johnjbarton.com
+ * @author John J Barton
  * 
  */
 public class PDFText2HTML extends PDFTextStripper

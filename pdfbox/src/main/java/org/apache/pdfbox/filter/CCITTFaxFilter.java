@@ -20,15 +20,14 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.filter.ccitt.TIFFFaxDecoder;
-import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.filter.ccitt.CCITTFaxG31DDecodeInputStream;
 import org.apache.pdfbox.filter.ccitt.FillOrderChangeInputStream;
+import org.apache.pdfbox.filter.ccitt.TIFFFaxDecoder;
+import org.apache.pdfbox.io.IOUtils;
 
 /**
  * Decodes image data that has been encoded using either Group 3 or Group 4
@@ -43,7 +42,7 @@ final class CCITTFaxFilter extends Filter
     private static final Log LOG = LogFactory.getLog(CCITTFaxFilter.class);
 
     @Override
-    public final DecodeResult decode(InputStream encoded, OutputStream decoded,
+    public DecodeResult decode(InputStream encoded, OutputStream decoded,
                                          COSDictionary parameters, int index) throws IOException
     {
         DecodeResult result = new DecodeResult(new COSDictionary());
@@ -116,7 +115,7 @@ final class CCITTFaxFilter extends Filter
         return new DecodeResult(parameters);
     }
 
-    private void invertBitmap(byte[] bufferData)
+    private static void invertBitmap(byte[] bufferData)
     {
         for (int i = 0, c = bufferData.length; i < c; i++)
         {
@@ -125,7 +124,7 @@ final class CCITTFaxFilter extends Filter
     }
 
     @Override
-    protected final void encode(InputStream input, OutputStream encoded, COSDictionary parameters)
+    protected void encode(InputStream input, OutputStream encoded, COSDictionary parameters)
             throws IOException
     {
         LOG.warn("CCITTFaxDecode.encode is not implemented yet, skipping this stream.");

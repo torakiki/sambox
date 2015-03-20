@@ -356,7 +356,8 @@ public final class Matrix implements Cloneable
      *
      * @param point point to transform
      */
-    public void transform(Point2D point) {
+    public void transform(Point2D point)
+    {
         float x = (float)point.getX();
         float y = (float)point.getY();
         float a = single[0];
@@ -374,7 +375,8 @@ public final class Matrix implements Cloneable
      * @param x x-coordinate
      * @param y y-coordinate
      */
-    public Point2D.Float transformPoint(float x, float y) {
+    public Point2D.Float transformPoint(float x, float y)
+    {
         float a = single[0];
         float b = single[1];
         float c = single[3];
@@ -389,7 +391,8 @@ public final class Matrix implements Cloneable
      *
      * @param vector @2D vector
      */
-    public Vector transform(Vector vector) {
+    public Vector transform(Vector vector)
+    {
         float a = single[0];
         float b = single[1];
         float c = single[3];
@@ -481,7 +484,7 @@ public final class Matrix implements Cloneable
      * @param theta The angle of rotation measured in radians
      * @param tx The x translation.
      * @param ty The y translation.
-     * @return A new matrix with just the x/y translating.
+     * @return A new matrix with the rotation and the x/y translating.
      */
     public static Matrix getRotateInstance(double theta, float tx, float ty)
     {

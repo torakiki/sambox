@@ -48,8 +48,7 @@ import org.apache.pdfbox.cos.COSObjectKey;
  * This class is used to contain parsing logic that will be used by both the
  * PDFParser and the COSStreamParser.
  *
- * @author <a href="mailto:ben@benlitchfield.com">Ben Litchfield</a>
- * @version $Revision$
+ * @author Ben Litchfield
  */
 public abstract class BaseParser implements Closeable
 {
@@ -248,7 +247,7 @@ public abstract class BaseParser implements Closeable
             {
                 throw new IOException("expected number, actual=" + number + " at offset " + genOffset);
             }
-            COSObjectKey key = new COSObjectKey(((COSInteger) number).intValue(),
+            COSObjectKey key = new COSObjectKey(((COSInteger) number).longValue(),
                     ((COSInteger) generationNumber).intValue());
             retval = document.getObjectFromPool(key);
         }
@@ -411,9 +410,8 @@ public abstract class BaseParser implements Closeable
                 pdfSource.unread( whitespace );
             }
 
-            /*This needs to be dic.getItem because when we are parsing, the underlying object
-             * might still be null.
-             */
+            // This needs to be dic.getItem because when we are parsing, the underlying object
+            // might still be null.
             COSBase streamLength = dic.getItem(COSName.LENGTH);
 
             //Need to keep track of the
@@ -580,7 +578,8 @@ public abstract class BaseParser implements Closeable
         int charMatchCount = 0;
         byte[] keyw = ENDSTREAM;
         
-        final int quickTestOffset = 5;  // last character position of shortest keyword ('endobj')
+        // last character position of shortest keyword ('endobj')
+        final int quickTestOffset = 5;
         
         // read next chunk into buffer; already matched chars are added to beginning of buffer
         while ( ( bufSize = pdfSource.read( strmBuf, charMatchCount, STRMBUFLEN - charMatchCount ) ) > 0 ) 
@@ -612,7 +611,8 @@ public abstract class BaseParser implements Closeable
                     }
                 }
                 
-                final byte ch = strmBuf[bIdx];  // could be negative - but we only compare to ASCII
+                // could be negative - but we only compare to ASCII
+                final byte ch = strmBuf[bIdx];
             
                 if ( ch == keyw[ charMatchCount ] ) 
                 {
@@ -994,7 +994,7 @@ public abstract class BaseParser implements Closeable
                     if (po.get(po.size()-1) instanceof COSInteger)
                     {
                         COSInteger number = (COSInteger)po.remove( po.size() -1 );
-                        COSObjectKey key = new COSObjectKey(number.intValue(), genNumber.intValue());
+                        COSObjectKey key = new COSObjectKey(number.longValue(), genNumber.intValue());
                         pbo = document.getObjectFromPool(key);
                     }
                     else
@@ -1274,8 +1274,6 @@ public abstract class BaseParser implements Closeable
                 //so we are more compatible with POS writers that don't
                 //follow the spec
                 String badString = readString();
-                //throw new IOException( "Unknown dir object c='" + c +
-                //"' peek='" + (char)pdfSource.peek() + "' " + pdfSource );
                 if( badString == null || badString.length() == 0 )
                 {
                     int peek = pdfSource.peek();

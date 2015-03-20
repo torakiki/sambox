@@ -23,11 +23,9 @@ import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
-
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.graphics.color.PDJPXColorSpace;
@@ -50,7 +48,7 @@ import org.apache.pdfbox.pdmodel.graphics.color.PDJPXColorSpace;
 public final class JPXFilter extends Filter
 {
     @Override
-    public final DecodeResult decode(InputStream encoded, OutputStream decoded,
+    public DecodeResult decode(InputStream encoded, OutputStream decoded,
                                          COSDictionary parameters, int index) throws IOException
     {
         DecodeResult result = new DecodeResult(new COSDictionary());
@@ -69,7 +67,7 @@ public final class JPXFilter extends Filter
     }
 
     // try to read using JAI Image I/O
-    private BufferedImage readJPX(InputStream input, DecodeResult result) throws IOException
+    private static BufferedImage readJPX(InputStream input, DecodeResult result) throws IOException
     {
         ImageReader reader = findImageReader("JPEG2000", "Java Advanced Imaging (JAI) Image I/O Tools are not installed");
         ImageInputStream iis = null;
@@ -124,7 +122,7 @@ public final class JPXFilter extends Filter
     }
 
     @Override
-    protected final void encode(InputStream input, OutputStream encoded, COSDictionary parameters)
+    protected void encode(InputStream input, OutputStream encoded, COSDictionary parameters)
             throws IOException
     {
         throw new UnsupportedOperationException("JPX encoding not implemented");

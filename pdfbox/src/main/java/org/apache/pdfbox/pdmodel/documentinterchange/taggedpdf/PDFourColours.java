@@ -25,13 +25,12 @@ import org.apache.pdfbox.pdmodel.graphics.color.PDGamma;
 /**
  * An object for four colours.
  *
- * @author <a href="mailto:Johannes%20Koch%20%3Ckoch@apache.org%3E">Johannes Koch</a>
- * @version $Revision: $
+ * @author Johannes Koch
  */
 public class PDFourColours implements COSObjectable
 {
 
-    private COSArray array;
+    private final COSArray array;
 
     public PDFourColours()
     {
@@ -140,6 +139,7 @@ public class PDFourColours implements COSObjectable
     /**
      * {@inheritDoc}
      */
+    @Override
     public COSBase getCOSObject()
     {
         return this.array;

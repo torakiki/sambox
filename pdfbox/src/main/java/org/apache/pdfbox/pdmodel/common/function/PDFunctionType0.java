@@ -31,8 +31,8 @@ import org.apache.pdfbox.pdmodel.common.PDRange;
 /**
  * This class represents a type 0 function in a PDF document.
  *
- * @author <a href="mailto:ben@benlitchfield.com">Ben Litchfield</a>
- * @author Tilman Hausherr <tilman@snafu.de>
+ * @author Ben Litchfield
+ * @author Tilman Hausherr
  * 
  */
 public class PDFunctionType0 extends PDFunction
@@ -325,9 +325,12 @@ public class PDFunctionType0 extends PDFunction
      */
     class Rinterpol
     {
-        final float[] in; // coordinate that is to be interpolated
-        final int[] inPrev; // coordinate of the "ceil" point
-        final int[] inNext; // coordinate of the "floor" point
+        // coordinate that is to be interpolated
+        final float[] in;
+        // coordinate of the "ceil" point
+        final int[] inPrev;
+        // coordinate of the "floor" point
+        final int[] inNext;
         final int numberOfInputValues;
         final int numberOfOutputValues = getNumberOfOutputParameters();
 

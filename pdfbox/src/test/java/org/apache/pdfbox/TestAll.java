@@ -28,6 +28,7 @@ import org.apache.pdfbox.io.TestIOUtils;
 import org.apache.pdfbox.io.TestRandomAccessBuffer;
 import org.apache.pdfbox.filter.ccitt.TestCCITTFaxG31DDecodeInputStream;
 import org.apache.pdfbox.filter.ccitt.TestPackedBitArray;
+import org.apache.pdfbox.multipdf.TestLayerUtility;
 import org.apache.pdfbox.pdmodel.TestFDF;
 import org.apache.pdfbox.pdmodel.TestPDDocument;
 import org.apache.pdfbox.pdmodel.TestPDDocumentInformation;
@@ -43,7 +44,7 @@ import org.apache.pdfbox.util.TestMatrix;
  * This is a holder for all test cases in the pdfbox system.
  * It's part of the ant build and isn't used by the maven build.
  *
- * @author <a href="mailto:ben@benlitchfield.com">Ben Litchfield</a>
+ * @author Ben Litchfield
  * 
  */
 public class TestAll extends TestCase
@@ -89,7 +90,7 @@ public class TestAll extends TestCase
         suite.addTestSuite( TestPDDocument.class );
         suite.addTestSuite( TestPDDocumentInformation.class );
         suite.addTestSuite( TestOptionalContentGroups.class );
-        suite.addTestSuite( org.apache.pdfbox.util.TestLayerUtility.class );
+        suite.addTestSuite( TestLayerUtility.class );
         suite.addTest( org.apache.pdfbox.pdmodel.common.function.TestFunctions.suite() );
 
         suite.addTestSuite( TestIOUtils.class );

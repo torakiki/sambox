@@ -26,8 +26,6 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.fontbox.util.BoundingBox;
-import org.apache.pdfbox.cos.COSFloat;
-import org.apache.pdfbox.cos.COSInteger;
 import org.apache.pdfbox.cos.COSNumber;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.font.PDType3CharProc;
@@ -149,13 +147,9 @@ public class PreflightType3Stream extends PreflightStreamEngine
         {
             width = ((Number) obj).intValue();
         }
-        else if (obj instanceof COSInteger)
+        else if (obj instanceof COSNumber)
         {
-            width = ((COSInteger) obj).floatValue();
-        }
-        else if (obj instanceof COSFloat)
-        {
-            width = ((COSFloat) obj).floatValue();
+            width = ((COSNumber) obj).floatValue();
         }
         else
         {

@@ -39,7 +39,8 @@ public abstract class AbstractTypeTester
 
     private Random counterRandom = new Random(COUNTER_SEED);
 
-    protected void initializeSeed (Random rand) {
+    protected void initializeSeed(Random rand)
+    {
         this.counterRandom = rand;
     }
 
@@ -114,7 +115,7 @@ public abstract class AbstractTypeTester
         }
         else if (type.getImplementingClass() == IntegerType.class)
         {
-            return new Integer(counterRandom.nextInt());
+            return counterRandom.nextInt();
         }
         else
         {

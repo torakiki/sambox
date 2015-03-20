@@ -25,7 +25,6 @@ import java.util.Map;
  * This class represents a CharStringCommand.
  * 
  * @author Villu Ruusmann
- * @version $Revision$
  */
 public class CharStringCommand
 {
@@ -92,10 +91,7 @@ public class CharStringCommand
         {
             return getKey().toString() + '|';
         }
-        else
-        {
-            return str + '|';
-        }
+        return str + '|';
     }
 
     /**

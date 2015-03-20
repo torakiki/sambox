@@ -235,9 +235,10 @@ public abstract class SecurityHandler
             IvParameterSpec ips = new IvParameterSpec(iv);
             decryptCipher.init(decrypt ? Cipher.DECRYPT_MODE : Cipher.ENCRYPT_MODE, aesKey, ips);
             byte[] buffer = new byte[256];
-            for (int n = 0; -1 != (n = data.read(buffer));)
+            int n;
+            while ((n = data.read(buffer)) != -1)
             {
-                output.write(decryptCipher.update(buffer,0, n ));
+                output.write(decryptCipher.update(buffer, 0, n));
             }
             output.write(decryptCipher.doFinal());
         }
@@ -393,7 +394,7 @@ public abstract class SecurityHandler
      *
      * @throws IOException If there is an error getting the stream data.
      */
-    public void encryptStream(COSStream stream, long objNum, long genNum) throws IOException
+    public void encryptStream(COSStream stream, long objNum, int genNum) throws IOException
     {
         InputStream encryptedStream = stream.getFilteredStream();
         encryptData(objNum, genNum, encryptedStream, stream.createFilteredStream(), false /* encrypt */);
@@ -421,8 +422,9 @@ public abstract class SecurityHandler
                 {
                     // if we are a signature dictionary and contain a Contents entry then
                     // we don't decrypt it.
-                    if (!(entry.getKey().equals(COSName.CONTENTS) && value instanceof COSString && potentialSignatures
-                            .contains(dictionary)))
+                    if (!(entry.getKey().equals(COSName.CONTENTS)
+                            && value instanceof COSString
+                            && potentialSignatures.contains(dictionary)))
                     {
                         decrypt(value, objNum, genNum);
                     }
@@ -457,7 +459,7 @@ public abstract class SecurityHandler
      *
      * @throws IOException If an error occurs writing the new string.
      */
-    public void encryptString(COSString string, long objNum, long genNum) throws IOException
+    public void encryptString(COSString string, long objNum, int genNum) throws IOException
     {
         ByteArrayInputStream data = new ByteArrayInputStream(string.getBytes());
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();

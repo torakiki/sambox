@@ -26,8 +26,7 @@ import org.apache.pdfbox.pdmodel.interactive.action.PDAction;
 /**
  * This is the class that represents a widget.
  *
- * @author <a href="mailto:ben@benlitchfield.com">Ben Litchfield</a>
- * @version $Revision: 1.3 $
+ * @author Ben Litchfield
  */
 public class PDAnnotationWidget extends PDAnnotation
 {
@@ -51,11 +50,12 @@ public class PDAnnotationWidget extends PDAnnotation
      * Creates a PDWidget from a COSDictionary, expected to be
      * a correct object definition for a field in PDF.
      *
-     * @param field the PDF objet to represent as a field.
+     * @param field the PDF object to represent as a field.
      */
     public PDAnnotationWidget(COSDictionary field)
     {
         super( field );
+        getDictionary().setName( COSName.SUBTYPE, SUB_TYPE);
     }
 
     /**

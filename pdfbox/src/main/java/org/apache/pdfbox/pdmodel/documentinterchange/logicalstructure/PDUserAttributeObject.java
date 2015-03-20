@@ -26,8 +26,7 @@ import org.apache.pdfbox.cos.COSName;
 /**
  * A User attribute object.
  * 
- * @author <a href="mailto:Johannes%20Koch%20%3Ckoch@apache.org%3E">Johannes Koch</a>
- * @version $Revision: $
+ * @author Johannes Koch
  */
 public class PDUserAttributeObject extends PDAttributeObject
 {
@@ -119,6 +118,9 @@ public class PDUserAttributeObject extends PDAttributeObject
         this.notifyChanged();
     }
 
+    /**
+     * @param userProperty  
+     */
     public void userPropertyChanged(PDUserProperty userProperty)
     {
         

@@ -28,8 +28,7 @@ import org.apache.pdfbox.text.TextPosition;
 /**
  * A marked content.
  * 
- * @author <a href="mailto:Johannes%20Koch%20%3Ckoch@apache.org%3E">Johannes Koch</a>
- * @version $Revision: $
+ * @author Johannes Koch
  */
 public class PDMarkedContent
 {
@@ -45,15 +44,15 @@ public class PDMarkedContent
     {
         if (COSName.ARTIFACT.equals(tag))
         {
-            new PDArtifactMarkedContent(properties);
+            return new PDArtifactMarkedContent(properties);
         }
         return new PDMarkedContent(tag, properties);
     }
 
 
-    private String tag;
-    private COSDictionary properties;
-    private List<Object> contents;
+    private final String tag;
+    private final COSDictionary properties;
+    private final List<Object> contents;
 
 
     /**

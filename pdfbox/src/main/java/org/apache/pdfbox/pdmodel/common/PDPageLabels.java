@@ -35,9 +35,7 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 /**
  * Represents the page label dictionary of a document.
  * 
- * @author <a href="mailto:igor.podolskiy@ievvwi.uni-stuttgart.de">Igor
- *         Podolskiy</a>
- * @version $Revision$
+ * @author Igor Podolskiy
  */
 public class PDPageLabels implements COSObjectable
 {
@@ -246,7 +244,7 @@ public class PDPageLabels implements COSObjectable
      * 
      * @author Igor Podolskiy
      */
-    private static interface LabelHandler
+    private interface LabelHandler
     {
         void newLabel(int pageIndex, String label);
     }

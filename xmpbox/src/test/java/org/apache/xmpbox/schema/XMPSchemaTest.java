@@ -21,7 +21,6 @@
 
 package org.apache.xmpbox.schema;
 
-import java.io.IOException;
 import java.util.Calendar;
 import java.util.List;
 import org.apache.xmpbox.DateConverter;
@@ -302,7 +301,7 @@ public class XMPSchemaTest
         {
             ok = true;
         }
-        Assert.assertEquals(true, ok);
+        Assert.assertTrue(ok);
         ok = false;
         try
         {
@@ -312,7 +311,7 @@ public class XMPSchemaTest
         {
             ok = true;
         }
-        Assert.assertEquals(true, ok);
+        Assert.assertTrue(ok);
         ok = false;
         try
         {
@@ -322,7 +321,7 @@ public class XMPSchemaTest
         {
             ok = true;
         }
-        Assert.assertEquals(true, ok);
+        Assert.assertTrue(ok);
         ok = false;
         try
         {

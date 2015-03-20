@@ -49,8 +49,8 @@ public class TestCOSUtils
         try
         {
             COSObject co = new COSObject(COSInteger.get(10));
-            co.setGenerationNumber(COSInteger.ZERO);
-            co.setObjectNumber(COSInteger.get(10));
+            co.setGenerationNumber(0);
+            co.setObjectNumber(10);
 
             assertFalse(COSUtils.isInteger(co, new IOCOSDocument()));
 
@@ -71,8 +71,8 @@ public class TestCOSUtils
         try
         {
             COSObject co = new COSObject(new COSFloat(10.0f));
-            co.setGenerationNumber(COSInteger.ZERO);
-            co.setObjectNumber(COSInteger.get(10));
+            co.setGenerationNumber(0);
+            co.setObjectNumber(10);
 
             assertFalse(COSUtils.isFloat(co, new IOCOSDocument()));
 
@@ -93,8 +93,8 @@ public class TestCOSUtils
         try
         {
             COSObject co = new COSObject(new COSString(""));
-            co.setGenerationNumber(COSInteger.ZERO);
-            co.setObjectNumber(COSInteger.get(10));
+            co.setGenerationNumber(0);
+            co.setObjectNumber(10);
 
             assertFalse(COSUtils.isString(co, new IOCOSDocument()));
 
@@ -115,8 +115,8 @@ public class TestCOSUtils
         try
         {
             COSObject co = new COSObject(new COSStream());
-            co.setGenerationNumber(COSInteger.ZERO);
-            co.setObjectNumber(COSInteger.get(10));
+            co.setGenerationNumber(0);
+            co.setObjectNumber(10);
 
             assertFalse(COSUtils.isStream(co, new IOCOSDocument()));
 
@@ -137,8 +137,8 @@ public class TestCOSUtils
         try
         {
             COSObject co = new COSObject(new COSDictionary());
-            co.setGenerationNumber(COSInteger.ZERO);
-            co.setObjectNumber(COSInteger.get(10));
+            co.setGenerationNumber(0);
+            co.setObjectNumber(10);
 
             assertFalse(COSUtils.isDictionary(co, new IOCOSDocument()));
 
@@ -159,8 +159,8 @@ public class TestCOSUtils
         try
         {
             COSObject co = new COSObject(new COSArray());
-            co.setGenerationNumber(COSInteger.ZERO);
-            co.setObjectNumber(COSInteger.get(10));
+            co.setGenerationNumber(0);
+            co.setObjectNumber(10);
 
             assertFalse(COSUtils.isArray(co, new IOCOSDocument()));
 

@@ -96,6 +96,8 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName BOUNDS = new COSName("Bounds");
     public static final COSName BPC = new COSName("BPC");
     public static final COSName BS = new COSName("BS");
+    //** Acro form field type for button fields.
+    public static final COSName BTN = new COSName("Btn");
     public static final COSName BYTERANGE = new COSName("ByteRange");
     // C
     public static final COSName C = new COSName("C");
@@ -112,6 +114,8 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName CENTER_WINDOW = new COSName("CenterWindow");
     public static final COSName CF = new COSName("CF");
     public static final COSName CFM = new COSName("CFM");
+    //** Acro form field type for choice fields.
+    public static final COSName CH = new COSName("Ch");
     public static final COSName CHAR_PROCS = new COSName("CharProcs");
     public static final COSName CHAR_SET = new COSName("CharSet");
     public static final COSName CICI_SIGNIT = new COSName("CICI.SignIt");
@@ -203,8 +207,8 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName ENCODING = new COSName("Encoding");
     public static final COSName ENCODING_90MS_RKSJ_H = new COSName("90ms-RKSJ-H");
     public static final COSName ENCODING_90MS_RKSJ_V = new COSName("90ms-RKSJ-V");
-    public static final COSName ENCODING_ETEN_B5_H = new COSName("ETen?B5?H");
-    public static final COSName ENCODING_ETEN_B5_V = new COSName("ETen?B5?V");
+    public static final COSName ENCODING_ETEN_B5_H = new COSName("ETen-B5-H");
+    public static final COSName ENCODING_ETEN_B5_V = new COSName("ETen-B5-V");
     public static final COSName ENCRYPT = new COSName("Encrypt");
     public static final COSName ENCRYPT_META_DATA = new COSName("EncryptMetadata");
     public static final COSName END_OF_LINE = new COSName("EndOfLine");
@@ -445,7 +449,6 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName STRUCT_PARENTS = new COSName("StructParents");
     public static final COSName STRUCT_TREE_ROOT = new COSName("StructTreeRoot");
     public static final COSName SUB_FILTER = new COSName("SubFilter");
-    public static final COSName SUBFILTER = new COSName("SubFilter");
     public static final COSName SUBJ = new COSName("Subj");
     public static final COSName SUBJECT = new COSName("Subject");
     public static final COSName SUBTYPE = new COSName("Subtype");
@@ -473,6 +476,8 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName TRUE_TYPE = new COSName("TrueType");
     public static final COSName TRUSTED_MODE = new COSName("TrustedMode");
     public static final COSName TU = new COSName("TU");
+    /** Acro form field type for text field. */
+    public static final COSName TX = new COSName("Tx");
     public static final COSName TYPE = new COSName("Type");
     public static final COSName TYPE0 = new COSName("Type0");
     public static final COSName TYPE1 = new COSName("Type1");
