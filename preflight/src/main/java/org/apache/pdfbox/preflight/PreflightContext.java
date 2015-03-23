@@ -29,11 +29,11 @@ import java.util.Map;
 import javax.activation.DataSource;
 
 import org.apache.pdfbox.cos.COSBase;
-import org.apache.pdfbox.pdfparser.xref.TrailerMerger;
 import org.apache.pdfbox.preflight.ValidationResult.ValidationError;
 import org.apache.pdfbox.preflight.font.container.FontContainer;
 import org.apache.pdfbox.preflight.graphic.ICCProfileWrapper;
 import org.apache.pdfbox.preflight.utils.COSUtils;
+import org.apache.pdfbox.xref.TrailerMerger;
 import org.apache.xmpbox.XMPMetadata;
 
 public class PreflightContext implements Closeable

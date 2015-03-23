@@ -68,10 +68,6 @@ import org.apache.pdfbox.pdfparser.BaseParser;
 import org.apache.pdfbox.pdfparser.COSParser;
 import org.apache.pdfbox.pdfparser.PDFObjectStreamParser;
 import org.apache.pdfbox.pdfparser.PDFParser;
-import org.apache.pdfbox.pdfparser.xref.CompressedXrefEntry;
-import org.apache.pdfbox.pdfparser.xref.Xref;
-import org.apache.pdfbox.pdfparser.xref.XrefEntry;
-import org.apache.pdfbox.pdfparser.xref.XrefType;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.preflight.Format;
 import org.apache.pdfbox.preflight.PreflightConfiguration;
@@ -81,6 +77,10 @@ import org.apache.pdfbox.preflight.PreflightDocument;
 import org.apache.pdfbox.preflight.ValidationResult;
 import org.apache.pdfbox.preflight.ValidationResult.ValidationError;
 import org.apache.pdfbox.preflight.exception.SyntaxValidationException;
+import org.apache.pdfbox.xref.CompressedXrefEntry;
+import org.apache.pdfbox.xref.Xref;
+import org.apache.pdfbox.xref.XrefEntry;
+import org.apache.pdfbox.xref.XrefType;
 
 public class PreflightParser extends PDFParser
 {

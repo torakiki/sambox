@@ -36,8 +36,8 @@ import org.apache.pdfbox.cos.COSObject;
 import org.apache.pdfbox.cos.COSObjectKey;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.cos.COSString;
-import org.apache.pdfbox.pdfparser.xref.XrefEntry;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.xref.XrefEntry;
 import org.junit.Test;
 
 public class TestCOSUtils

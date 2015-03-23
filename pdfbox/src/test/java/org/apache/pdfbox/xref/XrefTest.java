@@ -14,13 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.pdfbox.pdfparser.xref;
+package org.apache.pdfbox.xref;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.pdfbox.cos.COSObjectKey;
+import org.apache.pdfbox.xref.CompressedXrefEntry;
+import org.apache.pdfbox.xref.Xref;
+import org.apache.pdfbox.xref.XrefEntry;
 import org.junit.Test;
 
 /**

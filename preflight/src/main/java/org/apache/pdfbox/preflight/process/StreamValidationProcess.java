@@ -40,13 +40,13 @@ import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSObject;
 import org.apache.pdfbox.cos.COSObjectKey;
 import org.apache.pdfbox.cos.COSStream;
-import org.apache.pdfbox.pdfparser.xref.XrefEntry;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.preflight.PreflightContext;
 import org.apache.pdfbox.preflight.ValidationResult.ValidationError;
 import org.apache.pdfbox.preflight.exception.ValidationException;
 import org.apache.pdfbox.preflight.utils.COSUtils;
 import org.apache.pdfbox.preflight.utils.FilterHelper;
+import org.apache.pdfbox.xref.XrefEntry;
 
 public class StreamValidationProcess extends AbstractProcess
 {

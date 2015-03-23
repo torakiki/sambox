@@ -43,6 +43,7 @@ public class COSObject extends COSBase implements COSUpdateInfo
         setObject( object );
     }
 
+    // TODO this makes sense only if the object wraps a dictionary. Remove
     /**
      * This will get the dictionary object in this object that has the name key and
      * if it is a pdfobjref then it will dereference that and return it.
@@ -54,13 +55,14 @@ public class COSObject extends COSBase implements COSUpdateInfo
     public COSBase getDictionaryObject( COSName key )
     {
         COSBase retval =null;
-        if( baseObject instanceof COSDictionary )
+        if (getObject() instanceof COSDictionary)
         {
             retval = ((COSDictionary)baseObject).getDictionaryObject( key );
         }
         return retval;
     }
 
+    // TODO this makes sense only if the object wraps a dictionary. Remove
     /**
      * This will get the dictionary object in this object that has the name key.
      *
@@ -71,7 +73,7 @@ public class COSObject extends COSBase implements COSUpdateInfo
     public COSBase getItem( COSName key )
     {
         COSBase retval =null;
-        if( baseObject instanceof COSDictionary )
+        if (getObject() instanceof COSDictionary)
         {
             retval = ((COSDictionary)baseObject).getItem( key );
         }
@@ -79,30 +81,24 @@ public class COSObject extends COSBase implements COSUpdateInfo
     }
 
     /**
-     * This will get the object that this object encapsulates.
-     *
-     * @return The encapsulated object.
+     * @return The encapsulated COSBase object.
      */
     public COSBase getObject()
     {
         return baseObject;
     }
 
+    // TODO make this immutable and set through constructor
     /**
      * This will set the object that this object encapsulates.
      *
      * @param object The new object to encapsulate.
-     *
-     * @throws IOException If there is an error setting the updated object.
      */
-    public final void setObject( COSBase object ) throws IOException
+    public final void setObject(COSBase object)
     {
         baseObject = object;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString()
     {
@@ -118,6 +114,7 @@ public class COSObject extends COSBase implements COSUpdateInfo
         return objectNumber;
     }
 
+    // TODO make this immutable and set through constructor
     /** 
      * Setter for property objectNumber.
      * @param objectNum New value of property objectNumber.
@@ -136,6 +133,7 @@ public class COSObject extends COSBase implements COSUpdateInfo
         return generationNumber;
     }
 
+    // TODO make this immutable and set through constructor
     /** 
      * Setter for property generationNumber.
      * @param generationNumberValue New value of property generationNumber.

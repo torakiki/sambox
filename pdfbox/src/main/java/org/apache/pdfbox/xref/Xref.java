@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.pdfbox.pdfparser.xref;
+package org.apache.pdfbox.xref;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -30,7 +30,7 @@ import org.apache.pdfbox.cos.COSObjectKey;
  */
 public class Xref
 {
-    private HashMap<COSObjectKey, XrefEntry> data = new HashMap<COSObjectKey, XrefEntry>();
+    private HashMap<COSObjectKey, XrefEntry> data = new HashMap<>();
 
     /**
      * Adds the given entry to the {@link Xref} if an entry with the given object number is not already present.
@@ -41,13 +41,8 @@ public class Xref
      */
     public XrefEntry add(XrefEntry entry)
     {
-        XrefEntry current = data.get(entry.key());
-        if (current == null)
-        {
-            data.put(new COSObjectKey(entry.getObjectNumber(), entry.getGenerationNumber()), entry);
-        }
-        return current;
-        // JDK7 return data.putIfAbsent(new COSObjectKey(entry.getObjectNumber(), entry.getGenerationNumber()), entry);
+        return data.putIfAbsent(
+                new COSObjectKey(entry.getObjectNumber(), entry.getGenerationNumber()), entry);
     }
 
     /**
@@ -68,7 +63,7 @@ public class Xref
     }
 
     /**
-     * @param stmObjKey
+     * @param objectKey
      * @return true if a value for the given key is registered to this xref
      */
     public boolean contains(COSObjectKey objectKey)

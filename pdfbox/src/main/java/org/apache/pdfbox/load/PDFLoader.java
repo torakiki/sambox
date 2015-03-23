@@ -14,15 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.pdfbox.pdfparser.xref;
+package org.apache.pdfbox.load;
+
+import java.io.File;
+
+import org.apache.pdfbox.cos.COSDocument;
 
 /**
- * Possible types of xref entry
- * 
  * @author Andrea Vacondio
  *
  */
-public enum XrefType
+public class PDFLoader
 {
-    FREE, IN_USE, COMPRESSED;
+
+    public COSDocument load(File file)
+    {
+        return null;
+    }
 }

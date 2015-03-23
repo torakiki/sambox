@@ -16,7 +16,7 @@
  */
 package org.apache.pdfbox.pdfparser;
 
-import static org.apache.pdfbox.pdfparser.xref.XrefEntry.inUseEntry;
+import static org.apache.pdfbox.xref.XrefEntry.inUseEntry;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -49,12 +49,12 @@ import org.apache.pdfbox.cos.COSObject;
 import org.apache.pdfbox.cos.COSObjectKey;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.io.IOUtils;
-import org.apache.pdfbox.pdfparser.xref.CompressedXrefEntry;
-import org.apache.pdfbox.pdfparser.xref.TrailerMerger;
-import org.apache.pdfbox.pdfparser.xref.Xref;
-import org.apache.pdfbox.pdfparser.xref.XrefEntry;
-import org.apache.pdfbox.pdfparser.xref.XrefType;
 import org.apache.pdfbox.pdmodel.encryption.SecurityHandler;
+import org.apache.pdfbox.xref.CompressedXrefEntry;
+import org.apache.pdfbox.xref.TrailerMerger;
+import org.apache.pdfbox.xref.Xref;
+import org.apache.pdfbox.xref.XrefEntry;
+import org.apache.pdfbox.xref.XrefType;
 
 /**
  * PDF-Parser which first reads startxref and xref tables in order to know valid objects and parse only these objects.

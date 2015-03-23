@@ -47,13 +47,13 @@ import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSObject;
 import org.apache.pdfbox.cos.COSObjectKey;
 import org.apache.pdfbox.cos.COSString;
-import org.apache.pdfbox.pdfparser.xref.XrefEntry;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.preflight.PreflightConstants;
 import org.apache.pdfbox.preflight.PreflightContext;
 import org.apache.pdfbox.preflight.ValidationResult.ValidationError;
 import org.apache.pdfbox.preflight.exception.ValidationException;
 import org.apache.pdfbox.preflight.utils.COSUtils;
+import org.apache.pdfbox.xref.XrefEntry;
 
 public class TrailerValidationProcess extends AbstractProcess
 {

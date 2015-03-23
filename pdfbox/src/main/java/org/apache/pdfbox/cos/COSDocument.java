@@ -28,9 +28,8 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.pdfbox.pdfparser.PDFObjectStreamParser;
-import org.apache.pdfbox.pdfparser.xref.Xref;
-import org.apache.pdfbox.pdfparser.xref.XrefEntry;
+import org.apache.pdfbox.xref.Xref;
+import org.apache.pdfbox.xref.XrefEntry;
 
 /**
  * This is the in-memory representation of the PDF document. You need to call close() on this object when you are done
@@ -526,43 +525,6 @@ public class COSDocument extends COSBase implements Closeable
     public void setWarnMissingClose(boolean warn)
     {
         this.warnMissingClose = warn;
-    }
-
-    /**
-     * This method will search the list of objects for types of ObjStm. If it finds them then it will parse out all of
-     * the objects from the stream that is contains.
-     *
-     * @throws IOException If there is an error parsing the stream.
-     */
-    // TODO this is never used
-    public void dereferenceObjectStreams() throws IOException
-    {
-        for (COSObject objStream : getObjectsByType(COSName.OBJ_STM))
-        {
-            COSStream stream = (COSStream) objStream.getObject();
-            PDFObjectStreamParser parser = new PDFObjectStreamParser(stream, this);
-            try
-            {
-                parser.parse();
-                COSObjectKey streamKey = new COSObjectKey(objStream);
-                for (COSObject next : parser.getObjects())
-                {
-                    COSObjectKey key = new COSObjectKey(next);
-                    if (objectPool.get(key) == null
-                            || objectPool.get(key).getObject() == null
-                            || (xref.contains(streamKey) && xref.get(streamKey).owns(xref.get(key))))
-                    {
-                        COSObject obj = getObjectFromPool(key);
-                        obj.setObject(next.getObject());
-                    }
-                }
-            }
-            finally
-            {
-                parser.close();
-            }
-
-        }
     }
 
     /**

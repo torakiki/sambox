@@ -61,13 +61,13 @@ import org.apache.pdfbox.cos.COSUpdateInfo;
 import org.apache.pdfbox.cos.ICOSVisitor;
 import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.pdfparser.PDFXRefStream;
-import org.apache.pdfbox.pdfparser.xref.XrefEntry;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.encryption.SecurityHandler;
 import org.apache.pdfbox.pdmodel.fdf.FDFDocument;
 import org.apache.pdfbox.pdmodel.interactive.digitalsignature.SignatureInterface;
 import org.apache.pdfbox.util.Charsets;
 import org.apache.pdfbox.util.Hex;
+import org.apache.pdfbox.xref.XrefEntry;
 
 /**
  * This class acts on a in-memory representation of a PDF document.

@@ -26,9 +26,9 @@ import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.cos.COSInteger;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSStream;
-import org.apache.pdfbox.pdfparser.xref.CompressedXrefEntry;
-import org.apache.pdfbox.pdfparser.xref.Xref;
-import org.apache.pdfbox.pdfparser.xref.XrefEntry;
+import org.apache.pdfbox.xref.CompressedXrefEntry;
+import org.apache.pdfbox.xref.Xref;
+import org.apache.pdfbox.xref.XrefEntry;
 
 /**
  * This will parse a PDF 1.5 (or better) Xref stream and

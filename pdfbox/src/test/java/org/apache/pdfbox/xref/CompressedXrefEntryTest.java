@@ -14,9 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.pdfbox.pdfparser.xref;
+package org.apache.pdfbox.xref;
 
-import static org.apache.pdfbox.pdfparser.xref.CompressedXrefEntry.compressedEntry;
+import static org.apache.pdfbox.xref.CompressedXrefEntry.compressedEntry;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.pdfbox.pdfparser.xref;
+package org.apache.pdfbox.xref;
 
 import java.util.TreeMap;
 
@@ -32,7 +32,7 @@ public final class TrailerMerger
 {
     private static final Log LOG = LogFactory.getLog(TrailerMerger.class);
 
-    private TreeMap<Long, COSDictionary> history = new TreeMap<Long, COSDictionary>();
+    private TreeMap<Long, COSDictionary> history = new TreeMap<>();
     private COSDictionary trailer = new COSDictionary();
 
     /**
