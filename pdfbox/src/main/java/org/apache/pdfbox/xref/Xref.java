@@ -33,16 +33,30 @@ public class Xref
     private HashMap<COSObjectKey, XrefEntry> data = new HashMap<>();
 
     /**
+     * Adds the given entry to the {@link Xref} if an entry with the given object number and generation is not already
+     * present.
+     * 
+     * @param entry
+     * @return null if the entry was added. The current entry with the given object number and generation if the entry
+     * was already present.
+     */
+    public XrefEntry add(XrefEntry entry)
+    {
+        return data.putIfAbsent(
+                new COSObjectKey(entry.getObjectNumber(), entry.getGenerationNumber()), entry);
+    }
+
+    /**
      * Adds the given entry to the {@link Xref} if an entry with the given object number is not already present.
      * 
      * @param entry
      * @return null if the entry was added. The current entry with the given object number if the entry was already
      * present.
      */
-    public XrefEntry add(XrefEntry entry)
+    public void put(XrefEntry entry)
     {
-        return data.putIfAbsent(
-                new COSObjectKey(entry.getObjectNumber(), entry.getGenerationNumber()), entry);
+        data.put(new COSObjectKey(entry.getObjectNumber(), entry.getGenerationNumber()), entry);
+
     }
 
     /**
