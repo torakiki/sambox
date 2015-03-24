@@ -1277,7 +1277,7 @@ public class COSParser extends BaseParser
                                 }
                                 if (objectID != null)
                                 {
-                                    bfSearchCOSObjectKeyOffsets.put(new COSObjectKey(objectID, genID), tempOffset);
+                                    bfSearchCOSObjectKeyOffsets.put(new COSObjectKey(objectID, genID), tempOffset+1);
                                 }
                             }
                         }
