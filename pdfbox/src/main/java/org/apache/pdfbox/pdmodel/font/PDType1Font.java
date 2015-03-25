@@ -105,7 +105,25 @@ public class PDType1Font extends PDSimpleFont implements PDType1Equivalent
 
         // todo: could load the PFB font here if we wanted to support Standard 14 embedding
         type1font = null;
-        type1Equivalent = ExternalFonts.getType1EquivalentFont(getBaseFont());
+        Type1Equivalent t1Equiv = ExternalFonts.getType1EquivalentFont(getBaseFont());
+        if (t1Equiv != null)
+        {
+            type1Equivalent = t1Equiv;
+        }
+        else
+        {
+            type1Equivalent = ExternalFonts.getType1FallbackFont(getFontDescriptor());
+            String fontName;
+            try
+            {
+                fontName = type1Equivalent.getName();
+            }
+            catch (IOException e)
+            {
+                fontName = "?";
+            }
+            LOG.warn("Using fallback font " + fontName + " for base font " + getBaseFont());
+        }
         isEmbedded = false;
         isDamaged = false;
     }
@@ -296,9 +314,10 @@ public class PDType1Font extends PDSimpleFont implements PDType1Equivalent
         }
 
         String name = getGlyphList().codePointToName(unicode);
+        String nameInFont = getNameInFont(name);
         Map<String, Integer> inverted = getInvertedEncoding();
 
-        if (name.equals(".notdef") || !type1Equivalent.hasGlyph(name))
+        if (nameInFont.equals(".notdef") || !type1Equivalent.hasGlyph(nameInFont))
         {
             throw new IllegalArgumentException(
                     String.format("No glyph for U+%04X in font %s", unicode, getName()));
@@ -423,6 +442,15 @@ public class PDType1Font extends PDSimpleFont implements PDType1Equivalent
     public String codeToName(int code) throws IOException
     {
         String name = getEncoding().getName(code);
+        return getNameInFont(name);
+    }
+
+    /**
+     * Maps a PostScript glyph name to the name in the underlying font, for example when
+     * using a TTF font we might map "W" to "uni0057".
+     */
+    private String getNameInFont(String name) throws IOException
+    {
         if (isEmbedded() || type1Equivalent.hasGlyph(name))
         {
             return name;
