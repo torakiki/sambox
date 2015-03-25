@@ -102,4 +102,13 @@ public final class ParseUtils
     {
         return c >= ASCII_ZERO && c <= ASCII_NINE;
     }
+
+    /**
+     * @param c The character to be checked
+     * @return true if the character is an hex digit.
+     */
+    public static boolean isHexDigit(int c)
+    {
+        return isDigit(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
+    }
 }

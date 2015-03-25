@@ -17,10 +17,11 @@
 package org.apache.pdfbox.load.parse;
 
 import static org.apache.pdfbox.load.parse.ParseUtils.isCarriageReturn;
+import static org.apache.pdfbox.load.parse.ParseUtils.isDigit;
 import static org.apache.pdfbox.load.parse.ParseUtils.isEOL;
 import static org.apache.pdfbox.load.parse.ParseUtils.isEndOfName;
+import static org.apache.pdfbox.load.parse.ParseUtils.isHexDigit;
 import static org.apache.pdfbox.load.parse.ParseUtils.isLineFeed;
-import static org.apache.pdfbox.load.parse.ParseUtils.isSpace;
 import static org.apache.pdfbox.load.parse.ParseUtils.isWhitespace;
 
 import java.io.IOException;
@@ -36,42 +37,51 @@ public class SourceReader
 
     private static final long OBJECT_NUMBER_THRESHOLD = 10000000000L;
     private static final long GENERATION_NUMBER_THRESHOLD = 65535;
-    private static final String ISO_8859_1 = "ISO-8859-1";
+    protected static final String ISO_8859_1 = "ISO-8859-1";
 
+    // TODO maybe use a pool of buffers if we want to support concurrent reads and async indirect objs resolve
     private StringBuilder buffer = new StringBuilder();
-    protected PushBackInputStream source;
+    private PushBackInputStream source;
 
     public SourceReader(PushBackInputStream source)
     {
         this.source = source;
     }
 
-    private void clearBuffer()
+    /**
+     * @return a buffer to be used during read and parsing.
+     */
+    protected StringBuilder buffer()
     {
         buffer.setLength(0);
+        return buffer;
     }
 
+    /**
+     * @return the source for this reader
+     */
+    protected PushBackInputStream source()
+    {
+        return source;
+    }
 
     /**
      * @return The next string that was read from the stream.
      *
      * @throws IOException If there is an error reading from the stream.
      */
-    public String readString() throws IOException
+    protected String readString() throws IOException
     {
         skipSpaces();
-        clearBuffer();
-        char c = (char) source.read();
-        while (!isEndOfName(c) && c != -1)
+        StringBuilder builder = buffer();
+        char c;
+        while (((c = (char) source.read()) != -1) && !isEndOfName(c))
         {
-            buffer.append((char) c);
+            builder.append((char) c);
             c = (char) source.read();
         }
-        if (c != -1)
-        {
-            source.unread(c);
-        }
-        return buffer.toString();
+        unreadIfValid(c);
+        return builder.toString();
     }
 
     /**
@@ -80,7 +90,7 @@ public class SourceReader
      * @param expectedString the String value that is expected.
      * @throws IOException if the String char is not the expected value or if an I/O error occurs.
      */
-    public final void skipExpected(String expected) throws IOException
+    protected final void skipExpected(String expected) throws IOException
     {
         for (char c : expected.toCharArray())
         {
@@ -94,7 +104,7 @@ public class SourceReader
      * @param ec the char value that is expected.
      * @throws IOException if the read char is not the expected value or if an I/O error occurs.
      */
-    public void skipExpected(char ec) throws IOException
+    protected void skipExpected(char ec) throws IOException
     {
         char c = (char) source.read();
         if (c != ec)
@@ -111,25 +121,25 @@ public class SourceReader
      * @return The characters between the current position and the end of the line.
      * @throws IOException If there is an error reading from the stream.
      */
-    public String readLine() throws IOException
+    protected String readLine() throws IOException
     {
         if (source.isEOF())
         {
             throw new IOException("Expected line but was end of file");
         }
 
-        clearBuffer();
+        StringBuilder builder = buffer();
 
         int c;
         while ((c = source.read()) != -1 && !isEOL(c))
         {
-            buffer.append((char) c);
+            builder.append((char) c);
         }
         if (isCarriageReturn(c) && isLineFeed(source.peek()))
         {
             source.read();
         }
-        return buffer.toString();
+        return builder.toString();
     }
 
     /**
@@ -139,7 +149,7 @@ public class SourceReader
      * @return the object number being read.
      * @throws IOException if an I/O error occurs
      */
-    public long readObjectNumber() throws IOException
+    protected long readObjectNumber() throws IOException
     {
         long retval = readLong();
         if (retval < 0 || retval >= OBJECT_NUMBER_THRESHOLD)
@@ -168,8 +178,59 @@ public class SourceReader
     }
 
     /**
-     * This will read an integer from the stream.
-     *
+     * Reads a token conforming with PDF Name Objects chap 7.3.5 PDF 32000-1:2008.
+     * 
+     * @return the generation number being read.
+     * @throws IOException if an I/O error occurs
+     */
+    protected String readName() throws IOException
+    {
+        skipExpected('/');
+        StringBuilder builder = buffer();
+        char c;
+        while (((c = (char) source.read()) != -1) && !isEndOfName(c))
+        {
+            if (c == '#')
+            {
+                int ch1 = source.read();
+                int ch2 = source.read();
+
+                // Prior to PDF v1.2, the # was not a special character. Also,
+                // it has been observed that various PDF tools do not follow the
+                // spec with respect to the # escape, even though they report
+                // PDF versions of 1.2 or later. The solution here is that we
+                // interpret the # as an escape only when it is followed by two
+                // valid hex digits.
+                //
+                if (isHexDigit(ch1) && isHexDigit(ch2))
+                {
+                    String hex = "" + ch1 + ch2;
+                    try
+                    {
+                        c = (char) Integer.parseInt(hex, 16);
+                    }
+                    catch (NumberFormatException e)
+                    {
+                        source.unread(ch1);
+                        source.unread(ch2);
+                        throw new IOException(String.format(
+                                "Expected an Hex number at offset %d but was '%s'",
+                                source.getOffset(), hex), e);
+                    }
+                }
+                else
+                {
+                    source.unread(ch2);
+                    c = (char) ch1;
+                }
+            }
+            builder.append(c);
+        }
+        unreadIfValid(c);
+        return builder.toString();
+    }
+
+    /**
      * @return The integer that was read from the stream.
      *
      * @throws IOException If there is an error reading from the stream.
@@ -177,26 +238,21 @@ public class SourceReader
     protected int readInt() throws IOException
     {
         skipSpaces();
-        int retval = 0;
-
-        String intBuffer = readStringNumber();
-
+        String intBuffer = readIntegerNumber();
         try
         {
-            retval = Integer.parseInt(intBuffer);
+            return Integer.parseInt(intBuffer);
         }
         catch (NumberFormatException e)
         {
             source.unread(intBuffer.getBytes(ISO_8859_1));
-            throw new IOException(
-                    "Error: Expected an integer type at offset " + source.getOffset(), e);
+            throw new IOException(String.format(
+                    "Expected an integer type at offset %d but was '%s'", source.getOffset(),
+                    intBuffer), e);
         }
-        return retval;
     }
 
     /**
-     * This will read an long from the stream.
-     *
      * @return The long that was read from the stream.
      *
      * @throws IOException If there is an error reading from the stream.
@@ -204,47 +260,61 @@ public class SourceReader
     protected long readLong() throws IOException
     {
         skipSpaces();
-        long retval = 0;
-
-        String longBuffer = readStringNumber();
-
+        String longBuffer = readIntegerNumber();
         try
         {
-            retval = Long.parseLong(longBuffer);
+            return Long.parseLong(longBuffer);
         }
         catch (NumberFormatException e)
         {
             source.unread(longBuffer.getBytes(ISO_8859_1));
-            throw new IOException("Error: Expected a long type at offset " + source.getOffset()
-                    + ", instead got '" + longBuffer + "'", e);
+            throw new IOException(String.format("Expected a long type at offset %d but was '%s'",
+                    source.getOffset(), longBuffer), e);
         }
-        return retval;
     }
 
     /**
      * Reads a token by the {@linkplain #readInt()} method and the {@linkplain #readLong()} method.
      *
      * @return the token to parse as integer or long by the calling method.
-     * @throws IOException throws by the {@link #source} methods.
+     * @throws IOException If there is an error reading from the stream.
      */
-    private final String readStringNumber() throws IOException
+    private final String readIntegerNumber() throws IOException
     {
-        int lastByte = 0;
-        clearBuffer();
-        while ((lastByte = source.read()) != -1 && !isSpace(lastByte) && !isEOL(lastByte)
-                && lastByte != 60 && // see sourceforge bug 1714707
-                lastByte != '[' && // PDFBOX-1845
-                lastByte != '(' && // PDFBOX-2579
-                lastByte != 0 // See sourceforge bug 853328
-        )
+        StringBuilder builder = buffer();
+        int c = source.read();
+        if (c != -1 && (isDigit(c) || c == '+' || c == '-'))
         {
-            buffer.append((char) lastByte);
+            builder.append((char) c);
+            while ((c = source.read()) != -1 && isDigit(c))
+            {
+                builder.append((char) c);
+            }
         }
-        if (lastByte != -1)
+        unreadIfValid(c);
+        return builder.toString();
+    }
+
+    /**
+     * Reads a token conforming with PDF Numeric Objects chap 7.3.3 PDF 32000-1:2008.
+     *
+     * @return the token to parse as integer or long by the calling method.
+     * @throws IOException If there is an error reading from the stream.
+     */
+    protected final String readNumber() throws IOException
+    {
+        StringBuilder builder = buffer();
+        int c = source.read();
+        if (c != -1 && (isDigit(c) || c == '+' || c == '-' || c == '.'))
         {
-            source.unread(lastByte);
+            builder.append((char) c);
+            while ((c = source.read()) != -1 && (isDigit(c) || c == 'E' || c == 'e'))
+            {
+                builder.append((char) c);
+            }
         }
-        return buffer.toString();
+        unreadIfValid(c);
+        return builder.toString();
     }
 
     /**
@@ -272,6 +342,17 @@ public class SourceReader
                 c = source.read();
             }
         }
+        unreadIfValid(c);
+    }
+
+    /**
+     * Unreads the given character if it's not -1
+     * 
+     * @param c
+     * @throws IOException
+     */
+    protected void unreadIfValid(int c) throws IOException
+    {
         if (c != -1)
         {
             source.unread(c);
