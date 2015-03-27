@@ -16,17 +16,27 @@
  */
 package org.apache.pdfbox.load.parse;
 
+import static java.util.Arrays.asList;
+import static org.apache.pdfbox.load.parse.ParseUtils.ASCII_BACKSPACE;
+import static org.apache.pdfbox.load.parse.ParseUtils.ASCII_CARRIAGE_RETURN;
+import static org.apache.pdfbox.load.parse.ParseUtils.ASCII_FORM_FEED;
+import static org.apache.pdfbox.load.parse.ParseUtils.ASCII_HORIZONTAL_TAB;
+import static org.apache.pdfbox.load.parse.ParseUtils.ASCII_LINE_FEED;
 import static org.apache.pdfbox.load.parse.ParseUtils.isCarriageReturn;
 import static org.apache.pdfbox.load.parse.ParseUtils.isDigit;
 import static org.apache.pdfbox.load.parse.ParseUtils.isEOL;
 import static org.apache.pdfbox.load.parse.ParseUtils.isEndOfName;
 import static org.apache.pdfbox.load.parse.ParseUtils.isHexDigit;
 import static org.apache.pdfbox.load.parse.ParseUtils.isLineFeed;
+import static org.apache.pdfbox.load.parse.ParseUtils.isOctalDigit;
 import static org.apache.pdfbox.load.parse.ParseUtils.isWhitespace;
 
 import java.io.IOException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.io.PushBackInputStream;
+import org.apache.pdfbox.util.Charsets;
 
 /**
  * @author Andrea Vacondio
@@ -35,12 +45,11 @@ import org.apache.pdfbox.io.PushBackInputStream;
 public class SourceReader
 {
 
+    private static final Log LOG = LogFactory.getLog(SourceReader.class);
+
     private static final long OBJECT_NUMBER_THRESHOLD = 10000000000L;
     private static final long GENERATION_NUMBER_THRESHOLD = 65535;
-    protected static final String ISO_8859_1 = "ISO-8859-1";
 
-    // TODO maybe use a pool of buffers if we want to support concurrent reads and async indirect objs resolve
-    private StringBuilder buffer = new StringBuilder();
     private PushBackInputStream source;
 
     public SourceReader(PushBackInputStream source)
@@ -53,8 +62,11 @@ public class SourceReader
      */
     protected StringBuilder buffer()
     {
-        buffer.setLength(0);
-        return buffer;
+        // TODO use some sort of pool of buffers and avoid creating tons of StringBuilders
+        // private StringBuilder buffer = new StringBuilder();
+        // buffer.setLength(0);
+        // return buffer;
+        return new StringBuilder();
     }
 
     /**
@@ -66,18 +78,19 @@ public class SourceReader
     }
 
     /**
-     * @return The next string that was read from the stream.
+     * @return The next token that was read from the stream.
      *
      * @throws IOException If there is an error reading from the stream.
+     * @see ParseUtils#isEndOfName(int)
      */
-    protected String readString() throws IOException
+    protected String readToken() throws IOException
     {
         skipSpaces();
         StringBuilder builder = buffer();
         char c;
         while (((c = (char) source.read()) != -1) && !isEndOfName(c))
         {
-            builder.append((char) c);
+            builder.append(c);
             c = (char) source.read();
         }
         unreadIfValid(c);
@@ -85,7 +98,7 @@ public class SourceReader
     }
 
     /**
-     * Skips the given String
+     * Skips the expected given String
      *
      * @param expectedString the String value that is expected.
      * @throws IOException if the String char is not the expected value or if an I/O error occurs.
@@ -112,6 +125,24 @@ public class SourceReader
             throw new IOException("expected='" + ec + "' actual='" + c + "' at offset "
                     + source.getOffset());
         }
+    }
+
+    /**
+     * Skips the next token if it's value is one of the given ones
+     *
+     * @param values the values to skip
+     * @return true if the token is found and skipped, false otherwise.
+     * @throws IOException if there is an error reading from the stream
+     */
+    protected boolean skipTokenIfValue(String... values) throws IOException
+    {
+        String token = readToken();
+        if (!asList(values).contains(token))
+        {
+            source.unread(token.getBytes(Charsets.ISO_8859_1));
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -221,6 +252,8 @@ public class SourceReader
                 else
                 {
                     source.unread(ch2);
+                    LOG.warn("Found NUMBER SIGN (#) not used as escaping char while reading name at "
+                            + source.getOffset());
                     c = (char) ch1;
                 }
             }
@@ -232,7 +265,6 @@ public class SourceReader
 
     /**
      * @return The integer that was read from the stream.
-     *
      * @throws IOException If there is an error reading from the stream.
      */
     protected int readInt() throws IOException
@@ -245,7 +277,7 @@ public class SourceReader
         }
         catch (NumberFormatException e)
         {
-            source.unread(intBuffer.getBytes(ISO_8859_1));
+            source.unread(intBuffer.getBytes(Charsets.ISO_8859_1));
             throw new IOException(String.format(
                     "Expected an integer type at offset %d but was '%s'", source.getOffset(),
                     intBuffer), e);
@@ -254,7 +286,6 @@ public class SourceReader
 
     /**
      * @return The long that was read from the stream.
-     *
      * @throws IOException If there is an error reading from the stream.
      */
     protected long readLong() throws IOException
@@ -267,19 +298,19 @@ public class SourceReader
         }
         catch (NumberFormatException e)
         {
-            source.unread(longBuffer.getBytes(ISO_8859_1));
+            source.unread(longBuffer.getBytes(Charsets.ISO_8859_1));
             throw new IOException(String.format("Expected a long type at offset %d but was '%s'",
                     source.getOffset(), longBuffer), e);
         }
     }
 
     /**
-     * Reads a token by the {@linkplain #readInt()} method and the {@linkplain #readLong()} method.
+     * Reads a a token conforming with a PDF Integer object defined in Numeric Objects chap 7.3.3 PDF 32000-1:2008.
      *
-     * @return the token to parse as integer or long by the calling method.
+     * @return the token to parse as {@link Integer} or {@link Long}.
      * @throws IOException If there is an error reading from the stream.
      */
-    private final String readIntegerNumber() throws IOException
+    protected final String readIntegerNumber() throws IOException
     {
         StringBuilder builder = buffer();
         int c = source.read();
@@ -298,7 +329,7 @@ public class SourceReader
     /**
      * Reads a token conforming with PDF Numeric Objects chap 7.3.3 PDF 32000-1:2008.
      *
-     * @return the token to parse as integer or long by the calling method.
+     * @return the token to parse as integer or real number.
      * @throws IOException If there is an error reading from the stream.
      */
     protected final String readNumber() throws IOException
@@ -308,9 +339,173 @@ public class SourceReader
         if (c != -1 && (isDigit(c) || c == '+' || c == '-' || c == '.'))
         {
             builder.append((char) c);
-            while ((c = source.read()) != -1 && (isDigit(c) || c == 'E' || c == 'e'))
+            while ((c = source.read()) != -1 && (isDigit(c) || c == '.' || c == 'E' || c == 'e'))
             {
                 builder.append((char) c);
+            }
+        }
+        unreadIfValid(c);
+        return builder.toString();
+    }
+
+    /**
+     * Reads a token conforming with PDF Hexadecimal Strings chap 7.3.4.3 PDF 32000-1:2008. Any non hexadecimal char
+     * found while parsing the token is replace with the default '0' hex char.
+     *
+     * @return the token to parse as an hexadecimal string
+     * @throws IOException If there is an error reading from the stream.
+     */
+    protected final String readHexString() throws IOException
+    {
+        skipExpected('<');
+        StringBuilder builder = buffer();
+        char c;
+        while (((c = (char) source.read()) != -1) && c != '>')
+        {
+            if (isHexDigit(c))
+            {
+                builder.append(c);
+            }
+            else if (isWhitespace(c))
+            {
+                continue;
+            }
+            else
+            {
+                // this differs from original PDFBox implementation. It replaces the wrong char with a default value and
+                // goes on.
+                LOG.warn(String
+                        .format("Expected an hexadecimal char at offset %d but was '%c'. Replaced with default 0.",
+                                source.getOffset() - 1, c));
+                builder.append('0');
+            }
+        }
+        if (c == -1)
+        {
+            throw new IOException("Unexpected EOF. Missing closing bracket for hexadecimal string.");
+        }
+        return builder.toString();
+    }
+
+    /**
+     * Reads a token conforming with PDF Literal Strings chap 7.3.4.2 PDF 32000-1:2008.
+     *
+     * @return the token to parse as a literal string
+     * @throws IOException If there is an error during parsing.
+     */
+    protected String readLiteralString() throws IOException
+    {
+        skipExpected('(');
+        int bracesCounter = 1;
+        StringBuilder builder = buffer();
+
+        char c;
+        while ((c = (char) source.read()) != -1 && bracesCounter > 0)
+        {
+            switch (c)
+            {
+            case '(':
+                bracesCounter++;
+                builder.append(c);
+                break;
+            case ')':
+                bracesCounter--;
+                // TODO PDFBox 276
+                // this differs from the PDFBox 2.0.0 impl.
+                // consider if we want to take care of this. Maybe investigate Acrobat to see how they do it
+                if (bracesCounter > 0)
+                {
+                    builder.append(c);
+                }
+                break;
+            case '\\':
+            {
+                char next = (char) source().read();
+                switch (next)
+                {
+                case 'n':
+                    builder.append(ASCII_LINE_FEED);
+                    break;
+                case 'r':
+                    builder.append(ASCII_CARRIAGE_RETURN);
+                    break;
+                case 't':
+                    builder.append(ASCII_HORIZONTAL_TAB);
+                    break;
+                case 'b':
+                    builder.append(ASCII_BACKSPACE);
+                    break;
+                case 'f':
+                    builder.append(ASCII_FORM_FEED);
+                    break;
+                case ')':
+                    // TODO PDFBox 276
+                    // this differs from the PDFBox 2.0.0 impl.
+                    // consider if we want to take care of this. Maybe investigate Acrobat to see how they do it
+                case '(':
+                case '\\':
+                    builder.append(next);
+                    break;
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                {
+                    StringBuilder octal = buffer();
+                    octal.append(next);
+                    next = (char) source.read();
+                    if (isOctalDigit(next))
+                    {
+                        octal.append(next);
+                        next = (char) source.read();
+                        if (isOctalDigit(next))
+                        {
+                            octal.append(next);
+                        }
+                        else
+                        {
+                            unreadIfValid(next);
+                        }
+                    }
+                    else
+                    {
+                        unreadIfValid(next);
+                    }
+                    try
+                    {
+                        builder.append(Integer.parseInt(octal.toString(), 8));
+                    }
+                    catch (NumberFormatException e)
+                    {
+                        throw new IOException(String.format(
+                                "Expected an octal type character at offset but was '%s'",
+                                octal.toString()), e);
+                    }
+                    break;
+                }
+                case ASCII_LINE_FEED:
+                case ASCII_CARRIAGE_RETURN:
+                {
+                    // this is a break in the line so ignore it and the newline and continue
+                    while ((c = (char) source.read()) != -1 && isEOL(c))
+                    {
+                        // NOOP
+                    }
+                    unreadIfValid(c);
+                    break;
+                }
+                default:
+                    // dropping the backslash
+                    builder.append(next);
+                }
+                break;
+            }
+            default:
+                builder.append(c);
             }
         }
         unreadIfValid(c);
@@ -331,10 +526,9 @@ public class SourceReader
             if (c == 37)
             {
                 // skip past the comment section
-                c = source.read();
-                while (!isEOL(c) && c != -1)
+                while ((c = source.read()) != -1 && !isEOL(c))
                 {
-                    c = source.read();
+                    // NOOP
                 }
             }
             else

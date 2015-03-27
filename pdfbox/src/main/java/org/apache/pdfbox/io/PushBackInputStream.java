@@ -16,9 +16,9 @@
  */
 package org.apache.pdfbox.io;
 
-import java.io.InputStream;
-import java.io.IOException;
 import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * A simple subclass that adds a few convience methods.
@@ -158,8 +158,7 @@ public class PushBackInputStream extends java.io.PushbackInputStream
      */
     public boolean isEOF() throws IOException
     {
-        int peek = peek();
-        return peek == -1;
+        return peek() == -1;
     }
 
     /**

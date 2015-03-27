@@ -23,12 +23,17 @@ package org.apache.pdfbox.load.parse;
 public final class ParseUtils
 {
 
-    private static final byte ASCII_LINE_FEED = 10;
-    private static final byte ASCII_CARRIAGE_RETURN = 13;
+    public static final byte ASCII_LINE_FEED = 10;
+    public static final byte ASCII_FORM_FEED = 12;
+    public static final byte ASCII_CARRIAGE_RETURN = 13;
+    public static final byte ASCII_BACKSPACE = 8;
+    public static final byte ASCII_HORIZONTAL_TAB = 9;
+
     private static final byte ASCII_ZERO = 48;
+
+    private static final byte ASCII_SEVEN = 55;
     private static final byte ASCII_NINE = 57;
     private static final byte ASCII_SPACE = 32;
-    private static final byte ASCII_HORIZONTAL_TAB = 9;
 
     private ParseUtils()
     {
@@ -82,7 +87,8 @@ public final class ParseUtils
      */
     public static boolean isWhitespace(int c)
     {
-        return c == 0 || c == ASCII_HORIZONTAL_TAB || c == 12 || isEOL(c) || isSpace(c);
+        return c == 0 || c == ASCII_HORIZONTAL_TAB || c == ASCII_FORM_FEED || isEOL(c)
+                || isSpace(c);
     }
 
     /**
@@ -101,6 +107,15 @@ public final class ParseUtils
     public static boolean isDigit(int c)
     {
         return c >= ASCII_ZERO && c <= ASCII_NINE;
+    }
+
+    /**
+     * @param c The character to be checked
+     * @return true if the character is an octal digit.
+     */
+    public static boolean isOctalDigit(int c)
+    {
+        return c >= ASCII_ZERO && c <= ASCII_SEVEN;
     }
 
     /**

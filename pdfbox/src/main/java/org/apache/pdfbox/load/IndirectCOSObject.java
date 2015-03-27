@@ -21,8 +21,8 @@ import java.util.Optional;
 
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSNull;
+import org.apache.pdfbox.cos.COSObjectKey;
 import org.apache.pdfbox.cos.ICOSVisitor;
-import org.apache.pdfbox.xref.XrefEntry;
 
 /**
  * @author Andrea Vacondio
@@ -32,13 +32,13 @@ public class IndirectCOSObject extends COSBase
 {
 
     private COSBase baseObject;
-    private XrefEntry xrefEntry;
+    private COSObjectKey key;
     private IndirectObjectsProvider provider;
 
-    public IndirectCOSObject(XrefEntry xrefEntry, IndirectObjectsProvider provider)
+    public IndirectCOSObject(COSObjectKey key, IndirectObjectsProvider provider)
     {
         // TODO verify if we need a null check here
-        this.xrefEntry = xrefEntry;
+        this.key = key;
         this.provider = provider;
     }
 
@@ -47,7 +47,7 @@ public class IndirectCOSObject extends COSBase
         // TODO multi thread?
         if (baseObject == null)
         {
-            baseObject = Optional.ofNullable(provider.get(xrefEntry.key())).orElse(COSNull.NULL);
+            baseObject = Optional.ofNullable(provider.get(key)).orElse(COSNull.NULL);
         }
         return baseObject;
     }
