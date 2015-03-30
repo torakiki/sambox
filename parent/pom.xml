@@ -161,6 +161,7 @@
                         <link>http://docs.oracle.com/javase/8/docs/api/</link>
                     </links>
                     <encoding>UTF-8</encoding>
+                    <notimestamp>true</notimestamp>
                 </configuration>
             </plugin>
             <plugin>
