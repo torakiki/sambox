@@ -14,22 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.pdfbox.load.parse;
+package org.apache.pdfbox.load;
 
 import static java.util.Arrays.asList;
-import static org.apache.pdfbox.load.parse.ParseUtils.ASCII_BACKSPACE;
-import static org.apache.pdfbox.load.parse.ParseUtils.ASCII_CARRIAGE_RETURN;
-import static org.apache.pdfbox.load.parse.ParseUtils.ASCII_FORM_FEED;
-import static org.apache.pdfbox.load.parse.ParseUtils.ASCII_HORIZONTAL_TAB;
-import static org.apache.pdfbox.load.parse.ParseUtils.ASCII_LINE_FEED;
-import static org.apache.pdfbox.load.parse.ParseUtils.isCarriageReturn;
-import static org.apache.pdfbox.load.parse.ParseUtils.isDigit;
-import static org.apache.pdfbox.load.parse.ParseUtils.isEOL;
-import static org.apache.pdfbox.load.parse.ParseUtils.isEndOfName;
-import static org.apache.pdfbox.load.parse.ParseUtils.isHexDigit;
-import static org.apache.pdfbox.load.parse.ParseUtils.isLineFeed;
-import static org.apache.pdfbox.load.parse.ParseUtils.isOctalDigit;
-import static org.apache.pdfbox.load.parse.ParseUtils.isWhitespace;
+import static org.apache.pdfbox.load.ParseUtils.ASCII_BACKSPACE;
+import static org.apache.pdfbox.load.ParseUtils.ASCII_CARRIAGE_RETURN;
+import static org.apache.pdfbox.load.ParseUtils.ASCII_FORM_FEED;
+import static org.apache.pdfbox.load.ParseUtils.ASCII_HORIZONTAL_TAB;
+import static org.apache.pdfbox.load.ParseUtils.ASCII_LINE_FEED;
+import static org.apache.pdfbox.load.ParseUtils.isCarriageReturn;
+import static org.apache.pdfbox.load.ParseUtils.isDigit;
+import static org.apache.pdfbox.load.ParseUtils.isEOL;
+import static org.apache.pdfbox.load.ParseUtils.isEndOfName;
+import static org.apache.pdfbox.load.ParseUtils.isHexDigit;
+import static org.apache.pdfbox.load.ParseUtils.isLineFeed;
+import static org.apache.pdfbox.load.ParseUtils.isOctalDigit;
+import static org.apache.pdfbox.load.ParseUtils.isWhitespace;
+import static org.apache.pdfbox.util.RequireUtils.requireArg;
+import static org.apache.pdfbox.util.RequireUtils.requireIOCondition;
 
 import java.io.IOException;
 
@@ -48,12 +50,14 @@ public class SourceReader
     private static final Log LOG = LogFactory.getLog(SourceReader.class);
 
     private static final long OBJECT_NUMBER_THRESHOLD = 10000000000L;
-    private static final long GENERATION_NUMBER_THRESHOLD = 65535;
+    private static final int GENERATION_NUMBER_THRESHOLD = 65535;
+    private static final String OBJ = "obj";
 
     private PushBackInputStream source;
 
     public SourceReader(PushBackInputStream source)
     {
+        requireArg(source != null, "Cannot read a null source");
         this.source = source;
     }
 
@@ -75,6 +79,25 @@ public class SourceReader
     protected PushBackInputStream source()
     {
         return source;
+    }
+
+    /**
+     * @return the current offset
+     */
+    protected long offset()
+    {
+        return source.getOffset();
+    }
+
+    /**
+     * seeks to the given offset
+     * 
+     * @param offset the new offset
+     * @throws IOException
+     */
+    protected void offset(long offset) throws IOException
+    {
+        source.seek(offset);
     }
 
     /**
@@ -122,8 +145,7 @@ public class SourceReader
         char c = (char) source.read();
         if (c != ec)
         {
-            throw new IOException("expected='" + ec + "' actual='" + c + "' at offset "
-                    + source.getOffset());
+            throw new IOException("expected='" + ec + "' actual='" + c + "' at offset " + offset());
         }
     }
 
@@ -146,6 +168,31 @@ public class SourceReader
     }
 
     /**
+     * Skips an indirect object definition open tag (Ex. "12 0 obj")as defined in the chap 7.3.10 PDF 32000-1:2008.
+     * 
+     * @throws IOException if we are reading a not valid indirect object definition open tag
+     */
+    protected void skipIndirectObjectDefinition() throws IOException
+    {
+        readObjectNumber();
+        readGenerationNumber();
+        skipSpaces();
+        skipExpected(OBJ);
+    }
+
+    /**
+     * @param valid values for the next token.
+     * @return true if the next token is one of the given values. false otherwise.
+     * @throws IOException if there is an error reading from the stream
+     */
+    protected boolean isNextToken(String... values) throws IOException
+    {
+        String token = readToken();
+        source.unread(token.getBytes(Charsets.ISO_8859_1));
+        return asList(values).contains(token);
+    }
+
+    /**
      * Reads bytes until the first end of line marker occurs. NOTE: The EOL marker may consists of 1 (CR or LF) or 2 (CR
      * and CL) bytes which is an important detail if one wants to unread the line.
      *
@@ -154,13 +201,9 @@ public class SourceReader
      */
     protected String readLine() throws IOException
     {
-        if (source.isEOF())
-        {
-            throw new IOException("Expected line but was end of file");
-        }
+        requireIOCondition(!source.isEOF(), "Expected line but was end of file");
 
         StringBuilder builder = buffer();
-
         int c;
         while ((c = source.read()) != -1 && !isEOL(c))
         {
@@ -245,15 +288,15 @@ public class SourceReader
                         source.unread(ch1);
                         source.unread(ch2);
                         throw new IOException(String.format(
-                                "Expected an Hex number at offset %d but was '%s'",
-                                source.getOffset(), hex), e);
+                                "Expected an Hex number at offset %d but was '%s'", offset(), hex),
+                                e);
                     }
                 }
                 else
                 {
                     source.unread(ch2);
                     LOG.warn("Found NUMBER SIGN (#) not used as escaping char while reading name at "
-                            + source.getOffset());
+                            + offset());
                     c = (char) ch1;
                 }
             }
@@ -269,7 +312,6 @@ public class SourceReader
      */
     protected int readInt() throws IOException
     {
-        skipSpaces();
         String intBuffer = readIntegerNumber();
         try
         {
@@ -279,8 +321,7 @@ public class SourceReader
         {
             source.unread(intBuffer.getBytes(Charsets.ISO_8859_1));
             throw new IOException(String.format(
-                    "Expected an integer type at offset %d but was '%s'", source.getOffset(),
-                    intBuffer), e);
+                    "Expected an integer type at offset %d but was '%s'", offset(), intBuffer), e);
         }
     }
 
@@ -290,7 +331,6 @@ public class SourceReader
      */
     protected long readLong() throws IOException
     {
-        skipSpaces();
         String longBuffer = readIntegerNumber();
         try
         {
@@ -300,7 +340,7 @@ public class SourceReader
         {
             source.unread(longBuffer.getBytes(Charsets.ISO_8859_1));
             throw new IOException(String.format("Expected a long type at offset %d but was '%s'",
-                    source.getOffset(), longBuffer), e);
+                    offset(), longBuffer), e);
         }
     }
 
@@ -312,6 +352,7 @@ public class SourceReader
      */
     protected final String readIntegerNumber() throws IOException
     {
+        skipSpaces();
         StringBuilder builder = buffer();
         int c = source.read();
         if (c != -1 && (isDigit(c) || c == '+' || c == '-'))
@@ -376,14 +417,12 @@ public class SourceReader
                 // goes on.
                 LOG.warn(String
                         .format("Expected an hexadecimal char at offset %d but was '%c'. Replaced with default 0.",
-                                source.getOffset() - 1, c));
+                                offset() - 1, c));
                 builder.append('0');
             }
         }
-        if (c == -1)
-        {
-            throw new IOException("Unexpected EOF. Missing closing bracket for hexadecimal string.");
-        }
+        requireIOCondition(c != -1,
+                "Unexpected EOF. Missing closing bracket for hexadecimal string.");
         return builder.toString();
     }
 
@@ -420,7 +459,7 @@ public class SourceReader
                 break;
             case '\\':
             {
-                char next = (char) source().read();
+                char next = (char) source.read();
                 switch (next)
                 {
                 case 'n':

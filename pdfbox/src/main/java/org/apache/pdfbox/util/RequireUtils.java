@@ -16,6 +16,8 @@
  */
 package org.apache.pdfbox.util;
 
+import java.io.IOException;
+
 /**
  * Utility methods to check parameters and conditions validity.
  * 
@@ -55,6 +57,22 @@ public final class RequireUtils
         if (!condition)
         {
             throw new IllegalArgumentException(exceptionMessage);
+        }
+    }
+
+    /**
+     * Throws an {@link IOException} if the given condition is not met
+     * 
+     * @param condition
+     * @param exceptionMessage
+     * @throws IOException
+     */
+    public static void requireIOCondition(boolean condition, String exceptionMessage)
+            throws IOException
+    {
+        if (!condition)
+        {
+            throw new IOException(exceptionMessage);
         }
     }
 }

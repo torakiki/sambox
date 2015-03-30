@@ -407,9 +407,6 @@ public class COSArray extends COSBase implements Iterable<COSBase>
         return removed;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString()
     {

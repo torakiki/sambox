@@ -14,9 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.pdfbox.load.parse;
+package org.apache.pdfbox.load;
 
-import static org.apache.pdfbox.load.parse.ParseUtils.isDigit;
+import static org.apache.pdfbox.load.ParseUtils.isDigit;
 
 import java.io.IOException;
 
@@ -32,8 +32,6 @@ import org.apache.pdfbox.cos.COSNumber;
 import org.apache.pdfbox.cos.COSObjectKey;
 import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.io.PushBackInputStream;
-import org.apache.pdfbox.load.IndirectCOSObject;
-import org.apache.pdfbox.load.IndirectObjectsProvider;
 import org.apache.pdfbox.util.Charsets;
 
 /**
@@ -46,6 +44,7 @@ public class BaseCOSParser extends SourceReader
     private static final Log LOG = LogFactory.getLog(BaseCOSParser.class);
 
     protected static final String ENDOBJ = "endobj";
+    protected static final String STREAM = "stream";
     protected static final String ENDSTREAM = "endstream";
     private static final String DEF = "def";
 
@@ -119,7 +118,7 @@ public class BaseCOSParser extends SourceReader
             else
             {
                 LOG.warn(String.format("Unknown token with value '%s' ending at offset %d",
-                        badString, source().getOffset()));
+                        badString, offset()));
             }
         }
         }
@@ -210,9 +209,7 @@ public class BaseCOSParser extends SourceReader
             {
                 // This could be an "endobj" or "endstream" which means we can assume that
                 // the array has ended.
-                String isThisTheEnd = readToken();
-                source().unread(isThisTheEnd.getBytes(Charsets.ISO_8859_1));
-                if (ENDOBJ.equals(isThisTheEnd) || ENDSTREAM.equals(isThisTheEnd))
+                if (isNextToken(ENDOBJ, ENDSTREAM))
                 {
                     return array;
                 }
@@ -260,7 +257,7 @@ public class BaseCOSParser extends SourceReader
     protected COSBase nextNumberOrIndirectReference() throws IOException
     {
         String first = readNumber();
-        long offset = source().getOffset();
+        long offset = offset();
         skipSpaces();
         if (isDigit(source().peek()))
         {
@@ -282,7 +279,7 @@ public class BaseCOSParser extends SourceReader
                 }
             }
         }
-        source().seek(offset);
+        offset(offset);
         return COSNumber.get(first);
     }
 
@@ -341,7 +338,7 @@ public class BaseCOSParser extends SourceReader
             return nextHexadecimalString();
         default:
             throw new IOException(String.format("Expected '(' or '<' at offset %d but was '%c'",
-                    source().getOffset(), next));
+                    offset(), next));
         }
     }
 

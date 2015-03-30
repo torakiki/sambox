@@ -43,7 +43,7 @@ public final class TrailerMerger
      */
     public void mergeTrailerWithoutOverwriting(long offset, COSDictionary toMerge)
     {
-        LOG.debug("Merging trailer at offset " + offset);
+        LOG.trace("Merging trailer at offset " + offset);
         trailer.mergeInto(toMerge);
         history.put(offset, toMerge);
     }
