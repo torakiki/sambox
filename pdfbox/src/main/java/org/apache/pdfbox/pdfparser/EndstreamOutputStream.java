@@ -30,7 +30,7 @@ import java.io.OutputStream;
  *
  * @author Tilman Hausherr
  */
-class EndstreamOutputStream extends BufferedOutputStream
+public class EndstreamOutputStream extends BufferedOutputStream
 {
     //TODO: replace this class with a PullBackOutputStream class if there ever is one
     
@@ -39,7 +39,7 @@ class EndstreamOutputStream extends BufferedOutputStream
     private int pos = 0;
     private boolean mustFilter = true;
 
-    EndstreamOutputStream(OutputStream out)
+    public EndstreamOutputStream(OutputStream out)
     {
         super(out);
     }

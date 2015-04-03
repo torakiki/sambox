@@ -19,10 +19,6 @@ package org.apache.pdfbox.io;
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.pdfbox.cos.COSInteger;
-import org.apache.pdfbox.cos.COSObject;
-import org.apache.pdfbox.cos.COSString;
-
 import junit.framework.TestCase;
 
 /**
@@ -61,8 +57,6 @@ public class TestRandomAccessFileOutputStream extends TestCase
         }
         assertEquals(0, out.getPosition());
         assertEquals(16, out.getLength());
-        assertEquals(16, out.getLengthWritten());
-        assertEquals(null, out.getExpectedLength());
         assertEquals(16, raFile.length());
         assertEquals(16, raFile.getPosition());
         out.close();
@@ -73,8 +67,6 @@ public class TestRandomAccessFileOutputStream extends TestCase
         out = new RandomAccessFileOutputStream(raFile);
         assertEquals(16, out.getPosition());
         assertEquals(0, out.getLength());
-        assertEquals(0, out.getLengthWritten());
-        assertEquals(null, out.getExpectedLength());
         assertEquals(16, raFile.length());
         assertEquals(0, raFile.getPosition());
         out.close();
@@ -87,8 +79,6 @@ public class TestRandomAccessFileOutputStream extends TestCase
         out.write(buffer);
         assertEquals(16, out.getPosition());
         assertEquals(8, out.getLength());
-        assertEquals(8, out.getLengthWritten());
-        assertEquals(null, out.getExpectedLength());
         assertEquals(24, raFile.length());
         assertEquals(24, raFile.getPosition());
         out.close();
@@ -102,8 +92,6 @@ public class TestRandomAccessFileOutputStream extends TestCase
         out.write(buffer, 4, 2);
         assertEquals(24, out.getPosition());
         assertEquals(6, out.getLength());
-        assertEquals(6, out.getLengthWritten());
-        assertEquals(null, out.getExpectedLength());
         assertEquals(30, raFile.length());
         assertEquals(30, raFile.getPosition());
         out.close();
@@ -126,80 +114,6 @@ public class TestRandomAccessFileOutputStream extends TestCase
         assertEquals(61, buffer[27]);
         assertEquals(54, buffer[28]);
         assertEquals(55, buffer[29]);
-
-        // Cleanup
-        raFile.close();
-        file.delete();
-    }
-
-    public void testExpectedLength() throws IOException
-    {
-        RandomAccessFileOutputStream out;
-
-        File file = new File(testResultsDir, "raf-outputstream2.bin");
-
-        file.delete();
-
-        RandomAccessFile raFile = new RandomAccessFile(file, "rw");
-
-        byte[] buffer = createDataSequence(16, 10);
-
-        // Test COSInteger
-        out = new RandomAccessFileOutputStream(raFile);
-        out.setExpectedLength(COSInteger.get(24));
-        out.write(buffer);
-        assertEquals(0, out.getPosition());
-        assertEquals(24, out.getLength());
-        assertEquals(16, out.getLengthWritten());
-        assertEquals(COSInteger.get(24), out.getExpectedLength());
-        assertEquals(16, raFile.length());
-        assertEquals(16, raFile.getPosition());
-        out.close();
-
-        raFile.seek(0);
-
-        // Test COSInteger -1
-        out = new RandomAccessFileOutputStream(raFile);
-        out.setExpectedLength(COSInteger.get(-1));
-        out.write(buffer);
-        assertEquals(16, out.getPosition());
-        assertEquals(16, out.getLength());
-        assertEquals(16, out.getLengthWritten());
-        assertEquals(COSInteger.get(-1), out.getExpectedLength());
-        assertEquals(32, raFile.length());
-        assertEquals(32, raFile.getPosition());
-        out.close();
-
-        raFile.seek(0);
-
-        // Test COSObject
-        out = new RandomAccessFileOutputStream(raFile);
-        COSObject expLength = new COSObject(COSInteger.get(24));
-        out.setExpectedLength(expLength);
-        out.write(buffer);
-        assertEquals(32, out.getPosition());
-        assertEquals(24, out.getLength());
-        assertEquals(16, out.getLengthWritten());
-        assertSame(expLength, out.getExpectedLength());
-        assertEquals(48, raFile.length());
-        assertEquals(48, raFile.getPosition());
-        out.close();
-
-        raFile.seek(0);
-
-        // Test COSString
-        out = new RandomAccessFileOutputStream(raFile);
-        out.setExpectedLength(new COSString("24"));
-        out.write(buffer);
-        assertEquals(48, out.getPosition());
-        assertEquals(16, out.getLength());
-        assertEquals(16, out.getLengthWritten());
-        assertEquals(new COSString("24"), out.getExpectedLength());
-        assertEquals(64, raFile.length());
-        assertEquals(64, raFile.getPosition());
-        out.close();
-
-        raFile.seek(0);
 
         // Cleanup
         raFile.close();

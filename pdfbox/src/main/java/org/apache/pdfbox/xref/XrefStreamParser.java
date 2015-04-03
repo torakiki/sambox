@@ -55,17 +55,6 @@ class XrefStreamParser extends BaseCOSParser
         this.trailerMerger = trailerMerger;
     }
 
-    /**
-     * Parse the xref object stream and merge the trailer.
-     * 
-     * @param streamObjectOffset xref stream object offset
-     * @return the stream dictionary
-     * @throws IOException
-     */
-    public COSDictionary parseAndMergeTrailer(long streamObjectOffset) throws IOException
-    {
-        return parseXrefObjStream(streamObjectOffset, true);
-    }
 
     /**
      * Parse the xref object stream.
@@ -76,12 +65,6 @@ class XrefStreamParser extends BaseCOSParser
      */
     public COSDictionary parse(long streamObjectOffset) throws IOException
     {
-        return parseXrefObjStream(streamObjectOffset, false);
-    }
-
-    private COSDictionary parseXrefObjStream(long streamObjectOffset, boolean merge)
-            throws IOException
-    {
         LOG.debug("Parsing xref stream at offset " + streamObjectOffset);
         offset(streamObjectOffset);
         skipIndirectObjectDefinition();
@@ -89,10 +72,7 @@ class XrefStreamParser extends BaseCOSParser
         COSDictionary dictionary = nextDictionary();
         try (COSStream xrefStream = nextStream(dictionary))
         {
-            if (merge)
-            {
-                trailerMerger.mergeTrailerWithoutOverwriting(streamObjectOffset, dictionary);
-            }
+            trailerMerger.mergeTrailerWithoutOverwriting(streamObjectOffset, dictionary);
             parseStream(xrefStream);
         }
         LOG.debug("Done parsing xref stream");

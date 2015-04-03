@@ -38,11 +38,11 @@ import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSNull;
 import org.apache.pdfbox.cos.COSNumber;
 import org.apache.pdfbox.cos.COSObject;
+import org.apache.pdfbox.cos.COSObjectKey;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.io.PushBackInputStream;
-import org.apache.pdfbox.cos.COSObjectKey;
 
 /**
  * This class is used to contain parsing logic that will be used by both the
@@ -415,7 +415,7 @@ public abstract class BaseParser implements Closeable
             COSBase streamLength = dic.getItem(COSName.LENGTH);
 
             //Need to keep track of the
-            out = stream.createFilteredStream( streamLength );
+            out = stream.createFilteredStream();
 
             // try to read stream length - even if it is an indirect object
             int length = -1;

@@ -42,7 +42,8 @@ public class IndirectCOSObject extends COSBase
         this.provider = provider;
     }
 
-    public COSBase getObject()
+    @Override
+    public COSBase getCOSObject()
     {
         // TODO multi thread?
         if (baseObject == null)
@@ -55,7 +56,7 @@ public class IndirectCOSObject extends COSBase
     @Override
     public Object accept(ICOSVisitor visitor) throws IOException
     {
-        return getObject().accept(visitor);
+        return getCOSObject().accept(visitor);
     }
 
 }

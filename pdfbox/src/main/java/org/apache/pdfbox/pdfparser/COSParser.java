@@ -937,7 +937,7 @@ public class COSParser extends BaseParser
             // get output stream to copy data to
             if (streamLengthObj != null && validateStreamLength(streamLengthObj.longValue()))
             {
-                out = stream.createFilteredStream(streamLengthObj);
+                out = stream.createFilteredStream();
                 long remainBytes = streamLengthObj.longValue();
                 int bytesRead = 0;
                 while (remainBytes > 0)

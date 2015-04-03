@@ -30,16 +30,17 @@ import java.io.OutputStream;
  */
 public final class IOUtils
 {
-
-    //TODO PDFBox should really use Apache Commons IO.
+    private static final int STREAMCOPYBUFLEN = 8192;
+    // TODO PDFBox should really use Apache Commons IO.
 
     private IOUtils()
     {
-        //Utility class. Don't instantiate.
+        // Utility class. Don't instantiate.
     }
 
     /**
      * Reads the input stream and returns its contents as a byte array.
+     * 
      * @param in the input stream to read from.
      * @return the byte array
      * @throws IOException if an I/O error occurs
@@ -53,6 +54,7 @@ public final class IOUtils
 
     /**
      * Copies all the contents from the given input stream to the given output stream.
+     * 
      * @param input the input stream
      * @param output the output stream
      * @return the number of bytes that have been copied
@@ -60,7 +62,7 @@ public final class IOUtils
      */
     public static long copy(InputStream input, OutputStream output) throws IOException
     {
-        byte[] buffer = new byte[4096];
+        byte[] buffer = new byte[STREAMCOPYBUFLEN];
         long count = 0;
         int n = 0;
         while (-1 != (n = input.read(buffer)))
@@ -72,9 +74,43 @@ public final class IOUtils
     }
 
     /**
-     * Populates the given buffer with data read from the input stream. If the data doesn't
-     * fit the buffer, only the data that fits in the buffer is read. If the data is less than
-     * fits in the buffer, the buffer is not completely filled.
+     * copies length bytes from input to output using a buffer.
+     * 
+     * @param input
+     * @param output
+     * @param bufferLength length of the buffer to use
+     * @return the number of copied bytes
+     * @throws IOException
+     */
+    public static long copy(InputStream input, OutputStream output, final long length)
+            throws IOException
+    {
+        if (length == 0)
+        {
+            return 0;
+        }
+        byte[] buffer = new byte[STREAMCOPYBUFLEN];
+        int bytesToRead = (int) Math.min(length, STREAMCOPYBUFLEN);
+        int read;
+        long totalRead = 0;
+        while (bytesToRead > 0 && -1 != (read = input.read(buffer, 0, bytesToRead)))
+        {
+            output.write(buffer, 0, read);
+            totalRead += read;
+            if (length > 0)
+            { // only adjust length if not reading to the end
+              // Note the cast must work because buffer.length is an integer
+                bytesToRead = (int) Math.min(length - totalRead, STREAMCOPYBUFLEN);
+            }
+        }
+        return totalRead;
+    }
+
+    /**
+     * Populates the given buffer with data read from the input stream. If the data doesn't fit the buffer, only the
+     * data that fits in the buffer is read. If the data is less than fits in the buffer, the buffer is not completely
+     * filled.
+     * 
      * @param in the input stream to read from
      * @param buffer the buffer to fill
      * @return the number of bytes written to the buffer
@@ -89,7 +125,7 @@ public final class IOUtils
             int bytesRead = in.read(buffer, bufferWritePos, remaining);
             if (bytesRead < 0)
             {
-                break; //EOD
+                break; // EOD
             }
             remaining -= bytesRead;
         }

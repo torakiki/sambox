@@ -169,7 +169,7 @@ public class COSStream extends COSDictionary implements Closeable
             doEncode();
         }
         long position = filteredStream.getPosition();
-        long length = filteredStream.getLengthWritten();
+        long length = filteredStream.getLength();
 
         RandomAccessFileInputStream input =
             new RandomAccessFileInputStream( buffer, position, length );
@@ -218,7 +218,7 @@ public class COSStream extends COSDictionary implements Closeable
         if( unFilteredStream != null )
         {
             long position = unFilteredStream.getPosition();
-            long length = unFilteredStream.getLengthWritten();
+            long length = unFilteredStream.getLength();
             RandomAccessFileInputStream input =
                 new RandomAccessFileInputStream( buffer, position, length );
             retval = new BufferedInputStream( input, BUFFER_SIZE );
@@ -332,7 +332,7 @@ public class COSStream extends COSDictionary implements Closeable
         long position = unFilteredStream.getPosition();
         long length = unFilteredStream.getLength();
         // in case we need it later
-        long writtenLength = unFilteredStream.getLengthWritten();
+        long writtenLength = unFilteredStream.getLength();
 
         if (length == 0 && writtenLength == 0)
         {
@@ -487,24 +487,6 @@ public class COSStream extends COSDictionary implements Closeable
         IOUtils.closeQuietly(filteredStream);
         filteredStream = new RandomAccessFileOutputStream( buffer );
         return new BufferedOutputStream( filteredStream, BUFFER_SIZE );
-    }
-
-    /**
-     * This will create a new stream for which filtered byte should be
-     * written to.  You probably don't want this but want to use the
-     * createUnfilteredStream, which is used to write raw bytes to.
-     *
-     * @param expectedLength An entry where a length is expected.
-     *
-     * @return A stream that can be written to.
-     *
-     * @throws IOException If there is an error creating the stream.
-     */
-    public OutputStream createFilteredStream( COSBase expectedLength ) throws IOException
-    {
-        OutputStream out = createFilteredStream();
-        filteredStream.setExpectedLength(expectedLength);
-        return out;
     }
 
     /**

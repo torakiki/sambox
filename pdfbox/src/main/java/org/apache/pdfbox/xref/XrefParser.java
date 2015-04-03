@@ -17,6 +17,7 @@
 package org.apache.pdfbox.xref;
 
 import static org.apache.pdfbox.util.RequireUtils.requireIOCondition;
+import static org.apache.pdfbox.xref.XrefTableParser.XREF;
 
 import java.io.IOException;
 
@@ -24,7 +25,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.cos.COSObjectKey;
 import org.apache.pdfbox.io.PushBackInputStream;
 import org.apache.pdfbox.load.BaseCOSParser;
 import org.apache.pdfbox.load.IndirectObjectsProvider;
@@ -42,19 +42,18 @@ public class XrefParser extends BaseCOSParser
      */
     private static final int DEFAULT_TRAIL_BYTECOUNT = 2048;
     private static final String STARTXREF = "startxref";
-    private static final String XREF = "xref";
-    private static final String TRAILER = "trailer";
 
     private Xref xref = new Xref();
     private TrailerMerger trailerMerger = new TrailerMerger();
     private XrefStreamParser xrefStreamParser;
-    // TODO set this somehow
-    private long sourceLength;
+    private XrefTableParser xrefTableParser;
+
 
     public XrefParser(PushBackInputStream source, IndirectObjectsProvider provider)
     {
         super(source, provider);
         this.xrefStreamParser = new XrefStreamParser(source, provider, xref, trailerMerger);
+        this.xrefTableParser = new XrefTableParser(source, provider, xref, trailerMerger);
     }
 
     public void parse() throws IOException
@@ -80,9 +79,9 @@ public class XrefParser extends BaseCOSParser
      */
     private final long findXrefOffset() throws IOException
     {
-        int chunkSize = (int) Math.min(sourceLength, DEFAULT_TRAIL_BYTECOUNT);
+        int chunkSize = (int) Math.min(length(), DEFAULT_TRAIL_BYTECOUNT);
         byte[] buffer = new byte[chunkSize];
-        long startPosition = sourceLength - chunkSize;
+        long startPosition = length() - chunkSize;
         offset(startPosition);
         source().read(buffer, 0, chunkSize);
         int relativeIndex = new String(buffer, Charsets.ISO_8859_1).lastIndexOf(STARTXREF);
@@ -103,6 +102,8 @@ public class XrefParser extends BaseCOSParser
             LOG.warn("Offset '" + xrefOffset
                     + "' doesn't point to an xref table or stream, applying fallback strategy");
             // fallback strategy
+            // TODO set xrefOffset to amended offset
+
         }
         requireIOCondition(xrefOffset > 0, "Unable to find correct xref table or stream offset");
 
@@ -113,16 +114,7 @@ public class XrefParser extends BaseCOSParser
 
             if (isNextToken(XREF))
             {
-                parseXrefTable(xrefOffset);
-                skipSpaces();
-                // PDFBOX-1739 skip extra xref entries in RegisSTAR documents
-                while (source().peek() != 't')
-                {
-                    LOG.warn("Expected trailer object at position " + offset() + ", skipping line.");
-                    readLine();
-
-                }
-                COSDictionary trailer = parseTrailer();
+                COSDictionary trailer = xrefTableParser.parse(xrefOffset);
                 long streamOffset = trailer.getLong(COSName.XREF_STM);
                 if (streamOffset > 0)
                 {
@@ -130,20 +122,15 @@ public class XrefParser extends BaseCOSParser
                     {
                         LOG.warn("Offset '" + streamOffset
                                 + "' doesn't point to an xref stream, applying fallback strategy");
-                        // fallback
-                        streamOffset = (int) fixedOffset;
+                        // fallback strategy
+                        // TODO set streamOffset to amended offset
+                        // TODO log if the fallback offset is invalid
 
                     }
                     if (streamOffset > 0)
                     {
                         trailer.setLong(COSName.XREF_STM, streamOffset);
-                        offset(streamOffset);
-                        skipSpaces();
-                        xrefStreamParser.parse(xrefOffset);
-                    }
-                    else
-                    {
-                        LOG.warn("Skipping xref stream due to a corrupt offset.");
+                        xrefStreamParser.parse(streamOffset);
                     }
 
                 }
@@ -151,24 +138,13 @@ public class XrefParser extends BaseCOSParser
             }
             else
             {
-                COSDictionary streamDictionary = xrefStreamParser.parseAndMergeTrailer(xrefOffset);
+                COSDictionary streamDictionary = xrefStreamParser.parse(xrefOffset);
                 xrefOffset = amendPrevIfInvalid(streamDictionary);
             }
         }
+        // TODO
         // check the offsets of all referenced objects
-        checkXrefOffsets();
-    }
-
-    private COSDictionary parseTrailer() throws IOException
-    {
-        long offset = offset();
-        LOG.debug("Parsing trailer at " + offset);
-        skipExpected(TRAILER);
-        skipSpaces();
-        COSDictionary dictionary = nextDictionary();
-        trailerMerger.mergeTrailerWithoutOverwriting(offset, dictionary);
-        skipSpaces();
-        return dictionary;
+        // checkXrefOffsets();
     }
 
     /**
@@ -188,7 +164,8 @@ public class XrefParser extends BaseCOSParser
                 LOG.warn("Offset '" + prevOffset
                         + "' doesn't point to an xref table or stream, applying fallback strategy");
                 // fallback strategy
-                dictionary.setLong(COSName.PREV, amendedOffset);
+                // TODO set the amended offset
+                dictionary.setLong(COSName.PREV, prevOffset);
             }
         }
         return prevOffset;
@@ -238,56 +215,9 @@ public class XrefParser extends BaseCOSParser
      */
     protected final COSDictionary rebuildTrailer() throws IOException
     {
-        COSDictionary trailer = null;
-        bfSearchForObjects();
-        if (bfSearchCOSObjectKeyOffsets != null)
-        {
-            for (COSObjectKey objectKey : bfSearchCOSObjectKeyOffsets.keySet())
-            {
-                xref.add(XrefEntry.inUseEntry(objectKey.getNumber(),
-                        bfSearchCOSObjectKeyOffsets.get(objectKey), objectKey.getGeneration()));
-            }
-            trailer = trailerMerger.getTrailer();
-            getDocument().setTrailer(trailer);
-            // search for the different parts of the trailer dictionary
-            for (COSObjectKey key : bfSearchCOSObjectKeyOffsets.keySet())
-            {
-                Long offset = bfSearchCOSObjectKeyOffsets.get(key);
-                pdfSource.seek(offset);
-                readObjectNumber();
-                readGenerationNumber();
-                readExpectedString(OBJ_MARKER, true);
-                try
-                {
-                    COSDictionary dictionary = parseCOSDictionary();
-                    if (dictionary != null)
-                    {
-                        // document catalog
-                        if (COSName.CATALOG.equals(dictionary.getCOSName(COSName.TYPE)))
-                        {
-                            trailer.setItem(COSName.ROOT, document.getObjectFromPool(key));
-                        }
-                        // info dictionary
-                        else if (dictionary.containsKey(COSName.TITLE)
-                                || dictionary.containsKey(COSName.AUTHOR)
-                                || dictionary.containsKey(COSName.SUBJECT)
-                                || dictionary.containsKey(COSName.KEYWORDS)
-                                || dictionary.containsKey(COSName.CREATOR)
-                                || dictionary.containsKey(COSName.PRODUCER)
-                                || dictionary.containsKey(COSName.CREATION_DATE))
-                        {
-                            trailer.setItem(COSName.INFO, document.getObjectFromPool(key));
-                        }
-                        // TODO encryption dictionary
-                    }
-                }
-                catch (IOException exception)
-                {
-                    LOG.debug("Skipped object " + key + ", either it's corrupt or not a dictionary");
-                }
-            }
-        }
-        return trailer;
+
+        // TODO rebuild strategy
+        return null;
     }
 
     public COSDictionary getTrailer()

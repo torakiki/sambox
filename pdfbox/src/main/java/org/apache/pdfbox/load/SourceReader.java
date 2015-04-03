@@ -54,6 +54,8 @@ public class SourceReader
     private static final String OBJ = "obj";
 
     private PushBackInputStream source;
+    // TODO set this somehow
+    private long sourceLength;
 
     public SourceReader(PushBackInputStream source)
     {
@@ -87,6 +89,14 @@ public class SourceReader
     protected long offset()
     {
         return source.getOffset();
+    }
+
+    /**
+     * @return the length of the source in bytes
+     */
+    protected long length()
+    {
+        return sourceLength;
     }
 
     /**

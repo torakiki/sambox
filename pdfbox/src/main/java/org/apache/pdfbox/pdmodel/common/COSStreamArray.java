@@ -17,11 +17,10 @@
 package org.apache.pdfbox.pdmodel.common;
 
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.SequenceInputStream;
-
 import java.util.Vector;
 
 import org.apache.pdfbox.cos.COSArray;
@@ -210,23 +209,6 @@ public class COSStreamArray extends COSStream
     public OutputStream createFilteredStream() throws IOException
     {
         return firstStream.createFilteredStream();
-    }
-
-    /**
-     * This will create a new stream for which filtered byte should be
-     * written to.  You probably don't want this but want to use the
-     * createUnfilteredStream, which is used to write raw bytes to.
-     *
-     * @param expectedLength An entry where a length is expected.
-     *
-     * @return A stream that can be written to.
-     *
-     * @throws IOException If there is an error creating the stream.
-     */
-    @Override
-    public OutputStream createFilteredStream( COSBase expectedLength ) throws IOException
-    {
-        return firstStream.createFilteredStream( expectedLength );
     }
 
     /**

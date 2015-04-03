@@ -60,6 +60,15 @@ public final class ParseUtils
     }
 
     /**
+     * @param c
+     * @return true if the char is end of file
+     */
+    public static boolean isEOF(int c)
+    {
+        return c == -1;
+    }
+
+    /**
      * @param c The character to check against end of line
      * @return true if the character is a line feed or a carriage return
      */
