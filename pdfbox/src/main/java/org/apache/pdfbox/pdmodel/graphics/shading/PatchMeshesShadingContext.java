@@ -65,7 +65,7 @@ abstract class PatchMeshesShadingContext extends TriangleBasedShadingContext
     {
         super(shading, colorModel, xform, matrix, deviceBounds);
         patchMeshesShadingType = shading;
-        bitsPerFlag = ((PDShadingType6) shading).getBitsPerFlag();
+        bitsPerFlag = ((PDShadingType4) shading).getBitsPerFlag();
         patchList = new ArrayList<Patch>();
     }
 
@@ -93,61 +93,66 @@ abstract class PatchMeshesShadingContext extends TriangleBasedShadingContext
         COSStream cosStream = (COSStream) dict;
 
         ImageInputStream mciis = new MemoryCacheImageInputStream(cosStream.getUnfilteredStream());
-
-        Point2D[] implicitEdge = new Point2D[4];
-        float[][] implicitCornerColor = new float[2][numberOfColorComponents];
-
-        byte flag = (byte) 0;
-
         try
         {
-            flag = (byte) (mciis.readBits(bitsPerFlag) & 3);
-        }
-        catch (EOFException ex)
-        {
-            LOG.error(ex);
-        }
+            Point2D[] implicitEdge = new Point2D[4];
+            float[][] implicitCornerColor = new float[2][numberOfColorComponents];
 
-        while (true)
-        {
+            byte flag = (byte) 0;
+
             try
             {
-                boolean isFree = (flag == 0);
-                Patch current = readPatch(mciis, isFree, implicitEdge, implicitCornerColor,
-                        maxSrcCoord, maxSrcColor, rangeX, rangeY, colRange, matrix, xform, numP);
-                if (current == null)
-                {
-                    break;
-                }
-                list.add(current);
                 flag = (byte) (mciis.readBits(bitsPerFlag) & 3);
-                switch (flag)
-                {
-                    case 0:
-                        break;
-                    case 1:
-                        implicitEdge = current.getFlag1Edge();
-                        implicitCornerColor = current.getFlag1Color();
-                        break;
-                    case 2:
-                        implicitEdge = current.getFlag2Edge();
-                        implicitCornerColor = current.getFlag2Color();
-                        break;
-                    case 3:
-                        implicitEdge = current.getFlag3Edge();
-                        implicitCornerColor = current.getFlag3Color();
-                        break;
-                    default:
-                        LOG.warn("bad flag: " + flag);
-                        break;
-                }
             }
             catch (EOFException ex)
             {
-                break;
+                LOG.error(ex);
+            }
+
+            while (true)
+            {
+                try
+                {
+                    boolean isFree = (flag == 0);
+                    Patch current = readPatch(mciis, isFree, implicitEdge, implicitCornerColor,
+                            maxSrcCoord, maxSrcColor, rangeX, rangeY, colRange, matrix, xform, numP);
+                    if (current == null)
+                    {
+                        break;
+                    }
+                    list.add(current);
+                    flag = (byte) (mciis.readBits(bitsPerFlag) & 3);
+                    switch (flag)
+                    {
+                        case 0:
+                            break;
+                        case 1:
+                            implicitEdge = current.getFlag1Edge();
+                            implicitCornerColor = current.getFlag1Color();
+                            break;
+                        case 2:
+                            implicitEdge = current.getFlag2Edge();
+                            implicitCornerColor = current.getFlag2Color();
+                            break;
+                        case 3:
+                            implicitEdge = current.getFlag3Edge();
+                            implicitCornerColor = current.getFlag3Color();
+                            break;
+                        default:
+                            LOG.warn("bad flag: " + flag);
+                            break;
+                    }
+                }
+                catch (EOFException ex)
+                {
+                    break;
+                }
             }
         }
-        mciis.close();
+        finally
+        {
+            mciis.close();
+        }
         return list;
     }
 
@@ -214,8 +219,8 @@ abstract class PatchMeshesShadingContext extends TriangleBasedShadingContext
                 for (int j = 0; j < numberOfColorComponents; j++)
                 {
                     long c = input.readBits(bitsPerColorComponent);
-                    color[i][j] = (float) interpolate(c, maxSrcColor, colRange[j].getMin(),
-                                                      colRange[j].getMax());
+                    color[i][j] = interpolate(c, maxSrcColor, colRange[j].getMin(),
+                            colRange[j].getMax());
                 }
             }
         }

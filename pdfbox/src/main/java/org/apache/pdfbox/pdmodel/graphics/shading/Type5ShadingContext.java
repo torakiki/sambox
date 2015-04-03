@@ -52,7 +52,7 @@ class Type5ShadingContext extends GouraudShadingContext
      * @param matrix the pattern matrix concatenated with that of the parent content stream
      * @throws IOException if something went wrong
      */
-    public Type5ShadingContext(PDShadingType5 shading, ColorModel cm, AffineTransform xform,
+    Type5ShadingContext(PDShadingType5 shading, ColorModel cm, AffineTransform xform,
                                Matrix matrix, Rectangle deviceBounds) throws IOException
     {
         super(shading, cm, xform, matrix, deviceBounds);
@@ -83,18 +83,25 @@ class Type5ShadingContext extends GouraudShadingContext
         COSStream cosStream = (COSStream) cosDictionary;
 
         ImageInputStream mciis = new MemoryCacheImageInputStream(cosStream.getUnfilteredStream());
-        while (true)
+        try
         {
-            Vertex p;
-            try
+            while (true)
             {
-                p = readVertex(mciis, maxSrcCoord, maxSrcColor, rangeX, rangeY, colRange, matrix, xform);
-                vlist.add(p);
+                Vertex p;
+                try
+                {
+                    p = readVertex(mciis, maxSrcCoord, maxSrcColor, rangeX, rangeY, colRange, matrix, xform);
+                    vlist.add(p);
+                }
+                catch (EOFException ex)
+                {
+                    break;
+                }
             }
-            catch (EOFException ex)
-            {
-                break;
-            }
+        }
+        finally
+        {
+            mciis.close();
         }
         int sz = vlist.size(), rowNum = sz / numPerRow;
         Vertex[][] latticeArray = new Vertex[rowNum][numPerRow];
