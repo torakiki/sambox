@@ -23,18 +23,16 @@ import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.pdfbox.cos.BaseCOSParser;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.io.PushBackInputStream;
-import org.apache.pdfbox.load.BaseCOSParser;
-import org.apache.pdfbox.load.IndirectObjectsProvider;
 import org.apache.pdfbox.util.Charsets;
 
 /**
  * @author Andrea Vacondio
  *
  */
-public class XrefParser extends BaseCOSParser
+public class XrefParser
 {
     private static final Log LOG = LogFactory.getLog(XrefParser.class);
     /**
@@ -43,17 +41,15 @@ public class XrefParser extends BaseCOSParser
     private static final int DEFAULT_TRAIL_BYTECOUNT = 2048;
     private static final String STARTXREF = "startxref";
 
-    private Xref xref = new Xref();
     private TrailerMerger trailerMerger = new TrailerMerger();
     private XrefStreamParser xrefStreamParser;
     private XrefTableParser xrefTableParser;
+    private BaseCOSParser parser;
 
-
-    public XrefParser(PushBackInputStream source, IndirectObjectsProvider provider)
+    public XrefParser(BaseCOSParser parser)
     {
-        super(source, provider);
-        this.xrefStreamParser = new XrefStreamParser(source, provider, xref, trailerMerger);
-        this.xrefTableParser = new XrefTableParser(source, provider, xref, trailerMerger);
+        this.xrefStreamParser = new XrefStreamParser(parser, trailerMerger);
+        this.xrefTableParser = new XrefTableParser(parser, trailerMerger);
     }
 
     public void parse() throws IOException
@@ -79,20 +75,20 @@ public class XrefParser extends BaseCOSParser
      */
     private final long findXrefOffset() throws IOException
     {
-        int chunkSize = (int) Math.min(length(), DEFAULT_TRAIL_BYTECOUNT);
+        int chunkSize = (int) Math.min(parser.length(), DEFAULT_TRAIL_BYTECOUNT);
         byte[] buffer = new byte[chunkSize];
-        long startPosition = length() - chunkSize;
-        offset(startPosition);
-        source().read(buffer, 0, chunkSize);
+        long startPosition = parser.length() - chunkSize;
+        parser.offset(startPosition);
+        parser.source().read(buffer, 0, chunkSize);
         int relativeIndex = new String(buffer, Charsets.ISO_8859_1).lastIndexOf(STARTXREF);
         if (relativeIndex < 0)
         {
             LOG.warn("Unable to find 'startxref' keyword");
             return -1;
         }
-        offset(startPosition + relativeIndex + STARTXREF.length());
-        skipSpaces();
-        return readLong();
+        parser.offset(startPosition + relativeIndex + STARTXREF.length());
+        parser.skipSpaces();
+        return parser.readLong();
     }
 
     private void parseXref(long xrefOffset) throws IOException
@@ -109,10 +105,10 @@ public class XrefParser extends BaseCOSParser
 
         while (xrefOffset > -1)
         {
-            offset(xrefOffset);
-            skipSpaces();
+            parser.offset(xrefOffset);
+            parser.skipSpaces();
 
-            if (isNextToken(XREF))
+            if (parser.isNextToken(XREF))
             {
                 COSDictionary trailer = xrefTableParser.parse(xrefOffset);
                 long streamOffset = trailer.getLong(COSName.XREF_STM);
@@ -182,8 +178,8 @@ public class XrefParser extends BaseCOSParser
         {
             return true;
         }
-        offset(xrefOffset);
-        return isNextToken(XREF);
+        parser.offset(xrefOffset);
+        return parser.isNextToken(XREF);
     }
 
     /**
@@ -193,16 +189,16 @@ public class XrefParser extends BaseCOSParser
      */
     private boolean isValidXrefStreamOffset(long xrefStreamOffset) throws IOException
     {
-        offset(xrefStreamOffset);
+        parser.offset(xrefStreamOffset);
         try
         {
-            skipIndirectObjectDefinition();
+            parser.skipIndirectObjectDefinition();
         }
         catch (IOException exception)
         {
             return false;
         }
-        offset(xrefStreamOffset);
+        parser.offset(xrefStreamOffset);
         return true;
     }
 
@@ -223,11 +219,6 @@ public class XrefParser extends BaseCOSParser
     public COSDictionary getTrailer()
     {
         return this.trailerMerger.getTrailer();
-    }
-
-    public Xref getXref()
-    {
-        return this.xref;
     }
 
 }

@@ -14,29 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.pdfbox.load;
+package org.apache.pdfbox.cos;
 
-import static org.apache.pdfbox.load.ParseUtils.isCarriageReturn;
-import static org.apache.pdfbox.load.ParseUtils.isDigit;
-import static org.apache.pdfbox.load.ParseUtils.isLineFeed;
-import static org.apache.pdfbox.load.ParseUtils.isSpace;
+import static org.apache.pdfbox.cos.ParseUtils.isCarriageReturn;
+import static org.apache.pdfbox.cos.ParseUtils.isDigit;
+import static org.apache.pdfbox.cos.ParseUtils.isLineFeed;
+import static org.apache.pdfbox.cos.ParseUtils.isSpace;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.pdfbox.cos.COSArray;
-import org.apache.pdfbox.cos.COSBase;
-import org.apache.pdfbox.cos.COSBoolean;
-import org.apache.pdfbox.cos.COSDictionary;
-import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.cos.COSNull;
-import org.apache.pdfbox.cos.COSNumber;
-import org.apache.pdfbox.cos.COSObjectKey;
-import org.apache.pdfbox.cos.COSStream;
-import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.io.PushBackInputStream;
 import org.apache.pdfbox.pdfparser.EndstreamOutputStream;
@@ -46,21 +35,25 @@ import org.apache.pdfbox.util.Charsets;
  * @author Andrea Vacondio
  *
  */
-public class BaseCOSParser extends SourceReader
+public final class BaseCOSParser extends SourceReader
 {
 
     private static final Log LOG = LogFactory.getLog(BaseCOSParser.class);
 
-    private static final String ENDOBJ = "endobj";
+    public static final String ENDOBJ = "endobj";
     private static final byte[] ENDOBJ_BYTES = ENDOBJ.getBytes(Charsets.ISO_8859_1);
-    private static final String STREAM = "stream";
-    private static final String ENDSTREAM = "endstream";
+    public static final String STREAM = "stream";
+    public static final String ENDSTREAM = "endstream";
     private static final byte[] ENDSTREAM_BYTES = ENDSTREAM.getBytes(Charsets.ISO_8859_1);
     private static final String DEF = "def";
 
-    private static Pattern ENDSTREAM_PATTERN = Pattern.compile(ENDOBJ + "|" + ENDSTREAM);
-
     private IndirectObjectsProvider provider;
+
+    public BaseCOSParser(PushBackInputStream source)
+    {
+        super(source);
+        this.provider = new LazyIndirectObjectsProvider(this);
+    }
 
     public BaseCOSParser(PushBackInputStream source, IndirectObjectsProvider provider)
     {
@@ -73,7 +66,7 @@ public class BaseCOSParser extends SourceReader
      * 32000-1:2008
      * @throws IOException If there is an error during parsing.
      */
-    protected COSBase nextToken() throws IOException
+    public COSBase nextParsedToken() throws IOException
     {
         skipSpaces();
         char c = (char) source().peek();
@@ -87,7 +80,6 @@ public class BaseCOSParser extends SourceReader
             if (c == '<')
             {
                 return nextDictionary();
-                // TODO skipSpaces();
             }
             return nextHexadecimalString();
         }
@@ -142,7 +134,7 @@ public class BaseCOSParser extends SourceReader
      * 32000-1:2008
      * @throws IOException If there is an error during parsing.
      */
-    protected COSDictionary nextDictionary() throws IOException
+    public COSDictionary nextDictionary() throws IOException
     {
         skipExpected("<<");
         skipSpaces();
@@ -176,7 +168,7 @@ public class BaseCOSParser extends SourceReader
             else
             {
                 COSName key = nextName();
-                COSBase value = nextToken();
+                COSBase value = nextParsedToken();
                 skipSpaces();
                 if (source().peek() == 'd')
                 {
@@ -204,7 +196,7 @@ public class BaseCOSParser extends SourceReader
      * @return The next parsed array object from the stream. Array objects are defined in Chap 7.3.6 of PDF 32000-1:2008
      * @throws IOException If there is an error during parsing.
      */
-    protected COSArray nextArray() throws IOException
+    public COSArray nextArray() throws IOException
     {
         skipExpected('[');
         COSArray array = new COSArray();
@@ -212,7 +204,7 @@ public class BaseCOSParser extends SourceReader
         int c;
         while (((c = source().peek()) != -1) && c != ']')
         {
-            COSBase item = nextToken();
+            COSBase item = nextParsedToken();
             if (item != null)
             {
                 array.add(item);
@@ -237,7 +229,7 @@ public class BaseCOSParser extends SourceReader
      * 32000-1:2008
      * @throws IOException If there is an error during parsing.
      */
-    protected COSBoolean nextBoolean() throws IOException
+    public COSBoolean nextBoolean() throws IOException
     {
         char c = (char) source().peek();
         if (c == 't')
@@ -254,7 +246,7 @@ public class BaseCOSParser extends SourceReader
      * 32000-1:2008
      * @throws IOException If there is an error during parsing.
      */
-    protected COSNumber nextNumber() throws IOException
+    public COSNumber nextNumber() throws IOException
     {
         return COSNumber.get(readNumber());
     }
@@ -266,7 +258,7 @@ public class BaseCOSParser extends SourceReader
      * @throws IOException If there is an error during parsing.
      * @see #nextNumber()
      */
-    protected COSBase nextNumberOrIndirectReference() throws IOException
+    public COSBase nextNumberOrIndirectReference() throws IOException
     {
         String first = readNumber();
         long offset = offset();
@@ -299,7 +291,7 @@ public class BaseCOSParser extends SourceReader
      * @return The next parsed null object from the stream. Null object is defined in Chap 7.3.9 of PDF 32000-1:2008
      * @throws IOException If there is an error during parsing.
      */
-    protected COSNull nextNull() throws IOException
+    public COSNull nextNull() throws IOException
     {
         skipExpected("null");
         return COSNull.NULL;
@@ -309,7 +301,7 @@ public class BaseCOSParser extends SourceReader
      * @return The next parsed name object from the stream. Name objects are defined in Chap 7.3.5 of PDF 32000-1:2008
      * @throws IOException If there is an error during parsing.
      */
-    protected COSName nextName() throws IOException
+    public COSName nextName() throws IOException
     {
         return COSName.getPDFName(readName());
     }
@@ -319,7 +311,7 @@ public class BaseCOSParser extends SourceReader
      * of PDF 32000-1:2008
      * @throws IOException If there is an error during parsing.
      */
-    protected COSString nextLiteralString() throws IOException
+    public COSString nextLiteralString() throws IOException
     {
         return new COSString(readLiteralString());
     }
@@ -329,7 +321,7 @@ public class BaseCOSParser extends SourceReader
      * 7.3.4.3 of PDF 32000-1:2008
      * @throws IOException If there is an error during parsing.
      */
-    protected COSString nextHexadecimalString() throws IOException
+    public COSString nextHexadecimalString() throws IOException
     {
         return COSString.parseHex(readHexString());
     }
@@ -339,7 +331,7 @@ public class BaseCOSParser extends SourceReader
      * 32000-1:2008
      * @throws IOException If there is an error during parsing.
      */
-    protected COSString nextString() throws IOException
+    public COSString nextString() throws IOException
     {
         char next = (char) source().peek();
         switch (next)
@@ -367,7 +359,7 @@ public class BaseCOSParser extends SourceReader
      * @throws IOException if an error occurred reading the stream, like problems with reading length attribute, stream
      * does not end with 'endstream' after data read, stream too short etc.
      */
-    protected COSStream nextStream(COSDictionary streamDictionary) throws IOException
+    public COSStream nextStream(COSDictionary streamDictionary) throws IOException
     {
         skipExpected(STREAM);
         int c = source().read();
@@ -570,6 +562,11 @@ public class BaseCOSParser extends SourceReader
         }
         // this writes a lonely CR or drops trailing CR LF and LF
         out.flush();
+    }
+
+    public IndirectObjectsProvider provider()
+    {
+        return provider;
     }
 
 }

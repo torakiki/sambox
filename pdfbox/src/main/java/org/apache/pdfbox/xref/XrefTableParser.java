@@ -16,38 +16,34 @@
  */
 package org.apache.pdfbox.xref;
 
-import static org.apache.pdfbox.load.ParseUtils.isDigit;
-import static org.apache.pdfbox.load.ParseUtils.isEOF;
-import static org.apache.pdfbox.load.ParseUtils.isEndOfName;
+import static org.apache.pdfbox.cos.ParseUtils.isDigit;
+import static org.apache.pdfbox.cos.ParseUtils.isEOF;
+import static org.apache.pdfbox.cos.ParseUtils.isEndOfName;
 import static org.apache.pdfbox.xref.XrefEntry.inUseEntry;
 
 import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.pdfbox.cos.BaseCOSParser;
 import org.apache.pdfbox.cos.COSDictionary;
-import org.apache.pdfbox.io.PushBackInputStream;
-import org.apache.pdfbox.load.BaseCOSParser;
-import org.apache.pdfbox.load.IndirectObjectsProvider;
 
 /**
  * @author Andrea Vacondio
  *
  */
-class XrefTableParser extends BaseCOSParser
+class XrefTableParser
 {
     private static final Log LOG = LogFactory.getLog(XrefTableParser.class);
     private static final String TRAILER = "trailer";
     static final String XREF = "xref";
 
-    private Xref xref;
     private TrailerMerger trailerMerger;
+    private BaseCOSParser parser;
 
-    XrefTableParser(PushBackInputStream source, IndirectObjectsProvider provider, Xref xref,
-            TrailerMerger trailerMerger)
+    XrefTableParser(BaseCOSParser parser, TrailerMerger trailerMerger)
     {
-        super(source, provider);
-        this.xref = xref;
+        this.parser = parser;
         this.trailerMerger = trailerMerger;
     }
 
@@ -61,39 +57,39 @@ class XrefTableParser extends BaseCOSParser
     public COSDictionary parse(long tableOffset) throws IOException
     {
         parseXrefTable(tableOffset);
-        skipSpaces();
+        parser.skipSpaces();
         // PDFBOX-1739 skip extra xref entries in RegisSTAR documents
-        while (source().peek() != 't')
+        while (parser.source().peek() != 't')
         {
-            LOG.warn("Expected trailer object at position " + offset() + ", skipping line.");
-            readLine();
+            LOG.warn("Expected trailer object at position " + parser.offset() + ", skipping line.");
+            parser.readLine();
         }
         return parseTrailer();
     }
 
     private void parseXrefTable(long startByteOffset) throws IOException
     {
-        skipExpected(XREF);
-        if (isNextToken(TRAILER))
+        parser.skipExpected(XREF);
+        if (parser.isNextToken(TRAILER))
         {
             LOG.warn("Skipping empty xref table at offset " + startByteOffset);
             return;
         }
         while (true)
         {
-            long currentObjectNumber = readObjectNumber();
-            long numberOfEntries = readLong();
-            skipSpaces();
+            long currentObjectNumber = parser.readObjectNumber();
+            long numberOfEntries = parser.readLong();
+            parser.skipSpaces();
 
             for (int i = 0; i < numberOfEntries; i++)
             {
-                int next = source().peek();
+                int next = parser.source().peek();
                 if (next == 't' || isEndOfName(next) || isEOF(next))
                 {
                     break;
                 }
 
-                String currentLine = readLine();
+                String currentLine = parser.readLine();
                 String[] splitString = currentLine.split("\\s");
                 if (splitString.length < 3)
                 {
@@ -107,8 +103,11 @@ class XrefTableParser extends BaseCOSParser
                 {
                     try
                     {
-                        xref.add(inUseEntry(currentObjectNumber, Long.parseLong(splitString[0]),
-                                Integer.parseInt(splitString[1])));
+                        parser.provider()
+                                .xref()
+                                .add(inUseEntry(currentObjectNumber,
+                                        Long.parseLong(splitString[0]),
+                                        Integer.parseInt(splitString[1])));
                     }
                     catch (NumberFormatException e)
                     {
@@ -121,10 +120,10 @@ class XrefTableParser extends BaseCOSParser
                             + entryType);
                 }
                 currentObjectNumber++;
-                skipSpaces();
+                parser.skipSpaces();
             }
-            skipSpaces();
-            if (!isDigit(source().peek()))
+            parser.skipSpaces();
+            if (!isDigit(parser.source().peek()))
             {
                 break;
             }
@@ -134,13 +133,13 @@ class XrefTableParser extends BaseCOSParser
 
     private COSDictionary parseTrailer() throws IOException
     {
-        long offset = offset();
+        long offset = parser.offset();
         LOG.debug("Parsing trailer at " + offset);
-        skipExpected(TRAILER);
-        skipSpaces();
-        COSDictionary dictionary = nextDictionary();
+        parser.skipExpected(TRAILER);
+        parser.skipSpaces();
+        COSDictionary dictionary = parser.nextDictionary();
         trailerMerger.mergeTrailerWithoutOverwriting(offset, dictionary);
-        skipSpaces();
+        parser.skipSpaces();
         return dictionary;
     }
 }

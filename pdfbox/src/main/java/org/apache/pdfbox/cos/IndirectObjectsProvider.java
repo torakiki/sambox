@@ -14,10 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.pdfbox.load;
+package org.apache.pdfbox.cos;
 
-import org.apache.pdfbox.cos.COSBase;
-import org.apache.pdfbox.cos.COSObjectKey;
+import org.apache.pdfbox.pdmodel.encryption.SecurityHandler;
+import org.apache.pdfbox.xref.Xref;
 
 /**
  * @author Andrea Vacondio
@@ -27,4 +27,8 @@ public interface IndirectObjectsProvider
 {
 
     public COSBase get(COSObjectKey key);
+
+    public Xref xref();
+
+    public void decryptWith(SecurityHandler handler);
 }

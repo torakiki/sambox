@@ -19,6 +19,7 @@ package org.apache.pdfbox.load;
 import java.io.File;
 
 import org.apache.pdfbox.cos.COSBase;
+import org.apache.pdfbox.cos.IndirectObjectsProvider;
 
 /**
  * Component capable of parsing a PDF source and return {@link COSBase} objects.

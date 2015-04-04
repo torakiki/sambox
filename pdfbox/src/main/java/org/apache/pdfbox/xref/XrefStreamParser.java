@@ -27,34 +27,29 @@ import java.util.stream.LongStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.pdfbox.cos.BaseCOSParser;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSNumber;
 import org.apache.pdfbox.cos.COSStream;
-import org.apache.pdfbox.io.PushBackInputStream;
-import org.apache.pdfbox.load.BaseCOSParser;
-import org.apache.pdfbox.load.IndirectObjectsProvider;
 
 /**
  * @author Andrea Vacondio
  *
  */
-class XrefStreamParser extends BaseCOSParser
+class XrefStreamParser
 {
     private static final Log LOG = LogFactory.getLog(XrefStreamParser.class);
 
-    private Xref xref;
     private TrailerMerger trailerMerger;
+    private BaseCOSParser parser;
 
-    XrefStreamParser(PushBackInputStream source, IndirectObjectsProvider provider, Xref xref,
-            TrailerMerger trailerMerger)
+    XrefStreamParser(BaseCOSParser parser, TrailerMerger trailerMerger)
     {
-        super(source, provider);
-        this.xref = xref;
+        this.parser = parser;
         this.trailerMerger = trailerMerger;
     }
-
 
     /**
      * Parse the xref object stream.
@@ -66,11 +61,11 @@ class XrefStreamParser extends BaseCOSParser
     public COSDictionary parse(long streamObjectOffset) throws IOException
     {
         LOG.debug("Parsing xref stream at offset " + streamObjectOffset);
-        offset(streamObjectOffset);
-        skipIndirectObjectDefinition();
+        parser.offset(streamObjectOffset);
+        parser.skipIndirectObjectDefinition();
 
-        COSDictionary dictionary = nextDictionary();
-        try (COSStream xrefStream = nextStream(dictionary))
+        COSDictionary dictionary = parser.nextDictionary();
+        try (COSStream xrefStream = parser.nextStream(dictionary))
         {
             trailerMerger.mergeTrailerWithoutOverwriting(streamObjectOffset, dictionary);
             parseStream(xrefStream);
@@ -142,10 +137,11 @@ class XrefStreamParser extends BaseCOSParser
                     // xref.add(XrefEntry.freeEntry(objectId, field1, field2));
                     break;
                 case 1:
-                    xref.add(XrefEntry.inUseEntry(objectId, field1, field2));
+                    parser.provider().xref().add(XrefEntry.inUseEntry(objectId, field1, field2));
                     break;
                 case 2:
-                    xref.add(CompressedXrefEntry.compressedEntry(objectId, field1));
+                    parser.provider().xref()
+                            .add(CompressedXrefEntry.compressedEntry(objectId, field1));
                     break;
                 default:
                     break;

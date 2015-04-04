@@ -14,29 +14,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.pdfbox.load;
+package org.apache.pdfbox.cos;
 
 import static java.util.Arrays.asList;
-import static org.apache.pdfbox.load.ParseUtils.ASCII_BACKSPACE;
-import static org.apache.pdfbox.load.ParseUtils.ASCII_CARRIAGE_RETURN;
-import static org.apache.pdfbox.load.ParseUtils.ASCII_FORM_FEED;
-import static org.apache.pdfbox.load.ParseUtils.ASCII_HORIZONTAL_TAB;
-import static org.apache.pdfbox.load.ParseUtils.ASCII_LINE_FEED;
-import static org.apache.pdfbox.load.ParseUtils.isCarriageReturn;
-import static org.apache.pdfbox.load.ParseUtils.isDigit;
-import static org.apache.pdfbox.load.ParseUtils.isEOL;
-import static org.apache.pdfbox.load.ParseUtils.isEndOfName;
-import static org.apache.pdfbox.load.ParseUtils.isHexDigit;
-import static org.apache.pdfbox.load.ParseUtils.isLineFeed;
-import static org.apache.pdfbox.load.ParseUtils.isOctalDigit;
-import static org.apache.pdfbox.load.ParseUtils.isWhitespace;
+import static org.apache.pdfbox.cos.ParseUtils.ASCII_BACKSPACE;
+import static org.apache.pdfbox.cos.ParseUtils.ASCII_CARRIAGE_RETURN;
+import static org.apache.pdfbox.cos.ParseUtils.ASCII_FORM_FEED;
+import static org.apache.pdfbox.cos.ParseUtils.ASCII_HORIZONTAL_TAB;
+import static org.apache.pdfbox.cos.ParseUtils.ASCII_LINE_FEED;
+import static org.apache.pdfbox.cos.ParseUtils.isCarriageReturn;
+import static org.apache.pdfbox.cos.ParseUtils.isDigit;
+import static org.apache.pdfbox.cos.ParseUtils.isEOL;
+import static org.apache.pdfbox.cos.ParseUtils.isEndOfName;
+import static org.apache.pdfbox.cos.ParseUtils.isHexDigit;
+import static org.apache.pdfbox.cos.ParseUtils.isLineFeed;
+import static org.apache.pdfbox.cos.ParseUtils.isOctalDigit;
+import static org.apache.pdfbox.cos.ParseUtils.isWhitespace;
 import static org.apache.pdfbox.util.RequireUtils.requireArg;
 import static org.apache.pdfbox.util.RequireUtils.requireIOCondition;
 
+import java.io.Closeable;
 import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.io.PushBackInputStream;
 import org.apache.pdfbox.util.Charsets;
 
@@ -44,14 +46,14 @@ import org.apache.pdfbox.util.Charsets;
  * @author Andrea Vacondio
  *
  */
-public class SourceReader
+public class SourceReader implements Closeable
 {
 
     private static final Log LOG = LogFactory.getLog(SourceReader.class);
 
     private static final long OBJECT_NUMBER_THRESHOLD = 10000000000L;
     private static final int GENERATION_NUMBER_THRESHOLD = 65535;
-    private static final String OBJ = "obj";
+    public static final String OBJ = "obj";
 
     private PushBackInputStream source;
     // TODO set this somehow
@@ -66,7 +68,7 @@ public class SourceReader
     /**
      * @return a buffer to be used during read and parsing.
      */
-    protected StringBuilder buffer()
+    public StringBuilder buffer()
     {
         // TODO use some sort of pool of buffers and avoid creating tons of StringBuilders
         // private StringBuilder buffer = new StringBuilder();
@@ -78,7 +80,7 @@ public class SourceReader
     /**
      * @return the source for this reader
      */
-    protected PushBackInputStream source()
+    public PushBackInputStream source()
     {
         return source;
     }
@@ -86,7 +88,7 @@ public class SourceReader
     /**
      * @return the current offset
      */
-    protected long offset()
+    public long offset()
     {
         return source.getOffset();
     }
@@ -94,7 +96,7 @@ public class SourceReader
     /**
      * @return the length of the source in bytes
      */
-    protected long length()
+    public long length()
     {
         return sourceLength;
     }
@@ -105,7 +107,7 @@ public class SourceReader
      * @param offset the new offset
      * @throws IOException
      */
-    protected void offset(long offset) throws IOException
+    public void offset(long offset) throws IOException
     {
         source.seek(offset);
     }
@@ -116,7 +118,7 @@ public class SourceReader
      * @throws IOException If there is an error reading from the stream.
      * @see ParseUtils#isEndOfName(int)
      */
-    protected String readToken() throws IOException
+    public String readToken() throws IOException
     {
         skipSpaces();
         StringBuilder builder = buffer();
@@ -136,7 +138,7 @@ public class SourceReader
      * @param expectedString the String value that is expected.
      * @throws IOException if the String char is not the expected value or if an I/O error occurs.
      */
-    protected final void skipExpected(String expected) throws IOException
+    public final void skipExpected(String expected) throws IOException
     {
         for (char c : expected.toCharArray())
         {
@@ -150,7 +152,7 @@ public class SourceReader
      * @param ec the char value that is expected.
      * @throws IOException if the read char is not the expected value or if an I/O error occurs.
      */
-    protected void skipExpected(char ec) throws IOException
+    public void skipExpected(char ec) throws IOException
     {
         char c = (char) source.read();
         if (c != ec)
@@ -166,7 +168,7 @@ public class SourceReader
      * @return true if the token is found and skipped, false otherwise.
      * @throws IOException if there is an error reading from the stream
      */
-    protected boolean skipTokenIfValue(String... values) throws IOException
+    public boolean skipTokenIfValue(String... values) throws IOException
     {
         String token = readToken();
         if (!asList(values).contains(token))
@@ -178,14 +180,41 @@ public class SourceReader
     }
 
     /**
-     * Skips an indirect object definition open tag (Ex. "12 0 obj")as defined in the chap 7.3.10 PDF 32000-1:2008.
+     * Skips an indirect object definition open tag (Ex. "12 0 obj") as defined in the chap 7.3.10 PDF 32000-1:2008.
      * 
      * @throws IOException if we are reading a not valid indirect object definition open tag
      */
-    protected void skipIndirectObjectDefinition() throws IOException
+    public void skipIndirectObjectDefinition() throws IOException
     {
         readObjectNumber();
         readGenerationNumber();
+        skipSpaces();
+        skipExpected(OBJ);
+    }
+
+    /**
+     * Skips an indirect object definition open tag (Ex. "12 0 obj") as defined in the chap 7.3.10 PDF 32000-1:2008.
+     * 
+     * @param expected object we are expecting to find
+     * @throws IOException if we are reading a not valid indirect object definition open tag or the object number or
+     * generation number don't match the expected object
+     */
+    public void skipExpectedIndirectObjectDefinition(COSObjectKey expected) throws IOException
+    {
+        long number = readObjectNumber();
+        if (number != expected.getNumber())
+        {
+            throw new IOException(String.format(
+                    "Expected '%d' object number at offset %d but was '%d'", expected.getNumber(),
+                    offset(), number));
+        }
+        long generation = readGenerationNumber();
+        if (generation != expected.getGeneration())
+        {
+            throw new IOException(String.format(
+                    "Expected '%d' generation number at offset %d but was '%d'",
+                    expected.getGeneration(), offset(), number));
+        }
         skipSpaces();
         skipExpected(OBJ);
     }
@@ -195,7 +224,7 @@ public class SourceReader
      * @return true if the next token is one of the given values. false otherwise.
      * @throws IOException if there is an error reading from the stream
      */
-    protected boolean isNextToken(String... values) throws IOException
+    public boolean isNextToken(String... values) throws IOException
     {
         String token = readToken();
         source.unread(token.getBytes(Charsets.ISO_8859_1));
@@ -209,7 +238,7 @@ public class SourceReader
      * @return The characters between the current position and the end of the line.
      * @throws IOException If there is an error reading from the stream.
      */
-    protected String readLine() throws IOException
+    public String readLine() throws IOException
     {
         requireIOCondition(!source.isEOF(), "Expected line but was end of file");
 
@@ -233,7 +262,7 @@ public class SourceReader
      * @return the object number being read.
      * @throws IOException if an I/O error occurs
      */
-    protected long readObjectNumber() throws IOException
+    public long readObjectNumber() throws IOException
     {
         long retval = readLong();
         if (retval < 0 || retval >= OBJECT_NUMBER_THRESHOLD)
@@ -251,7 +280,7 @@ public class SourceReader
      * @return the generation number being read.
      * @throws IOException if an I/O error occurs
      */
-    protected int readGenerationNumber() throws IOException
+    public int readGenerationNumber() throws IOException
     {
         int retval = readInt();
         if (retval < 0 || retval > GENERATION_NUMBER_THRESHOLD)
@@ -267,7 +296,7 @@ public class SourceReader
      * @return the generation number being read.
      * @throws IOException if an I/O error occurs
      */
-    protected String readName() throws IOException
+    public String readName() throws IOException
     {
         skipExpected('/');
         StringBuilder builder = buffer();
@@ -320,7 +349,7 @@ public class SourceReader
      * @return The integer that was read from the stream.
      * @throws IOException If there is an error reading from the stream.
      */
-    protected int readInt() throws IOException
+    public int readInt() throws IOException
     {
         String intBuffer = readIntegerNumber();
         try
@@ -339,7 +368,7 @@ public class SourceReader
      * @return The long that was read from the stream.
      * @throws IOException If there is an error reading from the stream.
      */
-    protected long readLong() throws IOException
+    public long readLong() throws IOException
     {
         String longBuffer = readIntegerNumber();
         try
@@ -360,7 +389,7 @@ public class SourceReader
      * @return the token to parse as {@link Integer} or {@link Long}.
      * @throws IOException If there is an error reading from the stream.
      */
-    protected final String readIntegerNumber() throws IOException
+    public final String readIntegerNumber() throws IOException
     {
         skipSpaces();
         StringBuilder builder = buffer();
@@ -383,7 +412,7 @@ public class SourceReader
      * @return the token to parse as integer or real number.
      * @throws IOException If there is an error reading from the stream.
      */
-    protected final String readNumber() throws IOException
+    public final String readNumber() throws IOException
     {
         StringBuilder builder = buffer();
         int c = source.read();
@@ -406,7 +435,7 @@ public class SourceReader
      * @return the token to parse as an hexadecimal string
      * @throws IOException If there is an error reading from the stream.
      */
-    protected final String readHexString() throws IOException
+    public final String readHexString() throws IOException
     {
         skipExpected('<');
         StringBuilder builder = buffer();
@@ -442,7 +471,7 @@ public class SourceReader
      * @return the token to parse as a literal string
      * @throws IOException If there is an error during parsing.
      */
-    protected String readLiteralString() throws IOException
+    public String readLiteralString() throws IOException
     {
         skipExpected('(');
         int bracesCounter = 1;
@@ -566,7 +595,7 @@ public class SourceReader
      *
      * @throws IOException If there is an error reading from the stream.
      */
-    protected void skipSpaces() throws IOException
+    public void skipSpaces() throws IOException
     {
         int c = source.read();
         // 37 is the % character, a comment
@@ -594,11 +623,17 @@ public class SourceReader
      * @param c
      * @throws IOException
      */
-    protected void unreadIfValid(int c) throws IOException
+    public void unreadIfValid(int c) throws IOException
     {
         if (c != -1)
         {
             source.unread(c);
         }
+    }
+
+    @Override
+    public void close() throws IOException
+    {
+        IOUtils.closeQuietly(source);
     }
 }
