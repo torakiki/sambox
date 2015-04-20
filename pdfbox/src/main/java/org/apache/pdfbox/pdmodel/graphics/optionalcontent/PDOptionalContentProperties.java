@@ -22,7 +22,6 @@ import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.cos.COSObject;
 import org.apache.pdfbox.pdmodel.common.COSObjectable;
 
 /**
@@ -177,8 +176,7 @@ public class PDOptionalContentProperties implements COSObjectable
         COSArray ocgs = getOCGs();
         for (COSBase base : ocgs)
         {
-            COSObject obj = (COSObject)base; //Children must be indirect references
-            coll.add(new PDOptionalContentGroup((COSDictionary)obj.getObject()));
+            coll.add(new PDOptionalContentGroup((COSDictionary) base.getCOSObject()));
         }
         return coll;
     }
@@ -287,14 +285,7 @@ public class PDOptionalContentProperties implements COSObjectable
 
     private COSDictionary toDictionary(COSBase o)
     {
-        if (o instanceof COSObject)
-        {
-            return (COSDictionary)((COSObject)o).getObject();
-        }
-        else
-        {
-            return (COSDictionary)o;
-        }
+        return (COSDictionary) o.getCOSObject();
     }
 
     /**

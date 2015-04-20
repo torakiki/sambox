@@ -22,19 +22,19 @@ import java.util.Collections;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.cos.COSObject;
+import org.apache.pdfbox.cos.IndirectCOSObject;
 import org.apache.pdfbox.pdmodel.common.COSObjectable;
 import org.apache.pdfbox.pdmodel.documentinterchange.markedcontent.PDPropertyList;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDFontFactory;
-import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
-import org.apache.pdfbox.pdmodel.graphics.optionalcontent.PDOptionalContentGroup;
-import org.apache.pdfbox.pdmodel.graphics.state.PDExtendedGraphicsState;
+import org.apache.pdfbox.pdmodel.graphics.PDXObject;
 import org.apache.pdfbox.pdmodel.graphics.color.PDColorSpace;
+import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
+import org.apache.pdfbox.pdmodel.graphics.optionalcontent.PDOptionalContentGroup;
 import org.apache.pdfbox.pdmodel.graphics.pattern.PDAbstractPattern;
 import org.apache.pdfbox.pdmodel.graphics.shading.PDShading;
-import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
-import org.apache.pdfbox.pdmodel.graphics.PDXObject;
+import org.apache.pdfbox.pdmodel.graphics.state.PDExtendedGraphicsState;
 
 /**
  * A set of resources available at the page/pages/stream level.
@@ -181,13 +181,13 @@ public final class PDResources implements COSObjectable
         {
             return null;
         }
-        else if (value instanceof COSObject)
+        else if (value instanceof IndirectCOSObject)
         {
-            COSObject object = (COSObject)value;
+            IndirectCOSObject object = (IndirectCOSObject) value;
             // add the object number to create an unique identifier
             String id = name.getName();
-            id += "#" + object.getObjectNumber();
-            return PDXObject.createXObject(object.getObject(), id, this);
+            id += "#" + object.key().getNumber();
+            return PDXObject.createXObject(object.getCOSObject(), id, this);
         }
         else
         {

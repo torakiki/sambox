@@ -16,22 +16,21 @@
  */
 package org.apache.pdfbox.pdmodel.common;
 
-import org.apache.pdfbox.cos.COSArray;
-import org.apache.pdfbox.cos.COSBase;
-import org.apache.pdfbox.cos.COSDictionary;
-import org.apache.pdfbox.cos.COSInteger;
-import org.apache.pdfbox.cos.COSFloat;
-import org.apache.pdfbox.cos.COSString;
-import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.cos.COSNull;
-import org.apache.pdfbox.cos.COSNumber;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-import org.apache.pdfbox.cos.COSObject;
+
+import org.apache.pdfbox.cos.COSArray;
+import org.apache.pdfbox.cos.COSBase;
+import org.apache.pdfbox.cos.COSDictionary;
+import org.apache.pdfbox.cos.COSFloat;
+import org.apache.pdfbox.cos.COSInteger;
+import org.apache.pdfbox.cos.COSName;
+import org.apache.pdfbox.cos.COSNull;
+import org.apache.pdfbox.cos.COSNumber;
+import org.apache.pdfbox.cos.COSString;
 
 /**
  * This is an implementation of a List that will sync its contents to a COSArray.
@@ -275,15 +274,7 @@ public class COSArrayList<E> implements List<E>
             List<Integer> numbers = new ArrayList<Integer>();
             for (int i = 0; i < intArray.size(); i++)
             {
-                COSNumber num;
-                if (intArray.get(i) instanceof COSObject)
-                {
-                    num = (COSNumber) ((COSObject) intArray.get(i)).getObject();
-                }
-                else
-                {
-                    num = (COSNumber) intArray.get(i);
-                }
+                COSNumber num = (COSNumber) intArray.get(i).getCOSObject();
                 numbers.add(num.intValue());
             }
             retval = new COSArrayList<Integer>(numbers, intArray);

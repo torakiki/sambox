@@ -48,7 +48,7 @@ public final class CompressedXrefEntry extends XrefEntry
     @Override
     public String toString()
     {
-        return String.format("%s offset=%d objectStreamNumber=%d %s", getType().toString(),
+        return String.format("%s offset=%d objectStreamNumber=%d, %s", getType().toString(),
                 getByteOffset(), objectStreamNumber, key().toString());
     }
     /**

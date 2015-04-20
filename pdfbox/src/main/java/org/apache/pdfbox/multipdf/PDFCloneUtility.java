@@ -25,8 +25,8 @@ import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.cos.COSObject;
 import org.apache.pdfbox.cos.COSStream;
+import org.apache.pdfbox.cos.IndirectCOSObject;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.common.COSObjectable;
 import org.apache.pdfbox.pdmodel.common.COSStreamArray;
@@ -93,10 +93,9 @@ class PDFCloneUtility
               retval = cloneForNewDocument( ((COSObjectable)base).getCOSObject() );
               clonedVersion.put( base, retval );
           }
-          else if( base instanceof COSObject )
+        else if (base instanceof IndirectCOSObject)
           {
-              COSObject object = (COSObject)base;
-              retval = cloneForNewDocument( object.getObject() );
+            retval = cloneForNewDocument(((IndirectCOSObject) base).getCOSObject());
               clonedVersion.put( base, retval );
           }
           else if( base instanceof COSArray )
@@ -189,15 +188,16 @@ class PDFCloneUtility
               cloneMerge(base.getCOSObject(), target.getCOSObject());
               clonedVersion.put(base, retval);
           }
-          else if( base instanceof COSObject )
+        else if (base instanceof IndirectCOSObject)
           {
-              if(target instanceof COSObject)
+            if (target instanceof IndirectCOSObject)
               {
-                  cloneMerge(((COSObject) base).getObject(),((COSObject) target).getObject() );
+                cloneMerge(((IndirectCOSObject) base).getCOSObject(),
+                        ((IndirectCOSObject) target).getCOSObject());
               }
               else if(target instanceof COSDictionary)
               {
-                  cloneMerge(((COSObject) base).getObject(), target);
+                cloneMerge(((IndirectCOSObject) base).getCOSObject(), target);
               }
               clonedVersion.put( base, retval );
           }

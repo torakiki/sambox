@@ -25,11 +25,8 @@ import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSInteger;
 import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.cos.COSObject;
 import org.apache.pdfbox.pdmodel.common.COSArrayList;
 import org.apache.pdfbox.pdmodel.common.COSObjectable;
-import org.apache.pdfbox.pdmodel.graphics.PDXObject;
-import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotation;
 
 /**
  * A node in the structure tree.
@@ -271,11 +268,6 @@ public abstract class PDStructureNode implements COSObjectable
         else
         {
             boolean onlyKid = k.equals(refKidBase);
-            if (!onlyKid && (k instanceof COSObject))
-            {
-                COSBase kObj = ((COSObject) k).getObject();
-                onlyKid = kObj.equals(refKidBase);
-            }
             if (onlyKid)
             {
                 COSArray array = new COSArray();
@@ -350,12 +342,7 @@ public abstract class PDStructureNode implements COSObjectable
         else
         {
             // currently one kid: if current kid equals given object, remove kids entry
-            boolean onlyKid = k.equals(object);
-            if (!onlyKid && (k instanceof COSObject))
-            {
-                COSBase kObj = ((COSObject) k).getObject();
-                onlyKid = kObj.equals(object);
-            }
+            boolean onlyKid = k.equals(object.getCOSObject());
             if (onlyKid)
             {
                 this.getCOSDictionary().removeItem(COSName.K);
@@ -381,18 +368,11 @@ public abstract class PDStructureNode implements COSObjectable
      */
     protected static Object createObject(COSBase kid)
     {
+        COSBase direct = kid.getCOSObject();
         COSDictionary kidDic = null;
-        if (kid instanceof COSDictionary)
+        if (direct instanceof COSDictionary)
         {
-            kidDic = (COSDictionary) kid;
-        }
-        else if (kid instanceof COSObject)
-        {
-            COSBase base = ((COSObject) kid).getObject();
-            if (base instanceof COSDictionary)
-            {
-                kidDic = (COSDictionary) base;
-            }
+            kidDic = (COSDictionary) direct;
         }
         if (kidDic != null)
         {

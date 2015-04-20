@@ -361,6 +361,7 @@ public final class BaseCOSParser extends SourceReader
      */
     public COSStream nextStream(COSDictionary streamDictionary) throws IOException
     {
+        skipSpaces();
         skipExpected(STREAM);
         int c = source().read();
         while (isSpace(c))

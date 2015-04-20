@@ -22,7 +22,6 @@ import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.cos.COSObject;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.pdmodel.common.COSObjectable;
 import org.apache.pdfbox.pdmodel.common.PDRange;
@@ -136,11 +135,7 @@ public abstract class PDFunction implements COSObjectable
         }
 
         PDFunction retval = null;
-        if( function instanceof COSObject )
-        {
-            function = ((COSObject)function).getObject();
-        }
-        COSDictionary functionDictionary = (COSDictionary)function;
+        COSDictionary functionDictionary = (COSDictionary) function.getCOSObject();
         int functionType = functionDictionary.getInt( COSName.FUNCTION_TYPE );
         if( functionType == 0 )
         {

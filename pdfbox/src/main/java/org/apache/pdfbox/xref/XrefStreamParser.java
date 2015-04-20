@@ -63,6 +63,7 @@ class XrefStreamParser
         LOG.debug("Parsing xref stream at offset " + streamObjectOffset);
         parser.offset(streamObjectOffset);
         parser.skipIndirectObjectDefinition();
+        parser.skipSpaces();
 
         COSDictionary dictionary = parser.nextDictionary();
         try (COSStream xrefStream = parser.nextStream(dictionary))

@@ -113,6 +113,14 @@ public class SourceReader implements Closeable
     }
 
     /**
+     * sets the source length
+     */
+    public void length(long length)
+    {
+        this.sourceLength = length;
+    }
+
+    /**
      * @return The next token that was read from the stream.
      *
      * @throws IOException If there is an error reading from the stream.
@@ -126,7 +134,6 @@ public class SourceReader implements Closeable
         while (((c = (char) source.read()) != -1) && !isEndOfName(c))
         {
             builder.append(c);
-            c = (char) source.read();
         }
         unreadIfValid(c);
         return builder.toString();

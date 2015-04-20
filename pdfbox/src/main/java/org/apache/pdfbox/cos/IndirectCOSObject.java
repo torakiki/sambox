@@ -54,4 +54,9 @@ public class IndirectCOSObject extends COSBase
         return getCOSObject().accept(visitor);
     }
 
+    public COSObjectKey key()
+    {
+        return key;
+    }
+
 }

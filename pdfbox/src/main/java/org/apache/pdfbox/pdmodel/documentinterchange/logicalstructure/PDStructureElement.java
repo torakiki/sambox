@@ -24,7 +24,6 @@ import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSInteger;
 import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.cos.COSObject;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.documentinterchange.markedcontent.PDMarkedContent;
 
@@ -278,12 +277,7 @@ public class PDStructureElement extends PDStructureNode
         }
         else
         {
-            COSBase directA = a;
-            if (a instanceof COSObject)
-            {
-                directA = ((COSObject) a).getObject();
-            }
-            if (attributeObject.getCOSObject().equals(directA))
+            if (attributeObject.getCOSObject().equals(a.getCOSObject()))
             {
                 this.getCOSDictionary().removeItem(key);
             }
@@ -452,12 +446,7 @@ public class PDStructureElement extends PDStructureNode
         }
         else
         {
-            COSBase directC = c;
-            if (c instanceof COSObject)
-            {
-                directC = ((COSObject) c).getObject();
-            }
-            if (name.equals(directC))
+            if (name.equals(c.getCOSObject()))
             {
                 this.getCOSDictionary().removeItem(key);
             }

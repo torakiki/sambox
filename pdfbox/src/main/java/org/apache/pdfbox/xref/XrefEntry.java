@@ -93,7 +93,7 @@ public class XrefEntry
     @Override
     public String toString()
     {
-        return String.format("%s offset=%d %s", type.toString(), byteOffset, key.toString());
+        return String.format("%s offset=%d, %s", type.toString(), byteOffset, key.toString());
     }
 
     /**

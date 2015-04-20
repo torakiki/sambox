@@ -16,22 +16,21 @@
  */
 package org.apache.pdfbox.pdmodel.graphics.color;
 
-import org.apache.pdfbox.cos.COSBase;
-import org.apache.pdfbox.cos.COSArray;
-import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.cos.COSObject;
-import org.apache.pdfbox.pdmodel.MissingResourceException;
-import org.apache.pdfbox.pdmodel.PDResources;
-import org.apache.pdfbox.pdmodel.common.COSObjectable;
-
 import java.awt.Transparency;
+import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorConvertOp;
+import java.awt.image.ColorModel;
 import java.awt.image.ComponentColorModel;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
-import java.awt.color.ColorSpace;
-import java.awt.image.ColorModel;
+
+import org.apache.pdfbox.cos.COSArray;
+import org.apache.pdfbox.cos.COSBase;
+import org.apache.pdfbox.cos.COSName;
+import org.apache.pdfbox.pdmodel.MissingResourceException;
+import org.apache.pdfbox.pdmodel.PDResources;
+import org.apache.pdfbox.pdmodel.common.COSObjectable;
 
 /**
  * A color space specifies how the colours of graphics objects will be painted on the page.
@@ -54,21 +53,19 @@ public abstract class PDColorSpace implements COSObjectable
 
     /**
      * Creates a color space given a name or array.
-     * @param colorSpace the color space COS object
+     * 
+     * @param cs the color space COS object
      * @param resources the current resources.
      * @return a new color space
      * @throws MissingResourceException if the color space is missing in the resources dictionary
      * @throws IOException if the color space is unknown or cannot be created
      */
-    public static PDColorSpace create(COSBase colorSpace,
+    public static PDColorSpace create(COSBase cs,
                                       PDResources resources)
                                       throws IOException
     {
-        if (colorSpace instanceof COSObject)
-        {
-            return create(((COSObject) colorSpace).getObject(), resources);
-        }
-        else if (colorSpace instanceof COSName)
+        COSBase colorSpace = cs.getCOSObject();
+        if (colorSpace instanceof COSName)
         {
             COSName name = (COSName)colorSpace;
 

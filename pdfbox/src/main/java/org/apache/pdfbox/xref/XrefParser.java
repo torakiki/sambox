@@ -48,6 +48,7 @@ public class XrefParser
 
     public XrefParser(BaseCOSParser parser)
     {
+        this.parser = parser;
         this.xrefStreamParser = new XrefStreamParser(parser, trailerMerger);
         this.xrefTableParser = new XrefTableParser(parser, trailerMerger);
     }
