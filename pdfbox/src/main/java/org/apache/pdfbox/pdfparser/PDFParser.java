@@ -16,7 +16,6 @@
  */
 package org.apache.pdfbox.pdfparser;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,8 +49,6 @@ public class PDFParser extends COSParser
     private String keyAlias = null;
 
     private AccessPermission accessPermission;
-
-    private static final InputStream EMPTY_INPUT_STREAM = new ByteArrayInputStream(new byte[0]);
 
     private File tempPDFFile;
 
@@ -165,7 +162,6 @@ public class PDFParser extends COSParser
     public PDFParser(File file, String decryptionPassword, InputStream keyStore, String alias,
             boolean useScratchFiles) throws IOException
     {
-        super(EMPTY_INPUT_STREAM);
         fileLen = file.length();
         raStream = new RandomAccessBufferedFileInputStream(file);
         password = decryptionPassword;
@@ -255,7 +251,6 @@ public class PDFParser extends COSParser
     public PDFParser(InputStream input, String decryptionPassword, InputStream keyStore,
             String alias, boolean useScratchFiles) throws IOException
     {
-        super(EMPTY_INPUT_STREAM);
         tempPDFFile = createTmpFile(input);
         fileLen = tempPDFFile.length();
         raStream = new RandomAccessBufferedFileInputStream(tempPDFFile);
@@ -320,25 +315,7 @@ public class PDFParser extends COSParser
         // prepare decryption if necessary
         prepareDecryption();
     
-        // PDFBOX-1557 - ensure that all COSObject are loaded in the trailer
-        // PDFBOX-1606 - after securityHandler has been instantiated
-        for (COSBase trailerEntry : trailer.getValues())
-        {
-            if (trailerEntry instanceof COSObject)
-            {
-                COSObject tmpObj = (COSObject) trailerEntry;
-                parseObjectDynamically(tmpObj, false);
-            }
-        }
-        // parse catalog or root object
-        COSObject root = (COSObject) trailer.getItem(COSName.ROOT);
-    
-        if (root == null)
-        {
-            throw new IOException("Missing root object specification in trailer.");
-        }
-    
-        parseObjectDynamically(root, false);
+        parseTrailerValuesDynamically(trailer);
     
         COSObject catalogObj = document.getCatalog();
         if (catalogObj != null && catalogObj.getObject() instanceof COSDictionary)
@@ -383,14 +360,8 @@ public class PDFParser extends COSParser
     
             if (exceptionOccurred && document != null)
             {
-                try
-                {
-                    document.close();
-                    document = null;
-                }
-                catch (IOException ioe)
-                {
-                }
+                IOUtils.closeQuietly(document);
+                document = null;
             }
         }
     }

@@ -60,7 +60,7 @@ public abstract class PDStructureNode implements COSObjectable
 
     private final COSDictionary dictionary;
 
-    protected COSDictionary getCOSDictionary()
+    public COSDictionary getCOSDictionary()
     {
         return dictionary;
     }
@@ -120,7 +120,7 @@ public abstract class PDStructureNode implements COSObjectable
             while (kids.hasNext())
             {
                 COSBase kid = kids.next();
-                Object kidObject = PDStructureNode.createObject(kid);
+                Object kidObject = this.createObject(kid);
                 if (kidObject != null)
                 {
                     kidObjects.add(kidObject);
@@ -129,7 +129,7 @@ public abstract class PDStructureNode implements COSObjectable
         }
         else
         {
-            Object kidObject = PDStructureNode.createObject(k);
+            Object kidObject = this.createObject(k);
             if (kidObject != null)
             {
                 kidObjects.add(kidObject);
@@ -366,7 +366,7 @@ public abstract class PDStructureNode implements COSObjectable
      * @param kid the kid
      * @return the object
      */
-    protected static Object createObject(COSBase kid)
+    protected Object createObject(COSBase kid)
     {
         COSBase direct = kid.getCOSObject();
         COSDictionary kidDic = null;

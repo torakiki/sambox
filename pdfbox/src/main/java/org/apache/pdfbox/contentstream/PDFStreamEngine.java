@@ -67,7 +67,7 @@ import org.apache.pdfbox.util.Vector;
  * 
  * @author Ben Litchfield
  */
-public class PDFStreamEngine
+public abstract class PDFStreamEngine
 {
     private static final Log LOG = LogFactory.getLog(PDFStreamEngine.class);
 
@@ -86,7 +86,7 @@ public class PDFStreamEngine
     /**
      * Creates a new PDFStreamEngine.
      */
-    public PDFStreamEngine()
+    protected PDFStreamEngine()
     {
     }
 

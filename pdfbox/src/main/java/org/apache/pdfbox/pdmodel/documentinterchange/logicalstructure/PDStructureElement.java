@@ -77,7 +77,7 @@ public class PDStructureElement extends PDStructureNode
      * 
      * @param structureType the structure type
      */
-    public void setStructureType(String structureType)
+    public final void setStructureType(String structureType)
     {
         this.getCOSDictionary().setName(COSName.S, structureType);
     }
@@ -103,7 +103,7 @@ public class PDStructureElement extends PDStructureNode
      * 
      * @param structureNode the parent in the structure hierarchy
      */
-    public void setParent(PDStructureNode structureNode)
+    public final void setParent(PDStructureNode structureNode)
     {
         this.getCOSDictionary().setItem(COSName.P, structureNode);
     }
@@ -238,7 +238,7 @@ public class PDStructureElement extends PDStructureNode
         COSName key = COSName.A;
         attributeObject.setStructureElement(this);
         COSBase a = this.getCOSDictionary().getDictionaryObject(key);
-        COSArray array = null;
+        COSArray array;
         if (a instanceof COSArray)
         {
             array = (COSArray) a;
@@ -402,7 +402,7 @@ public class PDStructureElement extends PDStructureNode
         }
         COSName key = COSName.C;
         COSBase c = this.getCOSDictionary().getDictionaryObject(key);
-        COSArray array = null;
+        COSArray array;
         if (c instanceof COSArray)
         {
             array = (COSArray) c;
