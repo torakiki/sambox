@@ -17,7 +17,6 @@
 package org.apache.pdfbox.pdfparser;
 
 import static org.apache.pdfbox.util.Charsets.ISO_8859_1;
-import static org.apache.pdfbox.xref.XrefEntry.inUseEntry;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -30,6 +29,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -52,12 +52,8 @@ import org.apache.pdfbox.cos.COSObject;
 import org.apache.pdfbox.cos.COSObjectKey;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.io.IOUtils;
+import org.apache.pdfbox.pdfparser.XrefTrailerResolver.XRefType;
 import org.apache.pdfbox.pdmodel.encryption.SecurityHandler;
-import org.apache.pdfbox.xref.CompressedXrefEntry;
-import org.apache.pdfbox.xref.TrailerMerger;
-import org.apache.pdfbox.xref.Xref;
-import org.apache.pdfbox.xref.XrefEntry;
-import org.apache.pdfbox.xref.XrefType;
 
 /**
  * PDF-Parser which first reads startxref and xref tables in order to know valid objects and parse only these objects.
@@ -142,8 +138,10 @@ public class COSParser extends BaseParser
 
     private static final Log LOG = LogFactory.getLog(COSParser.class);
 
-    private Xref xref = new Xref();
-    private TrailerMerger trailerMerger = new TrailerMerger();
+    /**
+     * Collects all Xref/trailer objects and resolves them into single object using startxref reference.
+     */
+    protected XrefTrailerResolver xrefTrailerResolver = new XrefTrailerResolver();
 
     /**
      * The prefix for the temp file being used. 
@@ -156,7 +154,7 @@ public class COSParser extends BaseParser
     public COSParser()
     {
     }
-    
+
     /**
      * Constructor.
      * 
@@ -237,7 +235,12 @@ public class COSParser extends BaseParser
                     }
                     readLine();
                 }
-                COSDictionary trailer = parseTrailer();
+                if (!parseTrailer())
+                {
+                    throw new IOException("Expected trailer object at position: "
+                            + pdfSource.getOffset());
+                }
+                COSDictionary trailer = xrefTrailerResolver.getCurrentTrailer();
                 // check for a XRef stream, it may contain some object ids of compressed objects
                 if (trailer.containsKey(COSName.XREF_STM))
                 {
@@ -290,15 +293,21 @@ public class COSParser extends BaseParser
                     if (fixedOffset > -1 && fixedOffset != prev)
                     {
                         prev = fixedOffset;
+                        COSDictionary trailer = xrefTrailerResolver.getCurrentTrailer();
+                        trailer.setLong(COSName.PREV, prev);
                     }
                 }
             }
         }
-        COSDictionary trailer = trailerMerger.getTrailer();
+        // ---- build valid xrefs out of the xref chain
+        xrefTrailerResolver.setStartxref(startXrefOffset);
+        COSDictionary trailer = xrefTrailerResolver.getTrailer();
         document.setTrailer(trailer);
+        document.setIsXRefStream(XRefType.STREAM == xrefTrailerResolver.getXrefType());
         // check the offsets of all referenced objects
         checkXrefOffsets();
-        document.setXRefTable(xref);
+        // copy xref table
+        document.addXRefTable(xrefTrailerResolver.getXrefTable());
         return trailer;
     }
 
@@ -536,54 +545,51 @@ public class COSParser extends BaseParser
                 }
                 else if (baseObj instanceof COSArray)
                 {
-                    for (COSBase current : (COSArray) baseObj)
+                    final Iterator<COSBase> arrIter = ((COSArray) baseObj).iterator();
+                    while (arrIter.hasNext())
                     {
-                        addNewToList(toBeParsedList, current, addedObjects);
+                        addNewToList(toBeParsedList, arrIter.next(), addedObjects);
                     }
                 }
                 else if (baseObj instanceof COSObject)
                 {
                     COSObject obj = (COSObject) baseObj;
                     long objId = getObjectId(obj);
-                    COSObjectKey objKey = new COSObjectKey(obj);
+                    COSObjectKey objKey = new COSObjectKey(obj.getObjectNumber(),
+                            obj.getGenerationNumber());
 
                     if (!parsedObjects.contains(objId))
                     {
-                        XrefEntry entry = xref.get(objKey);
-                        if (entry != null)
+                        Long fileOffset = xrefTrailerResolver.getXrefTable().get(objKey);
+                        // it is allowed that object references point to null,
+                        // thus we have to test
+                        if (fileOffset != null && fileOffset != 0)
                         {
-                            switch (entry.getType())
+                            if (fileOffset > 0)
                             {
-                            case IN_USE:
-                                objToBeParsed.put(entry.getByteOffset(),
-                                        Collections.singletonList(obj));
-                                break;
-                            case COMPRESSED:
-                                long containingStreamNumber = ((CompressedXrefEntry) entry)
-                                        .getObjectStreamNumber();
-                                XrefEntry containingStreamEntry = xref.get(new COSObjectKey(
-                                        containingStreamNumber, 0));
-                                if (containingStreamEntry == null
-                                        || containingStreamEntry.getType() != XrefType.IN_USE
-                                        || containingStreamEntry.getByteOffset() <= 0)
+                                objToBeParsed.put(fileOffset, Collections.singletonList(obj));
+                            }
+                            else
+                            {
+                                // negative offset means we have a compressed
+                                // object within object stream;
+                                // get offset of object stream
+                                fileOffset = xrefTrailerResolver.getXrefTable().get(
+                                        new COSObjectKey((int) -fileOffset, 0));
+                                if ((fileOffset == null) || (fileOffset <= 0))
                                 {
                                     throw new IOException(
-                                            String.format(
-                                                    "Unable to find containing object stream %d for object %d",
-                                                    containingStreamNumber, entry.getObjectNumber()));
+                                            "Invalid object stream xref object reference for key '"
+                                                    + objKey + "': " + fileOffset);
                                 }
-                                List<COSObject> stmObjects = objToBeParsed
-                                        .get(containingStreamEntry.getByteOffset());
+
+                                List<COSObject> stmObjects = objToBeParsed.get(fileOffset);
                                 if (stmObjects == null)
                                 {
                                     stmObjects = new ArrayList<COSObject>();
-                                    objToBeParsed.put(containingStreamEntry.getByteOffset(),
-                                            stmObjects);
+                                    objToBeParsed.put(fileOffset, stmObjects);
                                 }
                                 stmObjects.add(obj);
-                                break;
-                            case FREE:
-                            default:
                             }
                         }
                         else
@@ -673,25 +679,26 @@ public class COSParser extends BaseParser
         {
             // not previously parsed
             // ---- read offset or object stream object number from xref table
-            XrefEntry xrefEntry = xref.get(objKey);
+            Long offsetOrObjstmObNr = xrefTrailerResolver.getXrefTable().get(objKey);
+
             // sanity test to circumvent loops with broken documents
             if (requireExistingNotCompressedObj
-                    && (xrefEntry == null || xrefEntry.getType() == XrefType.COMPRESSED))
+                    && ((offsetOrObjstmObNr == null) || (offsetOrObjstmObNr <= 0)))
             {
-                throw new IOException("Object " + objKey.getNumber() + ":" + objKey.getGeneration()
-                        + " must be defined and must not be compressed object: " + xrefEntry);
+                throw new IOException("Object must be defined and must not be compressed object: "
+                        + objKey.getNumber() + ":" + objKey.getGeneration());
             }
 
-            if (xrefEntry == null)
+            if (offsetOrObjstmObNr == null)
             {
                 // not defined object -> NULL object (Spec. 1.7, chap. 3.2.9)
                 pdfObject.setObject(COSNull.NULL);
             }
-            else if (xrefEntry.getType() != XrefType.COMPRESSED)
+            else if (offsetOrObjstmObNr > 0)
             {
                 // offset of indirect object in file
                 // ---- go to object start
-                pdfSource.seek(xrefEntry.getByteOffset());
+                pdfSource.seek(offsetOrObjstmObNr);
 
                 // ---- we must have an indirect object
                 final long readObjNr = readObjectNumber();
@@ -730,7 +737,7 @@ public class COSParser extends BaseParser
                         // the combination of a dict and the stream/endstream
                         // forms a complete stream object
                         throw new IOException("Stream not preceded by dictionary (offset: "
-                                + xrefEntry.getByteOffset() + ").");
+                                + offsetOrObjstmObNr + ").");
                     }
                     skipSpaces();
                     endObjectKey = readLine();
@@ -759,14 +766,13 @@ public class COSParser extends BaseParser
                     if (isLenient)
                     {
                         LOG.warn("Object (" + readObjNr + ":" + readObjGen + ") at offset "
-                                + xrefEntry.getByteOffset()
-                                + " does not end with 'endobj' but with '"
+                                + offsetOrObjstmObNr + " does not end with 'endobj' but with '"
                                 + endObjectKey + "'");
                     }
                     else
                     {
                         throw new IOException("Object (" + readObjNr + ":" + readObjGen
-                                + ") at offset " + xrefEntry.getByteOffset()
+                                + ") at offset " + offsetOrObjstmObNr
                                 + " does not end with 'endobj' but with '" + endObjectKey + "'");
                     }
                 }
@@ -777,24 +783,25 @@ public class COSParser extends BaseParser
                 // be parsed;
                 // since our object was not found it means object stream was not
                 // parsed so far
-                XrefEntry containingStreamEntry = xref.get(new COSObjectKey(
-                        ((CompressedXrefEntry) xrefEntry).getObjectStreamNumber(), 0));
-                final COSBase objstmBaseObj = parseObjectDynamically(
-                        containingStreamEntry.getObjectNumber(),
-                        containingStreamEntry.getGenerationNumber(), true);
+                final int objstmObjNr = (int) (-offsetOrObjstmObNr);
+                final COSBase objstmBaseObj = parseObjectDynamically(objstmObjNr, 0, true);
                 if (objstmBaseObj instanceof COSStream)
                 {
                     // parse object stream
                     PDFObjectStreamParser parser = new PDFObjectStreamParser((COSStream) objstmBaseObj, document);
                     parser.parse();
                     parser.close();
+                    // get set of object numbers referenced for this object
+                    // stream
+                    final Set<Long> refObjNrs = xrefTrailerResolver
+                            .getContainedObjectNumbers(objstmObjNr);
 
                     // register all objects which are referenced to be contained
                     // in object stream
                     for (COSObject next : parser.getObjects())
                     {
                         COSObjectKey stmObjKey = new COSObjectKey(next);
-                        if (containingStreamEntry.owns(xref.get(stmObjKey)))
+                        if (refObjNrs.contains(stmObjKey.getNumber()))
                         {
                             COSObject stmObj = document.getObjectFromPool(stmObjKey);
                             stmObj.setObject(next.getObject());
@@ -917,7 +924,7 @@ public class COSParser extends BaseParser
             // get output stream to copy data to
             if (streamLengthObj != null && validateStreamLength(streamLengthObj.longValue()))
             {
-                out = stream.createFilteredStream();
+                out = stream.createFilteredStream(streamLengthObj);
                 readValidStream(out, streamLengthObj);
             }
             else
@@ -1022,11 +1029,11 @@ public class COSParser extends BaseParser
         }
         if (startXRefOffset > 0)
         {
-	        long fixedOffset = checkXRefStreamOffset(startXRefOffset, true);
-	        if (fixedOffset > -1)
-	        {
-	        	return fixedOffset;
-	        }
+            long fixedOffset = checkXRefStreamOffset(startXRefOffset, true);
+            if (fixedOffset > -1)
+            {
+                return fixedOffset;
+            }
         }
         // try to find a fixed offset
         return calculateXRefFixedOffset(startXRefOffset, false);
@@ -1117,29 +1124,31 @@ public class COSParser extends BaseParser
         {
             return;
         }
-        boolean bruteForceSearch = false;
-        for (XrefEntry current : xref.values())
+        Map<COSObjectKey, Long> xrefOffset = xrefTrailerResolver.getXrefTable();
+        if (xrefOffset != null)
         {
-            if (current.getType() == XrefType.IN_USE)
+            boolean bruteForceSearch = false;
+            for (Entry<COSObjectKey, Long> objectEntry : xrefOffset.entrySet())
             {
-                if (!checkObjectKeys(current.key(), current.getByteOffset()))
+                COSObjectKey objectKey = objectEntry.getKey();
+                Long objectOffset = objectEntry.getValue();
+                // a negative offset number represents a object number itself
+                // see type 2 entry in xref stream
+                if (objectOffset != null && objectOffset >= 0
+                        && !checkObjectKeys(objectKey, objectOffset))
                 {
                     LOG.debug("Stop checking xref offsets as at least one couldn't be dereferenced");
                     bruteForceSearch = true;
                     break;
                 }
             }
-        }
-        if (bruteForceSearch)
-        {
-            bfSearchForObjects();
-            if (bfSearchCOSObjectKeyOffsets != null && !bfSearchCOSObjectKeyOffsets.isEmpty())
+            if (bruteForceSearch)
             {
-                LOG.debug("Replaced read xref table with the results of a brute force search");
-                for (Entry<COSObjectKey, Long> entry : bfSearchCOSObjectKeyOffsets.entrySet())
+                bfSearchForObjects();
+                if (bfSearchCOSObjectKeyOffsets != null && !bfSearchCOSObjectKeyOffsets.isEmpty())
                 {
-                    xref.put(XrefEntry.inUseEntry(entry.getKey().getNumber(), entry.getValue(),
-                            entry.getKey().getGeneration()));
+                    LOG.debug("Replaced read xref table with the results of a brute force search");
+                    xrefOffset.putAll(bfSearchCOSObjectKeyOffsets);
                 }
             }
         }
@@ -1478,12 +1487,13 @@ public class COSParser extends BaseParser
         bfSearchForObjects();
         if (bfSearchCOSObjectKeyOffsets != null)
         {
+            xrefTrailerResolver.nextXrefObj(0, XRefType.TABLE);
             for (COSObjectKey objectKey : bfSearchCOSObjectKeyOffsets.keySet())
             {
-                xref.add(XrefEntry.inUseEntry(objectKey.getNumber(),
-                        bfSearchCOSObjectKeyOffsets.get(objectKey), objectKey.getGeneration()));
+                xrefTrailerResolver.setXRef(objectKey, bfSearchCOSObjectKeyOffsets.get(objectKey));
             }
-            trailer = trailerMerger.getTrailer();
+            xrefTrailerResolver.setStartxref(0);
+            trailer = xrefTrailerResolver.getTrailer();
             getDocument().setTrailer(trailer);
             // search for the different parts of the trailer dictionary 
             for(COSObjectKey key : bfSearchCOSObjectKeyOffsets.keySet())
@@ -1604,17 +1614,17 @@ public class COSParser extends BaseParser
     /**
      * This will parse the trailer from the stream and add it to the state.
      *
-     * @return the parsed trailer
+     * @return false on parsing error
      * @throws IOException If an IO error occurs.
      */
-    private COSDictionary parseTrailer() throws IOException
+    private boolean parseTrailer() throws IOException
     {
-        // read "trailer"
-        long currentOffset = pdfSource.getOffset();
         if(pdfSource.peek() != 't')
         {
-            throw new IOException("Expected trailer object at position: " + currentOffset);
+            return false;
         }
+        // read "trailer"
+        long currentOffset = pdfSource.getOffset();
         String nextLine = readLine();
         if( !nextLine.trim().equals( "trailer" ) )
         {
@@ -1631,7 +1641,7 @@ public class COSParser extends BaseParser
             }
             else
             {
-                throw new IOException("Expected trailer object at position: " + currentOffset);
+                return false;
             }
         }
     
@@ -1639,10 +1649,12 @@ public class COSParser extends BaseParser
         // even if this does not comply with PDF reference we want to support as many PDFs as possible
         // Acrobat reader can also deal with this.
         skipSpaces();
-        COSDictionary dictionary = parseCOSDictionary();
-        trailerMerger.mergeTrailerWithoutOverwriting(currentOffset, dictionary);
+
+        COSDictionary parsedTrailer = parseCOSDictionary();
+        xrefTrailerResolver.setTrailer(parsedTrailer);
+
         skipSpaces();
-        return dictionary;
+        return true;
     }
 
     /**
@@ -1756,7 +1768,8 @@ public class COSParser extends BaseParser
         {
             return false;
         }
-        if (!readString().trim().equals("xref"))
+        String xref = readString();
+        if (!xref.trim().equals("xref"))
         {
             return false;
         }
@@ -1765,6 +1778,9 @@ public class COSParser extends BaseParser
         String str = readString();
         byte[] b = str.getBytes(ISO_8859_1);
         pdfSource.unread(b, 0, b.length);
+
+        // signal start of new XRef
+        xrefTrailerResolver.nextXrefObj(startByteOffset, XRefType.TABLE);
 
         if (str.startsWith("trailer"))
         {
@@ -1803,20 +1819,21 @@ public class COSParser extends BaseParser
                 /*
                  * This supports the corrupt table as reported in PDFBOX-474 (XXXX XXX XX n)
                  */
-                String entryType = splitString[splitString.length - 1];
-                if ("n".equals(entryType))
+                if (splitString[splitString.length - 1].equals("n"))
                 {
                     try
                     {
-                        xref.add(inUseEntry(currObjID, Long.parseLong(splitString[0]),
-                                Integer.parseInt(splitString[1])));
+                        int currOffset = Integer.parseInt(splitString[0]);
+                        int currGenID = Integer.parseInt(splitString[1]);
+                        COSObjectKey objKey = new COSObjectKey(currObjID, currGenID);
+                        xrefTrailerResolver.setXRef(objKey, currOffset);
                     }
                     catch(NumberFormatException e)
                     {
                         throw new IOException(e);
                     }
                 }
-                else if (!"f".equals(entryType))
+                else if (!splitString[2].equals("f"))
                 {
                     throw new IOException("Corrupt XRefTable Entry - ObjID:" + currObjID);
                 }
@@ -1846,10 +1863,10 @@ public class COSParser extends BaseParser
         // and we must not override the offset and the trailer
         if ( isStandalone )
         {
-            document.setIsXRefStream(true);
-            trailerMerger.mergeTrailerWithoutOverwriting(objByteOffset, stream);
+            xrefTrailerResolver.nextXrefObj(objByteOffset, XRefType.STREAM);
+            xrefTrailerResolver.setTrailer(stream);
         }
-        PDFXrefStreamParser parser = new PDFXrefStreamParser(stream, document, xref);
+        PDFXrefStreamParser parser = new PDFXrefStreamParser(stream, document, xrefTrailerResolver);
         parser.parse();
         parser.close();
     }
@@ -1872,18 +1889,9 @@ public class COSParser extends BaseParser
         return document;
     }
 
-    protected TrailerMerger getTrailerMerger()
-    {
-        return this.trailerMerger;
-    }
-
-    protected Xref getXref()
-    {
-        return this.xref;
-    }
     /**
-     * Create a temporary file with the input stream. If the creation succeed, the {@linkplain #isTmpPDFFile} is set to
-     * true. This Temporary file will be deleted at end of the parse method
+     * Create a temporary file with the input stream. The caller must take care to delete this file at end of the parse
+     * method.
      *
      * @param input
      * @return the temporary file
@@ -1905,7 +1913,7 @@ public class COSParser extends BaseParser
             IOUtils.closeQuietly(fos);
         }
     }
-    
+
     /**
      * Parse the values of the trailer dictionary and return the root object.
      *
