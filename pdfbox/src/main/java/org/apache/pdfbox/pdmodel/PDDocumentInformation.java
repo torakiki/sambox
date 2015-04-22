@@ -1,7 +1,7 @@
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
+ * this work for additional getCOSObject()rmation regarding copyright ownership.
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -20,11 +20,9 @@ import java.util.Calendar;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
-
-import org.apache.pdfbox.pdmodel.common.COSObjectable;
+import org.apache.pdfbox.pdmodel.common.PDDictionaryWrapper;
 
 /**
  * This is the document metadata.  Each getXXX method will return the entry if
@@ -35,50 +33,23 @@ import org.apache.pdfbox.pdmodel.common.COSObjectable;
  * @author Gerardo Ortiz
  *
  */
-public class PDDocumentInformation implements COSObjectable
+public class PDDocumentInformation extends PDDictionaryWrapper
 {
-    private final COSDictionary info;
-
-    /**
-     * Default Constructor.
-     */
     public PDDocumentInformation()
     {
-        info = new COSDictionary();
+        super();
     }
 
     /**
-     * Constructor that is used for a preexisting dictionary.
-     *
-     * @param dic The underlying dictionary.
+     * Creates a new instance with a given COS dictionary.
+     * 
+     * @param dictionary the dictionary
      */
-    public PDDocumentInformation( COSDictionary dic )
+    public PDDocumentInformation(COSDictionary dictionary)
     {
-        info = dic;
+        super(dictionary);
     }
 
-    /**
-     * This will get the underlying dictionary that this object wraps.
-     *
-     * @return The underlying info dictionary.
-     */
-    public COSDictionary getDictionary()
-    {
-        return info;
-    }
-
-    /**
-     * Convert this standard java object to a COS object.
-     *
-     * @return The cos object that matches this Java object.
-     */
-    @Override
-    public COSBase getCOSObject()
-    {
-        return info;
-    }
-    
-    
     /**
      * Return the properties String value.
      * <p>
@@ -91,7 +62,7 @@ public class PDDocumentInformation implements COSObjectable
      */
      public Object getPropertyStringValue(String propertyKey)
      {
-         return info.getString(propertyKey);
+        return getCOSObject().getString(propertyKey);
      }    
 
     /**
@@ -101,7 +72,7 @@ public class PDDocumentInformation implements COSObjectable
      */
     public String getTitle()
     {
-        return info.getString( COSName.TITLE );
+        return getCOSObject().getString(COSName.TITLE);
     }
 
     /**
@@ -111,7 +82,7 @@ public class PDDocumentInformation implements COSObjectable
      */
     public void setTitle( String title )
     {
-        info.setString( COSName.TITLE, title );
+        getCOSObject().setString(COSName.TITLE, title);
     }
 
     /**
@@ -121,7 +92,7 @@ public class PDDocumentInformation implements COSObjectable
      */
     public String getAuthor()
     {
-        return info.getString( COSName.AUTHOR );
+        return getCOSObject().getString(COSName.AUTHOR);
     }
 
     /**
@@ -131,7 +102,7 @@ public class PDDocumentInformation implements COSObjectable
      */
     public void setAuthor( String author )
     {
-        info.setString( COSName.AUTHOR, author );
+        getCOSObject().setString(COSName.AUTHOR, author);
     }
 
     /**
@@ -141,7 +112,7 @@ public class PDDocumentInformation implements COSObjectable
      */
     public String getSubject()
     {
-        return info.getString( COSName.SUBJECT );
+        return getCOSObject().getString(COSName.SUBJECT);
     }
 
     /**
@@ -151,7 +122,7 @@ public class PDDocumentInformation implements COSObjectable
      */
     public void setSubject( String subject )
     {
-        info.setString( COSName.SUBJECT, subject );
+        getCOSObject().setString(COSName.SUBJECT, subject);
     }
 
     /**
@@ -161,7 +132,7 @@ public class PDDocumentInformation implements COSObjectable
      */
     public String getKeywords()
     {
-        return info.getString( COSName.KEYWORDS );
+        return getCOSObject().getString(COSName.KEYWORDS);
     }
 
     /**
@@ -171,7 +142,7 @@ public class PDDocumentInformation implements COSObjectable
      */
     public void setKeywords( String keywords )
     {
-        info.setString( COSName.KEYWORDS, keywords );
+        getCOSObject().setString(COSName.KEYWORDS, keywords);
     }
 
     /**
@@ -181,7 +152,7 @@ public class PDDocumentInformation implements COSObjectable
      */
     public String getCreator()
     {
-        return info.getString( COSName.CREATOR );
+        return getCOSObject().getString(COSName.CREATOR);
     }
 
     /**
@@ -191,7 +162,7 @@ public class PDDocumentInformation implements COSObjectable
      */
     public void setCreator( String creator )
     {
-        info.setString( COSName.CREATOR, creator );
+        getCOSObject().setString(COSName.CREATOR, creator);
     }
 
     /**
@@ -201,7 +172,7 @@ public class PDDocumentInformation implements COSObjectable
      */
     public String getProducer()
     {
-        return info.getString( COSName.PRODUCER );
+        return getCOSObject().getString(COSName.PRODUCER);
     }
 
     /**
@@ -211,7 +182,7 @@ public class PDDocumentInformation implements COSObjectable
      */
     public void setProducer( String producer )
     {
-        info.setString( COSName.PRODUCER, producer );
+        getCOSObject().setString(COSName.PRODUCER, producer);
     }
 
     /**
@@ -221,7 +192,7 @@ public class PDDocumentInformation implements COSObjectable
      */
     public Calendar getCreationDate()
     {
-        return info.getDate( COSName.CREATION_DATE );
+        return getCOSObject().getDate(COSName.CREATION_DATE);
     }
 
     /**
@@ -231,7 +202,7 @@ public class PDDocumentInformation implements COSObjectable
      */
     public void setCreationDate( Calendar date )
     {
-        info.setDate( COSName.CREATION_DATE, date );
+        getCOSObject().setDate(COSName.CREATION_DATE, date);
     }
 
     /**
@@ -241,7 +212,7 @@ public class PDDocumentInformation implements COSObjectable
      */
     public Calendar getModificationDate()
     {
-        return info.getDate( COSName.MOD_DATE );
+        return getCOSObject().getDate(COSName.MOD_DATE);
     }
 
     /**
@@ -251,7 +222,7 @@ public class PDDocumentInformation implements COSObjectable
      */
     public void setModificationDate( Calendar date )
     {
-        info.setDate( COSName.MOD_DATE, date );
+        getCOSObject().setDate(COSName.MOD_DATE, date);
     }
 
     /**
@@ -262,11 +233,11 @@ public class PDDocumentInformation implements COSObjectable
      */
     public String getTrapped()
     {
-        return info.getNameAsString( COSName.TRAPPED );
+        return getCOSObject().getNameAsString(COSName.TRAPPED);
     }
 
     /**
-     * This will get the keys of all metadata information fields for the document.
+     * This will get the keys of all metadata getCOSObject()rmation fields for the document.
      *
      * @return all metadata key strings.
      * @since Apache PDFBox 1.3.0
@@ -274,7 +245,7 @@ public class PDDocumentInformation implements COSObjectable
     public Set<String> getMetadataKeys()
     {
         Set<String> keys = new TreeSet<String>();
-        for (COSName key : info.keySet())
+        for (COSName key : getCOSObject().keySet())
         {
             keys.add(key.getName());
         }
@@ -282,8 +253,8 @@ public class PDDocumentInformation implements COSObjectable
     }
 
     /**
-     *  This will get the value of a custom metadata information field for the document.
-     *  This will return null if one is not found.
+     * This will get the value of a custom metadata getCOSObject()rmation field for the document. This will return null
+     * if one is not found.
      *
      * @param fieldName Name of custom metadata field from pdf document.
      *
@@ -291,7 +262,7 @@ public class PDDocumentInformation implements COSObjectable
      */
     public String getCustomMetadataValue(String fieldName)
     {
-        return info.getString( fieldName );
+        return getCOSObject().getString(fieldName);
     }
 
     /**
@@ -302,7 +273,7 @@ public class PDDocumentInformation implements COSObjectable
      */
     public void setCustomMetadataValue( String fieldName, String fieldValue )
     {
-        info.setString( fieldName, fieldValue );
+        getCOSObject().setString(fieldName, fieldValue);
     }
 
     /**
@@ -322,6 +293,6 @@ public class PDDocumentInformation implements COSObjectable
                                         "'True', 'False', or 'Unknown'" );
         }
 
-        info.setName( COSName.TRAPPED, value );
+        getCOSObject().setName(COSName.TRAPPED, value);
     }
 }

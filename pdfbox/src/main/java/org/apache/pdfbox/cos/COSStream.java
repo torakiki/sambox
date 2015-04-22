@@ -20,20 +20,16 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.Closeable;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.filter.DecodeResult;
 import org.apache.pdfbox.filter.Filter;
 import org.apache.pdfbox.filter.FilterFactory;
 import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.io.RandomAccess;
 import org.apache.pdfbox.io.RandomAccessBuffer;
-import org.apache.pdfbox.io.RandomAccessFile;
 import org.apache.pdfbox.io.RandomAccessFileInputStream;
 import org.apache.pdfbox.io.RandomAccessFileOutputStream;
 
@@ -44,17 +40,12 @@ import org.apache.pdfbox.io.RandomAccessFileOutputStream;
  */
 public class COSStream extends COSDictionary implements Closeable
 {
-    /**
-     * Log instance.
-     */
-    private static final Log LOG = LogFactory.getLog(COSStream.class);
-
     private static final int BUFFER_SIZE=16384;
 
     /**
      * internal buffer, either held in memory or within a scratch file.
      */
-    private final RandomAccess buffer;
+    private final RandomAccess buffer = new RandomAccessBuffer();
     /**
      * The stream with all of the filters applied.
      */
@@ -66,87 +57,16 @@ public class COSStream extends COSDictionary implements Closeable
     private RandomAccessFileOutputStream unFilteredStream;
     private DecodeResult decodeResult;
 
-    private File scratchFile;
-    
-    /**
-     * Constructor.  Creates a new stream with an empty dictionary.
-     *
-     */
     public COSStream( )
     {
-        this(false, null);
     }
 
     /**
-     * Constructor.
-     *
      * @param dictionary The dictionary that is associated with this stream.
-     * 
      */
-    public COSStream( COSDictionary dictionary )
-    {
-        this(dictionary, false, null);
-    }
-
-    /**
-     * Constructor.  Creates a new stream with an empty dictionary.
-     * 
-     * @param useScratchFiles enables the usage of a scratch file if set to true
-     * @param scratchDirectory directory to be used to create the scratch file. If null java.io.temp is used instead.
-     *     
-     */
-    public COSStream( boolean useScratchFiles, File scratchDirectory )
-    {
-        super();
-        if (useScratchFiles)
-        {
-            buffer = createScratchFile(scratchDirectory);
-        }
-        else
-        {
-            buffer = new RandomAccessBuffer();
-        }
-    }
-
-    /**
-     * Constructor.
-     *
-     * @param dictionary The dictionary that is associated with this stream.
-     * @param useScratchFiles enables the usage of a scratch file if set to true
-     * @param scratchDirectory directory to be used to create the scratch file. If null java.io.temp is used instead.
-     * 
-     */
-    public COSStream( COSDictionary dictionary, boolean useScratchFiles, File scratchDirectory  )
+    public COSStream(COSDictionary dictionary)
     {
         super( dictionary );
-        if (useScratchFiles)
-        {
-            buffer = createScratchFile(scratchDirectory);
-        }
-        else
-        {
-            buffer = new RandomAccessBuffer();
-        }
-    }
-
-    /**
-     * Create a scratch file to be used as buffer to decrease memory foot print.
-     * 
-     * @param scratchDirectory directory to be used to create the scratch file. If null java.io.temp is used instead.
-     * 
-     */
-    private RandomAccess createScratchFile(File scratchDirectory)
-    {
-        try 
-        {
-            scratchFile = File.createTempFile("PDFBox", null, scratchDirectory);
-            return new RandomAccessFile(scratchFile, "rw");
-        }
-        catch (IOException exception)
-        {
-            LOG.error("Can't create temp file, using memory buffer instead", exception);
-            return new RandomAccessBuffer();
-        }
     }
 
     /**
@@ -528,27 +448,8 @@ public class COSStream extends COSDictionary implements Closeable
     @Override
     public void close() throws IOException
     {
-        if (buffer != null)
-        {
-            buffer.close();
-        }
-
-        if (filteredStream != null)
-        {
-            filteredStream.close();
-        }
-
-        if (unFilteredStream != null)
-        {
-            unFilteredStream.close();
-        }
-        
-        if (scratchFile != null && scratchFile.exists())
-        {
-            if (!scratchFile.delete())
-            {
-                throw new IOException("Can't delete the temporary scratch file "+scratchFile.getAbsolutePath());
-            }
-        }
+        IOUtils.close(buffer);
+        IOUtils.close(filteredStream);
+        IOUtils.close(unFilteredStream);
     }
 }

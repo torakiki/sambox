@@ -18,7 +18,6 @@ package org.apache.pdfbox.pdmodel.common;
 
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSStream;
-
 import org.apache.pdfbox.pdmodel.PDDocument;
 
 
@@ -50,7 +49,7 @@ public class PDObjectStream extends PDStream
      */
     public static PDObjectStream createStream( PDDocument document )
     {
-        COSStream cosStream = document.getDocument().createCOSStream();
+        COSStream cosStream = new COSStream();
         PDObjectStream strm = new PDObjectStream( cosStream );
         strm.getStream().setItem( COSName.TYPE, COSName.OBJ_STM );
         return strm;

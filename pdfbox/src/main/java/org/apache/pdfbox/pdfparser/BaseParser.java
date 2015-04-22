@@ -188,7 +188,7 @@ public abstract class BaseParser implements Closeable
     {
         if (document != null)
         {
-            return document.createCOSStream(dictionary);
+            return new COSStream(dictionary);
         }
         else
         {

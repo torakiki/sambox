@@ -76,9 +76,9 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
     }
 
     @Override
-    public Xref xref()
+    public void addEntry(XrefEntry entry)
     {
-        return xref;
+        xref.add(entry);
     }
 
     @Override
@@ -110,6 +110,7 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
             }
             if (securityHandler != null)
             {
+                LOG.trace("Decrypting stream");
                 securityHandler.decrypt(found, xrefEntry.getObjectNumber(),
                         xrefEntry.getGenerationNumber());
             }

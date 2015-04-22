@@ -21,6 +21,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.pdfbox.pdmodel.common.COSObjectable;
@@ -32,19 +33,15 @@ import org.apache.pdfbox.util.DateConverter;
  * @author Ben Litchfield
  * 
  */
-public class COSDictionary extends COSBase implements COSUpdateInfo
+public class COSDictionary extends COSBase
 {
     private static final String PATH_SEPARATOR = "/";
-    private boolean needToBeUpdated;
 
     /**
      * The name-value pairs of this dictionary. The pairs are kept in the order they were added to the dictionary.
      */
     protected Map<COSName, COSBase> items = new LinkedHashMap<COSName, COSBase>();
 
-    /**
-     * Constructor.
-     */
     public COSDictionary()
     {
         // default constructor
@@ -180,16 +177,8 @@ public class COSDictionary extends COSBase implements COSUpdateInfo
      */
     public COSBase getDictionaryObject(COSName key)
     {
-        COSBase retval = items.get(key);
-        if (retval instanceof COSObject)
-        {
-            retval = ((COSObject) retval).getObject();
-        }
-        if (retval instanceof COSNull)
-        {
-            retval = null;
-        }
-        return retval;
+        return Optional.ofNullable(items.get(key)).map(COSBase::getCOSObject)
+                .filter(i -> !COSNull.NULL.equals(i)).orElse(null);
     }
 
     /**
@@ -1318,18 +1307,6 @@ public class COSDictionary extends COSBase implements COSUpdateInfo
     public Object accept(ICOSVisitor visitor) throws IOException
     {
         return visitor.visitFromDictionary(this);
-    }
-    
-    @Override
-    public boolean isNeedToBeUpdated() 
-    {
-      return needToBeUpdated;
-    }
-    
-    @Override
-    public void setNeedToBeUpdated(boolean flag) 
-    {
-      needToBeUpdated = flag;
     }
 
     /**

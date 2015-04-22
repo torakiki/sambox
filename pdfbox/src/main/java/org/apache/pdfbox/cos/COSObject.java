@@ -24,7 +24,7 @@ import java.io.IOException;
  * @author Ben Litchfield
  * 
  */
-public class COSObject extends COSBase implements COSUpdateInfo
+public class COSObject extends COSBase
 {
     private COSBase baseObject;
     private long objectNumber;

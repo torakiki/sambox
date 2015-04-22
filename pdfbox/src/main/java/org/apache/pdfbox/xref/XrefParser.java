@@ -53,17 +53,24 @@ public class XrefParser
         this.xrefTableParser = new XrefTableParser(parser, trailerMerger);
     }
 
-    public void parse() throws IOException
+    /**
+     * @return parse the xref returning its offset
+     * @throws IOException
+     */
+    public long parse() throws IOException
     {
         long xrefOffset = findXrefOffset();
         if (xrefOffset > 0)
         {
             LOG.debug("Found xref offset at " + xrefOffset);
             parseXref(xrefOffset);
+            return xrefOffset;
         }
         else
         {
             rebuildTrailer();
+            // return the offset found
+            return -1;
         }
     }
 
@@ -77,10 +84,9 @@ public class XrefParser
     private final long findXrefOffset() throws IOException
     {
         int chunkSize = (int) Math.min(parser.length(), DEFAULT_TRAIL_BYTECOUNT);
-        byte[] buffer = new byte[chunkSize];
         long startPosition = parser.length() - chunkSize;
         parser.offset(startPosition);
-        parser.source().read(buffer, 0, chunkSize);
+        byte[] buffer = parser.source().readFully(chunkSize);
         int relativeIndex = new String(buffer, Charsets.ISO_8859_1).lastIndexOf(STARTXREF);
         if (relativeIndex < 0)
         {

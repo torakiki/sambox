@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.pdfbox.contentstream.operator.Operator;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSNumber;
 import org.apache.pdfbox.cos.COSStream;
@@ -36,11 +37,10 @@ import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDFontDescriptor;
 import org.apache.pdfbox.pdmodel.interactive.action.PDFormFieldAdditionalActions;
+import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationWidget;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAppearanceDictionary;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAppearanceEntry;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAppearanceStream;
-import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationWidget;
-import org.apache.pdfbox.contentstream.operator.Operator;
 
 /**
  * Create the AcroForms field appearance helper.
@@ -187,7 +187,7 @@ class AppearanceGeneratorHelper
                         normalAppearance.isStream() ? normalAppearance.getAppearanceStream() : null;
                 if (appearanceStream == null)
                 {
-                    COSStream cosStream = acroForm.getDocument().getDocument().createCOSStream();
+                    COSStream cosStream = new COSStream();
                     appearanceStream = new PDAppearanceStream(cosStream);
                     appearanceStream.setBBox(widget.getRectangle()
                             .createRetranslatedRectangle());

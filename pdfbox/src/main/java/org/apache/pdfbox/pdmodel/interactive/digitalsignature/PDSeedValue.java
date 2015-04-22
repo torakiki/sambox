@@ -16,13 +16,15 @@
  */
 package org.apache.pdfbox.pdmodel.interactive.digitalsignature;
 
+import static org.apache.pdfbox.cos.DirectCOSObject.asDirectObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.pdfbox.cos.COSArray;
-import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
+import org.apache.pdfbox.cos.DirectCOSObject;
 import org.apache.pdfbox.pdmodel.common.COSArrayList;
 import org.apache.pdfbox.pdmodel.common.COSObjectable;
 
@@ -70,25 +72,18 @@ public class PDSeedValue implements COSObjectable
 
     private COSDictionary dictionary;
 
-    /**
-     * Default constructor.
-     */
     public PDSeedValue()
     {
         dictionary = new COSDictionary();
         dictionary.setItem(COSName.TYPE, COSName.SV);
-        dictionary.setDirect(true); // the specification claim to use direct objects
     }
 
     /**
-     * Constructor.
-     *
      * @param dict The signature dictionary.
      */
     public PDSeedValue(COSDictionary dict)
     {
         dictionary = dict;
-        dictionary.setDirect(true); // the specification claim to use direct objects
     }
 
 
@@ -97,20 +92,9 @@ public class PDSeedValue implements COSObjectable
      *
      * @return The cos object that matches this Java object.
      */
-    @Override
-    public COSBase getCOSObject()
+    public DirectCOSObject getCOSObject()
     {
-        return getDictionary();
-    }
-
-    /**
-     * Convert this standard java object to a COS dictionary.
-     *
-     * @return The COS dictionary that matches this Java object.
-     */
-    public COSDictionary getDictionary()
-    {
-        return dictionary;
+        return asDirectObject(dictionary);
     }
 
     /**
@@ -119,7 +103,7 @@ public class PDSeedValue implements COSObjectable
      */
     public boolean isFilterRequired()
     {
-        return getDictionary().getFlag( COSName.FF, FLAG_FILTER);
+        return this.dictionary.getFlag(COSName.FF, FLAG_FILTER);
     }
 
     /**
@@ -129,7 +113,7 @@ public class PDSeedValue implements COSObjectable
      */
     public void setFilterRequired(boolean flag)
     {
-        getDictionary().setFlag( COSName.FF, FLAG_FILTER, flag);
+        this.dictionary.setFlag(COSName.FF, FLAG_FILTER, flag);
     }
 
     /**
@@ -138,7 +122,7 @@ public class PDSeedValue implements COSObjectable
      */
     public boolean isSubFilterRequired()
     {
-        return getDictionary().getFlag( COSName.FF, FLAG_SUBFILTER);
+        return this.dictionary.getFlag(COSName.FF, FLAG_SUBFILTER);
     }
 
     /**
@@ -148,7 +132,7 @@ public class PDSeedValue implements COSObjectable
      */
     public void setSubFilterRequired(boolean flag)
     {
-        getDictionary().setFlag( COSName.FF, FLAG_SUBFILTER, flag);
+        this.dictionary.setFlag(COSName.FF, FLAG_SUBFILTER, flag);
     }
 
     /**
@@ -157,7 +141,7 @@ public class PDSeedValue implements COSObjectable
     */
     public boolean isDigestMethodRequired()
     {
-        return getDictionary().getFlag( COSName.FF, FLAG_DIGEST_METHOD);
+        return this.dictionary.getFlag(COSName.FF, FLAG_DIGEST_METHOD);
     }
 
     /**
@@ -167,7 +151,7 @@ public class PDSeedValue implements COSObjectable
      */
     public void setDigestMethodRequired(boolean flag)
     {
-        getDictionary().setFlag( COSName.FF, FLAG_DIGEST_METHOD, flag);
+        this.dictionary.setFlag(COSName.FF, FLAG_DIGEST_METHOD, flag);
     }
 
     /**
@@ -176,7 +160,7 @@ public class PDSeedValue implements COSObjectable
     */
     public boolean isVRequired()
     {
-        return getDictionary().getFlag( COSName.FF, FLAG_V);
+        return this.dictionary.getFlag(COSName.FF, FLAG_V);
     }
 
     /**
@@ -186,7 +170,7 @@ public class PDSeedValue implements COSObjectable
      */
     public void setVRequired(boolean flag)
     {
-        getDictionary().setFlag( COSName.FF, FLAG_V, flag);
+        this.dictionary.setFlag(COSName.FF, FLAG_V, flag);
     }
 
     /**
@@ -195,7 +179,7 @@ public class PDSeedValue implements COSObjectable
     */
     public boolean isReasonRequired()
     {
-        return getDictionary().getFlag( COSName.FF, FLAG_REASON);
+        return this.dictionary.getFlag(COSName.FF, FLAG_REASON);
     }
 
     /**
@@ -205,7 +189,7 @@ public class PDSeedValue implements COSObjectable
      */
     public void setReasonRequired(boolean flag)
     {
-        getDictionary().setFlag( COSName.FF, FLAG_REASON, flag);
+        this.dictionary.setFlag(COSName.FF, FLAG_REASON, flag);
     }
 
     /**
@@ -214,7 +198,7 @@ public class PDSeedValue implements COSObjectable
     */
     public boolean isLegalAttestationRequired()
     {
-        return getDictionary().getFlag( COSName.FF, FLAG_LEGAL_ATTESTATION);
+        return this.dictionary.getFlag(COSName.FF, FLAG_LEGAL_ATTESTATION);
     }
 
     /**
@@ -224,7 +208,7 @@ public class PDSeedValue implements COSObjectable
      */
     public void setLegalAttestationRequired(boolean flag)
     {
-        getDictionary().setFlag( COSName.FF, FLAG_LEGAL_ATTESTATION, flag);
+        this.dictionary.setFlag(COSName.FF, FLAG_LEGAL_ATTESTATION, flag);
     }
 
     /**
@@ -233,7 +217,7 @@ public class PDSeedValue implements COSObjectable
     */
     public boolean isAddRevInfoRequired()
     {
-        return getDictionary().getFlag( COSName.FF, FLAG_ADD_REV_INFO);
+        return this.dictionary.getFlag(COSName.FF, FLAG_ADD_REV_INFO);
     }
 
     /**
@@ -243,7 +227,7 @@ public class PDSeedValue implements COSObjectable
      */
     public void setAddRevInfoRequired(boolean flag)
     {
-        getDictionary().setFlag( COSName.FF, FLAG_ADD_REV_INFO, flag);
+        this.dictionary.setFlag(COSName.FF, FLAG_ADD_REV_INFO, flag);
     }
 
     /**

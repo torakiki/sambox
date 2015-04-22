@@ -21,7 +21,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -32,13 +31,10 @@ import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSNull;
 import org.apache.pdfbox.cos.COSStream;
-
 import org.apache.pdfbox.filter.Filter;
 import org.apache.pdfbox.filter.FilterFactory;
 import org.apache.pdfbox.io.IOUtils;
-
 import org.apache.pdfbox.pdmodel.PDDocument;
-
 import org.apache.pdfbox.pdmodel.common.filespecification.PDFileSpecification;
 
 /**
@@ -67,7 +63,7 @@ public class PDStream implements COSObjectable
      */
     public PDStream(PDDocument document)
     {
-        stream = document.getDocument().createCOSStream();
+        stream = new COSStream();
     }
 
     /**
@@ -116,7 +112,7 @@ public class PDStream implements COSObjectable
         OutputStream output = null;
         try
         {
-            stream = doc.getDocument().createCOSStream();
+            stream = new COSStream();
             if (filtered)
             {
                 output = stream.createFilteredStream();

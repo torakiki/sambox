@@ -19,9 +19,9 @@ package org.apache.pdfbox.pdmodel;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.apache.pdfbox.contentstream.PDContentStream;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
@@ -49,9 +49,6 @@ import org.apache.pdfbox.util.Matrix;
  */
 public class PDPage implements COSObjectable, PDContentStream
 {
-    /**
-     * Log instance
-     */
     private static final Log LOG = LogFactory.getLog(PDPage.class);
     
     private final COSDictionary page;

@@ -138,11 +138,11 @@ class XrefStreamParser
                     // xref.add(XrefEntry.freeEntry(objectId, field1, field2));
                     break;
                 case 1:
-                    parser.provider().xref().add(XrefEntry.inUseEntry(objectId, field1, field2));
+                    parser.provider().addEntry(XrefEntry.inUseEntry(objectId, field1, field2));
                     break;
                 case 2:
-                    parser.provider().xref()
-                            .add(CompressedXrefEntry.compressedEntry(objectId, field1));
+                    parser.provider().addEntry(
+                            CompressedXrefEntry.compressedEntry(objectId, field1));
                     break;
                 default:
                     break;

@@ -16,9 +16,11 @@
  */
 package org.apache.pdfbox.pdmodel.interactive.digitalsignature;
 
-import org.apache.pdfbox.cos.COSBase;
+import static org.apache.pdfbox.cos.DirectCOSObject.asDirectObject;
+
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
+import org.apache.pdfbox.cos.DirectCOSObject;
 
 /**
  * This MDP dictionary is a part of the seed value dictionary and define
@@ -30,45 +32,27 @@ public class PDSeedValueMDP
 {
     private COSDictionary dictionary;
 
-    /**
-     * Default constructor.
-     */
     public PDSeedValueMDP()
     {
         dictionary = new COSDictionary();
-        dictionary.setDirect(true);
     }
 
     /**
-     * Constructor.
-     *
      * @param dict The signature dictionary.
      */
     public PDSeedValueMDP(COSDictionary dict)
     {
         dictionary = dict;
-        dictionary.setDirect(true);
     }
-
 
     /**
      * Convert this standard java object to a COS object.
      *
      * @return The cos object that matches this Java object.
      */
-    public COSBase getCOSObject()
+    public DirectCOSObject getCOSObject()
     {
-        return getDictionary();
-    }
-
-    /**
-     * Convert this standard java object to a COS dictionary.
-     *
-     * @return The COS dictionary that matches this Java object.
-     */
-    public COSDictionary getDictionary()
-    {
-        return dictionary;
+        return asDirectObject(dictionary);
     }
 
     /**

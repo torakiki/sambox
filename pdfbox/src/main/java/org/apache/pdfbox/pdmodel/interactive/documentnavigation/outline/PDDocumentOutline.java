@@ -27,12 +27,9 @@ import org.apache.pdfbox.cos.COSName;
 public final class PDDocumentOutline extends PDOutlineNode
 {
 
-    /**
-     * Default Constructor.
-     */
     public PDDocumentOutline()
     {
-        getCOSDictionary().setName(COSName.TYPE, COSName.OUTLINES.getName());
+        getCOSObject().setName(COSName.TYPE, COSName.OUTLINES.getName());
     }
 
     /**
@@ -40,10 +37,10 @@ public final class PDDocumentOutline extends PDOutlineNode
      *
      * @param dic The storage dictionary.
      */
-    public PDDocumentOutline( COSDictionary dic )
+    public PDDocumentOutline(COSDictionary dic)
     {
-        super( dic );
-        getCOSDictionary().setName(COSName.TYPE, COSName.OUTLINES.getName());
+        super(dic);
+        getCOSObject().setName(COSName.TYPE, COSName.OUTLINES.getName());
     }
 
     @Override

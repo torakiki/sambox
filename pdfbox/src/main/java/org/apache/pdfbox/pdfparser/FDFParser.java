@@ -95,7 +95,7 @@ public class FDFParser extends COSParser
                         + " does not contain an integer value, but: '" + eofLookupRangeStr + "'");
             }
         }
-        document = new COSDocument(false);
+        document = new COSDocument();
         pdfSource = new PushBackInputStream(raStream, 4096);
     }
 

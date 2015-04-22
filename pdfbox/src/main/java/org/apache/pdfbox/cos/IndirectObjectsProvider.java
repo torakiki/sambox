@@ -18,6 +18,7 @@ package org.apache.pdfbox.cos;
 
 import org.apache.pdfbox.pdmodel.encryption.SecurityHandler;
 import org.apache.pdfbox.xref.Xref;
+import org.apache.pdfbox.xref.XrefEntry;
 
 /**
  * @author Andrea Vacondio
@@ -28,7 +29,12 @@ public interface IndirectObjectsProvider
 
     public COSBase get(COSObjectKey key);
 
-    public Xref xref();
+    /**
+     * Adds the given xref entry to the {@link Xref}
+     * 
+     * @param entry
+     */
+    public void addEntry(XrefEntry entry);
 
     public void decryptWith(SecurityHandler handler);
 }

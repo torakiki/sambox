@@ -17,18 +17,17 @@
 package org.apache.pdfbox.pdmodel;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Queue;
+
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSInteger;
 import org.apache.pdfbox.cos.COSName;
-
 import org.apache.pdfbox.pdmodel.common.COSObjectable;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The page tree, which defines the ordering of pages in the document in an efficient manner.
@@ -99,6 +98,7 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
 
     /**
      * Helper to get kids from malformed PDFs.
+     * 
      * @param node page tree node
      * @return list of kids
      */
@@ -106,7 +106,7 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
     {
         List<COSDictionary> result = new ArrayList<COSDictionary>();
 
-        COSArray kids = (COSArray)node.getDictionaryObject(COSName.KIDS);
+        COSArray kids = (COSArray) node.getDictionaryObject(COSName.KIDS);
         if (kids == null)
         {
             // probably a malformed PDF
@@ -115,7 +115,8 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
 
         for (int i = 0, size = kids.size(); i < size; i++)
         {
-            result.add((COSDictionary)kids.getObject(i));
+            // TODO investigate this, does it load? Should it load?
+            result.add((COSDictionary) kids.getObject(i).getCOSObject());
         }
 
         return result;
@@ -266,12 +267,11 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
     /**
      * Returns true if the node is a page tree node (i.e. and intermediate).
      */
-    private boolean isPageTreeNode(COSDictionary node )
+    private boolean isPageTreeNode(COSDictionary node)
     {
         // some files such as PDFBOX-2250-229205.pdf don't have Pages set as the Type, so we have
         // to check for the presence of Kids too
-        return node.getCOSName(COSName.TYPE) == COSName.PAGES ||
-               node.containsKey(COSName.KIDS);
+        return node.getCOSName(COSName.TYPE) == COSName.PAGES || node.containsKey(COSName.KIDS);
     }
 
     /**
@@ -300,14 +300,12 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
                 num++;
             }
             node = (COSDictionary) node.getDictionaryObject(COSName.PARENT, COSName.P);
-        }
-        while (node != null);
+        } while (node != null);
         return num - 1;
     }
 
     /**
-     * Returns the number of leaf nodes (page objects) that are descendants of this root within the
-     * page tree.
+     * Returns the number of leaf nodes (page objects) that are descendants of this root within the page tree.
      */
     public int getCount()
     {
@@ -322,6 +320,7 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
 
     /**
      * Removes the page with the given index from the page tree.
+     * 
      * @param index zero-based page index
      */
     public void remove(int index)
@@ -345,7 +344,7 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
     {
         // remove from parent's kids
         COSDictionary parent = (COSDictionary) node.getDictionaryObject(COSName.PARENT, COSName.P);
-        COSArray kids = (COSArray)parent.getDictionaryObject(COSName.KIDS);
+        COSArray kids = (COSArray) parent.getDictionaryObject(COSName.KIDS);
         if (kids.removeObject(node))
         {
             // update ancestor counts
@@ -356,8 +355,7 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
                 {
                     node.setInt(COSName.COUNT, node.getInt(COSName.COUNT) - 1);
                 }
-            }
-            while (node != null);
+            } while (node != null);
         }
     }
 
@@ -373,7 +371,7 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
         // todo: re-balance tree? (or at least group new pages into tree nodes of e.g. 20)
 
         // add to parent's kids
-        COSArray kids = (COSArray)root.getDictionaryObject(COSName.KIDS);
+        COSArray kids = (COSArray) root.getDictionaryObject(COSName.KIDS);
         kids.add(node);
 
         // update ancestor counts
@@ -384,7 +382,6 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
             {
                 node.setInt(COSName.COUNT, node.getInt(COSName.COUNT) + 1);
             }
-        }
-        while (node != null);
+        } while (node != null);
     }
 }

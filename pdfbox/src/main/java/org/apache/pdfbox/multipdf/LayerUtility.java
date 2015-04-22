@@ -32,10 +32,10 @@ import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
 import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.PDResources;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.common.PDStream;
-import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
 import org.apache.pdfbox.pdmodel.graphics.optionalcontent.PDOptionalContentGroup;
 import org.apache.pdfbox.pdmodel.graphics.optionalcontent.PDOptionalContentProperties;
@@ -82,12 +82,12 @@ public class LayerUtility
     public void wrapInSaveRestore(PDPage page) throws IOException
     {
         COSDictionary saveGraphicsStateDic = new COSDictionary();
-        COSStream saveGraphicsStateStream = getDocument().getDocument().createCOSStream(saveGraphicsStateDic);
+        COSStream saveGraphicsStateStream = new COSStream(saveGraphicsStateDic);
         OutputStream saveStream = saveGraphicsStateStream.createUnfilteredStream();
         saveStream.write("q\n".getBytes("ISO-8859-1"));
         saveStream.flush();
 
-        COSStream restoreGraphicsStateStream = getDocument().getDocument().createCOSStream(saveGraphicsStateDic);
+        COSStream restoreGraphicsStateStream = new COSStream(saveGraphicsStateDic);
         OutputStream restoreStream = restoreGraphicsStateStream.createUnfilteredStream();
         restoreStream.write("Q\n".getBytes("ISO-8859-1"));
         restoreStream.flush();

@@ -840,8 +840,7 @@ public class PDLayoutAttributeObject extends PDStandardAttributeObject
      */
     public PDRectangle getBBox()
     {
-        COSArray array =
-            (COSArray) this.getCOSDictionary().getDictionaryObject(BBOX);
+        COSArray array = (COSArray) this.getCOSObject().getDictionaryObject(BBOX);
         if (array != null)
         {
             return new PDRectangle(array);
@@ -857,8 +856,8 @@ public class PDLayoutAttributeObject extends PDStandardAttributeObject
     public void setBBox(PDRectangle bbox)
     {
         String name = BBOX;
-        COSBase oldValue = this.getCOSDictionary().getDictionaryObject(name);
-        this.getCOSDictionary().setItem(name, bbox);
+        COSBase oldValue = this.getCOSObject().getDictionaryObject(name);
+        this.getCOSObject().setItem(name, bbox);
         COSBase newValue = bbox == null ? null : bbox.getCOSObject();
         this.potentiallyNotifyChanged(oldValue, newValue);
     }

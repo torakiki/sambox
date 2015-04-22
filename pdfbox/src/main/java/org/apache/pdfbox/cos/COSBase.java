@@ -27,7 +27,6 @@ import org.apache.pdfbox.pdmodel.common.COSObjectable;
  */
 public abstract class COSBase implements COSObjectable
 {
-    private boolean direct;
 
     /**
      * Convert this standard java object to a COS object.
@@ -48,25 +47,4 @@ public abstract class COSBase implements COSObjectable
      * @throws IOException If an error occurs while visiting this object.
      */
     public abstract Object accept(ICOSVisitor visitor) throws IOException;
-    
-    /**
-     * If the state is set true, the dictionary will be written direct into the called object. 
-     * This means, no indirect object will be created.
-     * 
-     * @return the state
-     */
-    public boolean isDirect() 
-    {
-        return direct;
-    }
-    
-    /**
-     * Set the state true, if the dictionary should be written as a direct object and not indirect.
-     * 
-     * @param direct set it true, for writing direct object
-     */
-    public void setDirect(boolean direct)
-    {
-      this.direct = direct;
-    }
 }

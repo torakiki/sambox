@@ -47,19 +47,6 @@ public class Xref
     }
 
     /**
-     * Adds the given entry to the {@link Xref} if an entry with the given object number is not already present.
-     * 
-     * @param entry
-     * @return null if the entry was added. The current entry with the given object number if the entry was already
-     * present.
-     */
-    public void put(XrefEntry entry)
-    {
-        data.put(new COSObjectKey(entry.getObjectNumber(), entry.getGenerationNumber()), entry);
-
-    }
-
-    /**
      * @param objectKey
      * @return the {@link XrefEntry} for with the given object Number and generation number or null if nothing is found
      */

@@ -16,9 +16,11 @@
  */
 package org.apache.pdfbox.pdmodel.interactive.digitalsignature;
 
-import org.apache.pdfbox.cos.COSBase;
+import static org.apache.pdfbox.cos.DirectCOSObject.asDirectObject;
+
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
+import org.apache.pdfbox.cos.DirectCOSObject;
 import org.apache.pdfbox.pdmodel.common.COSObjectable;
 
 /**
@@ -31,45 +33,19 @@ public class PDPropBuildDataDict implements COSObjectable
 {
     private COSDictionary dictionary;
 
-    /**
-     * Default constructor.
-     */
     public PDPropBuildDataDict()
     {
-        dictionary = new COSDictionary();
-        dictionary.setDirect(true); // the specification claim to use direct objects
+        this.dictionary = new COSDictionary();
     }
 
-    /**
-     * Constructor.
-     *
-     * @param dict The signature dictionary.
-     */
-    public PDPropBuildDataDict(COSDictionary dict)
+    public PDPropBuildDataDict(COSDictionary dictionary)
     {
-        dictionary = dict;
-        dictionary.setDirect(true); // the specification claim to use direct objects
+        this.dictionary = dictionary;
     }
 
-
-    /**
-     * Convert this standard java object to a COS object.
-     *
-     * @return The cos object that matches this Java object.
-     */
-    public COSBase getCOSObject()
+    public DirectCOSObject getCOSObject()
     {
-        return getDictionary();
-    }
-
-    /**
-     * Convert this standard java object to a COS dictionary.
-     *
-     * @return The COS dictionary that matches this Java object.
-     */
-    public COSDictionary getDictionary()
-    {
-        return dictionary;
+        return asDirectObject(dictionary);
     }
 
     /**

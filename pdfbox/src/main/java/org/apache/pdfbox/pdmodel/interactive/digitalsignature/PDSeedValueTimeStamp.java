@@ -16,9 +16,11 @@
  */
 package org.apache.pdfbox.pdmodel.interactive.digitalsignature;
 
-import org.apache.pdfbox.cos.COSBase;
+import static org.apache.pdfbox.cos.DirectCOSObject.asDirectObject;
+
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
+import org.apache.pdfbox.cos.DirectCOSObject;
 
 /**
  * If exist, it describe where the signature handler can request a RFC3161
@@ -30,24 +32,17 @@ public class PDSeedValueTimeStamp
 {
     private COSDictionary dictionary;
 
-    /**
-     * Default constructor.
-     */
     public PDSeedValueTimeStamp()
     {
         dictionary = new COSDictionary();
-        dictionary.setDirect(true);
     }
 
     /**
-     * Constructor.
-     *
      * @param dict The signature dictionary.
      */
     public PDSeedValueTimeStamp(COSDictionary dict)
     {
         dictionary = dict;
-        dictionary.setDirect(true);
     }
 
 
@@ -56,19 +51,9 @@ public class PDSeedValueTimeStamp
      *
      * @return The cos object that matches this Java object.
      */
-    public COSBase getCOSObject()
+    public DirectCOSObject getCOSObject()
     {
-        return getDictionary();
-    }
-
-    /**
-     * Convert this standard java object to a COS dictionary.
-     *
-     * @return The COS dictionary that matches this Java object.
-     */
-    public COSDictionary getDictionary()
-    {
-        return dictionary;
+        return asDirectObject(dictionary);
     }
 
     /**

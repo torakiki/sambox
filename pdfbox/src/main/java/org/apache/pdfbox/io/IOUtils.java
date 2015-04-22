@@ -31,6 +31,7 @@ import java.io.OutputStream;
 public final class IOUtils
 {
     private static final int STREAMCOPYBUFLEN = 8192;
+
     // TODO PDFBox should really use Apache Commons IO.
 
     private IOUtils()
@@ -130,6 +131,20 @@ public final class IOUtils
             remaining -= bytesRead;
         }
         return buffer.length - remaining;
+    }
+
+    /**
+     * Null safe close of the given {@link Closeable}.
+     *
+     * @param closeable to be closed
+     * @throws IOException
+     */
+    public static void close(Closeable closeable) throws IOException
+    {
+        if (closeable != null)
+        {
+            closeable.close();
+        }
     }
 
     /**

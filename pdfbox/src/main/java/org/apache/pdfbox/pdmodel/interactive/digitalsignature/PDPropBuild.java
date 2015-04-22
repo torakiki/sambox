@@ -16,16 +16,18 @@
  */
 package org.apache.pdfbox.pdmodel.interactive.digitalsignature;
 
-import org.apache.pdfbox.cos.COSBase;
+import static org.apache.pdfbox.cos.DirectCOSObject.asDirectObject;
+
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
+import org.apache.pdfbox.cos.DirectCOSObject;
 import org.apache.pdfbox.pdmodel.common.COSObjectable;
 
 /**
  * A signature build dictionary as specified in the PDF Signature Build Dictionary Specification.
  *
- * The signature build properties dictionary provides signature properties for the software
- * application that was used to create the signature.
+ * The signature build properties dictionary provides signature properties for the software application that was used to
+ * create the signature.
  *
  * @see <a href="http://partners.adobe.com/public/developer/en/acrobat/Acrobat_Signature_BuiladDict.pdf">
  * http://partners.adobe.com/public/developer/en/acrobat/Acrobat_Signature_BuiladDict.pdf</a>
@@ -36,24 +38,14 @@ public class PDPropBuild implements COSObjectable
 {
     private COSDictionary dictionary;
 
-    /**
-     * Default constructor.
-     */
     public PDPropBuild()
     {
-        dictionary = new COSDictionary();
-        dictionary.setDirect(true); // the specification claim to use direct objects
+        this.dictionary = new COSDictionary();
     }
 
-    /**
-     * Constructor.
-     *
-     * @param dict The signature dictionary.
-     */
-    public PDPropBuild(COSDictionary dict)
+    public PDPropBuild(COSDictionary dictionary)
     {
-        dictionary = dict;
-        dictionary.setDirect(true); // the specification claim to use direct objects
+        this.dictionary = dictionary;
     }
 
     /**
@@ -61,31 +53,20 @@ public class PDPropBuild implements COSObjectable
      *
      * @return The cos object that matches this Java object.
      */
-    public COSBase getCOSObject()
+    public DirectCOSObject getCOSObject()
     {
-        return getDictionary();
+        return asDirectObject(dictionary);
     }
 
     /**
-     * Convert this standard java object to a COS dictionary.
-     *
-     * @return The COS dictionary that matches this Java object.
-     */
-    public COSDictionary getDictionary()
-    {
-        return dictionary;
-    }
-
-    /**
-     * A build data dictionary for the signature handler that was
-     * used to create the parent signature.
+     * A build data dictionary for the signature handler that was used to create the parent signature.
      *
      * @return the Filter as PDPropBuildFilter object
      */
     public PDPropBuildDataDict getFilter()
     {
         PDPropBuildDataDict filter = null;
-        COSDictionary filterDic = (COSDictionary)dictionary.getDictionaryObject(COSName.FILTER);
+        COSDictionary filterDic = (COSDictionary) dictionary.getDictionaryObject(COSName.FILTER);
         if (filterDic != null)
         {
             filter = new PDPropBuildDataDict(filterDic);
@@ -94,8 +75,8 @@ public class PDPropBuild implements COSObjectable
     }
 
     /**
-     * Set the build data dictionary for the signature handler.
-     * This entry is optional but is highly recommended for the signatures.
+     * Set the build data dictionary for the signature handler. This entry is optional but is highly recommended for the
+     * signatures.
      *
      * @param filter is the PDPropBuildFilter
      */
@@ -105,15 +86,14 @@ public class PDPropBuild implements COSObjectable
     }
 
     /**
-     * A build data dictionary for the PubSec software module
-     * that was used to create the parent signature.
+     * A build data dictionary for the PubSec software module that was used to create the parent signature.
      *
      * @return the PubSec as PDPropBuildPubSec object
      */
     public PDPropBuildDataDict getPubSec()
     {
         PDPropBuildDataDict pubSec = null;
-        COSDictionary pubSecDic = (COSDictionary)dictionary.getDictionaryObject(COSName.PUB_SEC);
+        COSDictionary pubSecDic = (COSDictionary) dictionary.getDictionaryObject(COSName.PUB_SEC);
         if (pubSecDic != null)
         {
             pubSec = new PDPropBuildDataDict(pubSecDic);
@@ -132,15 +112,14 @@ public class PDPropBuild implements COSObjectable
     }
 
     /**
-     * A build data dictionary for the viewing application software
-     * module that was used to create the parent signature.
+     * A build data dictionary for the viewing application software module that was used to create the parent signature.
      *
      * @return the App as PDPropBuildApp object
      */
     public PDPropBuildDataDict getApp()
     {
         PDPropBuildDataDict app = null;
-        COSDictionary appDic = (COSDictionary)dictionary.getDictionaryObject(COSName.APP);
+        COSDictionary appDic = (COSDictionary) dictionary.getDictionaryObject(COSName.APP);
         if (appDic != null)
         {
             app = new PDPropBuildDataDict(appDic);
@@ -149,8 +128,7 @@ public class PDPropBuild implements COSObjectable
     }
 
     /**
-     * Set the build data dictionary for the viewing application
-     * software module.
+     * Set the build data dictionary for the viewing application software module.
      *
      * @param app is the PDPropBuildApp
      */

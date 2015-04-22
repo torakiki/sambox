@@ -400,15 +400,11 @@ public final class BaseCOSParser extends SourceReader
                 // TODO
                 copyUntilEndStreamTo(new EndstreamOutputStream(out));
             }
-            if (!isNextToken(ENDSTREAM))
+            if (!skipTokenIfValue(ENDSTREAM))
             {
                 if (isNextToken(ENDOBJ))
                 {
                     LOG.warn("Expected 'endstream' at " + offset() + " but was 'endobj'");
-                }
-                else
-                {
-                    skipExpected(ENDSTREAM);
                 }
             }
         }

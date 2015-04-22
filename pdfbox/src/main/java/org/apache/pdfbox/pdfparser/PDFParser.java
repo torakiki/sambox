@@ -275,7 +275,7 @@ public class PDFParser extends COSParser
                         + " does not contain an integer value, but: '" + eofLookupRangeStr + "'");
             }
         }
-        document = new COSDocument(useScratchFiles);
+        document = new COSDocument();
         pdfSource = new PushBackInputStream(raStream, 4096);
     }
 

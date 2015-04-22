@@ -103,10 +103,8 @@ class XrefTableParser
                 {
                     try
                     {
-                        parser.provider()
-                                .xref()
-                                .add(inUseEntry(currentObjectNumber,
-                                        Long.parseLong(splitString[0]),
+                        parser.provider().addEntry(
+                                inUseEntry(currentObjectNumber, Long.parseLong(splitString[0]),
                                         Integer.parseInt(splitString[1])));
                     }
                     catch (NumberFormatException e)

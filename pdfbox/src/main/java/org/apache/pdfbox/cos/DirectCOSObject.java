@@ -16,20 +16,44 @@
  */
 package org.apache.pdfbox.cos;
 
-public interface COSUpdateInfo 
+import java.io.IOException;
+import java.util.Optional;
+
+/**
+ * A COSBase that will be written as direct object
+ * 
+ * @author Andrea Vacondio
+ */
+public final class DirectCOSObject extends COSBase
 {
-    /**
-     * Get the update state for the COSWriter.
-     * 
-     * @return the update state.
-     */
-    boolean isNeedToBeUpdated();
+
+    private COSBase baseObject;
+
+    private DirectCOSObject(COSBase wrapped)
+    {
+        this.baseObject = Optional.ofNullable(wrapped).orElse(COSNull.NULL);
+    }
+
+    @Override
+    public COSBase getCOSObject()
+    {
+        return baseObject;
+    }
+
+    @Override
+    public Object accept(ICOSVisitor visitor) throws IOException
+    {
+        return getCOSObject().accept(visitor);
+    }
 
     /**
-     * Set the update state of the dictionary for the COSWriter.
+     * Factory method for an object that will be written as a direct object.
      * 
-     * @param flag the update state.
+     * @param wrapped
+     * @return the new instance
      */
-    void setNeedToBeUpdated(boolean flag);
-
+    public static DirectCOSObject asDirectObject(COSBase wrapped)
+    {
+        return new DirectCOSObject(wrapped);
+    }
 }
