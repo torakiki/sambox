@@ -1224,6 +1224,8 @@ public class COSWriter implements ICOSVisitor, Closeable
      * @param signInterface class to be used for signing 
      *
      * @throws IOException If an error occurs while generating the data.
+     * @throws IllegalStateException If the document has an encryption dictionary but no protection
+     * policy.
      */
     public void write(PDDocument doc, SignatureInterface signInterface) throws IOException
     {
@@ -1253,6 +1255,11 @@ public class COSWriter implements ICOSVisitor, Closeable
             if (pdDocument.getEncryption() != null)
             {
                 SecurityHandler securityHandler = pdDocument.getEncryption().getSecurityHandler();
+                if (!securityHandler.hasProtectionPolicy())
+                {
+                    throw new IllegalStateException("PDF contains an encryption dictionary, please remove it with "
+                            + "setAllSecurityToBeRemoved() or set a protection policy with protect()");
+                }
                 securityHandler.prepareDocumentForEncryption(pdDocument);
                 willEncrypt = true;
             }
