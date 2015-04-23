@@ -18,13 +18,12 @@ package org.apache.pdfbox.pdmodel.fdf;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
-import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
 
@@ -42,7 +41,7 @@ import org.w3c.dom.Element;
  *
  * @author Ben Litchfield
  */
-public class FDFDocument implements Closeable
+public class FDFDocument
 {
     private COSDocument document;
 
@@ -54,10 +53,7 @@ public class FDFDocument implements Closeable
     public FDFDocument() throws IOException
     {
         document = new COSDocument();
-        document.setVersion( 1.2f );
-
-        //First we need a trailer
-        document.setTrailer( new COSDictionary() );
+        document.setHeaderVersion(1.2f);
 
         //Next we need the root dictionary.
         FDFCatalog catalog = new FDFCatalog();
@@ -342,13 +338,4 @@ public class FDFDocument implements Closeable
         }
     }
 
-    /**
-     * This will close the underlying COSDocument object.
-     *
-     * @throws IOException If there is an error releasing resources.
-     */
-    public void close() throws IOException
-    {
-        document.close();
-    }
 }

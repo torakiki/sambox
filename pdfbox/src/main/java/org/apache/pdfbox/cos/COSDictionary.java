@@ -58,36 +58,16 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * @see java.util.Map#containsValue(java.lang.Object)
-     *
-     * @param value The value to find in the map.
-     *
-     * @return true if the map contains this value.
-     */
-    public boolean containsValue(Object value)
-    {
-        boolean contains = items.containsValue(value);
-        if (!contains && value instanceof COSObject)
-        {
-            contains = items.containsValue(((COSObject) value).getObject());
-        }
-        return contains;
-    }
-
-    /**
      * Search in the map for the value that matches the parameter and return the first key that maps to that value.
      *
      * @param value The value to search for in the map.
      * @return The key for the value in the map or null if it does not exist.
      */
-    public COSName getKeyForValue(Object value)
+    public COSName getKeyForValue(COSBase value)
     {
         for (Map.Entry<COSName, COSBase> entry : items.entrySet())
         {
-            Object nextValue = entry.getValue();
-            if (nextValue.equals(value)
-                    || (nextValue instanceof COSObject && ((COSObject) nextValue).getObject()
-                            .equals(value)))
+            if (entry.getValue().getCOSObject().equals(value.getCOSObject()))
             {
                 return entry.getKey();
             }

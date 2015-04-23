@@ -18,17 +18,10 @@ package org.apache.pdfbox.cos;
 
 import static org.apache.pdfbox.util.RequireUtils.requireNotNullArg;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 /**
- * This is the in-memory representation of the PDF document. You need to call close() on this object when you are done
- * using it!!
+ * This is the in-memory representation of the PDF document.
  *
  * @author Ben Litchfield
  * 
@@ -97,64 +90,6 @@ public final class COSDocument
     public void setEncryptionDictionary(COSDictionary encDictionary)
     {
         trailer.setItem(COSName.ENCRYPT, encDictionary);
-    }
-
-    /**
-     * This will return a list of signature dictionaries as COSDictionary.
-     *
-     * @return list of signature dictionaries as COSDictionary
-     * @throws IOException if no document catalog can be found
-     */
-    public List<COSDictionary> getSignatureDictionaries() throws IOException
-    {
-        List<COSDictionary> signatureFields = getSignatureFields(false);
-        List<COSDictionary> signatures = new LinkedList<COSDictionary>();
-        for (COSDictionary dict : signatureFields)
-        {
-            COSBase dictionaryObject = dict.getDictionaryObject(COSName.V);
-            if (dictionaryObject != null)
-            {
-                signatures.add((COSDictionary) dictionaryObject);
-            }
-        }
-        return signatures;
-    }
-
-    /**
-     * This will return a list of signature fields.
-     *
-     * @return list of signature dictionaries as COSDictionary
-     * @throws IOException if no document catalog can be found
-     */
-    public List<COSDictionary> getSignatureFields(boolean onlyEmptyFields) throws IOException
-    {
-        COSDictionary acroForm = (COSDictionary) getCatalog()
-                .getDictionaryObject(COSName.ACRO_FORM);
-        if (acroForm != null)
-        {
-            COSArray fields = (COSArray) acroForm.getDictionaryObject(COSName.FIELDS);
-            if (fields != null)
-            {
-                // Some fields may contain twice references to a single field.
-                // This will prevent such double entries.
-                Map<COSObjectKey, COSDictionary> signatures = new HashMap<COSObjectKey, COSDictionary>();
-                for (Object object : fields)
-                {
-                    COSObject dict = (COSObject) object;
-                    if (COSName.SIG.equals(dict.getItem(COSName.FT)))
-                    {
-                        COSBase dictionaryObject = dict.getDictionaryObject(COSName.V);
-                        if (dictionaryObject == null || !onlyEmptyFields)
-                        {
-                            signatures
-                                    .put(new COSObjectKey(dict), (COSDictionary) dict.getObject());
-                        }
-                    }
-                }
-                return new LinkedList<COSDictionary>(signatures.values());
-            }
-        }
-        return Collections.emptyList();
     }
 
     public COSArray getDocumentID()

@@ -28,18 +28,6 @@ public class COSObjectKey implements Comparable<COSObjectKey>
     private final int generation;
 
     /**
-     * PDFObjectKey constructor comment.
-     *
-     * @param object The object that this key will represent.
-     */
-    public COSObjectKey(COSObject object)
-    {
-        this(object.getObjectNumber(), object.getGenerationNumber());
-    }
-
-    /**
-     * PDFObjectKey constructor comment.
-     *
      * @param num The object number.
      * @param gen The object generation number.
      */
@@ -49,26 +37,15 @@ public class COSObjectKey implements Comparable<COSObjectKey>
         generation = gen;
     }
 
-    @Override
-    public boolean equals(Object obj)
-    {
-        return (obj instanceof COSObjectKey) &&
-               ((COSObjectKey)obj).getNumber() == getNumber() &&
-               ((COSObjectKey)obj).getGeneration() == getGeneration();
-    }
-
     /**
-     * This will get the generation number.
-     *
      * @return The objects generation number.
      */
     public int getGeneration()
     {
         return generation;
     }
+
     /**
-     * This will get the objects id.
-     *
      * @return The object's id.
      */
     public long getNumber()
@@ -77,43 +54,34 @@ public class COSObjectKey implements Comparable<COSObjectKey>
     }
 
     @Override
+    public boolean equals(Object obj)
+    {
+        return (obj instanceof COSObjectKey) && ((COSObjectKey) obj).getNumber() == getNumber()
+                && ((COSObjectKey) obj).getGeneration() == getGeneration();
+    }
+
+    @Override
     public int hashCode()
     {
-        return Long.valueOf(number+generation).hashCode();
+        return Long.valueOf(number + generation).hashCode();
     }
 
     @Override
     public String toString()
     {
-        return Long.toString(number) + " " +  Integer.toString(generation) + " R";
+        return Long.toString(number) + " " + Integer.toString(generation) + " R";
     }
 
     @Override
     public int compareTo(COSObjectKey other)
     {
-        if (getNumber() < other.getNumber())
+        int numCompare = Long.compare(number, other.getNumber());
+        if (numCompare == 0)
         {
-            return -1;
+            return Integer.compare(generation, other.getGeneration());
         }
-        else if (getNumber() > other.getNumber())
-        {
-            return 1;
-        }
-        else
-        {
-            if (getGeneration() < other.getGeneration())
-            {
-                return -1;
-            }
-            else if (getGeneration() > other.getGeneration())
-            {
-                return 1;
-            }
-            else
-            {
-                return 0;
-            }
-        }
+        return numCompare;
+
     }
 
 }
