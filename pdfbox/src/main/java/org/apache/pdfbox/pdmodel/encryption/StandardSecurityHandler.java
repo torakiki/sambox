@@ -26,13 +26,13 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
- 
+
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSString;
@@ -483,7 +483,7 @@ public final class StandardSecurityHandler extends SecurityHandler
             md.update(document.getDocument().toString().getBytes());
 
             byte[] id = md.digest(this.toString().getBytes(Charsets.ISO_8859_1));
-            COSString idString = new COSString(id);
+            COSString idString = COSString.newInstance(id);
 
             idArray = new COSArray();
             idArray.add(idString);

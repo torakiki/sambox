@@ -23,8 +23,8 @@ import java.util.Optional;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
+import org.apache.pdfbox.cos.COSObjectable;
 import org.apache.pdfbox.cos.IndirectCOSObject;
-import org.apache.pdfbox.pdmodel.common.COSObjectable;
 import org.apache.pdfbox.pdmodel.documentinterchange.markedcontent.PDPropertyList;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDFontFactory;
@@ -124,7 +124,7 @@ public final class PDResources implements COSObjectable
     /**
      * Returns the external graphics state resource with the given name, or null if none exists.
      */
-    public PDExtendedGraphicsState getExtGState(COSName name) throws IOException
+    public PDExtendedGraphicsState getExtGState(COSName name)
     {
         COSDictionary dict = (COSDictionary) get(COSName.EXT_G_STATE, name);
         if (dict == null)
@@ -163,7 +163,7 @@ public final class PDResources implements COSObjectable
     /**
      * Returns the property list resource with the given name, or null if none exists.
      */
-    public PDPropertyList getProperties(COSName name) throws IOException
+    public PDPropertyList getProperties(COSName name)
     {
         COSDictionary dict = (COSDictionary) get(COSName.PROPERTIES, name);
         if (dict == null)
@@ -286,7 +286,7 @@ public final class PDResources implements COSObjectable
      * @param font the font to add
      * @return the name of the resource in the resources dictionary
      */
-    public COSName add(PDFont font) throws IOException
+    public COSName add(PDFont font)
     {
         return add(COSName.FONT, "F", font);
     }
@@ -450,7 +450,7 @@ public final class PDResources implements COSObjectable
      * @param name the name of the resource
      * @param font the font to be added
      */
-    public void put(COSName name, PDFont font) throws IOException
+    public void put(COSName name, PDFont font)
     {
         put(COSName.FONT, name, font);
     }
@@ -461,7 +461,7 @@ public final class PDResources implements COSObjectable
      * @param name the name of the resource
      * @param colorSpace the color space to be added
      */
-    public void put(COSName name, PDColorSpace colorSpace) throws IOException
+    public void put(COSName name, PDColorSpace colorSpace)
     {
         put(COSName.COLORSPACE, name, colorSpace);
     }
@@ -472,7 +472,7 @@ public final class PDResources implements COSObjectable
      * @param name the name of the resource
      * @param extGState the external graphics state to be added
      */
-    public void put(COSName name, PDExtendedGraphicsState extGState) throws IOException
+    public void put(COSName name, PDExtendedGraphicsState extGState)
     {
         put(COSName.EXT_G_STATE, name, extGState);
     }
@@ -483,7 +483,7 @@ public final class PDResources implements COSObjectable
      * @param name the name of the resource
      * @param shading the shading to be added
      */
-    public void put(COSName name, PDShading shading) throws IOException
+    public void put(COSName name, PDShading shading)
     {
         put(COSName.SHADING, name, shading);
     }
@@ -494,7 +494,7 @@ public final class PDResources implements COSObjectable
      * @param name the name of the resource
      * @param pattern the pattern to be added
      */
-    public void put(COSName name, PDAbstractPattern pattern) throws IOException
+    public void put(COSName name, PDAbstractPattern pattern)
     {
         put(COSName.PATTERN, name, pattern);
     }
@@ -505,7 +505,7 @@ public final class PDResources implements COSObjectable
      * @param name the name of the resource
      * @param properties the property list to be added
      */
-    public void put(COSName name, PDPropertyList properties) throws IOException
+    public void put(COSName name, PDPropertyList properties)
     {
         put(COSName.PROPERTIES, name, properties);
     }
@@ -516,7 +516,7 @@ public final class PDResources implements COSObjectable
      * @param name the name of the resource
      * @param xobject the XObject to be added
      */
-    public void put(COSName name, PDXObject xobject) throws IOException
+    public void put(COSName name, PDXObject xobject)
     {
         put(COSName.XOBJECT, name, xobject);
     }

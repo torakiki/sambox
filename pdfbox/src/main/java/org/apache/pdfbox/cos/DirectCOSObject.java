@@ -39,11 +39,10 @@ public final class DirectCOSObject extends COSBase
     {
         return baseObject;
     }
-
     @Override
-    public Object accept(ICOSVisitor visitor) throws IOException
+    public void accept(COSVisitor visitor) throws IOException
     {
-        return getCOSObject().accept(visitor);
+        baseObject.accept(visitor);
     }
 
     /**
@@ -54,6 +53,6 @@ public final class DirectCOSObject extends COSBase
      */
     public static DirectCOSObject asDirectObject(COSBase wrapped)
     {
-        return new DirectCOSObject(wrapped);
+        return new DirectCOSObject(wrapped.getCOSObject());
     }
 }

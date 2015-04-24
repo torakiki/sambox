@@ -20,12 +20,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import java.util.List;
 
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSStream;
-
 import org.apache.pdfbox.pdmodel.common.filespecification.PDFileSpecification;
 
 /**
@@ -81,7 +79,7 @@ public class PDMemoryStream extends PDStream
      * @throws IOException If an IO error occurs during writing.
      */
     @Override
-    public OutputStream createOutputStream() throws IOException
+    public OutputStream createOutputStream()
     {
         throw new UnsupportedOperationException( "not supported for memory stream" );
     }
@@ -94,7 +92,7 @@ public class PDMemoryStream extends PDStream
      * @throws IOException If an IO error occurs during reading.
      */
     @Override
-    public InputStream createInputStream() throws IOException
+    public InputStream createInputStream()
     {
         return new ByteArrayInputStream( data );
     }
@@ -108,7 +106,7 @@ public class PDMemoryStream extends PDStream
      * @throws IOException If there is an error processing the stream.
      */
     @Override
-    public InputStream getPartiallyFilteredStream( List stopFilters ) throws IOException
+    public InputStream getPartiallyFilteredStream(List stopFilters)
     {
         return createInputStream();
     }
@@ -166,7 +164,7 @@ public class PDMemoryStream extends PDStream
      *
      * @throws IOException if there is an error retrieving the parameters.
      */
-    public List getDecodeParams() throws IOException
+    public List getDecodeParams()
     {
         return null;
     }
@@ -234,7 +232,7 @@ public class PDMemoryStream extends PDStream
      * @throws IOException if there is an error retrieving the parameters.
      */
     @Override
-    public List getFileDecodeParams() throws IOException
+    public List getFileDecodeParams()
     {
         return null;
     }
@@ -257,7 +255,7 @@ public class PDMemoryStream extends PDStream
      * @throws IOException When getFilteredStream did not work
      */
     @Override
-    public byte[] getByteArray() throws IOException
+    public byte[] getByteArray()
     {
         return data;
     }

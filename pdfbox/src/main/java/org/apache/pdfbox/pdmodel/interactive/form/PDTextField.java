@@ -229,8 +229,7 @@ public final class PDTextField extends PDVariableText
     {
         if (value != null)
         {
-            COSString fieldValue = new COSString(value);
-            setInheritableAttribute(COSName.DV, fieldValue);
+            setInheritableAttribute(COSName.DV, COSString.parseLiteral(value));
         }  
         else
         {
@@ -274,8 +273,7 @@ public final class PDTextField extends PDVariableText
     {
         if (value != null && !value.isEmpty())
         {
-            COSString fieldValue = new COSString(value);
-            setInheritableAttribute(COSName.V, fieldValue);
+            setInheritableAttribute(COSName.V, COSString.parseLiteral(value));
         }  
         else
         {

@@ -16,8 +16,6 @@
  */
 package org.apache.pdfbox.util;
 
-import java.io.IOException;
-
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -33,15 +31,13 @@ public class TestMatrix extends TestCase
      * Test class constructor.
      *
      * @param name The name of the test class.
-     *
-     * @throws IOException If there is an error creating the test.
      */
-    public TestMatrix( String name ) throws IOException
+    public TestMatrix(String name)
     {
         super( name );
     }
 
-    public void testConstructionAndCopy() throws Exception
+    public void testConstructionAndCopy()
     {
         Matrix m1 = new Matrix();
         assertMatrixIsPristine(m1);
@@ -51,7 +47,7 @@ public class TestMatrix extends TestCase
         assertMatrixIsPristine(m2);
     }
 
-    public void testMultiplication() throws Exception
+    public void testMultiplication()
     {
         // This matrix will not change - we use it to drive the various multiplications.
         final Matrix testMatrix = new Matrix();

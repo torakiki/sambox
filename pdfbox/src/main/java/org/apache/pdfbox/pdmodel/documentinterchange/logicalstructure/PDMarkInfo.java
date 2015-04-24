@@ -18,7 +18,7 @@ package org.apache.pdfbox.pdmodel.documentinterchange.logicalstructure;
 
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
-import org.apache.pdfbox.pdmodel.common.COSObjectable;
+import org.apache.pdfbox.cos.COSObjectable;
 
 /**
  * The MarkInfo provides additional information relevant to specialized

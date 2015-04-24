@@ -19,7 +19,7 @@ package org.apache.pdfbox.pdmodel.documentinterchange.taggedpdf;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSNull;
-import org.apache.pdfbox.pdmodel.common.COSObjectable;
+import org.apache.pdfbox.cos.COSObjectable;
 import org.apache.pdfbox.pdmodel.graphics.color.PDGamma;
 
 /**

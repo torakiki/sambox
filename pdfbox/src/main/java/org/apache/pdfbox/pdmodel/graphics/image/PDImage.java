@@ -21,7 +21,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 import org.apache.pdfbox.cos.COSArray;
-import org.apache.pdfbox.pdmodel.common.COSObjectable;
+import org.apache.pdfbox.cos.COSObjectable;
 import org.apache.pdfbox.pdmodel.common.PDStream;
 import org.apache.pdfbox.pdmodel.graphics.color.PDColorSpace;
 

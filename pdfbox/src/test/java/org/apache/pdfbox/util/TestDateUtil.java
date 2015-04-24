@@ -50,7 +50,7 @@ public class TestDateUtil extends TestCase
      *
      * @throws IOException If there is an error creating the test.
      */
-    public TestDateUtil( String name ) throws IOException
+    public TestDateUtil(String name)
     {
         super( name );
     }
@@ -65,7 +65,7 @@ public class TestDateUtil extends TestCase
      *
      * @throws Exception when there is an exception
      */
-    public void testExtract() throws Exception
+    public void testExtract()
     {
         TimeZone timezone = TimeZone.getDefault();
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
@@ -99,7 +99,7 @@ public class TestDateUtil extends TestCase
      * 
      * @throws IOException if something went wrong.
      */
-    public void testDateConversion() throws IOException 
+    public void testDateConversion()
     { 
         Calendar c = DateConverter.toCalendar("D:20050526205258+01'00'"); 
         assertEquals(2005, c.get(Calendar.YEAR)); 
@@ -127,7 +127,7 @@ public class TestDateUtil extends TestCase
      */
     private static void checkParse(int yr, int mon, int day, 
                 int hr, int min, int sec, int offsetHours, int offsetMinutes,
-                String orig) throws Exception 
+ String orig)
     {
         String pdfDate = String.format("D:%04d%02d%02d%02d%02d%02d%+03d'%02d'", 
                 yr,mon,day,hr,min,sec,offsetHours,offsetMinutes);
@@ -157,7 +157,7 @@ public class TestDateUtil extends TestCase
      * Years differ to make it easier to find failures.
      * @throws Exception none expected
      */
-    public void testDateConverter() throws Exception 
+    public void testDateConverter()
     {
             int year = Calendar.getInstance().get(Calendar.YEAR);
             checkParse(2010, 4,23, 0, 0, 0, 0, 0, "D:20100423");
@@ -299,7 +299,7 @@ public class TestDateUtil extends TestCase
 
     private static void checkToString(int yr, int mon, int day, 
                 int hr, int min, int sec, 
-                TimeZone tz, int offsetHours, int offsetMinutes) throws Exception 
+            TimeZone tz, int offsetHours, int offsetMinutes)
     {
         // construct a GregoreanCalendar from args
         GregorianCalendar cal = new GregorianCalendar(tz, Locale.ENGLISH);
@@ -320,7 +320,7 @@ public class TestDateUtil extends TestCase
      * 
      * @throws Exception if something went wrong.
      */
-    public void testToString() throws Exception 
+    public void testToString()
     {                                                              // std DST
         TimeZone tzPgh = TimeZone.getTimeZone("America/New_York");   // -5 -4
         TimeZone tzBerlin = TimeZone.getTimeZone("Europe/Berlin");   // +1 +2

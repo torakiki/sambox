@@ -21,11 +21,11 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.pdfbox.cos.COSArray;
+import org.apache.pdfbox.cos.COSArrayList;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSString;
-import org.apache.pdfbox.pdmodel.common.COSArrayList;
 import org.apache.pdfbox.pdmodel.interactive.form.FieldUtils.KeyValue;
 
 /**
@@ -200,8 +200,8 @@ public abstract class PDChoice extends PDVariableText
                 for (int i = 0; i<exportValues.size(); i++)
                 {
                     COSArray entry = new COSArray();
-                    entry.add(new COSString(keyValuePairs.get(i).getKey()));
-                    entry.add(new COSString(keyValuePairs.get(i).getValue()));
+                    entry.add(COSString.parseLiteral(keyValuePairs.get(i).getKey()));
+                    entry.add(COSString.parseLiteral(keyValuePairs.get(i).getValue()));
                     options.add(entry);
                 }
                 getDictionary().setItem(COSName.OPT, options);

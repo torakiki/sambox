@@ -201,7 +201,7 @@ extends InputStream implements RandomAccessRead
     }
     
     @Override
-    public int available() throws IOException
+    public int available()
     {
         return (int) Math.min( fileLength - fileOffset, Integer.MAX_VALUE );
     }
@@ -233,7 +233,7 @@ extends InputStream implements RandomAccessRead
     }
     
     @Override
-    public long length() throws IOException
+    public long length()
     {
         return fileLength;
     }

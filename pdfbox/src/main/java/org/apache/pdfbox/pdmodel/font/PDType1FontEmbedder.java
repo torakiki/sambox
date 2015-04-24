@@ -16,30 +16,30 @@
  */
 package org.apache.pdfbox.pdmodel.font;
 
-import org.apache.fontbox.afm.AFMParser;
-import org.apache.fontbox.afm.CharMetric;
-import org.apache.fontbox.afm.FontMetrics;
-import org.apache.fontbox.pfb.PfbParser;
-import org.apache.fontbox.type1.Type1Font;
-import org.apache.pdfbox.cos.COSArray;
-import org.apache.pdfbox.cos.COSDictionary;
-import org.apache.pdfbox.cos.COSInteger;
-import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.pdmodel.font.encoding.DictionaryEncoding;
-import org.apache.pdfbox.pdmodel.font.encoding.Encoding;
-import org.apache.pdfbox.pdmodel.font.encoding.Type1Encoding;
-import org.apache.pdfbox.io.IOUtils;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.common.COSArrayList;
-import org.apache.pdfbox.pdmodel.common.PDRectangle;
-import org.apache.pdfbox.pdmodel.common.PDStream;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import org.apache.fontbox.afm.AFMParser;
+import org.apache.fontbox.afm.CharMetric;
+import org.apache.fontbox.afm.FontMetrics;
+import org.apache.fontbox.pfb.PfbParser;
+import org.apache.fontbox.type1.Type1Font;
+import org.apache.pdfbox.cos.COSArray;
+import org.apache.pdfbox.cos.COSArrayList;
+import org.apache.pdfbox.cos.COSDictionary;
+import org.apache.pdfbox.cos.COSInteger;
+import org.apache.pdfbox.cos.COSName;
+import org.apache.pdfbox.io.IOUtils;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.common.PDStream;
+import org.apache.pdfbox.pdmodel.font.encoding.DictionaryEncoding;
+import org.apache.pdfbox.pdmodel.font.encoding.Encoding;
+import org.apache.pdfbox.pdmodel.font.encoding.Type1Encoding;
 
 /**
  * Embedded PDType1Font builder. Helper class to populate a PDType1Font from a PFB and AFM.
@@ -158,7 +158,7 @@ class PDType1FontEmbedder
     // to the pdf and consequently the StandardEncoding is used so that any special character is
     // missing I've copied the code from the pdfbox-forum posted by V0JT4 and made some additions
     // concerning german umlauts see also https://sourceforge.net/forum/message.php?msg_id=4705274
-    private DictionaryEncoding encodingFromAFM(FontMetrics metrics) throws IOException
+    private DictionaryEncoding encodingFromAFM(FontMetrics metrics)
     {
         Type1Encoding encoding = new Type1Encoding(metrics);
 

@@ -16,12 +16,11 @@
  */
 package org.apache.pdfbox.contentstream.operator.text;
 
-import java.io.IOException;
 import java.util.List;
 
-import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.contentstream.operator.Operator;
 import org.apache.pdfbox.contentstream.operator.OperatorProcessor;
+import org.apache.pdfbox.cos.COSBase;
 
 /**
  * ET: End text.
@@ -31,7 +30,7 @@ import org.apache.pdfbox.contentstream.operator.OperatorProcessor;
 public class EndText extends OperatorProcessor
 {
     @Override
-    public void process(Operator operator, List<COSBase> arguments) throws IOException
+    public void process(Operator operator, List<COSBase> arguments)
     {
         context.setTextMatrix(null);
         context.setTextLineMatrix(null);

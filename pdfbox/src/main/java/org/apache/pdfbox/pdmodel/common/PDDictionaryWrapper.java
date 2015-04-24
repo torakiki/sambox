@@ -17,6 +17,7 @@
 package org.apache.pdfbox.pdmodel.common;
 
 import org.apache.pdfbox.cos.COSDictionary;
+import org.apache.pdfbox.cos.COSObjectable;
 
 /**
  * A wrapper for a COS dictionary.

@@ -27,18 +27,6 @@ public abstract class COSNumber extends COSBase
 {
 
     /**
-     * @deprecated Use the {@link COSInteger#ZERO} constant instead
-     */
-    @Deprecated
-    public static final COSInteger ZERO = COSInteger.ZERO;
-
-    /**
-     * @deprecated Use the {@link COSInteger#ONE} constant instead
-     */
-    @Deprecated
-    public static final COSInteger ONE = COSInteger.ONE;
-
-    /**
      * This will get the float value of this number.
      *
      * @return The float value of this object.

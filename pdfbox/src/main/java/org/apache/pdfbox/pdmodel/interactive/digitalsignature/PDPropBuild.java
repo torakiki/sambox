@@ -20,8 +20,8 @@ import static org.apache.pdfbox.cos.DirectCOSObject.asDirectObject;
 
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
+import org.apache.pdfbox.cos.COSObjectable;
 import org.apache.pdfbox.cos.DirectCOSObject;
-import org.apache.pdfbox.pdmodel.common.COSObjectable;
 
 /**
  * A signature build dictionary as specified in the PDF Signature Build Dictionary Specification.

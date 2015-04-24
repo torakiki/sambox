@@ -20,9 +20,8 @@ import java.io.IOException;
 
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
+import org.apache.pdfbox.cos.COSObjectable;
 import org.apache.pdfbox.cos.COSString;
-
-import org.apache.pdfbox.pdmodel.common.COSObjectable;
 
 /**
  * This represents a file specification.

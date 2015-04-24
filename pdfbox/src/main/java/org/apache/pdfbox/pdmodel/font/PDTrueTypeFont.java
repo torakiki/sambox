@@ -33,11 +33,11 @@ import org.apache.fontbox.ttf.TrueTypeFont;
 import org.apache.fontbox.util.BoundingBox;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.common.PDStream;
 import org.apache.pdfbox.pdmodel.font.encoding.Encoding;
 import org.apache.pdfbox.pdmodel.font.encoding.GlyphList;
 import org.apache.pdfbox.pdmodel.font.encoding.MacOSRomanEncoding;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.common.PDStream;
 
 /**
  * TrueType font.
@@ -169,7 +169,7 @@ public class PDTrueTypeFont extends PDSimpleFont
     }
 
     @Override
-    protected Encoding readEncodingFromFont() throws IOException
+    protected Encoding readEncodingFromFont()
     {
         // for symbolic fonts the (3, 0) (Windows, Symbol) cmap is the font's built-in encoding
         // but this is handled by codeToGID

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.pdfbox.pdmodel.common;
+package org.apache.pdfbox.cos;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -23,12 +23,7 @@ import java.io.OutputStream;
 import java.io.SequenceInputStream;
 import java.util.Vector;
 
-import org.apache.pdfbox.cos.COSArray;
-import org.apache.pdfbox.cos.COSBase;
-import org.apache.pdfbox.cos.COSDictionary;
-import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.cos.COSStream;
-import org.apache.pdfbox.cos.ICOSVisitor;
+import org.apache.pdfbox.pdmodel.common.PDStream;
 
 /**
  * This will take an array of streams and sequence them together.
@@ -167,19 +162,11 @@ public class COSStreamArray extends COSStream
         return new SequenceInputStream( inputStreams.elements() );
     }
 
-    /**
-     * visitor pattern double dispatch method.
-     *
-     * @param visitor The object to notify when visiting this object.
-     * @return any object, depending on the visitor implementation, or null
-     * @throws IOException if the output could not be written
-     */
     @Override
-    public Object accept(ICOSVisitor visitor) throws IOException
+    public void accept(COSVisitor visitor)
     {
-        return streams.accept( visitor );
+        visitor.visit(this);
     }
-
 
     /**
      * This will return the filters to apply to the byte stream

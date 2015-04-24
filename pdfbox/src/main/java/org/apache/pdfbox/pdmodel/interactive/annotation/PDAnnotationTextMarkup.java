@@ -16,8 +16,8 @@
  */
 package org.apache.pdfbox.pdmodel.interactive.annotation;
 
-import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSArray;
+import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 
 /**
@@ -46,12 +46,6 @@ public class PDAnnotationTextMarkup extends PDAnnotationMarkup
      */
     public static final String SUB_TYPE_STRIKEOUT = "StrikeOut";
 
-
-    private PDAnnotationTextMarkup()
-    {
-        // Must be constructed with a subType or dictionary parameter
-    }
-
     /**
      * Creates a TextMarkup annotation of the specified sub type.
      *
@@ -59,7 +53,6 @@ public class PDAnnotationTextMarkup extends PDAnnotationMarkup
      */
     public PDAnnotationTextMarkup(String subType)
     {
-        super();
         setSubtype( subType );
 
         // Quad points are required, set and empty array

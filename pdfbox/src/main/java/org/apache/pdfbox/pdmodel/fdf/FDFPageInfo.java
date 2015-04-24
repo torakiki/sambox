@@ -18,8 +18,7 @@ package org.apache.pdfbox.pdmodel.fdf;
 
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
-
-import org.apache.pdfbox.pdmodel.common.COSObjectable;
+import org.apache.pdfbox.cos.COSObjectable;
 
 /**
  * This represents an FDF page info that is part of the FDF page.

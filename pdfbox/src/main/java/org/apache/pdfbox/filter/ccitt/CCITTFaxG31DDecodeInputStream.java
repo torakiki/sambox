@@ -369,7 +369,7 @@ public final class CCITTFaxG31DDecodeInputStream extends InputStream
             this.length = length;
         }
 
-        public CodeWord getNextCodeWord(CCITTFaxG31DDecodeInputStream decoder) throws IOException
+        public CodeWord getNextCodeWord(CCITTFaxG31DDecodeInputStream decoder)
         {
             return this;
         }
@@ -403,12 +403,12 @@ public final class CCITTFaxG31DDecodeInputStream extends InputStream
             this.length = length;
         }
 
-        public CodeWord getNextCodeWord(CCITTFaxG31DDecodeInputStream decoder) throws IOException
+        public CodeWord getNextCodeWord(CCITTFaxG31DDecodeInputStream decoder)
         {
             return this;
         }
 
-        public int execute(CCITTFaxG31DDecodeInputStream decoder) throws IOException
+        public int execute(CCITTFaxG31DDecodeInputStream decoder)
         {
             decoder.writeNonTerminating(length);
             return length;
@@ -445,7 +445,7 @@ public final class CCITTFaxG31DDecodeInputStream extends InputStream
             return this;
         }
 
-        public int execute(CCITTFaxG31DDecodeInputStream decoder) throws IOException
+        public int execute(CCITTFaxG31DDecodeInputStream decoder)
         {
             //nop
             return 0;

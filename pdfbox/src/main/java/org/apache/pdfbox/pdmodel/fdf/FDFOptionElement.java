@@ -18,9 +18,8 @@ package org.apache.pdfbox.pdmodel.fdf;
 
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
+import org.apache.pdfbox.cos.COSObjectable;
 import org.apache.pdfbox.cos.COSString;
-
-import org.apache.pdfbox.pdmodel.common.COSObjectable;
 
 /**
  * This represents an object that can be used in a Field's Opt entry to represent
@@ -38,8 +37,8 @@ public class FDFOptionElement implements COSObjectable
     public FDFOptionElement()
     {
         option = new COSArray();
-        option.add( new COSString( "" ) );
-        option.add( new COSString( "" ) );
+        option.add(COSString.parseLiteral(""));
+        option.add(COSString.parseLiteral(""));
     }
 
     /**
@@ -89,7 +88,7 @@ public class FDFOptionElement implements COSObjectable
      */
     public void setOption( String opt )
     {
-        option.set( 0, new COSString( opt ) );
+        option.set(0, COSString.parseLiteral(opt));
     }
 
     /**
@@ -109,6 +108,6 @@ public class FDFOptionElement implements COSObjectable
      */
     public void setDefaultAppearanceString( String da )
     {
-        option.set( 1, new COSString( da ) );
+        option.set(1, COSString.parseLiteral(da));
     }
 }

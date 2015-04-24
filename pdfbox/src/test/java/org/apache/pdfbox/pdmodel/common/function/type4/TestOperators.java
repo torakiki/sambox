@@ -16,9 +16,9 @@
  */
 package org.apache.pdfbox.pdmodel.common.function.type4;
 
-import org.junit.Assert;
-
 import junit.framework.TestCase;
+
+import org.junit.Assert;
 
 /**
  * Tests all implemented PostScript operators.
@@ -29,9 +29,8 @@ public class TestOperators extends TestCase
 
     /**
      * Tests the "add" operator.
-     * @throws Exception if an error occurs
      */
-    public void testAdd() throws Exception
+    public void testAdd()
     {
         Type4Tester.create("5 6 add").pop(11).isEmpty();
 
@@ -47,9 +46,8 @@ public class TestOperators extends TestCase
 
     /**
      * Tests the "abs" operator.
-     * @throws Exception if an error occurs
      */
-    public void testAbs() throws Exception
+    public void testAbs()
     {
         Type4Tester.create("-3 abs 2.1 abs -2.1 abs -7.5 abs")
             .pop(7.5f).pop(2.1f).pop(2.1f).pop(3).isEmpty();
@@ -57,9 +55,8 @@ public class TestOperators extends TestCase
 
     /**
      * Tests the "and" operator.
-     * @throws Exception if an error occurs
      */
-    public void testAnd() throws Exception
+    public void testAnd()
     {
         Type4Tester.create("true true and true false and")
             .pop(false).pop(true).isEmpty();
@@ -72,7 +69,7 @@ public class TestOperators extends TestCase
      * Tests the "atan" operator.
      * @throws Exception if an error occurs
      */
-    public void testAtan() throws Exception
+    public void testAtan()
     {
         Type4Tester.create("0 1 atan").pop(0f).isEmpty();
         Type4Tester.create("1 0 atan").pop(90f).isEmpty();
@@ -84,7 +81,7 @@ public class TestOperators extends TestCase
      * Tests the "ceiling" operator.
      * @throws Exception if an error occurs
      */
-    public void testCeiling() throws Exception
+    public void testCeiling()
     {
         Type4Tester.create("3.2 ceiling -4.8 ceiling 99 ceiling")
             .pop(99).pop(-4f).pop(4f).isEmpty();
@@ -94,7 +91,7 @@ public class TestOperators extends TestCase
      * Tests the "cos" operator.
      * @throws Exception if an error occurs
      */
-    public void testCos() throws Exception
+    public void testCos()
     {
         Type4Tester.create("0 cos").popReal(1f).isEmpty();
         Type4Tester.create("90 cos").popReal(0f).isEmpty();
@@ -102,9 +99,8 @@ public class TestOperators extends TestCase
 
     /**
      * Tests the "cvi" operator.
-     * @throws Exception if an error occurs
      */
-    public void testCvi() throws Exception
+    public void testCvi()
     {
         Type4Tester.create("-47.8 cvi").pop(-47).isEmpty();
         Type4Tester.create("520.9 cvi").pop(520).isEmpty();
@@ -114,7 +110,7 @@ public class TestOperators extends TestCase
      * Tests the "cvr" operator.
      * @throws Exception if an error occurs
      */
-    public void testCvr() throws Exception
+    public void testCvr()
     {
         Type4Tester.create("-47.8 cvr").popReal(-47.8f).isEmpty();
         Type4Tester.create("520.9 cvr").popReal(520.9f).isEmpty();
@@ -132,7 +128,7 @@ public class TestOperators extends TestCase
      * Tests the "div" operator.
      * @throws Exception if an error occurs
      */
-    public void testDiv() throws Exception
+    public void testDiv()
     {
         Type4Tester.create("3 2 div").popReal(1.5f).isEmpty();
         Type4Tester.create("4 2 div").popReal(2.0f).isEmpty();
@@ -142,7 +138,7 @@ public class TestOperators extends TestCase
      * Tests the "exp" operator.
      * @throws Exception if an error occurs
      */
-    public void testExp() throws Exception
+    public void testExp()
     {
         Type4Tester.create("9 0.5 exp").popReal(3.0f).isEmpty();
         Type4Tester.create("-9 -1 exp").popReal(-0.111111f, 0.000001).isEmpty();
@@ -152,7 +148,7 @@ public class TestOperators extends TestCase
      * Tests the "floor" operator.
      * @throws Exception if an error occurs
      */
-    public void testFloor() throws Exception
+    public void testFloor()
     {
         Type4Tester.create("3.2 floor -4.8 floor 99 floor")
             .pop(99).pop(-5f).pop(3f).isEmpty();
@@ -162,7 +158,7 @@ public class TestOperators extends TestCase
      * Tests the "div" operator.
      * @throws Exception if an error occurs
      */
-    public void testIDiv() throws Exception
+    public void testIDiv()
     {
         Type4Tester.create("3 2 idiv").pop(1).isEmpty();
         Type4Tester.create("4 2 idiv").pop(2).isEmpty();
@@ -182,7 +178,7 @@ public class TestOperators extends TestCase
      * Tests the "ln" operator.
      * @throws Exception if an error occurs
      */
-    public void testLn() throws Exception
+    public void testLn()
     {
         Type4Tester.create("10 ln").popReal(2.30259f, 0.00001f).isEmpty();
         Type4Tester.create("100 ln").popReal(4.60517f, 0.00001f).isEmpty();
@@ -192,7 +188,7 @@ public class TestOperators extends TestCase
      * Tests the "log" operator.
      * @throws Exception if an error occurs
      */
-    public void testLog() throws Exception
+    public void testLog()
     {
         Type4Tester.create("10 log").popReal(1.0f).isEmpty();
         Type4Tester.create("100 log").popReal(2.0f).isEmpty();
@@ -200,9 +196,8 @@ public class TestOperators extends TestCase
 
     /**
      * Tests the "mod" operator.
-     * @throws Exception if an error occurs
      */
-    public void testMod() throws Exception
+    public void testMod()
     {
         Type4Tester.create("5 3 mod").pop(2).isEmpty();
         Type4Tester.create("5 2 mod").pop(1).isEmpty();
@@ -222,7 +217,7 @@ public class TestOperators extends TestCase
      * Tests the "mul" operator.
      * @throws Exception if an error occurs
      */
-    public void testMul() throws Exception
+    public void testMul()
     {
         Type4Tester.create("1 2 mul").pop(2).isEmpty();
         Type4Tester.create("1.5 2 mul").popReal(3.0f).isEmpty();
@@ -235,7 +230,7 @@ public class TestOperators extends TestCase
      * Tests the "neg" operator.
      * @throws Exception if an error occurs
      */
-    public void testNeg() throws Exception
+    public void testNeg()
     {
         Type4Tester.create("4.5 neg").popReal(-4.5f).isEmpty();
         Type4Tester.create("-3 neg").pop(3).isEmpty();
@@ -251,7 +246,7 @@ public class TestOperators extends TestCase
      * Tests the "round" operator.
      * @throws Exception if an error occurs
      */
-    public void testRound() throws Exception
+    public void testRound()
     {
         Type4Tester.create("3.2 round").popReal(3.0f).isEmpty();
         Type4Tester.create("6.5 round").popReal(7.0f).isEmpty();
@@ -264,7 +259,7 @@ public class TestOperators extends TestCase
      * Tests the "sin" operator.
      * @throws Exception if an error occurs
      */
-    public void testSin() throws Exception
+    public void testSin()
     {
         Type4Tester.create("0 sin").popReal(0f).isEmpty();
         Type4Tester.create("90 sin").popReal(1f).isEmpty();
@@ -275,7 +270,7 @@ public class TestOperators extends TestCase
      * Tests the "sqrt" operator.
      * @throws Exception if an error occurs
      */
-    public void testSqrt() throws Exception
+    public void testSqrt()
     {
         Type4Tester.create("0 sqrt").popReal(0f).isEmpty();
         Type4Tester.create("1 sqrt").popReal(1f).isEmpty();
@@ -296,7 +291,7 @@ public class TestOperators extends TestCase
      * Tests the "sub" operator.
      * @throws Exception if an error occurs
      */
-    public void testSub() throws Exception
+    public void testSub()
     {
         Type4Tester.create("5 2 sub -7.5 1 sub").pop(-8.5f).pop(3).isEmpty();
     }
@@ -305,7 +300,7 @@ public class TestOperators extends TestCase
      * Tests the "truncate" operator.
      * @throws Exception if an error occurs
      */
-    public void testTruncate() throws Exception
+    public void testTruncate()
     {
         Type4Tester.create("3.2 truncate").popReal(3.0f).isEmpty();
         Type4Tester.create("-4.8 truncate").popReal(-4.0f).isEmpty();
@@ -316,7 +311,7 @@ public class TestOperators extends TestCase
      * Tests the "bitshift" operator.
      * @throws Exception if an error occurs
      */
-    public void testBitshift() throws Exception
+    public void testBitshift()
     {
         Type4Tester.create("7 3 bitshift 142 -3 bitshift")
             .pop(17).pop(56).isEmpty();
@@ -326,7 +321,7 @@ public class TestOperators extends TestCase
      * Tests the "eq" operator.
      * @throws Exception if an error occurs
      */
-    public void testEq() throws Exception
+    public void testEq()
     {
         Type4Tester.create("7 7 eq 7 6 eq 7 -7 eq true true eq false true eq 7.7 7.7 eq")
             .pop(true).pop(false).pop(true).pop(false).pop(false).pop(true).isEmpty();
@@ -336,7 +331,7 @@ public class TestOperators extends TestCase
      * Tests the "ge" operator.
      * @throws Exception if an error occurs
      */
-    public void testGe() throws Exception
+    public void testGe()
     {
         Type4Tester.create("5 7 ge 7 5 ge 7 7 ge -1 2 ge")
             .pop(false).pop(true).pop(true).pop(false).isEmpty();
@@ -346,7 +341,7 @@ public class TestOperators extends TestCase
      * Tests the "gt" operator.
      * @throws Exception if an error occurs
      */
-    public void testGt() throws Exception
+    public void testGt()
     {
         Type4Tester.create("5 7 gt 7 5 gt 7 7 gt -1 2 gt")
             .pop(false).pop(false).pop(true).pop(false).isEmpty();
@@ -356,7 +351,7 @@ public class TestOperators extends TestCase
      * Tests the "le" operator.
      * @throws Exception if an error occurs
      */
-    public void testLe() throws Exception
+    public void testLe()
     {
         Type4Tester.create("5 7 le 7 5 le 7 7 le -1 2 le")
             .pop(true).pop(true).pop(false).pop(true).isEmpty();
@@ -366,7 +361,7 @@ public class TestOperators extends TestCase
      * Tests the "lt" operator.
      * @throws Exception if an error occurs
      */
-    public void testLt() throws Exception
+    public void testLt()
     {
         Type4Tester.create("5 7 lt 7 5 lt 7 7 lt -1 2 lt")
             .pop(true).pop(false).pop(false).pop(true).isEmpty();
@@ -376,7 +371,7 @@ public class TestOperators extends TestCase
      * Tests the "ne" operator.
      * @throws Exception if an error occurs
      */
-    public void testNe() throws Exception
+    public void testNe()
     {
         Type4Tester.create("7 7 ne 7 6 ne 7 -7 ne true true ne false true ne 7.7 7.7 ne")
             .pop(false).pop(true).pop(false).pop(true).pop(true).pop(false).isEmpty();
@@ -386,7 +381,7 @@ public class TestOperators extends TestCase
      * Tests the "not" operator.
      * @throws Exception if an error occurs
      */
-    public void testNot() throws Exception
+    public void testNot()
     {
         Type4Tester.create("true not false not")
             .pop(true).pop(false).isEmpty();
@@ -399,7 +394,7 @@ public class TestOperators extends TestCase
      * Tests the "or" operator.
      * @throws Exception if an error occurs
      */
-    public void testOr() throws Exception
+    public void testOr()
     {
         Type4Tester.create("true true or true false or false false or")
             .pop(false).pop(true).pop(true).isEmpty();
@@ -412,7 +407,7 @@ public class TestOperators extends TestCase
      * Tests the "cor" operator.
      * @throws Exception if an error occurs
      */
-    public void testXor() throws Exception
+    public void testXor()
     {
         Type4Tester.create("true true xor true false xor false false xor")
             .pop(false).pop(true).pop(false).isEmpty();
@@ -425,7 +420,7 @@ public class TestOperators extends TestCase
      * Tests the "if" operator.
      * @throws Exception if an error occurs
      */
-    public void testIf() throws Exception
+    public void testIf()
     {
         Type4Tester.create("true { 2 1 add } if")
             .pop(3).isEmpty();
@@ -448,7 +443,7 @@ public class TestOperators extends TestCase
      * Tests the "ifelse" operator.
      * @throws Exception if an error occurs
      */
-    public void testIfElse() throws Exception
+    public void testIfElse()
     {
         Type4Tester.create("true { 2 1 add } { 2 1 sub } ifelse")
             .pop(3).isEmpty();
@@ -461,7 +456,7 @@ public class TestOperators extends TestCase
      * Tests the "copy" operator.
      * @throws Exception if an error occurs
      */
-    public void testCopy() throws Exception
+    public void testCopy()
     {
         Type4Tester.create("true 1 2 3 3 copy")
             .pop(3).pop(2).pop(1)
@@ -474,7 +469,7 @@ public class TestOperators extends TestCase
      * Tests the "dup" operator.
      * @throws Exception if an error occurs
      */
-    public void testDup() throws Exception
+    public void testDup()
     {
         Type4Tester.create("true 1 2 dup")
             .pop(2).pop(2).pop(1)
@@ -488,7 +483,7 @@ public class TestOperators extends TestCase
      * Tests the "exch" operator.
      * @throws Exception if an error occurs
      */
-    public void testExch() throws Exception
+    public void testExch()
     {
         Type4Tester.create("true 1 exch")
             .pop(true).pop(1).isEmpty();
@@ -500,7 +495,7 @@ public class TestOperators extends TestCase
      * Tests the "index" operator.
      * @throws Exception if an error occurs
      */
-    public void testIndex() throws Exception
+    public void testIndex()
     {
         Type4Tester.create("1 2 3 4 0 index")
             .pop(4).pop(4).pop(3).pop(2).pop(1).isEmpty();
@@ -512,7 +507,7 @@ public class TestOperators extends TestCase
      * Tests the "pop" operator.
      * @throws Exception if an error occurs
      */
-    public void testPop() throws Exception
+    public void testPop()
     {
         Type4Tester.create("1 pop 7 2 pop")
             .pop(7).isEmpty();
@@ -524,7 +519,7 @@ public class TestOperators extends TestCase
      * Tests the "roll" operator.
      * @throws Exception if an error occurs
      */
-    public void testRoll() throws Exception
+    public void testRoll()
     {
         Type4Tester.create("1 2 3 4 5 5 -2 roll")
             .pop(2).pop(1).pop(5).pop(4).pop(3).isEmpty();

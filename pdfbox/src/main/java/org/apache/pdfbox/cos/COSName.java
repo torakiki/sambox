@@ -33,11 +33,11 @@ import org.apache.pdfbox.util.Charsets;
 public final class COSName extends COSBase implements Comparable<COSName>
 {
     // using ConcurrentHashMap because this can be accessed by multiple threads
-    private static Map<String, COSName> nameMap = new ConcurrentHashMap<String, COSName>(8192);
+    private static Map<String, COSName> nameMap = new ConcurrentHashMap<>(8192);
 
     // all common COSName values are stored in this HashMap
     // hey are already defined as static constants and don't need to be synchronized
-    private static Map<String, COSName> commonNameMap = new HashMap<String, COSName>();
+    private static Map<String, COSName> commonNameMap = new HashMap<>();
 
     //
     // IMPORTANT: this list is *alphabetized* and does not need any JavaDoc
@@ -613,7 +613,6 @@ public final class COSName extends COSBase implements Comparable<COSName>
     }
 
     /**
-     * Returns true if the name is the empty string.
      * @return true if the name is the empty string.
      */
     public boolean isEmpty()
@@ -622,18 +621,18 @@ public final class COSName extends COSBase implements Comparable<COSName>
     }
 
     @Override
-    public Object accept(ICOSVisitor visitor) throws IOException
+    public void accept(COSVisitor visitor)
     {
-        return visitor.visitFromName(this);
+        visitor.visit(this);
     }
 
     /**
-     * This will output this string as a PDF object.
-     * 
+     * Writes the {@link COSName} to the given {@link OutputStream}
+     *
      * @param output The stream to write to.
      * @throws IOException If there is an error writing to the stream.
      */
-    public void writePDF(OutputStream output) throws IOException
+    public void writeTo(OutputStream output) throws IOException
     {
         output.write('/');
         byte[] bytes = getName().getBytes(Charsets.US_ASCII);
@@ -662,14 +661,5 @@ public final class COSName extends COSBase implements Comparable<COSName>
                 output.write(String.format("%02X", current).getBytes(Charsets.US_ASCII));
             }
         }
-    }
-
-    /**
-     * Not usually needed except if resources need to be reclaimed in a long running process.
-     */
-    public static synchronized void clearResources()
-    {
-        // Clear them all
-        nameMap.clear();
     }
 }

@@ -100,7 +100,7 @@ public abstract class PDVariableText extends PDField
     {
         if (daValue != null)
         {
-            setInheritableAttribute(COSName.DA, new COSString(daValue));
+            setInheritableAttribute(COSName.DA, COSString.parseLiteral(daValue));
         }
         else
         {
@@ -133,7 +133,7 @@ public abstract class PDVariableText extends PDField
     {
         if (defaultStyleString != null)
         {
-            getDictionary().setItem(COSName.DS, new COSString(defaultStyleString));
+            getDictionary().setItem(COSName.DS, COSString.parseLiteral(defaultStyleString));
         }
         else
         {
@@ -229,7 +229,7 @@ public abstract class PDVariableText extends PDField
     {
         if (richTextValue != null)
         {
-            getDictionary().setItem(COSName.RV, new COSString(richTextValue));
+            getDictionary().setItem(COSName.RV, COSString.parseLiteral(richTextValue));
         }
         else
         {

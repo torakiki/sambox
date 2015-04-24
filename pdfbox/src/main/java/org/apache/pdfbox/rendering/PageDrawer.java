@@ -36,6 +36,7 @@ import java.awt.image.Raster;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.contentstream.PDFGraphicsStreamEngine;
@@ -107,9 +108,8 @@ public class PageDrawer extends PDFGraphicsStreamEngine
      * Constructor.
      *
      * @param parameters Parameters for page drawing.
-     * @throws IOException If there is an error loading properties from the file.
      */
-    public PageDrawer(PageDrawerParameters parameters) throws IOException
+    public PageDrawer(PageDrawerParameters parameters)
     {
         super(parameters.getPage());
         this.renderer = parameters.getRenderer();
@@ -276,7 +276,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
     }
 
     @Override
-    public void beginText() throws IOException
+    public void beginText()
     {
         setClip();
     }

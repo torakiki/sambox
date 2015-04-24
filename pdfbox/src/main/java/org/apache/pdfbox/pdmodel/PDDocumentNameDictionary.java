@@ -19,7 +19,7 @@ package org.apache.pdfbox.pdmodel;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.pdmodel.common.COSObjectable;
+import org.apache.pdfbox.cos.COSObjectable;
 
 /**
  * This class holds all of the name trees that are available at the document level.

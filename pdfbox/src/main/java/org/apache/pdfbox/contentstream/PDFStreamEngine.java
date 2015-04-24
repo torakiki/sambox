@@ -528,7 +528,7 @@ public abstract class PDFStreamEngine
      *
      * @throws IOException if there was an error processing the text
      */
-    public void beginText() throws IOException
+    public void beginText()
     {
         // overridden in subclasses
     }
@@ -539,7 +539,7 @@ public abstract class PDFStreamEngine
      *
      * @throws IOException if there was an error processing the text
      */
-    public void endText() throws IOException
+    public void endText()
     {
         // overridden in subclasses
     }
@@ -607,7 +607,7 @@ public abstract class PDFStreamEngine
      * @param tx x-translation
      * @param ty y-translation
      */
-    protected void applyTextAdjustment(float tx, float ty) throws IOException
+    protected void applyTextAdjustment(float tx, float ty)
     {
         // update the text matrix
         textMatrix.concatenate(Matrix.getTranslateInstance(tx, ty));
@@ -739,7 +739,7 @@ public abstract class PDFStreamEngine
      * @throws IOException if the glyph cannot be processed
      */
     protected void showFontGlyph(Matrix textRenderingMatrix, PDFont font, int code, String unicode,
-                                 Vector displacement) throws IOException
+            Vector displacement)
     {
         // overridden in subclasses
     }
@@ -813,7 +813,7 @@ public abstract class PDFStreamEngine
      * @param operator The unknown operator.
      * @param operands The list of operands.
      */
-    protected void unsupportedOperator(Operator operator, List<COSBase> operands) throws IOException
+    protected void unsupportedOperator(Operator operator, List<COSBase> operands)
     {
         // overridden in subclasses
     }

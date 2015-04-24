@@ -21,9 +21,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+
 import junit.framework.TestCase;
+
+import org.apache.pdfbox.cos.COSArrayList;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSInteger;
+import org.apache.pdfbox.cos.COSObjectable;
 import org.junit.Assert;
 
 /**
@@ -91,7 +95,7 @@ public class TestPDNumberTreeNode extends TestCase
     }
 
     @Override
-    protected void setUp() throws Exception
+    protected void setUp()
     {
         this.node5 = new PDNumberTreeNode(PDTest.class);
         Map<Integer,PDTest> Numbers = new TreeMap<Integer, PDTest>();

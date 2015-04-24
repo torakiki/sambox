@@ -17,7 +17,9 @@
 package org.apache.pdfbox.multipdf;
 
 import java.io.File;
+
 import junit.framework.TestCase;
+
 import org.apache.pdfbox.pdmodel.PDDocument;
 
 /**
@@ -38,12 +40,12 @@ public class PageExtractorTest extends TestCase
     }
 
     @Override
-    protected void setUp() throws Exception
+    protected void setUp()
     {
     }
 
     @Override
-    protected void tearDown() throws Exception
+    protected void tearDown()
     {
     }
 

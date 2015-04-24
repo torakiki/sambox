@@ -295,7 +295,6 @@ final class DCTFilter extends Filter
 
     @Override
     protected void encode(InputStream input, OutputStream encoded, COSDictionary parameters)
-            throws IOException
     {
         LOG.warn("DCTFilter#encode is not implemented yet, skipping this stream.");
     }

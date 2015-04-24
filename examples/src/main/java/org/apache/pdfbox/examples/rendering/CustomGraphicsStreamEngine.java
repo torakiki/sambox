@@ -20,6 +20,7 @@ package org.apache.pdfbox.examples.rendering;
 import java.awt.geom.Point2D;
 import java.io.File;
 import java.io.IOException;
+
 import org.apache.pdfbox.contentstream.PDFGraphicsStreamEngine;
 import org.apache.pdfbox.contentstream.PDFStreamEngine;
 import org.apache.pdfbox.cos.COSArray;
@@ -80,7 +81,7 @@ public class CustomGraphicsStreamEngine extends PDFGraphicsStreamEngine
     }
     
     @Override
-    public void appendRectangle(Point2D p0, Point2D p1, Point2D p2, Point2D p3) throws IOException
+    public void appendRectangle(Point2D p0, Point2D p1, Point2D p2, Point2D p3)
     {
         System.out.printf("appendRectangle %.2f %.2f, %.2f %.2f, %.2f %.2f, %.2f %.2f\n",
                 p0.getX(), p0.getY(), p1.getX(), p1.getY(),

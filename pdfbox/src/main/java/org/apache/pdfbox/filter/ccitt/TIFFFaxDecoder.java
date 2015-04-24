@@ -29,7 +29,7 @@ public final class TIFFFaxDecoder
 
     private int bitPointer, bytePointer;
     private byte[] data;
-    private int w, h;
+    private int w;
     private int fillOrder;
 
     // Data structures needed to store changing elements for the previous
@@ -44,7 +44,6 @@ public final class TIFFFaxDecoder
     private int compression = 2;
 
     // Variables set by T4Options
-    private int uncompressedMode = 0;
     private int fillBits = 0;
     private int oneD;
 
@@ -536,7 +535,6 @@ public final class TIFFFaxDecoder
     {
         fillOrder = fillOrderValue;
         w = width;
-        h = height;
 
         bitPointer = 0;
         bytePointer = 0;
@@ -752,7 +750,6 @@ public final class TIFFFaxDecoder
         // uncompressedMode - haven't dealt with this yet.
 
         oneD = (int) (tiffT4Options & 0x01);
-        uncompressedMode = (int) ((tiffT4Options & 0x02) >> 1);
         fillBits = (int) ((tiffT4Options & 0x04) >> 2);
 
         // The data must start with an EOL code
@@ -912,11 +909,6 @@ public final class TIFFFaxDecoder
 
         // Return values from getNextChangingElement
         int[] b = new int[2];
-
-        // uncompressedMode - have written some code for this, but this
-        // has not been tested due to lack of test images using this optional
-
-        uncompressedMode = (int) ((tiffT6Options & 0x02) >> 1);
 
         // Local cached reference
         int[] cce = currChangingElems;

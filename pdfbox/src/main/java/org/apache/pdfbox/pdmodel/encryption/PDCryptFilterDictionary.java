@@ -92,7 +92,7 @@ public class PDCryptFilterDictionary
      *
      * @throws IOException If there is an error setting the data.
      */
-    public void setCryptFilterMethod(COSName cfm) throws IOException
+    public void setCryptFilterMethod(COSName cfm)
     {
         cryptFilterDictionary.setItem( COSName.CFM, cfm );
     }
@@ -105,7 +105,7 @@ public class PDCryptFilterDictionary
      *
      * @throws IOException If there is an error accessing the data.
      */
-    public COSName getCryptFilterMethod() throws IOException
+    public COSName getCryptFilterMethod()
     {
         return (COSName)cryptFilterDictionary.getDictionaryObject( COSName.CFM );
     }

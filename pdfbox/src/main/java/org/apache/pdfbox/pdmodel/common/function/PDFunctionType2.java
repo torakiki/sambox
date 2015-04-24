@@ -21,7 +21,6 @@ import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSFloat;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSNumber;
-import java.io.IOException;
 
 /**
  * This class represents a Type 2 (exponential interpolation) function in a PDF
@@ -92,7 +91,7 @@ public class PDFunctionType2 extends PDFunction
      * {@inheritDoc}
      */
     @Override
-    public float[] eval(float[] input) throws IOException
+    public float[] eval(float[] input)
     {
         // exponential interpolation
         float xToN = (float) Math.pow(input[0], exponent); // x^exponent

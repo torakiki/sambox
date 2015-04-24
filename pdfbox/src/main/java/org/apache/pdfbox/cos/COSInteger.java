@@ -19,6 +19,8 @@ package org.apache.pdfbox.cos;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.apache.pdfbox.util.Charsets;
+
 /**
  * This class represents an integer number in a PDF document.
  *
@@ -91,8 +93,6 @@ public final class COSInteger extends COSNumber
     private final long value;
 
     /**
-     * constructor.
-     *
      * @param val The integer value of this object.
      */
     private COSInteger( long val )
@@ -100,102 +100,63 @@ public final class COSInteger extends COSNumber
         value = val;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean equals(Object o)
     {
         return o instanceof COSInteger && ((COSInteger)o).intValue() == intValue();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int hashCode()
     {
-        //taken from java.lang.Long
-        return (int)(value ^ (value >> 32));
+        return Long.hashCode(value);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString()
     {
         return "COSInt{" + value + "}";
     }
 
-    /**
-     * polymorphic access to value as float.
-     *
-     * @return The float value of this object.
-     */
     @Override
     public float floatValue()
     {
         return value;
     }
 
-    /**
-     * polymorphic access to value as float.
-     *
-     * @return The double value of this object.
-     */
     @Override
     public double doubleValue()
     {
         return value;
     }
 
-    /**
-     * Polymorphic access to value as int
-     * This will get the integer value of this object.
-     *
-     * @return The int value of this object,
-     */
     @Override
     public int intValue()
     {
         return (int)value;
     }
 
-    /**
-     * Polymorphic access to value as int
-     * This will get the integer value of this object.
-     *
-     * @return The int value of this object,
-     */
     @Override
     public long longValue()
     {
         return value;
     }
 
-    /**
-     * visitor pattern double dispatch method.
-     *
-     * @param visitor The object to notify when visiting this object.
-     * @return any object, depending on the visitor implementation, or null
-     * @throws IOException If an error occurs while visiting this object.
-     */
     @Override
-    public Object accept(ICOSVisitor visitor) throws IOException
+    public void accept(COSVisitor visitor)
     {
-        return visitor.visitFromInt(this);
+        visitor.visit(this);
     }
 
     /**
-     * This will output this string as a PDF object.
+     * Writes the {@link COSInteger} to the given {@link OutputStream}
      *
      * @param output The stream to write to.
      * @throws IOException If there is an error writing to the stream.
      */
-    public void writePDF( OutputStream output ) throws IOException
+    public void writeTo(OutputStream output) throws IOException
     {
-        output.write(String.valueOf(value).getBytes("ISO-8859-1"));
+        output.write(Long.toString(value).getBytes(Charsets.ISO_8859_1));
     }
 
 }

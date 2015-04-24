@@ -18,13 +18,11 @@ package org.apache.pdfbox.contentstream.operator.text;
 
 import java.util.List;
 
+import org.apache.pdfbox.contentstream.operator.Operator;
+import org.apache.pdfbox.contentstream.operator.OperatorProcessor;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSNumber;
 import org.apache.pdfbox.pdmodel.graphics.state.RenderingMode;
-import org.apache.pdfbox.contentstream.operator.Operator;
-import org.apache.pdfbox.contentstream.operator.OperatorProcessor;
-
-import java.io.IOException;
 
 /**
  * Tr: Set text rendering mode.
@@ -34,7 +32,7 @@ import java.io.IOException;
 public class SetTextRenderingMode extends OperatorProcessor
 {
     @Override
-    public void process(Operator operator, List<COSBase> arguments) throws IOException
+    public void process(Operator operator, List<COSBase> arguments)
     {
         COSNumber mode = (COSNumber)arguments.get(0);
         RenderingMode renderingMode = RenderingMode.fromInt(mode.intValue());

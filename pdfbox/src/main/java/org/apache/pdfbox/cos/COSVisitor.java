@@ -14,21 +14,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.pdfbox.pdmodel.common;
-
-import org.apache.pdfbox.cos.COSBase;
+package org.apache.pdfbox.cos;
 
 /**
- * This is an interface used to get/create the underlying COSObject.
+ * @author Andrea Vacondio
  *
- * @author Ben Litchfield
  */
-public interface COSObjectable
+public interface COSVisitor
 {
-    /**
-     * Convert this standard java object to a COS object.
-     *
-     * @return The cos object that matches this Java object.
-     */
-    COSBase getCOSObject();
+
+    void visit(COSArray value);
+
+    void visit(COSBoolean value);
+
+    void visit(COSDictionary value);
+
+    void visit(COSDocument value);
+
+    void visit(COSFloat value);
+
+    void visit(COSInteger value);
+
+    void visit(COSName value);
+
+    void visit(COSNull value);
+
+    void visit(COSStream value);
+
+    void visit(COSString value);
+
 }

@@ -18,10 +18,11 @@
 package org.apache.pdfbox.cos;
 
 import static org.junit.Assert.assertEquals;
-import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.junit.Test;
 
 /**
  * Test for PDFDocEncoding.
@@ -85,7 +86,7 @@ public class PDFDocEncodingTest
     {
         for (String deviation: deviations)
         {
-            COSString cosString = new COSString(deviation);
+            COSString cosString = COSString.parseLiteral(deviation);
             assertEquals(cosString.getString(), deviation);
         }
     }

@@ -19,6 +19,7 @@ package org.apache.pdfbox.filter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSDictionary;
@@ -67,7 +68,6 @@ final class RunLengthDecodeFilter extends Filter
 
     @Override
     protected void encode(InputStream input, OutputStream encoded, COSDictionary parameters)
-            throws IOException
     {
         LOG.warn("RunLengthDecodeFilter.encode is not implemented yet, skipping this stream.");
     }

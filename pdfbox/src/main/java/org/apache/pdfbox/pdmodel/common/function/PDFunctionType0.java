@@ -17,6 +17,7 @@
 package org.apache.pdfbox.pdmodel.common.function;
 
 import java.io.IOException;
+
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.MemoryCacheImageInputStream;
 
@@ -419,11 +420,8 @@ public class PDFunctionType0 extends PDFunction
         }
     }
 
-    /**
-    * {@inheritDoc}
-    */
     @Override
-    public float[] eval(float[] input) throws IOException
+    public float[] eval(float[] input)
     {
         //This involves linear interpolation based on a set of sample points.
         //Theoretically it's not that difficult ... see section 3.9.1 of the PDF Reference.

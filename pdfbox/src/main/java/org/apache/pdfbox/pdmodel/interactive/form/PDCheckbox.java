@@ -59,7 +59,7 @@ public final class PDCheckbox extends PDButton
      * @return true If the radio button is checked.
      * @throws IOException 
      */
-    public boolean isChecked() throws IOException
+    public boolean isChecked()
     {
         String onValue = getOnValue();
         String fieldValue = null;

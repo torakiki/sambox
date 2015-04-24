@@ -27,14 +27,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Stack;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSNumber;
+import org.apache.pdfbox.cos.COSStreamArray;
 import org.apache.pdfbox.pdfwriter.COSWriter;
-import org.apache.pdfbox.pdmodel.common.COSStreamArray;
 import org.apache.pdfbox.pdmodel.common.PDStream;
 import org.apache.pdfbox.pdmodel.documentinterchange.markedcontent.PDPropertyList;
 import org.apache.pdfbox.pdmodel.font.PDFont;
@@ -844,7 +845,7 @@ public final class PDPageContentStream implements Closeable
         writeOperator("cs");
     }
 
-    private COSName getName(PDColorSpace colorSpace) throws IOException
+    private COSName getName(PDColorSpace colorSpace)
     {
         if (colorSpace instanceof PDDeviceGray ||
             colorSpace instanceof PDDeviceRGB ||
@@ -1997,31 +1998,6 @@ public final class PDPageContentStream implements Closeable
         output.write(formatDecimal.format(data).getBytes(Charsets.US_ASCII));
     }
 
-    /**
-     * This will append raw commands to the content stream.
-     *
-     * @param data Append a formatted float value to the stream.
-     * @throws IOException If an error occurs while writing to the stream.
-     * @deprecated This method will be removed in a future release.
-     */
-    @Deprecated
-    public void appendRawCommands(float data) throws IOException
-    {
-        output.write(formatDecimal.format(data).getBytes(Charsets.US_ASCII));
-    }
-
-    /**
-     * This will append a {@link COSName} to the content stream.
-     *
-     * @param name the name
-     * @throws IOException If an error occurs while writing to the stream.
-     * @deprecated This method will be removed in a future release.
-     */
-    @Deprecated
-    public void appendCOSName(COSName name) throws IOException
-    {
-        name.writePDF(output);
-    }
     
     /**
      * Set an extended graphics state.
@@ -2058,7 +2034,7 @@ public final class PDPageContentStream implements Closeable
      */
     private void writeOperand(COSName name) throws IOException
     {
-        name.writePDF(output);
+        name.writeTo(output);
         output.write(' ');
     }
 

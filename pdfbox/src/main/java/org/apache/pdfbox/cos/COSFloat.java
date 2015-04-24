@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 
+import org.apache.pdfbox.util.Charsets;
+
 /**
  * This class represents a floating point number in a PDF document.
  *
@@ -32,8 +34,6 @@ public class COSFloat extends COSNumber
     private String valueAsString;
 
     /**
-     * Constructor.
-     *
      * @param aFloat The primitive float object that this object wraps.
      */
     public COSFloat( float aFloat )
@@ -45,10 +45,7 @@ public class COSFloat extends COSNumber
     }
 
     /**
-     * Constructor.
-     *
      * @param aFloat The primitive float object that this object wraps.
-     *
      * @throws IOException If aFloat is not a float.
      */
     public COSFloat( String aFloat ) throws IOException
@@ -64,7 +61,7 @@ public class COSFloat extends COSNumber
         }
     }
 
-    private String removeNullDigits(String plainStringValue)
+    private static String removeNullDigits(String plainStringValue)
     {
         // remove fraction digit "0" only
         if (plainStringValue.indexOf('.') > -1 && !plainStringValue.endsWith(".0"))
@@ -77,53 +74,30 @@ public class COSFloat extends COSNumber
         return plainStringValue;
     }
 
-    /**
-     * The value of the float object that this one wraps.
-     *
-     * @return The value of this object.
-     */
     @Override
     public float floatValue()
     {
         return value.floatValue();
     }
 
-    /**
-     * The value of the double object that this one wraps.
-     *
-     * @return The double of this object.
-     */
     @Override
     public double doubleValue()
     {
         return value.doubleValue();
     }
 
-    /**
-     * This will get the long value of this object.
-     *
-     * @return The long value of this object,
-     */
     @Override
     public long longValue()
     {
         return value.longValue();
     }
 
-    /**
-     * This will get the integer value of this object.
-     *
-     * @return The int value of this object,
-     */
     @Override
     public int intValue()
     {
         return value.intValue();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean equals( Object o )
     {
@@ -131,45 +105,32 @@ public class COSFloat extends COSNumber
                 Float.floatToIntBits(((COSFloat)o).value.floatValue()) == Float.floatToIntBits(value.floatValue());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int hashCode()
     {
         return value.hashCode();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString()
     {
         return "COSFloat{" + valueAsString + "}";
     }
 
-    /**
-     * visitor pattern double dispatch method.
-     *
-     * @param visitor The object to notify when visiting this object.
-     * @return any object, depending on the visitor implementation, or null
-     * @throws IOException If an error occurs while visiting this object.
-     */
     @Override
-    public Object accept(ICOSVisitor visitor) throws IOException
+    public void accept(COSVisitor visitor)
     {
-        return visitor.visitFromFloat(this);
+        visitor.visit(this);
     }
 
     /**
-     * This will output this string as a PDF object.
+     * Writes the {@link COSFloat} to the given {@link OutputStream}
      *
      * @param output The stream to write to.
      * @throws IOException If there is an error writing to the stream.
      */
-    public void writePDF( OutputStream output ) throws IOException
+    public void writeTo(OutputStream output) throws IOException
     {
-        output.write(valueAsString.getBytes("ISO-8859-1"));
+        output.write(valueAsString.getBytes(Charsets.ISO_8859_1));
     }
 }

@@ -16,14 +16,13 @@
  */
 package org.apache.pdfbox.examples.signature;
 
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
-import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.cms.CMSTypedData;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
+import org.bouncycastle.cms.CMSTypedData;
 
 /**
  * Wraps a InputStream into a CMSProcessable object for bouncy castle.
@@ -53,7 +52,7 @@ class CMSProcessableInputStream implements CMSTypedData
     }
 
     @Override
-    public void write(OutputStream out) throws IOException, CMSException
+    public void write(OutputStream out) throws IOException
     {
         // read the content only one time
         byte[] buffer = new byte[8 * 1024];

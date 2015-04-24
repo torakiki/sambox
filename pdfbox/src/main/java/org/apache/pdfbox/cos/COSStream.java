@@ -113,8 +113,6 @@ public class COSStream extends COSDictionary implements Closeable
     }
     
     /**
-     * This will get the logical content stream with none of the filters.
-     *
      * @return the bytes of the logical (decoded) stream
      *
      * @throws IOException when encoding/decoding causes an exception
@@ -195,9 +193,9 @@ public class COSStream extends COSDictionary implements Closeable
     }
 
     @Override
-    public Object accept(ICOSVisitor visitor) throws IOException
+    public void accept(COSVisitor visitor)
     {
-        return visitor.visitFromStream(this);
+        visitor.visit(this);
     }
 
     /**

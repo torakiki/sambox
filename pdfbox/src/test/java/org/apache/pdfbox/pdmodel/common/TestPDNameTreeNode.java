@@ -20,8 +20,12 @@ import java.io.IOException;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
+
 import junit.framework.TestCase;
+
+import org.apache.pdfbox.cos.COSArrayList;
 import org.apache.pdfbox.cos.COSInteger;
+import org.apache.pdfbox.cos.COSObjectable;
 import org.junit.Assert;
 
 /**
@@ -39,7 +43,7 @@ public class TestPDNameTreeNode extends TestCase
     private PDNameTreeNode node24;
 
     @Override
-    protected void setUp() throws Exception
+    protected void setUp()
     {
         this.node5 = new PDNameTreeNode(COSInteger.class);
         SortedMap<String, COSObjectable> names = new TreeMap<String, COSObjectable>();

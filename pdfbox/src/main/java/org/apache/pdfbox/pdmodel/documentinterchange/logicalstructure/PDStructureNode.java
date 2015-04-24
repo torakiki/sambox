@@ -21,12 +21,12 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.pdfbox.cos.COSArray;
+import org.apache.pdfbox.cos.COSArrayList;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSInteger;
 import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.pdmodel.common.COSArrayList;
-import org.apache.pdfbox.pdmodel.common.COSObjectable;
+import org.apache.pdfbox.cos.COSObjectable;
 
 /**
  * A node in the structure tree.
@@ -254,10 +254,6 @@ public abstract class PDStructureNode implements COSObjectable
         if (refKid instanceof COSObjectable)
         {
             refKidBase = ((COSObjectable) refKid).getCOSObject();
-        }
-        else if (refKid instanceof COSInteger)
-        {
-            refKidBase = (COSBase) refKid;
         }
         if (k instanceof COSArray)
         {

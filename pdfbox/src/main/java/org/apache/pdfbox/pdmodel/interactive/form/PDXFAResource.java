@@ -27,8 +27,8 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
+import org.apache.pdfbox.cos.COSObjectable;
 import org.apache.pdfbox.cos.COSStream;
-import org.apache.pdfbox.pdmodel.common.COSObjectable;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 

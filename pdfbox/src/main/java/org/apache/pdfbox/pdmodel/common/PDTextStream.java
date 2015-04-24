@@ -16,12 +16,13 @@
  */
 package org.apache.pdfbox.pdmodel.common;
 
-import java.io.ByteArrayOutputStream;
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.apache.pdfbox.cos.COSBase;
+import org.apache.pdfbox.cos.COSObjectable;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.io.IOUtils;
@@ -57,7 +58,7 @@ public class PDTextStream implements COSObjectable
      */
     public PDTextStream( String str )
     {
-        string = new COSString( str );
+        string = COSString.parseLiteral(str);
     }
 
     /**

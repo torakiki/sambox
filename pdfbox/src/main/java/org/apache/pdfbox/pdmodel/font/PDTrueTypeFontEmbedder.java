@@ -23,11 +23,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.fontbox.ttf.HorizontalMetricsTable;
+import org.apache.pdfbox.cos.COSArrayList;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.common.COSArrayList;
 import org.apache.pdfbox.pdmodel.font.encoding.Encoding;
 import org.apache.pdfbox.pdmodel.font.encoding.GlyphList;
 import org.apache.pdfbox.pdmodel.font.encoding.WinAnsiEncoding;
@@ -122,7 +123,7 @@ final class PDTrueTypeFontEmbedder extends TrueTypeEmbedder
 
     @Override
     protected void buildSubset(InputStream ttfSubset, String tag,
-                            Map<Integer, Integer> gidToCid) throws IOException
+ Map<Integer, Integer> gidToCid)
     {
         // use PDType0Font instead
         throw new UnsupportedOperationException();

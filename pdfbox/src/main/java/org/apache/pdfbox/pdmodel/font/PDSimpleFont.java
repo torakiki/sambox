@@ -16,6 +16,10 @@
  */
 package org.apache.pdfbox.pdmodel.font;
 
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSBase;
@@ -27,10 +31,6 @@ import org.apache.pdfbox.pdmodel.font.encoding.GlyphList;
 import org.apache.pdfbox.pdmodel.font.encoding.MacRomanEncoding;
 import org.apache.pdfbox.pdmodel.font.encoding.StandardEncoding;
 import org.apache.pdfbox.pdmodel.font.encoding.WinAnsiEncoding;
-
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * A simple font. Simple fonts use a PostScript encoding vector.
@@ -284,13 +284,13 @@ public abstract class PDSimpleFont extends PDFont
     }
 
     @Override
-    public String toUnicode(int code) throws IOException
+    public String toUnicode(int code)
     {
         return toUnicode(code, GlyphList.getAdobeGlyphList());
     }
 
     @Override
-    public String toUnicode(int code, GlyphList customGlyphList) throws IOException
+    public String toUnicode(int code, GlyphList customGlyphList)
     {
         // allow the glyph list to be overridden for the purpose of extracting Unicode
         // we only do this when the font's glyph list is the AGL, to avoid breaking Zapf Dingbats
@@ -400,7 +400,7 @@ public abstract class PDSimpleFont extends PDFont
     }
 
     @Override
-    public void subset() throws IOException
+    public void subset()
     {
         // only TTF subsetting via PDType0Font is currently supported
         throw new UnsupportedOperationException();

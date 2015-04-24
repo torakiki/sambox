@@ -25,6 +25,8 @@ import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 
+import javax.imageio.ImageIO;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -32,8 +34,6 @@ import junit.framework.TestSuite;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.pdmodel.PDDocument;
-
-import javax.imageio.ImageIO;
 
 /**
  * Test suite for rendering.
@@ -76,10 +76,8 @@ public class TestPDFToImage extends TestCase
      * Test class constructor.
      *
      * @param name The name of the test class.
-     *
-     * @throws IOException If there is an error creating the test.
      */
-    public TestPDFToImage(String name) throws IOException
+    public TestPDFToImage(String name)
     {
         super(name);
     }

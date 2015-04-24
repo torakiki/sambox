@@ -23,8 +23,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -36,7 +34,6 @@ import org.apache.pdfbox.cos.COSInteger;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.io.IOUtils;
-import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdfwriter.COSWriter;
 import org.apache.pdfbox.pdmodel.common.PDStream;
 import org.apache.pdfbox.pdmodel.encryption.AccessPermission;
@@ -45,9 +42,6 @@ import org.apache.pdfbox.pdmodel.encryption.ProtectionPolicy;
 import org.apache.pdfbox.pdmodel.encryption.SecurityHandler;
 import org.apache.pdfbox.pdmodel.encryption.SecurityHandlerFactory;
 import org.apache.pdfbox.pdmodel.font.PDFont;
-import org.apache.pdfbox.pdmodel.interactive.digitalsignature.PDSignature;
-import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
-import org.apache.pdfbox.pdmodel.interactive.form.PDSignatureField;
 
 /**
  * This is the in-memory representation of the PDF document. The #close() method must be called once the document is no
@@ -261,64 +255,9 @@ public class PDDocument implements Closeable
      * 
      * @throws IOException If there is an error determining which security handler to use.
      */
-    public void setEncryptionDictionary(PDEncryption encryption) throws IOException
+    public void setEncryptionDictionary(PDEncryption encryption)
     {
         this.encryption = encryption;
-    }
-
-    /**
-     * This will return the last signature.
-     * 
-     * @return the last signature as <code>PDSignatureField</code>.
-     * @throws IOException if no document catalog can be found.
-     */
-    public PDSignature getLastSignatureDictionary() throws IOException
-    {
-        List<PDSignature> signatureDictionaries = getSignatureDictionaries();
-        int size = signatureDictionaries.size();
-        if (size > 0)
-        {
-            return signatureDictionaries.get(size - 1);
-        }
-        return null;
-    }
-
-    /**
-     * Retrieve all signature fields from the document.
-     * 
-     * @return a <code>List</code> of <code>PDSignatureField</code>s
-     * @throws IOException if no document catalog can be found.
-     */
-    public List<PDSignatureField> getSignatureFields() throws IOException
-    {
-        List<PDSignatureField> fields = new LinkedList<PDSignatureField>();
-        PDAcroForm acroForm = getDocumentCatalog().getAcroForm();
-        if (acroForm != null)
-        {
-            List<COSDictionary> signatureDictionary = document.getSignatureFields(false);
-            for (COSDictionary dict : signatureDictionary)
-            {
-                fields.add(new PDSignatureField(acroForm, dict, null));
-            }
-        }
-        return fields;
-    }
-
-    /**
-     * Retrieve all signature dictionaries from the document.
-     * 
-     * @return a <code>List</code> of <code>PDSignatureField</code>s
-     * @throws IOException if no document catalog can be found.
-     */
-    public List<PDSignature> getSignatureDictionaries() throws IOException
-    {
-        List<COSDictionary> signatureDictionary = document.getSignatureDictionaries();
-        List<PDSignature> signatures = new LinkedList<PDSignature>();
-        for (COSDictionary dict : signatureDictionary)
-        {
-            signatures.add(new PDSignature(dict));
-        }
-        return signatures;
     }
 
     /**
@@ -407,7 +346,7 @@ public class PDDocument implements Closeable
      * @throws IOException If there is an error releasing resources.
      */
     @Override
-    public void close() throws IOException
+    public void close()
     {
         // TODO
     }
@@ -532,107 +471,5 @@ public class PDDocument implements Closeable
             // versions < 1.4f have a version header only
             getDocument().setHeaderVersion(newVersion);
         }
-    }
-
-    /**
-     * Parses PDF with non sequential parser.
-     * 
-     * @param file file to be loaded
-     * 
-     * @return loaded document
-     * 
-     * @throws IOException in case of a file reading or parsing error
-     */
-    public static PDDocument load(File file) throws IOException
-    {
-        return load(file, "");
-    }
-
-    /**
-     * Parses PDF with non sequential parser.
-     * 
-     * @param file file to be loaded
-     * @param password password to be used for decryption
-     * @param useScratchFiles enables the usage of a scratch file if set to true
-     * 
-     * @return loaded document
-     * 
-     * @throws IOException in case of a file reading or parsing error
-     */
-    public static PDDocument load(File file, String password) throws IOException
-    {
-        return load(file, password, null, null);
-    }
-
-    /**
-     * Parses PDF with non sequential parser.
-     * 
-     * @param file file to be loaded
-     * @param password password to be used for decryption
-     * @param keyStore key store to be used for decryption when using public key security
-     * @param alias alias to be used for decryption when using public key security
-     * @param useScratchFiles enables the usage of a scratch file if set to true
-     * 
-     * @return loaded document
-     * 
-     * @throws IOException in case of a file reading or parsing error
-     */
-    public static PDDocument load(File file, String password, InputStream keyStore, String alias)
-            throws IOException
-    {
-        PDFParser parser = new PDFParser(file, password, keyStore, alias, false);
-        parser.parse();
-        PDDocument doc = parser.getPDDocument();
-        return doc;
-    }
-
-    /**
-     * Parses PDF with non sequential parser.
-     * 
-     * @param input stream that contains the document.
-     * 
-     * @return loaded document
-     * 
-     * @throws IOException in case of a file reading or parsing error
-     */
-    public static PDDocument load(InputStream input) throws IOException
-    {
-        return load(input, "", null, null);
-    }
-
-    /**
-     * Parses PDF with non sequential parser.
-     * 
-     * @param input stream that contains the document.
-     * @param password password to be used for decryption
-     * 
-     * @return loaded document
-     * 
-     * @throws IOException in case of a file reading or parsing error
-     */
-    public static PDDocument load(InputStream input, String password) throws IOException
-    {
-        return load(input, password, null, null);
-    }
-
-    /**
-     * Parses PDF with non sequential parser.
-     * 
-     * @param input stream that contains the document.
-     * @param password password to be used for decryption
-     * @param keyStore key store to be used for decryption when using public key security
-     * @param alias alias to be used for decryption when using public key security
-     * @param useScratchFiles enables the usage of a scratch file if set to true
-     * 
-     * @return loaded document
-     * 
-     * @throws IOException in case of a file reading or parsing error
-     */
-    public static PDDocument load(InputStream input, String password, InputStream keyStore,
-            String alias) throws IOException
-    {
-        PDFParser parser = new PDFParser(input, password, keyStore, alias, false);
-        parser.parse();
-        return parser.getPDDocument();
     }
 }

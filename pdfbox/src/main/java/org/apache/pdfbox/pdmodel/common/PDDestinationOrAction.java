@@ -16,6 +16,8 @@
  */
 package org.apache.pdfbox.pdmodel.common;
 
+import org.apache.pdfbox.cos.COSObjectable;
+
 /**
  * This is an interface used for some elements such as the document
  * OpenAction that can be either a Destination or an Action.

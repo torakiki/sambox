@@ -18,9 +18,9 @@
 package org.apache.pdfbox.pdmodel.font;
 
 import org.apache.pdfbox.contentstream.PDContentStream;
+import org.apache.pdfbox.cos.COSObjectable;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.pdmodel.PDResources;
-import org.apache.pdfbox.pdmodel.common.COSObjectable;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.util.Matrix;
 

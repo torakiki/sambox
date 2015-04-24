@@ -18,8 +18,7 @@ package org.apache.pdfbox.pdmodel.font;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.fontbox.cmap.CMap;
@@ -48,7 +47,6 @@ public class PDCIDFontType2 extends PDCIDFont
 
     private final TrueTypeFont ttf;
     private final int[] cid2gid;
-    private final Map<Integer, Integer> gid2cid;
     private final boolean hasIdentityCid2Gid;
     private final boolean isEmbedded;
     private final boolean isDamaged;
@@ -150,7 +148,6 @@ public class PDCIDFontType2 extends PDCIDFont
         cmap = ttf.getUnicodeCmap(false);
 
         cid2gid = readCIDToGIDMap();
-        gid2cid = invert(cid2gid);
         COSBase map = dict.getDictionaryObject(COSName.CID_TO_GID_MAP);
         hasIdentityCid2Gid = map instanceof COSName && ((COSName) map).getName().equals("Identity");
     }
@@ -194,20 +191,6 @@ public class PDCIDFontType2 extends PDCIDFont
             }
         }
         return cid2gid;
-    }
-
-    private Map<Integer, Integer> invert(int[] cid2gid)
-    {
-        if (cid2gid == null)
-        {
-            return null;
-        }
-        Map<Integer, Integer> inverse = new HashMap<Integer, Integer>();
-        for (int i = 0; i < cid2gid.length; i++)
-        {
-            inverse.put(cid2gid[i], i);
-        }
-        return inverse;
     }
 
     @Override

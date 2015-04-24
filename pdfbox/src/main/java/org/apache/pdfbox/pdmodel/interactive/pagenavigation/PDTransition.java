@@ -184,6 +184,6 @@ public final class PDTransition extends PDDictionaryWrapper
      */
     public void setFlyAreaOpaque(boolean opaque)
     {
-        getCOSObject().setItem(COSName.B, COSBoolean.getBoolean(opaque));
+        getCOSObject().setItem(COSName.B, COSBoolean.valueOf(opaque));
     }
 }

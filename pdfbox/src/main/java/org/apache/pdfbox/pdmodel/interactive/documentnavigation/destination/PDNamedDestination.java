@@ -66,7 +66,7 @@ public class PDNamedDestination extends PDDestination
      */
     public PDNamedDestination( String dest )
     {
-        namedDestination = new COSString( dest );
+        namedDestination = COSString.parseLiteral(dest);
     }
 
     /**
@@ -106,7 +106,7 @@ public class PDNamedDestination extends PDDestination
      *
      * @throws IOException If there is an error setting the named destination.
      */
-    public void setNamedDestination( String dest ) throws IOException
+    public void setNamedDestination(String dest)
     {
         if (dest == null)
         {
@@ -114,7 +114,7 @@ public class PDNamedDestination extends PDDestination
         }
         else
         {
-            namedDestination = new COSString( dest );
+            namedDestination = COSString.parseLiteral(dest);
         }
     }
 }

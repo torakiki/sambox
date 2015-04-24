@@ -125,7 +125,6 @@ public final class JPXFilter extends Filter
 
     @Override
     protected void encode(InputStream input, OutputStream encoded, COSDictionary parameters)
-            throws IOException
     {
         throw new UnsupportedOperationException("JPX encoding not implemented");
     }

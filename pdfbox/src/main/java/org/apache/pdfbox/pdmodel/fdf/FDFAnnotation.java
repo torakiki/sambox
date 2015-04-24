@@ -27,7 +27,7 @@ import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSNumber;
-import org.apache.pdfbox.pdmodel.common.COSObjectable;
+import org.apache.pdfbox.cos.COSObjectable;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotation;
 import org.apache.pdfbox.util.DateConverter;
@@ -70,10 +70,8 @@ public abstract class FDFAnnotation implements COSObjectable
      * Constructor.
      *
      * @param element An XFDF element.
-     *
-     * @throws IOException If there is an error extracting data from the element.
      */
-    public FDFAnnotation( Element element ) throws IOException
+    public FDFAnnotation(Element element)
     {
         this();
 

@@ -20,9 +20,9 @@ import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
+import org.apache.pdfbox.cos.COSObjectable;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.cos.COSString;
-import org.apache.pdfbox.pdmodel.common.COSObjectable;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.common.PDStream;
 
@@ -335,7 +335,7 @@ public final class PDFontDescriptor implements COSObjectable
         COSString name = null;
         if( fontFamily != null )
         {
-            name = new COSString( fontFamily );
+            name = COSString.parseLiteral(fontFamily);
         }
         dic.setItem( COSName.FONT_FAMILY, name );
     }
@@ -726,7 +726,7 @@ public final class PDFontDescriptor implements COSObjectable
         COSString name = null;
         if( charSet != null )
         {
-            name = new COSString( charSet );
+            name = COSString.parseLiteral(charSet);
         }
         dic.setItem( COSName.CHAR_SET, name );
     }

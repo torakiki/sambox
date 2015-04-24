@@ -18,8 +18,6 @@ package org.apache.pdfbox.cos;
 
 import java.io.IOException;
 
-import org.apache.pdfbox.pdmodel.common.COSObjectable;
-
 /**
  * The base object that all objects in the PDF document will extend.
  *
@@ -38,13 +36,12 @@ public abstract class COSBase implements COSObjectable
     {
         return this;
     }
-    
+
     /**
-     * visitor pattern double dispatch method.
-     *
-     * @param visitor The object to notify when visiting this object.
-     * @return any object, depending on the visitor implementation, or null
-     * @throws IOException If an error occurs while visiting this object.
+     * Visitor pattern for the COS model objects
+     * 
+     * @param visitor
+     * @throws IOException
      */
-    public abstract Object accept(ICOSVisitor visitor) throws IOException;
+    public abstract void accept(COSVisitor visitor) throws IOException;
 }

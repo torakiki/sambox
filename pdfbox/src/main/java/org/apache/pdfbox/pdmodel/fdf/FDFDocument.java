@@ -47,10 +47,8 @@ public class FDFDocument
 
     /**
      * Constructor, creates a new FDF document.
-     *
-     * @throws IOException If there is an error creating this document.
      */
-    public FDFDocument() throws IOException
+    public FDFDocument()
     {
         document = new COSDocument();
         document.setHeaderVersion(1.2f);

@@ -15,7 +15,6 @@
  */
 package org.apache.pdfbox.pdmodel.common.function;
 
-import java.io.IOException;
 import org.apache.pdfbox.cos.COSBase;
 
 /**
@@ -39,7 +38,7 @@ public class PDFunctionTypeIdentity extends PDFunction
     }
 
     @Override
-    public float[] eval(float[] input) throws IOException
+    public float[] eval(float[] input)
     {
         return input;
     }

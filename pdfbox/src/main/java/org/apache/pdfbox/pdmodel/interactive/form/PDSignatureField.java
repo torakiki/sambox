@@ -16,16 +16,15 @@
  */
 package org.apache.pdfbox.pdmodel.interactive.form;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.interactive.digitalsignature.PDSeedValue;
 import org.apache.pdfbox.pdmodel.interactive.digitalsignature.PDSignature;
-
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * A signature field is a form field that contains a digital signature.
@@ -51,10 +50,8 @@ public class PDSignatureField extends PDField
      * @see PDField#PDField(PDAcroForm)
      *
      * @param theAcroForm The acroForm for this field.
-     * @throws IOException If there is an error while resolving partial name for the signature field
-     *         or getting the widget object.
      */
-    public PDSignatureField(PDAcroForm theAcroForm) throws IOException
+    public PDSignatureField(PDAcroForm theAcroForm)
     {
         super( theAcroForm );
         getDictionary().setItem(COSName.FT, COSName.SIG);

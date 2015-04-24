@@ -124,7 +124,7 @@ public abstract class PDStandardAttributeObject extends PDAttributeObject
         COSArray array = new COSArray();
         for (String value : values)
         {
-            array.add(new COSString(value));
+            array.add(COSString.parseLiteral(value));
         }
         this.getCOSObject().setItem(name, array);
         COSBase newBase = this.getCOSObject().getDictionaryObject(name);

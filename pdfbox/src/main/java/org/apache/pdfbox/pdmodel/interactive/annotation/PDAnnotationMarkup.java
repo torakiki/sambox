@@ -16,14 +16,12 @@
  */
 package org.apache.pdfbox.pdmodel.interactive.annotation;
 
-import org.apache.pdfbox.cos.COSDictionary;
-
-import org.apache.pdfbox.pdmodel.common.PDTextStream;
-import org.apache.pdfbox.cos.COSBase;
-
 import java.io.IOException;
-
 import java.util.Calendar;
+
+import org.apache.pdfbox.cos.COSBase;
+import org.apache.pdfbox.cos.COSDictionary;
+import org.apache.pdfbox.pdmodel.common.PDTextStream;
 
 /**
  * This class represents the additonal fields of a Markup type Annotation.  See
@@ -207,7 +205,7 @@ public class PDAnnotationMarkup extends PDAnnotation
      * @throws IOException
      *             if there is a format problem when converting the date.
      */
-    public Calendar getCreationDate() throws IOException
+    public Calendar getCreationDate()
     {
         return getDictionary().getDate( "CreationDate" );
     }

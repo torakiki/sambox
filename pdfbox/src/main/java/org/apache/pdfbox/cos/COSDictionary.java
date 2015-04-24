@@ -16,7 +16,6 @@
  */
 package org.apache.pdfbox.cos;
 
-import java.io.IOException;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -24,7 +23,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.apache.pdfbox.pdmodel.common.COSObjectable;
 import org.apache.pdfbox.util.DateConverter;
 
 /**
@@ -40,7 +38,7 @@ public class COSDictionary extends COSBase
     /**
      * The name-value pairs of this dictionary. The pairs are kept in the order they were added to the dictionary.
      */
-    protected Map<COSName, COSBase> items = new LinkedHashMap<COSName, COSBase>();
+    protected Map<COSName, COSBase> items = new LinkedHashMap<>();
 
     public COSDictionary()
     {
@@ -214,7 +212,7 @@ public class COSDictionary extends COSBase
      */
     public void setBoolean(String key, boolean value)
     {
-        setItem(COSName.getPDFName(key), COSBoolean.getBoolean(value));
+        setItem(COSName.getPDFName(key), COSBoolean.valueOf(value));
     }
 
     /**
@@ -225,7 +223,7 @@ public class COSDictionary extends COSBase
      */
     public void setBoolean(COSName key, boolean value)
     {
-        setItem(key, COSBoolean.getBoolean(value));
+        setItem(key, COSBoolean.valueOf(value));
     }
 
     /**
@@ -347,7 +345,7 @@ public class COSDictionary extends COSBase
         COSString name = null;
         if (value != null)
         {
-            name = new COSString(value);
+            name = COSString.parseLiteral(value);
         }
         setItem(key, name);
     }
@@ -790,9 +788,8 @@ public class COSDictionary extends COSBase
      * @param embedded The embedded dictionary to get.
      * @param key The key to the item in the dictionary.
      * @return The name converted to a string.
-     * @throws IOException If there is an error converting to a date.
      */
-    public Calendar getEmbeddedDate(String embedded, String key) throws IOException
+    public Calendar getEmbeddedDate(String embedded, String key)
     {
         return getEmbeddedDate(embedded, COSName.getPDFName(key), null);
     }
@@ -804,10 +801,8 @@ public class COSDictionary extends COSBase
      * @param embedded The embedded dictionary to get.
      * @param key The key to the item in the dictionary.
      * @return The name converted to a string.
-     *
-     * @throws IOException If there is an error converting to a date.
      */
-    public Calendar getEmbeddedDate(String embedded, COSName key) throws IOException
+    public Calendar getEmbeddedDate(String embedded, COSName key)
     {
         return getEmbeddedDate(embedded, key, null);
     }
@@ -820,10 +815,8 @@ public class COSDictionary extends COSBase
      * @param key The key to the item in the dictionary.
      * @param defaultValue The default value to return.
      * @return The name converted to a string.
-     * @throws IOException If there is an error converting to a date.
      */
     public Calendar getEmbeddedDate(String embedded, String key, Calendar defaultValue)
-            throws IOException
     {
         return getEmbeddedDate(embedded, COSName.getPDFName(key), defaultValue);
     }
@@ -836,10 +829,8 @@ public class COSDictionary extends COSBase
      * @param key The key to the item in the dictionary.
      * @param defaultValue The default value to return.
      * @return The name converted to a string.
-     * @throws IOException If there is an error converting to a date.
      */
     public Calendar getEmbeddedDate(String embedded, COSName key, Calendar defaultValue)
-            throws IOException
     {
         Calendar retval = defaultValue;
         COSDictionary eDic = (COSDictionary) getDictionaryObject(embedded);
@@ -1275,22 +1266,14 @@ public class COSDictionary extends COSBase
         return items.values();
     }
 
-    /**
-     * visitor pattern double dispatch method.
-     *
-     * @param visitor The object to notify when visiting this object.
-     * @return The object that the visitor returns.
-     *
-     * @throws IOException If there is an error visiting this object.
-     */
     @Override
-    public Object accept(ICOSVisitor visitor) throws IOException
+    public void accept(COSVisitor visitor)
     {
-        return visitor.visitFromDictionary(this);
+        visitor.visit(this);
     }
 
     /**
-     * This will add all of the dictionarys keys/values to this dictionary. Only called when adding keys to a trailer
+     * This will add all of the dictionaries keys/values to this dictionary. Only called when adding keys to a trailer
      * that already exists.
      *
      * @param dic The dic to get the keys from.

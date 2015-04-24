@@ -131,7 +131,7 @@ public class PDEmbeddedFile extends PDStream
      * @return The Creation date.
      * @throws IOException If there is an error while constructing the date.
      */
-    public Calendar getCreationDate() throws IOException
+    public Calendar getCreationDate()
     {
         return getStream().getEmbeddedDate( "Params", "CreationDate" );
     }
@@ -152,7 +152,7 @@ public class PDEmbeddedFile extends PDStream
      * @return The mod date.
      * @throws IOException If there is an error while constructing the date.
      */
-    public Calendar getModDate() throws IOException
+    public Calendar getModDate()
     {
         return getStream().getEmbeddedDate( "Params", "ModDate" );
     }

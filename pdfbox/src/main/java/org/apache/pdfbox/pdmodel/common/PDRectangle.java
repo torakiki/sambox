@@ -18,13 +18,13 @@ package org.apache.pdfbox.pdmodel.common;
 
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
+
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSFloat;
 import org.apache.pdfbox.cos.COSNumber;
-
+import org.apache.pdfbox.cos.COSObjectable;
 import org.apache.fontbox.util.BoundingBox;
-
 import org.apache.pdfbox.util.Matrix;
 
 /**

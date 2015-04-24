@@ -26,9 +26,11 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSArray;
+import org.apache.pdfbox.cos.COSArrayList;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
+import org.apache.pdfbox.cos.COSObjectable;
 import org.apache.pdfbox.cos.COSString;
 
 /**
@@ -189,15 +191,15 @@ public class PDNameTreeNode implements COSObjectable
             }
             else
             {
-                try 
+                try
                 {
                     Map<String, COSObjectable> names = getNames();
                     if (names != null && names.size() > 0)
                     {
                         Object[] keys = names.keySet().toArray();
-                        String lowerLimit = (String)keys[0];
+                        String lowerLimit = (String) keys[0];
                         setLowerLimit(lowerLimit);
-                        String upperLimit = (String)keys[keys.length-1];
+                        String upperLimit = (String) keys[keys.length - 1];
                         setUpperLimit(upperLimit);
                     }
                     else
@@ -208,7 +210,8 @@ public class PDNameTreeNode implements COSObjectable
                 catch (IOException exception)
                 {
                     node.removeItem(COSName.LIMITS);
-                    LOG.error("Error while calculating the Limits of a PageNameTreeNode:", exception);
+                    LOG.error("Error while calculating the Limits of a PageNameTreeNode:",
+                            exception);
                 }
             }
         }
@@ -291,7 +294,7 @@ public class PDNameTreeNode implements COSObjectable
      * @return The converted PD Model object.
      * @throws IOException If there is an error during creation.
      */
-    protected COSObjectable convertCOSToPD( COSBase base ) throws IOException
+    protected COSObjectable convertCOSToPD(COSBase base) throws IOException
     {
         return base;
     }
@@ -328,7 +331,7 @@ public class PDNameTreeNode implements COSObjectable
             Collections.sort(keys);
             for (String key : keys) 
             {
-                array.add(new COSString(key));
+                array.add(COSString.parseLiteral(key));
                 array.add(names.get(key));
             }
             node.setItem(COSName.NAMES, array);

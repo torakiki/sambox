@@ -256,9 +256,9 @@ public class PDEncryption
      *
      * @throws IOException If there is an error setting the data.
      */
-    public void setOwnerKey(byte[] o) throws IOException
+    public void setOwnerKey(byte[] o)
     {
-        dictionary.setItem(COSName.O, new COSString(o));
+        dictionary.setItem(COSName.O, COSString.newInstance(o));
     }
 
     /**
@@ -268,7 +268,7 @@ public class PDEncryption
      *
      * @throws IOException If there is an error accessing the data.
      */
-    public byte[] getOwnerKey() throws IOException
+    public byte[] getOwnerKey()
     {
         byte[] o = null;
         COSString owner = (COSString) dictionary.getDictionaryObject( COSName.O );
@@ -286,9 +286,9 @@ public class PDEncryption
      *
      * @throws IOException If there is an error setting the data.
      */
-    public void setUserKey(byte[] u) throws IOException
+    public void setUserKey(byte[] u)
     {
-        dictionary.setItem(COSName.U, new COSString(u));
+        dictionary.setItem(COSName.U, COSString.newInstance(u));
     }
 
     /**
@@ -298,7 +298,7 @@ public class PDEncryption
      *
      * @throws IOException If there is an error accessing the data.
      */
-    public byte[] getUserKey() throws IOException
+    public byte[] getUserKey()
     {
         byte[] u = null;
         COSString user = (COSString) dictionary.getDictionaryObject( COSName.U );
@@ -316,9 +316,9 @@ public class PDEncryption
      *
      * @throws IOException If there is an error setting the data.
      */
-    public void setOwnerEncryptionKey(byte[] oe) throws IOException
+    public void setOwnerEncryptionKey(byte[] oe)
     {
-        dictionary.setItem( COSName.OE, new COSString(oe) );
+        dictionary.setItem(COSName.OE, COSString.newInstance(oe));
     }
 
     /**
@@ -328,7 +328,7 @@ public class PDEncryption
      *
      * @throws IOException If there is an error accessing the data.
      */
-    public byte[] getOwnerEncryptionKey() throws IOException
+    public byte[] getOwnerEncryptionKey()
     {
         byte[] oe = null;
         COSString ownerEncryptionKey = (COSString)dictionary.getDictionaryObject( COSName.OE );
@@ -346,9 +346,9 @@ public class PDEncryption
      *
      * @throws IOException If there is an error setting the data.
      */
-    public void setUserEncryptionKey(byte[] ue) throws IOException
+    public void setUserEncryptionKey(byte[] ue)
     {
-        dictionary.setItem( COSName.UE, new COSString(ue) );
+        dictionary.setItem(COSName.UE, COSString.newInstance(ue));
     }
 
     /**
@@ -358,7 +358,7 @@ public class PDEncryption
      *
      * @throws IOException If there is an error accessing the data.
      */
-    public byte[] getUserEncryptionKey() throws IOException
+    public byte[] getUserEncryptionKey()
     {
         byte[] ue = null;
         COSString userEncryptionKey = (COSString)dictionary.getDictionaryObject( COSName.UE );
@@ -415,13 +415,12 @@ public class PDEncryption
      * @param recipients the array of bytes arrays to put in the Recipients field.
      * @throws IOException If there is an error setting the data.
      */
-    public void setRecipients(byte[][] recipients) throws IOException
+    public void setRecipients(byte[][] recipients)
     {
         COSArray array = new COSArray();
         for (byte[] recipient : recipients)
         {
-            COSString recip = new COSString(recipient);
-            array.add(recip);
+            array.add(COSString.newInstance(recipient));
         }
         dictionary.setItem(COSName.RECIPIENTS, array);
     }
@@ -568,9 +567,9 @@ public class PDEncryption
      *
      * @throws IOException If there is an error setting the data.
      */
-    public void setPerms(byte[] perms) throws IOException
+    public void setPerms(byte[] perms)
     {
-        dictionary.setItem( COSName.PERMS, new COSString(perms) );
+        dictionary.setItem(COSName.PERMS, COSString.newInstance(perms));
     }
 
     /**
@@ -580,7 +579,7 @@ public class PDEncryption
      *
      * @throws IOException If there is an error accessing the data.
      */
-    public byte[] getPerms() throws IOException
+    public byte[] getPerms()
     {
         byte[] perms = null;
         COSString permsCosString = (COSString)dictionary.getDictionaryObject( COSName.PERMS );

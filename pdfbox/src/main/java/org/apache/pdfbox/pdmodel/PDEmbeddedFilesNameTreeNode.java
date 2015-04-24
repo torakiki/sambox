@@ -16,11 +16,9 @@
  */
 package org.apache.pdfbox.pdmodel;
 
-import java.io.IOException;
-
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
-import org.apache.pdfbox.pdmodel.common.COSObjectable;
+import org.apache.pdfbox.cos.COSObjectable;
 import org.apache.pdfbox.pdmodel.common.PDNameTreeNode;
 import org.apache.pdfbox.pdmodel.common.filespecification.PDComplexFileSpecification;
 
@@ -40,8 +38,6 @@ public class PDEmbeddedFilesNameTreeNode extends PDNameTreeNode
     }
 
     /**
-     * Constructor.
-     *
      * @param dic The COS dictionary.
      */
     public PDEmbeddedFilesNameTreeNode( COSDictionary dic )
@@ -49,17 +45,11 @@ public class PDEmbeddedFilesNameTreeNode extends PDNameTreeNode
         super( dic, PDComplexFileSpecification.class );
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    protected COSObjectable convertCOSToPD( COSBase base ) throws IOException
+    protected COSObjectable convertCOSToPD(COSBase base)
     {
         return new PDComplexFileSpecification( (COSDictionary)base );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     protected PDNameTreeNode createChildNode( COSDictionary dic )
     {
         return new PDEmbeddedFilesNameTreeNode(dic);

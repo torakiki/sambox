@@ -19,6 +19,7 @@ package org.apache.pdfbox.pdmodel.common;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
+import org.apache.pdfbox.cos.COSObjectable;
 
 /**
  * Contains information for a page label range.

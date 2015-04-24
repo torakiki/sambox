@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.pdfbox.pdmodel.common;
+package org.apache.pdfbox.cos;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,15 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
-import org.apache.pdfbox.cos.COSArray;
-import org.apache.pdfbox.cos.COSBase;
-import org.apache.pdfbox.cos.COSDictionary;
-import org.apache.pdfbox.cos.COSFloat;
-import org.apache.pdfbox.cos.COSInteger;
-import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.cos.COSNull;
-import org.apache.pdfbox.cos.COSNumber;
-import org.apache.pdfbox.cos.COSString;
+import org.apache.pdfbox.pdmodel.common.DualCOSObjectable;
 
 /**
  * This is an implementation of a List that will sync its contents to a COSArray.
@@ -165,7 +157,7 @@ public class COSArrayList<E> implements List<E>
         //string is a special case because we can't subclass to be COSObjectable
         if( o instanceof String )
         {
-            array.add( new COSString( (String)o ) );
+            array.add(COSString.parseLiteral((String) o));
         }
         else if( o instanceof DualCOSObjectable )
         {
@@ -271,13 +263,13 @@ public class COSArrayList<E> implements List<E>
         List<Integer> retval = null;
         if (intArray != null)
         {
-            List<Integer> numbers = new ArrayList<Integer>();
+            List<Integer> numbers = new ArrayList<>();
             for (int i = 0; i < intArray.size(); i++)
             {
                 COSNumber num = (COSNumber) intArray.get(i).getCOSObject();
                 numbers.add(num.intValue());
             }
-            retval = new COSArrayList<Integer>(numbers, intArray);
+            retval = new COSArrayList<>(numbers, intArray);
         }
         return retval;
     }
@@ -295,12 +287,12 @@ public class COSArrayList<E> implements List<E>
         List<Float> retval = null;
         if( floatArray != null )
         {
-            List<Float> numbers = new ArrayList<Float>();
+            List<Float> numbers = new ArrayList<>();
             for( int i=0; i<floatArray.size(); i++ )
             {
                 numbers.add( ((COSNumber)floatArray.get( i )).floatValue());
             }
-            retval = new COSArrayList<Float>( numbers, floatArray );
+            retval = new COSArrayList<>(numbers, floatArray);
         }
         return retval;
     }
@@ -318,12 +310,12 @@ public class COSArrayList<E> implements List<E>
         List<String> retval = null;
         if( nameArray != null )
         {
-            List<String>names = new ArrayList<String>();
+            List<String> names = new ArrayList<>();
             for( int i=0; i<nameArray.size(); i++ )
             {
                 names.add( ((COSName)nameArray.getObject( i )).getName() );
             }
-            retval = new COSArrayList<String>( names, nameArray );
+            retval = new COSArrayList<>(names, nameArray);
         }
         return retval;
     }
@@ -341,12 +333,12 @@ public class COSArrayList<E> implements List<E>
         List<String> retval = null;
         if( stringArray != null )
         {
-            List<String> string = new ArrayList<String>();
+            List<String> string = new ArrayList<>();
             for( int i=0; i<stringArray.size(); i++ )
             {
                 string.add( ((COSString)stringArray.getObject( i )).getString() );
             }
-            retval = new COSArrayList<String>( string, stringArray );
+            retval = new COSArrayList<>(string, stringArray);
         }
         return retval;
     }
@@ -382,7 +374,7 @@ public class COSArrayList<E> implements List<E>
         COSArray retval = new COSArray();
         for (String string : strings)
         {
-            retval.add(new COSString(string));
+            retval.add(COSString.parseLiteral(string));
         }
         return retval;
     }
@@ -414,7 +406,7 @@ public class COSArrayList<E> implements List<E>
                     Object next = iter.next();
                     if( next instanceof String )
                     {
-                        array.add( new COSString( (String)next ) );
+                        array.add(COSString.parseLiteral((String) next));
                     }
                     else if( next instanceof Integer || next instanceof Long )
                     {
@@ -459,7 +451,7 @@ public class COSArrayList<E> implements List<E>
             Object next = iter.next();
             if( next instanceof String )
             {
-                cosObjects.add( new COSString( (String)next ) );
+                cosObjects.add(COSString.parseLiteral((String) next));
             }
             else if( next instanceof DualCOSObjectable )
             {
@@ -548,7 +540,7 @@ public class COSArrayList<E> implements List<E>
     {
         if( element instanceof String )
         {
-            COSString item = new COSString( (String)element );
+            COSString item = COSString.parseLiteral((String) element);
             if( parentDict != null && index == 0 )
             {
                 parentDict.setItem( dictKey, item );
@@ -590,7 +582,7 @@ public class COSArrayList<E> implements List<E>
         actual.add( index, element );
         if( element instanceof String )
         {
-            array.add( index, new COSString( (String)element ) );
+            array.add(index, COSString.parseLiteral((String) element));
         }
         else if( element instanceof DualCOSObjectable )
         {

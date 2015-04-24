@@ -26,9 +26,9 @@ import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSStream;
-import org.apache.pdfbox.pdmodel.font.encoding.Encoding;
 import org.apache.pdfbox.pdmodel.PDResources;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.font.encoding.Encoding;
 import org.apache.pdfbox.util.Matrix;
 import org.apache.pdfbox.util.Vector;
 
@@ -63,7 +63,7 @@ public class PDType3Font extends PDSimpleFont
     }
 
     @Override
-    protected Encoding readEncodingFromFont() throws IOException
+    protected Encoding readEncodingFromFont()
     {
         throw new UnsupportedOperationException("not supported for Type 3 fonts");
     }
@@ -75,13 +75,13 @@ public class PDType3Font extends PDSimpleFont
     }
 
     @Override
-    public Vector getDisplacement(int code) throws IOException
+    public Vector getDisplacement(int code)
     {
         return getFontMatrix().transform(new Vector(getWidth(code), 0));
     }
 
     @Override
-    public float getWidth(int code) throws IOException
+    public float getWidth(int code)
     {
         int firstChar = dict.getInt(COSName.FIRST_CHAR, -1);
         int lastChar = dict.getInt(COSName.LAST_CHAR, -1);
@@ -119,7 +119,7 @@ public class PDType3Font extends PDSimpleFont
     }
 
     @Override
-    public float getHeight(int code) throws IOException
+    public float getHeight(int code)
     {
         PDFontDescriptor desc = getFontDescriptor();
         if (desc != null)
@@ -155,7 +155,7 @@ public class PDType3Font extends PDSimpleFont
     }
 
     @Override
-    protected byte[] encode(int unicode) throws IOException
+    protected byte[] encode(int unicode)
     {
         throw new UnsupportedOperationException("Not implemented: Type3");
     }

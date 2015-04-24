@@ -26,14 +26,14 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import org.apache.pdfbox.cos.COSName;
+import org.apache.pdfbox.cos.COSObjectable;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.pdfparser.PDFStreamParser;
-import org.apache.pdfbox.pdmodel.common.COSObjectable;
 import org.apache.pdfbox.pdmodel.fdf.FDFDocument;
+import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationWidget;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAppearanceEntry;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAppearanceStream;
-import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationWidget;
 import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
 import org.apache.pdfbox.pdmodel.interactive.form.PDFieldTreeNode;
 import org.apache.pdfbox.pdmodel.interactive.form.PDRadioButton;
@@ -249,7 +249,7 @@ public class TestFDF extends TestCase
         COSStream actual = appearanceStream.getCOSStream();
 
         List<Object> actualTokens = getStreamTokens( doc, actual );
-        assertTrue( actualTokens.contains( new COSString( expected ) ) );
+        assertTrue(actualTokens.contains(COSString.parseLiteral(expected)));
     }
 
     private void testContentStreams( PDDocument doc, PDFieldTreeNode field, String expected ) throws Exception

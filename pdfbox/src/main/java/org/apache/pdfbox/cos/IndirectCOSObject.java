@@ -49,9 +49,9 @@ public class IndirectCOSObject extends COSBase
     }
 
     @Override
-    public Object accept(ICOSVisitor visitor) throws IOException
+    public void accept(COSVisitor visitor) throws IOException
     {
-        return getCOSObject().accept(visitor);
+        getCOSObject().accept(visitor);
     }
 
     public COSObjectKey key()

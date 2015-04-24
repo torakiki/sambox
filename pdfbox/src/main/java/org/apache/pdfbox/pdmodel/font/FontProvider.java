@@ -19,6 +19,7 @@ package org.apache.pdfbox.pdmodel.font;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+
 import org.apache.fontbox.cff.CFFFont;
 import org.apache.fontbox.ttf.TrueTypeFont;
 import org.apache.fontbox.type1.Type1Font;
@@ -74,7 +75,7 @@ public abstract class FontProvider
      * Returns the font names for a given font. This allows substitution based on the PostScript
      * name of the external font, instead of just the BaseName in the PDF.
      */
-    protected final Set<String> getNames(Type1Font font) throws IOException
+    protected final Set<String> getNames(Type1Font font)
     {
         return getPostScriptNames(font.getName());
         // could add format-specific names here if needed
@@ -84,7 +85,7 @@ public abstract class FontProvider
      * Returns the font names for a given font. This allows substitution based on the PostScript
      * name of the external font, instead of just the BaseName in the PDF.
      */
-    protected final Set<String> getNames(CFFFont font) throws IOException
+    protected final Set<String> getNames(CFFFont font)
     {
         return getPostScriptNames(font.getName());
         // could add format-specific names here if needed
@@ -93,7 +94,7 @@ public abstract class FontProvider
     /**
      * Returns a list of alternative names for the given PostScript name.
      */
-    private Set<String> getPostScriptNames(String postScriptName) throws IOException
+    private Set<String> getPostScriptNames(String postScriptName)
     {
         Set<String> names = new HashSet<String>();
 

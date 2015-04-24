@@ -26,7 +26,7 @@ import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSNumber;
-import org.apache.pdfbox.pdmodel.common.COSObjectable;
+import org.apache.pdfbox.cos.COSObjectable;
 import org.apache.pdfbox.util.Matrix;
 import org.apache.pdfbox.util.Vector;
 
@@ -57,7 +57,7 @@ public abstract class PDCIDFont implements COSObjectable, PDFontLike
      *
      * @param fontDictionary The font dictionary according to the PDF specification.
      */
-    PDCIDFont(COSDictionary fontDictionary, PDType0Font parent) throws IOException
+    PDCIDFont(COSDictionary fontDictionary, PDType0Font parent)
     {
         this.dict = fontDictionary;
         this.parent = parent;

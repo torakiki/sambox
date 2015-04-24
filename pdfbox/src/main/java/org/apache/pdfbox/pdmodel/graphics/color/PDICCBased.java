@@ -18,17 +18,17 @@ package org.apache.pdfbox.pdmodel.graphics.color;
 
 import java.awt.color.ColorSpace;
 import java.util.Arrays;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSArray;
+import org.apache.pdfbox.cos.COSArrayList;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSFloat;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSStream;
-
 import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.common.COSArrayList;
 import org.apache.pdfbox.pdmodel.common.PDRange;
 import org.apache.pdfbox.pdmodel.common.PDStream;
 
@@ -38,12 +38,11 @@ import java.awt.color.ICC_ColorSpace;
 import java.awt.color.ICC_Profile;
 import java.awt.color.ProfileDataException;
 import java.awt.image.BufferedImage;
-
 import java.awt.image.WritableRaster;
 import java.io.InputStream;
 import java.io.IOException;
-
 import java.util.List;
+
 import org.apache.pdfbox.util.Charsets;
 
 /**

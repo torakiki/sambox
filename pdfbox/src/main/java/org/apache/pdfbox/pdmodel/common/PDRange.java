@@ -20,6 +20,7 @@ import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSFloat;
 import org.apache.pdfbox.cos.COSNumber;
+import org.apache.pdfbox.cos.COSObjectable;
 
 /**
  * This class will be used to signify a range.  a(min) &lt;= a* &lt;= a(max)

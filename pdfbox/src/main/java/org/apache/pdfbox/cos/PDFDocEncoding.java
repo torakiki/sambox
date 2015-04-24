@@ -122,7 +122,7 @@ final class PDFDocEncoding
     }
 
     /**
-     * Returns the given string encoded with PDFDocEncoding.
+     * @return the given string encoded with PDFDocEncoding.
      */
     public static byte[] getBytes(String text)
     {

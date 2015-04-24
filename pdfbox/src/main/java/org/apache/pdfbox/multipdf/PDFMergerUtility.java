@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.pdfbox.cos.COSArray;
+import org.apache.pdfbox.cos.COSArrayList;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSInteger;
@@ -43,7 +44,6 @@ import org.apache.pdfbox.pdmodel.PDDocumentNameDictionary;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDResources;
 import org.apache.pdfbox.pdmodel.PageMode;
-import org.apache.pdfbox.pdmodel.common.COSArrayList;
 import org.apache.pdfbox.pdmodel.common.PDNumberTreeNode;
 import org.apache.pdfbox.pdmodel.common.PDStream;
 import org.apache.pdfbox.pdmodel.documentinterchange.logicalstructure.PDMarkInfo;
@@ -497,7 +497,7 @@ public class PDFMergerUtility
             }
             kDictLevel0.setItem(COSName.K, newKArray);
             kDictLevel0.setItem(COSName.P, destStructTree);
-            kDictLevel0.setItem(COSName.S, new COSString(STRUCTURETYPE_DOCUMENT));
+            kDictLevel0.setItem(COSName.S, COSString.parseLiteral(STRUCTURETYPE_DOCUMENT));
             destStructTree.setK(kDictLevel0);
         }
     }

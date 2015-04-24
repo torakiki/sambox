@@ -639,7 +639,7 @@ public class SourceReader implements Closeable
     }
 
     @Override
-    public void close() throws IOException
+    public void close()
     {
         IOUtils.closeQuietly(source);
     }

@@ -14,31 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.pdfbox.contentstream.operator.state;
+package org.apache.pdfbox.cos;
 
-import java.util.List;
-
-import org.apache.pdfbox.contentstream.operator.Operator;
-import org.apache.pdfbox.contentstream.operator.OperatorProcessor;
-import org.apache.pdfbox.cos.COSBase;
-import org.apache.pdfbox.cos.COSNumber;
 
 /**
- * j: Set the line join style.
+ * This is an interface used to get/create the underlying COSObject.
  *
+ * @author Ben Litchfield
  */
-public class SetLineJoinStyle extends OperatorProcessor
+public interface COSObjectable
 {
-    @Override
-    public void process(Operator operator, List<COSBase> arguments)
-    {
-        int lineJoinStyle = ((COSNumber)arguments.get( 0 )).intValue();
-        context.getGraphicsState().setLineJoin( lineJoinStyle );
-    }
-
-    @Override
-    public String getName()
-    {
-        return "j";
-    }
+    /**
+     * Convert this standard java object to a COS object.
+     *
+     * @return The cos object that matches this Java object.
+     */
+    COSBase getCOSObject();
 }

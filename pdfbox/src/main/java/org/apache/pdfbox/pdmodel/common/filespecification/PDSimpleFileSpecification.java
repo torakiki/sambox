@@ -28,13 +28,9 @@ public class PDSimpleFileSpecification extends PDFileSpecification
 {
     private COSString file;
 
-    /**
-     * Constructor.
-     *
-     */
     public PDSimpleFileSpecification()
     {
-        file = new COSString( "" );
+        file = COSString.parseLiteral("");
     }
 
     /**
@@ -64,7 +60,7 @@ public class PDSimpleFileSpecification extends PDFileSpecification
      */
     public void setFile( String fileName )
     {
-    file = new COSString( fileName );
+        file = COSString.parseLiteral(fileName);
     }
 
     /**

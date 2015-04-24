@@ -90,11 +90,8 @@ public class RandomAccessBuffer implements RandomAccess, Closeable, Cloneable
         return copy;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void close() throws IOException
+    public void close()
     {
         currentBuffer = null;
         bufferList.clear();

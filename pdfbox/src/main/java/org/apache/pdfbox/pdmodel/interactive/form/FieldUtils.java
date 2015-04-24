@@ -23,9 +23,9 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.apache.pdfbox.cos.COSArray;
+import org.apache.pdfbox.cos.COSArrayList;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSString;
-import org.apache.pdfbox.pdmodel.common.COSArrayList;
 
 /**
  * A set of utility methods to help with common AcroForm form and field related functions.

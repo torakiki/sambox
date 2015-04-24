@@ -19,12 +19,13 @@ package org.apache.pdfbox.pdmodel.interactive.annotation;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
+import org.apache.pdfbox.cos.COSObjectable;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.pdmodel.common.COSDictionaryMap;
-import org.apache.pdfbox.pdmodel.common.COSObjectable;
 
 /**
  * An entry in an appearance dictionary. May contain either a single appearance stream or an
@@ -36,12 +37,7 @@ public class PDAppearanceEntry implements COSObjectable
 {
     private COSBase entry;
 
-    private PDAppearanceEntry()
-    {
-    }
-
     /**
-     * Constructor for reading.
      * @param entry
      */
     public PDAppearanceEntry(COSBase entry)

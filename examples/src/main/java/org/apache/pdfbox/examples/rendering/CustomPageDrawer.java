@@ -28,7 +28,9 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+
 import javax.imageio.ImageIO;
+
 import org.apache.pdfbox.contentstream.PDFGraphicsStreamEngine;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.font.PDFont;
@@ -85,7 +87,7 @@ public class CustomPageDrawer
      */
     private static class MyPageDrawer extends PageDrawer
     {
-        public MyPageDrawer(PageDrawerParameters parameters) throws IOException
+        public MyPageDrawer(PageDrawerParameters parameters)
         {
             super(parameters);
         }
