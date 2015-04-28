@@ -118,7 +118,7 @@ public class COSFloat extends COSNumber
     }
 
     @Override
-    public void accept(COSVisitor visitor)
+    public void accept(COSVisitor visitor) throws IOException
     {
         visitor.visit(this);
     }

@@ -32,7 +32,7 @@ import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSStream;
-import org.apache.pdfbox.cos.IndirectCOSObject;
+import org.apache.pdfbox.cos.LazyIndirectCOSObject;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDResources;
@@ -310,7 +310,7 @@ public class Overlay
                 contentStreams.addAll(createContentStreamList(item));
             }
         }
-        else if (contents instanceof IndirectCOSObject)
+        else if (contents instanceof LazyIndirectCOSObject)
         {
             contentStreams.addAll(createContentStreamList(contents.getCOSObject()));
         }

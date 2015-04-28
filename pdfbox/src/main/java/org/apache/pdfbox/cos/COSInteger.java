@@ -17,9 +17,6 @@
 package org.apache.pdfbox.cos;
 
 import java.io.IOException;
-import java.io.OutputStream;
-
-import org.apache.pdfbox.util.Charsets;
 
 /**
  * This class represents an integer number in a PDF document.
@@ -143,20 +140,8 @@ public final class COSInteger extends COSNumber
     }
 
     @Override
-    public void accept(COSVisitor visitor)
+    public void accept(COSVisitor visitor) throws IOException
     {
         visitor.visit(this);
     }
-
-    /**
-     * Writes the {@link COSInteger} to the given {@link OutputStream}
-     *
-     * @param output The stream to write to.
-     * @throws IOException If there is an error writing to the stream.
-     */
-    public void writeTo(OutputStream output) throws IOException
-    {
-        output.write(Long.toString(value).getBytes(Charsets.ISO_8859_1));
-    }
-
 }

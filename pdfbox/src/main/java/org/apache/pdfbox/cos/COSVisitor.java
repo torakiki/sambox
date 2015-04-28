@@ -16,31 +16,34 @@
  */
 package org.apache.pdfbox.cos;
 
+import java.io.Closeable;
+import java.io.IOException;
+
 /**
  * @author Andrea Vacondio
  *
  */
-public interface COSVisitor
+public interface COSVisitor extends Closeable
 {
 
-    void visit(COSArray value);
+    void visit(COSArray value) throws IOException;
 
-    void visit(COSBoolean value);
+    void visit(COSBoolean value) throws IOException;
 
-    void visit(COSDictionary value);
+    void visit(COSDictionary value) throws IOException;
 
-    void visit(COSDocument value);
+    void visit(COSFloat value) throws IOException;
 
-    void visit(COSFloat value);
+    void visit(COSInteger value) throws IOException;
 
-    void visit(COSInteger value);
+    void visit(COSName value) throws IOException;
 
-    void visit(COSName value);
+    void visit(COSNull value) throws IOException;
 
-    void visit(COSNull value);
+    void visit(COSStream value) throws IOException;
 
-    void visit(COSStream value);
+    void visit(COSString value) throws IOException;
 
-    void visit(COSString value);
+    void visit(IndirectCOSObjectReference value) throws IOException;
 
 }

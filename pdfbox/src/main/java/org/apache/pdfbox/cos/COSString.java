@@ -88,7 +88,7 @@ public final class COSString extends COSBase
     }
 
     /**
-     * Returns the content of this string as a PDF <i>text string</i>.
+     * @return the content of this string as a PDF <i>text string</i>.
      */
     public String getString()
     {
@@ -133,7 +133,7 @@ public final class COSString extends COSBase
     }
 
     @Override
-    public void accept(COSVisitor visitor)
+    public void accept(COSVisitor visitor) throws IOException
     {
         visitor.visit(this);
     }

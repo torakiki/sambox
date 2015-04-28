@@ -28,7 +28,7 @@ import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSObjectable;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.cos.COSStreamArray;
-import org.apache.pdfbox.cos.IndirectCOSObject;
+import org.apache.pdfbox.cos.LazyIndirectCOSObject;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.common.PDStream;
 
@@ -93,9 +93,9 @@ class PDFCloneUtility
               retval = cloneForNewDocument( ((COSObjectable)base).getCOSObject() );
               clonedVersion.put( base, retval );
           }
-        else if (base instanceof IndirectCOSObject)
+        else if (base instanceof LazyIndirectCOSObject)
           {
-            retval = cloneForNewDocument(((IndirectCOSObject) base).getCOSObject());
+            retval = cloneForNewDocument(((LazyIndirectCOSObject) base).getCOSObject());
               clonedVersion.put( base, retval );
           }
           else if( base instanceof COSArray )
@@ -188,16 +188,16 @@ class PDFCloneUtility
               cloneMerge(base.getCOSObject(), target.getCOSObject());
               clonedVersion.put(base, retval);
           }
-        else if (base instanceof IndirectCOSObject)
+        else if (base instanceof LazyIndirectCOSObject)
           {
-            if (target instanceof IndirectCOSObject)
+            if (target instanceof LazyIndirectCOSObject)
               {
-                cloneMerge(((IndirectCOSObject) base).getCOSObject(),
-                        ((IndirectCOSObject) target).getCOSObject());
+                cloneMerge(((LazyIndirectCOSObject) base).getCOSObject(),
+                        ((LazyIndirectCOSObject) target).getCOSObject());
               }
               else if(target instanceof COSDictionary)
               {
-                cloneMerge(((IndirectCOSObject) base).getCOSObject(), target);
+                cloneMerge(((LazyIndirectCOSObject) base).getCOSObject(), target);
               }
               clonedVersion.put( base, retval );
           }

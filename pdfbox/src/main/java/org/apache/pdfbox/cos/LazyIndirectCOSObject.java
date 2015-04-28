@@ -17,51 +17,46 @@
 package org.apache.pdfbox.cos;
 
 import java.io.IOException;
+import java.util.Optional;
 
 /**
- * This class represents a boolean value in the PDF document.
+ * @author Andrea Vacondio
  *
- * @author Ben Litchfield
  */
-public final class COSBoolean extends COSBase
+public class LazyIndirectCOSObject extends COSBase
 {
-    public static final COSBoolean TRUE = new COSBoolean(true);
-    public static final COSBoolean FALSE = new COSBoolean(false);
 
-    private final boolean value;
+    private COSBase baseObject;
+    private COSObjectKey key;
+    private IndirectObjectsProvider provider;
 
-    private COSBoolean(boolean value)
+    public LazyIndirectCOSObject(COSObjectKey key, IndirectObjectsProvider provider)
     {
-        this.value = value;
-    }
-
-    /**
-     * @return The boolean value of this object.
-     */
-    public boolean getValue()
-    {
-        return value;
-    }
-
-    /**
-     * @param value Parameter telling which boolean value to get.
-     *
-     * @return The single boolean instance that matches the parameter.
-     */
-    public static COSBoolean valueOf(boolean value)
-    {
-        return value ? TRUE : FALSE;
+        // TODO verify if we need a null check here
+        this.key = key;
+        this.provider = provider;
     }
 
     @Override
-    public String toString()
+    public COSBase getCOSObject()
     {
-        return Boolean.toString(value);
+        // TODO multi thread?
+        if (baseObject == null)
+        {
+            baseObject = Optional.ofNullable(provider.get(key)).orElse(COSNull.NULL);
+        }
+        return baseObject;
     }
 
     @Override
     public void accept(COSVisitor visitor) throws IOException
     {
-        visitor.visit(this);
+        getCOSObject().accept(visitor);
     }
+
+    public COSObjectKey key()
+    {
+        return key;
+    }
+
 }

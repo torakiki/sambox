@@ -24,7 +24,7 @@ import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSObjectable;
-import org.apache.pdfbox.cos.IndirectCOSObject;
+import org.apache.pdfbox.cos.LazyIndirectCOSObject;
 import org.apache.pdfbox.pdmodel.documentinterchange.markedcontent.PDPropertyList;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDFontFactory;
@@ -183,9 +183,9 @@ public final class PDResources implements COSObjectable
         {
             return null;
         }
-        else if (value instanceof IndirectCOSObject)
+        else if (value instanceof LazyIndirectCOSObject)
         {
-            IndirectCOSObject object = (IndirectCOSObject) value;
+            LazyIndirectCOSObject object = (LazyIndirectCOSObject) value;
             // add the object number to create an unique identifier
             String id = name.getName();
             id += "#" + object.key().getNumber();

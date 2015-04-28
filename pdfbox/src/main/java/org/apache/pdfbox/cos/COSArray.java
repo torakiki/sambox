@@ -17,6 +17,7 @@
 package org.apache.pdfbox.cos;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -31,12 +32,14 @@ public class COSArray extends COSBase implements Iterable<COSBase>
 {
     private final List<COSBase> objects = new ArrayList<>();
 
-    /**
-     * Constructor.
-     */
     public COSArray()
     {
         // default constructor
+    }
+
+    public COSArray(COSBase... items)
+    {
+        Arrays.stream(items).forEach(objects::add);
     }
 
     /**

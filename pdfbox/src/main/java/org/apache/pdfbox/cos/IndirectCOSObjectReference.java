@@ -19,44 +19,43 @@ package org.apache.pdfbox.cos;
 import java.io.IOException;
 import java.util.Optional;
 
+import org.apache.pdfbox.xref.XrefEntry;
+
 /**
  * @author Andrea Vacondio
  *
  */
-public class IndirectCOSObject extends COSBase
+public class IndirectCOSObjectReference extends COSBase
 {
-
     private COSBase baseObject;
-    private COSObjectKey key;
-    private IndirectObjectsProvider provider;
+    private XrefEntry xrefEntry;
 
-    public IndirectCOSObject(COSObjectKey key, IndirectObjectsProvider provider)
+    public IndirectCOSObjectReference(long objectNumber, int generationNumber, COSBase baseObject)
     {
-        // TODO verify if we need a null check here
-        this.key = key;
-        this.provider = provider;
-    }
-
-    @Override
-    public COSBase getCOSObject()
-    {
-        // TODO multi thread?
-        if (baseObject == null)
-        {
-            baseObject = Optional.ofNullable(provider.get(key)).orElse(COSNull.NULL);
-        }
-        return baseObject;
+        this.xrefEntry = XrefEntry.unknownOffsetEntry(objectNumber, generationNumber);
+        this.baseObject = baseObject;
     }
 
     @Override
     public void accept(COSVisitor visitor) throws IOException
     {
-        getCOSObject().accept(visitor);
+        visitor.visit(this);
     }
 
-    public COSObjectKey key()
+    public XrefEntry xrefEntry()
     {
-        return key;
+        return xrefEntry;
     }
 
+    @Override
+    public COSBase getCOSObject()
+    {
+        return Optional.ofNullable(baseObject).map(COSBase::getCOSObject).orElse(COSNull.NULL);
+    }
+
+    @Override
+    public String toString()
+    {
+        return xrefEntry().key().toString();
+    }
 }

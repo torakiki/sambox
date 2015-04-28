@@ -22,17 +22,22 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSArray;
+import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.cos.COSInteger;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSStream;
+import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.pdfwriter.COSWriter;
 import org.apache.pdfbox.pdmodel.common.PDStream;
@@ -42,6 +47,7 @@ import org.apache.pdfbox.pdmodel.encryption.ProtectionPolicy;
 import org.apache.pdfbox.pdmodel.encryption.SecurityHandler;
 import org.apache.pdfbox.pdmodel.encryption.SecurityHandlerFactory;
 import org.apache.pdfbox.pdmodel.font.PDFont;
+import org.apache.pdfbox.util.Charsets;
 
 /**
  * This is the in-memory representation of the PDF document. The #close() method must be called once the document is no
@@ -55,22 +61,12 @@ public class PDDocument implements Closeable
 
     private final COSDocument document;
     private PDDocumentCatalog documentCatalog;
-
-    // the encryption will be cached here. When the document is decrypted then
-    // the COSDocument will not have an "Encrypt" dictionary anymore and this object must be used
     private PDEncryption encryption;
-
-    // holds a flag which tells us if we should remove all security from this documents.
-    private boolean allSecurityToBeRemoved;
-
     private AccessPermission accessPermission;
 
     // fonts to subset before saving
-    private final Set<PDFont> fontsToSubset = new HashSet<PDFont>();
+    private final Set<PDFont> fontsToSubset = new HashSet<>();
 
-    /**
-     * Creates an empty PDF document. You need to add at least one page for the document to be valid.
-     */
     public PDDocument()
     {
         document = new COSDocument();
@@ -249,15 +245,20 @@ public class PDDocument implements Closeable
     }
 
     /**
-     * This will set the encryption dictionary for this document.
-     * 
-     * @param encryption The encryption dictionary(most likely a PDStandardEncryption object)
-     * 
-     * @throws IOException If there is an error determining which security handler to use.
+     * @param encryption The encryption
      */
-    public void setEncryptionDictionary(PDEncryption encryption)
+    public void setEncryption(PDEncryption encryption)
     {
         this.encryption = encryption;
+    }
+
+    /**
+     * @param removes any encryption configuration and encryption dictionary
+     */
+    public void removeEncryption()
+    {
+        this.encryption = null;
+        this.getDocument().getTrailer().removeItem(COSName.ENCRYPT);
     }
 
     /**
@@ -397,26 +398,6 @@ public class PDDocument implements Closeable
     }
 
     /**
-     * Indicates if all security is removed or not when writing the pdf.
-     * 
-     * @return returns true if all security shall be removed otherwise false
-     */
-    public boolean isAllSecurityToBeRemoved()
-    {
-        return allSecurityToBeRemoved;
-    }
-
-    /**
-     * Activates/Deactivates the removal of all security when writing the pdf.
-     * 
-     * @param removeAllSecurity remove all security if set to true
-     */
-    public void setAllSecurityToBeRemoved(boolean removeAllSecurity)
-    {
-        allSecurityToBeRemoved = removeAllSecurity;
-    }
-
-    /**
      * @return the PDF specification version this document conforms to (e.g. 1.4f)
      */
     public float getVersion()
@@ -470,6 +451,30 @@ public class PDDocument implements Closeable
         {
             // versions < 1.4f have a version header only
             getDocument().setHeaderVersion(newVersion);
+        }
+    }
+
+    /**
+     * @return a newly generated file identifier as defined in the chap 14.4 PDF 32000-1:2008.
+     */
+    public COSString generateFileIdentifier()
+    {
+        try
+        {
+            MessageDigest md5 = MessageDigest.getInstance("MD5");
+            md5.update(Long.toString(System.currentTimeMillis()).getBytes(Charsets.ISO_8859_1));
+            Optional.ofNullable(getDocument().getTrailer().getDictionaryObject(COSName.INFO))
+                    .map(d -> (COSDictionary) d).ifPresent(d -> {
+                        for (COSBase current : d.getValues())
+                        {
+                            md5.update(current.toString().getBytes(Charsets.ISO_8859_1));
+                        }
+                    });
+            return COSString.newInstance(md5.digest());
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            throw new RuntimeException(e);
         }
     }
 }

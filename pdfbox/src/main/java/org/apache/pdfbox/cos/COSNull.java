@@ -17,9 +17,6 @@
 package org.apache.pdfbox.cos;
 
 import java.io.IOException;
-import java.io.OutputStream;
-
-import org.apache.pdfbox.util.Charsets;
 
 /**
  * This class represents a null PDF object.
@@ -39,19 +36,8 @@ public final class COSNull extends COSBase
     }
 
     @Override
-    public void accept(COSVisitor visitor)
+    public void accept(COSVisitor visitor) throws IOException
     {
         visitor.visit(this);
-    }
-
-    /**
-     * Writes the {@link COSNull} to the given {@link OutputStream}
-     *
-     * @param output The stream to write to.
-     * @throws IOException If there is an error writing to the stream.
-     */
-    public void writeTo(OutputStream output) throws IOException
-    {
-        output.write("null".getBytes(Charsets.ISO_8859_1));
     }
 }

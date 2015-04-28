@@ -621,7 +621,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     }
 
     @Override
-    public void accept(COSVisitor visitor)
+    public void accept(COSVisitor visitor) throws IOException
     {
         visitor.visit(this);
     }

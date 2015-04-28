@@ -110,6 +110,18 @@ public class XrefEntry
     }
 
     /**
+     * Factory method for an in use xref table/stream entry with unknown offset
+     * 
+     * @param objectNumber
+     * @param generationNumber
+     * @return the newly created instance
+     */
+    public static XrefEntry unknownOffsetEntry(long objectNumber, int generationNumber)
+    {
+        return new XrefEntry(XrefType.IN_USE, objectNumber, UNKNOWN_OFFSET, generationNumber);
+    }
+
+    /**
      * Factory method for a free xref tabe/stream entry
      * 
      * @param objectNumber

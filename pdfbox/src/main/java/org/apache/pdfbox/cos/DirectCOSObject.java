@@ -51,7 +51,7 @@ public final class DirectCOSObject extends COSBase
      * @param wrapped
      * @return the new instance
      */
-    public static DirectCOSObject asDirectObject(COSBase wrapped)
+    public static DirectCOSObject asDirectObject(COSObjectable wrapped)
     {
         return new DirectCOSObject(wrapped.getCOSObject());
     }
