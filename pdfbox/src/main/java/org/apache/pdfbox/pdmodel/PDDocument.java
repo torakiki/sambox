@@ -16,12 +16,14 @@
  */
 package org.apache.pdfbox.pdmodel;
 
+import static org.apache.pdfbox.output.CountingWritableByteChannel.from;
+
 import java.io.Closeable;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.channels.WritableByteChannel;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
@@ -39,7 +41,8 @@ import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.io.IOUtils;
-import org.apache.pdfbox.pdfwriter.COSWriter;
+import org.apache.pdfbox.output.CountingWritableByteChannel;
+import org.apache.pdfbox.output.DefaultPDFWriter;
 import org.apache.pdfbox.pdmodel.common.PDStream;
 import org.apache.pdfbox.pdmodel.encryption.AccessPermission;
 import org.apache.pdfbox.pdmodel.encryption.PDEncryption;
@@ -269,55 +272,6 @@ public class PDDocument implements Closeable
         return fontsToSubset;
     }
 
-    /**
-     * Save the document to a file.
-     * 
-     * @param fileName The file to save as.
-     * @throws IOException if the output could not be written
-     */
-    public void save(String fileName) throws IOException
-    {
-        save(new File(fileName));
-    }
-
-    /**
-     * Save the document to a file.
-     * 
-     * @param file The file to save as.
-     * @throws IOException if the output could not be written
-     */
-    public void save(File file) throws IOException
-    {
-        save(new FileOutputStream(file));
-    }
-
-    /**
-     * This will save the document to an output stream.
-     * 
-     * @param output The stream to write to.
-     * @throws IOException if the output could not be written
-     */
-    public void save(OutputStream output) throws IOException
-    {
-        // subset designated fonts
-        for (PDFont font : fontsToSubset)
-        {
-            font.subset();
-        }
-        fontsToSubset.clear();
-
-        // save PDF
-        COSWriter writer = new COSWriter(output);
-        try
-        {
-            writer.write(this);
-            writer.close();
-        }
-        finally
-        {
-            writer.close();
-        }
-    }
 
     /**
      * @param pageIndex the page index
@@ -475,6 +429,40 @@ public class PDDocument implements Closeable
         catch (NoSuchAlgorithmException e)
         {
             throw new RuntimeException(e);
+        }
+    }
+
+    public void writeTo(File file) throws IOException
+    {
+        writeTo(from(file));
+    }
+
+    public void writeTo(String filename) throws IOException
+    {
+        writeTo(from(filename));
+    }
+
+    public void writeTo(WritableByteChannel channel) throws IOException
+    {
+        writeTo(from(channel));
+    }
+
+    public void writeTo(OutputStream out) throws IOException
+    {
+        writeTo(from(out));
+    }
+
+    public void writeTo(CountingWritableByteChannel output) throws IOException
+    {
+        for (PDFont font : fontsToSubset)
+        {
+            font.subset();
+        }
+        fontsToSubset.clear();
+
+        try (DefaultPDFWriter writer = new DefaultPDFWriter(this))
+        {
+            writer.writeTo(output);
         }
     }
 }

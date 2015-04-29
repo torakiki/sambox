@@ -16,12 +16,13 @@
  */
 package org.apache.pdfbox.output;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
@@ -30,6 +31,7 @@ import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSBoolean;
 import org.apache.pdfbox.cos.COSDictionary;
+import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.cos.COSFloat;
 import org.apache.pdfbox.cos.COSInteger;
 import org.apache.pdfbox.cos.COSName;
@@ -42,25 +44,47 @@ import org.apache.pdfbox.cos.IndirectCOSObjectReference;
 import org.apache.pdfbox.cos.LazyIndirectCOSObject;
 
 /**
- * Component that visits pdf document collecting indirect objects that need to be written and replacing references to
- * them with an {@link IndirectCOSObjectReference}.
+ * Component that visits pdf document collecting pdf objects that need to be written, replacing references to them with
+ * an {@link IndirectCOSObjectReference} and writing the collected objects using the given {@link PDFWriter}.
  * 
  * @author Andrea Vacondio
  *
  */
-class ObjectsToWriteCollector implements COSVisitor
+class PdfBodyWriter implements COSVisitor
 {
 
-    private static final Log LOG = LogFactory.getLog(ObjectsToWriteCollector.class);
+    private static final Log LOG = LogFactory.getLog(PdfBodyWriter.class);
 
     private Map<COSObjectKey, IndirectCOSObjectReference> existingIndirectToNewXref = new HashMap<>();
     private Map<COSBase, IndirectCOSObjectReference> newObjects = new HashMap<>();
     private AtomicInteger objectsCounter = new AtomicInteger(0);
-    private Set<IndirectCOSObjectReference> toWrite = new HashSet<>();
+    private PDFWriter writer;
+
+    PdfBodyWriter(PDFWriter writer)
+    {
+        requireNonNull(writer);
+        this.writer = writer;
+    }
 
     private IndirectCOSObjectReference nextReferenceFor(COSBase baseObject)
     {
         return new IndirectCOSObjectReference(objectsCounter.incrementAndGet(), 0, baseObject);
+    }
+
+    @Override
+    public void visit(COSDocument document) throws IOException
+    {
+        for (COSName k : Arrays.asList(COSName.ROOT, COSName.INFO, COSName.ENCRYPT))
+        {
+            COSBase value = document.getTrailer().getItem(k);
+            if (value != null)
+            {
+                IndirectCOSObjectReference ref = getOrCreateIndirectReferenceFor(value);
+                value.accept(this);
+                document.getTrailer().setItem(k, ref);
+                writer.writerObject(ref);
+            }
+        }
     }
 
     @Override
@@ -73,8 +97,8 @@ class ObjectsToWriteCollector implements COSVisitor
             {
                 IndirectCOSObjectReference ref = getOrCreateIndirectReferenceFor(item);
                 item.accept(this);
-                toWrite.add(ref);
                 array.set(i, ref);
+                writer.writerObject(ref);
             }
         }
     }
@@ -89,8 +113,8 @@ class ObjectsToWriteCollector implements COSVisitor
             {
                 IndirectCOSObjectReference ref = getOrCreateIndirectReferenceFor(item);
                 item.accept(this);
-                toWrite.add(ref);
                 value.setItem(key, ref);
+                writer.writerObject(ref);
             }
         }
     }
@@ -178,6 +202,5 @@ class ObjectsToWriteCollector implements COSVisitor
     {
         existingIndirectToNewXref.clear();
         newObjects.clear();
-        toWrite.clear();
     }
 }

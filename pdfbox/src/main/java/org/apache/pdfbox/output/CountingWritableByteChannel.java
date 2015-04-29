@@ -27,12 +27,14 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
 
+import org.apache.pdfbox.io.IOUtils;
+
 /**
  * A {@link WritableByteChannel} that keeps track of the number of written bytes
  * 
  * @author Andrea Vacondio
  */
-class CountingWritableByteChannel implements WritableByteChannel
+public class CountingWritableByteChannel implements WritableByteChannel
 {
 
     private long written = 0;
@@ -69,25 +71,25 @@ class CountingWritableByteChannel implements WritableByteChannel
     @Override
     public void close() throws IOException
     {
-        wrapped.close();
+        IOUtils.close(wrapped);
     }
 
-    static CountingWritableByteChannel from(WritableByteChannel channel)
+    public static CountingWritableByteChannel from(WritableByteChannel channel)
     {
         return new CountingWritableByteChannel(channel);
     }
 
-    static CountingWritableByteChannel from(OutputStream stream)
+    public static CountingWritableByteChannel from(OutputStream stream)
     {
         return new CountingWritableByteChannel(Channels.newChannel(stream));
     }
 
-    static CountingWritableByteChannel from(File file) throws FileNotFoundException
+    public static CountingWritableByteChannel from(File file) throws FileNotFoundException
     {
         return new CountingWritableByteChannel(new RandomAccessFile(file, "rw").getChannel());
     }
 
-    static CountingWritableByteChannel from(String file) throws FileNotFoundException
+    public static CountingWritableByteChannel from(String file) throws FileNotFoundException
     {
         return new CountingWritableByteChannel(new RandomAccessFile(file, "rw").getChannel());
     }

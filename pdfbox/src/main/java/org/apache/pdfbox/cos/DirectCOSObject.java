@@ -39,6 +39,7 @@ public final class DirectCOSObject extends COSBase
     {
         return baseObject;
     }
+
     @Override
     public void accept(COSVisitor visitor) throws IOException
     {

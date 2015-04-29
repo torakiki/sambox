@@ -16,6 +16,7 @@
  */
 package org.apache.pdfbox.cos;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -478,7 +479,7 @@ public class COSArray extends COSBase implements Iterable<COSBase>
     }
 
     @Override
-    public void accept(COSVisitor visitor)
+    public void accept(COSVisitor visitor) throws IOException
     {
         visitor.visit(this);
     }

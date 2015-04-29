@@ -16,16 +16,14 @@
  */
 package org.apache.pdfbox.output;
 
-import static java.util.Objects.requireNonNull;
-
 import java.io.IOException;
-import java.nio.ByteBuffer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBoolean;
 import org.apache.pdfbox.cos.COSDictionary;
+import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.cos.COSFloat;
 import org.apache.pdfbox.cos.COSInteger;
 import org.apache.pdfbox.cos.COSName;
@@ -34,25 +32,19 @@ import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.cos.COSVisitor;
 import org.apache.pdfbox.cos.IndirectCOSObjectReference;
-import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.util.Charsets;
 
 /**
  * @author Andrea Vacondio
  *
  */
-class COSWriter implements COSVisitor
+class COSWriter extends DestinationWriter implements COSVisitor
 {
     private static final Log LOG = LogFactory.getLog(COSWriter.class);
-    private static final String OUTPUT_PAGE_SIZE = "org.pdfbox.output.page.size";
-
-    private CountingWritableByteChannel channel;
-    private ByteBuffer buffer = ByteBuffer.allocate(Integer.getInteger(OUTPUT_PAGE_SIZE, 4096));
 
     public COSWriter(CountingWritableByteChannel channel)
     {
-        requireNonNull(channel);
-        this.channel = channel;
+        super(channel);
     }
 
     @Override
@@ -117,55 +109,14 @@ class COSWriter implements COSVisitor
     @Override
     public void visit(IndirectCOSObjectReference value) throws IOException
     {
-        value.xrefEntry().setByteOffset(offset());
         write(value.xrefEntry().key().toString());
-    }
-    /**
-     * @return the current offset in the output
-     */
-    public long offset()
-    {
-        return channel.count() + buffer.position();
     }
 
     @Override
-    public void close() throws IOException
+    public void visit(COSDocument value) throws IOException
     {
-        if (buffer.position() != 0)
-        {
-            flushBuffer();
-        }
-        IOUtils.close(channel);
-    }
+        // TODO Auto-generated method stub
 
-    /**
-     * writes the given string in {@link Charsets#ISO_8859_1}
-     * 
-     * @param value
-     * @throws IOException
-     */
-    void write(String value) throws IOException
-    {
-        write(value.getBytes(Charsets.ISO_8859_1));
-    }
-
-    void write(byte[] bytes) throws IOException
-    {
-        for (int i = 0; i < bytes.length; i++)
-        {
-            buffer.put(bytes[i]);
-            if (!buffer.hasRemaining())
-            {
-                flushBuffer();
-            }
-        }
-    }
-
-    private void flushBuffer() throws IOException
-    {
-        buffer.flip();
-        channel.write(buffer);
-        buffer.clear();
     }
 
 }

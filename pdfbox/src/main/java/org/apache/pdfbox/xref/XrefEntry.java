@@ -28,7 +28,9 @@ import org.apache.pdfbox.cos.COSObjectKey;
  */
 public class XrefEntry
 {
-    public static final int MAX_GENERATION_NUMBER = 65535;
+    private static final String XREFTABLE_ENTRY_FORMAT = "%010d %05d %c\r\n";
+
+    public static final XrefEntry DEFAULT_FREE_ENTRY = freeEntry(0, 65535);
     public static final long UNKNOWN_OFFSET = -1;
 
     private XrefType type;
@@ -97,6 +99,27 @@ public class XrefEntry
     }
 
     /**
+     * @return a xref table line corresponding to this entry
+     * @throws IllegalArgumentException if the entry is a compressed one
+     */
+    public String toXrefTableEntry()
+    {
+        switch (type)
+        {
+        case IN_USE:
+            return String.format(XREFTABLE_ENTRY_FORMAT, getByteOffset(), getGenerationNumber(),
+                    'n');
+        case FREE:
+            return String.format(XREFTABLE_ENTRY_FORMAT, getObjectNumber(), getGenerationNumber(),
+                    'f');
+        default:
+            throw new IllegalArgumentException(
+                    "Only in_use and free entries can be written to an xref table");
+        }
+
+    }
+
+    /**
      * Factory method for an in use xref table/stream entry
      * 
      * @param objectNumber
@@ -125,12 +148,11 @@ public class XrefEntry
      * Factory method for a free xref tabe/stream entry
      * 
      * @param objectNumber
-     * @param byteOffset
      * @param generationNumber
      * @return the newly created instance
      */
-    public static XrefEntry freeEntry(long objectNumber, long byteOffset, int generationNumber)
+    public static XrefEntry freeEntry(long objectNumber, int generationNumber)
     {
-        return new XrefEntry(XrefType.FREE, objectNumber, byteOffset, generationNumber);
+        return new XrefEntry(XrefType.FREE, objectNumber, UNKNOWN_OFFSET, generationNumber);
     }
 }

@@ -16,26 +16,16 @@
  */
 package org.apache.pdfbox.output;
 
+import static java.util.Objects.requireNonNull;
 import static org.apache.pdfbox.cos.DirectCOSObject.asDirectObject;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSArray;
-import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.cos.COSObjectKey;
 import org.apache.pdfbox.cos.DirectCOSObject;
-import org.apache.pdfbox.cos.IndirectCOSObjectReference;
-import org.apache.pdfbox.cos.LazyIndirectCOSObject;
+import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.encryption.SecurityHandler;
 
@@ -45,29 +35,18 @@ import org.apache.pdfbox.pdmodel.encryption.SecurityHandler;
  */
 public class DefaultPDFWriter implements Closeable
 {
+    private PDDocument document;
+    private PDFWriter writer;
 
-    private static final Log LOG = LogFactory.getLog(DefaultPDFWriter.class);
-    /**
-     * To be used when 2 byte sequence is enforced.
-     */
-    public static final byte[] CRLF = { '\r', '\n' };
-    public static final byte[] LF = { '\n' };
-    public static final byte[] EOL = { '\n' };
-    public static final byte[] COMMENT = { '%' };
-    public static final byte[] GARBAGE = new byte[] { (byte) 0x9d, (byte) 0xe3, (byte) 0xf1,
-            (byte) 0xf1 };
-
-    private Map<COSObjectKey, IndirectCOSObjectReference> existingIndirectToNewXref = new HashMap<>();
-    private Map<COSBase, IndirectCOSObjectReference> newObjects = new HashMap<>();
-    private AtomicInteger objectsCounter = new AtomicInteger(0);
-    private COSWriter writer;
-    private Set<IndirectCOSObjectReference> toWrite = new HashSet<>();
-
-    public DefaultPDFWriter(OutputStream os)
+    public DefaultPDFWriter(PDDocument document)
     {
+        requireNonNull(document);
+        this.document = document;
     }
 
-    public void write(PDDocument document) throws IOException
+
+
+    public void writeTo(CountingWritableByteChannel channel) throws IOException
     {
         if (document.getEncryption() != null)
         {
@@ -84,50 +63,18 @@ public class DefaultPDFWriter implements Closeable
         DirectCOSObject id = asDirectObject(document.generateFileIdentifier());
         document.getDocument().getTrailer()
                 .setItem(COSName.ID, asDirectObject(new COSArray(id, id)));
-        writeHeader(document.getDocument().getHeaderVersion());
-        COSBase catalog = document.getDocument().getTrailer().getItem(COSName.ROOT);
-        process(nextReferenceFor(base));
-        // TODO finish write catalog
-        // TODO write xref
-        close();
+        writer = new PDFWriter(channel);
+        writer.writeHeader(document.getDocument().getHeaderVersion());
+        writer.writeBody(document.getDocument());
+        long startxref = writer.writeXrefTable();
+        writer.writeTrailer(document.getDocument().getTrailer(), startxref);
     }
 
-
-    private IndirectCOSObjectReference nextReferenceFor(COSBase baseObject)
-    {
-        return new IndirectCOSObjectReference(objectsCounter.incrementAndGet(), 0, baseObject);
-    }
-
-    private void writeHeader(float version) throws IOException
-    {
-        writer.write("%PDF-" + Float.toString(version));
-        writer.write(EOL);
-        writer.write(COMMENT);
-        writer.write(GARBAGE);
-        writer.write(EOL);
-    }
 
     @Override
     public void close() throws IOException
     {
-        writer.close();
-        existingIndirectToNewXref.clear();
-        newObjects.clear();
-    }
-
-    void process(COSBase base){
-        IndirectCOSObjectReference ref = nextReferenceFor(base);
-        process(ref);
-        if(base instanceof LazyIndirectCOSObject){
-            existingIndirectToNewXref.put(((LazyIndirectCOSObject)base).key(), ref);
-        }else{
-            newObjects.put(base, ref);
-        }
-        toWrite.add(ref);
-    }
-
-    void process(IndirectCOSObjectReference ref)
-    {
-
+        IOUtils.close(writer);
+        IOUtils.close(document);
     }
 }

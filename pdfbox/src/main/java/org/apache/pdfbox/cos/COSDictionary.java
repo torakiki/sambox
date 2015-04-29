@@ -16,6 +16,7 @@
  */
 package org.apache.pdfbox.cos;
 
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -1267,7 +1268,7 @@ public class COSDictionary extends COSBase
     }
 
     @Override
-    public void accept(COSVisitor visitor)
+    public void accept(COSVisitor visitor) throws IOException
     {
         visitor.visit(this);
     }

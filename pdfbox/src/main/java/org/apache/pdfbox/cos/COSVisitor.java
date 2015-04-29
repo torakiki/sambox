@@ -25,6 +25,7 @@ import java.io.IOException;
  */
 public interface COSVisitor extends Closeable
 {
+    void visit(COSDocument value) throws IOException;
 
     void visit(COSArray value) throws IOException;
 

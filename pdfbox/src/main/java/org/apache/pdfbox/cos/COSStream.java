@@ -193,7 +193,7 @@ public class COSStream extends COSDictionary implements Closeable
     }
 
     @Override
-    public void accept(COSVisitor visitor)
+    public void accept(COSVisitor visitor) throws IOException
     {
         visitor.visit(this);
     }
