@@ -39,10 +39,10 @@ class PDFWriter extends COSWriter
     private static final Log LOG = LogFactory.getLog(PDFWriter.class);
 
     public static final byte[] COMMENT = { '%' };
-    public static final byte[] GARBAGE = new byte[] { (byte) 0x9d, (byte) 0xe3, (byte) 0xf1,
-            (byte) 0xf1 };
-    public static final byte[] OBJ = "obj".getBytes(Charsets.ISO_8859_1);
-    public static final byte[] ENDOBJ = "endobj".getBytes(Charsets.ISO_8859_1);
+    public static final byte[] GARBAGE = new byte[] { (byte) 0xA7, (byte) 0xE3, (byte) 0xF1,
+            (byte) 0xF1 };
+    public static final byte[] OBJ = "obj".getBytes(Charsets.US_ASCII);
+    public static final byte[] ENDOBJ = "endobj".getBytes(Charsets.US_ASCII);
 
     private TreeMap<Long, XrefEntry> written = new TreeMap<>();
 
@@ -67,9 +67,9 @@ class PDFWriter extends COSWriter
         {
             object.xrefEntry().setByteOffset(offset());
             write(Long.toString(object.xrefEntry().getObjectNumber()));
-            writeSpace();
+            write(SPACE);
             write(Integer.toString(object.xrefEntry().getGenerationNumber()));
-            writeSpace();
+            write(SPACE);
             write(OBJ);
             writeEOL();
             object.getCOSObject().accept(this);
@@ -85,7 +85,7 @@ class PDFWriter extends COSWriter
     {
         try (PdfBodyWriter bodyWriter = new PdfBodyWriter(this))
         {
-            bodyWriter.visit(document);
+            document.accept(bodyWriter);
         }
     }
 
@@ -122,14 +122,14 @@ class PDFWriter extends COSWriter
         trailer.removeItem(COSName.XREF_STM);
         trailer.removeItem(COSName.DOC_CHECKSUM);
         trailer.setLong(COSName.SIZE, written.lastKey() + 1);
-        write("trailer");
+        write("trailer".getBytes(Charsets.US_ASCII));
         writeEOL();
         visit(trailer);
-        write("startxref");
+        write("startxref".getBytes(Charsets.US_ASCII));
         writeEOL();
         write(Long.toString(startxref));
         writeEOL();
-        write("%%EOF");
+        write("%%EOF".getBytes(Charsets.US_ASCII));
         writeEOL();
     }
 

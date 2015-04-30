@@ -18,6 +18,7 @@ package org.apache.pdfbox.cos;
 
 import static org.apache.pdfbox.util.RequireUtils.requireNotNullArg;
 
+import java.io.IOException;
 import java.util.Optional;
 
 /**
@@ -26,7 +27,7 @@ import java.util.Optional;
  * @author Ben Litchfield
  * 
  */
-public final class COSDocument
+public final class COSDocument extends COSBase
 {
 
     private float headerVersion;
@@ -132,5 +133,11 @@ public final class COSDocument
     public void setIsXRefStream(boolean xRefStream)
     {
         this.xRefStream = xRefStream;
+    }
+
+    @Override
+    public void accept(COSVisitor visitor) throws IOException
+    {
+        visitor.visit(this);
     }
 }

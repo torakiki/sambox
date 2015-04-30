@@ -16,11 +16,16 @@
  */
 package org.apache.pdfbox.output;
 
-import java.io.IOException;
+import static org.apache.pdfbox.util.CharUtils.isDigit;
+import static org.apache.pdfbox.util.CharUtils.isLetter;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Optional;
+
 import org.apache.pdfbox.cos.COSArray;
+import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSBoolean;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSDocument;
@@ -40,7 +45,8 @@ import org.apache.pdfbox.util.Charsets;
  */
 class COSWriter extends DestinationWriter implements COSVisitor
 {
-    private static final Log LOG = LogFactory.getLog(COSWriter.class);
+    private static final byte[] STREAM = "stream".getBytes(Charsets.US_ASCII);
+    private static final byte[] ENDSTREAM = "endstream".getBytes(Charsets.US_ASCII);
 
     public COSWriter(CountingWritableByteChannel channel)
     {
@@ -48,10 +54,20 @@ class COSWriter extends DestinationWriter implements COSVisitor
     }
 
     @Override
-    public void visit(COSArray value)
+    public void visit(COSArray value) throws IOException
     {
-        // TODO Auto-generated method stub
-
+        write(LEFT_SQUARE_BRACKET);
+        for (Iterator<COSBase> i = value.iterator(); i.hasNext();)
+        {
+            COSBase current = i.next();
+            Optional.ofNullable(current).orElse(COSNull.NULL).accept(this);
+            if (i.hasNext())
+            {
+                write(SPACE);
+            }
+        }
+        write(RIGHT_SQUARE_BRACKET);
+        writeEOL();
     }
 
     @Override
@@ -61,49 +77,110 @@ class COSWriter extends DestinationWriter implements COSVisitor
     }
 
     @Override
-    public void visit(COSDictionary value)
+    public void visit(COSDictionary dictionary) throws IOException
     {
-        // TODO Auto-generated method stub
-
+        write(LESS_THEN);
+        write(LESS_THEN);
+        writeEOL();
+        for (Map.Entry<COSName, COSBase> entry : dictionary.entrySet())
+        {
+            COSBase value = entry.getValue();
+            if (value != null)
+            {
+                entry.getKey().accept(this);
+                write(SPACE);
+                entry.getValue().accept(this);
+                writeEOL();
+            }
+        }
+        write(GREATER_THEN);
+        write(GREATER_THEN);
+        writeEOL();
     }
 
     @Override
-    public void visit(COSFloat value)
+    public void visit(COSFloat value) throws IOException
     {
+        write(value.toString());
     }
 
     @Override
     public void visit(COSInteger value) throws IOException
     {
-        write(Long.toString(value.longValue()));
-
+        write(value.toString());
     }
 
     @Override
-    public void visit(COSName value)
+    public void visit(COSName value) throws IOException
     {
-        // TODO Auto-generated method stub
-
+        write(SOLIDUS);
+        byte[] bytes = value.getName().getBytes(Charsets.US_ASCII);
+        for (int i = 0; i < bytes.length; i++)
+        {
+            int current = bytes[i] & 0xFF;
+            if (isLetter(current) || isDigit(current))
+            {
+                write(bytes[i]);
+            }
+            else
+            {
+                write(NUMBER_SIGN);
+                write(String.format("%02X", current).getBytes(Charsets.US_ASCII));
+            }
+        }
     }
 
     @Override
     public void visit(COSNull value) throws IOException
     {
-        write("null".getBytes(Charsets.ISO_8859_1));
-
+        write("null".getBytes(Charsets.US_ASCII));
     }
 
     @Override
-    public void visit(COSStream value)
+    public void visit(COSStream value) throws IOException
     {
-        // alla fine
-        // value.setItem(COSName.LENGTH, asDirect(lengthObject));
-
+        value.setLong(COSName.LENGTH, value.getFilteredLength());
+        visit((COSDictionary) value);
+        write(STREAM);
+        write(CRLF);
+        write(value.getFilteredStream());
+        write(CRLF);
+        write(ENDSTREAM);
+        write(CRLF);
     }
 
     @Override
     public void visit(COSString value) throws IOException
     {
+        if (value.isForceHexForm())
+        {
+            write(LESS_THEN);
+            write(value.toHexString());
+            write(GREATER_THEN);
+        }
+        else
+        {
+            write(LEFT_PARENTHESIS);
+            for (byte b : value.getBytes())
+            {
+                switch (b)
+                {
+                case '\n':
+                case '\r':
+                case '\t':
+                case '\b':
+                case '\f':
+                case '(':
+                case ')':
+                case '\\':
+                    write(REVERSE_SOLIDUS);
+                    //$FALL-THROUGH$
+                default:
+                    write(b);
+                }
+            }
+            write(RIGHT_PARENTHESIS);
+        }
     }
 
     @Override
@@ -113,10 +190,9 @@ class COSWriter extends DestinationWriter implements COSVisitor
     }
 
     @Override
-    public void visit(COSDocument value) throws IOException
+    public void visit(COSDocument value)
     {
-        // TODO Auto-generated method stub
-
+        // nothing to do
     }
 
 }

@@ -90,11 +90,11 @@ public final class COSInteger extends COSNumber
     private final long value;
 
     /**
-     * @param val The integer value of this object.
+     * @param value The integer value of this object.
      */
-    private COSInteger( long val )
+    private COSInteger(long value)
     {
-        value = val;
+        this.value = value;
     }
 
     @Override
@@ -112,7 +112,7 @@ public final class COSInteger extends COSNumber
     @Override
     public String toString()
     {
-        return "COSInt{" + value + "}";
+        return Long.toString(value);
     }
 
     @Override

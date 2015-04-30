@@ -216,7 +216,7 @@ public class XrefParser
      * 
      * @throws IOException if something went wrong
      */
-    protected final COSDictionary rebuildTrailer() throws IOException
+    protected final COSDictionary rebuildTrailer()
     {
 
         // TODO rebuild strategy

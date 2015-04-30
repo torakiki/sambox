@@ -16,10 +16,10 @@
  */
 package org.apache.pdfbox.cos;
 
-import static org.apache.pdfbox.cos.ParseUtils.isCarriageReturn;
-import static org.apache.pdfbox.cos.ParseUtils.isDigit;
-import static org.apache.pdfbox.cos.ParseUtils.isLineFeed;
-import static org.apache.pdfbox.cos.ParseUtils.isSpace;
+import static org.apache.pdfbox.util.CharUtils.isCarriageReturn;
+import static org.apache.pdfbox.util.CharUtils.isDigit;
+import static org.apache.pdfbox.util.CharUtils.isLineFeed;
+import static org.apache.pdfbox.util.CharUtils.isSpace;
 
 import java.io.IOException;
 import java.io.OutputStream;

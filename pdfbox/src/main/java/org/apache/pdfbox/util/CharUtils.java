@@ -14,13 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.pdfbox.cos;
+package org.apache.pdfbox.util;
 
 /**
  * @author Andrea Vacondio
  *
  */
-public final class ParseUtils
+public final class CharUtils
 {
 
     public static final byte ASCII_LINE_FEED = 10;
@@ -35,7 +35,12 @@ public final class ParseUtils
     private static final byte ASCII_NINE = 57;
     private static final byte ASCII_SPACE = 32;
 
-    private ParseUtils()
+    private static final byte ASCII_UPPERCASE_A = 65;
+    private static final byte ASCII_UPPERCASE_Z = 90;
+    private static final byte ASCII_LOWERCASE_A = 97;
+    private static final byte ASCII_LOWERCASE_Z = 122;
+
+    private CharUtils()
     {
         // no instance
     }
@@ -116,6 +121,16 @@ public final class ParseUtils
     public static boolean isDigit(int c)
     {
         return c >= ASCII_ZERO && c <= ASCII_NINE;
+    }
+
+    /**
+     * @param c The character to be checked
+     * @return true if the character is a letter (case unsensitive).
+     */
+    public static boolean isLetter(int c)
+    {
+        return (c >= ASCII_UPPERCASE_A && c <= ASCII_UPPERCASE_Z)
+                || (c >= ASCII_LOWERCASE_A && c <= ASCII_LOWERCASE_Z);
     }
 
     /**

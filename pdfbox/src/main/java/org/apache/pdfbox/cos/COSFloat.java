@@ -17,10 +17,7 @@
 package org.apache.pdfbox.cos;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.math.BigDecimal;
-
-import org.apache.pdfbox.util.Charsets;
 
 /**
  * This class represents a floating point number in a PDF document.
@@ -31,47 +28,31 @@ import org.apache.pdfbox.util.Charsets;
 public class COSFloat extends COSNumber
 {
     private BigDecimal value;
-    private String valueAsString;
 
     /**
      * @param aFloat The primitive float object that this object wraps.
      */
-    public COSFloat( float aFloat )
+    public COSFloat(float aFloat)
     {
-        // use a BigDecimal as intermediate state to avoid 
+        // use a BigDecimal as intermediate state to avoid
         // a floating point string representation of the float value
         value = new BigDecimal(String.valueOf(aFloat));
-        valueAsString = removeNullDigits(value.toPlainString());
     }
 
     /**
      * @param aFloat The primitive float object that this object wraps.
      * @throws IOException If aFloat is not a float.
      */
-    public COSFloat( String aFloat ) throws IOException
+    public COSFloat(String aFloat) throws IOException
     {
         try
         {
-            valueAsString = aFloat; 
-            value = new BigDecimal( valueAsString );
+            value = new BigDecimal(aFloat);
         }
-        catch( NumberFormatException e )
+        catch (NumberFormatException e)
         {
-            throw new IOException( "Error expected floating point number actual='" +aFloat + "'", e );
+            throw new IOException("Error expected floating point number actual='" + aFloat + "'", e);
         }
-    }
-
-    private static String removeNullDigits(String plainStringValue)
-    {
-        // remove fraction digit "0" only
-        if (plainStringValue.indexOf('.') > -1 && !plainStringValue.endsWith(".0"))
-        {
-            while (plainStringValue.endsWith("0") && !plainStringValue.endsWith(".0"))
-            {
-                plainStringValue = plainStringValue.substring(0,plainStringValue.length()-1);
-            }
-        }
-        return plainStringValue;
     }
 
     @Override
@@ -99,10 +80,11 @@ public class COSFloat extends COSNumber
     }
 
     @Override
-    public boolean equals( Object o )
+    public boolean equals(Object o)
     {
-        return o instanceof COSFloat && 
-                Float.floatToIntBits(((COSFloat)o).value.floatValue()) == Float.floatToIntBits(value.floatValue());
+        return o instanceof COSFloat
+                && Float.floatToIntBits(((COSFloat) o).value.floatValue()) == Float
+                        .floatToIntBits(value.floatValue());
     }
 
     @Override
@@ -114,23 +96,12 @@ public class COSFloat extends COSNumber
     @Override
     public String toString()
     {
-        return "COSFloat{" + valueAsString + "}";
+        return value.stripTrailingZeros().toPlainString();
     }
 
     @Override
     public void accept(COSVisitor visitor) throws IOException
     {
         visitor.visit(this);
-    }
-
-    /**
-     * Writes the {@link COSFloat} to the given {@link OutputStream}
-     *
-     * @param output The stream to write to.
-     * @throws IOException If there is an error writing to the stream.
-     */
-    public void writeTo(OutputStream output) throws IOException
-    {
-        output.write(valueAsString.getBytes(Charsets.ISO_8859_1));
     }
 }

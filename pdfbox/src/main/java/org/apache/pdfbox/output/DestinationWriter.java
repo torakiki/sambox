@@ -20,7 +20,10 @@ import static java.util.Objects.requireNonNull;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 
 import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.util.Charsets;
@@ -34,12 +37,22 @@ class DestinationWriter implements Closeable
     private static final String OUTPUT_PAGE_SIZE_PROPERTY = "org.pdfbox.output.page.size";
 
     private static final byte[] EOL = { '\n' };
-    private static final byte[] SPACE = { ' ' };
-    private static final byte[] CRLF = { '\r', '\n' };
+    public static final byte[] SPACE = { ' ' };
+    public static final byte[] CRLF = { '\r', '\n' };
+    public static final byte SOLIDUS = 0x2F;
+    public static final byte REVERSE_SOLIDUS = 0x5C;
+    public static final byte NUMBER_SIGN = 0x23;
+    public static final byte LESS_THEN = 0x3C;
+    public static final byte GREATER_THEN = 0x3E;
+    public static final byte LEFT_PARENTHESIS = 0x28;
+    public static final byte RIGHT_PARENTHESIS = 0x29;
+    public static final byte LEFT_SQUARE_BRACKET = 0x5B;
+    public static final byte RIGHT_SQUARE_BRACKET = 0x5D;
 
     private CountingWritableByteChannel channel;
     private ByteBuffer buffer = ByteBuffer.allocate(Integer.getInteger(OUTPUT_PAGE_SIZE_PROPERTY,
             4096));
+    private boolean onNewLine = false;
 
     public DestinationWriter(CountingWritableByteChannel channel)
     {
@@ -57,6 +70,15 @@ class DestinationWriter implements Closeable
         IOUtils.close(channel);
     }
 
+    public void writeEOL() throws IOException
+    {
+        if (!onNewLine)
+        {
+            write(EOL);
+            onNewLine = true;
+        }
+    }
+
     /**
      * Writes the given string in {@link Charsets#ISO_8859_1}
      * 
@@ -66,21 +88,6 @@ class DestinationWriter implements Closeable
     public void write(String value) throws IOException
     {
         write(value.getBytes(Charsets.ISO_8859_1));
-    }
-
-    public void writeEOL() throws IOException
-    {
-        write(EOL);
-    }
-
-    public void writeSpace() throws IOException
-    {
-        write(SPACE);
-    }
-
-    public void writeCRLF() throws IOException
-    {
-        write(CRLF);
     }
 
     /**
@@ -93,8 +100,27 @@ class DestinationWriter implements Closeable
     {
         for (int i = 0; i < bytes.length; i++)
         {
-            buffer.put(bytes[i]);
-            if (!buffer.hasRemaining())
+            write(bytes[i]);
+        }
+    }
+
+    public void write(byte myByte) throws IOException
+    {
+        onNewLine = false;
+        buffer.put(myByte);
+        if (!buffer.hasRemaining())
+        {
+            flushBuffer();
+        }
+    }
+
+    public void write(InputStream stream) throws IOException
+    {
+        onNewLine = false;
+        try (ReadableByteChannel readable = Channels.newChannel(stream))
+        {
+            flushBuffer();
+            while (readable.read(buffer) != -1)
             {
                 flushBuffer();
             }

@@ -96,9 +96,13 @@ class PdfBodyWriter implements COSVisitor
             if (item instanceof LazyIndirectCOSObject || item instanceof COSDictionary)
             {
                 IndirectCOSObjectReference ref = getOrCreateIndirectReferenceFor(item);
-                item.accept(this);
                 array.set(i, ref);
+                item.accept(this);
                 writer.writerObject(ref);
+            }
+            else
+            {
+                item.accept(this);
             }
         }
     }
@@ -112,9 +116,13 @@ class PdfBodyWriter implements COSVisitor
             if (item instanceof LazyIndirectCOSObject || item instanceof COSDictionary)
             {
                 IndirectCOSObjectReference ref = getOrCreateIndirectReferenceFor(item);
-                item.accept(this);
                 value.setItem(key, ref);
+                item.accept(this);
                 writer.writerObject(ref);
+            }
+            else
+            {
+                item.accept(this);
             }
         }
     }

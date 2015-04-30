@@ -16,9 +16,9 @@
  */
 package org.apache.pdfbox.xref;
 
-import static org.apache.pdfbox.cos.ParseUtils.isDigit;
-import static org.apache.pdfbox.cos.ParseUtils.isEOF;
-import static org.apache.pdfbox.cos.ParseUtils.isEndOfName;
+import static org.apache.pdfbox.util.CharUtils.isDigit;
+import static org.apache.pdfbox.util.CharUtils.isEOF;
+import static org.apache.pdfbox.util.CharUtils.isEndOfName;
 import static org.apache.pdfbox.xref.XrefEntry.inUseEntry;
 
 import java.io.IOException;

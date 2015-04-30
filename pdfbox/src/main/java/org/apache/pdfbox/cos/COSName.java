@@ -17,12 +17,9 @@
 package org.apache.pdfbox.cos;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import org.apache.pdfbox.util.Charsets;
 
 
 /**
@@ -579,8 +576,6 @@ public final class COSName extends COSBase implements Comparable<COSName>
     }
 
     /**
-     * This will get the name of this COSName object.
-     * 
      * @return The name of the object.
      */
     public String getName()
@@ -624,42 +619,5 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public void accept(COSVisitor visitor) throws IOException
     {
         visitor.visit(this);
-    }
-
-    /**
-     * Writes the {@link COSName} to the given {@link OutputStream}
-     *
-     * @param output The stream to write to.
-     * @throws IOException If there is an error writing to the stream.
-     */
-    public void writeTo(OutputStream output) throws IOException
-    {
-        output.write('/');
-        byte[] bytes = getName().getBytes(Charsets.US_ASCII);
-        for (byte b : bytes)
-        {
-            int current = (b + 256) % 256;
-
-            // be more restrictive than the PDF spec, "Name Objects", see PDFBOX-2073
-            if (current >= 'A' && current <= 'Z' ||
-                    current >= 'a' && current <= 'z' ||
-                    current >= '0' && current <= '9' ||
-                    current == '+' ||
-                    current == '-' ||
-                    current == '_' ||
-                    current == '@' ||
-                    current == '*' ||
-                    current == '$' ||
-                    current == ';' ||
-                    current == '.')
-            {
-                output.write(current);
-            }
-            else
-            {
-                output.write('#');
-                output.write(String.format("%02X", current).getBytes(Charsets.US_ASCII));
-            }
-        }
     }
 }

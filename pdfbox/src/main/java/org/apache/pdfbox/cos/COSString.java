@@ -80,9 +80,9 @@ public final class COSString extends COSBase
     }
 
     /**
-     * Returns true if the string is to be written in hex form.
+     * @return true if the string is to be written in hex form.
      */
-    public boolean getForceHexForm()
+    public boolean isForceHexForm()
     {
         return forceHexForm;
     }
@@ -235,7 +235,9 @@ public final class COSString extends COSBase
             }
         }
 
-        return new COSString(bytes.toByteArray());
+        COSString retVal = new COSString(bytes.toByteArray());
+        retVal.setForceHexForm(true);
+        return retVal;
     }
 
 }

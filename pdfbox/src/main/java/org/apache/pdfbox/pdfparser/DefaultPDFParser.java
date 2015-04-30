@@ -137,7 +137,7 @@ public class DefaultPDFParser
         try
         {
             LOG.debug("Found header " + header);
-            return Float.valueOf(header.substring(EXPECTED_HEADER_LENGTH - 1,
+            return Float.valueOf(header.substring(EXPECTED_HEADER_LENGTH - 3,
                     EXPECTED_HEADER_LENGTH));
         }
         catch (NumberFormatException exception)

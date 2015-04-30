@@ -424,7 +424,9 @@ public class PDDocument implements Closeable
                             md5.update(current.toString().getBytes(Charsets.ISO_8859_1));
                         }
                     });
-            return COSString.newInstance(md5.digest());
+            COSString retVal = COSString.newInstance(md5.digest());
+            retVal.setForceHexForm(true);
+            return retVal;
         }
         catch (NoSuchAlgorithmException e)
         {
@@ -452,7 +454,7 @@ public class PDDocument implements Closeable
         writeTo(from(out));
     }
 
-    public void writeTo(CountingWritableByteChannel output) throws IOException
+    private void writeTo(CountingWritableByteChannel output) throws IOException
     {
         for (PDFont font : fontsToSubset)
         {

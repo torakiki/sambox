@@ -17,19 +17,19 @@
 package org.apache.pdfbox.cos;
 
 import static java.util.Arrays.asList;
-import static org.apache.pdfbox.cos.ParseUtils.ASCII_BACKSPACE;
-import static org.apache.pdfbox.cos.ParseUtils.ASCII_CARRIAGE_RETURN;
-import static org.apache.pdfbox.cos.ParseUtils.ASCII_FORM_FEED;
-import static org.apache.pdfbox.cos.ParseUtils.ASCII_HORIZONTAL_TAB;
-import static org.apache.pdfbox.cos.ParseUtils.ASCII_LINE_FEED;
-import static org.apache.pdfbox.cos.ParseUtils.isCarriageReturn;
-import static org.apache.pdfbox.cos.ParseUtils.isDigit;
-import static org.apache.pdfbox.cos.ParseUtils.isEOL;
-import static org.apache.pdfbox.cos.ParseUtils.isEndOfName;
-import static org.apache.pdfbox.cos.ParseUtils.isHexDigit;
-import static org.apache.pdfbox.cos.ParseUtils.isLineFeed;
-import static org.apache.pdfbox.cos.ParseUtils.isOctalDigit;
-import static org.apache.pdfbox.cos.ParseUtils.isWhitespace;
+import static org.apache.pdfbox.util.CharUtils.ASCII_BACKSPACE;
+import static org.apache.pdfbox.util.CharUtils.ASCII_CARRIAGE_RETURN;
+import static org.apache.pdfbox.util.CharUtils.ASCII_FORM_FEED;
+import static org.apache.pdfbox.util.CharUtils.ASCII_HORIZONTAL_TAB;
+import static org.apache.pdfbox.util.CharUtils.ASCII_LINE_FEED;
+import static org.apache.pdfbox.util.CharUtils.isCarriageReturn;
+import static org.apache.pdfbox.util.CharUtils.isDigit;
+import static org.apache.pdfbox.util.CharUtils.isEOL;
+import static org.apache.pdfbox.util.CharUtils.isEndOfName;
+import static org.apache.pdfbox.util.CharUtils.isHexDigit;
+import static org.apache.pdfbox.util.CharUtils.isLineFeed;
+import static org.apache.pdfbox.util.CharUtils.isOctalDigit;
+import static org.apache.pdfbox.util.CharUtils.isWhitespace;
 import static org.apache.pdfbox.util.RequireUtils.requireArg;
 import static org.apache.pdfbox.util.RequireUtils.requireIOCondition;
 
@@ -41,6 +41,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.io.PushBackInputStream;
 import org.apache.pdfbox.util.Charsets;
+import org.apache.pdfbox.util.CharUtils;
 
 /**
  * @author Andrea Vacondio
@@ -124,7 +125,7 @@ public class SourceReader implements Closeable
      * @return The next token that was read from the stream.
      *
      * @throws IOException If there is an error reading from the stream.
-     * @see ParseUtils#isEndOfName(int)
+     * @see CharUtils#isEndOfName(int)
      */
     public String readToken() throws IOException
     {
