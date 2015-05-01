@@ -43,6 +43,7 @@ import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.io.PushBackInputStream;
 import org.apache.pdfbox.util.CharUtils;
 import org.apache.pdfbox.util.Charsets;
+import org.apache.pdfbox.util.Pool;
 
 /**
  * @author Andrea Vacondio
@@ -50,13 +51,15 @@ import org.apache.pdfbox.util.Charsets;
  */
 class SourceReader implements Closeable
 {
-
+    private static final String BUFFERS_POOL_SIZE_PROPERTY = "org.pdfbox.buffers.pool.size";
     private static final Log LOG = LogFactory.getLog(SourceReader.class);
 
     private static final long OBJECT_NUMBER_THRESHOLD = 10000000000L;
     private static final int GENERATION_NUMBER_THRESHOLD = 65535;
     public static final String OBJ = "obj";
 
+    private Pool<StringBuilder> pool = new Pool<>(StringBuilder::new, Integer.getInteger(
+            BUFFERS_POOL_SIZE_PROPERTY, 10)).onGive(b -> b.setLength(0));
     private PushBackInputStream source;
     // TODO set this somehow
     private long sourceLength;
@@ -65,18 +68,6 @@ class SourceReader implements Closeable
     {
         requireArg(source != null, "Cannot read a null source");
         this.source = source;
-    }
-
-    /**
-     * @return a buffer to be used during read and parsing.
-     */
-    public StringBuilder buffer()
-    {
-        // TODO use some sort of pool of buffers and avoid creating tons of StringBuilders
-        // private StringBuilder buffer = new StringBuilder();
-        // buffer.setLength(0);
-        // return buffer;
-        return new StringBuilder();
     }
 
     /**
@@ -131,14 +122,22 @@ class SourceReader implements Closeable
     public String readToken() throws IOException
     {
         skipSpaces();
-        StringBuilder builder = buffer();
-        char c;
-        while (((c = (char) source.read()) != -1) && !isEndOfName(c))
+
+        StringBuilder builder = pool.borrow();
+        try
         {
-            builder.append(c);
+            char c;
+            while (((c = (char) source.read()) != -1) && !isEndOfName(c))
+            {
+                builder.append(c);
+            }
+            unreadIfValid(c);
+            return builder.toString();
         }
-        unreadIfValid(c);
-        return builder.toString();
+        finally
+        {
+            pool.give(builder);
+        }
     }
 
     /**
@@ -251,17 +250,24 @@ class SourceReader implements Closeable
     {
         requireIOCondition(!source.isEOF(), "Expected line but was end of file");
 
-        StringBuilder builder = buffer();
-        int c;
-        while ((c = source.read()) != -1 && !isEOL(c))
+        StringBuilder builder = pool.borrow();
+        try
         {
-            builder.append((char) c);
+            int c;
+            while ((c = source.read()) != -1 && !isEOL(c))
+            {
+                builder.append((char) c);
+            }
+            if (isCarriageReturn(c) && isLineFeed(source.peek()))
+            {
+                source.read();
+            }
+            return builder.toString();
         }
-        if (isCarriageReturn(c) && isLineFeed(source.peek()))
+        finally
         {
-            source.read();
+            pool.give(builder);
         }
-        return builder.toString();
     }
 
     /**
@@ -308,50 +314,57 @@ class SourceReader implements Closeable
     public String readName() throws IOException
     {
         skipExpected('/');
-        StringBuilder builder = buffer();
-        char c;
-        while (((c = (char) source.read()) != -1) && !isEndOfName(c))
+        StringBuilder builder = pool.borrow();
+        try
         {
-            if (c == '#')
+            char c;
+            while (((c = (char) source.read()) != -1) && !isEndOfName(c))
             {
-                int ch1 = source.read();
-                int ch2 = source.read();
+                if (c == '#')
+                {
+                    int ch1 = source.read();
+                    int ch2 = source.read();
 
-                // Prior to PDF v1.2, the # was not a special character. Also,
-                // it has been observed that various PDF tools do not follow the
-                // spec with respect to the # escape, even though they report
-                // PDF versions of 1.2 or later. The solution here is that we
-                // interpret the # as an escape only when it is followed by two
-                // valid hex digits.
-                //
-                if (isHexDigit(ch1) && isHexDigit(ch2))
-                {
-                    String hex = "" + ch1 + ch2;
-                    try
+                    // Prior to PDF v1.2, the # was not a special character. Also,
+                    // it has been observed that various PDF tools do not follow the
+                    // spec with respect to the # escape, even though they report
+                    // PDF versions of 1.2 or later. The solution here is that we
+                    // interpret the # as an escape only when it is followed by two
+                    // valid hex digits.
+                    //
+                    if (isHexDigit(ch1) && isHexDigit(ch2))
                     {
-                        c = (char) Integer.parseInt(hex, 16);
+                        String hex = "" + ch1 + ch2;
+                        try
+                        {
+                            c = (char) Integer.parseInt(hex, 16);
+                        }
+                        catch (NumberFormatException e)
+                        {
+                            source.unread(ch1);
+                            source.unread(ch2);
+                            throw new IOException(String.format(
+                                    "Expected an Hex number at offset %d but was '%s'", offset(),
+                                    hex), e);
+                        }
                     }
-                    catch (NumberFormatException e)
+                    else
                     {
-                        source.unread(ch1);
                         source.unread(ch2);
-                        throw new IOException(String.format(
-                                "Expected an Hex number at offset %d but was '%s'", offset(), hex),
-                                e);
+                        LOG.warn("Found NUMBER SIGN (#) not used as escaping char while reading name at "
+                                + offset());
+                        c = (char) ch1;
                     }
                 }
-                else
-                {
-                    source.unread(ch2);
-                    LOG.warn("Found NUMBER SIGN (#) not used as escaping char while reading name at "
-                            + offset());
-                    c = (char) ch1;
-                }
+                builder.append(c);
             }
-            builder.append(c);
+            unreadIfValid(c);
+            return builder.toString();
         }
-        unreadIfValid(c);
-        return builder.toString();
+        finally
+        {
+            pool.give(builder);
+        }
     }
 
     /**
@@ -401,18 +414,25 @@ class SourceReader implements Closeable
     public final String readIntegerNumber() throws IOException
     {
         skipSpaces();
-        StringBuilder builder = buffer();
-        int c = source.read();
-        if (c != -1 && (isDigit(c) || c == '+' || c == '-'))
+        StringBuilder builder = pool.borrow();
+        try
         {
-            builder.append((char) c);
-            while ((c = source.read()) != -1 && isDigit(c))
+            int c = source.read();
+            if (c != -1 && (isDigit(c) || c == '+' || c == '-'))
             {
                 builder.append((char) c);
+                while ((c = source.read()) != -1 && isDigit(c))
+                {
+                    builder.append((char) c);
+                }
             }
+            unreadIfValid(c);
+            return builder.toString();
         }
-        unreadIfValid(c);
-        return builder.toString();
+        finally
+        {
+            pool.give(builder);
+        }
     }
 
     /**
@@ -423,18 +443,26 @@ class SourceReader implements Closeable
      */
     public final String readNumber() throws IOException
     {
-        StringBuilder builder = buffer();
-        int c = source.read();
-        if (c != -1 && (isDigit(c) || c == '+' || c == '-' || c == '.'))
+        StringBuilder builder = pool.borrow();
+        try
         {
-            builder.append((char) c);
-            while ((c = source.read()) != -1 && (isDigit(c) || c == '.' || c == 'E' || c == 'e'))
+            int c = source.read();
+            if (c != -1 && (isDigit(c) || c == '+' || c == '-' || c == '.'))
             {
                 builder.append((char) c);
+                while ((c = source.read()) != -1
+                        && (isDigit(c) || c == '.' || c == 'E' || c == 'e'))
+                {
+                    builder.append((char) c);
+                }
             }
+            unreadIfValid(c);
+            return builder.toString();
         }
-        unreadIfValid(c);
-        return builder.toString();
+        finally
+        {
+            pool.give(builder);
+        }
     }
 
     /**
@@ -447,31 +475,39 @@ class SourceReader implements Closeable
     public final String readHexString() throws IOException
     {
         skipExpected('<');
-        StringBuilder builder = buffer();
-        char c;
-        while (((c = (char) source.read()) != -1) && c != '>')
+        StringBuilder builder = pool.borrow();
+        try
         {
-            if (isHexDigit(c))
+            char c;
+            while (((c = (char) source.read()) != -1) && c != '>')
             {
-                builder.append(c);
+                if (isHexDigit(c))
+                {
+                    builder.append(c);
+                }
+                else if (isWhitespace(c))
+                {
+                    continue;
+                }
+                else
+                {
+                    // this differs from original PDFBox implementation. It replaces the wrong char with a default value
+                    // and
+                    // goes on.
+                    LOG.warn(String
+                            .format("Expected an hexadecimal char at offset %d but was '%c'. Replaced with default 0.",
+                                    offset() - 1, c));
+                    builder.append('0');
+                }
             }
-            else if (isWhitespace(c))
-            {
-                continue;
-            }
-            else
-            {
-                // this differs from original PDFBox implementation. It replaces the wrong char with a default value and
-                // goes on.
-                LOG.warn(String
-                        .format("Expected an hexadecimal char at offset %d but was '%c'. Replaced with default 0.",
-                                offset() - 1, c));
-                builder.append('0');
-            }
+            requireIOCondition(c != -1,
+                    "Unexpected EOF. Missing closing bracket for hexadecimal string.");
+            return builder.toString();
         }
-        requireIOCondition(c != -1,
-                "Unexpected EOF. Missing closing bracket for hexadecimal string.");
-        return builder.toString();
+        finally
+        {
+            pool.give(builder);
+        }
     }
 
     /**
@@ -484,119 +520,131 @@ class SourceReader implements Closeable
     {
         skipExpected('(');
         int bracesCounter = 1;
-        StringBuilder builder = buffer();
-
-        char c;
-        while ((c = (char) source.read()) != -1 && bracesCounter > 0)
+        StringBuilder builder = pool.borrow();
+        try
         {
-            switch (c)
+
+            char c;
+            while ((c = (char) source.read()) != -1 && bracesCounter > 0)
             {
-            case '(':
-                bracesCounter++;
-                builder.append(c);
-                break;
-            case ')':
-                bracesCounter--;
-                // TODO PDFBox 276
-                // this differs from the PDFBox 2.0.0 impl.
-                // consider if we want to take care of this. Maybe investigate Acrobat to see how they do it
-                if (bracesCounter > 0)
+                switch (c)
                 {
+                case '(':
+                    bracesCounter++;
                     builder.append(c);
-                }
-                break;
-            case '\\':
-            {
-                char next = (char) source.read();
-                switch (next)
-                {
-                case 'n':
-                    builder.append(ASCII_LINE_FEED);
-                    break;
-                case 'r':
-                    builder.append(ASCII_CARRIAGE_RETURN);
-                    break;
-                case 't':
-                    builder.append(ASCII_HORIZONTAL_TAB);
-                    break;
-                case 'b':
-                    builder.append(ASCII_BACKSPACE);
-                    break;
-                case 'f':
-                    builder.append(ASCII_FORM_FEED);
                     break;
                 case ')':
+                    bracesCounter--;
                     // TODO PDFBox 276
                     // this differs from the PDFBox 2.0.0 impl.
                     // consider if we want to take care of this. Maybe investigate Acrobat to see how they do it
-                case '(':
+                    if (bracesCounter > 0)
+                    {
+                        builder.append(c);
+                    }
+                    break;
                 case '\\':
-                    builder.append(next);
-                    break;
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
                 {
-                    StringBuilder octal = buffer();
-                    octal.append(next);
-                    next = (char) source.read();
-                    if (isOctalDigit(next))
+                    char next = (char) source.read();
+                    switch (next)
                     {
-                        octal.append(next);
-                        next = (char) source.read();
-                        if (isOctalDigit(next))
+                    case 'n':
+                        builder.append(ASCII_LINE_FEED);
+                        break;
+                    case 'r':
+                        builder.append(ASCII_CARRIAGE_RETURN);
+                        break;
+                    case 't':
+                        builder.append(ASCII_HORIZONTAL_TAB);
+                        break;
+                    case 'b':
+                        builder.append(ASCII_BACKSPACE);
+                        break;
+                    case 'f':
+                        builder.append(ASCII_FORM_FEED);
+                        break;
+                    case ')':
+                        // TODO PDFBox 276
+                        // this differs from the PDFBox 2.0.0 impl.
+                        // consider if we want to take care of this. Maybe investigate Acrobat to see how they do it
+                    case '(':
+                    case '\\':
+                        builder.append(next);
+                        break;
+                    case '0':
+                    case '1':
+                    case '2':
+                    case '3':
+                    case '4':
+                    case '5':
+                    case '6':
+                    case '7':
+                    {
+                        StringBuilder octal = pool.borrow();
+                        try
                         {
+
                             octal.append(next);
+                            next = (char) source.read();
+                            if (isOctalDigit(next))
+                            {
+                                octal.append(next);
+                                next = (char) source.read();
+                                if (isOctalDigit(next))
+                                {
+                                    octal.append(next);
+                                }
+                                else
+                                {
+                                    unreadIfValid(next);
+                                }
+                            }
+                            else
+                            {
+                                unreadIfValid(next);
+                            }
+                            builder.append(Integer.parseInt(octal.toString(), 8));
                         }
-                        else
+                        catch (NumberFormatException e)
                         {
-                            unreadIfValid(next);
+                            throw new IOException(String.format(
+                                    "Expected an octal type character at offset but was '%s'",
+                                    octal.toString()), e);
                         }
+                        finally
+                        {
+                            pool.give(octal);
+                        }
+                        break;
                     }
-                    else
+                    case ASCII_LINE_FEED:
+                    case ASCII_CARRIAGE_RETURN:
                     {
-                        unreadIfValid(next);
+                        // this is a break in the line so ignore it and the newline and continue
+                        while ((c = (char) source.read()) != -1 && isEOL(c))
+                        {
+                            // NOOP
+                        }
+                        unreadIfValid(c);
+                        break;
                     }
-                    try
-                    {
-                        builder.append(Integer.parseInt(octal.toString(), 8));
+                    default:
+                        // dropping the backslash
+                        builder.append(next);
                     }
-                    catch (NumberFormatException e)
-                    {
-                        throw new IOException(String.format(
-                                "Expected an octal type character at offset but was '%s'",
-                                octal.toString()), e);
-                    }
-                    break;
-                }
-                case ASCII_LINE_FEED:
-                case ASCII_CARRIAGE_RETURN:
-                {
-                    // this is a break in the line so ignore it and the newline and continue
-                    while ((c = (char) source.read()) != -1 && isEOL(c))
-                    {
-                        // NOOP
-                    }
-                    unreadIfValid(c);
                     break;
                 }
                 default:
-                    // dropping the backslash
-                    builder.append(next);
+                    builder.append(c);
                 }
-                break;
             }
-            default:
-                builder.append(c);
-            }
+            unreadIfValid(c);
+            return builder.toString();
         }
-        unreadIfValid(c);
-        return builder.toString();
+        finally
+        {
+            pool.give(builder);
+        }
     }
 
     /**
