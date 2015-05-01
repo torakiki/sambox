@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.pdfbox.cos;
+package org.apache.pdfbox.input;
 
 import static java.util.Arrays.asList;
 import static org.apache.pdfbox.util.CharUtils.ASCII_BACKSPACE;
@@ -38,16 +38,17 @@ import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.pdfbox.cos.COSObjectKey;
 import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.io.PushBackInputStream;
-import org.apache.pdfbox.util.Charsets;
 import org.apache.pdfbox.util.CharUtils;
+import org.apache.pdfbox.util.Charsets;
 
 /**
  * @author Andrea Vacondio
  *
  */
-public class SourceReader implements Closeable
+class SourceReader implements Closeable
 {
 
     private static final Log LOG = LogFactory.getLog(SourceReader.class);

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.pdfbox.pdfparser;
+package org.apache.pdfbox.input;
 
 import static java.util.Objects.requireNonNull;
 import static org.apache.pdfbox.util.RequireUtils.requireIOCondition;
@@ -29,7 +29,6 @@ import java.security.cert.CertificateException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.pdfbox.cos.BaseCOSParser;
 import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.io.PushBackInputStream;
 import org.apache.pdfbox.io.RandomAccessBufferedFileInputStream;

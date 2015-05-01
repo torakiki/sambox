@@ -14,12 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.pdfbox.cos;
+package org.apache.pdfbox.input;
 
-import static org.apache.pdfbox.cos.BaseCOSParser.ENDOBJ;
-import static org.apache.pdfbox.cos.BaseCOSParser.ENDSTREAM;
-import static org.apache.pdfbox.cos.BaseCOSParser.STREAM;
-import static org.apache.pdfbox.cos.SourceReader.OBJ;
+import static org.apache.pdfbox.input.BaseCOSParser.ENDOBJ;
+import static org.apache.pdfbox.input.BaseCOSParser.ENDSTREAM;
+import static org.apache.pdfbox.input.BaseCOSParser.STREAM;
+import static org.apache.pdfbox.input.SourceReader.OBJ;
 import static org.apache.pdfbox.util.RequireUtils.requireIOCondition;
 
 import java.io.IOException;
@@ -30,6 +30,11 @@ import java.util.TreeMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.pdfbox.cos.COSBase;
+import org.apache.pdfbox.cos.COSDictionary;
+import org.apache.pdfbox.cos.COSName;
+import org.apache.pdfbox.cos.COSObjectKey;
+import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.io.PushBackInputStream;
 import org.apache.pdfbox.pdmodel.encryption.SecurityHandler;
 import org.apache.pdfbox.xref.CompressedXrefEntry;

@@ -14,10 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.pdfbox.cos;
+package org.apache.pdfbox.input;
 
 import java.io.IOException;
 import java.util.Optional;
+
+import org.apache.pdfbox.cos.COSBase;
+import org.apache.pdfbox.cos.COSNull;
+import org.apache.pdfbox.cos.COSObjectKey;
+import org.apache.pdfbox.cos.COSVisitor;
 
 /**
  * @author Andrea Vacondio

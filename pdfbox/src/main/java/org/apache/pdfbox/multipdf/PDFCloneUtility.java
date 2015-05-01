@@ -28,7 +28,7 @@ import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSObjectable;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.cos.COSStreamArray;
-import org.apache.pdfbox.cos.LazyIndirectCOSObject;
+import org.apache.pdfbox.input.LazyIndirectCOSObject;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.common.PDStream;
 

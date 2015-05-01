@@ -41,7 +41,7 @@ import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.cos.COSVisitor;
 import org.apache.pdfbox.cos.IndirectCOSObjectReference;
-import org.apache.pdfbox.cos.LazyIndirectCOSObject;
+import org.apache.pdfbox.input.LazyIndirectCOSObject;
 
 /**
  * Component that visits pdf document collecting pdf objects that need to be written, replacing references to them with

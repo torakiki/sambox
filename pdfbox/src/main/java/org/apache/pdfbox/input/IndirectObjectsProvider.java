@@ -14,8 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.pdfbox.cos;
+package org.apache.pdfbox.input;
 
+import org.apache.pdfbox.cos.COSBase;
+import org.apache.pdfbox.cos.COSObjectKey;
 import org.apache.pdfbox.pdmodel.encryption.SecurityHandler;
 import org.apache.pdfbox.xref.Xref;
 import org.apache.pdfbox.xref.XrefEntry;
