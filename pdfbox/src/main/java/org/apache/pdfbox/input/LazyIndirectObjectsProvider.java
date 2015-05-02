@@ -95,7 +95,7 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
     private void parseObject(COSObjectKey key) throws IOException
     {
         XrefEntry xrefEntry = xref.get(key);
-        LOG.debug("Starting parse of indirect object " + xrefEntry);
+        LOG.trace("Starting parse of indirect object " + xrefEntry);
         if (xrefEntry.getType() == XrefType.IN_USE)
         {
             parser.offset(xrefEntry.getByteOffset());

@@ -16,10 +16,13 @@
  */
 package org.apache.pdfbox.cos;
 
+import static org.apache.pdfbox.util.RequireUtils.requireNotBlank;
 import static org.apache.pdfbox.util.RequireUtils.requireNotNullArg;
 
 import java.io.IOException;
 import java.util.Optional;
+
+import org.apache.pdfbox.util.SpecVersionUtils;
 
 /**
  * This is the in-memory representation of the PDF document.
@@ -30,13 +33,13 @@ import java.util.Optional;
 public final class COSDocument extends COSBase
 {
 
-    private float headerVersion;
+    private String headerVersion;
     private COSDictionary trailer;
     private boolean xRefStream;
 
     public COSDocument()
     {
-        this(new COSDictionary(), 1.4f);
+        this(new COSDictionary(), SpecVersionUtils.V1_4);
         COSDictionary catalog = new COSDictionary();
         catalog.setItem(COSName.TYPE, COSName.CATALOG);
         trailer.setItem(COSName.ROOT, catalog);
@@ -44,23 +47,34 @@ public final class COSDocument extends COSBase
 
     public COSDocument(COSDictionary trailer)
     {
-        this(trailer, 1.4f);
+        this(trailer, SpecVersionUtils.V1_4);
     }
 
-    // TODO use an enum instead of float
-    public COSDocument(COSDictionary trailer, float headerVersion)
+    public COSDocument(COSDictionary trailer, String headerVersion)
     {
         requireNotNullArg(trailer, "Trailer cannot be null");
+        requireNotBlank(headerVersion, "Header version cannot be blank");
         this.trailer = trailer;
         this.headerVersion = headerVersion;
     }
 
-    public void setHeaderVersion(float headerVersion)
+    /**
+     * Sets the version of the PDF specification to write to the file header. File header is defined in Chap 7.5.2 of
+     * PDF 32000-1:2008
+     * 
+     * @param headerVersion
+     */
+    public void setHeaderVersion(String headerVersion)
     {
+        requireNotBlank(headerVersion, "Header version cannot be null");
         this.headerVersion = headerVersion;
     }
 
-    public float getHeaderVersion()
+    /**
+     * @return the version of the PDF specification retrieved from the file header. File header is defined in Chap 7.5.2
+     * of PDF 32000-1:2008
+     */
+    public String getHeaderVersion()
     {
         return headerVersion;
     }

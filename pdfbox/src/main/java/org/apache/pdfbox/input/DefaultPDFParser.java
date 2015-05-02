@@ -18,6 +18,7 @@ package org.apache.pdfbox.input;
 
 import static java.util.Objects.requireNonNull;
 import static org.apache.pdfbox.util.RequireUtils.requireIOCondition;
+import static org.apache.pdfbox.util.SpecVersionUtils.PDF_HEADER;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,8 +39,8 @@ import org.apache.pdfbox.pdmodel.encryption.PDEncryption;
 import org.apache.pdfbox.pdmodel.encryption.PublicKeyDecryptionMaterial;
 import org.apache.pdfbox.pdmodel.encryption.SecurityHandler;
 import org.apache.pdfbox.pdmodel.encryption.StandardDecryptionMaterial;
+import org.apache.pdfbox.util.SpecVersionUtils;
 import org.apache.pdfbox.xref.XrefParser;
-
 /**
  * @author Andrea Vacondio
  *
@@ -47,9 +48,6 @@ import org.apache.pdfbox.xref.XrefParser;
 public class DefaultPDFParser
 {
     private static final Log LOG = LogFactory.getLog(DefaultPDFParser.class);
-
-    private static final String PDF_HEADER = "%PDF-";
-    private static final int EXPECTED_HEADER_LENGTH = 8;
 
     /**
      * Parses the given {@link File} returning the corresponding {@link PDDocument}.
@@ -95,7 +93,7 @@ public class DefaultPDFParser
         BaseCOSParser parser = new BaseCOSParser(new PushBackInputStream(
                 new RandomAccessBufferedFileInputStream(file), 4096));
         parser.length(file.length());
-        float headerVersion = readHeader(parser);
+        String headerVersion = readHeader(parser);
         XrefParser xrefParser = new XrefParser(parser);
         xrefParser.parse();
         COSDocument document = new COSDocument(xrefParser.getTrailer(), headerVersion);
@@ -115,7 +113,7 @@ public class DefaultPDFParser
         return new PDDocument(document);
     }
 
-    private static float readHeader(BaseCOSParser parser) throws IOException
+    private static String readHeader(BaseCOSParser parser) throws IOException
     {
         parser.offset(0);
         int headerIndex = -1;
@@ -130,19 +128,11 @@ public class DefaultPDFParser
             header = parser.readLine();
         }
 
-        header = header.substring(headerIndex, header.length());
-        requireIOCondition(header.length() >= EXPECTED_HEADER_LENGTH,
+        final String trimmedLeftHeader = header.substring(headerIndex, header.length());
+        requireIOCondition(trimmedLeftHeader.length() >= SpecVersionUtils.EXPECTED_HEADER_LENGTH,
                 "Unable to find expected header '%PDF-n.n'");
-        try
-        {
-            LOG.debug("Found header " + header);
-            return Float.valueOf(header.substring(EXPECTED_HEADER_LENGTH - 3,
-                    EXPECTED_HEADER_LENGTH));
-        }
-        catch (NumberFormatException exception)
-        {
-            throw new IOException("Unable to get header version from " + header);
-        }
+        LOG.debug("Found header " + trimmedLeftHeader);
+        return SpecVersionUtils.parseHeaderString(trimmedLeftHeader);
     }
 
     private static DecryptionMaterial getDecryptionMaterial(String password, InputStream keyStore,

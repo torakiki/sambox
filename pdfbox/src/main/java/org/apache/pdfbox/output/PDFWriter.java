@@ -16,6 +16,8 @@
  */
 package org.apache.pdfbox.output;
 
+import static org.apache.pdfbox.util.SpecVersionUtils.PDF_HEADER;
+
 import java.io.IOException;
 import java.util.Optional;
 import java.util.TreeMap;
@@ -28,7 +30,6 @@ import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.IndirectCOSObjectReference;
 import org.apache.pdfbox.util.Charsets;
 import org.apache.pdfbox.xref.XrefEntry;
-
 /**
  * @author Andrea Vacondio
  *
@@ -51,10 +52,11 @@ class PDFWriter extends COSWriter
         super(channel);
     }
 
-    public void writeHeader(float version) throws IOException
+    public void writeHeader(String version) throws IOException
     {
-        LOG.trace("Writing header");
-        write("%PDF-" + Float.toString(version));
+        LOG.debug("Writing header " + version);
+        write(PDF_HEADER);
+        write(version);
         writeEOL();
         write(COMMENT);
         write(GARBAGE);

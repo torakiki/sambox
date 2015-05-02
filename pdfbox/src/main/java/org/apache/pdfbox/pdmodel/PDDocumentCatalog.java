@@ -42,6 +42,7 @@ import org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline.PDDocume
 import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
 import org.apache.pdfbox.pdmodel.interactive.pagenavigation.PDThread;
 import org.apache.pdfbox.pdmodel.interactive.viewerpreferences.PDViewerPreferences;
+import org.apache.pdfbox.util.SpecVersionUtils;
 
 /**
  * The Document Catalog of a PDF.
@@ -497,7 +498,7 @@ public class PDDocumentCatalog implements COSObjectable
     /**
      * Sets the PDF specification version this document conforms to.
      *
-     * @param version the PDF version (e.g. "1.4")
+     * @param version the PDF version
      */
     public void setVersion(String version)
     {
@@ -547,9 +548,9 @@ public class PDDocumentCatalog implements COSObjectable
         root.setItem(COSName.OCPROPERTIES, ocProperties);
 
         // optional content groups require PDF 1.5
-        if (ocProperties != null && document.getVersion() < 1.5)
+        if (ocProperties != null && document.getVersion().compareTo(SpecVersionUtils.V1_5) < 0)
         {
-            document.setVersion(1.5f);
+            document.setVersion(SpecVersionUtils.V1_5);
         }
     }
 }

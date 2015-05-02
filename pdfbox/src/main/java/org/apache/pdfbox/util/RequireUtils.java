@@ -61,6 +61,17 @@ public final class RequireUtils
     }
 
     /**
+     * Throws an {@link IllegalArgumentException} if the given string is blank
+     * 
+     * @param value string
+     * @param exceptionMessage
+     */
+    public static void requireNotBlank(String value, String exceptionMessage)
+    {
+        requireArg(value != null && value.trim().length() > 0, exceptionMessage);
+    }
+
+    /**
      * Throws an {@link IOException} if the given condition is not met
      * 
      * @param condition

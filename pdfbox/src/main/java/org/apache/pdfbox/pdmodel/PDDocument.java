@@ -17,6 +17,7 @@
 package org.apache.pdfbox.pdmodel;
 
 import static org.apache.pdfbox.output.CountingWritableByteChannel.from;
+import static org.apache.pdfbox.util.RequireUtils.requireNotBlank;
 
 import java.io.Closeable;
 import java.io.File;
@@ -51,6 +52,7 @@ import org.apache.pdfbox.pdmodel.encryption.SecurityHandler;
 import org.apache.pdfbox.pdmodel.encryption.SecurityHandlerFactory;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.util.Charsets;
+import org.apache.pdfbox.util.SpecVersionUtils;
 
 /**
  * This is the in-memory representation of the PDF document. The #close() method must be called once the document is no
@@ -352,58 +354,41 @@ public class PDDocument implements Closeable
     }
 
     /**
-     * @return the PDF specification version this document conforms to (e.g. 1.4f)
+     * @return The version of the PDF specification to which the document conforms.
      */
-    public float getVersion()
+    public String getVersion()
     {
-        float headerVersionFloat = getDocument().getHeaderVersion();
-        // there may be a second version information in the document catalog starting with 1.4
-        if (headerVersionFloat >= 1.4f)
+        String headerVersion = getDocument().getHeaderVersion();
+        if (headerVersion.compareTo(SpecVersionUtils.V1_4) >= 0)
         {
-            String catalogVersion = getDocumentCatalog().getVersion();
-            if (catalogVersion != null)
-            {
-                try
-                {
-                    return Math.max(Float.parseFloat(catalogVersion), headerVersionFloat);
-                }
-                catch (NumberFormatException e)
-                {
-                    LOG.error("Can't extract the version number of the document catalog.", e);
-                }
-            }
+            return Optional.ofNullable(getDocumentCatalog().getVersion())
+                    .filter(catalogVersion -> (catalogVersion.compareTo(headerVersion) > 0))
+                    .orElse(headerVersion);
         }
-        return headerVersionFloat;
+        return headerVersion;
     }
 
     /**
-     * Sets the PDF specification version for this document.
+     * Sets the version of the PDF specification to which the document conforms. Downgrading of the document version is
+     * not allowed.
      *
-     * @param newVersion the new PDF version (e.g. 1.4f)
+     * @param newVersion the new PDF version
      * 
      */
-    public void setVersion(float newVersion)
+    public void setVersion(String newVersion)
     {
-        float currentVersion = getVersion();
-        // nothing to do?
-        if (newVersion == currentVersion)
+        requireNotBlank(newVersion, "Spec version cannot be blank");
+        int compare = getVersion().compareTo(newVersion);
+        if (compare > 0)
         {
-            return;
+            LOG.warn("Spec version downgrade not allowed");
         }
-        // the version can't be downgraded
-        if (newVersion < currentVersion)
+        else if (compare < 0)
         {
-            LOG.error("It's not allowed to downgrade the version of a pdf.");
-            return;
-        }
-        // update the catalog version if the document version is >= 1.4
-        if (getDocument().getHeaderVersion() >= 1.4f)
-        {
-            getDocumentCatalog().setVersion(Float.toString(newVersion));
-        }
-        else
-        {
-            // versions < 1.4f have a version header only
+            if (getDocument().getHeaderVersion().compareTo(SpecVersionUtils.V1_4) >= 0)
+            {
+                getDocumentCatalog().setVersion(newVersion);
+            }
             getDocument().setHeaderVersion(newVersion);
         }
     }
