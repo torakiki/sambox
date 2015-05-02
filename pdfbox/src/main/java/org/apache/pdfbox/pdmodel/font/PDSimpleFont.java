@@ -17,7 +17,9 @@
 package org.apache.pdfbox.pdmodel.font;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -45,7 +47,8 @@ public abstract class PDSimpleFont extends PDFont
     protected GlyphList glyphList;
     private Boolean isSymbolic;
     private final Set<Integer> noUnicode = new HashSet<Integer>(); // for logging
-
+    private Map<String, Integer> invertedEncoding; // for writing
+    
     /**
      * Constructor for embedding.
      */
@@ -166,7 +169,7 @@ public abstract class PDSimpleFont extends PDFont
     /**
      * Called by readEncoding() if the encoding needs to be extracted from the font file.
      *
-     * @throws IOException if the font file could not be read
+     * @throws IOException if the font file could not be read.
      */
     protected abstract Encoding readEncodingFromFont() throws IOException;
 
@@ -186,6 +189,28 @@ public abstract class PDSimpleFont extends PDFont
         return glyphList;
     }
 
+    /**
+     * Inverts the font's Encoding. Any duplicate (Name -> Code) mappings will be lost.
+     */
+    protected Map<String, Integer> getInvertedEncoding()
+    {
+        if (invertedEncoding != null)
+        {
+            return invertedEncoding;
+        }
+
+        invertedEncoding = new HashMap<String, Integer>();
+        Map<Integer, String> codeToName = encoding.getCodeToNameMap();
+        for (Map.Entry<Integer, String> entry : codeToName.entrySet())
+        {
+            if (!invertedEncoding.containsKey(entry.getValue()))
+            {
+                invertedEncoding.put(entry.getValue(), entry.getKey());
+            }
+        }
+        return invertedEncoding;
+    }
+    
     /**
      * Returns true the font is a symbolic (that is, it does not use the Adobe Standard Roman
      * character set).
@@ -386,8 +411,16 @@ public abstract class PDSimpleFont extends PDFont
             DictionaryEncoding dictionary = (DictionaryEncoding)getEncoding();
             if (dictionary.getDifferences().size() > 0)
             {
-                // todo: do we need to check if entries actually differ from the base encoding?
-                return false;
+                // we also require that the differences are actually different, see PDFBOX-1900 with
+                // the file from PDFBOX-2192 on Windows
+                Encoding baseEncoding = dictionary.getBaseEncoding();
+                for (Map.Entry<Integer, String> entry : dictionary.getDifferences().entrySet())
+                {
+                    if (!entry.getValue().equals(baseEncoding.getName(entry.getKey())))
+                    {
+                        return false;
+                    }
+                }
             }
         }
         return super.isStandard14();

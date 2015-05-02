@@ -31,7 +31,6 @@ import java.awt.image.ComponentColorModel;
 import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
-import java.io.IOException;
 
 /**
  * AWT Paint that adds a soft mask to the alpha channel of the existing parent paint. If the parent
@@ -63,16 +62,9 @@ public final class SoftMaskPaint implements Paint
     public PaintContext createContext(ColorModel cm, Rectangle deviceBounds,
             Rectangle2D userBounds, AffineTransform at, RenderingHints hints)
     {
-        try
-        {
             PaintContext parentContext = parentPaint.createContext(null, deviceBounds, userBounds,
                     at, hints);
             return new Context(parentContext);
-        }
-        catch (IOException e)
-        {
-            return null; // context cannot be created
-        }
     }
 
     private class Context implements PaintContext

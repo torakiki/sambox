@@ -16,16 +16,15 @@
  */
 package org.apache.pdfbox.pdmodel.graphics.color;
 
-import java.net.URL;
-import org.apache.pdfbox.cos.COSName;
-
 import java.awt.color.ICC_ColorSpace;
 import java.awt.color.ICC_Profile;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
-
 import java.io.InputStream;
+import java.net.URL;
+
+import org.apache.pdfbox.cos.COSName;
 
 /**
  * Allows colors to be specified according to the subtractive CMYK (cyan, magenta, yellow, black)
@@ -122,7 +121,7 @@ public class PDDeviceCMYK extends PDDeviceColorSpace
     }
 
     @Override
-    public BufferedImage toRGBImage(WritableRaster raster) throws IOException
+    public BufferedImage toRGBImage(WritableRaster raster)
     {
         return toRGBImageAWT(raster, awtColorSpace);
     }

@@ -26,9 +26,7 @@ import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSInteger;
 import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.cos.COSObjectable;
 import org.apache.pdfbox.cos.COSString;
-import org.apache.pdfbox.pdfwriter.COSFilterInputStream;
 
 /**
  * This represents a digital signature that can be attached to a document.

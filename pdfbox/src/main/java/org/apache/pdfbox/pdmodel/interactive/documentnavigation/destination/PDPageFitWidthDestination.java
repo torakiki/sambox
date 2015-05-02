@@ -17,7 +17,6 @@
 package org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination;
 
 import org.apache.pdfbox.cos.COSArray;
-import org.apache.pdfbox.cos.COSBase;
 
 /**
  * This represents a destination to a page at a y location and the width is magnified
@@ -81,7 +80,7 @@ public class PDPageFitWidthDestination extends PDPageDestination
         array.growToSize( 3 );
         if( y == -1 )
         {
-            array.set( 2, (COSBase)null );
+            array.set(2, null);
         }
         else
         {

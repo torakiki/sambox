@@ -403,7 +403,7 @@ public class COSStream extends COSDictionary implements Closeable
         IOUtils.closeQuietly(unFilteredStream);
         unFilteredStream = null;
         IOUtils.closeQuietly(filteredStream);
-        filteredStream = new RandomAccessFileOutputStream( buffer );
+        filteredStream = new RandomAccessFileOutputStream(buffer);
         return new BufferedOutputStream( filteredStream, BUFFER_SIZE );
     }
 

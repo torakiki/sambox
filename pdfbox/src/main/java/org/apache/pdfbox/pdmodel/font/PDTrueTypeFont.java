@@ -225,11 +225,6 @@ public class PDTrueTypeFont extends PDSimpleFont
     @Override
     public float getWidthFromFont(int code) throws IOException
     {
-        if (getStandard14AFM() != null && getEncoding() != null)
-        {
-            return getStandard14Width(code);
-        }
-
         int gid = codeToGID(code);
         float width = ttf.getAdvanceWidth(gid);
         float unitsPerEM = ttf.getUnitsPerEm();
@@ -261,14 +256,18 @@ public class PDTrueTypeFont extends PDSimpleFont
                     String.format("U+%04X is not available in this font's Encoding", unicode));
         }
 
-        int gid = codeToGID(unicode);
+        String name = getGlyphList().codePointToName(unicode);
+        Map<String, Integer> inverted = getInvertedEncoding();
+        
+        int gid = ttf.getUnicodeCmap().getGlyphId(unicode);
         if (gid == 0)
         {
             throw new IllegalArgumentException(
                     String.format("No glyph for U+%04X in font %s", unicode, getName()));
         }
-
-        return new byte[] { (byte)unicode };
+        
+        int code = inverted.get(name);
+        return new byte[] { (byte)code };
     }
 
     @Override
