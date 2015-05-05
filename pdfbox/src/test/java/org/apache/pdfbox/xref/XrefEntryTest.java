@@ -24,7 +24,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.pdfbox.cos.COSObjectKey;
-import org.apache.pdfbox.xref.XrefType;
 import org.junit.Test;
 
 /**
@@ -71,6 +70,6 @@ public class XrefEntryTest
     {
         assertEquals(XrefType.IN_USE, inUseEntry(10, -10, 0).getType());
         assertEquals(XrefType.COMPRESSED, compressedEntry(10, 10).getType());
-        assertEquals(XrefType.FREE, freeEntry(10, 50, 1).getType());
+        assertEquals(XrefType.FREE, freeEntry(10, 1).getType());
     }
 }

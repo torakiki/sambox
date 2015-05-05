@@ -51,7 +51,7 @@ public class COSFloat extends COSNumber
         }
         catch (NumberFormatException e)
         {
-            throw new IOException("Error expected floating point number actual='" + aFloat + "'", e);
+            throw new IOException("Expected floating point number actual='" + aFloat + "'", e);
         }
     }
 

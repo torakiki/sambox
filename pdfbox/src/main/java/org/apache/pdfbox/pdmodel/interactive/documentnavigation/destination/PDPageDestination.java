@@ -19,9 +19,9 @@ package org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
+import org.apache.pdfbox.cos.COSInteger;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSNumber;
-
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageTree;
 
@@ -150,7 +150,7 @@ public abstract class PDPageDestination extends PDDestination
      */
     public void setPageNumber( int pageNumber )
     {
-        array.set( 0, pageNumber );
+        array.set(0, COSInteger.get(pageNumber));
     }
 
     /**
@@ -158,6 +158,7 @@ public abstract class PDPageDestination extends PDDestination
      *
      * @return The cos object that matches this Java object.
      */
+    @Override
     public COSBase getCOSObject()
     {
         return array;

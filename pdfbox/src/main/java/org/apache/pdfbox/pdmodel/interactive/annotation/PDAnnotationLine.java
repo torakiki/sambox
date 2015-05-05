@@ -180,7 +180,7 @@ public class PDAnnotationLine extends PDAnnotationMarkup
         }
         else
         {
-            array.setName( 0, style );
+            array.set(0, COSName.getPDFName(style));
         }
     }
 
@@ -224,7 +224,7 @@ public class PDAnnotationLine extends PDAnnotationMarkup
         }
         else
         {
-            array.setName( 1, style );
+            array.set(1, COSName.getPDFName(style));
         }
     }
 

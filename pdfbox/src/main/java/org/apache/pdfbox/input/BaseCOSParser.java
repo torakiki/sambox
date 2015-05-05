@@ -323,7 +323,7 @@ public final class BaseCOSParser extends SourceReader
      */
     public COSString nextLiteralString() throws IOException
     {
-        return COSString.parseLiteral(readLiteralString());
+        return COSString.newInstance(readLiteralString().getBytes(Charsets.ISO_8859_1));
     }
 
     /**

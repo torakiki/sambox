@@ -271,7 +271,7 @@ public final class PDIndexed extends PDSpecialColorSpace
      */
     public void setHighValue(int high)
     {
-        array.set(2, high);
+        array.set(2, COSInteger.get(high));
     }
 
     @Override

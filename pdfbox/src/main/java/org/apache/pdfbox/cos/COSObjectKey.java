@@ -17,10 +17,9 @@
 package org.apache.pdfbox.cos;
 
 /**
- * Object representing the physical reference to an indirect pdf object.
+ * Object representing a key to identify a PDF object
  *
  * @author Michael Traut
- * @version $Revision: 1.5 $
  */
 public class COSObjectKey implements Comparable<COSObjectKey>
 {
@@ -69,7 +68,7 @@ public class COSObjectKey implements Comparable<COSObjectKey>
     @Override
     public String toString()
     {
-        return Long.toString(number) + " " + Integer.toString(generation) + " R";
+        return Long.toString(number) + " " + Integer.toString(generation);
     }
 
     @Override
@@ -81,7 +80,5 @@ public class COSObjectKey implements Comparable<COSObjectKey>
             return Integer.compare(generation, other.getGeneration());
         }
         return numCompare;
-
     }
-
 }

@@ -188,7 +188,7 @@ class COSWriter extends DestinationWriter implements COSVisitor
     @Override
     public void visit(IndirectCOSObjectReference value) throws IOException
     {
-        write(value.xrefEntry().key().toString());
+        write(value.toString());
     }
 
     @Override

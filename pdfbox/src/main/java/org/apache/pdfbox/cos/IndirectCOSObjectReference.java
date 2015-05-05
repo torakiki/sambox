@@ -56,6 +56,7 @@ public class IndirectCOSObjectReference extends COSBase
     @Override
     public String toString()
     {
-        return xrefEntry().key().toString();
+        return Long.toString(xrefEntry().key().getNumber()) + " "
+                + Integer.toString(xrefEntry().key().getGeneration()) + " R";
     }
 }

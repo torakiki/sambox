@@ -35,7 +35,6 @@ public final class COSDocument extends COSBase
 
     private String headerVersion;
     private COSDictionary trailer;
-    private boolean xRefStream;
 
     public COSDocument()
     {
@@ -88,7 +87,7 @@ public final class COSDocument extends COSBase
     }
 
     /**
-     * This will get the encryption dictionary if the document is encrypted or null if the document is not encrypted.
+     * Get the encryption dictionary if the document is encrypted or null if the document is not encrypted.
      *
      * @return The encryption dictionary.
      */
@@ -98,13 +97,13 @@ public final class COSDocument extends COSBase
     }
 
     /**
-     * This will set the encryption dictionary, this should only be called when encrypting the document.
+     * Set the encryption dictionary, this should only be called when encrypting the document.
      *
-     * @param encDictionary The encryption dictionary.
+     * @param dictionary The encryption dictionary.
      */
-    public void setEncryptionDictionary(COSDictionary encDictionary)
+    public void setEncryptionDictionary(COSDictionary dictionary)
     {
-        trailer.setItem(COSName.ENCRYPT, encDictionary);
+        trailer.setItem(COSName.ENCRYPT, dictionary);
     }
 
     public COSArray getDocumentID()
@@ -124,29 +123,12 @@ public final class COSDocument extends COSBase
     public COSDictionary getCatalog()
     {
         return (COSDictionary) Optional.ofNullable(trailer.getDictionaryObject(COSName.ROOT))
-                .map(COSBase::getCOSObject)
                 .orElseThrow(() -> new IllegalStateException("Catalog cannot be found"));
     }
 
     public COSDictionary getTrailer()
     {
         return trailer;
-    }
-
-    /**
-     * @return true if the trailer is a XRef stream
-     */
-    public boolean isXRefStream()
-    {
-        return xRefStream;
-    }
-
-    /**
-     * @param xRefStream the new value for xRefStream
-     */
-    public void setIsXRefStream(boolean xRefStream)
-    {
-        this.xRefStream = xRefStream;
     }
 
     @Override

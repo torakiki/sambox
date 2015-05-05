@@ -40,4 +40,10 @@ public final class COSNull extends COSBase
     {
         visitor.visit(this);
     }
+
+    @Override
+    public String toString()
+    {
+        return "COSNull";
+    }
 }

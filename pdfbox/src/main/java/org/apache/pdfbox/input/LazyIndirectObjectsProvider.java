@@ -35,6 +35,7 @@ import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSObjectKey;
 import org.apache.pdfbox.cos.COSStream;
+import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.io.PushBackInputStream;
 import org.apache.pdfbox.pdmodel.encryption.SecurityHandler;
 import org.apache.pdfbox.xref.CompressedXrefEntry;
@@ -98,52 +99,61 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
         LOG.trace("Starting parse of indirect object " + xrefEntry);
         if (xrefEntry.getType() == XrefType.IN_USE)
         {
-            parser.offset(xrefEntry.getByteOffset());
-            parser.skipExpectedIndirectObjectDefinition(key);
-            parser.skipSpaces();
-            COSBase found = parser.nextParsedToken();
-            parser.skipSpaces();
-            if (parser.isNextToken(STREAM))
-            {
-                requireIOCondition(found instanceof COSDictionary,
-                        "Found stream with missing dictionary");
-                found = parser.nextStream((COSDictionary) found);
-                if (parser.skipTokenIfValue(ENDSTREAM))
-                {
-                    LOG.warn("Found double 'endstream' token for " + xrefEntry);
-                }
-            }
-            if (securityHandler != null)
-            {
-                LOG.trace("Decrypting stream");
-                securityHandler.decrypt(found, xrefEntry.getObjectNumber(),
-                        xrefEntry.getGenerationNumber());
-            }
-            if (!parser.skipTokenIfValue(ENDOBJ))
-            {
-                LOG.warn("Missing 'endobj' token for " + xrefEntry);
-            }
-            store.put(key, found);
+            parseInUseEntry(xrefEntry);
         }
         if (xrefEntry.getType() == XrefType.COMPRESSED)
         {
-            XrefEntry containingStreamEntry = xref.get(new COSObjectKey(
-                    ((CompressedXrefEntry) xrefEntry).getObjectStreamNumber(), 0));
-
-            requireIOCondition(containingStreamEntry != null
-                    && containingStreamEntry.getType() != XrefType.COMPRESSED,
-                    "Expected an uncompressed indirect object reference for the ObjectStream");
-
-            parseObject(containingStreamEntry.key());
-            COSBase stream = store.get(containingStreamEntry.key()).getCOSObject();
-
-            if (!(stream instanceof COSStream))
-            {
-                throw new IOException("Expected an object stream instance for "
-                        + containingStreamEntry);
-            }
-            parseObjectStream(containingStreamEntry, (COSStream) stream);
+            parseCompressedEntry(xrefEntry);
         }
+    }
+
+    private void parseInUseEntry(XrefEntry xrefEntry) throws IOException
+    {
+        parser.offset(xrefEntry.getByteOffset());
+        parser.skipExpectedIndirectObjectDefinition(xrefEntry.key());
+        parser.skipSpaces();
+        COSBase found = parser.nextParsedToken();
+        parser.skipSpaces();
+        if (parser.isNextToken(STREAM))
+        {
+            requireIOCondition(found instanceof COSDictionary,
+                    "Found stream with missing dictionary");
+            found = parser.nextStream((COSDictionary) found);
+            if (parser.skipTokenIfValue(ENDSTREAM))
+            {
+                LOG.warn("Found double 'endstream' token for " + xrefEntry);
+            }
+        }
+        if (securityHandler != null)
+        {
+            LOG.trace("Decrypting stream");
+            securityHandler.decrypt(found, xrefEntry.getObjectNumber(),
+                    xrefEntry.getGenerationNumber());
+        }
+        if (!parser.skipTokenIfValue(ENDOBJ))
+        {
+            LOG.warn("Missing 'endobj' token for " + xrefEntry);
+        }
+        store.put(xrefEntry.key(), found);
+    }
+
+    private void parseCompressedEntry(XrefEntry xrefEntry) throws IOException
+    {
+        XrefEntry containingStreamEntry = xref.get(new COSObjectKey(
+                ((CompressedXrefEntry) xrefEntry).getObjectStreamNumber(), 0));
+
+        requireIOCondition(containingStreamEntry != null
+                && containingStreamEntry.getType() != XrefType.COMPRESSED,
+                "Expected an uncompressed indirect object reference for the ObjectStream");
+
+        parseObject(containingStreamEntry.key());
+        COSBase stream = store.get(containingStreamEntry.key()).getCOSObject();
+
+        if (!(stream instanceof COSStream))
+        {
+            throw new IOException("Expected an object stream instance for " + containingStreamEntry);
+        }
+        parseObjectStream(containingStreamEntry, (COSStream) stream);
     }
 
     private void parseObjectStream(XrefEntry containingStreamEntry, COSStream stream)
@@ -190,5 +200,6 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
                 }
             }
         }
+        IOUtils.close(stream);
     }
 }

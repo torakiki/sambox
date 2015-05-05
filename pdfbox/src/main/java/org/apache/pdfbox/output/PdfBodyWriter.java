@@ -144,8 +144,8 @@ class PdfBodyWriter implements COSVisitor
             return Optional.ofNullable(existingIndirectToNewXref.get(key)).orElseGet(
                     () -> {
                         IndirectCOSObjectReference newRef = nextReferenceFor(item);
-                        LOG.trace("Created new indirect reference '" + newRef
-                                + "' replacing the existing one: " + key);
+                        LOG.trace("Created new indirect reference " + newRef
+                                + " replacing the existing one " + key);
                         existingIndirectToNewXref.put(key, newRef);
                         return newRef;
                     });

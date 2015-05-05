@@ -22,8 +22,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * The "PDFDocEncoding" encoding. Note that this is *not* a Type 1 font encoding, it is used only
- * within PDF "text strings".
+ * The "PDFDocEncoding" encoding. Note that this is *not* a Type 1 font encoding, it is used only within PDF
+ * "text strings".
  */
 final class PDFDocEncoding
 {
@@ -35,12 +35,12 @@ final class PDFDocEncoding
     static
     {
         CODE_TO_UNI = new int[256];
-        UNI_TO_CODE = new HashMap<Character, Integer>(256);
+        UNI_TO_CODE = new HashMap<>(256);
 
         // initialize with basically ISO-8859-1
         for (int i = 0; i < 256; i++)
         {
-            set(i, (char)i);
+            set(i, (char) i);
         }
 
         // then do all deviations (based on the table in ISO 32000-1:2008)
@@ -90,7 +90,7 @@ final class PDFDocEncoding
         set(0xA0, '\u20AC'); // EURO SIGN
         // end of deviations
     }
-    
+
     private PDFDocEncoding()
     {
     }
@@ -102,7 +102,7 @@ final class PDFDocEncoding
     }
 
     /**
-     * Returns the string representation of the given PDFDocEncoded bytes.
+     * @return the string representation of the given PDFDocEncoded bytes.
      */
     public static String toString(byte[] bytes)
     {
@@ -115,14 +115,14 @@ final class PDFDocEncoding
             }
             else
             {
-                sb.append((char)CODE_TO_UNI[b & 0xff]);
+                sb.append((char) CODE_TO_UNI[b & 0xff]);
             }
         }
         return sb.toString();
     }
 
     /**
-     * @return the given string encoded with PDFDocEncoding.
+     * @return the given string encoded with PDFDocEncoding or null if the string cannot be encoded
      */
     public static byte[] getBytes(String text)
     {
@@ -132,23 +132,10 @@ final class PDFDocEncoding
             Integer code = UNI_TO_CODE.get(c);
             if (code == null)
             {
-                out.write(0);
+                return null;
             }
-            else
-            {
-                out.write(code);
-            }
+            out.write(code);
         }
         return out.toByteArray();
-    }
-
-    /**
-     * Returns true if the given character is available in PDFDocEncoding.
-     *
-     * @param character UTF-16 character
-     */
-    public static boolean containsChar(char character)
-    {
-        return UNI_TO_CODE.containsKey(character);
     }
 }

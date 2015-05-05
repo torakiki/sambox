@@ -17,6 +17,7 @@
 package org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination;
 
 import org.apache.pdfbox.cos.COSArray;
+import org.apache.pdfbox.cos.COSName;
 
 /**
  * This represents a destination to a page and the page contents will be magnified to just
@@ -43,7 +44,7 @@ public class PDPageFitDestination extends PDPageDestination
     {
         super();
         array.growToSize(2);
-        array.setName( 1, TYPE );
+        array.set(1, COSName.getPDFName(TYPE));
 
     }
 
@@ -77,11 +78,11 @@ public class PDPageFitDestination extends PDPageDestination
         array.growToSize( 2 );
         if( fitBoundingBox )
         {
-            array.setName( 1, TYPE_BOUNDED );
+            array.set(1, COSName.getPDFName(TYPE_BOUNDED));
         }
         else
         {
-            array.setName( 1, TYPE );
+            array.set(1, COSName.getPDFName(TYPE));
         }
     }
 }

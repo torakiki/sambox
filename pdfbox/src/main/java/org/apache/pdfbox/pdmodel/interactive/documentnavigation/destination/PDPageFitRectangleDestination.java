@@ -17,6 +17,8 @@
 package org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination;
 
 import org.apache.pdfbox.cos.COSArray;
+import org.apache.pdfbox.cos.COSInteger;
+import org.apache.pdfbox.cos.COSName;
 
 /**
  * This represents a destination to a page at a y location and the width is magnified
@@ -39,7 +41,7 @@ public class PDPageFitRectangleDestination extends PDPageDestination
     {
         super();
         array.growToSize(6);
-        array.setName( 1, TYPE );
+        array.set(1, COSName.getPDFName(TYPE));
 
     }
 
@@ -78,7 +80,7 @@ public class PDPageFitRectangleDestination extends PDPageDestination
         }
         else
         {
-            array.setInt( 2, x );
+            array.set(2, COSInteger.get(x));
         }
     }
 
@@ -107,7 +109,7 @@ public class PDPageFitRectangleDestination extends PDPageDestination
         }
         else
         {
-            array.setInt( 3, y );
+            array.set(3, COSInteger.get(y));
         }
     }
 
@@ -136,7 +138,7 @@ public class PDPageFitRectangleDestination extends PDPageDestination
         }
         else
         {
-            array.setInt( 4, x );
+            array.set(4, COSInteger.get(x));
         }
     }
 
@@ -166,7 +168,7 @@ public class PDPageFitRectangleDestination extends PDPageDestination
         }
         else
         {
-            array.setInt( 5, y );
+            array.set(5, COSInteger.get(y));
         }
     }
 }

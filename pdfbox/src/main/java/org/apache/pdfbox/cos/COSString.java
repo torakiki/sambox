@@ -19,6 +19,7 @@ package org.apache.pdfbox.cos;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Optional;
 
 import org.apache.pdfbox.util.Charsets;
 import org.apache.pdfbox.util.Hex;
@@ -169,39 +170,28 @@ public final class COSString extends COSBase
      */
     public static COSString newInstance(byte[] value)
     {
-        return new COSString(Arrays.copyOf(value, value.length));
+        return new COSString(value);
     }
 
     /**
      * Factory method creating a {@link COSString} from a literal string.
      *
      * @param literal A literal string.
-     * @return A {@link COSString} with the hex characters converted to their actual bytes.
+     * @return A {@link COSString} encoded with {@link PDFDocEncoding} encoding if possible, with
+     * {@link Charsets#UTF_16BE} otherwise.
      * @throws IOException If there is an error with the hex string.
      */
     public static COSString parseLiteral(String literal)
     {
-        // check whether the string uses only characters available in PDFDocEncoding
-        for (char c : literal.toCharArray())
-        {
-            if (!PDFDocEncoding.containsChar(c))
-            {
-                byte[] data = literal.getBytes(Charsets.UTF_16BE);
-                ByteArrayOutputStream out = new ByteArrayOutputStream(data.length + 2);
-                out.write(0xFE); // BOM
-                out.write(0xFF); // BOM
-                try
-                {
-                    out.write(data);
-                }
-                catch (IOException e)
-                {
-                    throw new RuntimeException(e);
-                }
-                return new COSString(out.toByteArray());
-            }
-        }
-        return new COSString(PDFDocEncoding.getBytes(literal));
+        return Optional.ofNullable(PDFDocEncoding.getBytes(literal)).map(COSString::new)
+                .orElseGet(() -> {
+                    byte[] data = literal.getBytes(Charsets.UTF_16BE);
+                    byte[] bytes = new byte[data.length + 2];
+                    bytes[0] = (byte) 0xFE;
+                    bytes[1] = (byte) 0xFF;
+                    System.arraycopy(data, 0, bytes, 2, data.length);
+                    return new COSString(bytes);
+                });
     }
 
     /**

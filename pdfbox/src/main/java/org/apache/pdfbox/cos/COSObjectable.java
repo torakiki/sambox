@@ -18,16 +18,14 @@ package org.apache.pdfbox.cos;
 
 
 /**
- * This is an interface used to get/create the underlying COSObject.
+ * This is an interface used to wrap {@link COSBase} objects.
  *
  * @author Ben Litchfield
  */
 public interface COSObjectable
 {
     /**
-     * Convert this standard java object to a COS object.
-     *
-     * @return The cos object that matches this Java object.
+     * @return The {@link COSBase} that matches this Java object.
      */
     COSBase getCOSObject();
 }

@@ -19,6 +19,8 @@ package org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSFloat;
+import org.apache.pdfbox.cos.COSInteger;
+import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSNumber;
 
 /**
@@ -43,7 +45,7 @@ public class PDPageXYZDestination extends PDPageDestination
     {
         super();
         array.growToSize(5);
-        array.setName( 1, TYPE );
+        array.set(1, COSName.getPDFName(TYPE));
     }
 
     /**
@@ -81,7 +83,7 @@ public class PDPageXYZDestination extends PDPageDestination
         }
         else
         {
-            array.setInt( 2, x );
+            array.set(2, COSInteger.get(x));
         }
     }
 
@@ -110,7 +112,7 @@ public class PDPageXYZDestination extends PDPageDestination
         }
         else
         {
-            array.setInt( 3, y );
+            array.set(3, COSInteger.get(y));
         }
     }
 
