@@ -20,87 +20,49 @@ import static java.util.Objects.requireNonNull;
 import static org.apache.pdfbox.util.RequireUtils.requireIOCondition;
 import static org.apache.pdfbox.util.SpecVersionUtils.PDF_HEADER;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSDocument;
-import org.apache.pdfbox.io.PushBackInputStream;
-import org.apache.pdfbox.io.RandomAccessBufferedFileInputStream;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.encryption.DecryptionMaterial;
 import org.apache.pdfbox.pdmodel.encryption.PDEncryption;
-import org.apache.pdfbox.pdmodel.encryption.PublicKeyDecryptionMaterial;
 import org.apache.pdfbox.pdmodel.encryption.SecurityHandler;
-import org.apache.pdfbox.pdmodel.encryption.StandardDecryptionMaterial;
 import org.apache.pdfbox.util.SpecVersionUtils;
-import org.apache.pdfbox.xref.XrefParser;
+
 /**
  * @author Andrea Vacondio
  *
  */
-public class DefaultPDFParser
+class DefaultPDFParser
 {
     private static final Log LOG = LogFactory.getLog(DefaultPDFParser.class);
 
     /**
-     * Parses the given {@link File} returning the corresponding {@link PDDocument}.
+     * Parses the given {@link SeekableSource} using the given {@link DecryptionMaterial} and returning the
+     * corresponding decrypted {@link PDDocument}. A custom {@link IndirectObjectsProvider} can be provided to use a
+     * different strategy to load objects from the document; if null the default provider is used and objects are lazy
+     * loaded when the object is accessed.
      * 
-     * @param file
+     * @param source {@link SeekableSource} to parse
+     * @param provider {@link IndirectObjectsProvider} to use. Optional.
+     * @param decryptionMaterial to be used for decryption. Optional.
      * @return the parsed document
      * @throws IOException
      */
-    public static PDDocument parse(File file) throws IOException
+    static PDDocument parse(SeekableSource source, IndirectObjectsProvider provider,
+            DecryptionMaterial decryptionMaterial) throws IOException
     {
-        return parse(file, null, null, null);
-    }
-
-    /**
-     * Parses the given {@link File} using the provided password returning the corresponding decrypted
-     * {@link PDDocument}.
-     * 
-     * @param file
-     * @param password the password to decrypt the document
-     * @return the parsed document
-     * @throws IOException
-     */
-    public static PDDocument parse(File file, String password) throws IOException
-    {
-        return parse(file, password, null, null);
-    }
-
-    /**
-     * Parses the given {@link File} using the given keystore and password, returning the corresponding decrypted
-     * {@link PDDocument}.
-     * 
-     * @param file
-     * @param password password to be used for decryption.
-     * @param keyStore key store to be used for decryption when using public key security
-     * @param keyAlias alias to be used for decryption when using public key security
-     * @return the parsed document
-     * @throws IOException
-     */
-    public static PDDocument parse(File file, String password, InputStream keyStore, String keyAlias)
-            throws IOException
-    {
-        requireNonNull(file);
-        BaseCOSParser parser = new BaseCOSParser(new PushBackInputStream(
-                new RandomAccessBufferedFileInputStream(file), 4096));
+        requireNonNull(source);
+        BaseCOSParser parser = new BaseCOSParser(source);
         String headerVersion = readHeader(parser);
         XrefParser xrefParser = new XrefParser(parser);
         xrefParser.parse();
         COSDocument document = new COSDocument(xrefParser.getTrailer(), headerVersion);
-        if (document.isEncrypted())
+        if (document.isEncrypted() && decryptionMaterial != null)
         {
             LOG.debug("Preparing for document decryption");
-            DecryptionMaterial decryptionMaterial = getDecryptionMaterial(password, keyStore,
-                    keyAlias);
             PDEncryption encryption = new PDEncryption(document.getEncryptionDictionary());
 
             SecurityHandler securityHandler = encryption.getSecurityHandler();
@@ -132,24 +94,5 @@ public class DefaultPDFParser
                 "Unable to find expected header '%PDF-n.n'");
         LOG.debug("Found header " + trimmedLeftHeader);
         return SpecVersionUtils.parseHeaderString(trimmedLeftHeader);
-    }
-
-    private static DecryptionMaterial getDecryptionMaterial(String password, InputStream keyStore,
-            String keyAlias) throws IOException
-    {
-        if (keyStore != null)
-        {
-            try
-            {
-                KeyStore ks = KeyStore.getInstance("PKCS12");
-                ks.load(keyStore, password.toCharArray());
-                return new PublicKeyDecryptionMaterial(ks, keyAlias, password);
-            }
-            catch (KeyStoreException | NoSuchAlgorithmException | CertificateException e)
-            {
-                throw new IOException(e);
-            }
-        }
-        return new StandardDecryptionMaterial(password);
     }
 }

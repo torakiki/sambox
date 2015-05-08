@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.pdfbox.xref;
+package org.apache.pdfbox.input;
 
 import static java.util.stream.LongStream.concat;
 import static java.util.stream.LongStream.empty;
@@ -32,7 +32,8 @@ import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSNumber;
 import org.apache.pdfbox.cos.COSStream;
-import org.apache.pdfbox.input.BaseCOSParser;
+import org.apache.pdfbox.xref.CompressedXrefEntry;
+import org.apache.pdfbox.xref.XrefEntry;
 
 /**
  * @author Andrea Vacondio

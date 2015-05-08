@@ -23,6 +23,7 @@ import static org.apache.pdfbox.util.CharUtils.isSpace;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Optional;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,7 +45,7 @@ import org.apache.pdfbox.util.Charsets;
  * @author Andrea Vacondio
  *
  */
-public final class BaseCOSParser extends SourceReader
+final class BaseCOSParser extends SourceReader
 {
 
     private static final Log LOG = LogFactory.getLog(BaseCOSParser.class);
@@ -67,7 +68,7 @@ public final class BaseCOSParser extends SourceReader
     public BaseCOSParser(SeekableSource source, IndirectObjectsProvider provider)
     {
         super(source);
-        this.provider = provider;
+        this.provider = Optional.ofNullable(provider).orElse(new LazyIndirectObjectsProvider(this));
     }
 
     /**

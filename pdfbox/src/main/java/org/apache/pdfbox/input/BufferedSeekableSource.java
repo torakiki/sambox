@@ -78,6 +78,7 @@ public class BufferedSeekableSource implements SeekableSource
     public void close() throws IOException
     {
         IOUtils.close(wrapped);
+        buffer.clear();
     }
 
     @Override

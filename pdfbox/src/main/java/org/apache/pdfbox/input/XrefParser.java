@@ -14,25 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.pdfbox.xref;
+package org.apache.pdfbox.input;
 
+import static org.apache.pdfbox.input.XrefTableParser.XREF;
 import static org.apache.pdfbox.util.RequireUtils.requireIOCondition;
-import static org.apache.pdfbox.xref.XrefTableParser.XREF;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.input.BaseCOSParser;
 import org.apache.pdfbox.util.Charsets;
 
 /**
  * @author Andrea Vacondio
  *
  */
-public class XrefParser
+class XrefParser
 {
     private static final Log LOG = LogFactory.getLog(XrefParser.class);
     /**
@@ -86,7 +86,8 @@ public class XrefParser
         int chunkSize = (int) Math.min(parser.length(), DEFAULT_TRAIL_BYTECOUNT);
         long startPosition = parser.length() - chunkSize;
         parser.position(startPosition);
-        byte[] buffer = parser.source().readFully(chunkSize);
+        byte[] buffer = new byte[chunkSize];
+        parser.source().read(ByteBuffer.wrap(buffer));
         int relativeIndex = new String(buffer, Charsets.ISO_8859_1).lastIndexOf(STARTXREF);
         if (relativeIndex < 0)
         {

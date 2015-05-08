@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.pdfbox.xref;
+package org.apache.pdfbox.input;
 
 import static org.apache.pdfbox.util.CharUtils.isDigit;
 import static org.apache.pdfbox.util.CharUtils.isEOF;
@@ -26,7 +26,6 @@ import java.io.IOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSDictionary;
-import org.apache.pdfbox.input.BaseCOSParser;
 
 /**
  * @author Andrea Vacondio

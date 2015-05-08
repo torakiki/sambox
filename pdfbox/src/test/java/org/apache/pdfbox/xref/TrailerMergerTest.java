@@ -20,7 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import org.apache.pdfbox.cos.COSDictionary;
-import org.apache.pdfbox.xref.TrailerMerger;
+import org.apache.pdfbox.input.TrailerMerger;
 import org.junit.Before;
 import org.junit.Test;
 

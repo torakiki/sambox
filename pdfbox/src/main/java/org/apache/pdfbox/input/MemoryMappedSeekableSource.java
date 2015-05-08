@@ -93,7 +93,6 @@ public class MemoryMappedSeekableSource implements SeekableSource
         if (relativePosition < page.limit())
         {
             int read = readPage(dst, zeroBasedPagesNumber, relativePosition);
-            System.out.println("1" + dst);
             while (dst.hasRemaining())
             {
                 System.out.println(dst);

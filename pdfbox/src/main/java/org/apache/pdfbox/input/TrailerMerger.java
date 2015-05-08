@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.pdfbox.xref;
+package org.apache.pdfbox.input;
 
 import java.util.TreeMap;
 
@@ -28,7 +28,7 @@ import org.apache.pdfbox.cos.COSDictionary;
  * @author Andrea Vacondio
  *
  */
-public final class TrailerMerger
+final class TrailerMerger
 {
     private static final Log LOG = LogFactory.getLog(TrailerMerger.class);
 
