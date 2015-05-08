@@ -92,7 +92,6 @@ public class DefaultPDFParser
         requireNonNull(file);
         BaseCOSParser parser = new BaseCOSParser(new PushBackInputStream(
                 new RandomAccessBufferedFileInputStream(file), 4096));
-        parser.length(file.length());
         String headerVersion = readHeader(parser);
         XrefParser xrefParser = new XrefParser(parser);
         xrefParser.parse();
@@ -115,7 +114,7 @@ public class DefaultPDFParser
 
     private static String readHeader(BaseCOSParser parser) throws IOException
     {
-        parser.offset(0);
+        parser.position(0);
         int headerIndex = -1;
         String header = parser.readLine();
         while ((headerIndex = header.indexOf(PDF_HEADER)) < 0)

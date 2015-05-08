@@ -37,7 +37,6 @@ import org.apache.pdfbox.cos.COSObjectKey;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.io.IOUtils;
-import org.apache.pdfbox.io.PushBackInputStream;
 import org.apache.pdfbox.pdfparser.EndstreamOutputStream;
 import org.apache.pdfbox.util.Charsets;
 
@@ -59,13 +58,13 @@ public final class BaseCOSParser extends SourceReader
 
     private IndirectObjectsProvider provider;
 
-    public BaseCOSParser(PushBackInputStream source)
+    public BaseCOSParser(SeekableSource source)
     {
         super(source);
         this.provider = new LazyIndirectObjectsProvider(this);
     }
 
-    public BaseCOSParser(PushBackInputStream source, IndirectObjectsProvider provider)
+    public BaseCOSParser(SeekableSource source, IndirectObjectsProvider provider)
     {
         super(source);
         this.provider = provider;
@@ -86,7 +85,7 @@ public final class BaseCOSParser extends SourceReader
         {
             int leftBracket = source().read();
             c = (char) source().peek();
-            source().unread(leftBracket);
+            source().skip(-1);
             if (c == '<')
             {
                 return nextDictionary();
@@ -127,12 +126,12 @@ public final class BaseCOSParser extends SourceReader
             // if it's an endstream/endobj, we want to put it back so the caller will see it
             if (ENDOBJ.equals(badString) || ENDSTREAM.equals(badString))
             {
-                source().unread(badString.getBytes(Charsets.ISO_8859_1));
+                source().skip(-badString.getBytes(Charsets.ISO_8859_1).length);
             }
             else
             {
                 LOG.warn(String.format("Unknown token with value '%s' ending at offset %d",
-                        badString, offset()));
+                        badString, position()));
             }
         }
         }
@@ -271,7 +270,7 @@ public final class BaseCOSParser extends SourceReader
     public COSBase nextNumberOrIndirectReference() throws IOException
     {
         String first = readNumber();
-        long offset = offset();
+        long offset = position();
         skipSpaces();
         if (isDigit(source().peek()))
         {
@@ -293,7 +292,7 @@ public final class BaseCOSParser extends SourceReader
                 }
             }
         }
-        offset(offset);
+        position(offset);
         return COSNumber.get(first);
     }
 
@@ -352,7 +351,7 @@ public final class BaseCOSParser extends SourceReader
             return nextHexadecimalString();
         default:
             throw new IOException(String.format("Expected '(' or '<' at offset %d but was '%c'",
-                    offset(), next));
+                    position(), next));
         }
     }
 
@@ -386,7 +385,7 @@ public final class BaseCOSParser extends SourceReader
             {
                 source().unread(c);
                 LOG.warn("Couldn't find expected LF following CR after 'stream' keyword at "
-                        + offset());
+                        + position());
             }
         }
         else if (!isLineFeed(c))
@@ -406,7 +405,7 @@ public final class BaseCOSParser extends SourceReader
             else
             {
                 LOG.info("Using fallback strategy reading until 'endstream' or 'endobj' is found. Starting at offset "
-                        + offset());
+                        + position());
                 // TODO
                 copyUntilEndStreamTo(new EndstreamOutputStream(out));
             }
@@ -414,7 +413,7 @@ public final class BaseCOSParser extends SourceReader
             {
                 if (isNextToken(ENDOBJ))
                 {
-                    LOG.warn("Expected 'endstream' at " + offset() + " but was 'endobj'");
+                    LOG.warn("Expected 'endstream' at " + position() + " but was 'endobj'");
                 }
             }
         }
@@ -442,20 +441,20 @@ public final class BaseCOSParser extends SourceReader
                     + retVal.getClass().getSimpleName());
         }
         long length = ((COSNumber) retVal).longValue();
-        long startingOffset = offset();
+        long startingOffset = position();
         long endStreamOffset = startingOffset + length;
         if (endStreamOffset > length())
         {
             LOG.warn("Invalid stream length. Out of range");
             return -1;
         }
-        offset(endStreamOffset);
+        position(endStreamOffset);
         if (!isNextToken(ENDSTREAM))
         {
             LOG.warn("Invalid stream length. Expected '" + ENDSTREAM + "' at " + endStreamOffset);
             return -1;
         }
-        offset(startingOffset);
+        position(startingOffset);
         return length;
     }
 

@@ -85,7 +85,7 @@ public class XrefParser
     {
         int chunkSize = (int) Math.min(parser.length(), DEFAULT_TRAIL_BYTECOUNT);
         long startPosition = parser.length() - chunkSize;
-        parser.offset(startPosition);
+        parser.position(startPosition);
         byte[] buffer = parser.source().readFully(chunkSize);
         int relativeIndex = new String(buffer, Charsets.ISO_8859_1).lastIndexOf(STARTXREF);
         if (relativeIndex < 0)
@@ -93,7 +93,7 @@ public class XrefParser
             LOG.warn("Unable to find 'startxref' keyword");
             return -1;
         }
-        parser.offset(startPosition + relativeIndex + STARTXREF.length());
+        parser.position(startPosition + relativeIndex + STARTXREF.length());
         parser.skipSpaces();
         return parser.readLong();
     }
@@ -112,7 +112,7 @@ public class XrefParser
 
         while (xrefOffset > -1)
         {
-            parser.offset(xrefOffset);
+            parser.position(xrefOffset);
             parser.skipSpaces();
 
             if (parser.isNextToken(XREF))
@@ -185,7 +185,7 @@ public class XrefParser
         {
             return true;
         }
-        parser.offset(xrefOffset);
+        parser.position(xrefOffset);
         return parser.isNextToken(XREF);
     }
 
@@ -196,7 +196,7 @@ public class XrefParser
      */
     private boolean isValidXrefStreamOffset(long xrefStreamOffset) throws IOException
     {
-        parser.offset(xrefStreamOffset);
+        parser.position(xrefStreamOffset);
         try
         {
             parser.skipIndirectObjectDefinition();
@@ -205,7 +205,7 @@ public class XrefParser
         {
             return false;
         }
-        parser.offset(xrefStreamOffset);
+        parser.position(xrefStreamOffset);
         return true;
     }
 

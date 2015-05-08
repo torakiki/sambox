@@ -61,7 +61,7 @@ class XrefTableParser
         // PDFBOX-1739 skip extra xref entries in RegisSTAR documents
         while (parser.source().peek() != 't')
         {
-            LOG.warn("Expected trailer object at position " + parser.offset() + ", skipping line.");
+            LOG.warn("Expected trailer object at position " + parser.position() + ", skipping line.");
             parser.readLine();
         }
         return parseTrailer();
@@ -131,7 +131,7 @@ class XrefTableParser
 
     private COSDictionary parseTrailer() throws IOException
     {
-        long offset = parser.offset();
+        long offset = parser.position();
         LOG.debug("Parsing trailer at " + offset);
         parser.skipExpected(TRAILER);
         parser.skipSpaces();

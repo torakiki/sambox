@@ -177,6 +177,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName DR = newCommonInstance("DR");
     public static final COSName DS = newCommonInstance("DS");
     public static final COSName DUPLEX = newCommonInstance("Duplex");
+    public static final COSName DUR = newCommonInstance("Dur");
     public static final COSName DV = newCommonInstance("DV");
     public static final COSName DW = newCommonInstance("DW");
     public static final COSName DW2 = newCommonInstance("DW2");

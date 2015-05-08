@@ -40,7 +40,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSObjectKey;
 import org.apache.pdfbox.io.IOUtils;
-import org.apache.pdfbox.io.PushBackInputStream;
 import org.apache.pdfbox.util.CharUtils;
 import org.apache.pdfbox.util.Charsets;
 import org.apache.pdfbox.util.Pool;
@@ -60,11 +59,9 @@ class SourceReader implements Closeable
 
     private Pool<StringBuilder> pool = new Pool<>(StringBuilder::new, Integer.getInteger(
             BUFFERS_POOL_SIZE_PROPERTY, 10)).onGive(b -> b.setLength(0));
-    private PushBackInputStream source;
-    // TODO set this somehow
-    private long sourceLength;
+    private SeekableSource source;
 
-    public SourceReader(PushBackInputStream source)
+    public SourceReader(SeekableSource source)
     {
         requireArg(source != null, "Cannot read a null source");
         this.source = source;
@@ -73,25 +70,19 @@ class SourceReader implements Closeable
     /**
      * @return the source for this reader
      */
-    public PushBackInputStream source()
+    public SeekableSource source()
     {
         return source;
     }
 
     /**
-     * @return the current offset
+     * @return the current position
+     * @throws IOException
+     * @see {@link SeekableSource#position()}
      */
-    public long offset()
+    public long position() throws IOException
     {
-        return source.getOffset();
-    }
-
-    /**
-     * @return the length of the source in bytes
-     */
-    public long length()
-    {
-        return sourceLength;
+        return source.position();
     }
 
     /**
@@ -99,18 +90,20 @@ class SourceReader implements Closeable
      * 
      * @param offset the new offset
      * @throws IOException
+     * @see {@link SeekableSource#position(long)}
      */
-    public void offset(long offset) throws IOException
+    public void position(long offset) throws IOException
     {
-        source.seek(offset);
+        source.position(offset);
     }
 
     /**
-     * sets the source length
+     * @return the source length
+     * @see {@link SeekableSource#size()}
      */
-    public void length(long length)
+    public long length()
     {
-        this.sourceLength = length;
+        return source.size();
     }
 
     /**
@@ -165,7 +158,8 @@ class SourceReader implements Closeable
         char c = (char) source.read();
         if (c != ec)
         {
-            throw new IOException("expected='" + ec + "' actual='" + c + "' at offset " + offset());
+            throw new IOException("expected='" + ec + "' actual='" + c + "' at offset "
+                    + position());
         }
     }
 
@@ -181,7 +175,7 @@ class SourceReader implements Closeable
         String token = readToken();
         if (!asList(values).contains(token))
         {
-            source.unread(token.getBytes(Charsets.ISO_8859_1));
+            source.skip(-token.getBytes(Charsets.ISO_8859_1).length);
             return false;
         }
         return true;
@@ -214,14 +208,14 @@ class SourceReader implements Closeable
         {
             throw new IOException(String.format(
                     "Expected '%d' object number at offset %d but was '%d'", expected.getNumber(),
-                    offset(), number));
+                    position(), number));
         }
         long generation = readGenerationNumber();
         if (generation != expected.getGeneration())
         {
             throw new IOException(String.format(
                     "Expected '%d' generation number at offset %d but was '%d'",
-                    expected.getGeneration(), offset(), number));
+                    expected.getGeneration(), position(), number));
         }
         skipSpaces();
         skipExpected(OBJ);
@@ -235,7 +229,7 @@ class SourceReader implements Closeable
     public boolean isNextToken(String... values) throws IOException
     {
         String token = readToken();
-        source.unread(token.getBytes(Charsets.ISO_8859_1));
+        source.skip(-token.getBytes(Charsets.ISO_8859_1).length);
         return asList(values).contains(token);
     }
 
@@ -248,7 +242,7 @@ class SourceReader implements Closeable
      */
     public String readLine() throws IOException
     {
-        requireIOCondition(!source.isEOF(), "Expected line but was end of file");
+        requireIOCondition(source.peek() != -1, "Expected line but was end of file");
 
         StringBuilder builder = pool.borrow();
         try
@@ -341,18 +335,17 @@ class SourceReader implements Closeable
                         }
                         catch (NumberFormatException e)
                         {
-                            source.unread(ch1);
-                            source.unread(ch2);
+                            source.skip(-2);
                             throw new IOException(String.format(
-                                    "Expected an Hex number at offset %d but was '%s'", offset(),
+                                    "Expected an Hex number at offset %d but was '%s'", position(),
                                     hex), e);
                         }
                     }
                     else
                     {
-                        source.unread(ch2);
+                        source.skip(-1);
                         LOG.warn("Found NUMBER SIGN (#) not used as escaping char while reading name at "
-                                + offset());
+                                + position());
                         c = (char) ch1;
                     }
                 }
@@ -380,9 +373,9 @@ class SourceReader implements Closeable
         }
         catch (NumberFormatException e)
         {
-            source.unread(intBuffer.getBytes(Charsets.ISO_8859_1));
+            source.skip(-intBuffer.getBytes(Charsets.ISO_8859_1).length);
             throw new IOException(String.format(
-                    "Expected an integer type at offset %d but was '%s'", offset(), intBuffer), e);
+                    "Expected an integer type at offset %d but was '%s'", position(), intBuffer), e);
         }
     }
 
@@ -399,9 +392,9 @@ class SourceReader implements Closeable
         }
         catch (NumberFormatException e)
         {
-            source.unread(longBuffer.getBytes(Charsets.ISO_8859_1));
+            source.skip(-longBuffer.getBytes(Charsets.ISO_8859_1).length);
             throw new IOException(String.format("Expected a long type at offset %d but was '%s'",
-                    offset(), longBuffer), e);
+                    position(), longBuffer), e);
         }
     }
 
@@ -496,7 +489,7 @@ class SourceReader implements Closeable
                     // goes on.
                     LOG.warn(String
                             .format("Expected an hexadecimal char at offset %d but was '%c'. Replaced with default 0.",
-                                    offset() - 1, c));
+                                    position() - 1, c));
                     builder.append('0');
                 }
             }
@@ -684,7 +677,7 @@ class SourceReader implements Closeable
     {
         if (c != -1)
         {
-            source.unread(c);
+            source.skip(-1);
         }
     }
 

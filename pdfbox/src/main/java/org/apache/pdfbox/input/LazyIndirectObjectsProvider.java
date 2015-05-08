@@ -109,7 +109,7 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
 
     private void parseInUseEntry(XrefEntry xrefEntry) throws IOException
     {
-        parser.offset(xrefEntry.getByteOffset());
+        parser.position(xrefEntry.getByteOffset());
         parser.skipExpectedIndirectObjectDefinition(xrefEntry.key());
         parser.skipSpaces();
         COSBase found = parser.nextParsedToken();
@@ -178,7 +178,7 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
             }
             for (Entry<Long, Long> entry : entries.entrySet())
             {
-                streamParser.offset(entry.getValue());
+                streamParser.position(entry.getValue());
                 if (streamParser.skipTokenIfValue(OBJ))
                 {
                     LOG.warn("Unexptected 'obj' token in objects stream");

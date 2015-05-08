@@ -61,7 +61,7 @@ class XrefStreamParser
     public COSDictionary parse(long streamObjectOffset) throws IOException
     {
         LOG.debug("Parsing xref stream at offset " + streamObjectOffset);
-        parser.offset(streamObjectOffset);
+        parser.position(streamObjectOffset);
         parser.skipIndirectObjectDefinition();
         parser.skipSpaces();
 
