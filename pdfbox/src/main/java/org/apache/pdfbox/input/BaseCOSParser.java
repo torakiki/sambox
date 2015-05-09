@@ -37,6 +37,7 @@ import org.apache.pdfbox.cos.COSNumber;
 import org.apache.pdfbox.cos.COSObjectKey;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.cos.COSString;
+import org.apache.pdfbox.input.source.SeekableSource;
 import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.pdfparser.EndstreamOutputStream;
 import org.apache.pdfbox.util.Charsets;
@@ -45,7 +46,7 @@ import org.apache.pdfbox.util.Charsets;
  * @author Andrea Vacondio
  *
  */
-final class BaseCOSParser extends SourceReader
+public final class BaseCOSParser extends SourceReader
 {
 
     private static final Log LOG = LogFactory.getLog(BaseCOSParser.class);
@@ -61,14 +62,13 @@ final class BaseCOSParser extends SourceReader
 
     public BaseCOSParser(SeekableSource source)
     {
-        super(source);
-        this.provider = new LazyIndirectObjectsProvider(this);
+        this(source, null);
     }
 
     public BaseCOSParser(SeekableSource source, IndirectObjectsProvider provider)
     {
         super(source);
-        this.provider = Optional.ofNullable(provider).orElse(new LazyIndirectObjectsProvider(this));
+        this.provider = Optional.ofNullable(provider).orElse(new LazyIndirectObjectsProvider());
     }
 
     /**
@@ -84,7 +84,6 @@ final class BaseCOSParser extends SourceReader
         {
         case '<':
         {
-            int leftBracket = source().read();
             c = (char) source().peek();
             source().skip(-1);
             if (c == '<')
@@ -281,8 +280,8 @@ final class BaseCOSParser extends SourceReader
             {
                 try
                 {
-                    return new LazyIndirectCOSObject(new COSObjectKey(Long.parseLong(first),
-                            Integer.parseInt(second)), provider);
+                    return new IndirectCOSObject(new COSObjectKey(Long.parseLong(first),
+                            Integer.parseInt(second)), provider, this);
                 }
                 catch (NumberFormatException nfe)
                 {

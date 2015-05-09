@@ -41,7 +41,7 @@ import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.cos.COSVisitor;
 import org.apache.pdfbox.cos.IndirectCOSObjectReference;
-import org.apache.pdfbox.input.LazyIndirectCOSObject;
+import org.apache.pdfbox.input.IndirectCOSObject;
 
 /**
  * Component that visits pdf document collecting pdf objects that need to be written, replacing references to them with
@@ -93,7 +93,7 @@ class PdfBodyWriter implements COSVisitor
         for (int i = 0; i < array.size(); i++)
         {
             COSBase item = array.get(i);
-            if (item instanceof LazyIndirectCOSObject || item instanceof COSDictionary)
+            if (item instanceof IndirectCOSObject || item instanceof COSDictionary)
             {
                 IndirectCOSObjectReference ref = getOrCreateIndirectReferenceFor(item);
                 array.set(i, ref);
@@ -113,7 +113,7 @@ class PdfBodyWriter implements COSVisitor
         for (COSName key : value.keySet())
         {
             COSBase item = value.getItem(key);
-            if (item instanceof LazyIndirectCOSObject || item instanceof COSDictionary)
+            if (item instanceof IndirectCOSObject || item instanceof COSDictionary)
             {
                 IndirectCOSObjectReference ref = getOrCreateIndirectReferenceFor(item);
                 value.setItem(key, ref);
@@ -137,9 +137,9 @@ class PdfBodyWriter implements COSVisitor
 
     private IndirectCOSObjectReference getOrCreateIndirectReferenceFor(COSBase item)
     {
-        if (item instanceof LazyIndirectCOSObject)
+        if (item instanceof IndirectCOSObject)
         {
-            COSObjectKey key = ((LazyIndirectCOSObject) item).key();
+            COSObjectKey key = ((IndirectCOSObject) item).key();
 
             return Optional.ofNullable(existingIndirectToNewXref.get(key)).orElseGet(
                     () -> {

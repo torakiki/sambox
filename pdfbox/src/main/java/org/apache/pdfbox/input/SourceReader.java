@@ -39,6 +39,7 @@ import java.io.IOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSObjectKey;
+import org.apache.pdfbox.input.source.SeekableSource;
 import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.util.CharUtils;
 import org.apache.pdfbox.util.Charsets;

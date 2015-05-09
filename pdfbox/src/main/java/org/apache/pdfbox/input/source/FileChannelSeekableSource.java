@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.pdfbox.input;
+package org.apache.pdfbox.input.source;
 
 import static java.util.Objects.requireNonNull;
 import static org.apache.pdfbox.util.RequireUtils.requireArg;
@@ -34,7 +34,6 @@ import org.apache.pdfbox.io.IOUtils;
 public class FileChannelSeekableSource implements SeekableSource
 {
     private FileChannel channel;
-    private long position;
     private long size;
 
     public FileChannelSeekableSource(File file) throws IOException
@@ -53,7 +52,7 @@ public class FileChannelSeekableSource implements SeekableSource
     @Override
     public SeekableSource position(long newPosition) throws IOException
     {
-        requireArg(position >= 0, "Cannot set position to a negative value");
+        requireArg(newPosition >= 0, "Cannot set position to a negative value");
         channel.position(newPosition);
         return this;
     }

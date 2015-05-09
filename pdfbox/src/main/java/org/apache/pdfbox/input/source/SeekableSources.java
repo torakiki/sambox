@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.pdfbox.input;
+package org.apache.pdfbox.input.source;
 
 import static java.util.Objects.requireNonNull;
 
@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+
+import org.apache.pdfbox.io.IOUtils;
 
 /**
  * @author Andrea Vacondio
@@ -59,7 +61,7 @@ public final class SeekableSources
 
     /**
      * Factory method to create a {@link SeekableSource} from a {@link InputStream}. The whole stream is read an stored
-     * in a byte array.
+     * in a byte array with a max size of 2GB.
      * 
      * @param stream
      * @return a {@link SeekableSource} from the given stream.
@@ -68,8 +70,7 @@ public final class SeekableSources
     public static SeekableSource inMemorySeekableSourceFrom(InputStream stream) throws IOException
     {
         requireNonNull(stream);
-        // TODO
-        return null;
+        return new ByteArraySeekableSource(IOUtils.toByteArray(stream));
     }
 
     /**

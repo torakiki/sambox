@@ -28,18 +28,20 @@ import org.apache.pdfbox.cos.COSVisitor;
  * @author Andrea Vacondio
  *
  */
-public class LazyIndirectCOSObject extends COSBase
+public class IndirectCOSObject extends COSBase
 {
 
     private COSBase baseObject;
     private COSObjectKey key;
     private IndirectObjectsProvider provider;
+    private BaseCOSParser parser;
 
-    public LazyIndirectCOSObject(COSObjectKey key, IndirectObjectsProvider provider)
+    public IndirectCOSObject(COSObjectKey key, IndirectObjectsProvider provider,
+            BaseCOSParser parser)
     {
-        // TODO verify if we need a null check here
         this.key = key;
         this.provider = provider;
+        this.parser = parser;
     }
 
     @Override
@@ -48,7 +50,7 @@ public class LazyIndirectCOSObject extends COSBase
         // TODO multi thread?
         if (baseObject == null)
         {
-            baseObject = Optional.ofNullable(provider.get(key)).orElse(COSNull.NULL);
+            baseObject = Optional.ofNullable(provider.get(key, parser)).orElse(COSNull.NULL);
         }
         return baseObject;
     }

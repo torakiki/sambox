@@ -19,6 +19,7 @@ package org.apache.pdfbox.input;
 import java.io.IOException;
 import java.util.Optional;
 
+import org.apache.pdfbox.input.source.SeekableSource;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.encryption.StandardDecryptionMaterial;
 

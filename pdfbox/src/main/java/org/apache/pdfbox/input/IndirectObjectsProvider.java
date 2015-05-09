@@ -29,7 +29,7 @@ import org.apache.pdfbox.xref.XrefEntry;
 public interface IndirectObjectsProvider
 {
 
-    public COSBase get(COSObjectKey key);
+    public COSBase get(COSObjectKey key, BaseCOSParser parser);
 
     /**
      * Adds the given xref entry to the {@link Xref}

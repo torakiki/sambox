@@ -52,25 +52,19 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
     private static final Log LOG = LogFactory.getLog(LazyIndirectObjectsProvider.class);
 
     private Xref xref = new Xref();
-    private BaseCOSParser parser;
     // TODO references that the GC can claim
     private Map<COSObjectKey, COSBase> store = new HashMap<>();
     private SecurityHandler securityHandler = null;
 
-    LazyIndirectObjectsProvider(BaseCOSParser parser)
-    {
-        this.parser = parser;
-    }
-
     @Override
-    public COSBase get(COSObjectKey key)
+    public COSBase get(COSObjectKey key, BaseCOSParser parser)
     {
         try
         {
             COSBase value = store.get(key);
             if (value == null)
             {
-                parseObject(key);
+                parseObject(key, parser);
             }
             return store.get(key);
         }
@@ -93,21 +87,21 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
         this.securityHandler = handler;
     }
 
-    private void parseObject(COSObjectKey key) throws IOException
+    private void parseObject(COSObjectKey key, BaseCOSParser parser) throws IOException
     {
         XrefEntry xrefEntry = xref.get(key);
         LOG.trace("Starting parse of indirect object " + xrefEntry);
         if (xrefEntry.getType() == XrefType.IN_USE)
         {
-            parseInUseEntry(xrefEntry);
+            parseInUseEntry(xrefEntry, parser);
         }
         if (xrefEntry.getType() == XrefType.COMPRESSED)
         {
-            parseCompressedEntry(xrefEntry);
+            parseCompressedEntry(xrefEntry, parser);
         }
     }
 
-    private void parseInUseEntry(XrefEntry xrefEntry) throws IOException
+    private void parseInUseEntry(XrefEntry xrefEntry, BaseCOSParser parser) throws IOException
     {
         parser.position(xrefEntry.getByteOffset());
         parser.skipExpectedIndirectObjectDefinition(xrefEntry.key());
@@ -137,7 +131,7 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
         store.put(xrefEntry.key(), found);
     }
 
-    private void parseCompressedEntry(XrefEntry xrefEntry) throws IOException
+    private void parseCompressedEntry(XrefEntry xrefEntry, BaseCOSParser parser) throws IOException
     {
         XrefEntry containingStreamEntry = xref.get(new COSObjectKey(
                 ((CompressedXrefEntry) xrefEntry).getObjectStreamNumber(), 0));
@@ -146,18 +140,18 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
                 && containingStreamEntry.getType() != XrefType.COMPRESSED,
                 "Expected an uncompressed indirect object reference for the ObjectStream");
 
-        parseObject(containingStreamEntry.key());
+        parseObject(containingStreamEntry.key(), parser);
         COSBase stream = store.get(containingStreamEntry.key()).getCOSObject();
 
         if (!(stream instanceof COSStream))
         {
             throw new IOException("Expected an object stream instance for " + containingStreamEntry);
         }
-        parseObjectStream(containingStreamEntry, (COSStream) stream);
+        parseObjectStream(containingStreamEntry, (COSStream) stream, parser);
     }
 
-    private void parseObjectStream(XrefEntry containingStreamEntry, COSStream stream)
-            throws IOException
+    private void parseObjectStream(XrefEntry containingStreamEntry, COSStream stream,
+            BaseCOSParser parser) throws IOException
     {
         try (BaseCOSParser streamParser = new BaseCOSParser(new PushBackInputStream(
                 stream.getUnfilteredStream(), 65536), this))
