@@ -16,6 +16,7 @@
  */
 package org.apache.pdfbox.input;
 
+import static java.util.Objects.requireNonNull;
 import static org.apache.pdfbox.input.BaseCOSParser.ENDOBJ;
 import static org.apache.pdfbox.input.BaseCOSParser.ENDSTREAM;
 import static org.apache.pdfbox.input.BaseCOSParser.STREAM;
@@ -55,9 +56,10 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
     // TODO references that the GC can claim
     private Map<COSObjectKey, COSBase> store = new HashMap<>();
     private SecurityHandler securityHandler = null;
+    private BaseCOSParser parser;
 
     @Override
-    public COSBase get(COSObjectKey key, BaseCOSParser parser)
+    public COSBase get(COSObjectKey key)
     {
         try
         {
@@ -82,7 +84,14 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
     }
 
     @Override
-    public void decryptWith(SecurityHandler handler)
+    public void initializeWith(BaseCOSParser parser)
+    {
+        requireNonNull(parser);
+        this.parser = parser;
+    }
+
+    @Override
+    public void initializeWith(SecurityHandler handler)
     {
         this.securityHandler = handler;
     }

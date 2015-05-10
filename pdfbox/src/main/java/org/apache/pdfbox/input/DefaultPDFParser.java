@@ -42,24 +42,22 @@ class DefaultPDFParser
 
     /**
      * Parses the given {@link SeekableSource} using the given {@link DecryptionMaterial} and returning the
-     * corresponding decrypted {@link PDDocument}. A custom {@link IndirectObjectsProvider} can be provided to use a
-     * different strategy to load objects from the document; if null the default provider is used and objects are lazy
-     * loaded when the object is accessed.
+     * corresponding decrypted {@link PDDocument}.
      * 
      * @param source {@link SeekableSource} to parse
-     * @param provider {@link IndirectObjectsProvider} to use. Optional.
      * @param decryptionMaterial to be used for decryption. Optional.
      * @return the parsed document
      * @throws IOException
      */
-    static PDDocument parse(SeekableSource source, IndirectObjectsProvider provider,
-            DecryptionMaterial decryptionMaterial) throws IOException
+    static PDDocument parse(SeekableSource source, DecryptionMaterial decryptionMaterial)
+            throws IOException
     {
         requireNonNull(source);
         BaseCOSParser parser = new BaseCOSParser(source);
         String headerVersion = readHeader(parser);
         XrefParser xrefParser = new XrefParser(parser);
         xrefParser.parse();
+        parser.provider().initializeWith(parser);
         COSDocument document = new COSDocument(xrefParser.getTrailer(), headerVersion);
         if (document.isEncrypted() && decryptionMaterial != null)
         {
@@ -69,7 +67,7 @@ class DefaultPDFParser
             SecurityHandler securityHandler = encryption.getSecurityHandler();
             securityHandler.prepareForDecryption(encryption, document.getDocumentID(),
                     decryptionMaterial);
-            parser.provider().decryptWith(securityHandler);
+            parser.provider().initializeWith(securityHandler);
             return new PDDocument(document, securityHandler.getCurrentAccessPermission());
         }
         return new PDDocument(document);

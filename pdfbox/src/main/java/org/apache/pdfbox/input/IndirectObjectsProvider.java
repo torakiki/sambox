@@ -23,13 +23,22 @@ import org.apache.pdfbox.xref.Xref;
 import org.apache.pdfbox.xref.XrefEntry;
 
 /**
+ * Component providing {@link COSBase} objects for given keys. It's used when an indirect reference is asked to resolve
+ * to the actual COS object. This component is populated during the xref parsing process by adding {@link XrefEntry}s
+ * found in the xref table/stream, it's then initialized with {@link BaseCOSParser} to use to parse and retrieve
+ * requested objects and the {@link SecurityHandler} required (if any) to decrypt streams and string.
+ * 
  * @author Andrea Vacondio
  *
  */
-public interface IndirectObjectsProvider
+interface IndirectObjectsProvider
 {
 
-    public COSBase get(COSObjectKey key, BaseCOSParser parser);
+    /**
+     * @param key
+     * @return the {@link COSBase} corresponding to the given key.
+     */
+    public COSBase get(COSObjectKey key);
 
     /**
      * Adds the given xref entry to the {@link Xref}
@@ -38,5 +47,17 @@ public interface IndirectObjectsProvider
      */
     public void addEntry(XrefEntry entry);
 
-    public void decryptWith(SecurityHandler handler);
+    /**
+     * Initialize the component with the {@link BaseCOSParser} to use to retrieve and parse requested object
+     * 
+     * @param parser
+     */
+    public void initializeWith(BaseCOSParser parser);
+
+    /**
+     * Initialize the component with the {@link SecurityHandler} to decrypt streams and strings.
+     * 
+     * @param handler
+     */
+    public void initializeWith(SecurityHandler handler);
 }

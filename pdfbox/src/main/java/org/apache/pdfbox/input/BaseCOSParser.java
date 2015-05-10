@@ -23,7 +23,6 @@ import static org.apache.pdfbox.util.CharUtils.isSpace;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Optional;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -62,13 +61,8 @@ public final class BaseCOSParser extends SourceReader
 
     public BaseCOSParser(SeekableSource source)
     {
-        this(source, null);
-    }
-
-    public BaseCOSParser(SeekableSource source, IndirectObjectsProvider provider)
-    {
         super(source);
-        this.provider = Optional.ofNullable(provider).orElse(new LazyIndirectObjectsProvider());
+        this.provider = new LazyIndirectObjectsProvider();
     }
 
     /**
@@ -281,7 +275,7 @@ public final class BaseCOSParser extends SourceReader
                 try
                 {
                     return new IndirectCOSObject(new COSObjectKey(Long.parseLong(first),
-                            Integer.parseInt(second)), provider, this);
+                            Integer.parseInt(second)), provider);
                 }
                 catch (NumberFormatException nfe)
                 {

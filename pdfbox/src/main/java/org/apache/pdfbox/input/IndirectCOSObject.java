@@ -34,14 +34,11 @@ public class IndirectCOSObject extends COSBase
     private COSBase baseObject;
     private COSObjectKey key;
     private IndirectObjectsProvider provider;
-    private BaseCOSParser parser;
 
-    public IndirectCOSObject(COSObjectKey key, IndirectObjectsProvider provider,
-            BaseCOSParser parser)
+    public IndirectCOSObject(COSObjectKey key, IndirectObjectsProvider provider)
     {
         this.key = key;
         this.provider = provider;
-        this.parser = parser;
     }
 
     @Override
@@ -50,7 +47,7 @@ public class IndirectCOSObject extends COSBase
         // TODO multi thread?
         if (baseObject == null)
         {
-            baseObject = Optional.ofNullable(provider.get(key, parser)).orElse(COSNull.NULL);
+            baseObject = Optional.ofNullable(provider.get(key)).orElse(COSNull.NULL);
         }
         return baseObject;
     }

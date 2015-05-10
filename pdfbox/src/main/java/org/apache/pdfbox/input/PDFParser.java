@@ -43,39 +43,21 @@ public final class PDFParser
      */
     public static PDDocument parse(SeekableSource source) throws IOException
     {
-        return parse(source, null, null);
+        return parse(source, null);
     }
 
     /**
-     * Parses the given {@link SeekableSource} using the provided password returning the corresponding decrypted
+     * Parses the given {@link SeekableSource} using the given password, returning the corresponding decrypted
      * {@link PDDocument}.
      * 
-     * @param source
-     * @param password the password to decrypt the document
+     * @param source {@link SeekableSource} to parse
+     * @param password to be used for decryption. Optional.
      * @return the parsed document
      * @throws IOException
      */
     public static PDDocument parse(SeekableSource source, String password) throws IOException
     {
-        return parse(source, null, password);
-    }
-
-    /**
-     * Parses the given {@link SeekableSource} using the given password, returning the corresponding decrypted
-     * {@link PDDocument}. A custom {@link IndirectObjectsProvider} can be provided to use a different strategy to load
-     * objects from the document; if null the default provider is used and objects are lazy loaded when the object is
-     * accessed.
-     * 
-     * @param source {@link SeekableSource} to parse
-     * @param provider {@link IndirectObjectsProvider} to use. Optional.
-     * @param password to be used for decryption. Optional.
-     * @return the parsed document
-     * @throws IOException
-     */
-    public static PDDocument parse(SeekableSource source, IndirectObjectsProvider provider,
-            String password) throws IOException
-    {
-        return DefaultPDFParser.parse(source, provider,
+        return DefaultPDFParser.parse(source,
                 Optional.ofNullable(password).map(StandardDecryptionMaterial::new).orElse(null));
     }
 }
