@@ -16,22 +16,19 @@
  */
 package org.apache.pdfbox.cos;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Optional;
 
 import org.apache.pdfbox.filter.DecodeResult;
 import org.apache.pdfbox.filter.Filter;
 import org.apache.pdfbox.filter.FilterFactory;
+import org.apache.pdfbox.input.source.SeekableSourceViewInputStream;
 import org.apache.pdfbox.io.IOUtils;
-import org.apache.pdfbox.io.RandomAccess;
-import org.apache.pdfbox.io.RandomAccessBuffer;
-import org.apache.pdfbox.io.RandomAccessFileInputStream;
-import org.apache.pdfbox.io.RandomAccessFileOutputStream;
 
 /**
  * This class represents a stream object in a PDF document.
@@ -40,11 +37,9 @@ import org.apache.pdfbox.io.RandomAccessFileOutputStream;
  */
 public class COSStream extends COSDictionary implements Closeable
 {
-    private static final int BUFFER_SIZE = 16384;
-
-    private final RandomAccess buffer = new RandomAccessBuffer();
-    private RandomAccessFileOutputStream filteredStream;
-    private RandomAccessFileOutputStream unFilteredStream;
+    private SeekableSourceViewInputStream existing;
+    private byte[] filtered;
+    private byte[] unfiltered;
     private DecodeResult decodeResult;
 
     public COSStream()
@@ -60,99 +55,88 @@ public class COSStream extends COSDictionary implements Closeable
     }
 
     /**
-     * This will get the stream with all of the filters applied.
-     *
-     * @return the bytes of the physical (encoded) stream
-     *
+     * Creates a stream from an existing one which is a bounded view of the original PDF.
+     * 
+     * @param dictionary The dictionary that is associated with this stream.
+     * @param existing
+     */
+    public COSStream(COSDictionary dictionary, SeekableSourceViewInputStream existing)
+    {
+        super(dictionary);
+        this.existing = existing;
+    }
+
+    /**
+     * @return the (encoded) stream with all of the filters applied.
      * @throws IOException when encoding/decoding causes an exception
      */
     public InputStream getFilteredStream() throws IOException
     {
-        if (buffer.isClosed())
+        if (existing != null)
         {
-            throw new IOException("COSStream has been closed and cannot be read. "
-                    + "Perhaps its enclosing PDDocument has been closed?");
+            return existing;
         }
-
-        if (filteredStream == null)
+        if (getFilters() != null)
         {
-            doEncode();
+            if (filtered == null)
+            {
+                doEncode();
+            }
+            return new MyByteArrayInputStream(filtered);
         }
-        long position = filteredStream.getPosition();
-        long length = filteredStream.getLength();
-
-        RandomAccessFileInputStream input = new RandomAccessFileInputStream(buffer, position,
-                length);
-        return new BufferedInputStream(input, BUFFER_SIZE);
+        return new MyByteArrayInputStream(unfiltered);
     }
 
     /**
-     * This will get the length of the encoded stream.
-     * 
      * @return the length of the encoded stream as long
-     *
      * @throws IOException
      */
     public long getFilteredLength() throws IOException
     {
-        if (filteredStream == null)
+        if (existing != null)
         {
-            doEncode();
+            return existing.getLength();
         }
-        return filteredStream.getLength();
+        if (getFilters() != null)
+        {
+            if (filtered == null)
+            {
+                doEncode();
+            }
+            return Optional.ofNullable(filtered).map(f -> f.length).orElse(0);
+        }
+        return Optional.ofNullable(unfiltered).map(f -> f.length).orElse(0);
     }
 
     /**
-     * @return the bytes of the logical (decoded) stream
-     *
+     * @return the (decoded) stream with all of the filters applied.
      * @throws IOException when encoding/decoding causes an exception
      */
     public InputStream getUnfilteredStream() throws IOException
     {
-        if (buffer.isClosed())
+        if (getFilters() != null)
         {
-            throw new IOException("COSStream has been closed and cannot be read. "
-                    + "Perhaps its enclosing PDDocument has been closed?");
+            if (unfiltered == null)
+            {
+                doDecode();
+            }
+            return new MyByteArrayInputStream(unfiltered);
         }
-
-        InputStream retval;
-        if (unFilteredStream == null)
-        {
-            doDecode();
-        }
-
-        // if unFilteredStream is still null then this stream has not been
-        // created yet, so we should return null.
-        if (unFilteredStream != null)
-        {
-            long position = unFilteredStream.getPosition();
-            long length = unFilteredStream.getLength();
-            RandomAccessFileInputStream input = new RandomAccessFileInputStream(buffer, position,
-                    length);
-            retval = new BufferedInputStream(input, BUFFER_SIZE);
-        }
-        else
-        {
-
-            retval = new ByteArrayInputStream(new byte[0]);
-        }
-        return retval;
+        return getStreamToDecode();
     }
 
     /**
-     * Returns the repaired stream parameters dictionary.
-     *
      * @return the repaired stream parameters dictionary
      * @throws IOException when encoding/decoding causes an exception
      */
     public DecodeResult getDecodeResult() throws IOException
     {
-        if (unFilteredStream == null)
+        if (unfiltered == null)
         {
             doDecode();
         }
 
-        if (unFilteredStream == null || decodeResult == null)
+        if (unfiltered == null || decodeResult == null)
         {
             StringBuilder filterInfo = new StringBuilder();
             COSBase filters = getFilters();
@@ -195,27 +179,18 @@ public class COSStream extends COSDictionary implements Closeable
      */
     private void doDecode() throws IOException
     {
-        // FIXME: We shouldn't keep the same reference?
-        unFilteredStream = filteredStream;
-
         COSBase filters = getFilters();
         if (filters == null)
         {
-            // then do nothing
             decodeResult = DecodeResult.DEFAULT;
         }
         else if (filters instanceof COSName)
         {
-            doDecode((COSName) filters, 0);
+            unfiltered = decode((COSName) filters, 0, getStreamToDecode());
         }
         else if (filters instanceof COSArray)
         {
-            COSArray filterArray = (COSArray) filters;
-            for (int i = 0; i < filterArray.size(); i++)
-            {
-                COSName filterName = (COSName) filterArray.get(i);
-                doDecode(filterName, i);
-            }
+            unfiltered = decodeChain((COSArray) filters, getStreamToDecode());
         }
         else
         {
@@ -223,96 +198,52 @@ public class COSStream extends COSDictionary implements Closeable
         }
     }
 
-    /**
-     * This will decode applying a single filter on the stream.
-     *
-     * @param filterName The name of the filter.
-     * @param filterIndex The index of the current filter.
-     *
-     * @throws IOException If there is an error parsing the stream.
-     */
-    private void doDecode(COSName filterName, int filterIndex) throws IOException
+    private InputStream getStreamToDecode()
     {
-        Filter filter = FilterFactory.INSTANCE.getFilter(filterName);
-
-        boolean done = false;
-        IOException exception = null;
-        long position = unFilteredStream.getPosition();
-        long length = unFilteredStream.getLength();
-        // in case we need it later
-        long writtenLength = unFilteredStream.getLength();
-
-        if (length == 0 && writtenLength == 0)
+        InputStream input = existing;
+        if (input == null)
         {
-            // if the length is zero then don't bother trying to decode
-            // some filters don't work when attempting to decode
-            // with a zero length stream. See zlib_error_01.pdf
-            IOUtils.closeQuietly(unFilteredStream);
-            unFilteredStream = new RandomAccessFileOutputStream(buffer);
-            done = true;
+            input = new MyByteArrayInputStream(filtered);
         }
-        else
-        {
-            // ok this is a simple hack, sometimes we read a couple extra
-            // bytes that shouldn't be there, so we encounter an error we will just
-            // try again with one less byte.
-            for (int tryCount = 0; length > 0 && !done && tryCount < 5; tryCount++)
-            {
-                try
-                {
-                    attemptDecode(position, length, filter, filterIndex);
-                    done = true;
-                }
-                catch (IOException io)
-                {
-                    length--;
-                    exception = io;
-                }
-            }
-            if (!done)
-            {
-                // if no good stream was found then lets try again but with the
-                // length of data that was actually read and not length
-                // defined in the dictionary
-                length = writtenLength;
-                for (int tryCount = 0; !done && tryCount < 5; tryCount++)
-                {
-                    try
-                    {
-                        attemptDecode(position, length, filter, filterIndex);
-                        done = true;
-                    }
-                    catch (IOException io)
-                    {
-                        length--;
-                        exception = io;
-                    }
-                }
-            }
-        }
-        if (!done && exception != null)
-        {
-            throw exception;
-        }
+        return input;
     }
 
-    // attempts to decode the stream at the given position and length
-    private void attemptDecode(long position, long length, Filter filter, int filterIndex)
+    private byte[] decodeChain(COSArray filters, InputStream startingFrom) throws IOException
+    {
+        if (filters.size() > 0)
+        {
+            byte[] tmpResult = new byte[0];
+            InputStream input = startingFrom;
+            for (int i = 0; i < filters.size(); i++)
+            {
+                COSName filterName = (COSName) filters.getObject(i);
+                tmpResult = decode(filterName, i, input);
+                input = new MyByteArrayInputStream(tmpResult);
+            }
+            return tmpResult;
+        }
+        decodeResult = DecodeResult.DEFAULT;
+        return null;
+    }
+
+    private byte[] decode(COSName filterName, int filterIndex, InputStream toDecode)
             throws IOException
     {
-        InputStream input = null;
-        try
+        byte[] decoded = new byte[0];
+        if (toDecode.available() > 0)
         {
-            input = new BufferedInputStream(new RandomAccessFileInputStream(buffer, position,
-                    length), BUFFER_SIZE);
-            IOUtils.closeQuietly(unFilteredStream);
-            unFilteredStream = new RandomAccessFileOutputStream(buffer);
-            decodeResult = filter.decode(input, unFilteredStream, this, filterIndex);
+            Filter filter = FilterFactory.INSTANCE.getFilter(filterName);
+            try (MyByteArrayOutputStream out = new MyByteArrayOutputStream(decoded))
+            {
+                decodeResult = filter.decode(toDecode, out, this, filterIndex);
+            }
+            finally
+            {
+                IOUtils.close(toDecode);
+            }
         }
-        finally
-        {
-            IOUtils.closeQuietly(input);
-        }
+        return decoded;
+
     }
 
     /**
@@ -322,47 +253,42 @@ public class COSStream extends COSDictionary implements Closeable
      */
     private void doEncode() throws IOException
     {
-        filteredStream = unFilteredStream;
 
         COSBase filters = getFilters();
-        if (filters == null)
+        if (filters instanceof COSName)
         {
-            // there is no filter to apply
-        }
-        else if (filters instanceof COSName)
-        {
-            doEncode((COSName) filters, 0);
+            filtered = encode((COSName) filters, 0, new MyByteArrayInputStream(unfiltered));
         }
         else if (filters instanceof COSArray)
         {
-            // apply filters in reverse order
-            COSArray filterArray = (COSArray) filters;
-            for (int i = filterArray.size() - 1; i >= 0; i--)
-            {
-                COSName filterName = (COSName) filterArray.get(i);
-                doEncode(filterName, i);
-            }
+            filtered = encodeChain((COSArray) filters, new MyByteArrayInputStream(unfiltered));
         }
     }
 
-    /**
-     * This will encode applying a single filter on the stream.
-     *
-     * @param filterName The name of the filter.
-     * @param filterIndex The index to the filter.
-     *
-     * @throws IOException If there is an error parsing the stream.
-     */
-    private void doEncode(COSName filterName, int filterIndex) throws IOException
+    private byte[] encode(COSName filterName, int filterIndex, InputStream toEncode)
+            throws IOException
     {
         Filter filter = FilterFactory.INSTANCE.getFilter(filterName);
+        byte[] encoded = new byte[0];
+        filter.encode(toEncode, new MyByteArrayOutputStream(encoded), this, filterIndex);
+        return encoded;
+    }
 
-        InputStream input = new BufferedInputStream(new RandomAccessFileInputStream(buffer,
-                filteredStream.getPosition(), filteredStream.getLength()), BUFFER_SIZE);
-        IOUtils.closeQuietly(filteredStream);
-        filteredStream = new RandomAccessFileOutputStream(buffer);
-        filter.encode(input, filteredStream, this, filterIndex);
-        IOUtils.closeQuietly(input);
+    private byte[] encodeChain(COSArray filters, InputStream startingFrom) throws IOException
+    {
+        if (filters.size() > 0)
+        {
+            byte[] tmpResult = new byte[0];
+            InputStream input = startingFrom;
+            for (int i = filters.size() - 1; i >= 0; i--)
+            {
+                COSName filterName = (COSName) filters.getObject(i);
+                tmpResult = encode(filterName, i, input);
+                input = new MyByteArrayInputStream(tmpResult);
+            }
+            return tmpResult;
+        }
+        return null;
     }
 
     /**
@@ -382,15 +308,14 @@ public class COSStream extends COSDictionary implements Closeable
      * the createUnfilteredStream, which is used to write raw bytes to.
      *
      * @return A stream that can be written to.
-     * @throws IOException If there is an error creating the stream.
      */
-    public OutputStream createFilteredStream() throws IOException
+    public OutputStream createFilteredStream()
     {
-        IOUtils.closeQuietly(unFilteredStream);
-        unFilteredStream = null;
-        IOUtils.closeQuietly(filteredStream);
-        filteredStream = new RandomAccessFileOutputStream(buffer);
-        return new BufferedOutputStream(filteredStream, BUFFER_SIZE);
+        IOUtils.closeQuietly(existing);
+        unfiltered = null;
+        existing = null;
+        filtered = new byte[0];
+        return new MyByteArrayOutputStream(filtered);
     }
 
     /**
@@ -401,15 +326,18 @@ public class COSStream extends COSDictionary implements Closeable
      */
     public void setFilters(COSBase filters) throws IOException
     {
-        if (unFilteredStream == null)
+        if (unfiltered == null)
         {
-            // don't lose stream contents
-            doDecode();
+            unfiltered = new byte[0];
+            try (InputStream in = getUnfilteredStream())
+            {
+                IOUtils.copy(in, new MyByteArrayOutputStream(unfiltered));
+            }
+
         }
         setItem(COSName.FILTER, filters);
-        // kill cached filtered streams
-        IOUtils.closeQuietly(filteredStream);
-        filteredStream = null;
+        IOUtils.closeQuietly(existing);
+        existing = null;
     }
 
     /**
@@ -419,20 +347,38 @@ public class COSStream extends COSDictionary implements Closeable
      *
      * @throws IOException If there is an error creating the stream.
      */
-    public OutputStream createUnfilteredStream() throws IOException
+    public OutputStream createUnfilteredStream()
     {
-        IOUtils.closeQuietly(filteredStream);
-        filteredStream = null;
-        IOUtils.closeQuietly(unFilteredStream);
-        unFilteredStream = new RandomAccessFileOutputStream(buffer);
-        return new BufferedOutputStream(unFilteredStream, BUFFER_SIZE);
+        filtered = null;
+        IOUtils.closeQuietly(existing);
+        existing = null;
+        unfiltered = new byte[0];
+        return new MyByteArrayOutputStream(unfiltered);
     }
 
     @Override
-    public void close() throws IOException
+    public void close()
     {
-        IOUtils.close(buffer);
-        IOUtils.close(filteredStream);
-        IOUtils.close(unFilteredStream);
+        IOUtils.closeQuietly(existing);
+        existing = null;
+        unfiltered = null;
+        filtered = null;
     }
+
+    class MyByteArrayOutputStream extends ByteArrayOutputStream
+    {
+        MyByteArrayOutputStream(byte[] bytes)
+        {
+            this.buf = Optional.ofNullable(bytes).orElse(new byte[0]);
+        }
+    }
+
+    public static class MyByteArrayInputStream extends ByteArrayInputStream
+    {
+        MyByteArrayInputStream(byte[] bytes)
+        {
+            super(Optional.ofNullable(bytes).orElse(new byte[0]));
+        }
+    }
+
 }

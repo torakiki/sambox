@@ -33,7 +33,7 @@ import java.util.List;
  * @author Andrea Vacondio
  *
  */
-public class MemoryMappedSeekableSource implements SeekableSource
+public class MemoryMappedSeekableSource extends BaseSeekableSource
 {
     private static final long PAGE_SIZE = 1 << 29; // 500MB
     private List<MappedByteBuffer> pages = new ArrayList<>();
@@ -142,8 +142,9 @@ public class MemoryMappedSeekableSource implements SeekableSource
     }
 
     @Override
-    public void close()
+    public void close() throws IOException
     {
+        super.close();
         pages.clear();
     }
 

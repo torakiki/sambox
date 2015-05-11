@@ -193,7 +193,7 @@ public class COSStreamArray extends COSStream
      * @throws IOException If there is an error creating the stream.
      */
     @Override
-    public OutputStream createFilteredStream() throws IOException
+    public OutputStream createFilteredStream()
     {
         return firstStream.createFilteredStream();
     }
@@ -221,7 +221,7 @@ public class COSStreamArray extends COSStream
      * @throws IOException If there is an error creating the stream.
      */
     @Override
-    public OutputStream createUnfilteredStream() throws IOException
+    public OutputStream createUnfilteredStream()
     {
         return firstStream.createUnfilteredStream();
     }

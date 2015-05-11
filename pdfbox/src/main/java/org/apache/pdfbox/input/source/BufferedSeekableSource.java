@@ -28,7 +28,7 @@ import org.apache.pdfbox.io.IOUtils;
  * @author Andrea Vacondio
  *
  */
-public class BufferedSeekableSource implements SeekableSource
+public class BufferedSeekableSource extends BaseSeekableSource
 {
     private static final String INPUT_PAGE_SIZE_PROPERTY = "org.pdfbox.input.page.size";
     private ByteBuffer buffer = ByteBuffer.allocate(Integer.getInteger(INPUT_PAGE_SIZE_PROPERTY,
@@ -77,6 +77,7 @@ public class BufferedSeekableSource implements SeekableSource
     @Override
     public void close() throws IOException
     {
+        super.close();
         IOUtils.close(wrapped);
         buffer.clear();
     }

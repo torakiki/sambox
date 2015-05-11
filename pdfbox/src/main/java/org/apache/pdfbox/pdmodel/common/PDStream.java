@@ -97,17 +97,13 @@ public class PDStream implements COSObjectable
     }
 
     /**
-     * Constructor. Reads all data from the input stream and embeds it into the
-     * document, this will close the InputStream.
+     * Constructor. Reads all data from the input stream and embeds it into the document, this will close the
+     * InputStream.
      * 
-     * @param doc
-     *            The document that will hold the stream.
-     * @param str
-     *            The stream parameter.
-     * @param filtered
-     *            True if the stream already has a filter applied.
-     * @throws IOException
-     *             If there is an error creating the stream in the document.
+     * @param doc The document that will hold the stream.
+     * @param str The stream parameter.
+     * @param filtered True if the stream already has a filter applied.
+     * @throws IOException If there is an error creating the stream in the document.
      */
     public PDStream(PDDocument doc, InputStream str, boolean filtered)
             throws IOException
@@ -124,23 +120,12 @@ public class PDStream implements COSObjectable
             {
                 output = stream.createUnfilteredStream();
             }
-            byte[] buffer = new byte[1024];
-            int amountRead;
-            while ((amountRead = str.read(buffer)) != -1)
-            {
-                output.write(buffer, 0, amountRead);
-            }
+            IOUtils.copy(str, output);
         } 
         finally
         {
-            if (output != null)
-            {
-                output.close();
-            }
-            if (str != null)
-            {
-                str.close();
-            }
+            IOUtils.close(str);
+            IOUtils.close(output);
         }
     }
 
@@ -213,7 +198,7 @@ public class PDStream implements COSObjectable
      * @throws IOException
      *             If an IO error occurs during writing.
      */
-    public OutputStream createOutputStream() throws IOException
+    public OutputStream createOutputStream()
     {
         return stream.createUnfilteredStream();
     }

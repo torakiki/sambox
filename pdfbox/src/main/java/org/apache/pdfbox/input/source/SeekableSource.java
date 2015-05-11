@@ -16,15 +16,14 @@
  */
 package org.apache.pdfbox.input.source;
 
-import java.io.Closeable;
 import java.io.IOException;
-import java.nio.ByteBuffer;
+import java.nio.channels.ReadableByteChannel;
 
 /**
  * @author Andrea Vacondio
  *
  */
-public interface SeekableSource extends Closeable
+public interface SeekableSource extends ReadableByteChannel
 {
     /**
      * @return the current source position as a positive long
@@ -46,18 +45,6 @@ public interface SeekableSource extends Closeable
      * @return The source size, measured in bytes
      */
     long size();
-
-    /**
-     * Reads a sequence of bytes from this channel into the given buffer.
-     *
-     * An attempt is made to read up to <i>r</i> bytes from the channel, where <i>r</i> is the number of bytes remaining
-     * in the buffer, that is, <tt>dst.remaining()</tt>, at the moment this method is invoked.
-     *
-     * @param dst The buffer into which bytes are to be transferred
-     * @return The number of bytes read, possibly zero, or <tt>-1</tt> if we reached the end of the source
-     * @throws IOException If some other I/O error occurs
-     */
-    public int read(ByteBuffer dst) throws IOException;
 
     /**
      * Reads a byte of data from this source. The byte is returned as an integer in the range 0 to 255 (

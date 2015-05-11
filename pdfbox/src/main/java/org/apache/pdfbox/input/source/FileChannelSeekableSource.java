@@ -31,7 +31,7 @@ import org.apache.pdfbox.io.IOUtils;
  * @author Andrea Vacondio
  *
  */
-public class FileChannelSeekableSource implements SeekableSource
+public class FileChannelSeekableSource extends BaseSeekableSource
 {
     private FileChannel channel;
     private long size;
@@ -66,6 +66,7 @@ public class FileChannelSeekableSource implements SeekableSource
     @Override
     public void close() throws IOException
     {
+        super.close();
         IOUtils.close(channel);
     }
 

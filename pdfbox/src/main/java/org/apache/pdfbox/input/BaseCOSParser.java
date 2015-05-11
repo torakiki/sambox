@@ -37,8 +37,7 @@ import org.apache.pdfbox.cos.COSObjectKey;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.input.source.SeekableSource;
-import org.apache.pdfbox.io.IOUtils;
-import org.apache.pdfbox.pdfparser.EndstreamOutputStream;
+import org.apache.pdfbox.input.source.SeekableSourceViewInputStream;
 import org.apache.pdfbox.util.Charsets;
 
 /**
@@ -377,41 +376,38 @@ public final class BaseCOSParser extends SourceReader
             c = source().read();
             if (!isLineFeed(c))
             {
-                source().unread(c);
+                source().skip(-1);
                 LOG.warn("Couldn't find expected LF following CR after 'stream' keyword at "
                         + position());
             }
         }
         else if (!isLineFeed(c))
         {
-            source().unread(c);
+            source().skip(-1);
         }
 
-        final COSStream stream = new COSStream(streamDictionary);
+        final COSStream stream;
         long length = streamLength(streamDictionary);
-
-        try (OutputStream out = stream.createFilteredStream())
+        if (length > 0)
         {
-            if (length > 0)
+            stream = new COSStream(streamDictionary, new SeekableSourceViewInputStream(source(),
+                    source().position(), length));
+        }
+        else
+        {
+            LOG.info("Using fallback strategy reading until 'endstream' or 'endobj' is found. Starting at offset "
+                    + position());
+            // TODO find end of stream and create a view on that
+            // copyUntilEndStreamTo(new EndstreamOutputStream(out));
+            stream = new COSStream(streamDictionary);
+        }
+        if (!skipTokenIfValue(ENDSTREAM))
+        {
+            if (isNextToken(ENDOBJ))
             {
-                IOUtils.copy(source(), out, length);
-            }
-            else
-            {
-                LOG.info("Using fallback strategy reading until 'endstream' or 'endobj' is found. Starting at offset "
-                        + position());
-                // TODO
-                copyUntilEndStreamTo(new EndstreamOutputStream(out));
-            }
-            if (!skipTokenIfValue(ENDSTREAM))
-            {
-                if (isNextToken(ENDOBJ))
-                {
-                    LOG.warn("Expected 'endstream' at " + position() + " but was 'endobj'");
-                }
+                LOG.warn("Expected 'endstream' at " + position() + " but was 'endobj'");
             }
         }
-
         return stream;
     }
 

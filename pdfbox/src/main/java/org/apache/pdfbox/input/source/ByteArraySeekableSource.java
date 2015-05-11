@@ -19,6 +19,7 @@ package org.apache.pdfbox.input.source;
 import static java.util.Objects.requireNonNull;
 import static org.apache.pdfbox.util.RequireUtils.requireArg;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 /**
@@ -27,7 +28,7 @@ import java.nio.ByteBuffer;
  * @author Andrea Vacondio
  *
  */
-public class ByteArraySeekableSource implements SeekableSource
+public class ByteArraySeekableSource  extends BaseSeekableSource
 {
     private byte[] bytes;
     private long position;
@@ -82,9 +83,9 @@ public class ByteArraySeekableSource implements SeekableSource
     }
 
     @Override
-    public void close()
+    public void close() throws IOException
     {
-        // nothing to do
+        super.close();
     }
 
 }
