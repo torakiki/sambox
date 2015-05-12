@@ -34,11 +34,13 @@ public class IndirectCOSObject extends COSBase
     private COSBase baseObject;
     private COSObjectKey key;
     private IndirectObjectsProvider provider;
+    private String sourceId;
 
-    public IndirectCOSObject(COSObjectKey key, IndirectObjectsProvider provider)
+    public IndirectCOSObject(COSObjectKey key, IndirectObjectsProvider provider, String sourceId)
     {
         this.key = key;
         this.provider = provider;
+        this.sourceId = sourceId;
     }
 
     @Override
@@ -61,6 +63,14 @@ public class IndirectCOSObject extends COSBase
     public COSObjectKey key()
     {
         return key;
+    }
+
+    /**
+     * @return the id of the source this indirect object was read from
+     */
+    public String sourceId()
+    {
+        return sourceId;
     }
 
 }

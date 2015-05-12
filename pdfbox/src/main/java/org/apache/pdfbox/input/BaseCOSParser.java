@@ -274,7 +274,7 @@ public final class BaseCOSParser extends SourceReader
                 try
                 {
                     return new IndirectCOSObject(new COSObjectKey(Long.parseLong(first),
-                            Integer.parseInt(second)), provider);
+                            Integer.parseInt(second)), provider, source().id());
                 }
                 catch (NumberFormatException nfe)
                 {

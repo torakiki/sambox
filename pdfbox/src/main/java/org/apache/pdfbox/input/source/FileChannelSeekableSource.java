@@ -16,7 +16,6 @@
  */
 package org.apache.pdfbox.input.source;
 
-import static java.util.Objects.requireNonNull;
 import static org.apache.pdfbox.util.RequireUtils.requireArg;
 
 import java.io.File;
@@ -38,7 +37,7 @@ public class FileChannelSeekableSource extends BaseSeekableSource
 
     public FileChannelSeekableSource(File file) throws IOException
     {
-        requireNonNull(file);
+        super(file);
         channel = new RandomAccessFile(file, "r").getChannel();
         size = channel.size();
     }

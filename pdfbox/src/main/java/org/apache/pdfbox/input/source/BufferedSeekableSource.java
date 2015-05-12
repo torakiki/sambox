@@ -16,11 +16,11 @@
  */
 package org.apache.pdfbox.input.source;
 
-import static java.util.Objects.requireNonNull;
 import static org.apache.pdfbox.util.RequireUtils.requireArg;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Optional;
 
 import org.apache.pdfbox.io.IOUtils;
 
@@ -39,7 +39,7 @@ public class BufferedSeekableSource extends BaseSeekableSource
 
     public BufferedSeekableSource(SeekableSource wrapped)
     {
-        requireNonNull(wrapped);
+        super(Optional.of(wrapped).map(SeekableSource::id).get());
         this.wrapped = wrapped;
         size = wrapped.size();
     }

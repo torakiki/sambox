@@ -21,6 +21,8 @@ import static org.apache.pdfbox.util.RequireUtils.requireArg;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * A byte array based {@link SeekableSource} with a max size of 2GB.
@@ -35,6 +37,7 @@ public class ByteArraySeekableSource  extends BaseSeekableSource
 
     public ByteArraySeekableSource(byte[] bytes)
     {
+        super(UUID.nameUUIDFromBytes(Optional.of(bytes).get()).toString());
         requireNonNull(bytes, "Cannot create a byte array source from a null byte array");
         this.bytes = bytes;
     }

@@ -55,7 +55,7 @@ class PdfBodyWriter implements COSVisitor
 
     private static final Log LOG = LogFactory.getLog(PdfBodyWriter.class);
 
-    private Map<COSObjectKey, IndirectCOSObjectReference> existingIndirectToNewXref = new HashMap<>();
+    private Map<String, Map<COSObjectKey, IndirectCOSObjectReference>> bySourceExistingIndirectToNewXref = new HashMap<>();
     private Map<COSBase, IndirectCOSObjectReference> newObjects = new HashMap<>();
     private AtomicInteger objectsCounter = new AtomicInteger(0);
     private PDFWriter writer;
@@ -139,14 +139,21 @@ class PdfBodyWriter implements COSVisitor
     {
         if (item instanceof IndirectCOSObject)
         {
-            COSObjectKey key = ((IndirectCOSObject) item).key();
+            String sourceId = ((IndirectCOSObject) item).sourceId();
+            Map<COSObjectKey, IndirectCOSObjectReference> indirectsForSource = Optional.ofNullable(
+                    bySourceExistingIndirectToNewXref.get(sourceId)).orElseGet(() -> {
+                HashMap<COSObjectKey, IndirectCOSObjectReference> newMap = new HashMap<>();
+                bySourceExistingIndirectToNewXref.put(sourceId, newMap);
+                return newMap;
+            });
 
-            return Optional.ofNullable(existingIndirectToNewXref.get(key)).orElseGet(
+            COSObjectKey key = ((IndirectCOSObject) item).key();
+            return Optional.ofNullable(indirectsForSource.get(key)).orElseGet(
                     () -> {
                         IndirectCOSObjectReference newRef = nextReferenceFor(item);
                         LOG.trace("Created new indirect reference " + newRef
                                 + " replacing the existing one " + key);
-                        existingIndirectToNewXref.put(key, newRef);
+                        indirectsForSource.put(key, newRef);
                         return newRef;
                     });
         }
@@ -208,7 +215,7 @@ class PdfBodyWriter implements COSVisitor
     @Override
     public void close()
     {
-        existingIndirectToNewXref.clear();
+        bySourceExistingIndirectToNewXref.clear();
         newObjects.clear();
     }
 }

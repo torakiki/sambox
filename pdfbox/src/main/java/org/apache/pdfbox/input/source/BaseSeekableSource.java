@@ -16,6 +16,10 @@
  */
 package org.apache.pdfbox.input.source;
 
+import static java.util.Objects.requireNonNull;
+import static org.apache.pdfbox.util.RequireUtils.requireNotBlank;
+
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -26,6 +30,19 @@ public abstract class BaseSeekableSource implements SeekableSource
 {
 
     private boolean open = true;
+    private String id;
+
+    public BaseSeekableSource(String id)
+    {
+        requireNotBlank(id, "SeekableSource id cannot be blank");
+        this.id = id;
+    }
+
+    public BaseSeekableSource(File file)
+    {
+        requireNonNull(file);
+        this.id = file.getAbsolutePath();
+    }
 
     @Override
     public boolean isOpen()
@@ -37,7 +54,14 @@ public abstract class BaseSeekableSource implements SeekableSource
     public void close() throws IOException
     {
         this.open = false;
-
     }
 
+    /**
+     * @return the unique id for this source
+     */
+    @Override
+    public String id()
+    {
+        return id;
+    }
 }

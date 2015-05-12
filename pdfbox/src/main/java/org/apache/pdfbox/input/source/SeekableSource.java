@@ -26,6 +26,11 @@ import java.nio.channels.ReadableByteChannel;
 public interface SeekableSource extends ReadableByteChannel
 {
     /**
+     * @return the unique id for the source.
+     */
+    String id();
+
+    /**
      * @return the current source position as a positive long
      * @throws IOException
      */

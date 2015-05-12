@@ -36,8 +36,8 @@ import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSObjectKey;
 import org.apache.pdfbox.cos.COSStream;
+import org.apache.pdfbox.input.source.SeekableSources;
 import org.apache.pdfbox.io.IOUtils;
-import org.apache.pdfbox.io.PushBackInputStream;
 import org.apache.pdfbox.pdmodel.encryption.SecurityHandler;
 import org.apache.pdfbox.xref.CompressedXrefEntry;
 import org.apache.pdfbox.xref.Xref;
@@ -162,8 +162,9 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
     private void parseObjectStream(XrefEntry containingStreamEntry, COSStream stream,
             BaseCOSParser parser) throws IOException
     {
-        try (BaseCOSParser streamParser = new BaseCOSParser(new PushBackInputStream(
-                stream.getUnfilteredStream(), 65536), this))
+        // TODO create a SeekableSourceView from the COSStream?
+        try (BaseCOSParser streamParser = new BaseCOSParser(
+                SeekableSources.inMemorySeekableSourceFrom(stream.getUnfilteredStream())))
         {
             int numberOfObjects = stream.getInt(COSName.N);
             requireIOCondition(numberOfObjects >= 0,

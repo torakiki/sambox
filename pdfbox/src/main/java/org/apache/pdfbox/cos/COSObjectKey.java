@@ -45,7 +45,7 @@ public class COSObjectKey implements Comparable<COSObjectKey>
     }
 
     /**
-     * @return The object's id.
+     * @return The object number
      */
     public long getNumber()
     {
