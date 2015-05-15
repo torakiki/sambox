@@ -61,22 +61,47 @@ public interface SeekableSource extends ReadableByteChannel
     int read() throws IOException;
 
     /**
-     * Skips the given number of bytes
+     * Skips backward the given number of bytes moving back the source position
      * 
-     * @param offset the number of bytes to skip, either positive or negative to move the position back
+     * @param offset the number of bytes to skip back.
      * @return this source
      * @throws IOException
      */
-    default SeekableSource skip(long offset) throws IOException
+    default SeekableSource back(long offset) throws IOException
     {
-        long newPosition = position() + offset;
-        if (newPosition <= 0 || newPosition > size())
+        long newPosition = position() - offset;
+        if (newPosition < 0 || newPosition > size())
         {
-            throw new IllegalArgumentException("Skipping " + offset
-                    + " moves outside of source boundaries");
+            throw new IllegalArgumentException("Going back would move to " + newPosition
+                    + ", outside of source boundaries");
         }
         position(newPosition);
         return this;
+    }
+
+    /**
+     * Skips backward moving back the source position of one byte
+     * 
+     * @return this source
+     * @throws IOException
+     * @see {@link SeekableSource#back(long)}
+     */
+    default SeekableSource back() throws IOException
+    {
+        return back(1);
+    }
+
+    /**
+     * 
+     * Skips the given number of bytes moving forward the source position
+     * 
+     * @param offset the number of bytes to skip .
+     * @return this source
+     * @throws IOException
+     */
+    default SeekableSource forward(long offset) throws IOException
+    {
+        return back(-offset);
     }
 
     /**
@@ -91,7 +116,7 @@ public interface SeekableSource extends ReadableByteChannel
         int val = read();
         if (val != -1)
         {
-            skip(-1);
+            back(1);
         }
         return val;
     }

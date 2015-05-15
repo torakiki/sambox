@@ -160,7 +160,7 @@ class SourceReader implements Closeable
         if (c != ec)
         {
             throw new IOException("expected='" + ec + "' actual='" + c + "' at offset "
-                    + position());
+                    + (position() - 1));
         }
     }
 
@@ -176,7 +176,7 @@ class SourceReader implements Closeable
         String token = readToken();
         if (!asList(values).contains(token))
         {
-            source.skip(-token.getBytes(Charsets.ISO_8859_1).length);
+            source.back(token.getBytes(Charsets.ISO_8859_1).length);
             return false;
         }
         return true;
@@ -204,19 +204,21 @@ class SourceReader implements Closeable
      */
     public void skipExpectedIndirectObjectDefinition(COSObjectKey expected) throws IOException
     {
+        long objNumOffset = position();
         long number = readObjectNumber();
         if (number != expected.getNumber())
         {
             throw new IOException(String.format(
                     "Expected '%d' object number at offset %d but was '%d'", expected.getNumber(),
-                    position(), number));
+                    objNumOffset, number));
         }
+        long genNumOffset = position();
         long generation = readGenerationNumber();
         if (generation != expected.getGeneration())
         {
             throw new IOException(String.format(
                     "Expected '%d' generation number at offset %d but was '%d'",
-                    expected.getGeneration(), position(), number));
+                    expected.getGeneration(), genNumOffset, number));
         }
         skipSpaces();
         skipExpected(OBJ);
@@ -230,7 +232,7 @@ class SourceReader implements Closeable
     public boolean isNextToken(String... values) throws IOException
     {
         String token = readToken();
-        source.skip(-token.getBytes(Charsets.ISO_8859_1).length);
+        source.back(token.getBytes(Charsets.ISO_8859_1).length);
         return asList(values).contains(token);
     }
 
@@ -308,6 +310,7 @@ class SourceReader implements Closeable
      */
     public String readName() throws IOException
     {
+        long offset = position();
         skipExpected('/');
         StringBuilder builder = pool.borrow();
         try
@@ -336,15 +339,16 @@ class SourceReader implements Closeable
                         }
                         catch (NumberFormatException e)
                         {
-                            source.skip(-2);
-                            throw new IOException(String.format(
-                                    "Expected an Hex number at offset %d but was '%s'", position(),
-                                    hex), e);
+                            source.back(2);
+                            throw new IOException(
+                                    String.format(
+                                            "Expected an Hex number at offset %d but was '%s'",
+                                            offset, hex), e);
                         }
                     }
                     else
                     {
-                        source.skip(-1);
+                        source.back();
                         LOG.warn("Found NUMBER SIGN (#) not used as escaping char while reading name at "
                                 + position());
                         c = (char) ch1;
@@ -374,7 +378,7 @@ class SourceReader implements Closeable
         }
         catch (NumberFormatException e)
         {
-            source.skip(-intBuffer.getBytes(Charsets.ISO_8859_1).length);
+            source.back(intBuffer.getBytes(Charsets.ISO_8859_1).length);
             throw new IOException(String.format(
                     "Expected an integer type at offset %d but was '%s'", position(), intBuffer), e);
         }
@@ -393,7 +397,7 @@ class SourceReader implements Closeable
         }
         catch (NumberFormatException e)
         {
-            source.skip(-longBuffer.getBytes(Charsets.ISO_8859_1).length);
+            source.back(longBuffer.getBytes(Charsets.ISO_8859_1).length);
             throw new IOException(String.format("Expected a long type at offset %d but was '%s'",
                     position(), longBuffer), e);
         }
@@ -678,7 +682,7 @@ class SourceReader implements Closeable
     {
         if (c != -1)
         {
-            source.skip(-1);
+            source.back();
         }
     }
 

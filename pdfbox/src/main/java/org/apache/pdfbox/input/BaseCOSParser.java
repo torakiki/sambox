@@ -22,7 +22,8 @@ import static org.apache.pdfbox.util.CharUtils.isLineFeed;
 import static org.apache.pdfbox.util.CharUtils.isSpace;
 
 import java.io.IOException;
-import java.io.OutputStream;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -50,10 +51,8 @@ public final class BaseCOSParser extends SourceReader
     private static final Log LOG = LogFactory.getLog(BaseCOSParser.class);
 
     public static final String ENDOBJ = "endobj";
-    private static final byte[] ENDOBJ_BYTES = ENDOBJ.getBytes(Charsets.ISO_8859_1);
     public static final String STREAM = "stream";
     public static final String ENDSTREAM = "endstream";
-    private static final byte[] ENDSTREAM_BYTES = ENDSTREAM.getBytes(Charsets.ISO_8859_1);
     private static final String DEF = "def";
 
     private IndirectObjectsProvider provider;
@@ -77,8 +76,9 @@ public final class BaseCOSParser extends SourceReader
         {
         case '<':
         {
+            source().read();
             c = (char) source().peek();
-            source().skip(-1);
+            source().back();
             if (c == '<')
             {
                 return nextDictionary();
@@ -119,7 +119,7 @@ public final class BaseCOSParser extends SourceReader
             // if it's an endstream/endobj, we want to put it back so the caller will see it
             if (ENDOBJ.equals(badString) || ENDSTREAM.equals(badString))
             {
-                source().skip(-badString.getBytes(Charsets.ISO_8859_1).length);
+                source().back(badString.getBytes(Charsets.ISO_8859_1).length);
             }
             else
             {
@@ -376,14 +376,14 @@ public final class BaseCOSParser extends SourceReader
             c = source().read();
             if (!isLineFeed(c))
             {
-                source().skip(-1);
+                source().back();
                 LOG.warn("Couldn't find expected LF following CR after 'stream' keyword at "
                         + position());
             }
         }
         else if (!isLineFeed(c))
         {
-            source().skip(-1);
+            source().back();
         }
 
         final COSStream stream;
@@ -391,15 +391,14 @@ public final class BaseCOSParser extends SourceReader
         if (length > 0)
         {
             stream = new COSStream(streamDictionary, new SeekableSourceViewInputStream(source(),
-                    source().position(), length));
+                    position(), length));
         }
         else
         {
             LOG.info("Using fallback strategy reading until 'endstream' or 'endobj' is found. Starting at offset "
                     + position());
-            // TODO find end of stream and create a view on that
-            // copyUntilEndStreamTo(new EndstreamOutputStream(out));
-            stream = new COSStream(streamDictionary);
+            stream = new COSStream(streamDictionary, new SeekableSourceViewInputStream(source(),
+                    position(), findStreamLength()));
         }
         if (!skipTokenIfValue(ENDSTREAM))
         {
@@ -413,7 +412,7 @@ public final class BaseCOSParser extends SourceReader
 
     /**
      * @param streamDictionary
-     * @return the stream length if found in the dictionary. -1 if if nothing is found or if the length is incorrect.
+     * @return the stream length if found in the dictionary. -1 if nothing is found or if the length is incorrect.
      * @throws IOException
      */
     private long streamLength(COSDictionary streamDictionary) throws IOException
@@ -449,115 +448,32 @@ public final class BaseCOSParser extends SourceReader
     }
 
     /**
-     * This method will read through the current stream object until we find the keyword "endstream" meaning we're at
-     * the end of this object. Some pdf files, however, forget to write some endstream tags and just close off objects
-     * with an "endobj" tag so we have to handle this case as well.
+     * Reads from the current position until it finds the "endstream" meaning we're at the end of this stream object.
+     * Some pdf files, however, forget to write some endstream tags and just close off objects with an "endobj" tag so
+     * we have to handle this case as well.
      * 
-     * This method is optimized using buffered IO and reduced number of byte compare operations.
-     * 
-     * @param out stream we write out to.
-     * 
-     * @throws IOException if something went wrong
+     * @return the length from the current position to the position where "endstream" or "endobj" was found
+     * @throws IOException
      */
-    // TODO
-    private void copyUntilEndStreamTo(final OutputStream out) throws IOException
+    private long findStreamLength() throws IOException
     {
-
-        byte[] buffer = new byte[2048];
-        int bufSize;
-        int charMatchCount = 0;
-        byte[] keyw = ENDSTREAM_BYTES;
-
-        // last character position of shortest keyword ('endobj')
-        final int quickTestOffset = 5;
-
-        // read next chunk into buffer; already matched chars are added to beginning of buffer
-        while ((bufSize = source().read(buffer, charMatchCount, 2048 - charMatchCount)) > 0)
+        long start = position();
+        Pattern pattern = Pattern.compile("endstream|endobj");
+        while (true)
         {
-            bufSize += charMatchCount;
-
-            int bIdx = charMatchCount;
-            int quickTestIdx;
-
-            // iterate over buffer, trying to find keyword match
-            for (int maxQuicktestIdx = bufSize - quickTestOffset; bIdx < bufSize; bIdx++)
+            String currentLine = readLine();
+            Matcher matcher = pattern.matcher(currentLine);
+            if (matcher.find())
             {
-                // reduce compare operations by first test last character we would have to
-                // match if current one matches; if it is not a character from keywords
-                // we can move behind the test character;
-                // this shortcut is inspired by the Boyer-Moore string search algorithm
-                // and can reduce parsing time by approx. 20%
-                if ((charMatchCount == 0)
-                        && ((quickTestIdx = bIdx + quickTestOffset) < maxQuicktestIdx))
+                source().back(currentLine.length() - matcher.start());
+                source().back();
+                if (isSpace(source().read()))
                 {
-
-                    final byte ch = buffer[quickTestIdx];
-                    if ((ch > 't') || (ch < 'a'))
-                    {
-                        // last character we would have to match if current character would match
-                        // is not a character from keywords -> jump behind and start over
-                        bIdx = quickTestIdx;
-                        continue;
-                    }
+                    return position() - start - 1;
                 }
-
-                // could be negative - but we only compare to ASCII
-                final byte ch = buffer[bIdx];
-
-                if (ch == keyw[charMatchCount])
-                {
-                    if (++charMatchCount == keyw.length)
-                    {
-                        // match found
-                        bIdx++;
-                        break;
-                    }
-                }
-                else
-                {
-                    if ((charMatchCount == 3) && (ch == ENDOBJ_BYTES[charMatchCount]))
-                    {
-                        // maybe ENDSTREAM is missing but we could have ENDOBJ
-                        keyw = ENDOBJ_BYTES;
-                        charMatchCount++;
-                    }
-                    else
-                    {
-                        // no match; incrementing match start by 1 would be dumb since we already know matched chars
-                        // depending on current char read we may already have beginning of a new match:
-                        // 'e': first char matched;
-                        // 'n': if we are at match position idx 7 we already read 'e' thus 2 chars matched
-                        // for each other char we have to start matching first keyword char beginning with next
-                        // read position
-                        charMatchCount = (ch == 'e') ? 1 : ((ch == 'n') && (charMatchCount == 7)) ? 2 : 0;
-                        // search again for 'endstream'
-                        keyw = ENDSTREAM_BYTES;
-                    }
-                }
-            } // for
-
-            int contentBytes = Math.max(0, bIdx - charMatchCount);
-
-            // write buffer content until first matched char to output stream
-            if (contentBytes > 0)
-            {
-                out.write(buffer, 0, contentBytes);
+                return position() - start;
             }
-            if (charMatchCount == keyw.length)
-            {
-                // keyword matched; unread matched keyword (endstream/endobj) and following buffered content
-                source().unread(buffer, contentBytes, bufSize - contentBytes);
-                break;
-            }
-            else
-            {
-                // copy matched chars at start of buffer
-                System.arraycopy(keyw, 0, buffer, 0, charMatchCount);
-            }
-
         }
-        // this writes a lonely CR or drops trailing CR LF and LF
-        out.flush();
     }
 
     public IndirectObjectsProvider provider()

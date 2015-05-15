@@ -20,8 +20,9 @@ import static org.apache.pdfbox.util.RequireUtils.requireArg;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Optional;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.io.IOUtils;
 
 /**
@@ -30,6 +31,8 @@ import org.apache.pdfbox.io.IOUtils;
  */
 public class BufferedSeekableSource extends BaseSeekableSource
 {
+    private static final Log LOG = LogFactory.getLog(BufferedSeekableSource.class);
+
     private static final String INPUT_PAGE_SIZE_PROPERTY = "org.pdfbox.input.page.size";
     private ByteBuffer buffer = ByteBuffer.allocate(Integer.getInteger(INPUT_PAGE_SIZE_PROPERTY,
             8192));
@@ -39,32 +42,35 @@ public class BufferedSeekableSource extends BaseSeekableSource
 
     public BufferedSeekableSource(SeekableSource wrapped)
     {
-        super(Optional.of(wrapped).map(SeekableSource::id).get());
+        super(wrapped.id());
         this.wrapped = wrapped;
-        size = wrapped.size();
+        this.size = wrapped.size();
     }
 
     @Override
     public long position()
     {
-        return position;
+        return this.position;
     }
 
     @Override
     public SeekableSource position(long newPosition) throws IOException
     {
-        requireArg(position >= 0, "Cannot set position to a negative value");
-        long newBufPosition = newPosition - position + buffer.position();
-        if (newBufPosition >= 0 && newBufPosition < buffer.capacity())
+        requireArg(newPosition >= 0, "Cannot set position to a negative value");
+        if (newPosition != this.position)
         {
-            buffer.position((int) newBufPosition);
+            long newBufPosition = newPosition - position + buffer.position();
+            if (newBufPosition >= 0 && newBufPosition < buffer.limit())
+            {
+                buffer.position((int) newBufPosition);
+            }
+            else
+            {
+                buffer.limit(0);
+                wrapped.position(newPosition);
+            }
+            this.position = Math.min(newPosition, size);
         }
-        else
-        {
-            buffer.clear();
-            wrapped.position(position);
-        }
-        this.position = Math.min(newPosition, size);
         return this;
     }
 
