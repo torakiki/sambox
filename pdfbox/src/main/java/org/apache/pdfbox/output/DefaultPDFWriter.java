@@ -44,8 +44,6 @@ public class DefaultPDFWriter implements Closeable
         this.document = document;
     }
 
-
-
     public void writeTo(CountingWritableByteChannel channel) throws IOException
     {
         if (document.getEncryption() != null)
@@ -69,7 +67,6 @@ public class DefaultPDFWriter implements Closeable
         long startxref = writer.writeXrefTable();
         writer.writeTrailer(document.getDocument().getTrailer(), startxref);
     }
-
 
     @Override
     public void close() throws IOException

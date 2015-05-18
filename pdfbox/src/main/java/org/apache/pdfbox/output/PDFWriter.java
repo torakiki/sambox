@@ -30,13 +30,13 @@ import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.IndirectCOSObjectReference;
 import org.apache.pdfbox.util.Charsets;
 import org.apache.pdfbox.xref.XrefEntry;
+
 /**
  * @author Andrea Vacondio
  *
  */
 class PDFWriter extends COSWriter
 {
-
     private static final Log LOG = LogFactory.getLog(PDFWriter.class);
 
     public static final byte[] COMMENT = { '%' };
@@ -85,7 +85,8 @@ class PDFWriter extends COSWriter
 
     public void writeBody(COSDocument document) throws IOException
     {
-        try (PdfBodyWriter bodyWriter = new PdfBodyWriter(this))
+        LOG.debug("Writing body");
+        try (AbstractPdfBodyWriter bodyWriter = new AsyncPdfBodyWriter(this))
         {
             document.accept(bodyWriter);
         }

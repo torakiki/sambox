@@ -16,8 +16,6 @@
  */
 package org.apache.pdfbox.output;
 
-import static java.util.Objects.requireNonNull;
-
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -50,21 +48,13 @@ import org.apache.pdfbox.input.IndirectCOSObject;
  * @author Andrea Vacondio
  *
  */
-class PdfBodyWriter implements COSVisitor
+abstract class AbstractPdfBodyWriter implements COSVisitor
 {
-
-    private static final Log LOG = LogFactory.getLog(PdfBodyWriter.class);
+    private static final Log LOG = LogFactory.getLog(AbstractPdfBodyWriter.class);
 
     private Map<String, Map<COSObjectKey, IndirectCOSObjectReference>> bySourceExistingIndirectToNewXref = new HashMap<>();
     private Map<COSBase, IndirectCOSObjectReference> newObjects = new HashMap<>();
     private AtomicInteger objectsCounter = new AtomicInteger(0);
-    private PDFWriter writer;
-
-    PdfBodyWriter(PDFWriter writer)
-    {
-        requireNonNull(writer);
-        this.writer = writer;
-    }
 
     private IndirectCOSObjectReference nextReferenceFor(COSBase baseObject)
     {
@@ -82,10 +72,15 @@ class PdfBodyWriter implements COSVisitor
                 IndirectCOSObjectReference ref = getOrCreateIndirectReferenceFor(value);
                 value.accept(this);
                 document.getTrailer().setItem(k, ref);
-                writer.writerObject(ref);
+                writeObject(ref);
             }
         }
+        onCompletion();
     }
+
+    abstract void writeObject(IndirectCOSObjectReference ref) throws IOException;
+
+    abstract void onCompletion() throws IOException;
 
     @Override
     public void visit(COSArray array) throws IOException
@@ -98,7 +93,7 @@ class PdfBodyWriter implements COSVisitor
                 IndirectCOSObjectReference ref = getOrCreateIndirectReferenceFor(item);
                 array.set(i, ref);
                 item.accept(this);
-                writer.writerObject(ref);
+                writeObject(ref);
             }
             else
             {
@@ -118,7 +113,7 @@ class PdfBodyWriter implements COSVisitor
                 IndirectCOSObjectReference ref = getOrCreateIndirectReferenceFor(item);
                 value.setItem(key, ref);
                 item.accept(this);
-                writer.writerObject(ref);
+                writeObject(ref);
             }
             else
             {
