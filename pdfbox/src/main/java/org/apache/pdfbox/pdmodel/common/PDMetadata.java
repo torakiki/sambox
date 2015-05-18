@@ -19,11 +19,9 @@ package org.apache.pdfbox.pdmodel.common;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
 import org.apache.pdfbox.cos.COSName;
-
-
 import org.apache.pdfbox.cos.COSStream;
-
 import org.apache.pdfbox.pdmodel.PDDocument;
 
 /**
@@ -95,8 +93,9 @@ public class PDMetadata extends PDStream
     public void importXMPMetadata( byte[] xmp )
         throws IOException
     {
-        OutputStream os = createOutputStream();
-        os.write(xmp);
-        os.close();
+        try (OutputStream os = createOutputStream())
+        {
+            os.write(xmp);
+        }
     }
 }

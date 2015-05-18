@@ -156,7 +156,7 @@ public abstract class SecurityHandler
                 rc4.write(data, output);
             }
         }
-        output.flush();
+        IOUtils.close(output);
     }
 
     /**

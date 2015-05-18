@@ -20,6 +20,7 @@ import static java.util.Objects.requireNonNull;
 import static org.apache.pdfbox.util.RequireUtils.requireArg;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Optional;
 import java.util.UUID;
@@ -89,6 +90,14 @@ public class ByteArraySeekableSource  extends BaseSeekableSource
     public void close() throws IOException
     {
         super.close();
+        this.bytes = new byte[0];
+    }
+
+    @Override
+    public InputStream view(long startingPosition, long length)
+    {
+        return new SeekableSourceViewInputStream(new ByteArraySeekableSource(bytes),
+                startingPosition, length);
     }
 
 }

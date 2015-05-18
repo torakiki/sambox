@@ -19,11 +19,12 @@ package org.apache.pdfbox.pdmodel.common.function;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import junit.framework.TestCase;
+
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSStream;
-
-import junit.framework.TestCase;
+import org.apache.pdfbox.io.IOUtils;
 
 /**
  * Tests the {@link PDFunctionType4} class.
@@ -47,7 +48,7 @@ public class TestPDFunctionType4 extends TestCase
         OutputStream out = functionStream.createUnfilteredStream();
         byte[] data = function.getBytes("US-ASCII");
         out.write(data, 0, data.length);
-        out.flush();
+        IOUtils.close(out);
 
         return new PDFunctionType4(functionStream);
     }

@@ -38,7 +38,6 @@ import org.apache.pdfbox.cos.COSObjectKey;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.input.source.SeekableSource;
-import org.apache.pdfbox.input.source.SeekableSourceViewInputStream;
 import org.apache.pdfbox.util.Charsets;
 
 /**
@@ -390,16 +389,15 @@ public final class BaseCOSParser extends SourceReader
         long length = streamLength(streamDictionary);
         if (length > 0)
         {
-            stream = new COSStream(streamDictionary, new SeekableSourceViewInputStream(source(),
-                    position(), length));
+            stream = new COSStream(streamDictionary, source(), position(), length);
         }
         else
         {
             LOG.info("Using fallback strategy reading until 'endstream' or 'endobj' is found. Starting at offset "
                     + position());
-            stream = new COSStream(streamDictionary, new SeekableSourceViewInputStream(source(),
-                    position(), findStreamLength()));
+            stream = new COSStream(streamDictionary, source(), position(), findStreamLength());
         }
+        source().forward(stream.getFilteredLength());
         if (!skipTokenIfValue(ENDSTREAM))
         {
             if (isNextToken(ENDOBJ))
@@ -417,6 +415,7 @@ public final class BaseCOSParser extends SourceReader
      */
     private long streamLength(COSDictionary streamDictionary) throws IOException
     {
+        long startingOffset = position();
         COSBase lengthBaseObj = streamDictionary.getItem(COSName.LENGTH);
         if (lengthBaseObj == null)
         {
@@ -430,7 +429,6 @@ public final class BaseCOSParser extends SourceReader
                     + retVal.getClass().getSimpleName());
         }
         long length = ((COSNumber) retVal).longValue();
-        long startingOffset = position();
         long endStreamOffset = startingOffset + length;
         if (endStreamOffset > length())
         {

@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.TreeMap;
 
 import org.apache.commons.logging.Log;
@@ -80,6 +81,7 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
     @Override
     public void addEntry(XrefEntry entry)
     {
+        LOG.trace("Added xref entry " + entry);
         xref.add(entry);
     }
 
@@ -98,7 +100,9 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
 
     private void parseObject(COSObjectKey key, BaseCOSParser parser) throws IOException
     {
-        XrefEntry xrefEntry = xref.get(key);
+
+        XrefEntry xrefEntry = Optional.ofNullable(xref.get(key)).orElseThrow(
+                () -> new IOException("Unable to find xref data for " + key));
         LOG.trace("Starting parse of indirect object " + xrefEntry);
         if (xrefEntry.getType() == XrefType.IN_USE)
         {
@@ -108,6 +112,7 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
         {
             parseCompressedEntry(xrefEntry, parser);
         }
+        LOG.trace("Parsing done");
     }
 
     private void parseInUseEntry(XrefEntry xrefEntry, BaseCOSParser parser) throws IOException
@@ -156,13 +161,13 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
         {
             throw new IOException("Expected an object stream instance for " + containingStreamEntry);
         }
-        parseObjectStream(containingStreamEntry, (COSStream) stream, parser);
+        parseObjectStream(containingStreamEntry, (COSStream) stream);
     }
 
-    private void parseObjectStream(XrefEntry containingStreamEntry, COSStream stream,
-            BaseCOSParser parser) throws IOException
+    private void parseObjectStream(XrefEntry containingStreamEntry, COSStream stream)
+            throws IOException
     {
-        // TODO create a SeekableSourceView from the COSStream?
+        // TODO we dont' want to load the stream in memory, fix this.
         try (BaseCOSParser streamParser = new BaseCOSParser(
                 SeekableSources.inMemorySeekableSourceFrom(stream.getUnfilteredStream())))
         {
@@ -182,12 +187,14 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
             }
             for (Entry<Long, Long> entry : entries.entrySet())
             {
-                streamParser.position(entry.getValue());
+                LOG.trace("Parsing compressed object " + entry.getValue() + " at offset "
+                        + entry.getKey());
+                streamParser.position(entry.getKey());
                 if (streamParser.skipTokenIfValue(OBJ))
                 {
                     LOG.warn("Unexptected 'obj' token in objects stream");
                 }
-                COSBase object = parser.nextParsedToken();
+                COSBase object = streamParser.nextParsedToken();
                 if (object != null)
                 {
                     COSObjectKey key = new COSObjectKey(entry.getValue(), 0);

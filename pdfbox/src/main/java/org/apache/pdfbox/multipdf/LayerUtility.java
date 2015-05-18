@@ -29,6 +29,7 @@ import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSStream;
+import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -85,12 +86,12 @@ public class LayerUtility
         COSStream saveGraphicsStateStream = new COSStream(saveGraphicsStateDic);
         OutputStream saveStream = saveGraphicsStateStream.createUnfilteredStream();
         saveStream.write("q\n".getBytes("ISO-8859-1"));
-        saveStream.flush();
+        IOUtils.close(saveStream);
 
         COSStream restoreGraphicsStateStream = new COSStream(saveGraphicsStateDic);
         OutputStream restoreStream = restoreGraphicsStateStream.createUnfilteredStream();
         restoreStream.write("Q\n".getBytes("ISO-8859-1"));
-        restoreStream.flush();
+        IOUtils.close(restoreStream);
 
         //Wrap the existing page's content in a save/restore pair (q/Q) to have a controlled
         //environment to add additional content.

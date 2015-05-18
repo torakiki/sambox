@@ -20,6 +20,7 @@ import static org.apache.pdfbox.util.RequireUtils.requireArg;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
@@ -28,12 +29,17 @@ import java.nio.channels.FileChannel.MapMode;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * @author Andrea Vacondio
  *
  */
 public class MemoryMappedSeekableSource extends BaseSeekableSource
 {
+    private static final Log LOG = LogFactory.getLog(MemoryMappedSeekableSource.class);
+
     private static final long PAGE_SIZE = 1 << 29; // 500MB
     private List<MappedByteBuffer> pages = new ArrayList<>();
     private long position;
@@ -60,7 +66,15 @@ public class MemoryMappedSeekableSource extends BaseSeekableSource
                     pages.add(i, channel.map(MapMode.READ_ONLY, i * PAGE_SIZE, PAGE_SIZE));
                 }
             }
+            LOG.debug("Created MemoryMappedSeekableSource with " + pages.size() + " pages");
         }
+    }
+
+    private MemoryMappedSeekableSource(MemoryMappedSeekableSource parent)
+    {
+        super(parent.id());
+        this.size = parent.size;
+        this.pages.addAll(parent.pages);
     }
 
     @Override
@@ -94,7 +108,6 @@ public class MemoryMappedSeekableSource extends BaseSeekableSource
             int read = readPage(dst, zeroBasedPagesNumber, relativePosition);
             while (dst.hasRemaining())
             {
-                System.out.println(dst);
                 int readBytes = readPage(dst, zeroBasedPagesNumber + 1, 0);
                 if (readBytes == 0)
                 {
@@ -145,6 +158,13 @@ public class MemoryMappedSeekableSource extends BaseSeekableSource
     {
         super.close();
         pages.clear();
+    }
+
+    @Override
+    public InputStream view(long startingPosition, long length)
+    {
+        return new SeekableSourceViewInputStream(new MemoryMappedSeekableSource(this),
+                startingPosition, length);
     }
 
 }

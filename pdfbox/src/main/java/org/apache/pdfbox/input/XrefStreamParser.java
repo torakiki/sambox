@@ -103,7 +103,6 @@ class XrefStreamParser
         int w1 = xrefFormat.getInt(1);
         int w2 = xrefFormat.getInt(2);
         int lineSize = w0 + w1 + w2;
-
         try (InputStream stream = xrefStream.getUnfilteredStream())
         {
             OfLong objectIds = objectNumbers.iterator();

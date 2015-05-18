@@ -19,10 +19,9 @@ package org.apache.pdfbox.input.source;
 import static org.apache.pdfbox.util.RequireUtils.requireArg;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.io.IOUtils;
 
 /**
@@ -31,8 +30,6 @@ import org.apache.pdfbox.io.IOUtils;
  */
 public class BufferedSeekableSource extends BaseSeekableSource
 {
-    private static final Log LOG = LogFactory.getLog(BufferedSeekableSource.class);
-
     private static final String INPUT_PAGE_SIZE_PROPERTY = "org.pdfbox.input.page.size";
     private ByteBuffer buffer = ByteBuffer.allocate(Integer.getInteger(INPUT_PAGE_SIZE_PROPERTY,
             8192));
@@ -121,5 +118,11 @@ public class BufferedSeekableSource extends BaseSeekableSource
             buffer.flip();
         }
         return buffer.remaining();
+    }
+
+    @Override
+    public InputStream view(long startingPosition, long length) throws IOException
+    {
+        return wrapped.view(startingPosition, length);
     }
 }

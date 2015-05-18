@@ -22,12 +22,14 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.ref.WeakReference;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import org.apache.pdfbox.filter.DecodeResult;
 import org.apache.pdfbox.filter.Filter;
 import org.apache.pdfbox.filter.FilterFactory;
-import org.apache.pdfbox.input.source.SeekableSourceViewInputStream;
+import org.apache.pdfbox.input.source.SeekableSource;
 import org.apache.pdfbox.io.IOUtils;
 
 /**
@@ -37,7 +39,7 @@ import org.apache.pdfbox.io.IOUtils;
  */
 public class COSStream extends COSDictionary implements Closeable
 {
-    private SeekableSourceViewInputStream existing;
+    private LazySeekableSourceViewHolder existing;
     private byte[] filtered;
     private byte[] unfiltered;
     private DecodeResult decodeResult;
@@ -55,15 +57,18 @@ public class COSStream extends COSDictionary implements Closeable
     }
 
     /**
-     * Creates a stream from an existing one which is a bounded view of the original PDF.
+     * Creates a stream with the given dictionary and where filtered data is a view of the given {@link SeekableSource}.
      * 
      * @param dictionary The dictionary that is associated with this stream.
-     * @param existing
+     * @param seekableSource the source where filtered data is read from
+     * @param startingPosition starting position of the stream data in the {@link SeekableSource}
+     * @param length the length of the stream data
      */
-    public COSStream(COSDictionary dictionary, SeekableSourceViewInputStream existing)
+    public COSStream(COSDictionary dictionary, SeekableSource seekableSource,
+            long startingPosition, long length)
     {
         super(dictionary);
-        this.existing = existing;
+        this.existing = new LazySeekableSourceViewHolder(seekableSource, startingPosition, length);
     }
 
     /**
@@ -74,7 +79,7 @@ public class COSStream extends COSDictionary implements Closeable
     {
         if (existing != null)
         {
-            return existing;
+            return existing.get();
         }
         if (getFilters() != null)
         {
@@ -95,7 +100,7 @@ public class COSStream extends COSDictionary implements Closeable
     {
         if (existing != null)
         {
-            return existing.getLength();
+            return existing.length;
         }
         if (getFilters() != null)
         {
@@ -198,14 +203,13 @@ public class COSStream extends COSDictionary implements Closeable
         }
     }
 
-    private InputStream getStreamToDecode()
+    private InputStream getStreamToDecode() throws IOException
     {
-        InputStream input = existing;
-        if (input == null)
+        if (existing != null)
         {
-            input = new MyByteArrayInputStream(filtered);
+            return existing.get();
         }
-        return input;
+        return new MyByteArrayInputStream(filtered);
     }
 
     private byte[] decodeChain(COSArray filters, InputStream startingFrom) throws IOException
@@ -229,20 +233,20 @@ public class COSStream extends COSDictionary implements Closeable
     private byte[] decode(COSName filterName, int filterIndex, InputStream toDecode)
             throws IOException
     {
-        byte[] decoded = new byte[0];
         if (toDecode.available() > 0)
         {
             Filter filter = FilterFactory.INSTANCE.getFilter(filterName);
-            try (MyByteArrayOutputStream out = new MyByteArrayOutputStream(decoded))
+            try (MyByteArrayOutputStream out = new MyByteArrayOutputStream())
             {
                 decodeResult = filter.decode(toDecode, out, this, filterIndex);
+                return out.toByteArray();
             }
             finally
             {
                 IOUtils.close(toDecode);
             }
         }
-        return decoded;
+        return new byte[0];
 
     }
 
@@ -269,9 +273,11 @@ public class COSStream extends COSDictionary implements Closeable
             throws IOException
     {
         Filter filter = FilterFactory.INSTANCE.getFilter(filterName);
-        byte[] encoded = new byte[0];
-        filter.encode(toEncode, new MyByteArrayOutputStream(encoded), this, filterIndex);
-        return encoded;
+        try (MyByteArrayOutputStream encoded = new MyByteArrayOutputStream())
+        {
+            filter.encode(toEncode, encoded, this, filterIndex);
+            return encoded.toByteArray();
+        }
     }
 
     private byte[] encodeChain(COSArray filters, InputStream startingFrom) throws IOException
@@ -314,8 +320,10 @@ public class COSStream extends COSDictionary implements Closeable
         IOUtils.closeQuietly(existing);
         unfiltered = null;
         existing = null;
-        filtered = new byte[0];
-        return new MyByteArrayOutputStream(filtered);
+        filtered = null;
+        return new MyByteArrayOutputStream(bytes -> {
+            this.filtered = bytes;
+        });
     }
 
     /**
@@ -328,10 +336,15 @@ public class COSStream extends COSDictionary implements Closeable
     {
         if (unfiltered == null)
         {
-            unfiltered = new byte[0];
             try (InputStream in = getUnfilteredStream())
             {
-                IOUtils.copy(in, new MyByteArrayOutputStream(unfiltered));
+                try (MyByteArrayOutputStream out = new MyByteArrayOutputStream(bytes -> {
+                    this.unfiltered = bytes;
+                }))
+                {
+                    IOUtils.copy(in, out);
+                }
+
             }
 
         }
@@ -352,8 +365,10 @@ public class COSStream extends COSDictionary implements Closeable
         filtered = null;
         IOUtils.closeQuietly(existing);
         existing = null;
-        unfiltered = new byte[0];
-        return new MyByteArrayOutputStream(unfiltered);
+        unfiltered = null;
+        return new MyByteArrayOutputStream(bytes -> {
+            this.unfiltered = bytes;
+        });
     }
 
     @Override
@@ -365,19 +380,83 @@ public class COSStream extends COSDictionary implements Closeable
         filtered = null;
     }
 
-    class MyByteArrayOutputStream extends ByteArrayOutputStream
+    static class MyByteArrayOutputStream extends ByteArrayOutputStream
     {
-        MyByteArrayOutputStream(byte[] bytes)
+        private Optional<Consumer<byte[]>> onClose;
+
+        MyByteArrayOutputStream()
         {
-            this.buf = Optional.ofNullable(bytes).orElse(new byte[0]);
+            this(null);
+        }
+
+        MyByteArrayOutputStream(Consumer<byte[]> onClose)
+        {
+            super(0);
+            this.onClose = Optional.ofNullable(onClose);
+        }
+
+        @Override
+        public byte toByteArray()[]
+        {
+            return this.buf;
+        }
+
+        @Override
+        public void close() throws IOException
+        {
+            super.close();
+            onClose.ifPresent(c -> c.accept(buf));
         }
     }
 
-    public static class MyByteArrayInputStream extends ByteArrayInputStream
+    static class MyByteArrayInputStream extends ByteArrayInputStream
     {
         MyByteArrayInputStream(byte[] bytes)
         {
             super(Optional.ofNullable(bytes).orElse(new byte[0]));
+        }
+    }
+
+    /**
+     * Holder for a view of a portion of the given {@link SeekableSource}
+     * 
+     * @author Andrea Vacondio
+     */
+    private static class LazySeekableSourceViewHolder implements Closeable
+    {
+        private WeakReference<SeekableSource> sourceRef;
+        private long startingPosition;
+        private long length;
+
+        private InputStream view;
+
+        public LazySeekableSourceViewHolder(SeekableSource source, long startingPosition,
+                long length)
+        {
+            this.sourceRef = new WeakReference<>(source);
+            this.startingPosition = startingPosition;
+            this.length = length;
+        }
+
+        InputStream get() throws IOException
+        {
+            SeekableSource source = Optional
+                    .ofNullable(this.sourceRef.get())
+                    .filter(SeekableSource::isOpen)
+                    .orElseThrow(
+                            () -> new IllegalStateException(
+                                    "The original SeekableSource has been closed."));
+            if (view == null)
+            {
+                view = source.view(startingPosition, length);
+            }
+            return view;
+        }
+
+        @Override
+        public void close() throws IOException
+        {
+            IOUtils.close(view);
         }
     }
 

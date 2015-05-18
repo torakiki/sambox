@@ -17,6 +17,7 @@
 package org.apache.pdfbox.input.source;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.channels.ReadableByteChannel;
 
 /**
@@ -59,6 +60,15 @@ public interface SeekableSource extends ReadableByteChannel
      * @throws IOException
      */
     int read() throws IOException;
+
+    /**
+     * @param startingPosition
+     * @param length
+     * @return a readable view of a portion of this {@link SeekableSource}. Reading from this view doesn't affect the
+     * this {@link SeekableSource} position.
+     * @throws IOException if something goes wrong while creating the view
+     */
+    InputStream view(long startingPosition, long length) throws IOException;
 
     /**
      * Skips backward the given number of bytes moving back the source position

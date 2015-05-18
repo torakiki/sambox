@@ -18,37 +18,34 @@ package org.apache.pdfbox.input.source;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.ref.WeakReference;
+import java.nio.ByteBuffer;
 import java.util.Optional;
+
+import org.apache.pdfbox.io.IOUtils;
 
 /**
  * @author Andrea Vacondio
  *
  */
-public class SeekableSourceViewInputStream extends InputStream
+class SeekableSourceViewInputStream extends InputStream
 {
     private long startingPosition;
     private long length;
     private long currentPosition;
-    private WeakReference<SeekableSource> wrapped;
+    private SeekableSource wrapped;
 
-    /**
-     * @param startingPosition
-     * @param length
-     * @param wrapped
-     */
-    public SeekableSourceViewInputStream(SeekableSource wrapped, long startingPosition, long length)
+    SeekableSourceViewInputStream(SeekableSource wrapped, long startingPosition, long length)
     {
         this.startingPosition = startingPosition;
         this.currentPosition = 0;
         this.length = length;
-        this.wrapped = new WeakReference<>(wrapped);
+        this.wrapped = wrapped;
     }
 
     @Override
     public int read() throws IOException
     {
-        if (currentPosition < length)
+        if (available() > 0)
         {
             getSource().position(startingPosition + currentPosition);
             currentPosition++;
@@ -60,7 +57,17 @@ public class SeekableSourceViewInputStream extends InputStream
     @Override
     public int read(byte[] b) throws IOException
     {
-        return this.read(b, 0, b.length);
+        if (available() > 0)
+        {
+            getSource().position(startingPosition + currentPosition);
+            int read = getSource().read(ByteBuffer.wrap(b, 0, Math.min(b.length, available())));
+            if (read > 0)
+            {
+                currentPosition += read;
+                return read;
+            }
+        }
+        return -1;
     }
 
     @Override
@@ -87,22 +94,18 @@ public class SeekableSourceViewInputStream extends InputStream
         return length;
     }
 
-    /**
-     * Doesn't close the wrapped {@link SeekableSource}
-     */
     @Override
-    public void close()
+    public void close() throws IOException
     {
+        IOUtils.close(wrapped);
         this.currentPosition = 0;
     }
 
     private SeekableSource getSource()
     {
         return Optional
-                .ofNullable(this.wrapped.get())
+                .ofNullable(this.wrapped)
                 .filter(SeekableSource::isOpen)
-                .orElseThrow(
-                        () -> new IllegalStateException(
-                                "The original SeekableSource has been closed."));
+                .orElseThrow(() -> new IllegalStateException("The SeekableSource has been closed."));
     }
 }
