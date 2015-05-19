@@ -14,38 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.pdfbox.output;
-
-import static java.util.Objects.requireNonNull;
-
-import java.io.IOException;
-
-import org.apache.pdfbox.cos.IndirectCOSObjectReference;
+package org.apache.pdfbox;
 
 /**
  * @author Andrea Vacondio
  *
  */
-class SyncPdfBodyWriter extends AbstractPdfBodyWriter
+public final class PDFBox
 {
-    private PDFWriter writer;
-
-    SyncPdfBodyWriter(PDFWriter writer)
-    {
-        requireNonNull(writer);
-        this.writer = writer;
-    }
-
-    @Override
-    void writeObject(IndirectCOSObjectReference ref) throws IOException
-    {
-        writer.writerObject(ref);
-    }
-
-    @Override
-    void onCompletion()
-    {
-        // no op
-    }
-
+    public static final String MAPPED_SIZE_THRESHOLD_PROPERTY = "org.pdfbox.mapped.size.threshold";
+    public static final String INPUT_PAGE_SIZE_PROPERTY = "org.pdfbox.buffered.input.page.size";
+    public static final String OUTPUT_PAGE_SIZE_PROPERTY = "org.pdfbox.buffered.output.page.size";
+    public static final String BUFFERS_POOL_SIZE_PROPERTY = "org.pdfbox.buffers.pool.size";
 }

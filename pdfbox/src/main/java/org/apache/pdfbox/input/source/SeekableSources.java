@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import org.apache.pdfbox.PDFBox;
 import org.apache.pdfbox.io.IOUtils;
 
 /**
@@ -32,9 +33,8 @@ import org.apache.pdfbox.io.IOUtils;
  */
 public final class SeekableSources
 {
-    private static final String MAPPED_SIZE_THRESHOLD_PROPERTY = "org.pdfbox.mapped.size.threshold";
-    private static final long MAPPED_SIZE_THRESHOLD = Long.getLong(MAPPED_SIZE_THRESHOLD_PROPERTY,
-            1 << 25);
+    private static final long MAPPED_SIZE_THRESHOLD = Long.getLong(
+            PDFBox.MAPPED_SIZE_THRESHOLD_PROPERTY, 1 << 24);
 
     private SeekableSources()
     {

@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
+import org.apache.pdfbox.PDFBox;
 import org.apache.pdfbox.io.IOUtils;
 
 /**
@@ -30,9 +31,9 @@ import org.apache.pdfbox.io.IOUtils;
  */
 public class BufferedSeekableSource extends BaseSeekableSource
 {
-    private static final String INPUT_PAGE_SIZE_PROPERTY = "org.pdfbox.input.page.size";
-    private ByteBuffer buffer = ByteBuffer.allocate(Integer.getInteger(INPUT_PAGE_SIZE_PROPERTY,
-            8192));
+
+    private ByteBuffer buffer = ByteBuffer.allocate(Integer.getInteger(
+            PDFBox.INPUT_PAGE_SIZE_PROPERTY, 8192));
     private SeekableSource wrapped;
     private long position;
     private long size;
@@ -83,12 +84,13 @@ public class BufferedSeekableSource extends BaseSeekableSource
         super.close();
         IOUtils.close(wrapped);
         buffer.clear();
+        buffer.limit(0);
     }
 
     @Override
     public int read(ByteBuffer dst) throws IOException
     {
-        buffer.clear();
+        buffer.limit(0);
         wrapped.position(position);
         int read = wrapped.read(dst);
         if (read > 0)

@@ -25,6 +25,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 
+import org.apache.pdfbox.PDFBox;
 import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.util.Charsets;
 
@@ -34,8 +35,6 @@ import org.apache.pdfbox.util.Charsets;
  */
 class DestinationWriter implements Closeable
 {
-    private static final String OUTPUT_PAGE_SIZE_PROPERTY = "org.pdfbox.output.page.size";
-
     private static final byte[] EOL = { '\n' };
     public static final byte[] SPACE = { ' ' };
     public static final byte[] CRLF = { '\r', '\n' };
@@ -50,8 +49,8 @@ class DestinationWriter implements Closeable
     public static final byte RIGHT_SQUARE_BRACKET = 0x5D;
 
     private CountingWritableByteChannel channel;
-    private ByteBuffer buffer = ByteBuffer.allocate(Integer.getInteger(OUTPUT_PAGE_SIZE_PROPERTY,
-            4096));
+    private ByteBuffer buffer = ByteBuffer.allocate(Integer.getInteger(
+            PDFBox.OUTPUT_PAGE_SIZE_PROPERTY, 4096));
     private boolean onNewLine = false;
 
     public DestinationWriter(CountingWritableByteChannel channel)

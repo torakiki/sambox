@@ -38,6 +38,7 @@ import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.pdfbox.PDFBox;
 import org.apache.pdfbox.cos.COSObjectKey;
 import org.apache.pdfbox.input.source.SeekableSource;
 import org.apache.pdfbox.io.IOUtils;
@@ -51,7 +52,7 @@ import org.apache.pdfbox.util.Pool;
  */
 class SourceReader implements Closeable
 {
-    private static final String BUFFERS_POOL_SIZE_PROPERTY = "org.pdfbox.buffers.pool.size";
+
     private static final Log LOG = LogFactory.getLog(SourceReader.class);
 
     private static final long OBJECT_NUMBER_THRESHOLD = 10000000000L;
@@ -59,7 +60,7 @@ class SourceReader implements Closeable
     public static final String OBJ = "obj";
 
     private Pool<StringBuilder> pool = new Pool<>(StringBuilder::new, Integer.getInteger(
-            BUFFERS_POOL_SIZE_PROPERTY, 10)).onGive(b -> b.setLength(0));
+            PDFBox.BUFFERS_POOL_SIZE_PROPERTY, 10)).onGive(b -> b.setLength(0));
     private SeekableSource source;
 
     public SourceReader(SeekableSource source)

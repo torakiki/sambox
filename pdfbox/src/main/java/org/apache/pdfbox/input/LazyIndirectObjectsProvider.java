@@ -103,7 +103,7 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
 
         XrefEntry xrefEntry = Optional.ofNullable(xref.get(key)).orElseThrow(
                 () -> new IOException("Unable to find xref data for " + key));
-        LOG.trace("Starting parse of indirect object " + xrefEntry);
+        LOG.debug("Starting parse of indirect object " + xrefEntry);
         if (xrefEntry.getType() == XrefType.IN_USE)
         {
             parseInUseEntry(xrefEntry, parser);
