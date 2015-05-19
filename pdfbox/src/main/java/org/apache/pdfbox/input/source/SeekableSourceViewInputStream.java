@@ -19,7 +19,6 @@ package org.apache.pdfbox.input.source;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.util.Optional;
 
 import org.apache.pdfbox.io.IOUtils;
 
@@ -71,6 +70,23 @@ class SeekableSourceViewInputStream extends InputStream
     }
 
     @Override
+    public int read(byte[] b, int offset, int length) throws IOException
+    {
+        if (available() > 0)
+        {
+            getSource().position(startingPosition + currentPosition);
+            int read = getSource().read(
+                    ByteBuffer.wrap(b, offset, Math.min(b.length - offset, available())));
+            if (read > 0)
+            {
+                currentPosition += read;
+                return read;
+            }
+        }
+        return -1;
+    }
+
+    @Override
     public int available()
     {
         return (int) (length - currentPosition);
@@ -103,9 +119,10 @@ class SeekableSourceViewInputStream extends InputStream
 
     private SeekableSource getSource()
     {
-        return Optional
-                .ofNullable(this.wrapped)
-                .filter(SeekableSource::isOpen)
-                .orElseThrow(() -> new IllegalStateException("The SeekableSource has been closed."));
+        if (wrapped.isOpen())
+        {
+            return wrapped;
+        }
+        throw new IllegalStateException("The SeekableSource has been closed");
     }
 }

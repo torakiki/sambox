@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
-import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.util.ArrayList;
@@ -41,7 +40,7 @@ public class MemoryMappedSeekableSource extends BaseSeekableSource
     private static final Log LOG = LogFactory.getLog(MemoryMappedSeekableSource.class);
 
     private static final long PAGE_SIZE = 1 << 29; // 500MB
-    private List<MappedByteBuffer> pages = new ArrayList<>();
+    private List<ByteBuffer> pages = new ArrayList<>();
     private long position;
     private long size;
 
@@ -74,7 +73,10 @@ public class MemoryMappedSeekableSource extends BaseSeekableSource
     {
         super(parent.id());
         this.size = parent.size;
-        this.pages.addAll(parent.pages);
+        for (ByteBuffer page : parent.pages)
+        {
+            this.pages.add(page.duplicate());
+        }
     }
 
     @Override
@@ -101,14 +103,14 @@ public class MemoryMappedSeekableSource extends BaseSeekableSource
     public int read(ByteBuffer dst)
     {
         int zeroBasedPagesNumber = (int) (position() / PAGE_SIZE);
-        MappedByteBuffer page = pages.get(zeroBasedPagesNumber);
+        ByteBuffer page = pages.get(zeroBasedPagesNumber);
         int relativePosition = (int) (position() - (zeroBasedPagesNumber * PAGE_SIZE));
         if (relativePosition < page.limit())
         {
             int read = readPage(dst, zeroBasedPagesNumber, relativePosition);
             while (dst.hasRemaining())
             {
-                int readBytes = readPage(dst, zeroBasedPagesNumber + 1, 0);
+                int readBytes = readPage(dst, ++zeroBasedPagesNumber, 0);
                 if (readBytes == 0)
                 {
                     break;
@@ -125,7 +127,7 @@ public class MemoryMappedSeekableSource extends BaseSeekableSource
     {
         if (pageNumber < pages.size())
         {
-            MappedByteBuffer page = pages.get(pageNumber);
+            ByteBuffer page = pages.get(pageNumber);
             page.position(bufferPosition);
             if (page.hasRemaining())
             {
@@ -143,7 +145,7 @@ public class MemoryMappedSeekableSource extends BaseSeekableSource
     public int read()
     {
         int zeroBasedPagesNumber = (int) (position() / PAGE_SIZE);
-        MappedByteBuffer page = pages.get(zeroBasedPagesNumber);
+        ByteBuffer page = pages.get(zeroBasedPagesNumber);
         int relativePosition = (int) (position() - (zeroBasedPagesNumber * PAGE_SIZE));
         if (relativePosition < page.limit())
         {
