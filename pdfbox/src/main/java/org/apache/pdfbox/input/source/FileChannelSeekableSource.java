@@ -20,7 +20,6 @@ import static org.apache.pdfbox.util.RequireUtils.requireArg;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -75,12 +74,14 @@ public class FileChannelSeekableSource extends BaseSeekableSource
     @Override
     public int read(ByteBuffer dst) throws IOException
     {
+        requireOpen();
         return channel.read(dst);
     }
 
     @Override
     public int read() throws IOException
     {
+        requireOpen();
         ByteBuffer buffer = ByteBuffer.allocate(1);
         if (channel.read(buffer) > 0)
         {
@@ -91,9 +92,10 @@ public class FileChannelSeekableSource extends BaseSeekableSource
     }
 
     @Override
-    public InputStream view(long startingPosition, long length) throws IOException
+    public SeekableSource view(long startingPosition, long length) throws IOException
     {
-        return new SeekableSourceViewInputStream(new FileChannelSeekableSource(this.file),
-                startingPosition, length);
+        requireOpen();
+        return new SeekableSourceView(new FileChannelSeekableSource(this.file), startingPosition,
+                length);
     }
 }

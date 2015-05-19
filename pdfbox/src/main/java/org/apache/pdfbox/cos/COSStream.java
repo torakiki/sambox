@@ -16,6 +16,9 @@
  */
 package org.apache.pdfbox.cos;
 
+import static org.apache.pdfbox.input.source.SeekableSources.inMemorySeekableSourceFrom;
+import static org.apache.pdfbox.input.source.SeekableSources.inputStreamFrom;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
@@ -79,7 +82,7 @@ public class COSStream extends COSDictionary implements Closeable
     {
         if (existing != null)
         {
-            return existing.get();
+            return inputStreamFrom(existing.get());
         }
         if (getFilters() != null)
         {
@@ -90,6 +93,27 @@ public class COSStream extends COSDictionary implements Closeable
             return new MyByteArrayInputStream(filtered);
         }
         return new MyByteArrayInputStream(unfiltered);
+    }
+
+    /**
+     * @return the (encoded) {@link SeekableSource} with all of the filters applied.
+     * @throws IOException when encoding/decoding causes an exception
+     */
+    public SeekableSource getFilteredSource() throws IOException
+    {
+        if (existing != null)
+        {
+            return existing.get();
+        }
+        if (getFilters() != null)
+        {
+            if (filtered == null)
+            {
+                doEncode();
+            }
+            return inMemorySeekableSourceFrom(filtered);
+        }
+        return inMemorySeekableSourceFrom(unfiltered);
     }
 
     /**
@@ -128,6 +152,27 @@ public class COSStream extends COSDictionary implements Closeable
             return new MyByteArrayInputStream(unfiltered);
         }
         return getStreamToDecode();
+    }
+
+    /**
+     * @return the (decoded) {@link SeekableSource} with all of the filters applied.
+     * @throws IOException when encoding/decoding causes an exception
+     */
+    public SeekableSource getUnfilteredSource() throws IOException
+    {
+        if (getFilters() != null)
+        {
+            if (unfiltered == null)
+            {
+                doDecode();
+            }
+            return inMemorySeekableSourceFrom(unfiltered);
+        }
+        if (existing != null)
+        {
+            return existing.get();
+        }
+        return inMemorySeekableSourceFrom(filtered);
     }
 
     /**
@@ -207,7 +252,7 @@ public class COSStream extends COSDictionary implements Closeable
     {
         if (existing != null)
         {
-            return existing.get();
+            return inputStreamFrom(existing.get());
         }
         return new MyByteArrayInputStream(filtered);
     }
@@ -428,7 +473,7 @@ public class COSStream extends COSDictionary implements Closeable
         private long startingPosition;
         private long length;
 
-        private InputStream view;
+        private SeekableSource view;
 
         public LazySeekableSourceViewHolder(SeekableSource source, long startingPosition,
                 long length)
@@ -438,7 +483,7 @@ public class COSStream extends COSDictionary implements Closeable
             this.length = length;
         }
 
-        InputStream get() throws IOException
+        SeekableSource get() throws IOException
         {
             SeekableSource source = Optional
                     .ofNullable(this.sourceRef.get())

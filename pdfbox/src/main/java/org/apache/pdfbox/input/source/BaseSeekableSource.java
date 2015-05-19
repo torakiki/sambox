@@ -56,6 +56,14 @@ public abstract class BaseSeekableSource implements SeekableSource
         this.open = false;
     }
 
+    protected void requireOpen() throws IOException
+    {
+        if (!this.open)
+        {
+            throw new IOException("The source is closed");
+        }
+    }
+
     /**
      * @return the unique id for this source
      */

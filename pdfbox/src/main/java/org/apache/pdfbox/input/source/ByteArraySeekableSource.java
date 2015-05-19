@@ -20,7 +20,6 @@ import static java.util.Objects.requireNonNull;
 import static org.apache.pdfbox.util.RequireUtils.requireArg;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Optional;
 import java.util.UUID;
@@ -31,7 +30,7 @@ import java.util.UUID;
  * @author Andrea Vacondio
  *
  */
-public class ByteArraySeekableSource  extends BaseSeekableSource
+public class ByteArraySeekableSource extends BaseSeekableSource
 {
     private byte[] bytes;
     private long position;
@@ -64,8 +63,9 @@ public class ByteArraySeekableSource  extends BaseSeekableSource
     }
 
     @Override
-    public int read(ByteBuffer dst)
+    public int read(ByteBuffer dst) throws IOException
     {
+        requireOpen();
         if (position < size())
         {
             int toCopy = (int) Math.min(dst.remaining(), size() - position);
@@ -77,8 +77,9 @@ public class ByteArraySeekableSource  extends BaseSeekableSource
     }
 
     @Override
-    public int read()
+    public int read() throws IOException
     {
+        requireOpen();
         if (position < size())
         {
             return bytes[(int) position++] & 0xff;
@@ -94,10 +95,10 @@ public class ByteArraySeekableSource  extends BaseSeekableSource
     }
 
     @Override
-    public InputStream view(long startingPosition, long length)
+    public SeekableSource view(long startingPosition, long length) throws IOException
     {
-        return new SeekableSourceViewInputStream(new ByteArraySeekableSource(bytes),
-                startingPosition, length);
+        requireOpen();
+        return new SeekableSourceView(new ByteArraySeekableSource(bytes), startingPosition, length);
     }
 
 }

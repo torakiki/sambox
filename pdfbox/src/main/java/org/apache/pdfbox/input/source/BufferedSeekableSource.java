@@ -19,7 +19,6 @@ package org.apache.pdfbox.input.source;
 import static org.apache.pdfbox.util.RequireUtils.requireArg;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
 
 import org.apache.pdfbox.PDFBox;
@@ -90,6 +89,7 @@ public class BufferedSeekableSource extends BaseSeekableSource
     @Override
     public int read(ByteBuffer dst) throws IOException
     {
+        requireOpen();
         buffer.limit(0);
         wrapped.position(position);
         int read = wrapped.read(dst);
@@ -103,6 +103,7 @@ public class BufferedSeekableSource extends BaseSeekableSource
     @Override
     public int read() throws IOException
     {
+        requireOpen();
         if (ensureBuffer() > 0)
         {
             position++;
@@ -123,8 +124,9 @@ public class BufferedSeekableSource extends BaseSeekableSource
     }
 
     @Override
-    public InputStream view(long startingPosition, long length) throws IOException
+    public SeekableSource view(long startingPosition, long length) throws IOException
     {
+        requireOpen();
         return wrapped.view(startingPosition, length);
     }
 }

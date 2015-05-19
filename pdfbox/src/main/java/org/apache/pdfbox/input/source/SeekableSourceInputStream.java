@@ -16,6 +16,8 @@
  */
 package org.apache.pdfbox.input.source;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -23,98 +25,63 @@ import java.nio.ByteBuffer;
 import org.apache.pdfbox.io.IOUtils;
 
 /**
+ * Bridge between {@link SeekableSources} and {@link InputStream}
+ * 
  * @author Andrea Vacondio
  *
  */
-class SeekableSourceViewInputStream extends InputStream
+class SeekableSourceInputStream extends InputStream
 {
-    private long startingPosition;
-    private long length;
-    private long currentPosition;
     private SeekableSource wrapped;
 
-    SeekableSourceViewInputStream(SeekableSource wrapped, long startingPosition, long length)
+    SeekableSourceInputStream(SeekableSource wrapped)
     {
-        this.startingPosition = startingPosition;
-        this.currentPosition = 0;
-        this.length = length;
+        requireNonNull(wrapped);
         this.wrapped = wrapped;
     }
 
     @Override
     public int read() throws IOException
     {
-        if (available() > 0)
-        {
-            getSource().position(startingPosition + currentPosition);
-            currentPosition++;
-            return getSource().read();
-        }
-        return -1;
+        return getSource().read();
     }
 
     @Override
     public int read(byte[] b) throws IOException
     {
-        if (available() > 0)
-        {
-            getSource().position(startingPosition + currentPosition);
-            int read = getSource().read(ByteBuffer.wrap(b, 0, Math.min(b.length, available())));
-            if (read > 0)
-            {
-                currentPosition += read;
-                return read;
-            }
-        }
-        return -1;
+        return getSource().read(ByteBuffer.wrap(b, 0, Math.min(b.length, available())));
     }
 
     @Override
     public int read(byte[] b, int offset, int length) throws IOException
     {
-        if (available() > 0)
-        {
-            getSource().position(startingPosition + currentPosition);
-            int read = getSource().read(
-                    ByteBuffer.wrap(b, offset, Math.min(b.length - offset, available())));
-            if (read > 0)
-            {
-                currentPosition += read;
-                return read;
-            }
-        }
-        return -1;
+        return getSource().read(
+                ByteBuffer.wrap(b, offset, Math.min(b.length - offset, available())));
+
     }
 
     @Override
-    public int available()
+    public int available() throws IOException
     {
-        return (int) (length - currentPosition);
+        return (int) (getSource().size() - getSource().position());
     }
 
     @Override
-    public long skip(long n)
+    public long skip(long offset) throws IOException
     {
-        long skipped = Math.min(n, available());
-        currentPosition += skipped;
-        return skipped;
-    }
-
-    public void seek(long newOffset) throws IOException
-    {
-        getSource().position(startingPosition + newOffset);
+        long start = getSource().position();
+        return getSource().forward(offset).position() - start;
     }
 
     public long getLength()
     {
-        return length;
+        return getSource().size();
     }
 
     @Override
     public void close() throws IOException
     {
         IOUtils.close(wrapped);
-        this.currentPosition = 0;
     }
 
     private SeekableSource getSource()

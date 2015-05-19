@@ -20,7 +20,6 @@ import static org.apache.pdfbox.util.RequireUtils.requireArg;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -100,8 +99,9 @@ public class MemoryMappedSeekableSource extends BaseSeekableSource
     }
 
     @Override
-    public int read(ByteBuffer dst)
+    public int read(ByteBuffer dst) throws IOException
     {
+        requireOpen();
         int zeroBasedPagesNumber = (int) (position() / PAGE_SIZE);
         ByteBuffer page = pages.get(zeroBasedPagesNumber);
         int relativePosition = (int) (position() - (zeroBasedPagesNumber * PAGE_SIZE));
@@ -142,8 +142,9 @@ public class MemoryMappedSeekableSource extends BaseSeekableSource
     }
 
     @Override
-    public int read()
+    public int read() throws IOException
     {
+        requireOpen();
         int zeroBasedPagesNumber = (int) (position() / PAGE_SIZE);
         ByteBuffer page = pages.get(zeroBasedPagesNumber);
         int relativePosition = (int) (position() - (zeroBasedPagesNumber * PAGE_SIZE));
@@ -163,10 +164,11 @@ public class MemoryMappedSeekableSource extends BaseSeekableSource
     }
 
     @Override
-    public InputStream view(long startingPosition, long length)
+    public SeekableSource view(long startingPosition, long length) throws IOException
     {
-        return new SeekableSourceViewInputStream(new MemoryMappedSeekableSource(this),
-                startingPosition, length);
+        requireOpen();
+        return new SeekableSourceView(new MemoryMappedSeekableSource(this), startingPosition,
+                length);
     }
 
 }

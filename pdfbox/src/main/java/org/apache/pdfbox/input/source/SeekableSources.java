@@ -74,8 +74,21 @@ public final class SeekableSources
     }
 
     /**
+     * Factory method to create a {@link SeekableSource} from a byte array.
+     * 
+     * @param bytes
+     * @return a {@link SeekableSource} wrapping the given byte array.
+     * @throws IOException
+     */
+    public static SeekableSource inMemorySeekableSourceFrom(byte[] bytes)
+    {
+        requireNonNull(bytes);
+        return new ByteArraySeekableSource(bytes);
+    }
+
+    /**
      * Factory method to create a {@link SeekableSource} from a {@link InputStream}. The whole stream is copied to a
-     * temporary file,
+     * temporary file.
      * 
      * @param stream
      * @return a {@link SeekableSource} from the given stream.
@@ -96,5 +109,17 @@ public final class SeekableSources
                 Files.deleteIfExists(temp);
             }
         });
+    }
+
+    /**
+     * Factory method to create an {@link InputStream} from a {@link SeekableSource}.
+     * 
+     * @param source the source
+     * @return the input stream wrapping the given {@link SeekableSource}
+     */
+    public static InputStream inputStreamFrom(SeekableSource source)
+    {
+        requireNonNull(source);
+        return new SeekableSourceInputStream(source);
     }
 }
