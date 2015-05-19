@@ -44,7 +44,7 @@ import org.apache.pdfbox.util.Charsets;
  * @author Andrea Vacondio
  *
  */
-public final class BaseCOSParser extends SourceReader
+final class BaseCOSParser extends SourceReader
 {
 
     private static final Log LOG = LogFactory.getLog(BaseCOSParser.class);

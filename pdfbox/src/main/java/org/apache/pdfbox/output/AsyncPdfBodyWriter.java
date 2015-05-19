@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.logging.Log;
@@ -36,7 +37,14 @@ class AsyncPdfBodyWriter extends AbstractPdfBodyWriter
 {
     private static final Log LOG = LogFactory.getLog(AsyncPdfBodyWriter.class);
 
-    private ExecutorService executor = Executors.newSingleThreadExecutor();
+    private ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactory()
+    {
+        @Override
+        public Thread newThread(Runnable target)
+        {
+            return new Thread(null, target, "pdf-writer-thread", 0);
+        }
+    });
     private AtomicReference<IOException> executionException = new AtomicReference<>();
     private PDFWriter writer;
 
