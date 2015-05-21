@@ -21,6 +21,7 @@ import static org.apache.pdfbox.cos.DirectCOSObject.asDirectObject;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSName;
@@ -44,7 +45,8 @@ public class DefaultPDFWriter implements Closeable
         this.document = document;
     }
 
-    public void writeTo(CountingWritableByteChannel channel) throws IOException
+    public void writeTo(CountingWritableByteChannel channel, WriteOption... options)
+            throws IOException
     {
         if (document.getEncryption() != null)
         {
@@ -64,8 +66,15 @@ public class DefaultPDFWriter implements Closeable
         writer = new PDFWriter(channel);
         writer.writeHeader(document.getDocument().getHeaderVersion());
         writer.writeBody(document.getDocument());
-        long startxref = writer.writeXrefTable();
-        writer.writeTrailer(document.getDocument().getTrailer(), startxref);
+        if (Arrays.asList(options).contains(WriteOption.XREF_STREAM))
+        {
+            writer.writeXrefStream(document.getDocument().getTrailer());
+        }
+        else
+        {
+            long startxref = writer.writeXrefTable();
+            writer.writeTrailer(document.getDocument().getTrailer(), startxref);
+        }
     }
 
     @Override

@@ -112,7 +112,6 @@ class XrefStreamParser
                 Long objectId = objectIds.next();
                 byte[] currLine = new byte[lineSize];
                 stream.read(currLine);
-
                 int type = 0;
                 int i = 0;
                 /*
@@ -142,7 +141,7 @@ class XrefStreamParser
                     break;
                 case 2:
                     parser.provider().addEntry(
-                            CompressedXrefEntry.compressedEntry(objectId, field1));
+                            CompressedXrefEntry.compressedEntry(objectId, field1, field2));
                     break;
                 default:
                     break;

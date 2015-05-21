@@ -19,7 +19,6 @@ package org.apache.pdfbox.output;
 import static java.util.Objects.requireNonNull;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
@@ -84,13 +83,17 @@ public class CountingWritableByteChannel implements WritableByteChannel
         return new CountingWritableByteChannel(Channels.newChannel(stream));
     }
 
-    public static CountingWritableByteChannel from(File file) throws FileNotFoundException
+    public static CountingWritableByteChannel from(File file) throws IOException
     {
-        return new CountingWritableByteChannel(new RandomAccessFile(file, "rw").getChannel());
+        RandomAccessFile raf = new RandomAccessFile(file, "rw");
+        raf.setLength(0);
+        return new CountingWritableByteChannel(raf.getChannel());
     }
 
-    public static CountingWritableByteChannel from(String file) throws FileNotFoundException
+    public static CountingWritableByteChannel from(String file) throws IOException
     {
-        return new CountingWritableByteChannel(new RandomAccessFile(file, "rw").getChannel());
+        RandomAccessFile raf = new RandomAccessFile(file, "rw");
+        raf.setLength(0);
+        return new CountingWritableByteChannel(raf.getChannel());
     }
 }

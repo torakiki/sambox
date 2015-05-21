@@ -28,13 +28,15 @@ import static org.apache.pdfbox.util.RequireUtils.requireArg;
 public final class CompressedXrefEntry extends XrefEntry
 {
     private long objectStreamNumber;
+    private long index;
 
     private CompressedXrefEntry(XrefType type, long objectNumber, long byteOffset,
-            int generationNumber, long objectStreamNumber)
+            int generationNumber, long objectStreamNumber, long index)
     {
         super(type, objectNumber, byteOffset, generationNumber);
         requireArg(objectStreamNumber >= 0, "Containing object stream number cannot be negative");
         this.objectStreamNumber = objectStreamNumber;
+        this.index = index;
     }
 
     /**
@@ -46,21 +48,34 @@ public final class CompressedXrefEntry extends XrefEntry
     }
 
     @Override
+    public byte[] toXrefStreamEntry(int secondFieldLength, int thirdFieldLength)
+    {
+        byte[] retVal = new byte[1 + secondFieldLength + thirdFieldLength];
+        retVal[0] = (byte) 2;
+        copyBytesTo(getObjectStreamNumber(), secondFieldLength, retVal, 1);
+        copyBytesTo(index, thirdFieldLength, retVal, 1 + secondFieldLength);
+        return retVal;
+    }
+
+    @Override
     public String toString()
     {
         return String.format("%s offset=%d objectStreamNumber=%d, %s", getType().toString(),
                 getByteOffset(), objectStreamNumber, key().toString());
     }
+
     /**
      * Factory method for an entry in the xref stream representing a compressed object in an object stream
      * 
      * @param objectNumber
      * @param objectStreamNumber The object number of the object stream in which this object is stored.
+     * @param index The index of this object within the object stream.
      * @return the newly created instance
      */
-    public static CompressedXrefEntry compressedEntry(long objectNumber, long objectStreamNumber)
+    public static CompressedXrefEntry compressedEntry(long objectNumber, long objectStreamNumber,
+            long index)
     {
         return new CompressedXrefEntry(XrefType.COMPRESSED, objectNumber, UNKNOWN_OFFSET, 0,
-                objectStreamNumber);
+                objectStreamNumber, index);
     }
 }

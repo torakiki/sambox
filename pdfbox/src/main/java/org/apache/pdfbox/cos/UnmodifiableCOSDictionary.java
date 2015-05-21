@@ -27,8 +27,7 @@ final class UnmodifiableCOSDictionary extends COSDictionary
 {
     UnmodifiableCOSDictionary(COSDictionary dict)
     {
-        super();
-        super.addAll(dict);
+        super(dict);
     }
 
     @Override

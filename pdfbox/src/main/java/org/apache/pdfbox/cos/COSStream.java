@@ -441,16 +441,10 @@ public class COSStream extends COSDictionary implements Closeable
         }
 
         @Override
-        public byte toByteArray()[]
-        {
-            return this.buf;
-        }
-
-        @Override
         public void close() throws IOException
         {
             super.close();
-            onClose.ifPresent(c -> c.accept(buf));
+            onClose.ifPresent(c -> c.accept(toByteArray()));
         }
     }
 

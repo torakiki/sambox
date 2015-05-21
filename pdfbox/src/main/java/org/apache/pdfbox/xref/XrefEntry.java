@@ -116,7 +116,38 @@ public class XrefEntry
             throw new IllegalArgumentException(
                     "Only in_use and free entries can be written to an xref table");
         }
+    }
 
+    /**
+     * Creates Cross-reference stream data for this entry as defined in Chap 7.5.8.3 of PDF32000-1:2008, table 18.
+     * 
+     * @param secondFieldLength length of the second field
+     * @param thirdFieldLength length of the second field
+     * @return an entry corresponding to this xref entry to be used in the xref stream.
+     */
+    public byte[] toXrefStreamEntry(int secondFieldLength, int thirdFieldLength)
+    {
+        byte[] retVal = new byte[1 + secondFieldLength + thirdFieldLength];
+        if (type == XrefType.FREE)
+        {
+            retVal[0] = (byte) 0;
+            copyBytesTo(key.getNumber(), secondFieldLength, retVal, 1);
+            copyBytesTo(key.getGeneration(), thirdFieldLength, retVal, 1 + secondFieldLength);
+            return retVal;
+        }
+        retVal[0] = (byte) 1;
+        copyBytesTo(byteOffset, secondFieldLength, retVal, 1);
+        copyBytesTo(key.getGeneration(), thirdFieldLength, retVal, 1 + secondFieldLength);
+        return retVal;
+    }
+
+    protected void copyBytesTo(long data, int length, byte[] destination, int destinationIndex)
+    {
+        for (int i = 0; i < length; i++)
+        {
+            destination[length + destinationIndex - i - 1] = (byte) (data & 0xFF);
+            data >>= 8;
+        }
     }
 
     /**

@@ -44,6 +44,7 @@ import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.output.CountingWritableByteChannel;
 import org.apache.pdfbox.output.DefaultPDFWriter;
+import org.apache.pdfbox.output.WriteOption;
 import org.apache.pdfbox.pdmodel.common.PDStream;
 import org.apache.pdfbox.pdmodel.encryption.AccessPermission;
 import org.apache.pdfbox.pdmodel.encryption.PDEncryption;
@@ -274,7 +275,6 @@ public class PDDocument implements Closeable
         return fontsToSubset;
     }
 
-
     /**
      * @param pageIndex the page index
      * @return the page at the given zero based index.
@@ -419,27 +419,28 @@ public class PDDocument implements Closeable
         }
     }
 
-    public void writeTo(File file) throws IOException
+    public void writeTo(File file, WriteOption... options) throws IOException
     {
-        writeTo(from(file));
+        writeTo(from(file), options);
     }
 
-    public void writeTo(String filename) throws IOException
+    public void writeTo(String filename, WriteOption... options) throws IOException
     {
-        writeTo(from(filename));
+        writeTo(from(filename), options);
     }
 
-    public void writeTo(WritableByteChannel channel) throws IOException
+    public void writeTo(WritableByteChannel channel, WriteOption... options) throws IOException
     {
-        writeTo(from(channel));
+        writeTo(from(channel), options);
     }
 
-    public void writeTo(OutputStream out) throws IOException
+    public void writeTo(OutputStream out, WriteOption... options) throws IOException
     {
-        writeTo(from(out));
+        writeTo(from(out), options);
     }
 
-    private void writeTo(CountingWritableByteChannel output) throws IOException
+    private void writeTo(CountingWritableByteChannel output, WriteOption... options)
+            throws IOException
     {
         for (PDFont font : fontsToSubset)
         {
@@ -449,7 +450,7 @@ public class PDDocument implements Closeable
 
         try (DefaultPDFWriter writer = new DefaultPDFWriter(this))
         {
-            writer.writeTo(output);
+            writer.writeTo(output, options);
         }
     }
 }

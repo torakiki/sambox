@@ -148,7 +148,7 @@ class COSWriter extends DestinationWriter implements COSVisitor
         IOUtils.close(value);
         write(CRLF);
         write(ENDSTREAM);
-        write(CRLF);
+        writeEOL();
     }
 
     @Override
