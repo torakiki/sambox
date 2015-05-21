@@ -53,7 +53,7 @@ class XrefStream extends COSStream
         setName(COSName.TYPE, COSName.XREF.getName());
         setLong(COSName.SIZE, entries.lastKey() + 1);
         setItem(COSName.INDEX, asDirectObject(new COSArray(COSInteger.get(entries.firstKey()),
-                COSInteger.get(entries.size()))));
+                COSInteger.get(entries.lastKey() - entries.firstKey() + 1))));
         int secondFieldLength = sizeOf(entries.lastEntry().getValue().getByteOffset());
         setItem(COSName.W,
                 asDirectObject(new COSArray(COSInteger.get(1), COSInteger.get(secondFieldLength),
