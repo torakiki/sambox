@@ -22,6 +22,7 @@ import static org.apache.pdfbox.cos.DirectCOSObject.asDirectObject;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSName;
@@ -65,8 +66,26 @@ public class DefaultPDFWriter implements Closeable
                 .setItem(COSName.ID, asDirectObject(new COSArray(id, id)));
         writer = new PDFWriter(channel);
         writer.writeHeader(document.getDocument().getHeaderVersion());
-        writer.writeBody(document.getDocument());
-        if (Arrays.asList(options).contains(WriteOption.XREF_STREAM))
+        List<WriteOption> opts = Arrays.asList(options);
+        writeBody(opts);
+        writeXref(opts);
+    }
+
+    private void writeBody(List<WriteOption> opts) throws IOException
+    {
+        if (opts.contains(WriteOption.SYNC_BODY_WRITE))
+        {
+            writer.writeBodySync(document.getDocument());
+        }
+        else
+        {
+            writer.writeBodyAsync(document.getDocument());
+        }
+    }
+
+    private void writeXref(List<WriteOption> opts) throws IOException
+    {
+        if (opts.contains(WriteOption.XREF_STREAM))
         {
             writer.writeXrefStream(document.getDocument().getTrailer());
         }

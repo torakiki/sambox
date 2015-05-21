@@ -22,5 +22,5 @@ package org.apache.pdfbox.output;
  */
 public enum WriteOption
 {
-    XREF_STREAM;
+    XREF_STREAM, SYNC_BODY_WRITE;
 }

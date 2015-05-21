@@ -28,6 +28,7 @@ import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.IndirectCOSObjectReference;
+import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.util.Charsets;
 import org.apache.pdfbox.xref.XrefEntry;
 
@@ -88,12 +89,26 @@ class PDFWriter extends COSWriter
         LOG.trace("Written object " + object.xrefEntry());
     }
 
-    void writeBody(COSDocument document) throws IOException
+    void writeBodyAsync(COSDocument document) throws IOException
     {
-        LOG.debug("Writing body");
-        try (AbstractPdfBodyWriter bodyWriter = new AsyncPdfBodyWriter(this))
+        writeBody(document, new AsyncPdfBodyWriter(this));
+    }
+
+    void writeBodySync(COSDocument document) throws IOException
+    {
+        writeBody(document, new SyncPdfBodyWriter(this));
+    }
+
+    void writeBody(COSDocument document, AbstractPdfBodyWriter bodyWriter) throws IOException
+    {
+        LOG.debug("Writing body using " + bodyWriter.getClass());
+        try
         {
             document.accept(bodyWriter);
+        }
+        finally
+        {
+            IOUtils.close(bodyWriter);
         }
     }
 
