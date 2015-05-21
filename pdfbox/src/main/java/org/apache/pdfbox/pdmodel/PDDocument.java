@@ -16,6 +16,7 @@
  */
 package org.apache.pdfbox.pdmodel;
 
+import static org.apache.pdfbox.cos.DirectCOSObject.asDirectObject;
 import static org.apache.pdfbox.output.CountingWritableByteChannel.from;
 import static org.apache.pdfbox.util.RequireUtils.requireNotBlank;
 
@@ -41,6 +42,7 @@ import org.apache.pdfbox.cos.COSInteger;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.cos.COSString;
+import org.apache.pdfbox.cos.DirectCOSObject;
 import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.output.CountingWritableByteChannel;
 import org.apache.pdfbox.output.DefaultPDFWriter;
@@ -69,6 +71,8 @@ public class PDDocument implements Closeable
     private PDDocumentCatalog documentCatalog;
     private PDEncryption encryption;
     private AccessPermission accessPermission;
+    private boolean open = true;
+    private OnClose onClose;
 
     // fonts to subset before saving
     private final Set<PDFont> fontsToSubset = new HashSet<>();
@@ -116,6 +120,7 @@ public class PDDocument implements Closeable
      */
     public void addPage(PDPage page)
     {
+        requireOpen();
         getPages().add(page);
     }
 
@@ -126,6 +131,7 @@ public class PDDocument implements Closeable
      */
     public void removePage(PDPage page)
     {
+        requireOpen();
         getPages().remove(page);
     }
 
@@ -136,6 +142,7 @@ public class PDDocument implements Closeable
      */
     public void removePage(int pageNumber)
     {
+        requireOpen();
         getPages().remove(pageNumber);
     }
 
@@ -152,6 +159,7 @@ public class PDDocument implements Closeable
      */
     public PDPage importPage(PDPage page) throws IOException
     {
+        requireOpen();
         PDPage importedPage = new PDPage(new COSDictionary(page.getCOSObject()));
         InputStream is = null;
         OutputStream os = null;
@@ -298,17 +306,6 @@ public class PDDocument implements Closeable
     }
 
     /**
-     * This will close the underlying COSDocument object.
-     * 
-     * @throws IOException If there is an error releasing resources.
-     */
-    @Override
-    public void close()
-    {
-        // TODO
-    }
-
-    /**
      * Protects the document with the protection policy pp. The document content will be really encrypted when it will
      * be saved. This method only marks the document for encryption.
      *
@@ -321,6 +318,7 @@ public class PDDocument implements Closeable
      */
     public void protect(ProtectionPolicy policy) throws IOException
     {
+        requireOpen();
         if (!isEncrypted())
         {
             encryption = new PDEncryption();
@@ -377,6 +375,7 @@ public class PDDocument implements Closeable
      */
     public void setVersion(String newVersion)
     {
+        requireOpen();
         requireNotBlank(newVersion, "Spec version cannot be blank");
         int compare = getVersion().compareTo(newVersion);
         if (compare > 0)
@@ -394,9 +393,28 @@ public class PDDocument implements Closeable
     }
 
     /**
-     * @return a newly generated file identifier as defined in the chap 14.4 PDF 32000-1:2008.
+     * Sets an action to be performed right before this {@link PDDocument} is closed.
+     * 
+     * @param onClose
      */
-    public COSString generateFileIdentifier()
+    public void setOnCloseAction(OnClose onClose)
+    {
+        this.onClose = onClose;
+    }
+
+    private void requireOpen() throws IllegalStateException
+    {
+        if (!this.open)
+        {
+            throw new IllegalStateException("The document is closed");
+        }
+    }
+
+    /**
+     * Generates file identifier as defined in the chap 14.4 PDF 32000-1:2008 and sets it as ID value of the document
+     * trailer.
+     */
+    private void generateFileIdentifier()
     {
         try
         {
@@ -411,7 +429,8 @@ public class PDDocument implements Closeable
                     });
             COSString retVal = COSString.newInstance(md5.digest());
             retVal.setForceHexForm(true);
-            return retVal;
+            DirectCOSObject id = asDirectObject(retVal);
+            getDocument().getTrailer().setItem(COSName.ID, asDirectObject(new COSArray(id, id)));
         }
         catch (NoSuchAlgorithmException e)
         {
@@ -442,15 +461,43 @@ public class PDDocument implements Closeable
     private void writeTo(CountingWritableByteChannel output, WriteOption... options)
             throws IOException
     {
+        requireOpen();
         for (PDFont font : fontsToSubset)
         {
             font.subset();
         }
         fontsToSubset.clear();
-
+        generateFileIdentifier();
         try (DefaultPDFWriter writer = new DefaultPDFWriter(this))
         {
             writer.writeTo(output, options);
         }
+    }
+
+    @Override
+    public void close() throws IOException
+    {
+        if (onClose != null)
+        {
+            onClose.onClose();
+        }
+        this.open = false;
+    }
+
+    /**
+     * Action to be performed before the {@link PDDocument} is close
+     * 
+     * @author Andrea Vacondio
+     *
+     */
+    @FunctionalInterface
+    public static interface OnClose
+    {
+        /**
+         * Sets an action to be performed right before this {@link PDDocument} is closed.
+         * 
+         * @param onClose
+         */
+        void onClose() throws IOException;
     }
 }

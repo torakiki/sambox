@@ -210,4 +210,10 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
         }
         IOUtils.close(stream);
     }
+
+    @Override
+    public void close()
+    {
+        store.clear();
+    }
 }

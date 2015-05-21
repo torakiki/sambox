@@ -444,6 +444,7 @@ public class COSStream extends COSDictionary implements Closeable
         public void close() throws IOException
         {
             super.close();
+            // TODO find a way to avoid copying the array
             onClose.ifPresent(c -> c.accept(toByteArray()));
         }
     }

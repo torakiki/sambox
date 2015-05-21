@@ -161,7 +161,7 @@ abstract class AbstractPdfBodyWriter implements COSVisitor
                 return newRef;
             });
         }
-        throw new IllegalArgumentException("Idirect reference is not supperted for type "
+        throw new IllegalArgumentException("Indirect reference is not supperted for type "
                 + item.getClass());
     }
 

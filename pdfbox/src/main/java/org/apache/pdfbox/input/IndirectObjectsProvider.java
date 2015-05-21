@@ -16,6 +16,8 @@
  */
 package org.apache.pdfbox.input;
 
+import java.io.Closeable;
+
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSObjectKey;
 import org.apache.pdfbox.pdmodel.encryption.SecurityHandler;
@@ -31,7 +33,7 @@ import org.apache.pdfbox.xref.XrefEntry;
  * @author Andrea Vacondio
  *
  */
-interface IndirectObjectsProvider
+interface IndirectObjectsProvider extends Closeable
 {
 
     /**

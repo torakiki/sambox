@@ -688,8 +688,8 @@ class SourceReader implements Closeable
     }
 
     @Override
-    public void close()
+    public void close() throws IOException
     {
-        IOUtils.closeQuietly(source);
+        IOUtils.close(source);
     }
 }

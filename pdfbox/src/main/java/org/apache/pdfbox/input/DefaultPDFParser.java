@@ -26,6 +26,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.input.source.SeekableSource;
+import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.encryption.DecryptionMaterial;
 import org.apache.pdfbox.pdmodel.encryption.PDEncryption;
@@ -54,6 +55,22 @@ class DefaultPDFParser
     {
         requireNonNull(source);
         BaseCOSParser parser = new BaseCOSParser(source);
+        PDDocument document = doParse(decryptionMaterial, parser);
+        document.setOnCloseAction(() -> {
+            IOUtils.close(parser);
+        });
+        return document;
+    }
+
+    /**
+     * @param decryptionMaterial
+     * @param parser
+     * @return
+     * @throws IOException
+     */
+    private static PDDocument doParse(DecryptionMaterial decryptionMaterial, BaseCOSParser parser)
+            throws IOException
+    {
         String headerVersion = readHeader(parser);
         XrefParser xrefParser = new XrefParser(parser);
         xrefParser.parse();

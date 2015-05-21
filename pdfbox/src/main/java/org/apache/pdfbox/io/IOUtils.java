@@ -25,11 +25,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * This class contains various I/O-related methods.
  */
 public final class IOUtils
 {
+    private static final Log LOG = LogFactory.getLog(IOUtils.class);
     private static final int STREAMCOPYBUFLEN = 8192;
 
     // TODO PDFBox should really use Apache Commons IO.
@@ -163,7 +167,7 @@ public final class IOUtils
         }
         catch (IOException ioe)
         {
-            // ignore
+            LOG.info("An error occured while closing a Closeable resource", ioe);
         }
     }
 }

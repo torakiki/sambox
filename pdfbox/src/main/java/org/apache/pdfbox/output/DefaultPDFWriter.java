@@ -17,16 +17,12 @@
 package org.apache.pdfbox.output;
 
 import static java.util.Objects.requireNonNull;
-import static org.apache.pdfbox.cos.DirectCOSObject.asDirectObject;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.pdfbox.cos.COSArray;
-import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.cos.DirectCOSObject;
 import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.encryption.SecurityHandler;
@@ -61,9 +57,6 @@ public class DefaultPDFWriter implements Closeable
             }
             securityHandler.prepareDocumentForEncryption(document);
         }
-        DirectCOSObject id = asDirectObject(document.generateFileIdentifier());
-        document.getDocument().getTrailer()
-                .setItem(COSName.ID, asDirectObject(new COSArray(id, id)));
         writer = new PDFWriter(channel);
         writer.writeHeader(document.getDocument().getHeaderVersion());
         List<WriteOption> opts = Arrays.asList(options);
