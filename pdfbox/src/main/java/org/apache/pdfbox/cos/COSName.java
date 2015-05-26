@@ -71,6 +71,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName BASE_STATE = newCommonInstance("BaseState");
     public static final COSName BBOX = newCommonInstance("BBox");
     public static final COSName BC = newCommonInstance("BC");
+    public static final COSName BE = newCommonInstance("BE");
     public static final COSName BEFORE = newCommonInstance("Before");
     public static final COSName BG = newCommonInstance("BG");
     public static final COSName BITS_PER_COMPONENT = newCommonInstance("BitsPerComponent");
@@ -94,6 +95,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName CA_NS = newCommonInstance("ca");
     public static final COSName CALGRAY = newCommonInstance("CalGray");
     public static final COSName CALRGB = newCommonInstance("CalRGB");
+    public static final COSName CAP = newCommonInstance("Cap");
     public static final COSName CAP_HEIGHT = newCommonInstance("CapHeight");
     public static final COSName CATALOG = newCommonInstance("Catalog");
     public static final COSName CCITTFAX_DECODE = newCommonInstance("CCITTFaxDecode");
@@ -115,6 +117,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName CMAP = newCommonInstance("CMap");
     public static final COSName CMAPNAME = newCommonInstance("CMapName");
     public static final COSName CMYK = newCommonInstance("CMYK");
+    public static final COSName CO = newCommonInstance("CO");
     public static final COSName COLOR_BURN = newCommonInstance("ColorBurn");
     public static final COSName COLOR_DODGE = newCommonInstance("ColorDodge");
     public static final COSName COLORANTS = newCommonInstance("Colorants");
@@ -127,6 +130,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName CONTENTS = newCommonInstance("Contents");
     public static final COSName COORDS = newCommonInstance("Coords");
     public static final COSName COUNT = newCommonInstance("Count");
+    public static final COSName CP = newCommonInstance("CP");
     public static final COSName CREATION_DATE = newCommonInstance("CreationDate");
     public static final COSName CREATOR = newCommonInstance("Creator");
     public static final COSName CROP_BOX = newCommonInstance("CropBox");
@@ -265,7 +269,9 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName INDEX = newCommonInstance("Index");
     public static final COSName INDEXED = newCommonInstance("Indexed");
     public static final COSName INFO = newCommonInstance("Info");
+    public static final COSName INKLIST = newCommonInstance("InkList");
     public static final COSName INTERPOLATE = newCommonInstance("Interpolate");
+    public static final COSName IT = newCommonInstance("IT");
     public static final COSName ITALIC_ANGLE = newCommonInstance("ItalicAngle");
     // J
     public static final COSName JAVA_SCRIPT = newCommonInstance("JavaScript");
@@ -284,6 +290,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName LAST_CHAR = newCommonInstance("LastChar");
     public static final COSName LAST_MODIFIED = newCommonInstance("LastModified");
     public static final COSName LC = newCommonInstance("LC");
+    public static final COSName LE = newCommonInstance("LE");
     public static final COSName LEADING = newCommonInstance("Leading");
     public static final COSName LEGAL_ATTESTATION = newCommonInstance("LegalAttestation");
     public static final COSName LENGTH = newCommonInstance("Length");
@@ -292,6 +299,9 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName LIGHTEN = newCommonInstance("Lighten");
     public static final COSName LIMITS = newCommonInstance("Limits");
     public static final COSName LJ = newCommonInstance("LJ");
+    public static final COSName LL = newCommonInstance("LL");
+    public static final COSName LLE = newCommonInstance("LLE");
+    public static final COSName LLO = newCommonInstance("LLO");
     public static final COSName LOCATION = newCommonInstance("Location");
     public static final COSName LUMINOSITY = newCommonInstance("Luminosity");
     public static final COSName LW = newCommonInstance("LW");
@@ -389,6 +399,8 @@ public final class COSName extends COSBase implements Comparable<COSName>
     // R
     public static final COSName R = newCommonInstance("R");
     public static final COSName RANGE = newCommonInstance("Range");
+    public static final COSName RC = newCommonInstance("RC");
+    public static final COSName RD = newCommonInstance("RD");
     public static final COSName REASON = newCommonInstance("Reason");
     public static final COSName REASONS = newCommonInstance("Reasons");
     public static final COSName RECIPIENTS = newCommonInstance("Recipients");
@@ -425,6 +437,8 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName SS = newCommonInstance("SS");
     public static final COSName ST = newCommonInstance("St");
     public static final COSName STANDARD_ENCODING = newCommonInstance("StandardEncoding");
+    public static final COSName STATE = newCommonInstance("State");
+    public static final COSName STATE_MODEL = newCommonInstance("StateModel");
     public static final COSName STATUS = newCommonInstance("Status");
     public static final COSName STD_CF = newCommonInstance("StdCF");
     public static final COSName STEM_H = newCommonInstance("StemH");
@@ -480,6 +494,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName V = newCommonInstance("V");
     public static final COSName VERISIGN_PPKVS = newCommonInstance("VeriSign.PPKVS");
     public static final COSName VERSION = newCommonInstance("Version");
+    public static final COSName VERTICES = newCommonInstance("Vertices");
     public static final COSName VERTICES_PER_ROW = newCommonInstance("VerticesPerRow");
     public static final COSName VIEW_AREA = newCommonInstance("ViewArea");
     public static final COSName VIEW_CLIP = newCommonInstance("ViewClip");

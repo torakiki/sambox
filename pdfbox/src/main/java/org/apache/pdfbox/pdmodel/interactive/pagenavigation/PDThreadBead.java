@@ -17,7 +17,6 @@
 package org.apache.pdfbox.pdmodel.interactive.pagenavigation;
 
 import org.apache.pdfbox.cos.COSArray;
-import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSObjectable;
@@ -33,7 +32,7 @@ public class PDThreadBead implements COSObjectable
 {
 
 
-    private COSDictionary bead;
+    private final COSDictionary bead;
 
     /**
      * Constructor that is used for a preexisting dictionary.
@@ -62,17 +61,8 @@ public class PDThreadBead implements COSObjectable
      *
      * @return The underlying info dictionary.
      */
-    public COSDictionary getDictionary()
-    {
-        return bead;
-    }
-
-    /**
-     * Convert this standard java object to a COS object.
-     *
-     * @return The cos object that matches this Java object.
-     */
-    public COSBase getCOSObject()
+    @Override
+    public COSDictionary getCOSObject()
     {
         return bead;
     }
@@ -121,7 +111,7 @@ public class PDThreadBead implements COSObjectable
      *
      * @param next The next bead.
      */
-    protected void setNextBead( PDThreadBead next )
+    protected final void setNextBead( PDThreadBead next )
     {
         bead.setItem( "N", next );
     }
@@ -142,7 +132,7 @@ public class PDThreadBead implements COSObjectable
      *
      * @param previous The previous bead.
      */
-    protected void setPreviousBead( PDThreadBead previous )
+    protected final void setPreviousBead( PDThreadBead previous )
     {
         bead.setItem( "V", previous );
     }

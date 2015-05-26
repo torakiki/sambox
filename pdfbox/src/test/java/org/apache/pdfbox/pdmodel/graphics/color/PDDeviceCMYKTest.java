@@ -14,37 +14,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.pdfbox.pdmodel.graphics.shading;
 
-import java.awt.Paint;
+package org.apache.pdfbox.pdmodel.graphics.color;
 
-import org.apache.pdfbox.cos.COSDictionary;
-import org.apache.pdfbox.util.Matrix;
+import java.io.IOException;
+import junit.framework.TestCase;
 
 /**
- * Resources for a radial shading.
+ * Test for power user creation of a custom default CMYK color space.
+ *
+ * @author John Hewson
  */
-public class PDShadingType3 extends PDShadingType2
+public class PDDeviceCMYKTest extends TestCase
 {
-    /**
-     * Constructor using the given shading dictionary.
-     *
-     * @param shadingDictionary the dictionary for this shading
-     */
-    public PDShadingType3(COSDictionary shadingDictionary)
+    public void testCMYK() throws IOException
     {
-        super(shadingDictionary);
+        PDDeviceCMYK.INSTANCE = new CustomDeviceCMYK();
     }
-
-    @Override
-    public int getShadingType()
+    
+    private static class CustomDeviceCMYK extends PDDeviceCMYK
     {
-        return PDShading.SHADING_TYPE3;
-    }
-
-    @Override
-    public Paint toPaint(Matrix matrix)
-    {
-        return new RadialShadingPaint(this, matrix);
+        protected CustomDeviceCMYK() throws IOException
+        {
+        }
     }
 }

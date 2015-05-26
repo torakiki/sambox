@@ -16,7 +16,6 @@
  */
 package org.apache.pdfbox.pdmodel.interactive.pagenavigation;
 
-import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSObjectable;
 import org.apache.pdfbox.pdmodel.PDDocumentInformation;
@@ -29,7 +28,6 @@ import org.apache.pdfbox.pdmodel.PDDocumentInformation;
 public class PDThread implements COSObjectable
 {
 
-
     private COSDictionary thread;
 
     /**
@@ -37,7 +35,7 @@ public class PDThread implements COSObjectable
      *
      * @param t The underlying dictionary.
      */
-    public PDThread( COSDictionary t )
+    public PDThread(COSDictionary t)
     {
         thread = t;
     }
@@ -49,7 +47,7 @@ public class PDThread implements COSObjectable
     public PDThread()
     {
         thread = new COSDictionary();
-        thread.setName( "Type", "Thread" );
+        thread.setName("Type", "Thread");
     }
 
     /**
@@ -57,17 +55,8 @@ public class PDThread implements COSObjectable
      *
      * @return The underlying info dictionary.
      */
-    public COSDictionary getDictionary()
-    {
-        return thread;
-    }
-
-    /**
-     * Convert this standard java object to a COS object.
-     *
-     * @return The cos object that matches this Java object.
-     */
-    public COSBase getCOSObject()
+    @Override
+    public COSDictionary getCOSObject()
     {
         return thread;
     }
@@ -80,10 +69,10 @@ public class PDThread implements COSObjectable
     public PDDocumentInformation getThreadInfo()
     {
         PDDocumentInformation retval = null;
-        COSDictionary info = (COSDictionary)thread.getDictionaryObject( "I" );
-        if( info != null )
+        COSDictionary info = (COSDictionary) thread.getDictionaryObject("I");
+        if (info != null)
         {
-            retval = new PDDocumentInformation( info );
+            retval = new PDDocumentInformation(info);
         }
 
         return retval;
@@ -94,43 +83,41 @@ public class PDThread implements COSObjectable
      *
      * @param info The info dictionary about this thread.
      */
-    public void setThreadInfo( PDDocumentInformation info )
+    public void setThreadInfo(PDDocumentInformation info)
     {
-        thread.setItem( "I", info );
+        thread.setItem("I", info);
     }
 
     /**
-     * Get the first bead in the thread, or null if it has not been set yet.  This
-     * is a required field for this object.
+     * Get the first bead in the thread, or null if it has not been set yet. This is a required field for this object.
      *
      * @return The first bead in the thread.
      */
     public PDThreadBead getFirstBead()
     {
         PDThreadBead retval = null;
-        COSDictionary bead = (COSDictionary)thread.getDictionaryObject( "F" );
-        if( bead != null )
+        COSDictionary bead = (COSDictionary) thread.getDictionaryObject("F");
+        if (bead != null)
         {
-            retval = new PDThreadBead( bead );
+            retval = new PDThreadBead(bead);
         }
 
         return retval;
     }
 
     /**
-     * This will set the first bead in the thread.  When this is set it will
-     * also set the thread property of the bead object.
+     * This will set the first bead in the thread. When this is set it will also set the thread property of the bead
+     * object.
      *
      * @param bead The first bead in the thread.
      */
-    public void setFirstBead( PDThreadBead bead )
+    public void setFirstBead(PDThreadBead bead)
     {
-        if( bead != null )
+        if (bead != null)
         {
-            bead.setThread( this );
+            bead.setThread(this);
         }
-        thread.setItem( "F", bead );
+        thread.setItem("F", bead);
     }
-
 
 }

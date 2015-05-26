@@ -43,7 +43,8 @@ abstract class TriangleBasedShadingContext extends ShadingContext implements Pai
     protected int bitsPerCoordinate;
     protected int bitsPerColorComponent;
     protected int numberOfColorComponents;
-    protected final boolean hasFunction;
+    
+    private final boolean hasFunction;
 
     // map of pixels within triangles to their RGB color
     private Map<Point, Integer> pixelTable;
@@ -58,25 +59,25 @@ abstract class TriangleBasedShadingContext extends ShadingContext implements Pai
      * @throws IOException if there is an error getting the color space or doing background color conversion.
      */
     TriangleBasedShadingContext(PDShading shading, ColorModel cm, AffineTransform xform,
-                                       Matrix matrix, Rectangle deviceBounds) throws IOException
+                                       Matrix matrix) throws IOException
     {
-        super(shading, cm, xform, matrix, deviceBounds);
+        super(shading, cm, xform, matrix);
         PDTriangleBasedShadingType triangleBasedShadingType = (PDTriangleBasedShadingType) shading;
         hasFunction = shading.getFunction() != null;
         bitsPerCoordinate = triangleBasedShadingType.getBitsPerCoordinate();
         LOG.debug("bitsPerCoordinate: " + (Math.pow(2, bitsPerCoordinate) - 1));
         bitsPerColorComponent = triangleBasedShadingType.getBitsPerComponent();
         LOG.debug("bitsPerColorComponent: " + bitsPerColorComponent);
-        numberOfColorComponents = hasFunction ? 1 : shadingColorSpace.getNumberOfComponents();
+        numberOfColorComponents = hasFunction ? 1 : getShadingColorSpace().getNumberOfComponents();
         LOG.debug("numberOfColorComponents: " + numberOfColorComponents);
     }
 
     /**
      * Creates the pixel table.
      */
-    protected final void createPixelTable() throws IOException
+    protected final void createPixelTable(Rectangle deviceBounds) throws IOException
     {
-        pixelTable = calcPixelTable();
+        pixelTable = calcPixelTable(deviceBounds);
     }
 
     /**
@@ -84,13 +85,13 @@ abstract class TriangleBasedShadingContext extends ShadingContext implements Pai
      *
      * @return a Hash table which contains all the points' positions and colors of one image
      */
-    abstract Map<Point, Integer> calcPixelTable() throws IOException;
+    abstract Map<Point, Integer> calcPixelTable(Rectangle deviceBounds) throws IOException;
 
     /**
-     * Get the points from the triangles, calculate their color and add  point-color mappings.
+     * Get the points from the triangles, calculate their color and add point-color mappings.
      */
-    protected void calcPixelTable(List<ShadedTriangle> triangleList, Map<Point, Integer> map)
-            throws IOException
+    protected void calcPixelTable(List<ShadedTriangle> triangleList, Map<Point, Integer> map,
+            Rectangle deviceBounds) throws IOException
     {
         for (ShadedTriangle tri : triangleList)
         {
@@ -133,7 +134,7 @@ abstract class TriangleBasedShadingContext extends ShadingContext implements Pai
     {
         if (hasFunction)
         {
-            values = shading.evalFunction(values);
+            values = getShading().evalFunction(values);
         }
         return convertToRGB(values);
     }
@@ -146,14 +147,13 @@ abstract class TriangleBasedShadingContext extends ShadingContext implements Pai
     @Override
     public final ColorModel getColorModel()
     {
-        return outputColorModel;
+        return super.getColorModel();
     }
 
     @Override
     public void dispose()
     {
-        outputColorModel = null;
-        shadingColorSpace = null;
+        super.dispose();
     }
 
     @Override
@@ -161,7 +161,7 @@ abstract class TriangleBasedShadingContext extends ShadingContext implements Pai
     {
         WritableRaster raster = getColorModel().createCompatibleWritableRaster(w, h);
         int[] data = new int[w * h * 4];
-        if (!isDataEmpty() || background != null)
+        if (!isDataEmpty() || getBackground() != null)
         {
             for (int row = 0; row < h; row++)
             {
@@ -185,11 +185,11 @@ abstract class TriangleBasedShadingContext extends ShadingContext implements Pai
                     }
                     else
                     {
-                        if (background == null)
+                        if (getBackground() == null)
                         {
                             continue;
                         }
-                        value = rgbBackground;
+                        value = getRgbBackground();
                     }
                     int index = (row * w + col) * 4;
                     data[index] = value & 255;

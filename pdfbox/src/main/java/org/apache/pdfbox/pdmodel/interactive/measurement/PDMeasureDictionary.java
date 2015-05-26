@@ -16,7 +16,6 @@
  */
 package org.apache.pdfbox.pdmodel.interactive.measurement;
 
-import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSObjectable;
@@ -32,7 +31,7 @@ public class PDMeasureDictionary implements COSObjectable
      */
     public static final String TYPE = "Measure";
 
-    private COSDictionary measureDictionary;
+    private final COSDictionary measureDictionary;
 
     /**
      * Constructor.
@@ -40,7 +39,7 @@ public class PDMeasureDictionary implements COSObjectable
     protected PDMeasureDictionary()
     {
         this.measureDictionary = new COSDictionary();
-        this.getDictionary().setName(COSName.TYPE, TYPE);
+        this.getCOSObject().setName(COSName.TYPE, TYPE);
     }
 
     /**
@@ -54,19 +53,12 @@ public class PDMeasureDictionary implements COSObjectable
     }
 
     /**
-     * {@inheritDoc}
-     */
-    public COSBase getCOSObject()
-    {
-        return this.measureDictionary;
-    }
-
-    /**
      * This will return the corresponding dictionary.
      * 
      * @return the measure dictionary
      */
-    public COSDictionary getDictionary()
+    @Override
+    public COSDictionary getCOSObject()
     {
         return this.measureDictionary;
     }
@@ -89,7 +81,7 @@ public class PDMeasureDictionary implements COSObjectable
 
     public String getSubtype()
     {
-        return this.getDictionary().getNameAsString(COSName.SUBTYPE,
+        return this.getCOSObject().getNameAsString(COSName.SUBTYPE,
                 PDRectlinearMeasureDictionary.SUBTYPE);
     }
 
@@ -99,7 +91,7 @@ public class PDMeasureDictionary implements COSObjectable
      */
     protected void setSubtype(String subtype)
     {
-        this.getDictionary().setName(COSName.SUBTYPE, subtype);
+        this.getCOSObject().setName(COSName.SUBTYPE, subtype);
     }
 
 }
