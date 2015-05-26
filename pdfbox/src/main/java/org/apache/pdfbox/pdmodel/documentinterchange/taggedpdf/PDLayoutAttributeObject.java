@@ -389,7 +389,7 @@ public class PDLayoutAttributeObject extends PDStandardAttributeObject
      *   <li>{@link #PLACEMENT_BEFORE},</li>
      *   <li>{@link #PLACEMENT_START},</li>
      *   <li>{@link #PLACEMENT_END}.</li>
-     * <ul>
+     * </ul>
      * 
      * @param placement the placement
      */
