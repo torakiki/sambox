@@ -19,11 +19,10 @@ package org.apache.pdfbox.examples;
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.pdfbox.input.DefaultPDFParser;
+import org.apache.pdfbox.input.PDFParser;
+import org.apache.pdfbox.input.source.SeekableSources;
+import org.apache.pdfbox.output.WriteOption;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
-import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.PDPageTree;
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
 import org.junit.Test;
 
@@ -33,41 +32,41 @@ import org.junit.Test;
  */
 public class TestParse
 {
-    private static final String FILEPATH = "/home/torakiki/Scaricati/Responsive Web Design by Example [eBook].pdf";
+    private static final String FILEPATH = "/home/torakiki/Scrivania/test_incremental_xref/Responsive_sambox3.pdf";
     private static final String ENC_FILEPATH = "/home/torakiki/repos/sejda/sejda-core/src/test/resources/pdf/enc_usr_own_same_pwd.pdf";
+
     @Test
     public void testParse() throws IOException
     {
         File file = new File(FILEPATH);
-        PDDocument document = DefaultPDFParser.parse(file);
-        document.writeTo("/home/torakiki/Scrivania/test_incremental_xref/Responsive_sambox.pdf");
+        try (PDDocument document = PDFParser.parse(SeekableSources.seekableSourceFrom(file)))
+        {
+            document.writeTo(
+                    "/home/torakiki/Scrivania/test_incremental_xref/Responsive_sambox5.pdf",
+                    WriteOption.XREF_STREAM, WriteOption.SYNC_BODY_WRITE);
+        }
+
     }
 
     @Test
     public void testParseEnc() throws IOException
     {
         File file = new File(ENC_FILEPATH);
-        PDDocument document = DefaultPDFParser.parse(file, "test");
-        print(document);
+        try (PDDocument document = PDFParser
+                .parse(SeekableSources.seekableSourceFrom(file), "test"))
+        {
+            document.writeTo("/home/torakiki/Scrivania/test_incremental_xref/enc_sambox.pdf");
+        }
     }
 
     @Test(expected = InvalidPasswordException.class)
     public void testWrongParseEnc() throws IOException
     {
         File file = new File(ENC_FILEPATH);
-        PDDocument document = DefaultPDFParser.parse(file, "banana");
-        print(document);
-    }
-
-    private void print(PDDocument document)
-    {
-        PDDocumentCatalog catalog = document.getDocumentCatalog();
-        System.out.println("Got catalog");
-        PDPageTree pages = catalog.getPages();
-        for (PDPage page : pages)
+        try (PDDocument document = PDFParser
+                .parse(SeekableSources.seekableSourceFrom(file), "test"))
         {
-            page.getCOSObject();
-            System.out.println(page.getMediaBox());
+            document.writeTo("/home/torakiki/Scrivania/test_incremental_xref/enc_sambox.pdf");
         }
     }
 
