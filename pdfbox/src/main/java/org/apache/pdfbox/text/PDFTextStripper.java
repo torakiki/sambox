@@ -33,6 +33,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Vector;
 import java.util.regex.Pattern;
+
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageTree;
@@ -703,7 +704,6 @@ public class PDFTextStripper extends PDFTextStreamEngine
                 if (startOfPage)
                 {
                     lastPosition.setParagraphStart();
-                    lastPosition.setLineStart();
                     lastLineStartPosition = lastPosition;
                     startOfPage = false;
                 }
@@ -1446,7 +1446,6 @@ public class PDFTextStripper extends PDFTextStreamEngine
             PositionWrapper lastPosition, PositionWrapper lastLineStartPosition,
             float maxHeightForLine) throws IOException
     {
-        current.setLineStart();
         isParagraphSeparation(current, lastPosition, lastLineStartPosition, maxHeightForLine);
         lastLineStartPosition = current;
         if (current.isParagraphStart())  
@@ -1959,9 +1958,7 @@ public class PDFTextStripper extends PDFTextStreamEngine
      */
     private static final class PositionWrapper
     {
-        private boolean isLineStart = false;
         private boolean isParagraphStart = false;
-        private boolean isPageBreak = false;
         private boolean isHangingIndent = false;
         private boolean isArticleStart = false;
 
@@ -1975,20 +1972,6 @@ public class PDFTextStripper extends PDFTextStreamEngine
         {
             return position;
         }
-
-        public boolean isLineStart()
-        {
-            return isLineStart;
-        }
-
-        /**
-         * Sets the isLineStart() flag to true.
-         */
-        public void setLineStart()
-        {
-            this.isLineStart = true;
-        }
-
 
         public boolean isParagraphStart()
         {
@@ -2016,19 +1999,6 @@ public class PDFTextStripper extends PDFTextStreamEngine
         public void setArticleStart()
         {
             this.isArticleStart = true;
-        }
-
-        public boolean isPageBreak()
-        {
-            return isPageBreak;
-        }
-
-        /**
-         * Sets the isPageBreak() flag to true.
-         */
-        public void setPageBreak()
-        {
-            this.isPageBreak = true;
         }
 
         public boolean isHangingIndent()
