@@ -16,10 +16,8 @@
  */
 package org.apache.pdfbox.pdmodel.interactive.action;
 
-import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSObjectable;
-
 /**
  * This class represents a page object's dictionary of actions
  * that occur due to events.
@@ -55,17 +53,7 @@ public class PDPageAdditionalActions implements COSObjectable
      * @return The cos object that matches this Java object.
      */
     @Override
-    public COSBase getCOSObject()
-    {
-        return actions;
-    }
-
-    /**
-     * Convert this standard java object to a COS object.
-     *
-     * @return The cos object that matches this Java object.
-     */
-    public COSDictionary getCOSDictionary()
+    public COSDictionary getCOSObject()
     {
         return actions;
     }

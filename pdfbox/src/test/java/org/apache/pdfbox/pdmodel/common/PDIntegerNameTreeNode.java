@@ -14,28 +14,48 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.pdfbox.pdmodel.common;
 
+import java.io.IOException;
 import org.apache.pdfbox.cos.COSBase;
+import org.apache.pdfbox.cos.COSDictionary;
+import org.apache.pdfbox.cos.COSInteger;
 
 /**
- * This is an interface to represent a PDModel object that holds two COS objects.
+ * todo: JavaDoc
  *
- * @author Ben Litchfield
+ * @author John Hewson
  */
-public interface DualCOSObjectable
+public class PDIntegerNameTreeNode extends PDNameTreeNode<COSInteger>
 {
     /**
-     * Convert this standard java object to a COS object.
-     *
-     * @return The cos object that matches this Java object.
+     * Constructor.
      */
-    COSBase getFirstCOSObject();
+    public PDIntegerNameTreeNode()
+    {
+        super();
+    }
 
     /**
-     * Convert this standard java object to a COS object.
+     * Constructor.
      *
-     * @return The cos object that matches this Java object.
+     * @param dic The COS dictionary.
      */
-    COSBase getSecondCOSObject();
+    public PDIntegerNameTreeNode(COSDictionary dic)
+    {
+        super(dic);
+    }
+
+    @Override
+    protected COSInteger convertCOSToPD(COSBase base) throws IOException
+    {
+        return (COSInteger)base;
+    }
+
+    @Override
+    protected PDIntegerNameTreeNode createChildNode( COSDictionary dic )
+    {
+        return new PDIntegerNameTreeNode(dic);
+    }
 }

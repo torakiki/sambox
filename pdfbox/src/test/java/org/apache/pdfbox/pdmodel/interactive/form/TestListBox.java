@@ -98,6 +98,9 @@ public class TestListBox extends TestCase
             PDAcroForm form = new PDAcroForm( doc );
             PDChoice choice = new PDListBox(form);
             
+            // appearance construction is not implemented, so turn on NeedAppearances
+            form.setNeedAppearances(true);
+            
             // test that there are no nulls returned for an empty field
             // only specific methods are tested here
             assertNotNull(choice.getOptions());

@@ -25,6 +25,7 @@ import org.apache.pdfbox.cos.COSFloat;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.PDDestinationNameTreeNode;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDDocumentNameDestinationDictionary;
 import org.apache.pdfbox.pdmodel.PDDocumentNameDictionary;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.documentinterchange.logicalstructure.PDStructureElement;
@@ -215,77 +216,88 @@ public final class PDOutlineItem extends PDOutlineNode
 
     /**
      * This method will attempt to find the page in this PDF document that this outline points to.
-     * If the outline does not point to anything then this method will return null.  If the outline
-     * is an action that is not a GoTo action then this methods will throw the OutlineNotLocationException
+     * If the outline does not point to anything then this method will return null. If the outline
+     * is an action that is not a GoTo action then this method will also return null.
      *
      * @param doc The document to get the page from.
      *
-     * @return The page that this outline will go to when activated or null if it does not point to anything.
+     * @return The page that this outline will go to when activated or null if it does not point to
+     * anything.
      * @throws IOException If there is an error when trying to find the page.
      */
-    public PDPage findDestinationPage( PDDocument doc ) throws IOException
+    public PDPage findDestinationPage(PDDocument doc) throws IOException
     {
         PDDestination dest = getDestination();
-        if( dest == null )
+        if (dest == null)
         {
             PDAction outlineAction = getAction();
-            if( outlineAction instanceof PDActionGoTo )
+            if (outlineAction instanceof PDActionGoTo)
             {
-                dest = ((PDActionGoTo)outlineAction).getDestination();
-            }
-            else
-            {
-                return null;
+                dest = ((PDActionGoTo) outlineAction).getDestination();
             }
         }
-
-        PDPageDestination pageDestination;
-        if( dest instanceof PDNamedDestination )
-        {
-            //if we have a named destination we need to lookup the PDPageDestination
-            PDNamedDestination namedDest = (PDNamedDestination)dest;
-            PDDocumentNameDictionary namesDict = doc.getDocumentCatalog().getNames();
-            if( namesDict != null )
-            {
-                PDDestinationNameTreeNode destsTree = namesDict.getDests();
-                if( destsTree != null )
-                {
-                    pageDestination = (PDPageDestination)destsTree.getValue( namedDest.getNamedDestination() );
-                }
-                else
-                {
-                    return null;
-                }
-            }
-            else
-            {
-                return null;
-            }
-        }
-        else if( dest instanceof PDPageDestination)
-        {
-            pageDestination = (PDPageDestination) dest;
-        }
-        else if( dest == null )
+        if (dest == null)
         {
             return null;
         }
+
+        PDPageDestination pageDestination = null;
+        if (dest instanceof PDNamedDestination)
+        {
+            pageDestination = findNamedDestinationPage((PDNamedDestination) dest, doc);
+            if (pageDestination == null)
+            {
+                return null;
+            }
+        }
+        else if (dest instanceof PDPageDestination)
+        {
+            pageDestination = (PDPageDestination) dest;
+        }
         else
         {
-            throw new IOException( "Error: Unknown destination type " + dest );
+            throw new IOException("Error: Unknown destination type " + dest);
         }
 
         PDPage page = pageDestination.getPage();
-        if( page == null )
+        if (page == null)
         {
+            // Malformed PDF: local destinations must have a page object,
+            // not a page number, these are meant for remote destinations.
             int pageNumber = pageDestination.getPageNumber();
-            if( pageNumber != -1 )
+            if (pageNumber != -1)
             {
-                page = doc.getPage( pageNumber - 1 );
+                page = doc.getPage(pageNumber);
             }
         }
-
         return page;
+    }
+
+    //if we have a named destination we need to lookup the PDPageDestination
+    private PDPageDestination findNamedDestinationPage(PDNamedDestination namedDest, PDDocument doc)
+            throws IOException
+    {
+        PDPageDestination pageDestination = null;
+        PDDocumentNameDictionary namesDict = doc.getDocumentCatalog().getNames();
+        if (namesDict != null)
+        {
+            PDDestinationNameTreeNode destsTree = namesDict.getDests();
+            if (destsTree != null)
+            {
+                pageDestination = destsTree.getValue(namedDest.getNamedDestination());
+            }
+        }
+        if (pageDestination == null)
+        {
+            // Look up /Dests dictionary from catalog
+            PDDocumentNameDestinationDictionary nameDestDict = doc.getDocumentCatalog().getDests();
+            if (nameDestDict != null)
+            {
+                String name = namedDest.getNamedDestination();
+                pageDestination = (PDPageDestination) nameDestDict.getDestination(name);
+            }
+        }
+        return pageDestination;
     }
 
     /**

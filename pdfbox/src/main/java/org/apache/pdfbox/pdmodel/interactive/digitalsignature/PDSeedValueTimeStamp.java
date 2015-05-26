@@ -27,7 +27,7 @@ import org.apache.pdfbox.cos.DirectCOSObject;
  * timestamp and if it is a must have for the signature.
  *
  * @author Thomas Chojecki
- */
+ */ 
 public class PDSeedValueTimeStamp
 {
     private COSDictionary dictionary;

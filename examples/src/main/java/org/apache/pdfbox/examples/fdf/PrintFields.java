@@ -18,16 +18,13 @@ package org.apache.pdfbox.examples.fdf;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
-
 import org.apache.pdfbox.cos.COSObjectable;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
 import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
-import org.apache.pdfbox.pdmodel.interactive.form.PDFieldTreeNode;
+import org.apache.pdfbox.pdmodel.interactive.form.PDField;
 import org.apache.pdfbox.pdmodel.interactive.form.PDNonTerminalField;
-import org.apache.pdfbox.pdmodel.interactive.form.PDSignatureField;
 
 /**
  * This example will take a PDF document and print all the fields from the file.
@@ -49,25 +46,22 @@ public class PrintFields
     {
         PDDocumentCatalog docCatalog = pdfDocument.getDocumentCatalog();
         PDAcroForm acroForm = docCatalog.getAcroForm();
-        List<PDFieldTreeNode> fields = acroForm.getFields();
-        Iterator<PDFieldTreeNode> fieldsIter = fields.iterator();
+        List<PDField> fields = acroForm.getFields();
 
         System.out.println(fields.size() + " top-level fields were found on the form");
 
-        while (fieldsIter.hasNext())
+        for (PDField field : fields)
         {
-            PDFieldTreeNode field = fieldsIter.next();
             processField(field, "|--", field.getPartialName());
         }
     }
 
-    private void processField(PDFieldTreeNode field, String sLevel, String sParent) throws IOException
+    private void processField(PDField field, String sLevel, String sParent) throws IOException
     {
-        String partialName = field != null ? field.getPartialName() : "";
-        List<COSObjectable> kids = field.getKids();
-        if (kids != null)
+        String partialName = field.getPartialName();
+        
+        if (field instanceof PDNonTerminalField)
         {
-            Iterator<COSObjectable> kidsIter = kids.iterator();
             if (!sParent.equals(field.getPartialName()))
             {
                 if (partialName != null)
@@ -76,40 +70,15 @@ public class PrintFields
                 }
             }
             System.out.println(sLevel + sParent);
-            while (kidsIter.hasNext())
+
+            for (PDField child : ((PDNonTerminalField)field).getChildren())
             {
-                Object pdfObj = kidsIter.next();
-                if (pdfObj instanceof PDFieldTreeNode)
-                {
-                    PDFieldTreeNode kid = (PDFieldTreeNode) pdfObj;
-                    processField(kid, "|  " + sLevel, sParent);
-                }
+                processField(child, "|  " + sLevel, sParent);
             }
         }
         else
         {
-            String fieldValue;
-            if (field instanceof PDSignatureField)
-            {
-                // PDSignatureField doesn't have a value
-                fieldValue = "PDSignatureField";
-            }
-            else if(field instanceof PDNonTerminalField)
-            {
-                // Non terminal fields don't have a value
-                fieldValue = "node";
-            }
-            else
-            {
-                if (field.getValue() != null)
-                {
-                    fieldValue = field.getValue().toString();
-                }
-                else
-                {
-                    fieldValue = "no value available";
-                }
-            }
+            String fieldValue = field.getValueAsString();
             StringBuilder outputString = new StringBuilder(sLevel);
             outputString.append(sParent);
             if (partialName != null)

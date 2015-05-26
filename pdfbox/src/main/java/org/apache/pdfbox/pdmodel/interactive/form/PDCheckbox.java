@@ -30,155 +30,113 @@ import org.apache.pdfbox.cos.COSName;
  */
 public final class PDCheckbox extends PDButton
 {
-    
     /**
-     * @see PDFieldTreeNode#PDFieldTreeNode(PDAcroForm)
+     * @see PDField#PDField(PDAcroForm)
      *
-     * @param theAcroForm The acroform.
+     * @param acroForm The acroform.
      */
-    public PDCheckbox(PDAcroForm theAcroForm)
+    public PDCheckbox(PDAcroForm acroForm)
     {
-        super( theAcroForm );
+        super(acroForm);
     }
     
     /**
      * Constructor.
      * 
-     * @param theAcroForm The form that this field is part of.
+     * @param acroForm The form that this field is part of.
      * @param field the PDF object to represent as a field.
-     * @param parentNode the parent node of the node to be created
+     * @param parent the parent node of the node
      */
-    public PDCheckbox( PDAcroForm theAcroForm, COSDictionary field, PDFieldTreeNode parentNode)
+    PDCheckbox(PDAcroForm acroForm, COSDictionary field, PDNonTerminalField parent)
     {
-        super( theAcroForm, field, parentNode);
+        super(acroForm, field, parent);
     }
 
     /**
      * This will tell if this radio button is currently checked or not.
+     * This is equivalent to calling {@link #getValue()}.
      *
-     * @return true If the radio button is checked.
-     * @throws IOException 
+     * @return true If this field is checked.
      */
     public boolean isChecked()
     {
-        String onValue = getOnValue();
-        String fieldValue = null;
-        try
-        {
-            fieldValue = getValue();
-        }
-        catch (IOException e)
-        {
-            // getting there means that the field value
-            // doesn't have a supported type.
-            // Ignoring as that will also mean that the field is not checked.
-            // Setting the value explicitly as Code Analysis (Sonar) doesn't like
-            // empty catch blocks.
-            return false;
-        }
-        COSName radioValue = (COSName)getCOSObject().getDictionaryObject( COSName.AS );
-        if( radioValue != null && fieldValue != null && radioValue.getName().equals( onValue ) )
-        {
-            return true;
-        }
-
-        return false;
+        return getValue();
     }
 
     /**
      * Checks the check box.
      */
-    public void check()
+    public void check() throws IOException
     {
-        String onValue = getOnValue();
-        setValue(onValue);
-        getCOSObject().setItem(COSName.AS, COSName.getPDFName(onValue));
+        setValue(true);
     }
 
     /**
      * Unchecks the check box.
      */
-    public void unCheck()
+    public void unCheck() throws IOException
     {
-        getCOSObject().setItem(COSName.AS, PDButton.OFF);
+        setValue(false);
     }
 
     /**
-     * This will get the value assigned to the OFF state.
-     *
-     * @return The value of the check box.
+     * Returns true if this field is checked.
+     * 
+     * @return True if checked
      */
-    public String getOffValue()
+    public boolean getValue()
     {
-        return PDButton.OFF.getName();
+        COSBase value = getInheritableAttribute(COSName.V);
+        return value instanceof COSName && value.equals(COSName.YES);
     }
 
     /**
-     * This will get the value assigned to the ON state.
+     * Returns the default value, if any.
      *
-     * @return The value of the check box.
+     * @return True if checked, false if not checked, null if missing.
      */
-    public String getOnValue()
+    public Boolean getDefaultValue()
     {
-        COSDictionary ap = (COSDictionary) getCOSObject().getDictionaryObject(COSName.AP);
-        COSBase n = ap.getDictionaryObject(COSName.N);
-
-        //N can be a COSDictionary or a COSStream
-        if( n instanceof COSDictionary )
+        COSBase value = getInheritableAttribute(COSName.DV);
+        if (value == null)
         {
-            for( COSName key :((COSDictionary)n).keySet() )
-            {
-                if( !key.equals( PDButton.OFF) )
-                {
-                    return key.getName();
-                }
-            }
+            return null;
         }
-        return "";
+        return value instanceof COSName && value.equals(COSName.YES);
     }
 
     @Override
-    public String getValue() throws IOException
+    public String getValueAsString()
     {
-        COSBase attribute = getInheritableAttribute(COSName.V);
-
-        if (attribute == null)
-        {
-            return "";
-        }
-        else if (attribute instanceof COSName)
-        {
-            return ((COSName) attribute).getName();
-        }
-        else
-        {
-            throw new IOException("Expected a COSName entry but got " + attribute.getClass().getName());
-        }
+        return getValue() ? "Yes" : "Off";
     }
 
     /**
-     * Set the field value.
-     * 
-     * The field value holds a name object which is corresponding to the 
-     * appearance state representing the corresponding appearance 
-     * from the appearance directory.
+     * Sets the checked value of this field.
      *
-     * The default value is Off.
-     * 
-     * @param value the new field value value.
+     * @param value True if checked
+     * @throws IOException if the value could not be set
      */
-    public void setValue(String value)
+    public void setValue(boolean value) throws IOException
     {
-        if (value == null)
-        {
-            getCOSObject().removeItem(COSName.V);
-            getCOSObject().setItem( COSName.AS, PDButton.OFF );
-        }
-        else
-        {
-            COSName nameValue = COSName.getPDFName(value);
-            getCOSObject().setItem(COSName.V, nameValue);
-            getCOSObject().setItem( COSName.AS, nameValue);
-        }
+        COSName name = value ? COSName.YES : COSName.OFF;
+        dictionary.setItem(COSName.V, name);
+        
+        // update the appearance state (AS)
+        dictionary.setItem(COSName.AS, name);
+        
+        applyChange();
+    }
+
+    /**
+     * Sets the default value.
+     *
+     * @param value True if checked
+     * @throws IOException if the value could not be set
+     */
+    public void setDefaultValue(boolean value) throws IOException
+    {
+        COSName name = value ? COSName.YES : COSName.OFF;
+        dictionary.setItem(COSName.DV, name);
     }
 }

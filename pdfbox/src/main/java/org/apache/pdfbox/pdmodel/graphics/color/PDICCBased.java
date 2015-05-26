@@ -56,7 +56,7 @@ public final class PDICCBased extends PDCIEBasedColorSpace
 {
     private static final Log LOG = LogFactory.getLog(PDICCBased.class);
 
-    private PDStream stream;
+    private final PDStream stream;
     private int numberOfComponents = -1;
     private ICC_Profile iccProfile;
     private PDColorSpace alternateColorSpace;
@@ -71,7 +71,8 @@ public final class PDICCBased extends PDCIEBasedColorSpace
     {
         array = new COSArray();
         array.add(COSName.ICCBASED);
-        array.add(new PDStream(doc));
+        stream = new PDStream(doc);
+        array.add(stream);
     }
 
     /**
@@ -147,7 +148,7 @@ public final class PDICCBased extends PDCIEBasedColorSpace
                 // fall back to alternateColorSpace color space
                 awtColorSpace = null;
                 alternateColorSpace = getAlternateColorSpace();
-                LOG.error("Can't read embedded ICC profile, using alternate color space: " + alternateColorSpace.getName());
+                LOG.error("Can't read embedded ICC profile (" + e.getLocalizedMessage() + "), using alternate color space: " + alternateColorSpace.getName());
                 initialColor = alternateColorSpace.getInitialColor();
             }
             else

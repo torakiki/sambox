@@ -39,7 +39,7 @@ import org.apache.pdfbox.pdmodel.interactive.annotation.PDAppearanceDictionary;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAppearanceStream;
 import org.apache.pdfbox.pdmodel.interactive.digitalsignature.PDSignature;
 import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
-import org.apache.pdfbox.pdmodel.interactive.form.PDFieldTreeNode;
+import org.apache.pdfbox.pdmodel.interactive.form.PDField;
 import org.apache.pdfbox.pdmodel.interactive.form.PDSignatureField;
 
 /**
@@ -103,7 +103,7 @@ public class PDVisibleSigBuilder implements PDFTemplateBuilder
                                 String signatureName) throws IOException
     {
         PDSignature pdSignature = new PDSignature();
-        pdSignatureField.setSignature(pdSignature);
+        pdSignatureField.setValue(pdSignature);
         pdSignatureField.getWidget().setPage(page);
         page.getAnnotations().add(pdSignatureField.getWidget());
         pdSignature.setName(signatureName);
@@ -118,8 +118,8 @@ public class PDVisibleSigBuilder implements PDFTemplateBuilder
             throws IOException
     {
         @SuppressWarnings("unchecked")
-        List<PDFieldTreeNode> acroFormFields = acroForm.getFields();
-        COSDictionary acroFormDict = acroForm.getDictionary();
+        List<PDField> acroFormFields = acroForm.getFields();
+        COSDictionary acroFormDict = acroForm.getCOSObject();
         acroForm.setSignaturesExist(true);
         acroForm.setAppendOnly(true);
         acroFormDict.setDirect(true);
@@ -363,7 +363,7 @@ public class PDVisibleSigBuilder implements PDFTemplateBuilder
     public void createWidgetDictionary(PDSignatureField signatureField,
                                        PDResources holderFormResources) throws IOException
     {
-        COSDictionary widgetDict = signatureField.getWidget().getDictionary();
+        COSDictionary widgetDict = signatureField.getWidget().getCOSObject();
         widgetDict.setNeedToBeUpdated(true);
         widgetDict.setItem(COSName.DR, holderFormResources.getCOSObject());
 

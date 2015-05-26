@@ -18,11 +18,13 @@ package org.apache.pdfbox.pdmodel.interactive.form;
 
 import java.io.IOException;
 
+import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSNumber;
+import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.cos.COSString;
-import org.apache.pdfbox.pdmodel.common.PDTextStream;
+import org.apache.pdfbox.pdmodel.PDResources;
 
 /**
  * Base class for fields which use "Variable Text".
@@ -30,44 +32,32 @@ import org.apache.pdfbox.pdmodel.common.PDTextStream;
  *
  * @author Ben Litchfield
  */
-public abstract class PDVariableText extends PDField
+public abstract class PDVariableText extends PDTerminalField
 {
+    static final int QUADDING_LEFT = 0;
+    static final int QUADDING_CENTERED = 1;
+    static final int QUADDING_RIGHT = 2;
 
     /**
-     * A Q value.
-     */
-    public static final int QUADDING_LEFT = 0;
-
-    /**
-     * A Q value.
-     */
-    public static final int QUADDING_CENTERED = 1;
-
-    /**
-     * A Q value.
-     */
-    public static final int QUADDING_RIGHT = 2;
-
-    /**
-     * @see PDField#PDField(PDAcroForm,COSDictionary)
+     * @see PDTerminalField#PDTerminalField(PDAcroForm)
      *
-     * @param theAcroForm The acroform.
+     * @param acroForm The acroform.
      */
-    PDVariableText(PDAcroForm theAcroForm)
+    PDVariableText(PDAcroForm acroForm)
     {
-        super( theAcroForm );
+        super(acroForm);
     }
 
     /**
      * Constructor.
      * 
-     * @param theAcroForm The form that this field is part of.
+     * @param acroForm The form that this field is part of.
      * @param field the PDF object to represent as a field.
-     * @param parentNode the parent node of the node to be created
+     * @param parent the parent node of the node
      */
-    protected PDVariableText(PDAcroForm theAcroForm, COSDictionary field, PDFieldTreeNode parentNode)
+    PDVariableText(PDAcroForm acroForm, COSDictionary field, PDNonTerminalField parent)
     {
-        super( theAcroForm, field, parentNode);
+        super(acroForm, field, parent);
     }
 
     /**
@@ -87,6 +77,23 @@ public abstract class PDVariableText extends PDField
     }
 
     /**
+     * Get the default appearance.
+     *
+     * This is an inheritable attribute.
+     *
+     * The default appearance contains a set of default graphics and text operators
+     * to define the field’s text size and color.
+     *
+     * @return the DA element of the dictionary object
+     */
+    PDAppearanceString getDefaultAppearanceString() throws IOException
+    {
+        COSString da = (COSString) getInheritableAttribute(COSName.DA);
+        PDResources dr = getAcroForm().getDefaultResources();
+        return new PDAppearanceString(da, dr);
+    }
+
+    /**
      * Set the default appearance.
      * 
      * This will set the local default appearance for the variable text field only not 
@@ -98,16 +105,9 @@ public abstract class PDVariableText extends PDField
      */
     public void setDefaultAppearance(String daValue)
     {
-        if (daValue != null)
-        {
-            setInheritableAttribute(COSName.DA, COSString.parseLiteral(daValue));
-        }
-        else
-        {
-            removeInheritableAttribute(COSName.DA);
-        }
+        dictionary.setString(COSName.DA, daValue);
     }
-    
+
     /**
      * Get the default style string.
      * 
@@ -118,7 +118,7 @@ public abstract class PDVariableText extends PDField
      */
     public String getDefaultStyleString()
     {
-        COSString defaultStyleString = (COSString) getCOSObject().getDictionaryObject(COSName.DS);
+        COSString defaultStyleString = (COSString) dictionary.getDictionaryObject(COSName.DS);
         return defaultStyleString.getString();
     }
 
@@ -133,11 +133,11 @@ public abstract class PDVariableText extends PDField
     {
         if (defaultStyleString != null)
         {
-            getCOSObject().setItem(COSName.DS, COSString.parseLiteral(defaultStyleString));
+            dictionary.setItem(COSName.DS, COSString.parseLiteral(defaultStyleString));
         }
         else
         {
-            getCOSObject().removeItem(COSName.DS);
+            dictionary.removeItem(COSName.DS);
         }
     }    
 
@@ -157,9 +157,9 @@ public abstract class PDVariableText extends PDField
     {
         int retval = 0;
 
-        COSNumber number = (COSNumber)getInheritableAttribute(COSName.Q );
+        COSNumber number = (COSNumber)getInheritableAttribute(COSName.Q);
         
-        if( number != null )
+        if (number != null)
         {
             retval = number.intValue();
         }
@@ -171,9 +171,9 @@ public abstract class PDVariableText extends PDField
      *
      * @param q The new text justification.
      */
-    public void setQ( int q )
+    public void setQ(int q)
     {
-        getCOSObject().setInt( COSName.Q, q );
+        dictionary.setInt(COSName.Q, q);
     }
     
     /**
@@ -184,26 +184,7 @@ public abstract class PDVariableText extends PDField
      */
     public String getRichTextValue() throws IOException
     {
-        PDTextStream textStream = getAsTextStream(getInheritableAttribute(COSName.RV));
-        
-        if (textStream != null)
-        {
-            return textStream.getAsString();
-        }
-        return "";
-    }
-    
-    /**
-     * Get the fields rich text value.
-     * 
-     * The value is stored in the field dictionaries "V" entry.
-     * 
-     * @return The value of this entry.
-     * @throws IOException if the field dictionary entry is not a text type
-     */
-    public PDTextStream getRichTextValueAsStream() throws IOException
-    {
-        return getAsTextStream(getInheritableAttribute(COSName.RV));
+        return getStringOrStream(getInheritableAttribute(COSName.RV));
     }
     
     /**
@@ -216,10 +197,6 @@ public abstract class PDVariableText extends PDField
      * You can set {@link PDAcroForm#setNeedAppearances(Boolean)} to
      * signal a conforming reader to generate the appearance stream.
      * </p>
-     * <p>
-     * For long text it's more efficient to provide the text content as a
-     * text stream {@link #setRichTextValue(PDTextStream)}
-     * </p>
      * 
      * Providing null as the value will remove the default style string.
      * 
@@ -229,37 +206,39 @@ public abstract class PDVariableText extends PDField
     {
         if (richTextValue != null)
         {
-            getCOSObject().setItem(COSName.RV, COSString.parseLiteral(richTextValue));
+            dictionary.setItem(COSName.RV, COSString.parseLiteral(richTextValue));
         }
         else
         {
-            getCOSObject().removeItem(COSName.RV);
+            dictionary.removeItem(COSName.RV);
         }        
     }
-    
-    
+
     /**
-     * Set the fields rich text value.
-     * 
-     * Setting the rich text value will not generate the appearance
-     * for the field.
-     * 
-     * You can set {@link PDAcroForm#setNeedAppearances(Boolean)} to
-     * signal a conforming reader to generate the appearance stream.
-     * 
-     * Providing null as the value will remove the default style string.
-     * 
-     * @param richTextValue a rich text string
+     * Get a text as text stream.
+     *
+     * Some dictionary entries allow either a text or a text stream.
+     *
+     * @param base the potential text or text stream
+     * @return the text stream
      */
-    public void setRichTextValue(PDTextStream richTextValue)
+    protected final String getStringOrStream(COSBase base)
     {
-        if (richTextValue != null)
+        if (base == null)
         {
-            getCOSObject().setItem(COSName.RV, richTextValue.getCOSObject());
+            return "";
+        }
+        else if (base instanceof COSString)
+        {
+            return ((COSString)base).getString();
+        }
+        else if (base instanceof COSStream)
+        {
+            return ((COSStream)base).getString();
         }
         else
         {
-            getCOSObject().removeItem(COSName.RV);
-        }        
-    } 
+            return "";
+        }
+    }
 }

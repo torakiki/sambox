@@ -19,7 +19,6 @@ package org.apache.pdfbox.examples.acroforms;
 
 import java.io.File;
 import java.io.IOException;
-
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -62,20 +61,19 @@ public class CreateFormField
         
         // specify the annotation associated with the field
         // and add it to the page
-        PDAnnotationWidget widget = textBox.getWidget();
+        PDAnnotationWidget widget = textBox.getWidgets().get(0);
         PDRectangle rect = new PDRectangle();
         rect.setLowerLeftX((float) 50);
         rect.setLowerLeftY((float) 750);
         rect.setUpperRightX((float) 250);
-        rect.setUpperRightY((float) 800); 
+        rect.setUpperRightY((float) 800);
         widget.setRectangle(rect);
         page.getAnnotations().add(widget);
         
         // set the field value
-        textBox.setValue("English русский язык Tiếng Việt");
+        textBox.setValue("English form contents");
 
         document.save("exampleForm.pdf");
         document.close();
     }
 }
-

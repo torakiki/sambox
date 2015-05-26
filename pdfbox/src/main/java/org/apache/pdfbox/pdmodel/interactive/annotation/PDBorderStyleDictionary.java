@@ -16,7 +16,6 @@
  */
 package org.apache.pdfbox.pdmodel.interactive.annotation;
 
-import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSInteger;
@@ -61,7 +60,7 @@ public class PDBorderStyleDictionary implements COSObjectable
      */
     public static final String STYLE_UNDERLINE = "U";
 
-    private COSDictionary dictionary;
+    private final COSDictionary dictionary;
 
     /**
      * Constructor.
@@ -87,17 +86,8 @@ public class PDBorderStyleDictionary implements COSObjectable
      *
      * @return the dictionary
      */
-    public COSDictionary getDictionary()
-    {
-        return dictionary;
-    }
-
-    /**
-     * returns the dictionary.
-     *
-     * @return the dictionary
-     */
-    public COSBase getCOSObject()
+    @Override
+    public COSDictionary getCOSObject()
     {
         return dictionary;
     }
@@ -110,7 +100,7 @@ public class PDBorderStyleDictionary implements COSObjectable
      */
     public void setWidth( float w )
     {
-        getDictionary().setFloat( "W", w );
+        getCOSObject().setFloat( "W", w );
     }
 
     /**
@@ -120,7 +110,7 @@ public class PDBorderStyleDictionary implements COSObjectable
      */
     public float getWidth()
     {
-        return getDictionary().getFloat( "W", 1 );
+        return getCOSObject().getFloat( "W", 1 );
     }
 
     /**
@@ -131,7 +121,7 @@ public class PDBorderStyleDictionary implements COSObjectable
      */
     public void setStyle( String s )
     {
-        getDictionary().setName( "S", s );
+        getCOSObject().setName( "S", s );
     }
 
     /**
@@ -142,7 +132,7 @@ public class PDBorderStyleDictionary implements COSObjectable
      */
     public String getStyle()
     {
-        return getDictionary().getNameAsString( "S", STYLE_SOLID );
+        return getCOSObject().getNameAsString( "S", STYLE_SOLID );
     }
 
     /**
@@ -158,7 +148,7 @@ public class PDBorderStyleDictionary implements COSObjectable
         {
             array = dashArray;
         }
-        getDictionary().setItem( "D", array );
+        getCOSObject().setItem( "D", array );
     }
 
     /**
@@ -168,12 +158,12 @@ public class PDBorderStyleDictionary implements COSObjectable
      */
     public PDLineDashPattern getDashStyle()
     {
-        COSArray d = (COSArray) getDictionary().getDictionaryObject( "D" );
+        COSArray d = (COSArray) getCOSObject().getDictionaryObject( "D" );
         if (d == null)
         {
             d = new COSArray();
             d.add( COSInteger.THREE );
-            getDictionary().setItem( "D", d );
+            getCOSObject().setItem( "D", d );
         }
         return new PDLineDashPattern( d, 0 );
     }
