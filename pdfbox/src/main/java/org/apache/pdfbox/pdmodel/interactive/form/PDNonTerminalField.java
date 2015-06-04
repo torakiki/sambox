@@ -19,14 +19,13 @@ package org.apache.pdfbox.pdmodel.interactive.form;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.pdfbox.cos.COSArray;
+import org.apache.pdfbox.cos.COSArrayList;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSInteger;
 import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.pdmodel.common.COSArrayList;
-import org.apache.pdfbox.pdmodel.common.COSObjectable;
-import org.apache.pdfbox.pdmodel.fdf.FDFField;
 
 /**
  * A non terminal field in an interactive form.
@@ -75,49 +74,6 @@ public class PDNonTerminalField extends PDField
         return retval;
     }
 
-    @Override
-    void importFDF(FDFField fdfField) throws IOException
-    {
-        super.importFDF(fdfField);
-        
-        List<FDFField> fdfKids = fdfField.getKids();
-        List<PDField> children = getChildren();
-        for (int i = 0; fdfKids != null && i < fdfKids.size(); i++)
-        {
-            for (COSObjectable pdKid : children)
-            {
-                if (pdKid instanceof PDField)
-                {
-                    PDField pdChild = (PDField) pdKid;
-                    FDFField fdfChild = fdfKids.get(i);
-                    String fdfName = fdfChild.getPartialFieldName();
-                    if (fdfName != null && fdfName.equals(pdChild.getPartialName()))
-                    {
-                        pdChild.importFDF(fdfChild);
-                    }
-                }
-            }
-        }
-    }
-    
-    @Override
-    FDFField exportFDF() throws IOException
-    {
-        FDFField fdfField = new FDFField();
-        fdfField.setPartialFieldName(getPartialName());
-        fdfField.setValue(getValue());
-
-        List<PDField> children = getChildren();
-        List<FDFField> fdfChildren = new ArrayList<FDFField>();
-        for (PDField child : children)
-        {
-            fdfChildren.add(child.exportFDF());
-        }
-        fdfField.setKids(fdfChildren);
-        
-        return fdfField;
-    }
-    
     /**
      * Returns this field's children. These may be either terminal or non-terminal fields.
      * 

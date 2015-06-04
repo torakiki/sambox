@@ -21,9 +21,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.pdfbox.cos.COSObjectKey;
-import org.apache.pdfbox.xref.CompressedXrefEntry;
-import org.apache.pdfbox.xref.Xref;
-import org.apache.pdfbox.xref.XrefEntry;
 import org.junit.Test;
 
 /**
@@ -64,7 +61,7 @@ public class XrefTest
     {
         Xref xref = new Xref();
         xref.add(XrefEntry.inUseEntry(50, 4000, 0));
-        xref.add(CompressedXrefEntry.compressedEntry(20, 50));
+        xref.add(CompressedXrefEntry.compressedEntry(20, 50, 1));
         assertEquals(2, xref.values().size());
     }
 }

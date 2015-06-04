@@ -30,12 +30,12 @@ public class CompressedXrefEntryTest
     @Test(expected = IllegalArgumentException.class)
     public void negativeObjectStreamNumber()
     {
-        compressedEntry(10, -10);
+        compressedEntry(10, -10, 1);
     }
 
     @Test
     public void unknownOffset()
     {
-        assertTrue(compressedEntry(10, 100).isUnknownOffset());
+        assertTrue(compressedEntry(10, 100, 1).isUnknownOffset());
     }
 }

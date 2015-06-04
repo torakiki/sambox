@@ -21,10 +21,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.RandomAccessFile;
+import java.util.RandomAccess;
+
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.io.RandomAccess;
-import org.apache.pdfbox.io.RandomAccessFile;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.graphics.color.PDDeviceGray;
 
@@ -40,44 +41,6 @@ public final class CCITTFactory
     {
     }
     
-    /**
-     * Creates a new CCITT Fax compressed Image XObject from the first page of 
-     * a TIFF file.
-     * 
-     * @param document the document to create the image as part of.
-     * @param reader the random access TIFF file which contains a suitable CCITT
-     * compressed image
-     * @return a new Image XObject
-     * @throws IOException if there is an error reading the TIFF data.
-     * 
-     * @deprecated Use {@link #createFromFile(PDDocument, File)} instead.
-     */
-    @Deprecated
-    public static PDImageXObject createFromRandomAccess(PDDocument document, RandomAccess reader)
-            throws IOException
-    {
-        return createFromRandomAccessImpl(document, reader, 0);
-    }
-
-    /**
-     * Creates a new CCITT Fax compressed Image XObject from a TIFF file.
-     *
-     * @param document the document to create the image as part of.
-     * @param reader the random access TIFF file which contains a suitable CCITT
-     * compressed image
-     * @param number TIFF image number, starting from 0
-     * @return a new Image XObject, or null if no such page
-     * @throws IOException if there is an error reading the TIFF data.
-     * 
-     * @deprecated Use {@link #createFromFile(PDDocument, File, int)} instead.
-     */
-    @Deprecated
-    public static PDImageXObject createFromRandomAccess(PDDocument document, RandomAccess reader,
-                                                        int number) throws IOException
-    {
-        return createFromRandomAccessImpl(document, reader, number);
-    }
-
     /**
      * Creates a new CCITT Fax compressed Image XObject from the first page of 
      * a TIFF file.

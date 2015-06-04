@@ -53,10 +53,6 @@ final class PDFieldFactory
         {
             return new PDTextField(form, field, parent);
         }
-        else if (FIELD_TYPE_SIGNATURE.equals(fieldType))
-        {
-            return new PDSignatureField(form, field, parent);
-        }
         else if (FIELD_TYPE_BUTTON.equals(fieldType))
         {
             return createButtonSubType(form, field, parent);

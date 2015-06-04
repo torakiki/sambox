@@ -16,13 +16,11 @@
  */
 package org.apache.pdfbox.pdmodel.interactive.form;
 
-import java.io.IOException;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.pdmodel.common.COSObjectable;
-import org.apache.pdfbox.pdmodel.fdf.FDFField;
+import org.apache.pdfbox.cos.COSObjectable;
 import org.apache.pdfbox.pdmodel.interactive.action.PDFormFieldAdditionalActions;
 
 /**
@@ -201,61 +199,6 @@ public abstract class PDField implements COSObjectable
         }
         return null;
     }
-
-   /**
-     * This will import a fdf field from a fdf document.
-     * 
-     * @param fdfField The fdf field to import.
-     * @throws IOException If there is an error importing the data for this field.
-     */
-    void importFDF(FDFField fdfField) throws IOException
-    {
-        COSBase fieldValue = fdfField.getCOSValue();
-        if (fieldValue != null)
-        {
-            dictionary.setItem(COSName.V, fieldValue);
-        }
-        Integer ff = fdfField.getFieldFlags();
-        if (ff != null)
-        {
-            setFieldFlags(ff);
-        }
-        else
-        {
-            // these are suppose to be ignored if the Ff is set.
-            Integer setFf = fdfField.getSetFieldFlags();
-            int fieldFlags = getFieldFlags();
-            
-            if (setFf != null)
-            {
-                int setFfInt = setFf;
-                fieldFlags = fieldFlags | setFfInt;
-                setFieldFlags(fieldFlags);
-            }
-
-            Integer clrFf = fdfField.getClearFieldFlags();
-            if (clrFf != null)
-            {
-                // we have to clear the bits of the document fields for every bit that is
-                // set in this field.
-                //
-                // Example:
-                // docFf = 1011
-                // clrFf = 1101
-                // clrFfValue = 0010;
-                // newValue = 1011 & 0010 which is 0010
-                int clrFfValue = clrFf;
-                clrFfValue ^= 0xFFFFFFFF;
-                fieldFlags = fieldFlags & clrFfValue;
-                setFieldFlags(fieldFlags);
-            }
-        }
-    }
-
-    /**
-     * Exports this field and its children as FDF.
-     */
-    abstract FDFField exportFDF() throws IOException;
     
     /**
      * Get the parent field to this field, or null if none exists.

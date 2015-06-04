@@ -16,9 +16,10 @@
 package org.apache.pdfbox.pdmodel;
 
 import java.io.IOException;
+
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
-import org.apache.pdfbox.pdmodel.common.COSObjectable;
+import org.apache.pdfbox.cos.COSObjectable;
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDDestination;
 
 /**

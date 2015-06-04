@@ -19,13 +19,13 @@ package org.apache.pdfbox.pdmodel.interactive.form;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.pdfbox.cos.COSArray;
+import org.apache.pdfbox.cos.COSArrayList;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSInteger;
 import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.pdmodel.common.COSArrayList;
-import org.apache.pdfbox.pdmodel.fdf.FDFField;
 import org.apache.pdfbox.pdmodel.interactive.action.PDFormFieldAdditionalActions;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationWidget;
 
@@ -94,63 +94,6 @@ public abstract class PDTerminalField extends PDField
             fieldType = parent.getFieldType();
         }
         return fieldType;
-    }
-
-    @Override
-    public void importFDF(FDFField fdfField) throws IOException
-    {
-        super.importFDF(fdfField);
-        
-        PDAnnotationWidget widget = getWidgets().get(0); // fixme: ignores multiple widgets
-        if (widget != null)
-        {
-            int annotFlags = widget.getAnnotationFlags();
-            Integer f = fdfField.getWidgetFieldFlags();
-            if (f != null)
-            {
-                widget.setAnnotationFlags(f);
-            }
-            else
-            {
-                // these are suppose to be ignored if the F is set.
-                Integer setF = fdfField.getSetWidgetFieldFlags();
-                if (setF != null)
-                {
-                    annotFlags = annotFlags | setF;
-                    widget.setAnnotationFlags(annotFlags);
-                }
-
-                Integer clrF = fdfField.getClearWidgetFieldFlags();
-                if (clrF != null)
-                {
-                    // we have to clear the bits of the document fields for every bit that is
-                    // set in this field.
-                    //
-                    // Example:
-                    // docF = 1011
-                    // clrF = 1101
-                    // clrFValue = 0010;
-                    // newValue = 1011 & 0010 which is 0010
-                    int clrFValue = clrF;
-                    clrFValue ^= 0xFFFFFFFFL;
-                    annotFlags = annotFlags & clrFValue;
-                    widget.setAnnotationFlags(annotFlags);
-                }
-            }
-        }
-    }
-
-    @Override
-    FDFField exportFDF() throws IOException
-    {
-        FDFField fdfField = new FDFField();
-        fdfField.setPartialFieldName(getPartialName());
-        fdfField.setValue(dictionary.getDictionaryObject(COSName.V));
-
-        // fixme: the old code which was here assumed that Kids were PDField instances,
-        //        which is never true. They're annotation widgets.
-        
-        return fdfField;
     }
 
     /**

@@ -59,8 +59,8 @@ public class XrefEntryTest
     @Test
     public void own()
     {
-        assertTrue(inUseEntry(10, 2000, 0).owns(compressedEntry(20, 10)));
-        assertFalse(inUseEntry(10, 2000, 0).owns(compressedEntry(20, 50)));
+        assertTrue(inUseEntry(10, 2000, 0).owns(compressedEntry(20, 10, 1)));
+        assertFalse(inUseEntry(10, 2000, 0).owns(compressedEntry(20, 50, 1)));
         assertFalse(inUseEntry(10, 2000, 0).owns(null));
         assertFalse(inUseEntry(10, 2000, 0).owns(inUseEntry(20, 500, 10)));
     }
@@ -69,7 +69,7 @@ public class XrefEntryTest
     public void types()
     {
         assertEquals(XrefType.IN_USE, inUseEntry(10, -10, 0).getType());
-        assertEquals(XrefType.COMPRESSED, compressedEntry(10, 10).getType());
+        assertEquals(XrefType.COMPRESSED, compressedEntry(10, 10, 1).getType());
         assertEquals(XrefType.FREE, freeEntry(10, 1).getType());
     }
 }

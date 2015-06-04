@@ -18,15 +18,12 @@ package org.apache.pdfbox.pdmodel.interactive.annotation;
 
 import java.io.IOException;
 import java.util.Calendar;
+
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.cos.COSString;
-
-import org.apache.pdfbox.cos.COSBase;
-import org.apache.pdfbox.cos.COSDictionary;
-import org.apache.pdfbox.pdmodel.common.PDTextStream;
 
 /**
  * This class represents the additonal fields of a Markup type Annotation.  See
@@ -204,7 +201,7 @@ public class PDAnnotationMarkup extends PDAnnotation
      */
     public void setRichContents( String rc )
     {
-        getCOSObject().setItem(COSName.RC, new COSString(rc));
+        getCOSObject().setItem(COSName.RC, COSString.parseLiteral(rc));
     }
 
     /**

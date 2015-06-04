@@ -33,10 +33,6 @@ import org.apache.pdfbox.cos.COSObjectable;
 import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDResources;
-import org.apache.pdfbox.pdmodel.fdf.FDFCatalog;
-import org.apache.pdfbox.pdmodel.fdf.FDFDictionary;
-import org.apache.pdfbox.pdmodel.fdf.FDFDocument;
-import org.apache.pdfbox.pdmodel.fdf.FDFField;
 
 /**
  * An interactive form, also known as an AcroForm.
@@ -91,60 +87,6 @@ public final class PDAcroForm implements COSObjectable
     public COSDictionary getCOSObject()
     {
         return dictionary;
-    }
-
-    /**
-     * This method will import an entire FDF document into the PDF document
-     * that this acroform is part of.
-     *
-     * @param fdf The FDF document to import.
-     *
-     * @throws IOException If there is an error doing the import.
-     */
-    public void importFDF(FDFDocument fdf) throws IOException
-    {
-        List<FDFField> fields = fdf.getCatalog().getFDF().getFields();
-        if (fields != null)
-        {
-            for (FDFField field : fields)
-            {
-                FDFField fdfField = (FDFField) field;
-                PDField docField = getField(fdfField.getPartialFieldName());
-                if (docField != null)
-                {
-                    docField.importFDF(fdfField);
-                }
-            }
-        }
-    }
-
-    /**
-     * This will export all FDF form data.
-     *
-     * @return An FDF document used to export the document.
-     * @throws IOException If there is an error when exporting the document.
-     */
-    public FDFDocument exportFDF() throws IOException
-    {
-        FDFDocument fdf = new FDFDocument();
-        FDFCatalog catalog = fdf.getCatalog();
-        FDFDictionary fdfDict = new FDFDictionary();
-        catalog.setFDF(fdfDict);
-
-        List<FDFField> fdfFields = new ArrayList<FDFField>();
-        List<PDField> fields = getFields();
-        for (PDField field : fields)
-        {
-            fdfFields.add(field.exportFDF());
-        }
-        
-        fdfDict.setID(document.getDocument().getDocumentID());
-        
-        if (!fdfFields.isEmpty())
-        {
-            fdfDict.setFields(fdfFields);
-        }
-        return fdf;
     }
 
     /**

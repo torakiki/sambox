@@ -20,7 +20,7 @@ package org.apache.pdfbox.pdmodel.font;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.pdmodel.common.COSObjectable;
+import org.apache.pdfbox.cos.COSObjectable;
 
 /**
  * Represents a CIDSystemInfo.
