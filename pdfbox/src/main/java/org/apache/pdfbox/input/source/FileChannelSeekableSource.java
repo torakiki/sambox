@@ -24,7 +24,7 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
-import org.apache.pdfbox.io.IOUtils;
+import org.apache.pdfbox.util.IOUtils;
 
 /**
  * @author Andrea Vacondio

@@ -19,7 +19,7 @@ package org.apache.pdfbox.input.source;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import org.apache.pdfbox.io.IOUtils;
+import org.apache.pdfbox.util.IOUtils;
 
 /**
  * @author Andrea Vacondio

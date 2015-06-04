@@ -36,7 +36,7 @@ import org.apache.fontbox.ttf.TrueTypeCollection;
 import org.apache.fontbox.ttf.TrueTypeFont;
 import org.apache.fontbox.type1.Type1Font;
 import org.apache.fontbox.util.autodetect.FontFileFinder;
-import org.apache.pdfbox.io.IOUtils;
+import org.apache.pdfbox.util.IOUtils;
 
 /**
  * External font provider which searches for fonts on the local filesystem.

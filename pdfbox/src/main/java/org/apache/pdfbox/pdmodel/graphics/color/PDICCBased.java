@@ -27,7 +27,6 @@ import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSFloat;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSStream;
-import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.common.PDRange;
 import org.apache.pdfbox.pdmodel.common.PDStream;
@@ -44,6 +43,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.pdfbox.util.Charsets;
+import org.apache.pdfbox.util.IOUtils;
 
 /**
  * ICCBased colour spaces are based on a cross-platform colour profile as defined by the

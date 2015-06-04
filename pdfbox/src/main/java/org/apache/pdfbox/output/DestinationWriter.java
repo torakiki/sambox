@@ -26,8 +26,8 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 
 import org.apache.pdfbox.PDFBox;
-import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.util.Charsets;
+import org.apache.pdfbox.util.IOUtils;
 
 /**
  * @author Andrea Vacondio

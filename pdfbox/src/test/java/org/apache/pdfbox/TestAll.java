@@ -24,7 +24,6 @@ import org.apache.pdfbox.cos.TestCOSFloat;
 import org.apache.pdfbox.cos.TestCOSInteger;
 import org.apache.pdfbox.cos.TestCOSString;
 import org.apache.pdfbox.filter.TestFilters;
-import org.apache.pdfbox.io.TestIOUtils;
 import org.apache.pdfbox.io.TestRandomAccessBuffer;
 import org.apache.pdfbox.filter.ccitt.TestCCITTFaxG31DDecodeInputStream;
 import org.apache.pdfbox.filter.ccitt.TestPackedBitArray;
@@ -38,6 +37,7 @@ import org.apache.pdfbox.pdmodel.TestPDPageContentStream;
 import org.apache.pdfbox.pdmodel.graphics.optionalcontent.TestOptionalContentGroups;
 import org.apache.pdfbox.pdmodel.interactive.form.TestFields;
 import org.apache.pdfbox.util.TestDateUtil;
+import org.apache.pdfbox.util.TestIOUtils;
 import org.apache.pdfbox.util.TestMatrix;
 
 /**

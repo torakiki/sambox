@@ -26,7 +26,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
 
-import org.apache.pdfbox.io.IOUtils;
+import org.apache.pdfbox.util.IOUtils;
 
 /**
  * A {@link WritableByteChannel} that keeps track of the number of written bytes

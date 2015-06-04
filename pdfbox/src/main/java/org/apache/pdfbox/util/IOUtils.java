@@ -17,7 +17,7 @@
 
 /* $Id$ */
 
-package org.apache.pdfbox.io;
+package org.apache.pdfbox.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;

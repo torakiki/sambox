@@ -37,8 +37,8 @@ import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.cos.COSVisitor;
 import org.apache.pdfbox.cos.IndirectCOSObjectReference;
-import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.util.Charsets;
+import org.apache.pdfbox.util.IOUtils;
 
 /**
  * @author Andrea Vacondio

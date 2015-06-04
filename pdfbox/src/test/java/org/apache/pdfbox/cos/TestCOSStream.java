@@ -26,7 +26,7 @@ import junit.framework.TestCase;
 
 import org.apache.pdfbox.filter.Filter;
 import org.apache.pdfbox.filter.FilterFactory;
-import org.apache.pdfbox.io.IOUtils;
+import org.apache.pdfbox.util.IOUtils;
 
 public class TestCOSStream extends TestCase
 {

@@ -36,9 +36,9 @@ import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.cos.COSStreamArray;
 import org.apache.pdfbox.filter.Filter;
 import org.apache.pdfbox.filter.FilterFactory;
-import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.common.filespecification.PDFileSpecification;
+import org.apache.pdfbox.util.IOUtils;
 
 /**
  * A PDStream represents a stream in a PDF document. Streams are tied to a

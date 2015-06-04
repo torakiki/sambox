@@ -16,6 +16,8 @@
  */
 package org.apache.pdfbox.util;
 
+import static org.apache.pdfbox.util.RequireUtils.requireNotNullArg;
+
 import java.io.IOException;
 import java.util.regex.Pattern;
 
@@ -61,5 +63,16 @@ public class SpecVersionUtils
             throw new IOException("Unable to get header version from " + header);
         }
         return version;
+    }
+
+    /**
+     * @param version the version to compare
+     * @param atLeast min version to return true (ex. "1.5")
+     * @return true if the given pdf spec version is at least as high as the given atLeast version
+     */
+    public static boolean isAtLeast(String version, String atLeast)
+    {
+        requireNotNullArg(version, "Cannot compare a null version");
+        return version.compareTo(atLeast) >= 0;
     }
 }

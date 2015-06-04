@@ -17,11 +17,13 @@
 
 /* $Id$ */
 
-package org.apache.pdfbox.io;
+package org.apache.pdfbox.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+
+import org.apache.pdfbox.util.IOUtils;
 
 import junit.framework.TestCase;
 

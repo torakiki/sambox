@@ -16,6 +16,8 @@
  */
 package org.apache.pdfbox.pdmodel;
 
+import static org.apache.pdfbox.util.SpecVersionUtils.V1_5;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,8 +44,6 @@ import org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline.PDDocume
 import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
 import org.apache.pdfbox.pdmodel.interactive.pagenavigation.PDThread;
 import org.apache.pdfbox.pdmodel.interactive.viewerpreferences.PDViewerPreferences;
-import org.apache.pdfbox.util.SpecVersionUtils;
-
 /**
  * The Document Catalog of a PDF.
  *
@@ -562,9 +562,9 @@ public class PDDocumentCatalog implements COSObjectable
         root.setItem(COSName.OCPROPERTIES, ocProperties);
 
         // optional content groups require PDF 1.5
-        if (ocProperties != null && document.getVersion().compareTo(SpecVersionUtils.V1_5) < 0)
+        if (ocProperties != null)
         {
-            document.setVersion(SpecVersionUtils.V1_5);
+            document.requireMinVersion(V1_5);
         }
     }
 }

@@ -28,8 +28,8 @@ import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.IndirectCOSObjectReference;
-import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.util.Charsets;
+import org.apache.pdfbox.util.IOUtils;
 import org.apache.pdfbox.xref.XrefEntry;
 
 /**

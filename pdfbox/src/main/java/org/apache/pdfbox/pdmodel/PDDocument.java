@@ -19,6 +19,8 @@ package org.apache.pdfbox.pdmodel;
 import static org.apache.pdfbox.cos.DirectCOSObject.asDirectObject;
 import static org.apache.pdfbox.output.CountingWritableByteChannel.from;
 import static org.apache.pdfbox.util.RequireUtils.requireNotBlank;
+import static org.apache.pdfbox.util.SpecVersionUtils.V1_4;
+import static org.apache.pdfbox.util.SpecVersionUtils.isAtLeast;
 
 import java.io.Closeable;
 import java.io.File;
@@ -43,7 +45,6 @@ import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.cos.DirectCOSObject;
-import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.output.CountingWritableByteChannel;
 import org.apache.pdfbox.output.DefaultPDFWriter;
 import org.apache.pdfbox.output.WriteOption;
@@ -55,7 +56,7 @@ import org.apache.pdfbox.pdmodel.encryption.SecurityHandler;
 import org.apache.pdfbox.pdmodel.encryption.SecurityHandlerFactory;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.util.Charsets;
-import org.apache.pdfbox.util.SpecVersionUtils;
+import org.apache.pdfbox.util.IOUtils;
 
 /**
  * This is the in-memory representation of the PDF document. The #close() method must be called once the document is no
@@ -357,7 +358,7 @@ public class PDDocument implements Closeable
     public String getVersion()
     {
         String headerVersion = getDocument().getHeaderVersion();
-        if (headerVersion.compareTo(SpecVersionUtils.V1_4) >= 0)
+        if (isAtLeast(headerVersion, V1_4))
         {
             return Optional.ofNullable(getDocumentCatalog().getVersion())
                     .filter(catalogVersion -> (catalogVersion.compareTo(headerVersion) > 0))
@@ -384,11 +385,25 @@ public class PDDocument implements Closeable
         }
         else if (compare < 0)
         {
-            if (getDocument().getHeaderVersion().compareTo(SpecVersionUtils.V1_4) >= 0)
+            if (isAtLeast(newVersion, V1_4))
             {
                 getDocumentCatalog().setVersion(newVersion);
             }
             getDocument().setHeaderVersion(newVersion);
+        }
+    }
+
+    /**
+     * If the document is not at the given version or above, it sets the version of the PDF specification to which the
+     * document conforms.
+     * 
+     * @param version
+     */
+    public void requireMinVersion(String version)
+    {
+        if (!isAtLeast(getVersion(), version))
+        {
+            setVersion(version);
         }
     }
 

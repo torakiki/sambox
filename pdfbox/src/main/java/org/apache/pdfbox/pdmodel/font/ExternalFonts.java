@@ -36,7 +36,7 @@ import org.apache.fontbox.ttf.TTFParser;
 import org.apache.fontbox.ttf.Type1Equivalent;
 import org.apache.fontbox.ttf.TrueTypeFont;
 import org.apache.fontbox.type1.Type1Font;
-import org.apache.pdfbox.io.IOUtils;
+import org.apache.pdfbox.util.IOUtils;
 
 /**
  * External font service, locates non-embedded fonts via a pluggable FontProvider.
