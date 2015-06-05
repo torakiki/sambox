@@ -166,7 +166,7 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
     private void parseObjectStream(XrefEntry containingStreamEntry, COSStream stream)
             throws IOException
     {
-        try (BaseCOSParser streamParser = new BaseCOSParser(stream.getUnfilteredSource()))
+        try (BaseCOSParser streamParser = new BaseCOSParser(stream.getUnfilteredSource(), this))
         {
             int numberOfObjects = stream.getInt(COSName.N);
             requireIOCondition(numberOfObjects >= 0,
