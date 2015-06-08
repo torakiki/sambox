@@ -49,7 +49,7 @@ class FullScanner
 
     private void scan()
     {
-        LOG.info("Performing full scan");
+        LOG.info("Performing full scan to retrieve objects");
         try
         {
             long savedPos = reader.position();

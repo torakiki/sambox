@@ -19,8 +19,10 @@ package org.apache.pdfbox.output;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
@@ -42,9 +44,6 @@ import org.apache.pdfbox.cos.IndirectCOSObjectReference;
 import org.apache.pdfbox.input.IndirectCOSObject;
 
 /**
- * Component that visits pdf document collecting pdf objects that need to be written, replacing references to them with
- * an {@link IndirectCOSObjectReference} and writing the collected objects using the given {@link PDFWriter}.
- * 
  * @author Andrea Vacondio
  *
  */
@@ -56,10 +55,7 @@ abstract class AbstractPdfBodyWriter implements COSVisitor
     private Map<COSBase, IndirectCOSObjectReference> newObjects = new HashMap<>();
     private AtomicInteger objectsCounter = new AtomicInteger(0);
 
-    private IndirectCOSObjectReference nextReferenceFor(COSBase baseObject)
-    {
-        return new IndirectCOSObjectReference(objectsCounter.incrementAndGet(), 0, baseObject);
-    }
+    private Queue<IndirectCOSObjectReference> stack = new LinkedList<>();
 
     @Override
     public void visit(COSDocument document) throws IOException
@@ -70,10 +66,15 @@ abstract class AbstractPdfBodyWriter implements COSVisitor
             if (value != null)
             {
                 IndirectCOSObjectReference ref = getOrCreateIndirectReferenceFor(value);
-                value.accept(this);
+                stack.add(ref);
                 document.getTrailer().setItem(k, ref);
-                writeObject(ref);
             }
+        }
+        IndirectCOSObjectReference item;
+        while ((item = stack.poll()) != null)
+        {
+            item.getCOSObject().accept(this);
+            writeObject(item);
         }
         onCompletion();
     }
@@ -92,8 +93,6 @@ abstract class AbstractPdfBodyWriter implements COSVisitor
             {
                 IndirectCOSObjectReference ref = getOrCreateIndirectReferenceFor(item);
                 array.set(i, ref);
-                item.accept(this);
-                writeObject(ref);
             }
             else
             {
@@ -112,8 +111,6 @@ abstract class AbstractPdfBodyWriter implements COSVisitor
             {
                 IndirectCOSObjectReference ref = getOrCreateIndirectReferenceFor(item);
                 value.setItem(key, ref);
-                item.accept(this);
-                writeObject(ref);
             }
             else
             {
@@ -165,6 +162,14 @@ abstract class AbstractPdfBodyWriter implements COSVisitor
                 + item.getClass());
     }
 
+    private IndirectCOSObjectReference nextReferenceFor(COSBase baseObject)
+    {
+        IndirectCOSObjectReference ref = new IndirectCOSObjectReference(
+                objectsCounter.incrementAndGet(), 0, baseObject);
+        stack.add(ref);
+        return ref;
+    }
+
     @Override
     public void visit(COSBoolean value)
     {
@@ -213,4 +218,5 @@ abstract class AbstractPdfBodyWriter implements COSVisitor
         bySourceExistingIndirectToNewXref.clear();
         newObjects.clear();
     }
+
 }

@@ -109,7 +109,7 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
         }
         catch (IOException e)
         {
-            LOG.warn("An error occurred while parsing " + xrefEntry, e);
+            LOG.warn("An error occurred while parsing " + xrefEntry + ", trying fallback", e);
             doParseFallbackObject(key, parser);
         }
     }
