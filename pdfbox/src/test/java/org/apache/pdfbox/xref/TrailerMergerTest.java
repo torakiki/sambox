@@ -41,7 +41,7 @@ public class TrailerMergerTest
     @Test
     public void trailerNotNull()
     {
-        assertNotNull(merger.getTrailer());
+        assertNotNull(merger.trailer());
     }
 
     @Test
@@ -56,9 +56,9 @@ public class TrailerMergerTest
         second.setString("middle", "Frederic");
         second.setString("surname", "Seagal");
         merger.mergeTrailerWithoutOverwriting(10, second);
-        assertEquals("Chuck", merger.getTrailer().getString("name"));
-        assertEquals("Frederic", merger.getTrailer().getString("middle"));
-        assertEquals("Norris", merger.getTrailer().getString("surname"));
+        assertEquals("Chuck", merger.trailer().getString("name"));
+        assertEquals("Frederic", merger.trailer().getString("middle"));
+        assertEquals("Norris", merger.trailer().getString("surname"));
     }
 
     @Test
@@ -83,8 +83,8 @@ public class TrailerMergerTest
         COSDictionary first = new COSDictionary();
         first.setString("key", "First");
         merger.mergeTrailerWithoutOverwriting(1, first);
-        assertEquals(1, merger.getTrailer().size());
+        assertEquals(1, merger.trailer().size());
         merger.reset();
-        assertEquals(0, merger.getTrailer().size());
+        assertEquals(0, merger.trailer().size());
     }
 }

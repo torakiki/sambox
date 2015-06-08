@@ -1192,12 +1192,12 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * This will add all of the dictionarys keys/values to this dictionary, but only if they don't already exist. If a
-     * key already exists in this dictionary then nothing is changed.
+     * Adds all of the dictionaries keys/values to this dictionary, but only if they don't already exist. If a key
+     * already exists in this dictionary then nothing is changed.
      *
-     * @param dic The dic to get the keys from.
+     * @param dic The {@link COSDictionary} to get the keys from.
      */
-    public void mergeInto(COSDictionary dic)
+    public void mergeWithoutOverwriting(COSDictionary dic)
     {
         for (Map.Entry<COSName, COSBase> entry : dic.entrySet())
         {
@@ -1205,6 +1205,20 @@ public class COSDictionary extends COSBase
             {
                 setItem(entry.getKey(), entry.getValue());
             }
+        }
+    }
+
+    /**
+     * Adds all of the dictionaries keys/values to this dictionary. If a key already exists in this dictionary the value
+     * is overridden.
+     *
+     * @param dic The {@link COSDictionary} to get the keys from.
+     */
+    public void merge(COSDictionary dic)
+    {
+        for (Map.Entry<COSName, COSBase> entry : dic.entrySet())
+        {
+            setItem(entry.getKey(), entry.getValue());
         }
     }
 

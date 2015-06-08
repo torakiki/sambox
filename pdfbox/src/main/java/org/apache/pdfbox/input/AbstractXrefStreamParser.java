@@ -39,18 +39,21 @@ import org.apache.pdfbox.xref.XrefEntry;
  * @author Andrea Vacondio
  *
  */
-class XrefStreamParser
+abstract class AbstractXrefStreamParser
 {
-    private static final Log LOG = LogFactory.getLog(XrefStreamParser.class);
 
-    private TrailerMerger trailerMerger;
+    private static final Log LOG = LogFactory.getLog(AbstractXrefStreamParser.class);
+
     private BaseCOSParser parser;
 
-    XrefStreamParser(BaseCOSParser parser, TrailerMerger trailerMerger)
+    AbstractXrefStreamParser(BaseCOSParser parser)
     {
         this.parser = parser;
-        this.trailerMerger = trailerMerger;
     }
+
+    abstract void onTrailerFound(COSDictionary trailer);
+
+    abstract void onEntryFound(XrefEntry entry);
 
     /**
      * Parse the xref object stream.
@@ -59,7 +62,7 @@ class XrefStreamParser
      * @return the stream dictionary
      * @throws IOException
      */
-    public COSDictionary parse(long streamObjectOffset) throws IOException
+    COSDictionary parse(long streamObjectOffset) throws IOException
     {
         LOG.debug("Parsing xref stream at offset " + streamObjectOffset);
         parser.position(streamObjectOffset);
@@ -69,14 +72,14 @@ class XrefStreamParser
         COSDictionary dictionary = parser.nextDictionary();
         try (COSStream xrefStream = parser.nextStream(dictionary))
         {
-            trailerMerger.mergeTrailerWithoutOverwriting(streamObjectOffset, dictionary);
+            onTrailerFound(dictionary);
             parseStream(xrefStream);
         }
         LOG.debug("Done parsing xref stream");
         return dictionary;
     }
 
-    private void parseStream(COSStream xrefStream) throws IOException
+    void parseStream(COSStream xrefStream) throws IOException
     {
         LongStream objectNumbers = empty();
         COSArray index = (COSArray) xrefStream.getDictionaryObject(COSName.INDEX);
@@ -134,20 +137,23 @@ class XrefStreamParser
                 switch (type)
                 {
                 case 0:
-                    // xref.add(XrefEntry.freeEntry(objectId, field1, field2));
+                    onEntryFound(XrefEntry.freeEntry(objectId, field2));
                     break;
                 case 1:
-                    parser.provider().addEntry(XrefEntry.inUseEntry(objectId, field1, field2));
+                    onEntryFound(XrefEntry.inUseEntry(objectId, field1, field2));
                     break;
                 case 2:
-                    parser.provider().addEntry(
-                            CompressedXrefEntry.compressedEntry(objectId, field1, field2));
+                    onEntryFound(CompressedXrefEntry.compressedEntry(objectId, field1, field2));
                     break;
                 default:
                     break;
                 }
             }
-
         }
+    }
+
+    BaseCOSParser parser()
+    {
+        return parser;
     }
 }

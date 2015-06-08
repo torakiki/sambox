@@ -34,8 +34,8 @@ public class XrefTest
     public void add(){
         Xref xref = new Xref();
         XrefEntry entry = XrefEntry.inUseEntry(50, 4000, 0);
-        assertNull(xref.add(entry));
-        assertEquals(entry, xref.add(XrefEntry.inUseEntry(50, 2000, 0)));
+        assertNull(xref.addIfAbsent(entry));
+        assertEquals(entry, xref.addIfAbsent(XrefEntry.inUseEntry(50, 2000, 0)));
     }
 
     @Test
@@ -43,7 +43,7 @@ public class XrefTest
     {
         Xref xref = new Xref();
         XrefEntry entry = XrefEntry.inUseEntry(50, 4000, 0);
-        xref.add(entry);
+        xref.addIfAbsent(entry);
         assertTrue(xref.contains(new COSObjectKey(50, 0)));
     }
 
@@ -52,7 +52,7 @@ public class XrefTest
     {
         Xref xref = new Xref();
         XrefEntry entry = XrefEntry.inUseEntry(50, 4000, 0);
-        xref.add(entry);
+        xref.addIfAbsent(entry);
         assertEquals(entry, xref.get(new COSObjectKey(50, 0)));
     }
 
@@ -60,8 +60,8 @@ public class XrefTest
     public void values()
     {
         Xref xref = new Xref();
-        xref.add(XrefEntry.inUseEntry(50, 4000, 0));
-        xref.add(CompressedXrefEntry.compressedEntry(20, 50, 1));
+        xref.addIfAbsent(XrefEntry.inUseEntry(50, 4000, 0));
+        xref.addIfAbsent(CompressedXrefEntry.compressedEntry(20, 50, 1));
         assertEquals(2, xref.values().size());
     }
 }

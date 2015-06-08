@@ -16,10 +16,6 @@
  */
 package org.apache.pdfbox.input;
 
-import java.util.TreeMap;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSDictionary;
 
 /**
@@ -30,22 +26,26 @@ import org.apache.pdfbox.cos.COSDictionary;
  */
 final class TrailerMerger
 {
-    private static final Log LOG = LogFactory.getLog(TrailerMerger.class);
-
-    private TreeMap<Long, COSDictionary> history = new TreeMap<>();
     private COSDictionary trailer = new COSDictionary();
 
     /**
      * Merge the given dictionary to the current trailer. It doesn't overwrite values previously set.
      * 
-     * @param offset the byte offset for the trailer we are merging
      * @param toMerge
      */
-    public void mergeTrailerWithoutOverwriting(long offset, COSDictionary toMerge)
+    public void mergeWithoutOverwriting(COSDictionary toMerge)
     {
-        LOG.trace("Merging trailer at offset " + offset);
-        trailer.mergeInto(toMerge);
-        history.put(offset, toMerge);
+        trailer.mergeWithoutOverwriting(toMerge);
+    }
+
+    /**
+     * Merge the given dictionary to the current trailer. It overwrites values previously set.
+     * 
+     * @param toMerge
+     */
+    public void merge(COSDictionary toMerge)
+    {
+        trailer.mergeWithoutOverwriting(toMerge);
     }
 
     public COSDictionary getTrailer()
@@ -54,27 +54,10 @@ final class TrailerMerger
     }
 
     /**
-     * @return the first trailer that has been merged
-     */
-    public COSDictionary getFirstTrailer()
-    {
-        return history.firstEntry().getValue();
-    }
-
-    /**
-     * @return the last trailer that has been merged
-     */
-    public COSDictionary getLastTrailer()
-    {
-        return history.lastEntry().getValue();
-    }
-
-    /**
      * Resets the component state
      */
     public void reset()
     {
         trailer.clear();
-        history.clear();
     }
 }

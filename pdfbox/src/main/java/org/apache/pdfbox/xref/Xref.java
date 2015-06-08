@@ -40,10 +40,24 @@ public class Xref
      * @return null if the entry was added. The current entry with the given object number and generation if the entry
      * was already present.
      */
-    public XrefEntry add(XrefEntry entry)
+    public XrefEntry addIfAbsent(XrefEntry entry)
     {
         return data.putIfAbsent(
                 new COSObjectKey(entry.getObjectNumber(), entry.getGenerationNumber()), entry);
+    }
+
+    /**
+     * Adds the given entry to the {@link Xref} replacing any entry previously associated to the given object number and
+     * generation.
+     * 
+     * @param entry
+     * @return the previous value or null if no entry was previously associated to the given object number and
+     * generation.
+     */
+    public XrefEntry add(XrefEntry entry)
+    {
+        return data.put(new COSObjectKey(entry.getObjectNumber(), entry.getGenerationNumber()),
+                entry);
     }
 
     /**

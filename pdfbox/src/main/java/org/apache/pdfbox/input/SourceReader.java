@@ -60,7 +60,10 @@ class SourceReader implements Closeable
     public static final String OBJ = "obj";
 
     private Pool<StringBuilder> pool = new Pool<>(StringBuilder::new, Integer.getInteger(
-            PDFBox.BUFFERS_POOL_SIZE_PROPERTY, 10)).onGive(b -> b.setLength(0));
+            PDFBox.BUFFERS_POOL_SIZE_PROPERTY, 10)).onGive(b -> {
+        b.setLength(0);
+        b.trimToSize();
+    });
     private SeekableSource source;
 
     public SourceReader(SeekableSource source)
@@ -121,10 +124,10 @@ class SourceReader implements Closeable
         StringBuilder builder = pool.borrow();
         try
         {
-            char c;
-            while (((c = (char) source.read()) != -1) && !isEndOfName(c))
+            int c;
+            while (((c = source.read()) != -1) && !isEndOfName(c))
             {
-                builder.append(c);
+                builder.append((char) c);
             }
             unreadIfValid(c);
             return builder.toString();
@@ -316,9 +319,10 @@ class SourceReader implements Closeable
         StringBuilder builder = pool.borrow();
         try
         {
-            char c;
-            while (((c = (char) source.read()) != -1) && !isEndOfName(c))
+            int i;
+            while (((i = source.read()) != -1) && !isEndOfName(i))
             {
+                char c = (char) i;
                 if (c == '#')
                 {
                     int ch1 = source.read();
@@ -357,7 +361,7 @@ class SourceReader implements Closeable
                 }
                 builder.append(c);
             }
-            unreadIfValid(c);
+            unreadIfValid(i);
             return builder.toString();
         }
         finally
@@ -477,12 +481,12 @@ class SourceReader implements Closeable
         StringBuilder builder = pool.borrow();
         try
         {
-            char c;
-            while (((c = (char) source.read()) != -1) && c != '>')
+            int c;
+            while (((c = source.read()) != -1) && c != '>')
             {
                 if (isHexDigit(c))
                 {
-                    builder.append(c);
+                    builder.append((char) c);
                 }
                 else if (isWhitespace(c))
                 {
@@ -523,9 +527,10 @@ class SourceReader implements Closeable
         try
         {
 
-            char c;
-            while ((c = (char) source.read()) != -1 && bracesCounter > 0)
+            int i;
+            while ((i = source.read()) != -1 && bracesCounter > 0)
             {
+                char c = (char) i;
                 switch (c)
                 {
                 case '(':
@@ -637,7 +642,7 @@ class SourceReader implements Closeable
                     builder.append(c);
                 }
             }
-            unreadIfValid(c);
+            unreadIfValid(i);
             return builder.toString();
         }
         finally

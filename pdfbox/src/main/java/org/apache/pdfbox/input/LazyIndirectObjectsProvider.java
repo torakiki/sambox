@@ -27,7 +27,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.TreeMap;
 
 import org.apache.commons.logging.Log;
@@ -53,6 +52,7 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
     private static final Log LOG = LogFactory.getLog(LazyIndirectObjectsProvider.class);
 
     private Xref xref = new Xref();
+    private FullScanner scanner;
     // TODO references that the GC can claim
     private Map<COSObjectKey, COSBase> store = new HashMap<>();
     private SecurityHandler securityHandler = null;
@@ -61,20 +61,21 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
     @Override
     public COSBase get(COSObjectKey key)
     {
-        try
+        COSBase value = store.get(key);
+        if (value == null)
         {
-            COSBase value = store.get(key);
-            if (value == null)
-            {
-                parseObject(key, parser);
-            }
-            return store.get(key);
+            parseObject(key, parser);
         }
-        catch (IOException e)
+        return store.get(key);
+    }
+
+    @Override
+    public void addEntryIfAbsent(XrefEntry entry)
+    {
+        if (xref.addIfAbsent(entry) == null)
         {
-            LOG.error("An error occured while retrieving indirect object " + key, e);
+            LOG.trace("Added xref entry " + entry);
         }
-        return null;
     }
 
     @Override
@@ -89,6 +90,7 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
     {
         requireNonNull(parser);
         this.parser = parser;
+        this.scanner = new FullScanner(parser);
     }
 
     @Override
@@ -97,12 +99,45 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
         this.securityHandler = handler;
     }
 
-    private void parseObject(COSObjectKey key, BaseCOSParser parser) throws IOException
+    private void parseObject(COSObjectKey key, BaseCOSParser parser)
     {
+        XrefEntry xrefEntry = xref.get(key);
+        try
+        {
+            requireIOCondition(xrefEntry != null, "Unable to find xref data for " + key);
+            doParse(xrefEntry, parser);
+        }
+        catch (IOException e)
+        {
+            LOG.warn("An error occurred while parsing " + xrefEntry, e);
+            doParseFallbackObject(key, parser);
+        }
+    }
 
-        XrefEntry xrefEntry = Optional.ofNullable(xref.get(key)).orElseThrow(
-                () -> new IOException("Unable to find xref data for " + key));
-        LOG.debug("Starting parse of indirect object " + xrefEntry);
+    private void doParseFallbackObject(COSObjectKey key, BaseCOSParser parser)
+    {
+        LOG.info("Applying fallback strategy for " + key);
+        XrefEntry xrefEntry = scanner.entries().get(key);
+        if (xrefEntry != null)
+        {
+            try
+            {
+                doParse(xrefEntry, parser);
+            }
+            catch (IOException e)
+            {
+                LOG.warn("Unable to find fallback xref entry for " + xref, e);
+            }
+        }
+        else
+        {
+            LOG.warn("Unable to find fallback xref entry for " + xref);
+        }
+    }
+
+    private void doParse(XrefEntry xrefEntry, BaseCOSParser parser) throws IOException
+    {
+        LOG.trace("Parsing indirect object " + xrefEntry);
         if (xrefEntry.getType() == XrefType.IN_USE)
         {
             parseInUseEntry(xrefEntry, parser);
@@ -180,8 +215,9 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
                 long number = streamParser.readObjectNumber();
                 long offset = firstOffset + streamParser.readLong();
                 entries.put(offset, number);
-
             }
+            LOG.trace("Found " + entries.size() + " entries in object stream of size "
+                    + streamParser.source().size());
             for (Entry<Long, Long> entry : entries.entrySet())
             {
                 LOG.trace("Parsing compressed object " + entry.getValue() + " at offset "
@@ -198,7 +234,7 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
                     // make sure the xref points to this copy of the object and not one in another more recent stream
                     if (containingStreamEntry.owns(xref.get(key)))
                     {
-                        LOG.debug("Parsed compressed object " + key);
+                        LOG.debug("Parsed compressed object " + key + " " + object.getClass());
                         store.put(key, object);
                     }
                 }

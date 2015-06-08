@@ -57,6 +57,7 @@ class DefaultPDFParser
         BaseCOSParser parser = new BaseCOSParser(source);
         PDDocument document = doParse(decryptionMaterial, parser);
         document.setOnCloseAction(() -> {
+            IOUtils.close(parser.provider());
             IOUtils.close(parser);
         });
         return document;
@@ -75,7 +76,7 @@ class DefaultPDFParser
         XrefParser xrefParser = new XrefParser(parser);
         xrefParser.parse();
         parser.provider().initializeWith(parser);
-        COSDocument document = new COSDocument(xrefParser.getTrailer(), headerVersion);
+        COSDocument document = new COSDocument(xrefParser.trailer(), headerVersion);
         if (document.isEncrypted() && decryptionMaterial != null)
         {
             LOG.debug("Preparing for document decryption");

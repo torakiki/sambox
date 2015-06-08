@@ -16,7 +16,7 @@
  */
 package org.apache.pdfbox.input;
 
-import static org.apache.pdfbox.input.XrefTableParser.XREF;
+import static org.apache.pdfbox.input.AbstractXrefTableParser.XREF;
 import static org.apache.pdfbox.util.RequireUtils.requireIOCondition;
 
 import java.io.IOException;
@@ -27,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.util.Charsets;
+import org.apache.pdfbox.xref.XrefEntry;
 
 /**
  * @author Andrea Vacondio
@@ -41,36 +42,58 @@ class XrefParser
     private static final int DEFAULT_TRAIL_BYTECOUNT = 2048;
     private static final String STARTXREF = "startxref";
 
-    private TrailerMerger trailerMerger = new TrailerMerger();
-    private XrefStreamParser xrefStreamParser;
-    private XrefTableParser xrefTableParser;
+    private COSDictionary trailer = new COSDictionary();
+    private AbstractXrefStreamParser xrefStreamParser;
+    private AbstractXrefTableParser xrefTableParser;
     private BaseCOSParser parser;
 
     public XrefParser(BaseCOSParser parser)
     {
         this.parser = parser;
-        this.xrefStreamParser = new XrefStreamParser(parser, trailerMerger);
-        this.xrefTableParser = new XrefTableParser(parser, trailerMerger);
+        this.xrefStreamParser = new AbstractXrefStreamParser(parser)
+        {
+            @Override
+            void onTrailerFound(COSDictionary found)
+            {
+                trailer.mergeWithoutOverwriting(found);
+            }
+
+            @Override
+            void onEntryFound(XrefEntry entry)
+            {
+                parser().provider().addEntryIfAbsent(entry);
+            }
+        };
+
+        this.xrefTableParser = new AbstractXrefTableParser(parser)
+        {
+            @Override
+            void onTrailerFound(COSDictionary found)
+            {
+                trailer.mergeWithoutOverwriting(found);
+            }
+
+            @Override
+            void onEntryFound(XrefEntry entry)
+            {
+                parser().provider().addEntryIfAbsent(entry);
+            }
+        };
     }
 
     /**
-     * @return parse the xref returning its offset
+     * parse the xref using the given parser.
+     * 
      * @throws IOException
      */
-    public long parse() throws IOException
+    public void parse() throws IOException
     {
         long xrefOffset = findXrefOffset();
-        if (xrefOffset > 0)
+        if (xrefOffset <= 0 || !parseXref(xrefOffset))
         {
-            LOG.debug("Found xref offset at " + xrefOffset);
-            parseXref(xrefOffset);
-            return xrefOffset;
-        }
-        else
-        {
-            rebuildTrailer();
-            // return the offset found
-            return -1;
+            XrefFullScanner fallbackFullScanner = new XrefFullScanner(parser);
+            fallbackFullScanner.scan();
+            this.trailer = fallbackFullScanner.trailer();
         }
     }
 
@@ -96,83 +119,61 @@ class XrefParser
         }
         parser.position(startPosition + relativeIndex + STARTXREF.length());
         parser.skipSpaces();
-        return parser.readLong();
+        long xrefOffset = parser.readLong();
+        LOG.debug("Found xref offset at " + xrefOffset);
+        return xrefOffset;
     }
 
-    private void parseXref(long xrefOffset) throws IOException
+    private boolean parseXref(long xrefOffset) throws IOException
     {
-        if (!isValidXrefOffset(xrefOffset))
+        if (isValidXrefOffset(xrefOffset))
         {
-            LOG.warn("Offset '" + xrefOffset
-                    + "' doesn't point to an xref table or stream, applying fallback strategy");
-            // fallback strategy
-            // TODO set xrefOffset to amended offset
-
-        }
-        requireIOCondition(xrefOffset > 0, "Unable to find correct xref table or stream offset");
-
-        while (xrefOffset > -1)
-        {
-            parser.position(xrefOffset);
-            parser.skipSpaces();
-
-            if (parser.isNextToken(XREF))
+            requireIOCondition(xrefOffset > 0, "Unable to find correct xref table or stream offset");
+            while (xrefOffset > -1)
             {
-                COSDictionary trailer = xrefTableParser.parse(xrefOffset);
-                long streamOffset = trailer.getLong(COSName.XREF_STM);
-                if (streamOffset > 0)
+                if (!isValidXrefOffset(xrefOffset))
                 {
-                    if (!isValidXrefStreamOffset(streamOffset))
-                    {
-                        LOG.warn("Offset '" + streamOffset
-                                + "' doesn't point to an xref stream, applying fallback strategy");
-                        // fallback strategy
-                        // TODO set streamOffset to amended offset
-                        // TODO log if the fallback offset is invalid
+                    LOG.warn("Offset '"
+                            + xrefOffset
+                            + "' doesn't point to an xref table or stream, applying fallback strategy");
+                    return false;
+                }
+                parser.position(xrefOffset);
+                parser.skipSpaces();
 
-                    }
+                if (parser.isNextToken(XREF))
+                {
+                    COSDictionary trailer = xrefTableParser.parse(xrefOffset);
+                    long streamOffset = trailer.getLong(COSName.XREF_STM);
                     if (streamOffset > 0)
                     {
-                        trailer.setLong(COSName.XREF_STM, streamOffset);
-                        xrefStreamParser.parse(streamOffset);
+                        if (!isValidXrefStreamOffset(streamOffset))
+                        {
+                            LOG.warn("Offset '"
+                                    + streamOffset
+                                    + "' doesn't point to an xref stream, applying fallback strategy");
+                            return false;
+
+                        }
+                        if (streamOffset > 0)
+                        {
+                            trailer.setLong(COSName.XREF_STM, streamOffset);
+                            xrefStreamParser.parse(streamOffset);
+                        }
                     }
-
+                    xrefOffset = trailer.getLong(COSName.PREV);
                 }
-                xrefOffset = amendPrevIfInvalid(trailer);
+                else
+                {
+                    COSDictionary streamDictionary = xrefStreamParser.parse(xrefOffset);
+                    xrefOffset = streamDictionary.getLong(COSName.PREV);
+                }
             }
-            else
-            {
-                COSDictionary streamDictionary = xrefStreamParser.parse(xrefOffset);
-                xrefOffset = amendPrevIfInvalid(streamDictionary);
-            }
+            return true;
         }
-        // TODO
-        // check the offsets of all referenced objects
-        // checkXrefOffsets();
-    }
-
-    /**
-     * Validates the PREV entry in the given dictionary and if not valid it applies a fallback strategy
-     * 
-     * @param dictionary
-     * @return the original PREV value if valid, the fallback amended one otherwise.
-     * @throws IOException
-     */
-    private long amendPrevIfInvalid(COSDictionary dictionary) throws IOException
-    {
-        long prevOffset = dictionary.getLong(COSName.PREV);
-        if (prevOffset > 0)
-        {
-            if (!isValidXrefOffset(prevOffset))
-            {
-                LOG.warn("Offset '" + prevOffset
-                        + "' doesn't point to an xref table or stream, applying fallback strategy");
-                // fallback strategy
-                // TODO set the amended offset
-                dictionary.setLong(COSName.PREV, prevOffset);
-            }
-        }
-        return prevOffset;
+        LOG.warn("Offset '" + xrefOffset
+                + "' doesn't point to an xref table or stream, applying fallback strategy");
+        return false;
     }
 
     /**
@@ -210,23 +211,9 @@ class XrefParser
         return true;
     }
 
-    /**
-     * Rebuild the trailer dictionary if startxref can't be found.
-     * 
-     * @return the rebuild trailer dictionary
-     * 
-     * @throws IOException if something went wrong
-     */
-    protected final COSDictionary rebuildTrailer()
+    public COSDictionary trailer()
     {
-
-        // TODO rebuild strategy
-        return null;
-    }
-
-    public COSDictionary getTrailer()
-    {
-        return this.trailerMerger.getTrailer();
+        return this.trailer;
     }
 
 }

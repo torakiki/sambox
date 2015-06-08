@@ -39,7 +39,6 @@ import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.input.source.SeekableSource;
 import org.apache.pdfbox.util.Charsets;
-import org.apache.pdfbox.util.IOUtils;
 
 /**
  * @author Andrea Vacondio
@@ -485,10 +484,12 @@ final class BaseCOSParser extends SourceReader
         return provider;
     }
 
+    /**
+     * Closes the parser but not the associated provider
+     */
     @Override
     public void close() throws IOException
     {
         super.close();
-        IOUtils.close(provider);
     }
 }

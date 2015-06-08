@@ -26,30 +26,33 @@ import java.io.IOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSDictionary;
+import org.apache.pdfbox.xref.XrefEntry;
 
 /**
  * @author Andrea Vacondio
  *
  */
-class XrefTableParser
+abstract class AbstractXrefTableParser
 {
-    private static final Log LOG = LogFactory.getLog(XrefTableParser.class);
+    private static final Log LOG = LogFactory.getLog(AbstractXrefTableParser.class);
     private static final String TRAILER = "trailer";
     static final String XREF = "xref";
 
-    private TrailerMerger trailerMerger;
     private BaseCOSParser parser;
 
-    XrefTableParser(BaseCOSParser parser, TrailerMerger trailerMerger)
+    AbstractXrefTableParser(BaseCOSParser parser)
     {
         this.parser = parser;
-        this.trailerMerger = trailerMerger;
     }
+
+    abstract void onTrailerFound(COSDictionary trailer);
+
+    abstract void onEntryFound(XrefEntry entry);
 
     /**
      * Parse the xref table
      * 
-     * @param tableOffset xref stream object offset
+     * @param tableOffset xref table offset. This is the offset of the "xref" keyword.
      * @return the trailer for this table
      * @throws IOException
      */
@@ -60,18 +63,20 @@ class XrefTableParser
         // PDFBOX-1739 skip extra xref entries in RegisSTAR documents
         while (parser.source().peek() != 't')
         {
-            LOG.warn("Expected trailer object at position " + parser.position() + ", skipping line.");
+            LOG.warn("Expected trailer object at position " + parser.position()
+                    + ", skipping line.");
             parser.readLine();
         }
         return parseTrailer();
     }
 
-    private void parseXrefTable(long startByteOffset) throws IOException
+    private void parseXrefTable(long tableOffset) throws IOException
     {
+        parser.position(tableOffset);
         parser.skipExpected(XREF);
         if (parser.isNextToken(TRAILER))
         {
-            LOG.warn("Skipping empty xref table at offset " + startByteOffset);
+            LOG.warn("Skipping empty xref table at offset " + tableOffset);
             return;
         }
         while (true)
@@ -102,9 +107,8 @@ class XrefTableParser
                 {
                     try
                     {
-                        parser.provider().addEntry(
-                                inUseEntry(currentObjectNumber, Long.parseLong(splitString[0]),
-                                        Integer.parseInt(splitString[1])));
+                        onEntryFound(inUseEntry(currentObjectNumber,
+                                Long.parseLong(splitString[0]), Integer.parseInt(splitString[1])));
                     }
                     catch (NumberFormatException e)
                     {
@@ -125,7 +129,6 @@ class XrefTableParser
                 break;
             }
         }
-
     }
 
     private COSDictionary parseTrailer() throws IOException
@@ -135,8 +138,13 @@ class XrefTableParser
         parser.skipExpected(TRAILER);
         parser.skipSpaces();
         COSDictionary dictionary = parser.nextDictionary();
-        trailerMerger.mergeTrailerWithoutOverwriting(offset, dictionary);
+        onTrailerFound(dictionary);
         parser.skipSpaces();
         return dictionary;
+    }
+
+    BaseCOSParser parser()
+    {
+        return parser;
     }
 }

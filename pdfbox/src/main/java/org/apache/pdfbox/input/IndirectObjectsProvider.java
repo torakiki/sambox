@@ -43,6 +43,13 @@ interface IndirectObjectsProvider extends Closeable
     public COSBase get(COSObjectKey key);
 
     /**
+     * Adds the given xref entry to the {@link Xref} if absent
+     * 
+     * @param entry
+     */
+    public void addEntryIfAbsent(XrefEntry entry);
+
+    /**
      * Adds the given xref entry to the {@link Xref}
      * 
      * @param entry
