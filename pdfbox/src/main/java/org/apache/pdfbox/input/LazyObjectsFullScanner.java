@@ -33,15 +33,15 @@ import org.apache.pdfbox.xref.XrefEntry;
  * @author Andrea Vacondio
  *
  */
-class FullScanner
+class LazyObjectsFullScanner
 {
-    private static final Log LOG = LogFactory.getLog(FullScanner.class);
+    private static final Log LOG = LogFactory.getLog(LazyObjectsFullScanner.class);
     private Xref xref = new Xref();
     private SourceReader reader;
     private Pattern objectDefPatter = Pattern.compile("^(\\d+)[\\s](\\d+)[\\s]obj");
     private boolean scanned = false;
 
-    FullScanner(SourceReader reader)
+    LazyObjectsFullScanner(SourceReader reader)
     {
         requireNonNull(reader);
         this.reader = reader;
