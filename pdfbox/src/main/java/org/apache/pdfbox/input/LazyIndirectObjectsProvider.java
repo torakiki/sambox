@@ -24,10 +24,10 @@ import static org.apache.pdfbox.input.SourceReader.OBJ;
 import static org.apache.pdfbox.util.RequireUtils.requireIOCondition;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -54,7 +54,7 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
     private Xref xref = new Xref();
     private LazyObjectsFullScanner scanner;
     // TODO references that the GC can claim
-    private Map<COSObjectKey, COSBase> store = new HashMap<>();
+    private Map<COSObjectKey, COSBase> store = new ConcurrentHashMap<>();
     private SecurityHandler securityHandler = null;
     private BaseCOSParser parser;
 
@@ -67,6 +67,12 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
             parseObject(key, parser);
         }
         return store.get(key);
+    }
+
+    @Override
+    public void release(COSObjectKey key)
+    {
+        store.remove(key);
     }
 
     @Override

@@ -70,6 +70,8 @@ class PDFWriter extends COSWriter
         {
             doWriteObject(object);
             written.put(object.xrefEntry().getObjectNumber(), object.xrefEntry());
+            object.releaseCOSObject();
+            LOG.trace("Released " + object);
         }
     }
 

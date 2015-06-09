@@ -23,12 +23,13 @@ import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSNull;
 import org.apache.pdfbox.cos.COSObjectKey;
 import org.apache.pdfbox.cos.COSVisitor;
+import org.apache.pdfbox.cos.DisposableCOSObject;
 
 /**
  * @author Andrea Vacondio
  *
  */
-public class IndirectCOSObject extends COSBase
+public class IndirectCOSObject extends COSBase implements DisposableCOSObject
 {
 
     private COSBase baseObject;
@@ -52,6 +53,13 @@ public class IndirectCOSObject extends COSBase
             baseObject = Optional.ofNullable(provider.get(key)).orElse(COSNull.NULL);
         }
         return baseObject;
+    }
+
+    @Override
+    public void releaseCOSObject()
+    {
+        provider.release(key);
+        baseObject = null;
     }
 
     @Override

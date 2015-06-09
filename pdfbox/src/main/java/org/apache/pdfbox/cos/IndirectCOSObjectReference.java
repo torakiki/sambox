@@ -25,7 +25,7 @@ import org.apache.pdfbox.xref.XrefEntry;
  * @author Andrea Vacondio
  *
  */
-public class IndirectCOSObjectReference extends COSBase
+public class IndirectCOSObjectReference extends COSBase implements DisposableCOSObject
 {
     private COSBase baseObject;
     private XrefEntry xrefEntry;
@@ -50,7 +50,17 @@ public class IndirectCOSObjectReference extends COSBase
     @Override
     public COSBase getCOSObject()
     {
-        return Optional.ofNullable(baseObject).map(COSBase::getCOSObject).orElse(COSNull.NULL);
+        return Optional.ofNullable(baseObject).orElse(COSNull.NULL);
+    }
+
+    @Override
+    public void releaseCOSObject()
+    {
+        if (baseObject instanceof DisposableCOSObject)
+        {
+            ((DisposableCOSObject) baseObject).releaseCOSObject();
+        }
+        baseObject = null;
     }
 
     @Override

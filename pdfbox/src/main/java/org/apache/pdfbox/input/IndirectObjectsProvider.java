@@ -43,6 +43,13 @@ interface IndirectObjectsProvider extends Closeable
     public COSBase get(COSObjectKey key);
 
     /**
+     * Signals that the object corresponding to the given key is no longer needed and can be released
+     * 
+     * @param key
+     */
+    public void release(COSObjectKey key);
+
+    /**
      * Adds the given xref entry to the {@link Xref} if absent
      * 
      * @param entry
