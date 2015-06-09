@@ -19,6 +19,7 @@ package org.apache.pdfbox.xref;
 import static org.apache.pdfbox.xref.CompressedXrefEntry.compressedEntry;
 import static org.apache.pdfbox.xref.XrefEntry.freeEntry;
 import static org.apache.pdfbox.xref.XrefEntry.inUseEntry;
+import static org.apache.pdfbox.xref.XrefEntry.unknownOffsetEntry;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -50,10 +51,15 @@ public class XrefEntryTest
     {
         assertEquals(new COSObjectKey(10, 1), inUseEntry(10, 20, 1).key());
     }
+
     @Test
     public void unknownOffset()
     {
         assertFalse(inUseEntry(10, 20, 1).isUnknownOffset());
+        XrefEntry victim = unknownOffsetEntry(11, 0);
+        assertTrue(victim.isUnknownOffset());
+        victim.setByteOffset(200);
+        assertFalse(victim.isUnknownOffset());
     }
 
     @Test
@@ -72,4 +78,42 @@ public class XrefEntryTest
         assertEquals(XrefType.COMPRESSED, compressedEntry(10, 10, 1).getType());
         assertEquals(XrefType.FREE, freeEntry(10, 1).getType());
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void compressedToXrefTableEntry()
+    {
+        compressedEntry(10, 5, 3).toXrefTableEntry();
+    }
+
+    @Test
+    public void toXrefTableEntry()
+    {
+        assertEquals("0000003456 00001 n\r\n", inUseEntry(10, 3456, 1).toXrefTableEntry());
+        assertEquals("0000000032 00001 f\r\n", freeEntry(32, 1).toXrefTableEntry());
+    }
+
+    @Test
+    public void toXrefStreamEntryInUse()
+    {
+        XrefEntry entry = inUseEntry(10, 53, 1);
+        byte[] bytes = entry.toXrefStreamEntry(2, 1);
+        assertEquals(4, bytes.length);
+        assertEquals(0b00000001, bytes[0]);
+        assertEquals(0b00000000, bytes[1]);
+        assertEquals(0b00110101, bytes[2]);
+        assertEquals(0b00000001, bytes[3]);
+    }
+
+    @Test
+    public void toXrefStreamEntryFree()
+    {
+        XrefEntry entry = freeEntry(53, 1);
+        byte[] bytes = entry.toXrefStreamEntry(2, 1);
+        assertEquals(4, bytes.length);
+        assertEquals(0b00000000, bytes[0]);
+        assertEquals(0b00000000, bytes[1]);
+        assertEquals(0b00110101, bytes[2]);
+        assertEquals(0b00000001, bytes[3]);
+    }
+
 }

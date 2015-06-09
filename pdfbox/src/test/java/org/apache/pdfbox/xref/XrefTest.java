@@ -31,11 +31,24 @@ public class XrefTest
 {
 
     @Test
-    public void add(){
+    public void addIfAbsent()
+    {
         Xref xref = new Xref();
         XrefEntry entry = XrefEntry.inUseEntry(50, 4000, 0);
         assertNull(xref.addIfAbsent(entry));
         assertEquals(entry, xref.addIfAbsent(XrefEntry.inUseEntry(50, 2000, 0)));
+        assertEquals(entry, xref.get(new COSObjectKey(50, 0)));
+    }
+
+    @Test
+    public void add()
+    {
+        Xref xref = new Xref();
+        XrefEntry entry = XrefEntry.inUseEntry(50, 4000, 0);
+        assertNull(xref.add(entry));
+        XrefEntry nextEntry = XrefEntry.inUseEntry(50, 2000, 0);
+        assertEquals(entry, xref.add(nextEntry));
+        assertEquals(nextEntry, xref.get(new COSObjectKey(50, 0)));
     }
 
     @Test

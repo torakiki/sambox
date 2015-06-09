@@ -17,6 +17,7 @@
 package org.apache.pdfbox.xref;
 
 import static org.apache.pdfbox.xref.CompressedXrefEntry.compressedEntry;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
@@ -37,5 +38,17 @@ public class CompressedXrefEntryTest
     public void unknownOffset()
     {
         assertTrue(compressedEntry(10, 100, 1).isUnknownOffset());
+    }
+
+    @Test
+    public void toXrefStreamEntry()
+    {
+        CompressedXrefEntry entry = compressedEntry(10, 5, 3);
+        byte[] bytes = entry.toXrefStreamEntry(2, 1);
+        assertEquals(4, bytes.length);
+        assertEquals(0b00000010, bytes[0]);
+        assertEquals(0b00000000, bytes[1]);
+        assertEquals(0b00000101, bytes[2]);
+        assertEquals(0b00000011, bytes[3]);
     }
 }
