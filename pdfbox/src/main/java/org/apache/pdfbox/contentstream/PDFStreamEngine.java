@@ -32,12 +32,11 @@ import java.util.Stack;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.contentstream.operator.MissingOperandException;
-import org.apache.pdfbox.contentstream.operator.Operator;
-import org.apache.pdfbox.contentstream.operator.OperatorProcessor;
 import org.apache.pdfbox.contentstream.operator.state.EmptyGraphicsStackException;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSNumber;
+import org.apache.pdfbox.cos.COSObject;
 import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.filter.MissingImageReaderException;
 import org.apache.pdfbox.pdfparser.PDFStreamParser;
@@ -60,6 +59,8 @@ import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotation;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAppearanceStream;
 import org.apache.pdfbox.util.Matrix;
 import org.apache.pdfbox.util.Vector;
+import org.apache.pdfbox.contentstream.operator.Operator;
+import org.apache.pdfbox.contentstream.operator.OperatorProcessor;
 
 /**
  * Processes a PDF content stream and executes certain operations.
@@ -448,10 +449,20 @@ public abstract class PDFStreamEngine
     {
         List<COSBase> arguments = new ArrayList<COSBase>();
         PDFStreamParser parser = new PDFStreamParser(contentStream.getContentStream());
-        try
+        Iterator<Object> iter = parser.getTokenIterator();
+        while (iter.hasNext())
         {
-            Iterator<Object> iter = parser.getTokenIterator();
-            while (iter.hasNext())
+            Object token = iter.next();
+            if (token instanceof COSObject)
+            {
+                arguments.add(((COSObject) token).getObject());
+            }
+            else if (token instanceof Operator)
+            {
+                processOperator((Operator) token, arguments);
+                arguments = new ArrayList<COSBase>();
+            }
+            else
             {
                 Object token = iter.next();
                 if (token instanceof Operator)
@@ -463,11 +474,8 @@ public abstract class PDFStreamEngine
                 {
                     arguments.add(((COSBase) token).getCOSObject());
                 }
+                arguments.add((COSBase) token);
             }
-        }
-        finally
-        {
-            parser.close();
         }
     }
 
