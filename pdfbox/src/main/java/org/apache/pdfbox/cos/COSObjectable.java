@@ -22,6 +22,7 @@ package org.apache.pdfbox.cos;
  *
  * @author Ben Litchfield
  */
+// TODO rename this to COSObject once you feel it's time to
 public interface COSObjectable
 {
     /**
