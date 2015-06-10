@@ -76,4 +76,9 @@ interface IndirectObjectsProvider extends Closeable
      * @param handler
      */
     public void initializeWith(SecurityHandler handler);
+
+    /**
+     * @return the unique id for the provider.
+     */
+    String id();
 }

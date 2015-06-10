@@ -64,7 +64,7 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
         COSBase value = store.get(key);
         if (value == null)
         {
-            parseObject(key, parser);
+            parseObject(key);
         }
         return store.get(key);
     }
@@ -105,7 +105,7 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
         this.securityHandler = handler;
     }
 
-    private void parseObject(COSObjectKey key, BaseCOSParser parser)
+    private void parseObject(COSObjectKey key)
     {
         XrefEntry xrefEntry = xref.get(key);
         try
@@ -146,16 +146,16 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
         LOG.trace("Parsing indirect object " + xrefEntry);
         if (xrefEntry.getType() == XrefType.IN_USE)
         {
-            parseInUseEntry(xrefEntry, parser);
+            parseInUseEntry(xrefEntry);
         }
         if (xrefEntry.getType() == XrefType.COMPRESSED)
         {
-            parseCompressedEntry(xrefEntry, parser);
+            parseCompressedEntry(xrefEntry);
         }
         LOG.trace("Parsing done");
     }
 
-    private void parseInUseEntry(XrefEntry xrefEntry, BaseCOSParser parser) throws IOException
+    private void parseInUseEntry(XrefEntry xrefEntry) throws IOException
     {
         parser.position(xrefEntry.getByteOffset());
         parser.skipExpectedIndirectObjectDefinition(xrefEntry.key());
@@ -185,7 +185,7 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
         store.put(xrefEntry.key(), found);
     }
 
-    private void parseCompressedEntry(XrefEntry xrefEntry, BaseCOSParser parser) throws IOException
+    private void parseCompressedEntry(XrefEntry xrefEntry) throws IOException
     {
         XrefEntry containingStreamEntry = xref.get(new COSObjectKey(
                 ((CompressedXrefEntry) xrefEntry).getObjectStreamNumber(), 0));
@@ -194,7 +194,7 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
                 && containingStreamEntry.getType() != XrefType.COMPRESSED,
                 "Expected an uncompressed indirect object reference for the ObjectStream");
 
-        parseObject(containingStreamEntry.key(), parser);
+        parseObject(containingStreamEntry.key());
         COSBase stream = store.get(containingStreamEntry.key()).getCOSObject();
 
         if (!(stream instanceof COSStream))
@@ -257,5 +257,11 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
     public void close()
     {
         store.clear();
+    }
+
+    @Override
+    public String id()
+    {
+        return parser.source().id();
     }
 }

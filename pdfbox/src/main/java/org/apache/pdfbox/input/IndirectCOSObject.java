@@ -37,11 +37,11 @@ public class IndirectCOSObject extends COSBase implements DisposableCOSObject
     private IndirectObjectsProvider provider;
     private String sourceId;
 
-    public IndirectCOSObject(COSObjectKey key, IndirectObjectsProvider provider, String sourceId)
+    public IndirectCOSObject(COSObjectKey key, IndirectObjectsProvider provider)
     {
         this.key = key;
         this.provider = provider;
-        this.sourceId = sourceId;
+        this.sourceId = provider.id();
     }
 
     @Override
@@ -74,7 +74,8 @@ public class IndirectCOSObject extends COSBase implements DisposableCOSObject
     }
 
     /**
-     * @return the id of the source this indirect object was read from
+     * @return the id of the source this indirect object was read from, this is used to identify objects read from the
+     * same file.
      */
     public String sourceId()
     {
