@@ -26,4 +26,6 @@ public final class PDFBox
     public static final String INPUT_PAGE_SIZE_PROPERTY = "org.pdfbox.buffered.input.page.size";
     public static final String OUTPUT_PAGE_SIZE_PROPERTY = "org.pdfbox.buffered.output.page.size";
     public static final String BUFFERS_POOL_SIZE_PROPERTY = "org.pdfbox.buffers.pool.size";
+
+    public static final String SAMBOX_PROPERTIES = "org/apache/pdfbox/resources/sambox.properties";
 }

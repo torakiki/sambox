@@ -193,7 +193,13 @@ final class UnmodifiableCOSDictionary extends COSDictionary
     }
 
     @Override
-    public void mergeInto(COSDictionary dic)
+    public void mergeWithoutOverwriting(COSDictionary dic)
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void merge(COSDictionary dic)
     {
         throw new UnsupportedOperationException();
     }

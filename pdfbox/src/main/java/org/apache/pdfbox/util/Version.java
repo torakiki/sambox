@@ -18,16 +18,16 @@
 package org.apache.pdfbox.util;
 
 import java.io.IOException;
-import java.net.URL;
+import java.io.InputStream;
 import java.util.Properties;
+
+import org.apache.pdfbox.PDFBox;
 
 /**
  * Exposes PDFBox version.
  */
 public final class Version
 {
-    private static final String PDFBOX_VERSION_PROPERTIES =
-            "org/apache/pdfbox/resources/pdfbox.properties";
 
     private Version()
     {
@@ -35,24 +35,24 @@ public final class Version
     }
 
     /**
-     * Returns the version of PDFBox.
+     * @return the version of PDFBox.
      */
     public static String getVersion()
     {
-        try
+        try (InputStream stream = Version.class.getClassLoader().getResourceAsStream(
+                PDFBox.SAMBOX_PROPERTIES))
         {
-            URL url = Version.class.getClassLoader().getResource(PDFBOX_VERSION_PROPERTIES);
-            if (url == null)
+            if (stream != null)
             {
-                return null;
+                Properties properties = new Properties();
+                properties.load(stream);
+                return properties.getProperty("sambox.version", null);
             }
-            Properties properties = new Properties();
-            properties.load(url.openStream());
-            return properties.getProperty("pdfbox.version", null);
         }
         catch (IOException io)
         {
-            return null;
+            // nothing
         }
+        return null;
     }
 }
