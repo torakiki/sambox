@@ -16,7 +16,7 @@
  */
 package org.apache.pdfbox.util;
 
-import static java.util.Objects.requireNonNull;
+import static org.apache.pdfbox.util.RequireUtils.requireNotNullArg;
 
 import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -27,8 +27,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * A simple object pool implementation that requires a {@link Supplier} which is used in when an object is requested but
- * the pool is exhausted.
+ * A simple object pool implementation that requires a {@link Supplier} which is used to create instances to pool and
+ * when an object is requested but the pool is exhausted.
  * 
  * @author Andrea Vacondio
  */
@@ -43,16 +43,9 @@ public class Pool<T>
 
     public Pool(Supplier<T> creator, int poolsize)
     {
-        requireNonNull(creator);
+        requireNotNullArg(creator, "Pool objects creator cannot be null");
         this.pool = new ArrayBlockingQueue<>(poolsize);
-        for (int i = 0; i < poolsize; i++)
-        {
-            this.pool.offer(creator.get());
-        }
-        this.supplier = () -> {
-            LOG.info("Pool is empty, created new disposable instance");
-            return creator.get();
-        };
+        this.supplier = creator;
     }
 
     /**
@@ -73,7 +66,7 @@ public class Pool<T>
         applyOnGive.ifPresent(c -> c.accept(object));
         if (!this.pool.offer(object))
         {
-            LOG.info("Poll is already full, cannot return borrowed object");
+            LOG.info("Poll is already full, cannot return borrowed instance");
         }
     }
 

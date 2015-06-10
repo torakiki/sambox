@@ -73,6 +73,7 @@ public class SpecVersionUtils
     public static boolean isAtLeast(String version, String atLeast)
     {
         requireNotNullArg(version, "Cannot compare a null version");
+        requireNotNullArg(atLeast, "Cannot compare a null version");
         return version.compareTo(atLeast) >= 0;
     }
 }
