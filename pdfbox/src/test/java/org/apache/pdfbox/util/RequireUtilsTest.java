@@ -17,7 +17,11 @@
 package org.apache.pdfbox.util;
 
 import static org.apache.pdfbox.util.RequireUtils.requireArg;
+import static org.apache.pdfbox.util.RequireUtils.requireIOCondition;
+import static org.apache.pdfbox.util.RequireUtils.requireNotBlank;
 import static org.apache.pdfbox.util.RequireUtils.requireNotNullArg;
+
+import java.io.IOException;
 
 import org.junit.Test;
 
@@ -40,10 +44,36 @@ public class RequireUtilsTest
         requireArg(false, "message");
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void nullArgNotBlank()
+    {
+        requireNotBlank(null, "message");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void emptyArgNotBlank()
+    {
+        requireNotBlank("", "message");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void blankArgNotBlank()
+    {
+        requireNotBlank(" ", "message");
+    }
+
+    @Test(expected = IOException.class)
+    public void faseConditionIO() throws IOException
+    {
+        requireIOCondition(false, "message");
+    }
+
     @Test
-    public void positive()
+    public void positiveArg() throws IOException
     {
         requireArg(true, "message");
         requireNotNullArg(new Object(), "message");
+        requireNotBlank("ChuckNorris", "message");
+        requireIOCondition(true, "message");
     }
 }
