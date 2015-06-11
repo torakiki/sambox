@@ -20,8 +20,9 @@ import java.io.IOException;
 import java.nio.channels.ReadableByteChannel;
 
 /**
+ * Readable source that provides random access capabilities.
+ * 
  * @author Andrea Vacondio
- *
  */
 public interface SeekableSource extends ReadableByteChannel
 {
@@ -63,8 +64,8 @@ public interface SeekableSource extends ReadableByteChannel
     /**
      * @param startingPosition
      * @param length
-     * @return a readable view of a portion of this {@link SeekableSource}. Reading from this view doesn't affect the
-     * this {@link SeekableSource} position.
+     * @return a readable view of a portion of this {@link SeekableSource}. Reading from this view doesn't affect this
+     * {@link SeekableSource} position.
      * @throws IOException if something goes wrong while creating the view
      */
     SeekableSource view(long startingPosition, long length) throws IOException;

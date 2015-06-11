@@ -16,16 +16,15 @@
  */
 package org.apache.pdfbox.input.source;
 
-import static java.util.Objects.requireNonNull;
 import static org.apache.pdfbox.util.RequireUtils.requireIOCondition;
 import static org.apache.pdfbox.util.RequireUtils.requireNotBlank;
 
-import java.io.File;
 import java.io.IOException;
 
 /**
+ * Abstract {@link SeekableSources} that provides base functionalities common to all the {@link SeekableSource}s.
+ * 
  * @author Andrea Vacondio
- *
  */
 public abstract class BaseSeekableSource implements SeekableSource
 {
@@ -37,12 +36,6 @@ public abstract class BaseSeekableSource implements SeekableSource
     {
         requireNotBlank(id, "SeekableSource id cannot be blank");
         this.id = id;
-    }
-
-    public BaseSeekableSource(File file)
-    {
-        requireNonNull(file);
-        this.id = file.getAbsolutePath();
     }
 
     @Override
@@ -57,9 +50,12 @@ public abstract class BaseSeekableSource implements SeekableSource
         this.open = false;
     }
 
+    /**
+     * @throws IOException if the source is closed
+     */
     protected void requireOpen() throws IOException
     {
-        requireIOCondition(this.open, "The source is closed");
+        requireIOCondition(isOpen(), "The source is closed");
     }
 
     /**

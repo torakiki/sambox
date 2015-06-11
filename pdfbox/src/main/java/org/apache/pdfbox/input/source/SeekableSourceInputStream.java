@@ -56,26 +56,24 @@ class SeekableSourceInputStream extends InputStream
     public int read(byte[] b, int offset, int length) throws IOException
     {
         return getSource().read(
-                ByteBuffer.wrap(b, offset, Math.min(b.length - offset, available())));
+                ByteBuffer.wrap(b, Math.min(b.length, offset),
+                        Math.min(length, Math.min(b.length - offset, available()))));
 
     }
 
     @Override
     public int available() throws IOException
     {
-        return (int) (getSource().size() - getSource().position());
+        SeekableSource source = getSource();
+        return (int) (source.size() - source.position());
     }
 
     @Override
     public long skip(long offset) throws IOException
     {
-        long start = getSource().position();
-        return getSource().forward(offset).position() - start;
-    }
-
-    public long getLength()
-    {
-        return getSource().size();
+        SeekableSource source = getSource();
+        long start = source.position();
+        return source.forward(Math.min(offset, available())).position() - start;
     }
 
     @Override

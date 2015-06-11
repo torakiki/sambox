@@ -16,6 +16,7 @@
  */
 package org.apache.pdfbox.input.source;
 
+import static java.util.Optional.ofNullable;
 import static org.apache.pdfbox.util.RequireUtils.requireArg;
 
 import java.io.File;
@@ -38,7 +39,9 @@ public class FileChannelSeekableSource extends BaseSeekableSource
 
     public FileChannelSeekableSource(File file) throws IOException
     {
-        super(file);
+        super(ofNullable(file).map(File::getAbsolutePath).orElseThrow(() -> {
+            return new IllegalArgumentException("Input file cannot be null");
+        }));
         this.channel = new RandomAccessFile(file, "r").getChannel();
         this.size = channel.size();
         this.file = file;

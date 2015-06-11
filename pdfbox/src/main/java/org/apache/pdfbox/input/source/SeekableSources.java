@@ -23,18 +23,22 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 
 import org.apache.pdfbox.PDFBox;
 import org.apache.pdfbox.util.IOUtils;
 
 /**
+ * This class consists of solely static methods to create the most appropriate {@link SeekableSource} based on the given
+ * input or to bridge {@link SeekableSource}s to the more traditional {@link InputStream} or other standard I/O classes.
+ * 
  * @author Andrea Vacondio
  *
  */
 public final class SeekableSources
 {
-    private static final long MAPPED_SIZE_THRESHOLD = Long.getLong(
-            PDFBox.MAPPED_SIZE_THRESHOLD_PROPERTY, 1 << 24);
+
+    private static final long MB_16 = 1 << 24;
 
     private SeekableSources()
     {
@@ -52,7 +56,7 @@ public final class SeekableSources
     public static SeekableSource seekableSourceFrom(File file) throws IOException
     {
         requireNonNull(file);
-        if (file.length() > MAPPED_SIZE_THRESHOLD)
+        if (file.length() > Long.getLong(PDFBox.MAPPED_SIZE_THRESHOLD_PROPERTY, MB_16))
         {
             return new BufferedSeekableSource(new MemoryMappedSeekableSource(file));
         }
@@ -99,7 +103,7 @@ public final class SeekableSources
     {
         requireNonNull(stream);
         Path temp = Files.createTempFile("SAMBox", null);
-        Files.copy(stream, temp);
+        Files.copy(stream, temp, StandardCopyOption.REPLACE_EXISTING);
         return new BufferedSeekableSource(new FileChannelSeekableSource(temp.toFile())
         {
             @Override
