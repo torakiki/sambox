@@ -24,6 +24,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
+
 import org.apache.pdfbox.cos.COSObjectKey;
 import org.junit.Test;
 
@@ -95,25 +97,23 @@ public class XrefEntryTest
     @Test
     public void toXrefStreamEntryInUse()
     {
-        XrefEntry entry = inUseEntry(10, 53, 1);
-        byte[] bytes = entry.toXrefStreamEntry(2, 1);
-        assertEquals(4, bytes.length);
-        assertEquals(0b00000001, bytes[0]);
-        assertEquals(0b00000000, bytes[1]);
-        assertEquals(0b00110101, bytes[2]);
-        assertEquals(0b00000001, bytes[3]);
+        XrefEntry entry = inUseEntry(12, 1234, 1);
+        byte[] bytes = entry.toXrefStreamEntry(4, 1);
+        assertEquals(6, bytes.length);
+        byte[] expected = new byte[] { 0b00000001, 0b00000000, 0b00000000, 0b00000100,
+                (byte) 0b11010010,
+                0b00000001 };
+        assertTrue(Arrays.equals(expected, bytes));
     }
 
     @Test
     public void toXrefStreamEntryFree()
     {
         XrefEntry entry = freeEntry(53, 1);
-        byte[] bytes = entry.toXrefStreamEntry(2, 1);
-        assertEquals(4, bytes.length);
-        assertEquals(0b00000000, bytes[0]);
-        assertEquals(0b00000000, bytes[1]);
-        assertEquals(0b00110101, bytes[2]);
-        assertEquals(0b00000001, bytes[3]);
+        byte[] bytes = entry.toXrefStreamEntry(4, 1);
+        byte[] expected = new byte[] { 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00110101,
+                0b00000001 };
+        assertTrue(Arrays.equals(expected, bytes));
     }
 
 }

@@ -50,6 +50,10 @@ class XrefStream extends COSStream
         removeItem(COSName.PREV);
         removeItem(COSName.XREF_STM);
         removeItem(COSName.DOC_CHECKSUM);
+        removeItem(COSName.DECODE_PARMS);
+        removeItem(COSName.F_DECODE_PARMS);
+        removeItem(COSName.F_FILTER);
+        removeItem(COSName.F);
         setName(COSName.TYPE, COSName.XREF.getName());
         setLong(COSName.SIZE, entries.lastKey() + 1);
         setItem(COSName.INDEX, asDirectObject(new COSArray(COSInteger.get(entries.firstKey()),
@@ -58,7 +62,6 @@ class XrefStream extends COSStream
         setItem(COSName.W,
                 asDirectObject(new COSArray(COSInteger.get(1), COSInteger.get(secondFieldLength),
                         COSInteger.get(2))));
-        setFilters(COSName.FLATE_DECODE);
         try (OutputStream out = createUnfilteredStream())
         {
             for (long key = entries.firstKey(); key <= entries.lastKey(); key++)
@@ -68,6 +71,8 @@ class XrefStream extends COSStream
                         .toXrefStreamEntry(secondFieldLength, 2));
             }
         }
+        setLong(COSName.DL, getUnfilteredLength());
+        setFilters(COSName.FLATE_DECODE);
     }
 
     private static int sizeOf(long number)

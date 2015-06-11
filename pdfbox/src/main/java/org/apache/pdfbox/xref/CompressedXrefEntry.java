@@ -51,7 +51,7 @@ public final class CompressedXrefEntry extends XrefEntry
     public byte[] toXrefStreamEntry(int secondFieldLength, int thirdFieldLength)
     {
         byte[] retVal = new byte[1 + secondFieldLength + thirdFieldLength];
-        retVal[0] = (byte) 2;
+        retVal[0] = 0b00000010;
         copyBytesTo(getObjectStreamNumber(), secondFieldLength, retVal, 1);
         copyBytesTo(index, thirdFieldLength, retVal, 1 + secondFieldLength);
         return retVal;

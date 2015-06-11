@@ -166,6 +166,9 @@ public class COSStream extends COSDictionary implements Closeable
             {
                 doDecode();
             }
+        }
+        if (unfiltered != null)
+        {
             return inMemorySeekableSourceFrom(unfiltered);
         }
         if (existing != null)
@@ -173,6 +176,30 @@ public class COSStream extends COSDictionary implements Closeable
             return existing.get();
         }
         return inMemorySeekableSourceFrom(filtered);
+    }
+
+    /**
+     * @return the length of the decoded stream as long
+     * @throws IOException
+     */
+    public long getUnfilteredLength() throws IOException
+    {
+        if (getFilters() != null)
+        {
+            if (unfiltered == null)
+            {
+                doDecode();
+            }
+        }
+        if (unfiltered != null)
+        {
+            return Optional.ofNullable(unfiltered).map(f -> f.length).orElse(0);
+        }
+        if (existing != null)
+        {
+            return existing.length;
+        }
+        return Optional.ofNullable(filtered).map(f -> f.length).orElse(0);
     }
 
     /**
@@ -396,6 +423,7 @@ public class COSStream extends COSDictionary implements Closeable
         setItem(COSName.FILTER, filters);
         IOUtils.closeQuietly(existing);
         existing = null;
+        filtered = null;
     }
 
     /**

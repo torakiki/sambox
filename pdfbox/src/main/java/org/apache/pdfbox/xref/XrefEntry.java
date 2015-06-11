@@ -130,12 +130,12 @@ public class XrefEntry
         byte[] retVal = new byte[1 + secondFieldLength + thirdFieldLength];
         if (type == XrefType.FREE)
         {
-            retVal[0] = (byte) 0;
+            retVal[0] = 0b00000000;
             copyBytesTo(key.getNumber(), secondFieldLength, retVal, 1);
             copyBytesTo(key.getGeneration(), thirdFieldLength, retVal, 1 + secondFieldLength);
             return retVal;
         }
-        retVal[0] = (byte) 1;
+        retVal[0] = 0b00000001;
         copyBytesTo(byteOffset, secondFieldLength, retVal, 1);
         copyBytesTo(key.getGeneration(), thirdFieldLength, retVal, 1 + secondFieldLength);
         return retVal;

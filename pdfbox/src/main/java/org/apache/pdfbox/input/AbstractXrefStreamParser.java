@@ -146,6 +146,7 @@ abstract class AbstractXrefStreamParser
                     onEntryFound(CompressedXrefEntry.compressedEntry(objectId, field1, field2));
                     break;
                 default:
+                    LOG.warn("Unknown xref entry type " + type);
                     break;
                 }
             }
