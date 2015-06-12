@@ -79,11 +79,18 @@ public class SeekableSourcesTest
     @Test
     public void aboveThresholdSeekableSourceFrom() throws IOException
     {
-        System.setProperty(PDFBox.MAPPED_SIZE_THRESHOLD_PROPERTY, "10");
-        Path tempFile = Files.createTempFile("SAMBox", null);
-        Files.copy(getClass().getResourceAsStream("/input/allah2.pdf"), tempFile,
-                StandardCopyOption.REPLACE_EXISTING);
-        assertNotNull(SeekableSources.seekableSourceFrom(tempFile.toFile()));
+        try
+        {
+            System.setProperty(PDFBox.MAPPED_SIZE_THRESHOLD_PROPERTY, "10");
+            Path tempFile = Files.createTempFile("SAMBox", null);
+            Files.copy(getClass().getResourceAsStream("/input/allah2.pdf"), tempFile,
+                    StandardCopyOption.REPLACE_EXISTING);
+            assertNotNull(SeekableSources.seekableSourceFrom(tempFile.toFile()));
+        }
+        finally
+        {
+            System.getProperties().remove(PDFBox.MAPPED_SIZE_THRESHOLD_PROPERTY);
+        }
     }
 
     @Test

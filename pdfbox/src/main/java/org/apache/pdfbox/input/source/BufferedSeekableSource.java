@@ -16,6 +16,7 @@
  */
 package org.apache.pdfbox.input.source;
 
+import static java.util.Optional.ofNullable;
 import static org.apache.pdfbox.util.RequireUtils.requireArg;
 
 import java.io.IOException;
@@ -43,7 +44,9 @@ public class BufferedSeekableSource extends BaseSeekableSource
 
     public BufferedSeekableSource(SeekableSource wrapped)
     {
-        super(wrapped.id());
+        super(ofNullable(wrapped).map(SeekableSource::id).orElseThrow(() -> {
+            return new IllegalArgumentException("Input decorated SeekableSource cannot be null");
+        }));
         this.wrapped = wrapped;
         this.size = wrapped.size();
         this.buffer.limit(0);
@@ -132,6 +135,6 @@ public class BufferedSeekableSource extends BaseSeekableSource
     public SeekableSource view(long startingPosition, long length) throws IOException
     {
         requireOpen();
-        return wrapped.view(startingPosition, length);
+        return new BufferedSeekableSource(wrapped.view(startingPosition, length));
     }
 }

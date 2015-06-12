@@ -16,19 +16,17 @@
  */
 package org.apache.pdfbox.input.source;
 
-import static java.util.Objects.requireNonNull;
+import static java.util.Optional.ofNullable;
 import static org.apache.pdfbox.util.RequireUtils.requireArg;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Optional;
 import java.util.UUID;
 
 /**
  * A byte array based {@link SeekableSource} with a max size of 2GB.
  * 
  * @author Andrea Vacondio
- *
  */
 public class ByteArraySeekableSource extends BaseSeekableSource
 {
@@ -37,8 +35,10 @@ public class ByteArraySeekableSource extends BaseSeekableSource
 
     public ByteArraySeekableSource(byte[] bytes)
     {
-        super(UUID.nameUUIDFromBytes(Optional.of(bytes).get()).toString());
-        requireNonNull(bytes, "Cannot create a byte array source from a null byte array");
+        super(ofNullable(bytes).map(UUID::nameUUIDFromBytes).map(UUID::toString)
+                .orElseThrow(() -> {
+                    return new IllegalArgumentException("Input byte array cannot be null");
+                }));
         this.bytes = bytes;
     }
 
@@ -95,7 +95,7 @@ public class ByteArraySeekableSource extends BaseSeekableSource
     }
 
     @Override
-    public SeekableSource view(long startingPosition, long length) throws IOException
+    public SeekableSource view(long startingPosition, long length)
     {
         requireOpen();
         return new SeekableSourceView(new ByteArraySeekableSource(bytes), startingPosition, length);

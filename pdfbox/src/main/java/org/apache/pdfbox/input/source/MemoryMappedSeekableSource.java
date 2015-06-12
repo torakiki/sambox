@@ -30,16 +30,22 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.pdfbox.PDFBox;
 
 /**
+ * A {@link SeekableSource} implementation based on MappedByteBuffer. To overcome the int limit of the MappedByteBuffer,
+ * this source implement a pagination algorithm allowing to open files of any size. The size of the pages can be
+ * configured using the {@link PDFBox#MEMORY_MAPPED_PAGE_SIZE_PROPERTY} systm property.
+ * 
  * @author Andrea Vacondio
  *
  */
 public class MemoryMappedSeekableSource extends BaseSeekableSource
 {
     private static final Log LOG = LogFactory.getLog(MemoryMappedSeekableSource.class);
+    private static final long MB_500 = 1 << 29;
 
-    private static final long PAGE_SIZE = 1 << 29; // 500MB
+    private final long pageSize = Long.getLong(PDFBox.MEMORY_MAPPED_PAGE_SIZE_PROPERTY, MB_500);
     private List<ByteBuffer> pages = new ArrayList<>();
     private long position;
     private long size;
@@ -52,19 +58,19 @@ public class MemoryMappedSeekableSource extends BaseSeekableSource
         try (FileChannel channel = new RandomAccessFile(file, "r").getChannel())
         {
             this.size = channel.size();
-            int zeroBasedPagesNumber = (int) (channel.size() / PAGE_SIZE);
+            int zeroBasedPagesNumber = (int) (channel.size() / pageSize);
             for (int i = 0; i <= zeroBasedPagesNumber; i++)
             {
                 if (i == zeroBasedPagesNumber)
                 {
                     pages.add(
                             i,
-                            channel.map(MapMode.READ_ONLY, i * PAGE_SIZE, channel.size()
-                                    - (i * PAGE_SIZE)));
+                            channel.map(MapMode.READ_ONLY, i * pageSize, channel.size()
+                                    - (i * pageSize)));
                 }
                 else
                 {
-                    pages.add(i, channel.map(MapMode.READ_ONLY, i * PAGE_SIZE, PAGE_SIZE));
+                    pages.add(i, channel.map(MapMode.READ_ONLY, i * pageSize, pageSize));
                 }
             }
             LOG.debug("Created MemoryMappedSeekableSource with " + pages.size() + " pages");
@@ -102,12 +108,12 @@ public class MemoryMappedSeekableSource extends BaseSeekableSource
     }
 
     @Override
-    public int read(ByteBuffer dst) throws IOException
+    public int read(ByteBuffer dst)
     {
         requireOpen();
-        int zeroBasedPagesNumber = (int) (position() / PAGE_SIZE);
+        int zeroBasedPagesNumber = (int) (position() / pageSize);
         ByteBuffer page = pages.get(zeroBasedPagesNumber);
-        int relativePosition = (int) (position() - (zeroBasedPagesNumber * PAGE_SIZE));
+        int relativePosition = (int) (position() - (zeroBasedPagesNumber * pageSize));
         if (relativePosition < page.limit())
         {
             int read = readPage(dst, zeroBasedPagesNumber, relativePosition);
@@ -145,12 +151,12 @@ public class MemoryMappedSeekableSource extends BaseSeekableSource
     }
 
     @Override
-    public int read() throws IOException
+    public int read()
     {
         requireOpen();
-        int zeroBasedPagesNumber = (int) (position() / PAGE_SIZE);
+        int zeroBasedPagesNumber = (int) (position() / pageSize);
         ByteBuffer page = pages.get(zeroBasedPagesNumber);
-        int relativePosition = (int) (position() - (zeroBasedPagesNumber * PAGE_SIZE));
+        int relativePosition = (int) (position() - (zeroBasedPagesNumber * pageSize));
         if (relativePosition < page.limit())
         {
             position++;

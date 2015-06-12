@@ -16,28 +16,40 @@
  */
 package org.apache.pdfbox.input.source;
 
+import static java.util.Optional.ofNullable;
+import static org.apache.pdfbox.util.RequireUtils.requireArg;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import org.apache.pdfbox.util.IOUtils;
 
 /**
+ * {@link SeekableSource} representing a view over a portion of a {@link SeekableSource}. A view becomes invalid if the
+ * parent {@link SeekableSource} is closed and the parent view is closed when the view is closed. The parent position is
+ * modified when a read method is called on the view.
+ * 
  * @author Andrea Vacondio
  *
  */
-class SeekableSourceView extends BaseSeekableSource
+public class SeekableSourceView extends BaseSeekableSource
 {
     private long startingPosition;
     private long length;
     private long currentPosition;
     private SeekableSource wrapped;
 
-    SeekableSourceView(SeekableSource wrapped, long startingPosition, long length)
+    public SeekableSourceView(SeekableSource wrapped, long startingPosition, long length)
     {
-        super(wrapped.id());
+        super(ofNullable(wrapped).map(SeekableSource::id).orElseThrow(() -> {
+            return new IllegalArgumentException("Input decorated SeekableSource cannot be null");
+        }));
+        requireArg(startingPosition >= 0 && startingPosition < wrapped.size(),
+                "Starting position cannot be negative");
+        requireArg(length > 0, "View length must be positive");
         this.startingPosition = startingPosition;
         this.currentPosition = 0;
-        this.length = length;
+        this.length = Math.min(length, wrapped.size() - startingPosition);
         this.wrapped = wrapped;
     }
 
@@ -50,6 +62,7 @@ class SeekableSourceView extends BaseSeekableSource
     @Override
     public SeekableSource position(long newPosition) throws IOException
     {
+        requireArg(newPosition >= 0, "Cannot set position to a negative value");
         this.currentPosition = Math.min(length, newPosition);
         wrapped.position(startingPosition + currentPosition);
         return this;
@@ -105,9 +118,24 @@ class SeekableSourceView extends BaseSeekableSource
     }
 
     @Override
+    protected void requireOpen()
+    {
+        super.requireOpen();
+        if (!wrapped.isOpen())
+        {
+            throw new IllegalStateException("The original SeekableSource has been closed");
+        }
+    }
+
+    /**
+     * Cannot create a view of a view. This method throws {@link RuntimeException}.
+     * 
+     * @throws RuntimeException
+     */
+    @Override
     public SeekableSource view(long startingPosition, long length)
     {
-        throw new IllegalStateException("Cannot create a view of a view");
+        throw new RuntimeException("Cannot create a view of a view");
     }
 
 }

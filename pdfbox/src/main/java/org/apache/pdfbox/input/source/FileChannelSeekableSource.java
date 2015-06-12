@@ -28,8 +28,9 @@ import java.nio.channels.FileChannel;
 import org.apache.pdfbox.util.IOUtils;
 
 /**
+ * A {@link SeekableSource} implementation based on {@link FileChannel}.
+ * 
  * @author Andrea Vacondio
- *
  */
 public class FileChannelSeekableSource extends BaseSeekableSource
 {

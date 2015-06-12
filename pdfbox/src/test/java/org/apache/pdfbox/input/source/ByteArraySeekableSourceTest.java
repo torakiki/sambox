@@ -18,7 +18,6 @@ package org.apache.pdfbox.input.source;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -30,41 +29,21 @@ import org.junit.Test;
  * @author Andrea Vacondio
  *
  */
-public class BufferedSeekableSourceTest extends BaseTestSeekableSource
+public class ByteArraySeekableSourceTest extends BaseTestSeekableSource
 {
-    private ByteArraySeekableSource wrapped;
-    private BufferedSeekableSource victim;
+
+    private ByteArraySeekableSource victim;
 
     @Before
     public void setUp()
     {
-        wrapped = new ByteArraySeekableSource(new byte[] { 'a', 'b', 'c' });
-        victim = new BufferedSeekableSource(wrapped);
+        victim = new ByteArraySeekableSource(new byte[] { 'a', 'b', 'c' });
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void failingConstructor()
     {
-        new BufferedSeekableSource(null);
-    }
-
-    @Test
-    public void constructor()
-    {
-        assertEquals(wrapped.id(), victim.id());
-        assertEquals(wrapped.size(), victim.size());
-    }
-
-    @Override
-    @Test
-    public void close() throws IOException
-    {
-        victim.read();
-        assertTrue(victim.isOpen());
-        assertTrue(wrapped.isOpen());
-        victim.close();
-        assertFalse(victim.isOpen());
-        assertFalse(wrapped.isOpen());
+        new ByteArraySeekableSource(null);
     }
 
     @Test
@@ -122,4 +101,5 @@ public class BufferedSeekableSourceTest extends BaseTestSeekableSource
     {
         return victim;
     }
+
 }

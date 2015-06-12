@@ -508,14 +508,14 @@ public class COSStream extends COSDictionary implements Closeable
 
         SeekableSource get() throws IOException
         {
-            SeekableSource source = Optional
-                    .ofNullable(this.sourceRef.get())
-                    .filter(SeekableSource::isOpen)
-                    .orElseThrow(
-                            () -> new IllegalStateException(
-                                    "The original SeekableSource has been closed."));
             if (view == null)
             {
+                SeekableSource source = Optional
+                        .ofNullable(this.sourceRef.get())
+                        .filter(SeekableSource::isOpen)
+                        .orElseThrow(
+                                () -> new IllegalStateException(
+                                        "The original SeekableSource has been closed"));
                 view = source.view(startingPosition, length);
             }
             return view;

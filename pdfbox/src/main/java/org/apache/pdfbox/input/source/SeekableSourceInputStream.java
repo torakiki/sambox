@@ -25,7 +25,7 @@ import java.nio.ByteBuffer;
 import org.apache.pdfbox.util.IOUtils;
 
 /**
- * Bridge between {@link SeekableSources} and {@link InputStream}
+ * Bridge between {@link SeekableSource} and {@link InputStream}
  * 
  * @author Andrea Vacondio
  *
