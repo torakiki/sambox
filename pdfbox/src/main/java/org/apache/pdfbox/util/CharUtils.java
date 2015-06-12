@@ -17,6 +17,8 @@
 package org.apache.pdfbox.util;
 
 /**
+ * Utility class providing chars related helper methods
+ * 
  * @author Andrea Vacondio
  *
  */
@@ -30,9 +32,10 @@ public final class CharUtils
     public static final byte ASCII_HORIZONTAL_TAB = 9;
 
     private static final byte ASCII_ZERO = 48;
-
     private static final byte ASCII_SEVEN = 55;
     private static final byte ASCII_NINE = 57;
+
+    public static final byte ASCII_NULL = 0;
     private static final byte ASCII_SPACE = 32;
 
     private static final byte ASCII_UPPERCASE_A = 65;
@@ -52,16 +55,7 @@ public final class CharUtils
     public static boolean isEndOfName(int ch)
     {
         return isSpace(ch) || isEOL(ch) || ch == ASCII_HORIZONTAL_TAB || ch == '>' || ch == '<'
-                || ch == '[' || ch == '/' || isClosingSquareBracket(ch) || ch == ')' || ch == '(';
-    }
-
-    /**
-     * @param c The character to check against end of line
-     * @return true if the character is ']', false otherwise.
-     */
-    public static boolean isClosingSquareBracket(int c)
-    {
-        return c == ']';
+                || ch == '[' || ch == ']' || ch == '/' || ch == ')' || ch == '(';
     }
 
     /**
@@ -101,7 +95,7 @@ public final class CharUtils
      */
     public static boolean isWhitespace(int c)
     {
-        return c == 0 || c == ASCII_HORIZONTAL_TAB || c == ASCII_FORM_FEED || isEOL(c)
+        return c == ASCII_NULL || c == ASCII_HORIZONTAL_TAB || c == ASCII_FORM_FEED || isEOL(c)
                 || isSpace(c);
     }
 

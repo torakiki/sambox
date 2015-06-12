@@ -51,7 +51,7 @@ class SeekableSourceView extends BaseSeekableSource
     public SeekableSource position(long newPosition) throws IOException
     {
         this.currentPosition = Math.min(length, newPosition);
-        getSource().position(startingPosition + currentPosition);
+        wrapped.position(startingPosition + currentPosition);
         return this;
     }
 
@@ -67,8 +67,8 @@ class SeekableSourceView extends BaseSeekableSource
         requireOpen();
         if (available())
         {
-            getSource().position(startingPosition + currentPosition);
-            int read = getSource().read(dst);
+            wrapped.position(startingPosition + currentPosition);
+            int read = wrapped.read(dst);
             if (read > 0)
             {
                 currentPosition += read;
@@ -84,9 +84,9 @@ class SeekableSourceView extends BaseSeekableSource
         requireOpen();
         if (available())
         {
-            getSource().position(startingPosition + currentPosition);
+            wrapped.position(startingPosition + currentPosition);
             currentPosition++;
-            return getSource().read();
+            return wrapped.read();
         }
         return -1;
     }
@@ -102,15 +102,6 @@ class SeekableSourceView extends BaseSeekableSource
         super.close();
         IOUtils.close(wrapped);
         this.currentPosition = 0;
-    }
-
-    private SeekableSource getSource()
-    {
-        if (wrapped.isOpen())
-        {
-            return wrapped;
-        }
-        throw new IllegalStateException("The SeekableSource has been closed");
     }
 
     @Override
