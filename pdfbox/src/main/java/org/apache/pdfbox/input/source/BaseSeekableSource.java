@@ -16,7 +16,6 @@
  */
 package org.apache.pdfbox.input.source;
 
-import static org.apache.pdfbox.util.RequireUtils.requireIOCondition;
 import static org.apache.pdfbox.util.RequireUtils.requireNotBlank;
 
 import java.io.IOException;
@@ -51,11 +50,14 @@ public abstract class BaseSeekableSource implements SeekableSource
     }
 
     /**
-     * @throws IOException if the source is closed
+     * @throws IllegalStateException if the source is closed
      */
-    protected void requireOpen() throws IOException
+    protected void requireOpen()
     {
-        requireIOCondition(isOpen(), "The source is closed");
+        if (!isOpen())
+        {
+            throw new IllegalStateException("The SeekableSource has been closed");
+        }
     }
 
     /**

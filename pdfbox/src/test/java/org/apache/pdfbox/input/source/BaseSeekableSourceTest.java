@@ -93,7 +93,7 @@ public class BaseSeekableSourceTest
         victim.requireOpen();
     }
 
-    @Test(expected = IOException.class)
+    @Test(expected = IllegalStateException.class)
     public void failingRequireOpen() throws IOException
     {
         assertTrue(victim.isOpen());

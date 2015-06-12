@@ -25,8 +25,12 @@ import org.apache.pdfbox.PDFBox;
 import org.apache.pdfbox.util.IOUtils;
 
 /**
+ * {@link SeekableSource} wrapping an existing one and providing buffered read. When a read method is called, a
+ * {@link PDFBox#INPUT_PAGE_SIZE_PROPERTY} long chunk of bytes is read from the underlying source and stored in memory.
+ * Subsequent reads are served from the in memory buffer until they fall outside its range, at that point a new buffer
+ * is read from the wrapped source.
+ * 
  * @author Andrea Vacondio
- *
  */
 public class BufferedSeekableSource extends BaseSeekableSource
 {
@@ -42,6 +46,7 @@ public class BufferedSeekableSource extends BaseSeekableSource
         super(wrapped.id());
         this.wrapped = wrapped;
         this.size = wrapped.size();
+        this.buffer.limit(0);
     }
 
     @Override
