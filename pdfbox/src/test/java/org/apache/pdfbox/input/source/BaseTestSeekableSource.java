@@ -16,7 +16,9 @@
  */
 package org.apache.pdfbox.input.source;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -83,4 +85,48 @@ public abstract class BaseTestSeekableSource
         victim().close();
         victim().read(ByteBuffer.allocate(5));
     }
+
+    @Test
+    public void forward() throws IOException
+    {
+        assertEquals(0, victim().position());
+        assertEquals(1, victim().forward(1).position());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void invalidForward() throws IOException
+    {
+        assertEquals(0, victim().position());
+        victim().forward(victim().size() + 1);
+    }
+
+    @Test
+    public void back() throws IOException
+    {
+        assertEquals(1, victim().forward(1).position());
+        assertEquals(0, victim().back().position());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void invalidBack() throws IOException
+    {
+        assertEquals(0, victim().position());
+        victim().back();
+    }
+
+    @Test
+    public void peek() throws IOException
+    {
+        assertEquals(0, victim().position());
+        assertNotEquals(-1, victim().peek());
+        assertEquals(0, victim().position());
+    }
+
+    @Test
+    public void peekEOF() throws IOException
+    {
+        victim().position(victim().size());
+        assertEquals(-1, victim().peek());
+    }
+
 }
