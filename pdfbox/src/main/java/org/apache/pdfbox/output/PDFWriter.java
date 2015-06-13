@@ -146,6 +146,8 @@ class PDFWriter extends COSWriter
         trailer.removeItem(COSName.PREV);
         trailer.removeItem(COSName.XREF_STM);
         trailer.removeItem(COSName.DOC_CHECKSUM);
+        // TODO fix this once encryption is implemented
+        trailer.removeItem(COSName.ENCRYPT);
         trailer.setLong(COSName.SIZE, written.lastKey() + 1);
         write("trailer".getBytes(Charsets.US_ASCII));
         writeEOL();

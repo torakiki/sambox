@@ -17,8 +17,9 @@
 package org.apache.pdfbox.output;
 
 /**
+ * Options that can be selected when writing a PDF document.
+ * 
  * @author Andrea Vacondio
- *
  */
 public enum WriteOption
 {

@@ -52,7 +52,7 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
     private static final Log LOG = LogFactory.getLog(LazyIndirectObjectsProvider.class);
 
     private Xref xref = new Xref();
-    private LazyObjectsFullScanner scanner;
+    private ObjectsFullScanner scanner;
     // TODO references that the GC can claim
     private Map<COSObjectKey, COSBase> store = new ConcurrentHashMap<>();
     private SecurityHandler securityHandler = null;
@@ -96,7 +96,7 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
     {
         requireNonNull(parser);
         this.parser = parser;
-        this.scanner = new LazyObjectsFullScanner(parser);
+        this.scanner = new ObjectsFullScanner(parser);
     }
 
     @Override

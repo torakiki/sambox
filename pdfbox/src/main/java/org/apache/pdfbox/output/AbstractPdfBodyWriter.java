@@ -60,7 +60,9 @@ abstract class AbstractPdfBodyWriter implements COSVisitor
     @Override
     public void visit(COSDocument document) throws IOException
     {
-        for (COSName k : Arrays.asList(COSName.ROOT, COSName.INFO, COSName.ENCRYPT))
+        // TODO add Encrypt once implemented
+        // for (COSName k : Arrays.asList(COSName.ROOT, COSName.INFO, COSName.ENCRYPT))
+        for (COSName k : Arrays.asList(COSName.ROOT, COSName.INFO))
         {
             COSBase value = document.getTrailer().getItem(k);
             if (value != null)

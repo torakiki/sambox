@@ -28,20 +28,21 @@ import org.apache.pdfbox.xref.Xref;
 import org.apache.pdfbox.xref.XrefEntry;
 
 /**
- * Component performing a full scan of the document and retrieves objects definition and the corresponding offset.
+ * Component performing a full scan of the document and retrieves objects definition and the corresponding offset. This
+ * implementation is lazy and the full scan is performed the first time the entries are accessed.
  * 
  * @author Andrea Vacondio
- *
  */
-class LazyObjectsFullScanner
+class ObjectsFullScanner
 {
-    private static final Log LOG = LogFactory.getLog(LazyObjectsFullScanner.class);
+    private static final Log LOG = LogFactory.getLog(ObjectsFullScanner.class);
+    private static final Pattern OBJECT_DEF_PATTERN = Pattern.compile("^(\\d+)[\\s](\\d+)[\\s]obj");
+
     private Xref xref = new Xref();
     private SourceReader reader;
-    private Pattern objectDefPatter = Pattern.compile("^(\\d+)[\\s](\\d+)[\\s]obj");
     private boolean scanned = false;
 
-    LazyObjectsFullScanner(SourceReader reader)
+    ObjectsFullScanner(SourceReader reader)
     {
         requireNonNull(reader);
         this.reader = reader;
@@ -71,7 +72,7 @@ class LazyObjectsFullScanner
 
     private void addEntryIfObjectDefinition(long offset, String line)
     {
-        Matcher matcher = objectDefPatter.matcher(line);
+        Matcher matcher = OBJECT_DEF_PATTERN.matcher(line);
         if (matcher.find())
         {
             xref.add(XrefEntry.inUseEntry(Long.parseUnsignedLong(matcher.group(1)), offset,

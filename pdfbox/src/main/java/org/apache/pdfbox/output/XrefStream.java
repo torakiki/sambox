@@ -16,7 +16,7 @@
  */
 package org.apache.pdfbox.output;
 
-import static org.apache.pdfbox.cos.DirectCOSObject.asDirectObject;
+import static org.apache.pdfbox.xref.XrefEntry.freeEntry;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -31,14 +31,16 @@ import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.xref.XrefEntry;
 
 /**
+ * A {@link COSStream} that represent and xref stream as defined in Chap 7.5.8 of PDF 32000-1:2008
+ * 
  * @author Andrea Vacondio
- *
  */
 class XrefStream extends COSStream
 {
 
     /**
-     * Assumes the last entry is the one with highest offset
+     * Creates an xref stream from the given dictionary. The stream will contain the given entries and it assumes the
+     * last entry is the one with highest offset.
      * 
      * @param dictionary
      * @param entries
@@ -54,20 +56,21 @@ class XrefStream extends COSStream
         removeItem(COSName.F_DECODE_PARMS);
         removeItem(COSName.F_FILTER);
         removeItem(COSName.F);
+        // TODO fix this once encryption is implemented
+        removeItem(COSName.ENCRYPT);
         setName(COSName.TYPE, COSName.XREF.getName());
         setLong(COSName.SIZE, entries.lastKey() + 1);
-        setItem(COSName.INDEX, asDirectObject(new COSArray(COSInteger.get(entries.firstKey()),
-                COSInteger.get(entries.lastKey() - entries.firstKey() + 1))));
+        setItem(COSName.INDEX,
+                new COSArray(COSInteger.get(entries.firstKey()), COSInteger.get(entries.lastKey()
+                        - entries.firstKey() + 1)));
         int secondFieldLength = sizeOf(entries.lastEntry().getValue().getByteOffset());
-        setItem(COSName.W,
-                asDirectObject(new COSArray(COSInteger.get(1), COSInteger.get(secondFieldLength),
-                        COSInteger.get(2))));
+        setItem(COSName.W, new COSArray(COSInteger.get(1), COSInteger.get(secondFieldLength),
+                COSInteger.get(2)));
         try (OutputStream out = createUnfilteredStream())
         {
             for (long key = entries.firstKey(); key <= entries.lastKey(); key++)
             {
-                out.write(Optional.ofNullable(entries.get(key))
-                        .orElse(XrefEntry.DEFAULT_FREE_ENTRY)
+                out.write(Optional.ofNullable(entries.get(key)).orElse(freeEntry(key, 0))
                         .toXrefStreamEntry(secondFieldLength, 2));
             }
         }
