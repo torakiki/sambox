@@ -16,7 +16,7 @@
  */
 package org.apache.pdfbox.output;
 
-import static java.util.Objects.requireNonNull;
+import static org.apache.pdfbox.util.RequireUtils.requireNotNullArg;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,6 +24,7 @@ import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.WritableByteChannel;
 
 import org.apache.pdfbox.util.IOUtils;
@@ -39,9 +40,9 @@ public class CountingWritableByteChannel implements WritableByteChannel
     private long written = 0;
     private WritableByteChannel wrapped;
 
-    private CountingWritableByteChannel(WritableByteChannel wrapped)
+    public CountingWritableByteChannel(WritableByteChannel wrapped)
     {
-        requireNonNull(wrapped);
+        requireNotNullArg(wrapped, "Cannot decorate a null instance");
         this.wrapped = wrapped;
     }
 
@@ -56,6 +57,10 @@ public class CountingWritableByteChannel implements WritableByteChannel
     @Override
     public int write(ByteBuffer src) throws IOException
     {
+        if (!isOpen())
+        {
+            throw new ClosedChannelException();
+        }
         int count = wrapped.write(src);
         written += count;
         return count;
@@ -73,16 +78,37 @@ public class CountingWritableByteChannel implements WritableByteChannel
         IOUtils.close(wrapped);
     }
 
+    /**
+     * Static factory method to create a {@link CountingWritableByteChannel} from an existing
+     * {@link WritableByteChannel}.
+     * 
+     * @param channel
+     * @return the newly created {@link CountingWritableByteChannel}
+     */
     public static CountingWritableByteChannel from(WritableByteChannel channel)
     {
         return new CountingWritableByteChannel(channel);
     }
 
+    /**
+     * Static factory method to create a {@link CountingWritableByteChannel} from an existing {@link OutputStream}.
+     * 
+     * @param stream
+     * @return the newly created {@link CountingWritableByteChannel}
+     */
     public static CountingWritableByteChannel from(OutputStream stream)
     {
         return new CountingWritableByteChannel(Channels.newChannel(stream));
     }
 
+    /**
+     * Static factory method to create a {@link CountingWritableByteChannel} from an existing {@link File}. If the file
+     * already exists its content is purged.
+     * 
+     * @param file
+     * @return the newly created {@link CountingWritableByteChannel}
+     * @see RandomAccessFile#RandomAccessFile(File, String)
+     */
     public static CountingWritableByteChannel from(File file) throws IOException
     {
         RandomAccessFile raf = new RandomAccessFile(file, "rw");
@@ -90,6 +116,14 @@ public class CountingWritableByteChannel implements WritableByteChannel
         return new CountingWritableByteChannel(raf.getChannel());
     }
 
+    /**
+     * Static factory method to create a {@link CountingWritableByteChannel} from an existing file path. If the file
+     * already exists its content is purged.
+     * 
+     * @param file
+     * @return the newly created {@link CountingWritableByteChannel}
+     * @see RandomAccessFile#RandomAccessFile(String, String)
+     */
     public static CountingWritableByteChannel from(String file) throws IOException
     {
         RandomAccessFile raf = new RandomAccessFile(file, "rw");
