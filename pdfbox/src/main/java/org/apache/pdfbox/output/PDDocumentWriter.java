@@ -31,12 +31,12 @@ import org.apache.pdfbox.util.IOUtils;
  * @author Andrea Vacondio
  *
  */
-public class DefaultPDFWriter implements Closeable
+public class PDDocumentWriter implements Closeable
 {
     private PDDocument document;
     private PDFWriter writer;
 
-    public DefaultPDFWriter(PDDocument document)
+    public PDDocumentWriter(PDDocument document)
     {
         requireNonNull(document);
         this.document = document;
@@ -57,7 +57,7 @@ public class DefaultPDFWriter implements Closeable
             }
             securityHandler.prepareDocumentForEncryption(document);
         }
-        writer = new PDFWriter(channel);
+        writer = new PDFWriter(new BufferedDestinationWriter(channel));
         writer.writeHeader(document.getDocument().getHeaderVersion());
         List<WriteOption> opts = Arrays.asList(options);
         writeBody(opts);

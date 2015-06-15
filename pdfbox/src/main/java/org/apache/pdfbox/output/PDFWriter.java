@@ -48,20 +48,20 @@ class PDFWriter extends COSWriter
 
     private TreeMap<Long, XrefEntry> written = new TreeMap<>();
 
-    PDFWriter(CountingWritableByteChannel channel)
+    public PDFWriter(BufferedDestinationWriter writer)
     {
-        super(channel);
+        super(writer);
     }
 
     void writeHeader(String version) throws IOException
     {
         LOG.debug("Writing header " + version);
-        write(PDF_HEADER);
-        write(version);
-        writeEOL();
-        write(COMMENT);
-        write(GARBAGE);
-        writeEOL();
+        writer().write(PDF_HEADER);
+        writer().write(version);
+        writer().writeEOL();
+        writer().write(COMMENT);
+        writer().write(GARBAGE);
+        writer().writeEOL();
     }
 
     void writerObject(IndirectCOSObjectReference object) throws IOException
@@ -77,17 +77,17 @@ class PDFWriter extends COSWriter
 
     private void doWriteObject(IndirectCOSObjectReference object) throws IOException
     {
-        object.xrefEntry().setByteOffset(offset());
-        write(Long.toString(object.xrefEntry().getObjectNumber()));
-        write(SPACE);
-        write(Integer.toString(object.xrefEntry().getGenerationNumber()));
-        write(SPACE);
-        write(OBJ);
-        writeEOL();
+        object.xrefEntry().setByteOffset(writer().offset());
+        writer().write(Long.toString(object.xrefEntry().getObjectNumber()));
+        writer().write(SPACE);
+        writer().write(Integer.toString(object.xrefEntry().getGenerationNumber()));
+        writer().write(SPACE);
+        writer().write(OBJ);
+        writer().writeEOL();
         object.getCOSObject().accept(this);
-        writeEOL();
-        write(ENDOBJ);
-        writeEOL();
+        writer().writeEOL();
+        writer().write(ENDOBJ);
+        writer().writeEOL();
         LOG.trace("Written object " + object.xrefEntry());
     }
 
@@ -122,20 +122,21 @@ class PDFWriter extends COSWriter
      */
     long writeXrefTable() throws IOException
     {
-        long startxref = offset();
+        long startxref = writer().offset();
         LOG.debug("Writing xref table at offset " + startxref);
         if (written.put(0L, XrefEntry.DEFAULT_FREE_ENTRY) != null)
         {
             LOG.warn("Reserved object number 0 has been overwritten with the expected free entry");
         }
-        write("xref");
-        writeEOL();
-        write("0 " + written.size());
-        writeEOL();
+        writer().write("xref");
+        writer().writeEOL();
+        writer().write("0 " + written.size());
+        writer().writeEOL();
         for (long key = 0; key <= written.lastKey(); key++)
         {
-            write(Optional.ofNullable(written.get(key)).orElse(XrefEntry.DEFAULT_FREE_ENTRY)
-                    .toXrefTableEntry());
+            writer().write(
+                    Optional.ofNullable(written.get(key)).orElse(XrefEntry.DEFAULT_FREE_ENTRY)
+                            .toXrefTableEntry());
         }
         return startxref;
     }
@@ -149,31 +150,31 @@ class PDFWriter extends COSWriter
         // TODO fix this once encryption is implemented
         trailer.removeItem(COSName.ENCRYPT);
         trailer.setLong(COSName.SIZE, written.lastKey() + 1);
-        write("trailer".getBytes(Charsets.US_ASCII));
-        writeEOL();
-        visit(trailer);
-        write("startxref".getBytes(Charsets.US_ASCII));
-        writeEOL();
-        write(Long.toString(startxref));
-        writeEOL();
-        write("%%EOF".getBytes(Charsets.US_ASCII));
-        writeEOL();
+        writer().write("trailer".getBytes(Charsets.US_ASCII));
+        writer().writeEOL();
+        trailer.getCOSObject().accept(this);
+        writer().write("startxref".getBytes(Charsets.US_ASCII));
+        writer().writeEOL();
+        writer().write(Long.toString(startxref));
+        writer().writeEOL();
+        writer().write("%%EOF".getBytes(Charsets.US_ASCII));
+        writer().writeEOL();
     }
 
     void writeXrefStream(COSDictionary trailer) throws IOException
     {
-        long startxref = offset();
+        long startxref = writer().offset();
         LOG.debug("Writing xref stream at offset " + startxref);
         XrefEntry entry = XrefEntry.inUseEntry(written.lastKey() + 1, startxref, 0);
         written.put(entry.getObjectNumber(), entry);
         doWriteObject(new IndirectCOSObjectReference(entry.getObjectNumber(),
                 entry.getGenerationNumber(), new XrefStream(trailer, written)));
-        write("startxref".getBytes(Charsets.US_ASCII));
-        writeEOL();
-        write(Long.toString(startxref));
-        writeEOL();
-        write("%%EOF".getBytes(Charsets.US_ASCII));
-        writeEOL();
+        writer().write("startxref".getBytes(Charsets.US_ASCII));
+        writer().writeEOL();
+        writer().write(Long.toString(startxref));
+        writer().writeEOL();
+        writer().write("%%EOF".getBytes(Charsets.US_ASCII));
+        writer().writeEOL();
     }
 
     @Override

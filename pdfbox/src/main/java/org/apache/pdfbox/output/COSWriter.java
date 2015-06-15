@@ -18,6 +18,7 @@ package org.apache.pdfbox.output;
 
 import static org.apache.pdfbox.util.CharUtils.isDigit;
 import static org.apache.pdfbox.util.CharUtils.isLetter;
+import static org.apache.pdfbox.util.RequireUtils.requireNotNullArg;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -41,12 +42,13 @@ import org.apache.pdfbox.util.Charsets;
 import org.apache.pdfbox.util.IOUtils;
 
 /**
+ * Component capable of writing COS objects using the given {@link BufferedDestinationWriter}.
+ * 
  * @author Andrea Vacondio
- *
  */
-class COSWriter extends BufferedDestinationWriter implements COSVisitor
+class COSWriter implements COSVisitor
 {
-    protected static final byte[] SPACE = { ' ' };
+    protected static final byte SPACE = 0x20;
     private static final byte[] CRLF = { '\r', '\n' };
     private static final byte SOLIDUS = 0x2F;
     private static final byte REVERSE_SOLIDUS = 0x5C;
@@ -59,85 +61,87 @@ class COSWriter extends BufferedDestinationWriter implements COSVisitor
     private static final byte RIGHT_SQUARE_BRACKET = 0x5D;
     private static final byte[] STREAM = "stream".getBytes(Charsets.US_ASCII);
     private static final byte[] ENDSTREAM = "endstream".getBytes(Charsets.US_ASCII);
+    private BufferedDestinationWriter writer;
 
-    public COSWriter(CountingWritableByteChannel channel)
+    public COSWriter(BufferedDestinationWriter writer)
     {
-        super(channel);
+        requireNotNullArg(writer, "Cannot write to a null writer");
+        this.writer = writer;
     }
 
     @Override
     public void visit(COSArray value) throws IOException
     {
-        write(LEFT_SQUARE_BRACKET);
+        writer.write(LEFT_SQUARE_BRACKET);
         for (Iterator<COSBase> i = value.iterator(); i.hasNext();)
         {
             COSBase current = i.next();
             Optional.ofNullable(current).orElse(COSNull.NULL).accept(this);
             if (i.hasNext())
             {
-                write(SPACE);
+                writer.write(SPACE);
             }
         }
-        write(RIGHT_SQUARE_BRACKET);
-        writeEOL();
+        writer.write(RIGHT_SQUARE_BRACKET);
+        writer.writeEOL();
     }
 
     @Override
     public void visit(COSBoolean value) throws IOException
     {
-        write(value.toString());
+        writer.write(value.toString());
     }
 
     @Override
     public void visit(COSDictionary dictionary) throws IOException
     {
-        write(LESS_THEN);
-        write(LESS_THEN);
-        writeEOL();
+        writer.write(LESS_THEN);
+        writer.write(LESS_THEN);
+        writer.writeEOL();
         for (Map.Entry<COSName, COSBase> entry : dictionary.entrySet())
         {
             COSBase value = entry.getValue();
             if (value != null)
             {
                 entry.getKey().accept(this);
-                write(SPACE);
+                writer.write(SPACE);
                 entry.getValue().accept(this);
-                writeEOL();
+                writer.writeEOL();
             }
         }
-        write(GREATER_THEN);
-        write(GREATER_THEN);
-        writeEOL();
+        writer.write(GREATER_THEN);
+        writer.write(GREATER_THEN);
+        writer.writeEOL();
     }
 
     @Override
     public void visit(COSFloat value) throws IOException
     {
-        write(value.toString());
+        writer.write(value.toString());
     }
 
     @Override
     public void visit(COSInteger value) throws IOException
     {
-        write(value.toString());
+        writer.write(value.toString());
     }
 
     @Override
     public void visit(COSName value) throws IOException
     {
-        write(SOLIDUS);
+        writer.write(SOLIDUS);
         byte[] bytes = value.getName().getBytes(Charsets.US_ASCII);
         for (int i = 0; i < bytes.length; i++)
         {
             int current = bytes[i] & 0xFF;
             if (isLetter(current) || isDigit(current))
             {
-                write(bytes[i]);
+                writer.write(bytes[i]);
             }
             else
             {
-                write(NUMBER_SIGN);
-                write(String.format("%02X", current).getBytes(Charsets.US_ASCII));
+                writer.write(NUMBER_SIGN);
+                writer.write(String.format("%02X", current).getBytes(Charsets.US_ASCII));
             }
         }
     }
@@ -145,7 +149,7 @@ class COSWriter extends BufferedDestinationWriter implements COSVisitor
     @Override
     public void visit(COSNull value) throws IOException
     {
-        write("null".getBytes(Charsets.US_ASCII));
+        writer.write("null".getBytes(Charsets.US_ASCII));
     }
 
     @Override
@@ -153,13 +157,13 @@ class COSWriter extends BufferedDestinationWriter implements COSVisitor
     {
         value.setLong(COSName.LENGTH, value.getFilteredLength());
         visit((COSDictionary) value);
-        write(STREAM);
-        write(CRLF);
-        write(value.getFilteredStream());
+        writer.write(STREAM);
+        writer.write(CRLF);
+        writer.write(value.getFilteredStream());
         IOUtils.close(value);
-        write(CRLF);
-        write(ENDSTREAM);
-        writeEOL();
+        writer.write(CRLF);
+        writer.write(ENDSTREAM);
+        writer.writeEOL();
     }
 
     @Override
@@ -167,13 +171,13 @@ class COSWriter extends BufferedDestinationWriter implements COSVisitor
     {
         if (value.isForceHexForm())
         {
-            write(LESS_THEN);
-            write(value.toHexString());
-            write(GREATER_THEN);
+            writer.write(LESS_THEN);
+            writer.write(value.toHexString());
+            writer.write(GREATER_THEN);
         }
         else
         {
-            write(LEFT_PARENTHESIS);
+            writer.write(LEFT_PARENTHESIS);
             for (byte b : value.getBytes())
             {
                 switch (b)
@@ -186,20 +190,20 @@ class COSWriter extends BufferedDestinationWriter implements COSVisitor
                 case '(':
                 case ')':
                 case '\\':
-                    write(REVERSE_SOLIDUS);
+                    writer.write(REVERSE_SOLIDUS);
                     //$FALL-THROUGH$
                 default:
-                    write(b);
+                    writer.write(b);
                 }
             }
-            write(RIGHT_PARENTHESIS);
+            writer.write(RIGHT_PARENTHESIS);
         }
     }
 
     @Override
     public void visit(IndirectCOSObjectReference value) throws IOException
     {
-        write(value.toString());
+        writer.write(value.toString());
     }
 
     @Override
@@ -208,4 +212,14 @@ class COSWriter extends BufferedDestinationWriter implements COSVisitor
         // nothing to do
     }
 
+    @Override
+    public void close() throws IOException
+    {
+        IOUtils.close(writer);
+    }
+
+    BufferedDestinationWriter writer()
+    {
+        return this.writer;
+    }
 }

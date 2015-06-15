@@ -39,7 +39,7 @@ import org.apache.pdfbox.util.IOUtils;
  */
 class BufferedDestinationWriter implements Closeable
 {
-    private static final byte[] EOL = { '\n' };
+    private static final byte EOL = '\n';
 
     private CountingWritableByteChannel channel;
     private ByteBuffer buffer = ByteBuffer.allocate(Integer.getInteger(

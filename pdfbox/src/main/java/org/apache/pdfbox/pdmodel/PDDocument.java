@@ -46,7 +46,7 @@ import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.cos.DirectCOSObject;
 import org.apache.pdfbox.output.CountingWritableByteChannel;
-import org.apache.pdfbox.output.DefaultPDFWriter;
+import org.apache.pdfbox.output.PDDocumentWriter;
 import org.apache.pdfbox.output.WriteOption;
 import org.apache.pdfbox.pdmodel.common.PDStream;
 import org.apache.pdfbox.pdmodel.encryption.AccessPermission;
@@ -483,7 +483,7 @@ public class PDDocument implements Closeable
         }
         fontsToSubset.clear();
         generateFileIdentifier();
-        try (DefaultPDFWriter writer = new DefaultPDFWriter(this))
+        try (PDDocumentWriter writer = new PDDocumentWriter(this))
         {
             writer.writeTo(output, options);
         }
