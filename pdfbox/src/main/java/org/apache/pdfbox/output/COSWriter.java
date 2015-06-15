@@ -44,8 +44,19 @@ import org.apache.pdfbox.util.IOUtils;
  * @author Andrea Vacondio
  *
  */
-class COSWriter extends DestinationWriter implements COSVisitor
+class COSWriter extends BufferedDestinationWriter implements COSVisitor
 {
+    protected static final byte[] SPACE = { ' ' };
+    private static final byte[] CRLF = { '\r', '\n' };
+    private static final byte SOLIDUS = 0x2F;
+    private static final byte REVERSE_SOLIDUS = 0x5C;
+    private static final byte NUMBER_SIGN = 0x23;
+    private static final byte LESS_THEN = 0x3C;
+    private static final byte GREATER_THEN = 0x3E;
+    private static final byte LEFT_PARENTHESIS = 0x28;
+    private static final byte RIGHT_PARENTHESIS = 0x29;
+    private static final byte LEFT_SQUARE_BRACKET = 0x5B;
+    private static final byte RIGHT_SQUARE_BRACKET = 0x5D;
     private static final byte[] STREAM = "stream".getBytes(Charsets.US_ASCII);
     private static final byte[] ENDSTREAM = "endstream".getBytes(Charsets.US_ASCII);
 

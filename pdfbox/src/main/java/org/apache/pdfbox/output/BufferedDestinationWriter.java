@@ -30,30 +30,23 @@ import org.apache.pdfbox.util.Charsets;
 import org.apache.pdfbox.util.IOUtils;
 
 /**
+ * Component providing methods to write to a {@link CountingWritableByteChannel}. This implementation is buffered and
+ * bytes are flushed to the {@link CountingWritableByteChannel} only when the buffer is full. The buffer size is
+ * configurable using the {@link PDFBox#OUTPUT_BUFFER_SIZE_PROPERTY} property.
+ * 
  * @author Andrea Vacondio
  *
  */
-class DestinationWriter implements Closeable
+class BufferedDestinationWriter implements Closeable
 {
     private static final byte[] EOL = { '\n' };
-    public static final byte[] SPACE = { ' ' };
-    public static final byte[] CRLF = { '\r', '\n' };
-    public static final byte SOLIDUS = 0x2F;
-    public static final byte REVERSE_SOLIDUS = 0x5C;
-    public static final byte NUMBER_SIGN = 0x23;
-    public static final byte LESS_THEN = 0x3C;
-    public static final byte GREATER_THEN = 0x3E;
-    public static final byte LEFT_PARENTHESIS = 0x28;
-    public static final byte RIGHT_PARENTHESIS = 0x29;
-    public static final byte LEFT_SQUARE_BRACKET = 0x5B;
-    public static final byte RIGHT_SQUARE_BRACKET = 0x5D;
 
     private CountingWritableByteChannel channel;
     private ByteBuffer buffer = ByteBuffer.allocate(Integer.getInteger(
-            PDFBox.OUTPUT_PAGE_SIZE_PROPERTY, 4096));
+            PDFBox.OUTPUT_BUFFER_SIZE_PROPERTY, 4096));
     private boolean onNewLine = false;
 
-    public DestinationWriter(CountingWritableByteChannel channel)
+    public BufferedDestinationWriter(CountingWritableByteChannel channel)
     {
         requireNonNull(channel);
         this.channel = channel;
