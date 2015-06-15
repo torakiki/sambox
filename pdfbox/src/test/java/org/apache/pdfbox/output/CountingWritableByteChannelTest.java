@@ -57,7 +57,6 @@ public class CountingWritableByteChannelTest
     public void count() throws Exception
     {
         assertEquals(0, victim.count());
-        ByteBuffer src = ByteBuffer.wrap(new byte[] { '1', '1', '2', '1', '1' });
         victim.write(src);
         assertEquals(5, victim.count());
     }

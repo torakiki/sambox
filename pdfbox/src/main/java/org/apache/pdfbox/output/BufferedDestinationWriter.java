@@ -16,7 +16,7 @@
  */
 package org.apache.pdfbox.output;
 
-import static java.util.Objects.requireNonNull;
+import static org.apache.pdfbox.util.RequireUtils.requireNotNullArg;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -48,7 +48,7 @@ class BufferedDestinationWriter implements Closeable
 
     public BufferedDestinationWriter(CountingWritableByteChannel channel)
     {
-        requireNonNull(channel);
+        requireNotNullArg(channel, "Cannot write to a null channell");
         this.channel = channel;
     }
 
@@ -96,6 +96,12 @@ class BufferedDestinationWriter implements Closeable
         }
     }
 
+    /**
+     * Writes the single byte to the destination
+     * 
+     * @param myByte
+     * @throws IOException
+     */
     public void write(byte myByte) throws IOException
     {
         onNewLine = false;
@@ -106,6 +112,12 @@ class BufferedDestinationWriter implements Closeable
         }
     }
 
+    /**
+     * Writes everything that is read from the {@link InputStream} to the destination
+     * 
+     * @param stream
+     * @throws IOException
+     */
     public void write(InputStream stream) throws IOException
     {
         onNewLine = false;
