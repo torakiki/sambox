@@ -68,11 +68,11 @@ public class PDDocumentWriter implements Closeable
     {
         if (opts.contains(WriteOption.SYNC_BODY_WRITE))
         {
-            writer.writeBodySync(document.getDocument());
+            writer.writeBody(document.getDocument(), new SyncPdfBodyWriter(writer));
         }
         else
         {
-            writer.writeBodyAsync(document.getDocument());
+            writer.writeBody(document.getDocument(), new AsyncPdfBodyWriter(writer));
         }
     }
 

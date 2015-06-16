@@ -33,14 +33,16 @@ import org.apache.pdfbox.util.IOUtils;
 import org.apache.pdfbox.xref.XrefEntry;
 
 /**
+ * Component capable of writing parts of a PDF document (header, xref, body...) using the given
+ * {@link BufferedDestinationWriter}.
+ * 
  * @author Andrea Vacondio
- *
  */
 class PDFWriter extends COSWriter
 {
     private static final Log LOG = LogFactory.getLog(PDFWriter.class);
 
-    private static final byte[] COMMENT = { '%' };
+    private static final byte COMMENT = '%';
     private static final byte[] GARBAGE = new byte[] { (byte) 0xA7, (byte) 0xE3, (byte) 0xF1,
             (byte) 0xF1 };
     private static final byte[] OBJ = "obj".getBytes(Charsets.US_ASCII);
@@ -64,9 +66,15 @@ class PDFWriter extends COSWriter
         writer().writeEOL();
     }
 
+    /**
+     * Writes the given {@link IndirectCOSObjectReference} updating its offset and releasing it once written.
+     * 
+     * @param object
+     * @throws IOException
+     */
     void writerObject(IndirectCOSObjectReference object) throws IOException
     {
-        if (written.get(object.xrefEntry().getObjectNumber()) == null)
+        if (!written.containsKey(object.xrefEntry().getObjectNumber()))
         {
             doWriteObject(object);
             written.put(object.xrefEntry().getObjectNumber(), object.xrefEntry());
@@ -89,16 +97,6 @@ class PDFWriter extends COSWriter
         writer().write(ENDOBJ);
         writer().writeEOL();
         LOG.trace("Written object " + object.xrefEntry());
-    }
-
-    void writeBodyAsync(COSDocument document) throws IOException
-    {
-        writeBody(document, new AsyncPdfBodyWriter(this));
-    }
-
-    void writeBodySync(COSDocument document) throws IOException
-    {
-        writeBody(document, new SyncPdfBodyWriter(this));
     }
 
     void writeBody(COSDocument document, AbstractPdfBodyWriter bodyWriter) throws IOException
@@ -147,6 +145,10 @@ class PDFWriter extends COSWriter
         trailer.removeItem(COSName.PREV);
         trailer.removeItem(COSName.XREF_STM);
         trailer.removeItem(COSName.DOC_CHECKSUM);
+        trailer.removeItem(COSName.DECODE_PARMS);
+        trailer.removeItem(COSName.F_DECODE_PARMS);
+        trailer.removeItem(COSName.F_FILTER);
+        trailer.removeItem(COSName.F);
         // TODO fix this once encryption is implemented
         trailer.removeItem(COSName.ENCRYPT);
         trailer.setLong(COSName.SIZE, written.lastKey() + 1);
