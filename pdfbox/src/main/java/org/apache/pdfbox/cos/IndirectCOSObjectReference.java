@@ -22,8 +22,10 @@ import java.util.Optional;
 import org.apache.pdfbox.xref.XrefEntry;
 
 /**
+ * A disposable indirect object reference. It holds all the necessary information to write a {@link COSBase} as an
+ * indirect reference.
+ * 
  * @author Andrea Vacondio
- *
  */
 public class IndirectCOSObjectReference extends COSBase implements DisposableCOSObject
 {

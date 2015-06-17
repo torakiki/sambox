@@ -26,10 +26,13 @@ import org.apache.pdfbox.cos.COSVisitor;
 import org.apache.pdfbox.cos.DisposableCOSObject;
 
 /**
+ * An indirect object belonging to an existing pdf document. Indirect objects are defined in Chap 7.3.10 of PDF
+ * 32000-1:2008. The {@link COSBase} wrapped by an {@link ExistingIndirectCOSObject} is loaded on demand by querying the
+ * associated {@link IndirectObjectsProvider} when the {@link ExistingIndirectCOSObject#getCOSObject()} is called.
+ * 
  * @author Andrea Vacondio
- *
  */
-public class IndirectCOSObject extends COSBase implements DisposableCOSObject
+public class ExistingIndirectCOSObject extends COSBase implements DisposableCOSObject
 {
 
     private COSBase baseObject;
@@ -37,7 +40,7 @@ public class IndirectCOSObject extends COSBase implements DisposableCOSObject
     private IndirectObjectsProvider provider;
     private String sourceId;
 
-    public IndirectCOSObject(COSObjectKey key, IndirectObjectsProvider provider)
+    ExistingIndirectCOSObject(COSObjectKey key, IndirectObjectsProvider provider)
     {
         this.key = key;
         this.provider = provider;
@@ -75,7 +78,7 @@ public class IndirectCOSObject extends COSBase implements DisposableCOSObject
 
     /**
      * @return the id of the source this indirect object was read from, this is used to identify objects read from the
-     * same file.
+     * same pdf document.
      */
     public String sourceId()
     {

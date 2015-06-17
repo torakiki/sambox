@@ -41,13 +41,13 @@ import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.cos.COSVisitor;
 import org.apache.pdfbox.cos.IndirectCOSObjectReference;
-import org.apache.pdfbox.input.IndirectCOSObject;
+import org.apache.pdfbox.input.ExistingIndirectCOSObject;
 
 /**
  * Base component providing methods to write the body of a pdf document. This implementation starts from the document
- * trailer and visits the whole document graph replacing {@link COSDictionary} and {@link IndirectCOSObject} with a
+ * trailer and visits the whole document graph replacing {@link COSDictionary} and {@link ExistingIndirectCOSObject} with a
  * newly created {@link IndirectCOSObjectReference}. {@link IndirectCOSObjectReference}s are cached and reused if the
- * corresponding {@link COSDictionary}/{@link IndirectCOSObject} is found again while exploring the graph. Once all the
+ * corresponding {@link COSDictionary}/{@link ExistingIndirectCOSObject} is found again while exploring the graph. Once all the
  * values of a {@link COSDictionary} or {@link COSArray} have been processed, the {@link COSDictionary}/{@link COSArray}
  * is written as an object, this allows an async implementation to write objects while the writer is still perfoming its
  * algorithm.
@@ -108,7 +108,7 @@ abstract class AbstractPdfBodyWriter implements COSVisitor
         for (int i = 0; i < array.size(); i++)
         {
             COSBase item = array.get(i);
-            if (item instanceof IndirectCOSObject || item instanceof COSDictionary)
+            if (item instanceof ExistingIndirectCOSObject || item instanceof COSDictionary)
             {
                 IndirectCOSObjectReference ref = getOrCreateIndirectReferenceFor(item);
                 array.set(i, ref);
@@ -126,7 +126,7 @@ abstract class AbstractPdfBodyWriter implements COSVisitor
         for (COSName key : value.keySet())
         {
             COSBase item = value.getItem(key);
-            if (item instanceof IndirectCOSObject || item instanceof COSDictionary)
+            if (item instanceof ExistingIndirectCOSObject || item instanceof COSDictionary)
             {
                 IndirectCOSObjectReference ref = getOrCreateIndirectReferenceFor(item);
                 value.setItem(key, ref);
@@ -148,9 +148,9 @@ abstract class AbstractPdfBodyWriter implements COSVisitor
 
     private IndirectCOSObjectReference getOrCreateIndirectReferenceFor(COSBase item)
     {
-        if (item instanceof IndirectCOSObject)
+        if (item instanceof ExistingIndirectCOSObject)
         {
-            String sourceId = ((IndirectCOSObject) item).sourceId();
+            String sourceId = ((ExistingIndirectCOSObject) item).sourceId();
             Map<COSObjectKey, IndirectCOSObjectReference> indirectsForSource = Optional.ofNullable(
                     bySourceExistingIndirectToNewXref.get(sourceId)).orElseGet(() -> {
                 HashMap<COSObjectKey, IndirectCOSObjectReference> newMap = new HashMap<>();
@@ -158,7 +158,7 @@ abstract class AbstractPdfBodyWriter implements COSVisitor
                 return newMap;
             });
 
-            COSObjectKey key = ((IndirectCOSObject) item).key();
+            COSObjectKey key = ((ExistingIndirectCOSObject) item).key();
             return Optional.ofNullable(indirectsForSource.get(key)).orElseGet(
                     () -> {
                         IndirectCOSObjectReference newRef = nextReferenceFor(item);
