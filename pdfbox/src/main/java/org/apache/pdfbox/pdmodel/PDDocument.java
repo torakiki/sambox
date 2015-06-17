@@ -218,6 +218,7 @@ public class PDDocument implements Closeable
      */
     public void setDocumentInformation(PDDocumentInformation documentInformation)
     {
+        requireOpen();
         document.getTrailer().setItem(COSName.INFO, documentInformation.getCOSObject());
     }
 
@@ -264,6 +265,7 @@ public class PDDocument implements Closeable
      */
     public void setEncryption(PDEncryption encryption)
     {
+        requireOpen();
         this.encryption = encryption;
     }
 
@@ -272,6 +274,7 @@ public class PDDocument implements Closeable
      */
     public void removeEncryption()
     {
+        requireOpen();
         this.encryption = null;
         this.getDocument().getTrailer().removeItem(COSName.ENCRYPT);
     }
@@ -414,12 +417,13 @@ public class PDDocument implements Closeable
      */
     public void setOnCloseAction(OnClose onClose)
     {
+        requireOpen();
         this.onClose = onClose;
     }
 
     private void requireOpen() throws IllegalStateException
     {
-        if (!this.open)
+        if (!isOpen())
         {
             throw new IllegalStateException("The document is closed");
         }
@@ -453,21 +457,53 @@ public class PDDocument implements Closeable
         }
     }
 
+    /**
+     * Writes the document to the given {@link File}. The document is closed once written.
+     * 
+     * @see PDDocument#close()
+     * @param file
+     * @param options
+     * @throws IOException
+     */
     public void writeTo(File file, WriteOption... options) throws IOException
     {
         writeTo(from(file), options);
     }
 
+    /**
+     * Writes the document to the file corresponding the given file name. The document is closed once written.
+     * 
+     * @see PDDocument#close()
+     * @param filename
+     * @param options
+     * @throws IOException
+     */
     public void writeTo(String filename, WriteOption... options) throws IOException
     {
         writeTo(from(filename), options);
     }
 
+    /**
+     * Writes the document to the given {@link WritableByteChannel}. The document is closed once written.
+     * 
+     * @see PDDocument#close()
+     * @param channel
+     * @param options
+     * @throws IOException
+     */
     public void writeTo(WritableByteChannel channel, WriteOption... options) throws IOException
     {
         writeTo(from(channel), options);
     }
 
+    /**
+     * Writes the document to the given {@link OutputStream}. The document is closed once written.
+     * 
+     * @see PDDocument#close()
+     * @param out
+     * @param options
+     * @throws IOException
+     */
     public void writeTo(OutputStream out, WriteOption... options) throws IOException
     {
         writeTo(from(out), options);
@@ -483,12 +519,30 @@ public class PDDocument implements Closeable
         }
         fontsToSubset.clear();
         generateFileIdentifier();
-        try (PDDocumentWriter writer = new PDDocumentWriter(this))
+        try (PDDocumentWriter writer = new PDDocumentWriter(output))
         {
-            writer.writeTo(output, options);
+            writer.write(this, options);
+        }
+        finally
+        {
+            IOUtils.close(this);
         }
     }
 
+    /**
+     * @return true if the {@link PDDocument} is open
+     */
+    public boolean isOpen()
+    {
+        return this.open;
+    }
+
+    /**
+     * Closes the {@link PDDocument} executing an onClose action is set. Once closed the document is pretty much
+     * unusable since most of the mothods requires an open document.
+     * 
+     * @see PDDocument#setOnCloseAction(OnClose)
+     */
     @Override
     public void close() throws IOException
     {
@@ -503,7 +557,6 @@ public class PDDocument implements Closeable
      * Action to be performed before the {@link PDDocument} is close
      * 
      * @author Andrea Vacondio
-     *
      */
     @FunctionalInterface
     public static interface OnClose

@@ -16,10 +16,11 @@
  */
 package org.apache.pdfbox.output;
 
-import static java.util.Objects.requireNonNull;
+import static org.apache.pdfbox.util.RequireUtils.requireNotNullArg;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.nio.channels.WritableByteChannel;
 import java.util.Arrays;
 import java.util.List;
 
@@ -28,23 +29,31 @@ import org.apache.pdfbox.pdmodel.encryption.SecurityHandler;
 import org.apache.pdfbox.util.IOUtils;
 
 /**
+ * Writer for a {@link PDDocument}. This component wraps a required {@link PDDocument} and provides methods to write it
+ * to a {@link WritableByteChannel}.
+ * 
  * @author Andrea Vacondio
- *
  */
 public class PDDocumentWriter implements Closeable
 {
-    private PDDocument document;
     private PDFWriter writer;
 
-    public PDDocumentWriter(PDDocument document)
+    public PDDocumentWriter(CountingWritableByteChannel channel)
     {
-        requireNonNull(document);
-        this.document = document;
+        requireNotNullArg(channel, "Cannot write to a null channel");
+        this.writer = new PDFWriter(new BufferedDestinationWriter(channel));
     }
 
-    public void writeTo(CountingWritableByteChannel channel, WriteOption... options)
-            throws IOException
+    /**
+     * Writes the {@link PDDocument}.
+     * 
+     * @param document
+     * @param options
+     * @throws IOException
+     */
+    public void write(PDDocument document, WriteOption... options) throws IOException
     {
+        requireNotNullArg(document, "PDDocument cannot be null");
         if (document.getEncryption() != null)
         {
             // TODO refactor the encrypt/decrypt
@@ -57,14 +66,13 @@ public class PDDocumentWriter implements Closeable
             }
             securityHandler.prepareDocumentForEncryption(document);
         }
-        writer = new PDFWriter(new BufferedDestinationWriter(channel));
         writer.writeHeader(document.getDocument().getHeaderVersion());
         List<WriteOption> opts = Arrays.asList(options);
-        writeBody(opts);
-        writeXref(opts);
+        writeBody(document, opts);
+        writeXref(document, opts);
     }
 
-    private void writeBody(List<WriteOption> opts) throws IOException
+    private void writeBody(PDDocument document, List<WriteOption> opts) throws IOException
     {
         if (opts.contains(WriteOption.SYNC_BODY_WRITE))
         {
@@ -76,7 +84,7 @@ public class PDDocumentWriter implements Closeable
         }
     }
 
-    private void writeXref(List<WriteOption> opts) throws IOException
+    private void writeXref(PDDocument document, List<WriteOption> opts) throws IOException
     {
         if (opts.contains(WriteOption.XREF_STREAM))
         {
@@ -93,6 +101,5 @@ public class PDDocumentWriter implements Closeable
     public void close() throws IOException
     {
         IOUtils.close(writer);
-        IOUtils.close(document);
     }
 }
