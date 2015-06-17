@@ -42,7 +42,7 @@ public class FileChannelSeekableSourceTest extends BaseTestSeekableSource
     public void setUp() throws Exception
     {
         tempFile = Files.createTempFile("SAMBox", null);
-        Files.copy(getClass().getResourceAsStream("/input/allah2.pdf"), tempFile,
+        Files.copy(getClass().getResourceAsStream("/input/simple_test.pdf"), tempFile,
                 StandardCopyOption.REPLACE_EXISTING);
         victim = new FileChannelSeekableSource(tempFile.toFile());
     }

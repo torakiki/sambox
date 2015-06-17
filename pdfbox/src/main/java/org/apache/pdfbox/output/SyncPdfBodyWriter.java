@@ -16,13 +16,15 @@
  */
 package org.apache.pdfbox.output;
 
-import static java.util.Objects.requireNonNull;
+import static org.apache.pdfbox.util.RequireUtils.requireNotNullArg;
 
 import java.io.IOException;
 
 import org.apache.pdfbox.cos.IndirectCOSObjectReference;
 
 /**
+ * Synchronous implementation of an {@link AbstractPdfBodyWriter}.
+ * 
  * @author Andrea Vacondio
  *
  */
@@ -32,7 +34,7 @@ class SyncPdfBodyWriter extends AbstractPdfBodyWriter
 
     SyncPdfBodyWriter(PDFWriter writer)
     {
-        requireNonNull(writer);
+        requireNotNullArg(writer, "Cannot write to a null writer");
         this.writer = writer;
     }
 
@@ -47,5 +49,4 @@ class SyncPdfBodyWriter extends AbstractPdfBodyWriter
     {
         // no op
     }
-
 }

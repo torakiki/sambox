@@ -44,8 +44,15 @@ import org.apache.pdfbox.cos.IndirectCOSObjectReference;
 import org.apache.pdfbox.input.IndirectCOSObject;
 
 /**
+ * Base component providing methods to write the body of a pdf document. This implementation starts from the document
+ * trailer and visits the whole document graph replacing {@link COSDictionary} and {@link IndirectCOSObject} with a
+ * newly created {@link IndirectCOSObjectReference}. {@link IndirectCOSObjectReference}s are cached and reused if the
+ * corresponding {@link COSDictionary}/{@link IndirectCOSObject} is found again while exploring the graph. Once all the
+ * values of a {@link COSDictionary} or {@link COSArray} have been processed, the {@link COSDictionary}/{@link COSArray}
+ * is written as an object, this allows an async implementation to write objects while the writer is still perfoming its
+ * algorithm.
+ * 
  * @author Andrea Vacondio
- *
  */
 abstract class AbstractPdfBodyWriter implements COSVisitor
 {
@@ -56,6 +63,17 @@ abstract class AbstractPdfBodyWriter implements COSVisitor
     private AtomicInteger objectsCounter = new AtomicInteger(0);
 
     private Queue<IndirectCOSObjectReference> stack = new LinkedList<>();
+
+    /**
+     * Writes the body of the given document
+     * 
+     * @param document
+     * @throws IOException
+     */
+    public void write(COSDocument document) throws IOException
+    {
+        document.accept(this);
+    }
 
     @Override
     public void visit(COSDocument document) throws IOException
@@ -68,7 +86,6 @@ abstract class AbstractPdfBodyWriter implements COSVisitor
             if (value != null)
             {
                 IndirectCOSObjectReference ref = getOrCreateIndirectReferenceFor(value);
-                stack.add(ref);
                 document.getTrailer().setItem(k, ref);
             }
         }

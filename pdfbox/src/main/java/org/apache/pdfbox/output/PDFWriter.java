@@ -67,7 +67,8 @@ class PDFWriter extends COSWriter
     }
 
     /**
-     * Writes the given {@link IndirectCOSObjectReference} updating its offset and releasing it once written.
+     * Writes the given {@link IndirectCOSObjectReference} updating its offset and releasing it once written. Object
+     * numbers are cached to avoid writing the same object multiple times.
      * 
      * @param object
      * @throws IOException
@@ -104,7 +105,7 @@ class PDFWriter extends COSWriter
         LOG.debug("Writing body using " + bodyWriter.getClass());
         try
         {
-            document.accept(bodyWriter);
+            bodyWriter.write(document);
         }
         finally
         {

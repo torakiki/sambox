@@ -128,7 +128,7 @@ public class PDFWriterTest
         AbstractPdfBodyWriter bodyWriter = mock(AbstractPdfBodyWriter.class);
         InOrder inOrder = Mockito.inOrder(bodyWriter);
         victim.writeBody(document, bodyWriter);
-        inOrder.verify(bodyWriter).visit(document);
+        inOrder.verify(bodyWriter).write(document);
         inOrder.verify(bodyWriter).close();
     }
 

@@ -83,7 +83,7 @@ public class SeekableSourcesTest
         {
             System.setProperty(PDFBox.MAPPED_SIZE_THRESHOLD_PROPERTY, "10");
             Path tempFile = Files.createTempFile("SAMBox", null);
-            Files.copy(getClass().getResourceAsStream("/input/allah2.pdf"), tempFile,
+            Files.copy(getClass().getResourceAsStream("/input/simple_test.pdf"), tempFile,
                     StandardCopyOption.REPLACE_EXISTING);
             assertNotNull(SeekableSources.seekableSourceFrom(tempFile.toFile()));
         }

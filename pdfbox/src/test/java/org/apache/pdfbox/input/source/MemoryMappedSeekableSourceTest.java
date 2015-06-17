@@ -40,7 +40,7 @@ public class MemoryMappedSeekableSourceTest extends BaseTestSeekableSource
     public void setUp() throws Exception
     {
         tempFile = Files.createTempFile("SAMBox", null);
-        Files.copy(getClass().getResourceAsStream("/input/allah2.pdf"), tempFile,
+        Files.copy(getClass().getResourceAsStream("/input/simple_test.pdf"), tempFile,
                 StandardCopyOption.REPLACE_EXISTING);
         victim = new MemoryMappedSeekableSource(tempFile.toFile());
     }
@@ -76,7 +76,7 @@ public class MemoryMappedSeekableSourceTest extends BaseTestSeekableSource
         Path tempFile = Files.createTempFile("SAMBox", null);
         try
         {
-            Files.copy(getClass().getResourceAsStream("/input/allah2.pdf"), tempFile,
+            Files.copy(getClass().getResourceAsStream("/input/simple_test.pdf"), tempFile,
                     StandardCopyOption.REPLACE_EXISTING);
             victim = new MemoryMappedSeekableSource(tempFile.toFile());
             victim.position(49);

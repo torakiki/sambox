@@ -16,7 +16,7 @@
  */
 package org.apache.pdfbox.output;
 
-import static java.util.Objects.requireNonNull;
+import static org.apache.pdfbox.util.RequireUtils.requireNotNullArg;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
@@ -30,6 +30,9 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.IndirectCOSObjectReference;
 
 /**
+ * Asynchronous implementation of an {@link AbstractPdfBodyWriter} where a objects are written subbmitting a task to a
+ * single thread executor service.
+ * 
  * @author Andrea Vacondio
  *
  */
@@ -50,7 +53,7 @@ class AsyncPdfBodyWriter extends AbstractPdfBodyWriter
 
     AsyncPdfBodyWriter(PDFWriter writer)
     {
-        requireNonNull(writer);
+        requireNotNullArg(writer, "Cannot write to a null writer");
         this.writer = writer;
     }
 
