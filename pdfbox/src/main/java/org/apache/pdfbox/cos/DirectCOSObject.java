@@ -31,7 +31,7 @@ public final class DirectCOSObject extends COSBase
 
     private DirectCOSObject(COSBase wrapped)
     {
-        this.baseObject = Optional.ofNullable(wrapped).orElse(COSNull.NULL);
+        this.baseObject = wrapped;
     }
 
     @Override
@@ -54,6 +54,6 @@ public final class DirectCOSObject extends COSBase
      */
     public static DirectCOSObject asDirectObject(COSObjectable wrapped)
     {
-        return new DirectCOSObject(wrapped.getCOSObject());
+        return new DirectCOSObject(Optional.ofNullable(wrapped).orElse(COSNull.NULL).getCOSObject());
     }
 }
