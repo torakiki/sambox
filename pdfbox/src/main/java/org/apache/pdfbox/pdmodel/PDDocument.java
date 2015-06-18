@@ -59,8 +59,7 @@ import org.apache.pdfbox.util.Charsets;
 import org.apache.pdfbox.util.IOUtils;
 
 /**
- * This is the in-memory representation of the PDF document. The #close() method must be called once the document is no
- * longer needed.
+ * This is the in-memory representation of the PDF document.
  * 
  * @author Ben Litchfield
  */

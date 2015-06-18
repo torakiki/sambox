@@ -16,6 +16,7 @@
  */
 package org.apache.pdfbox.output;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -54,7 +55,7 @@ import org.apache.pdfbox.input.ExistingIndirectCOSObject;
  * 
  * @author Andrea Vacondio
  */
-abstract class AbstractPdfBodyWriter implements COSVisitor
+abstract class AbstractPdfBodyWriter implements COSVisitor, Closeable
 {
     private static final Log LOG = LogFactory.getLog(AbstractPdfBodyWriter.class);
 

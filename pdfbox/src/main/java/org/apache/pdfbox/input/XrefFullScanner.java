@@ -31,7 +31,7 @@ import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.xref.XrefEntry;
 
 /**
- * Component scanning for xref tables/streams. It scanns top to bottom parsing any xref table/stream found with the
+ * Component scanning for xref tables/streams. It scans top to bottom parsing any xref table/stream found with the
  * assumption that xrefs found later in the file are more recent.
  * 
  * @author Andrea Vacondio

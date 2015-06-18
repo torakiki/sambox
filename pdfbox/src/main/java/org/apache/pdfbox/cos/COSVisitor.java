@@ -16,14 +16,15 @@
  */
 package org.apache.pdfbox.cos;
 
-import java.io.Closeable;
 import java.io.IOException;
 
 /**
+ * Visitor interface to visit COS objects.
+ * 
  * @author Andrea Vacondio
  *
  */
-public interface COSVisitor extends Closeable
+public interface COSVisitor
 {
     void visit(COSDocument value) throws IOException;
 

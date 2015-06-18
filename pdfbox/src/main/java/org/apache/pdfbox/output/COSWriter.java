@@ -20,6 +20,7 @@ import static org.apache.pdfbox.util.CharUtils.isDigit;
 import static org.apache.pdfbox.util.CharUtils.isLetter;
 import static org.apache.pdfbox.util.RequireUtils.requireNotNullArg;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
@@ -46,7 +47,7 @@ import org.apache.pdfbox.util.IOUtils;
  * 
  * @author Andrea Vacondio
  */
-class COSWriter implements COSVisitor
+class COSWriter implements COSVisitor, Closeable
 {
     protected static final byte SPACE = 0x20;
     private static final byte[] CRLF = { '\r', '\n' };
