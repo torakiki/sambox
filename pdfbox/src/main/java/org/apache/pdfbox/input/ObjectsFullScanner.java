@@ -28,7 +28,7 @@ import org.apache.pdfbox.xref.Xref;
 import org.apache.pdfbox.xref.XrefEntry;
 
 /**
- * Component performing a full scan of the document and retrieves objects definition and the corresponding offset. This
+ * Component performing a full scan of the document and retrieving objects definition and the corresponding offset. This
  * implementation is lazy and the full scan is performed the first time the entries are accessed.
  * 
  * @author Andrea Vacondio
