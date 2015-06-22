@@ -29,8 +29,11 @@ import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.xref.XrefEntry;
 
 /**
+ * Base class for an xref table parser. Implementors will decide what to do when the parser finds a new trailer or a new
+ * entries.
+ * 
  * @author Andrea Vacondio
- *
+ * @see org.apache.pdfbox.input.AbstractXrefStreamParser
  */
 abstract class AbstractXrefTableParser
 {
@@ -45,8 +48,18 @@ abstract class AbstractXrefTableParser
         this.parser = parser;
     }
 
+    /**
+     * Action to perform when a trailer is found
+     * 
+     * @param trailer
+     */
     abstract void onTrailerFound(COSDictionary trailer);
 
+    /**
+     * Action to perform when an {@link XrefEntry} is found
+     * 
+     * @param entry
+     */
     abstract void onEntryFound(XrefEntry entry);
 
     /**

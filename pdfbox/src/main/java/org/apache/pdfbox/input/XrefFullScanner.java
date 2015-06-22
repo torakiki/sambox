@@ -35,7 +35,6 @@ import org.apache.pdfbox.xref.XrefEntry;
  * assumption that xrefs found later in the file are more recent.
  * 
  * @author Andrea Vacondio
- *
  */
 class XrefFullScanner
 {

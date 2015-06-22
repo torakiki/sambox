@@ -36,12 +36,14 @@ import org.apache.pdfbox.xref.CompressedXrefEntry;
 import org.apache.pdfbox.xref.XrefEntry;
 
 /**
+ * Base class for an xref stream parser. Implementors will decide what to do when the parser finds a new trailer or a
+ * new entries.
+ * 
  * @author Andrea Vacondio
- *
+ * @see org.apache.pdfbox.input.AbstractXrefTableParser
  */
 abstract class AbstractXrefStreamParser
 {
-
     private static final Log LOG = LogFactory.getLog(AbstractXrefStreamParser.class);
 
     private BaseCOSParser parser;
@@ -51,8 +53,18 @@ abstract class AbstractXrefStreamParser
         this.parser = parser;
     }
 
+    /**
+     * Action to perform when a trailer is found
+     * 
+     * @param trailer
+     */
     abstract void onTrailerFound(COSDictionary trailer);
 
+    /**
+     * Action to perform when an {@link XrefEntry} is found
+     * 
+     * @param entry
+     */
     abstract void onEntryFound(XrefEntry entry);
 
     /**

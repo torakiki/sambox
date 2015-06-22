@@ -73,7 +73,6 @@ class DefaultPDFParser
             throws IOException
     {
         String headerVersion = readHeader(parser);
-        parser.provider().initializeWith(parser);
         XrefParser xrefParser = new XrefParser(parser);
         xrefParser.parse();
 

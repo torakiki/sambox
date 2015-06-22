@@ -92,17 +92,19 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
     }
 
     @Override
-    public void initializeWith(BaseCOSParser parser)
+    public LazyIndirectObjectsProvider initializeWith(BaseCOSParser parser)
     {
         requireNonNull(parser);
         this.parser = parser;
         this.scanner = new ObjectsFullScanner(parser);
+        return this;
     }
 
     @Override
-    public void initializeWith(SecurityHandler handler)
+    public LazyIndirectObjectsProvider initializeWith(SecurityHandler handler)
     {
         this.securityHandler = handler;
+        return this;
     }
 
     private void parseObject(COSObjectKey key)
@@ -132,12 +134,12 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
             }
             catch (IOException e)
             {
-                LOG.warn("Unable to find fallback xref entry for " + xref, e);
+                LOG.warn("Unable to find fallback xref entry for " + key, e);
             }
         }
         else
         {
-            LOG.warn("Unable to find fallback xref entry for " + xref);
+            LOG.warn("Unable to find fallback xref entry for " + key);
         }
     }
 

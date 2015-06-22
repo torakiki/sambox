@@ -67,15 +67,17 @@ interface IndirectObjectsProvider extends Closeable
      * Initialize the component with the {@link BaseCOSParser} to use to retrieve and parse requested object
      * 
      * @param parser
+     * @return this provider
      */
-    public void initializeWith(BaseCOSParser parser);
+    public IndirectObjectsProvider initializeWith(BaseCOSParser parser);
 
     /**
      * Initialize the component with the {@link SecurityHandler} to decrypt streams and strings.
      * 
      * @param handler
+     * @return this provider
      */
-    public void initializeWith(SecurityHandler handler);
+    public IndirectObjectsProvider initializeWith(SecurityHandler handler);
 
     /**
      * @return the unique id for the provider.

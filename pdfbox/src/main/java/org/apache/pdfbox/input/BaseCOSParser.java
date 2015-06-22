@@ -58,7 +58,8 @@ final class BaseCOSParser extends SourceReader
 
     BaseCOSParser(SeekableSource source)
     {
-        this(source, new LazyIndirectObjectsProvider());
+        super(source);
+        this.provider = new LazyIndirectObjectsProvider().initializeWith(this);
     }
 
     BaseCOSParser(SeekableSource source, IndirectObjectsProvider provider)
