@@ -26,7 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
-import org.apache.pdfbox.PDFBox;
+import org.apache.pdfbox.SAMBox;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,7 +48,7 @@ public class MemoryMappedSeekableSourceTest extends BaseTestSeekableSource
     @After
     public void after() throws IOException
     {
-        System.getProperties().remove(PDFBox.MEMORY_MAPPED_PAGE_SIZE_PROPERTY);
+        System.getProperties().remove(SAMBox.MEMORY_MAPPED_PAGE_SIZE_PROPERTY);
         Files.deleteIfExists(tempFile);
     }
 
@@ -72,7 +72,7 @@ public class MemoryMappedSeekableSourceTest extends BaseTestSeekableSource
     @Test
     public void pagedRead() throws IOException
     {
-        System.setProperty(PDFBox.MEMORY_MAPPED_PAGE_SIZE_PROPERTY, "50");
+        System.setProperty(SAMBox.MEMORY_MAPPED_PAGE_SIZE_PROPERTY, "50");
         Path tempFile = Files.createTempFile("SAMBox", null);
         try
         {
@@ -109,7 +109,7 @@ public class MemoryMappedSeekableSourceTest extends BaseTestSeekableSource
     @Test
     public void pagedReadBuff() throws IOException
     {
-        System.setProperty(PDFBox.MEMORY_MAPPED_PAGE_SIZE_PROPERTY, "50");
+        System.setProperty(SAMBox.MEMORY_MAPPED_PAGE_SIZE_PROPERTY, "50");
         Path tempFile = Files.createTempFile("SAMBox", null);
         try
         {

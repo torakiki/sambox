@@ -30,7 +30,7 @@ import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
 import java.util.Arrays;
 
-import org.apache.pdfbox.PDFBox;
+import org.apache.pdfbox.SAMBox;
 import org.apache.pdfbox.util.Charsets;
 import org.junit.After;
 import org.junit.Before;
@@ -58,7 +58,7 @@ public class BufferedDestinationWriterTest
     @After
     public void after()
     {
-        System.getProperties().remove(PDFBox.OUTPUT_BUFFER_SIZE_PROPERTY);
+        System.getProperties().remove(SAMBox.OUTPUT_BUFFER_SIZE_PROPERTY);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -124,7 +124,7 @@ public class BufferedDestinationWriterTest
     @Test
     public void writeBytesExceedingBuffer() throws IOException
     {
-        System.getProperties().setProperty(PDFBox.OUTPUT_BUFFER_SIZE_PROPERTY, "4");
+        System.getProperties().setProperty(SAMBox.OUTPUT_BUFFER_SIZE_PROPERTY, "4");
         victim = new BufferedDestinationWriter(channel);
         byte[] bytes = new byte[] { '1', '1', '2', '1', '1' };
         victim.write(bytes);

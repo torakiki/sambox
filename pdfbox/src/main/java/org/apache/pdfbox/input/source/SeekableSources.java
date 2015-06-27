@@ -25,7 +25,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
-import org.apache.pdfbox.PDFBox;
+import org.apache.pdfbox.SAMBox;
 import org.apache.pdfbox.util.IOUtils;
 
 /**
@@ -56,7 +56,7 @@ public final class SeekableSources
     public static SeekableSource seekableSourceFrom(File file) throws IOException
     {
         requireNonNull(file);
-        if (file.length() > Long.getLong(PDFBox.MAPPED_SIZE_THRESHOLD_PROPERTY, MB_16))
+        if (file.length() > Long.getLong(SAMBox.MAPPED_SIZE_THRESHOLD_PROPERTY, MB_16))
         {
             return new BufferedSeekableSource(new MemoryMappedSeekableSource(file));
         }

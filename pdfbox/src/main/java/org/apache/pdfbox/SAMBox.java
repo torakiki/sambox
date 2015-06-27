@@ -17,15 +17,33 @@
 package org.apache.pdfbox;
 
 /**
+ * Holder for configurable system properties. This is supposed to give developers a single place where they can find out
+ * what's configurable in SAMBox.
+ * 
  * @author Andrea Vacondio
- *
  */
-public final class PDFBox
+public final class SAMBox
 {
+    /**
+     * Threshold size in bytes where the SeekableSources method with switch to
+     * org.apache.pdfbox.input.source.MemoryMappedSeekableSource.MemoryMappedSeekableSource(File)
+     */
     public static final String MAPPED_SIZE_THRESHOLD_PROPERTY = "org.pdfbox.mapped.size.threshold";
+    /**
+     * Buffer size for org.apache.pdfbox.input.source.BufferedSeekableSource
+     */
     public static final String INPUT_BUFFER_SIZE_PROPERTY = "org.pdfbox.buffered.input.size";
+    /**
+     * Buffer size for org.apache.pdfbox.output.BufferedDestinationWriter
+     */
     public static final String OUTPUT_BUFFER_SIZE_PROPERTY = "org.pdfbox.buffered.output.size";
+    /**
+     * Size of the pages used by org.apache.pdfbox.input.source.MemoryMappedSeekableSource
+     */
     public static final String MEMORY_MAPPED_PAGE_SIZE_PROPERTY = "org.pdfbox.memory.mapped.page.size";
+    /**
+     * Pool size used in org.apache.pdfbox.input.SourceReader
+     */
     public static final String BUFFERS_POOL_SIZE_PROPERTY = "org.pdfbox.buffers.pool.size";
 
     public static final String SAMBOX_PROPERTIES = "org/apache/pdfbox/resources/sambox.properties";

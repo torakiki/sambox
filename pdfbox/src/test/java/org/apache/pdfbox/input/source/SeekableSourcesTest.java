@@ -25,7 +25,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
-import org.apache.pdfbox.PDFBox;
+import org.apache.pdfbox.SAMBox;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -81,7 +81,7 @@ public class SeekableSourcesTest
     {
         try
         {
-            System.setProperty(PDFBox.MAPPED_SIZE_THRESHOLD_PROPERTY, "10");
+            System.setProperty(SAMBox.MAPPED_SIZE_THRESHOLD_PROPERTY, "10");
             Path tempFile = Files.createTempFile("SAMBox", null);
             Files.copy(getClass().getResourceAsStream("/input/simple_test.pdf"), tempFile,
                     StandardCopyOption.REPLACE_EXISTING);
@@ -89,7 +89,7 @@ public class SeekableSourcesTest
         }
         finally
         {
-            System.getProperties().remove(PDFBox.MAPPED_SIZE_THRESHOLD_PROPERTY);
+            System.getProperties().remove(SAMBox.MAPPED_SIZE_THRESHOLD_PROPERTY);
         }
     }
 

@@ -22,12 +22,12 @@ import static org.apache.pdfbox.util.RequireUtils.requireArg;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import org.apache.pdfbox.PDFBox;
+import org.apache.pdfbox.SAMBox;
 import org.apache.pdfbox.util.IOUtils;
 
 /**
  * {@link SeekableSource} wrapping an existing one and providing buffered read. When a read method is called, a
- * {@link PDFBox#INPUT_BUFFER_SIZE_PROPERTY} long chunk of bytes is read from the underlying source and stored in memory.
+ * {@link SAMBox#INPUT_BUFFER_SIZE_PROPERTY} long chunk of bytes is read from the underlying source and stored in memory.
  * Subsequent reads are served from the in memory buffer until they fall outside its range, at that point a new buffer
  * is read from the wrapped source.
  * 
@@ -37,7 +37,7 @@ public class BufferedSeekableSource extends BaseSeekableSource
 {
 
     private ByteBuffer buffer = ByteBuffer.allocate(Integer.getInteger(
-            PDFBox.INPUT_BUFFER_SIZE_PROPERTY, 8192));
+            SAMBox.INPUT_BUFFER_SIZE_PROPERTY, 8192));
     private SeekableSource wrapped;
     private long position;
     private long size;

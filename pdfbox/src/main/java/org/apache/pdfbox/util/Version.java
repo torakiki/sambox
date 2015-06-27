@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-import org.apache.pdfbox.PDFBox;
+import org.apache.pdfbox.SAMBox;
 
 /**
  * Exposes PDFBox version.
@@ -40,7 +40,7 @@ public final class Version
     public static String getVersion()
     {
         try (InputStream stream = Version.class.getClassLoader().getResourceAsStream(
-                PDFBox.SAMBOX_PROPERTIES))
+                SAMBox.SAMBOX_PROPERTIES))
         {
             if (stream != null)
             {

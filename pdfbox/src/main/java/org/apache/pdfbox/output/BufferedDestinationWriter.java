@@ -25,14 +25,14 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 
-import org.apache.pdfbox.PDFBox;
+import org.apache.pdfbox.SAMBox;
 import org.apache.pdfbox.util.Charsets;
 import org.apache.pdfbox.util.IOUtils;
 
 /**
  * Component providing methods to write to a {@link CountingWritableByteChannel}. This implementation is buffered and
  * bytes are flushed to the {@link CountingWritableByteChannel} only when the buffer is full. The buffer size is
- * configurable using the {@link PDFBox#OUTPUT_BUFFER_SIZE_PROPERTY} property.
+ * configurable using the {@link SAMBox#OUTPUT_BUFFER_SIZE_PROPERTY} property.
  * 
  * @author Andrea Vacondio
  *
@@ -43,7 +43,7 @@ class BufferedDestinationWriter implements Closeable
 
     private CountingWritableByteChannel channel;
     private ByteBuffer buffer = ByteBuffer.allocate(Integer.getInteger(
-            PDFBox.OUTPUT_BUFFER_SIZE_PROPERTY, 4096));
+            SAMBox.OUTPUT_BUFFER_SIZE_PROPERTY, 4096));
     private boolean onNewLine = false;
 
     public BufferedDestinationWriter(CountingWritableByteChannel channel)

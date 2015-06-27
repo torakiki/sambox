@@ -30,12 +30,12 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.pdfbox.PDFBox;
+import org.apache.pdfbox.SAMBox;
 
 /**
  * A {@link SeekableSource} implementation based on MappedByteBuffer. To overcome the int limit of the MappedByteBuffer,
  * this source implement a pagination algorithm allowing to open files of any size. The size of the pages can be
- * configured using the {@link PDFBox#MEMORY_MAPPED_PAGE_SIZE_PROPERTY} systm property.
+ * configured using the {@link SAMBox#MEMORY_MAPPED_PAGE_SIZE_PROPERTY} systm property.
  * 
  * @author Andrea Vacondio
  *
@@ -45,7 +45,7 @@ public class MemoryMappedSeekableSource extends BaseSeekableSource
     private static final Log LOG = LogFactory.getLog(MemoryMappedSeekableSource.class);
     private static final long MB_500 = 1 << 29;
 
-    private final long pageSize = Long.getLong(PDFBox.MEMORY_MAPPED_PAGE_SIZE_PROPERTY, MB_500);
+    private final long pageSize = Long.getLong(SAMBox.MEMORY_MAPPED_PAGE_SIZE_PROPERTY, MB_500);
     private List<ByteBuffer> pages = new ArrayList<>();
     private long position;
     private long size;
