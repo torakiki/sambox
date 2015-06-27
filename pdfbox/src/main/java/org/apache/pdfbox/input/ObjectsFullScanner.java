@@ -16,7 +16,7 @@
  */
 package org.apache.pdfbox.input;
 
-import static java.util.Objects.requireNonNull;
+import static org.apache.pdfbox.util.RequireUtils.requireNotNullArg;
 
 import java.io.IOException;
 import java.util.regex.Matcher;
@@ -44,7 +44,7 @@ class ObjectsFullScanner
 
     ObjectsFullScanner(SourceReader reader)
     {
-        requireNonNull(reader);
+        requireNotNullArg(reader, "Cannot read from a null reader");
         this.reader = reader;
     }
 

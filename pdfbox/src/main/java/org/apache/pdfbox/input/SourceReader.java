@@ -30,8 +30,8 @@ import static org.apache.pdfbox.util.CharUtils.isHexDigit;
 import static org.apache.pdfbox.util.CharUtils.isLineFeed;
 import static org.apache.pdfbox.util.CharUtils.isOctalDigit;
 import static org.apache.pdfbox.util.CharUtils.isWhitespace;
-import static org.apache.pdfbox.util.RequireUtils.requireArg;
 import static org.apache.pdfbox.util.RequireUtils.requireIOCondition;
+import static org.apache.pdfbox.util.RequireUtils.requireNotNullArg;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -47,8 +47,11 @@ import org.apache.pdfbox.util.IOUtils;
 import org.apache.pdfbox.util.Pool;
 
 /**
+ * Component responsible for reading a {@link SeekableSource}. Methods to read expected kind of tokens are available as
+ * well as methods to skip them. This implementation uses a pool of {@link StringBuilder}s to minimize garbage
+ * collection.
+ * 
  * @author Andrea Vacondio
- *
  */
 class SourceReader implements Closeable
 {
@@ -68,7 +71,7 @@ class SourceReader implements Closeable
 
     public SourceReader(SeekableSource source)
     {
-        requireArg(source != null, "Cannot read a null source");
+        requireNotNullArg(source, "Cannot read a null source");
         this.source = source;
     }
 
@@ -109,33 +112,6 @@ class SourceReader implements Closeable
     public long length()
     {
         return source.size();
-    }
-
-    /**
-     * @return The next token that was read from the stream.
-     *
-     * @throws IOException If there is an error reading from the stream.
-     * @see CharUtils#isEndOfName(int)
-     */
-    public String readToken() throws IOException
-    {
-        skipSpaces();
-
-        StringBuilder builder = pool.borrow();
-        try
-        {
-            int c;
-            while (((c = source.read()) != -1) && !isEndOfName(c))
-            {
-                builder.append((char) c);
-            }
-            unreadIfValid(c);
-            return builder.toString();
-        }
-        finally
-        {
-            pool.give(builder);
-        }
     }
 
     /**
@@ -229,6 +205,33 @@ class SourceReader implements Closeable
     }
 
     /**
+     * @return The next token that was read from the stream.
+     *
+     * @throws IOException If there is an error reading from the stream.
+     * @see CharUtils#isEndOfName(int)
+     */
+    public String readToken() throws IOException
+    {
+        skipSpaces();
+
+        StringBuilder builder = pool.borrow();
+        try
+        {
+            int c;
+            while (((c = source.read()) != -1) && !isEndOfName(c))
+            {
+                builder.append((char) c);
+            }
+            unreadIfValid(c);
+            return builder.toString();
+        }
+        finally
+        {
+            pool.give(builder);
+        }
+    }
+
+    /**
      * @param valid values for the next token.
      * @return true if the next token is one of the given values. false otherwise.
      * @throws IOException if there is an error reading from the stream
@@ -314,7 +317,6 @@ class SourceReader implements Closeable
      */
     public String readName() throws IOException
     {
-        long offset = position();
         skipExpected('/');
         StringBuilder builder = pool.borrow();
         try
@@ -325,8 +327,8 @@ class SourceReader implements Closeable
                 char c = (char) i;
                 if (c == '#')
                 {
-                    int ch1 = source.read();
-                    int ch2 = source.read();
+                    char ch1 = (char) source.read();
+                    char ch2 = (char) source.read();
 
                     // Prior to PDF v1.2, the # was not a special character. Also,
                     // it has been observed that various PDF tools do not follow the
@@ -338,25 +340,13 @@ class SourceReader implements Closeable
                     if (isHexDigit(ch1) && isHexDigit(ch2))
                     {
                         String hex = "" + ch1 + ch2;
-                        try
-                        {
-                            c = (char) Integer.parseInt(hex, 16);
-                        }
-                        catch (NumberFormatException e)
-                        {
-                            source.back(2);
-                            throw new IOException(
-                                    String.format(
-                                            "Expected an Hex number at offset %d but was '%s'",
-                                            offset, hex), e);
-                        }
+                        c = (char) Integer.parseInt(hex, 16);
                     }
                     else
                     {
-                        source.back();
+                        source.back(2);
                         LOG.warn("Found NUMBER SIGN (#) not used as escaping char while reading name at "
                                 + position());
-                        c = (char) ch1;
                     }
                 }
                 builder.append(c);
@@ -495,8 +485,7 @@ class SourceReader implements Closeable
                 else
                 {
                     // this differs from original PDFBox implementation. It replaces the wrong char with a default value
-                    // and
-                    // goes on.
+                    // and goes on.
                     LOG.warn(String
                             .format("Expected an hexadecimal char at offset %d but was '%c'. Replaced with default 0.",
                                     position() - 1, c));
@@ -553,19 +542,19 @@ class SourceReader implements Closeable
                     switch (next)
                     {
                     case 'n':
-                        builder.append(ASCII_LINE_FEED);
+                        builder.append((char) ASCII_LINE_FEED);
                         break;
                     case 'r':
-                        builder.append(ASCII_CARRIAGE_RETURN);
+                        builder.append((char) ASCII_CARRIAGE_RETURN);
                         break;
                     case 't':
-                        builder.append(ASCII_HORIZONTAL_TAB);
+                        builder.append((char) ASCII_HORIZONTAL_TAB);
                         break;
                     case 'b':
-                        builder.append(ASCII_BACKSPACE);
+                        builder.append((char) ASCII_BACKSPACE);
                         break;
                     case 'f':
-                        builder.append(ASCII_FORM_FEED);
+                        builder.append((char) ASCII_FORM_FEED);
                         break;
                     case ')':
                         // TODO PDFBox 276
@@ -607,13 +596,7 @@ class SourceReader implements Closeable
                             {
                                 unreadIfValid(next);
                             }
-                            builder.append(Integer.parseInt(octal.toString(), 8));
-                        }
-                        catch (NumberFormatException e)
-                        {
-                            throw new IOException(String.format(
-                                    "Expected an octal type character at offset but was '%s'",
-                                    octal.toString()), e);
+                            builder.append((char) Integer.parseInt(octal.toString(), 8));
                         }
                         finally
                         {
@@ -634,7 +617,19 @@ class SourceReader implements Closeable
                     }
                     default:
                         // dropping the backslash
-                        builder.append(next);
+                        unreadIfValid(c);
+                    }
+                    break;
+                }
+                case ASCII_LINE_FEED:
+                    builder.append((char) ASCII_LINE_FEED);
+                    break;
+                case ASCII_CARRIAGE_RETURN:
+                {
+                    builder.append((char) ASCII_LINE_FEED);
+                    if (!CharUtils.isLineFeed(source.read()))
+                    {
+                        unreadIfValid(c);
                     }
                     break;
                 }

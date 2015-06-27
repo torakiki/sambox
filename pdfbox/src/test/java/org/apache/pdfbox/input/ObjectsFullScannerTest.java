@@ -52,7 +52,7 @@ public class ObjectsFullScannerTest
         IOUtils.close(reader);
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void nullArgument()
     {
         new ObjectsFullScanner(null);
