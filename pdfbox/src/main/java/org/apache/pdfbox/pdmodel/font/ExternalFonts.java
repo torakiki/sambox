@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.fontbox.cff.CFFCIDFont;
@@ -33,10 +34,9 @@ import org.apache.fontbox.cff.CFFFont;
 import org.apache.fontbox.cff.CFFParser;
 import org.apache.fontbox.cff.CFFType1Font;
 import org.apache.fontbox.ttf.TTFParser;
-import org.apache.fontbox.ttf.Type1Equivalent;
 import org.apache.fontbox.ttf.TrueTypeFont;
+import org.apache.fontbox.ttf.Type1Equivalent;
 import org.apache.fontbox.type1.Type1Font;
-import org.apache.pdfbox.util.IOUtils;
 
 /**
  * External font service, locates non-embedded fonts via a pluggable FontProvider.

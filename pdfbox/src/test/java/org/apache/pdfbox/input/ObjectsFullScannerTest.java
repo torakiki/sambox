@@ -21,12 +21,12 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 
 import org.apache.pdfbox.cos.COSObjectKey;
-import org.apache.pdfbox.input.source.SeekableSources;
-import org.apache.pdfbox.util.IOUtils;
 import org.apache.pdfbox.xref.Xref;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.sejda.io.SeekableSources;
+import org.sejda.util.IOUtils;
 
 /**
  * @author Andrea Vacondio

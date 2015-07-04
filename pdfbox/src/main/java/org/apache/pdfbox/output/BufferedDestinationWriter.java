@@ -16,7 +16,7 @@
  */
 package org.apache.pdfbox.output;
 
-import static org.apache.pdfbox.util.RequireUtils.requireNotNullArg;
+import static org.sejda.util.RequireUtils.requireNotNullArg;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -27,7 +27,8 @@ import java.nio.channels.ReadableByteChannel;
 
 import org.apache.pdfbox.SAMBox;
 import org.apache.pdfbox.util.Charsets;
-import org.apache.pdfbox.util.IOUtils;
+import org.sejda.io.CountingWritableByteChannel;
+import org.sejda.util.IOUtils;
 
 /**
  * Component providing methods to write to a {@link CountingWritableByteChannel}. This implementation is buffered and

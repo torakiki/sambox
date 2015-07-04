@@ -16,19 +16,19 @@
  */
 package org.apache.pdfbox.input;
 
-import static org.apache.pdfbox.input.source.SeekableSources.inMemorySeekableSourceFrom;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.sejda.io.SeekableSources.inMemorySeekableSourceFrom;
 
 import java.io.IOException;
 
 import org.apache.pdfbox.cos.COSObjectKey;
-import org.apache.pdfbox.input.source.SeekableSource;
-import org.apache.pdfbox.input.source.SeekableSources;
-import org.apache.pdfbox.util.IOUtils;
 import org.junit.After;
 import org.junit.Test;
+import org.sejda.io.SeekableSource;
+import org.sejda.io.SeekableSources;
+import org.sejda.util.IOUtils;
 
 /**
  * @author Andrea Vacondio

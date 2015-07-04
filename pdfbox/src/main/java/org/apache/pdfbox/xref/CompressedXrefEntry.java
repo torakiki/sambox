@@ -16,7 +16,7 @@
  */
 package org.apache.pdfbox.xref;
 
-import static org.apache.pdfbox.util.RequireUtils.requireArg;
+import static org.sejda.util.RequireUtils.requireArg;
 
 /**
  * An xref entry for a cross reference stream which represent a compressed objects (i.e. an object part of an object

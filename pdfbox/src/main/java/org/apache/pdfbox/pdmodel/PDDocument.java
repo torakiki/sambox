@@ -17,10 +17,10 @@
 package org.apache.pdfbox.pdmodel;
 
 import static org.apache.pdfbox.cos.DirectCOSObject.asDirectObject;
-import static org.apache.pdfbox.output.CountingWritableByteChannel.from;
-import static org.apache.pdfbox.util.RequireUtils.requireNotBlank;
 import static org.apache.pdfbox.util.SpecVersionUtils.V1_4;
 import static org.apache.pdfbox.util.SpecVersionUtils.isAtLeast;
+import static org.sejda.io.CountingWritableByteChannel.from;
+import static org.sejda.util.RequireUtils.requireNotBlank;
 
 import java.io.Closeable;
 import java.io.File;
@@ -45,7 +45,6 @@ import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.cos.DirectCOSObject;
-import org.apache.pdfbox.output.CountingWritableByteChannel;
 import org.apache.pdfbox.output.PDDocumentWriter;
 import org.apache.pdfbox.output.WriteOption;
 import org.apache.pdfbox.pdmodel.common.PDStream;
@@ -56,7 +55,8 @@ import org.apache.pdfbox.pdmodel.encryption.SecurityHandler;
 import org.apache.pdfbox.pdmodel.encryption.SecurityHandlerFactory;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.util.Charsets;
-import org.apache.pdfbox.util.IOUtils;
+import org.sejda.io.CountingWritableByteChannel;
+import org.sejda.util.IOUtils;
 
 /**
  * This is the in-memory representation of the PDF document.
@@ -173,7 +173,7 @@ public class PDDocument implements Closeable
                 importedPage.setContents(dest);
                 is = src.createInputStream();
                 os = dest.createOutputStream();
-                IOUtils.copy(is, os);
+                org.apache.commons.io.IOUtils.copy(is, os);
             }
             addPage(importedPage);
         }

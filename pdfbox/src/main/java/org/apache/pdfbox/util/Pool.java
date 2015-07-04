@@ -16,7 +16,7 @@
  */
 package org.apache.pdfbox.util;
 
-import static org.apache.pdfbox.util.RequireUtils.requireNotNullArg;
+import static org.sejda.util.RequireUtils.requireNotNullArg;
 
 import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;

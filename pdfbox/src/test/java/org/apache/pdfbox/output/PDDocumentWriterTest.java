@@ -28,6 +28,7 @@ import org.apache.pdfbox.TestUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.junit.Before;
 import org.junit.Test;
+import org.sejda.io.CountingWritableByteChannel;
 
 /**
  * @author Andrea Vacondio

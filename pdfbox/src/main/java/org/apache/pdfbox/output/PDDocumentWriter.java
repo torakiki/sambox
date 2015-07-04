@@ -16,7 +16,7 @@
  */
 package org.apache.pdfbox.output;
 
-import static org.apache.pdfbox.util.RequireUtils.requireNotNullArg;
+import static org.sejda.util.RequireUtils.requireNotNullArg;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -26,7 +26,8 @@ import java.util.List;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.encryption.SecurityHandler;
-import org.apache.pdfbox.util.IOUtils;
+import org.sejda.io.CountingWritableByteChannel;
+import org.sejda.util.IOUtils;
 
 /**
  * Writer for a {@link PDDocument}. This component wraps a required {@link PDDocument} and provides methods to write it

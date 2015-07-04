@@ -16,7 +16,7 @@
  */
 package org.apache.pdfbox.xref;
 
-import static org.apache.pdfbox.util.RequireUtils.requireArg;
+import static org.sejda.util.RequireUtils.requireArg;
 
 import org.apache.pdfbox.cos.COSObjectKey;
 

@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSDictionary;
@@ -27,7 +28,6 @@ import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.filter.ccitt.CCITTFaxG31DDecodeInputStream;
 import org.apache.pdfbox.filter.ccitt.FillOrderChangeInputStream;
 import org.apache.pdfbox.filter.ccitt.TIFFFaxDecoder;
-import org.apache.pdfbox.util.IOUtils;
 
 /**
  * Decodes image data that has been encoded using either Group 3 or Group 4

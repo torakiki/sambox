@@ -38,7 +38,7 @@ import org.apache.pdfbox.filter.Filter;
 import org.apache.pdfbox.filter.FilterFactory;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.common.filespecification.PDFileSpecification;
-import org.apache.pdfbox.util.IOUtils;
+import org.sejda.util.IOUtils;
 
 /**
  * A PDStream represents a stream in a PDF document. Streams are tied to a
@@ -120,7 +120,7 @@ public class PDStream implements COSObjectable
             {
                 output = stream.createUnfilteredStream();
             }
-            IOUtils.copy(str, output);
+            org.apache.commons.io.IOUtils.copy(str, output);
         } 
         finally
         {

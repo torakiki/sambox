@@ -16,9 +16,20 @@
  */
 package org.apache.pdfbox.pdmodel.graphics.color;
 
+import java.awt.Color;
+import java.awt.color.CMMException;
 import java.awt.color.ColorSpace;
+import java.awt.color.ICC_ColorSpace;
+import java.awt.color.ICC_Profile;
+import java.awt.color.ProfileDataException;
+import java.awt.image.BufferedImage;
+import java.awt.image.WritableRaster;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
+import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSArray;
@@ -30,20 +41,7 @@ import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.common.PDRange;
 import org.apache.pdfbox.pdmodel.common.PDStream;
-
-import java.awt.Color;
-import java.awt.color.CMMException;
-import java.awt.color.ICC_ColorSpace;
-import java.awt.color.ICC_Profile;
-import java.awt.color.ProfileDataException;
-import java.awt.image.BufferedImage;
-import java.awt.image.WritableRaster;
-import java.io.InputStream;
-import java.io.IOException;
-import java.util.List;
-
 import org.apache.pdfbox.util.Charsets;
-import org.apache.pdfbox.util.IOUtils;
 
 /**
  * ICCBased colour spaces are based on a cross-platform colour profile as defined by the

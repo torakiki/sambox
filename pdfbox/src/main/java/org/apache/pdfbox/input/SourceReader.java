@@ -30,8 +30,8 @@ import static org.apache.pdfbox.util.CharUtils.isHexDigit;
 import static org.apache.pdfbox.util.CharUtils.isLineFeed;
 import static org.apache.pdfbox.util.CharUtils.isOctalDigit;
 import static org.apache.pdfbox.util.CharUtils.isWhitespace;
-import static org.apache.pdfbox.util.RequireUtils.requireIOCondition;
-import static org.apache.pdfbox.util.RequireUtils.requireNotNullArg;
+import static org.sejda.util.RequireUtils.requireIOCondition;
+import static org.sejda.util.RequireUtils.requireNotNullArg;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -40,12 +40,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.SAMBox;
 import org.apache.pdfbox.cos.COSObjectKey;
-import org.apache.pdfbox.input.source.SeekableSource;
 import org.apache.pdfbox.util.CharUtils;
 import org.apache.pdfbox.util.Charsets;
-import org.apache.pdfbox.util.IOUtils;
 import org.apache.pdfbox.util.Pool;
-
+import org.sejda.io.SeekableSource;
+import org.sejda.util.IOUtils;
 /**
  * Component responsible for reading a {@link SeekableSource}. Methods to read expected kind of tokens are available as
  * well as methods to skip them. This implementation uses a pool of {@link StringBuilder}s to minimize garbage

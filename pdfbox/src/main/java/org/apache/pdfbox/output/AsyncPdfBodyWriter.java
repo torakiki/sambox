@@ -16,7 +16,7 @@
  */
 package org.apache.pdfbox.output;
 
-import static org.apache.pdfbox.util.RequireUtils.requireNotNullArg;
+import static org.sejda.util.RequireUtils.requireNotNullArg;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;

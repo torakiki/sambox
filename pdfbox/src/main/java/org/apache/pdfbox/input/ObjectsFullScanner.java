@@ -16,7 +16,7 @@
  */
 package org.apache.pdfbox.input;
 
-import static org.apache.pdfbox.util.RequireUtils.requireNotNullArg;
+import static org.sejda.util.RequireUtils.requireNotNullArg;
 
 import java.io.IOException;
 import java.util.regex.Matcher;
@@ -26,7 +26,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.xref.Xref;
 import org.apache.pdfbox.xref.XrefEntry;
-
 /**
  * Component performing a full scan of the document and retrieving objects definition and the corresponding offset. This
  * implementation is lazy and the full scan is performed the first time the entries are accessed.

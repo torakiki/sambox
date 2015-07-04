@@ -35,6 +35,7 @@ import org.apache.pdfbox.util.Charsets;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.sejda.io.CountingWritableByteChannel;
 
 /**
  * @author Andrea Vacondio

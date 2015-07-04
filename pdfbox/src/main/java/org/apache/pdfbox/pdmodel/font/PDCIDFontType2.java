@@ -19,6 +19,7 @@ package org.apache.pdfbox.pdmodel.font;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.fontbox.cmap.CMap;
@@ -33,7 +34,6 @@ import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.pdmodel.common.PDStream;
-import org.apache.pdfbox.util.IOUtils;
 import org.apache.pdfbox.util.Matrix;
 
 /**

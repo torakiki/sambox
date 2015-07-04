@@ -50,11 +50,10 @@ import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.util.IOUtils;
+import org.sejda.util.IOUtils;
 
 /**
- * A security handler as described in the PDF specifications.
- * A security handler is responsible of documents protection.
+ * A security handler as described in the PDF specifications. A security handler is responsible of documents protection.
  *
  * @author Ben Litchfield
  * @author Benoit Guillon
@@ -72,7 +71,7 @@ public abstract class SecurityHandler
     /** The length of the secret key used to encrypt the document. */
     protected int keyLength = DEFAULT_KEY_LENGTH;
 
-    /** The encryption key that will used to encrypt / decrypt.*/
+    /** The encryption key that will used to encrypt / decrypt. */
     protected byte[] encryptionKey;
 
     /** The RC4 implementation used for cryptographic functions. */
@@ -86,8 +85,8 @@ public abstract class SecurityHandler
     private boolean useAES;
 
     /**
-     * The access permission granted to the current user for the document. These
-     * permissions are computed during decryption and are in read only mode.
+     * The access permission granted to the current user for the document. These permissions are computed during
+     * decryption and are in read only mode.
      */
     private AccessPermission currentAccessPermission = null;
 
@@ -113,8 +112,9 @@ public abstract class SecurityHandler
     /**
      * Prepares everything to decrypt the document.
      *
-     * @param encryption  encryption dictionary, can be retrieved via {@link PDDocument#getEncryption()}
-     * @param documentIDArray  document id which is returned via {@link org.apache.pdfbox.cos.COSDocument#getDocumentID()}
+     * @param encryption encryption dictionary, can be retrieved via {@link PDDocument#getEncryption()}
+     * @param documentIDArray document id which is returned via
+     * {@link org.apache.pdfbox.cos.COSDocument#getDocumentID()}
      * @param decryptionMaterial Information used to decrypt the document.
      *
      * @throws IOException If there is an error accessing data.
@@ -134,7 +134,7 @@ public abstract class SecurityHandler
      * @throws IOException If there is an error reading the data.
      */
     private void encryptData(long objectNumber, long genNumber, InputStream data,
-                            OutputStream output, boolean decrypt) throws IOException
+            OutputStream output, boolean decrypt) throws IOException
     {
         // Determine whether we're using Algorithm 1 (for RC4 and AES-128), or 1.A (for AES-256)
         if (useAES && encryptionKey.length == 32)
@@ -145,7 +145,8 @@ public abstract class SecurityHandler
         {
             if (useAES && !decrypt)
             {
-                throw new IllegalArgumentException("AES encryption with key length other than 256 bits is not yet implemented.");
+                throw new IllegalArgumentException(
+                        "AES encryption with key length other than 256 bits is not yet implemented.");
             }
 
             byte[] finalKey = calcFinalKey(objectNumber, genNumber);
@@ -222,12 +223,12 @@ public abstract class SecurityHandler
      *
      * @throws IOException If there is an error reading the data.
      */
-    protected void encryptDataRC4(byte[] finalKey, byte[] input, OutputStream output) throws IOException
+    protected void encryptDataRC4(byte[] finalKey, byte[] input, OutputStream output)
+            throws IOException
     {
         rc4.setKey(finalKey);
         rc4.write(input, output);
     }
-
 
     /**
      * Encrypt or decrypt data with AES with key length other than 256 bits.
@@ -239,17 +240,16 @@ public abstract class SecurityHandler
      *
      * @throws IOException If there is an error reading the data.
      */
-    private void encryptDataAESother(byte[] finalKey, InputStream data, OutputStream output, boolean decrypt)
-            throws IOException
+    private void encryptDataAESother(byte[] finalKey, InputStream data, OutputStream output,
+            boolean decrypt) throws IOException
     {
         byte[] iv = new byte[16];
 
         int ivSize = data.read(iv);
         if (ivSize != iv.length)
         {
-            throw new IOException(
-                    "AES initialization vector not fully read: only "
-                    + ivSize + " bytes read instead of " + iv.length);
+            throw new IOException("AES initialization vector not fully read: only " + ivSize
+                    + " bytes read instead of " + iv.length);
         }
 
         try
@@ -307,7 +307,8 @@ public abstract class SecurityHandler
      *
      * @throws IOException If there is an error reading the data.
      */
-    private void encryptDataAES256(InputStream data, OutputStream output, boolean decrypt) throws IOException
+    private void encryptDataAES256(InputStream data, OutputStream output, boolean decrypt)
+            throws IOException
     {
         byte[] iv = new byte[16];
 
@@ -340,9 +341,9 @@ public abstract class SecurityHandler
         CipherInputStream cis = new CipherInputStream(data, cipher);
         try
         {
-            IOUtils.copy(cis, output);
+            org.apache.commons.io.IOUtils.copy(cis, output);
         }
-        catch(IOException exception)
+        catch (IOException exception)
         {
             // starting with java 8 the JVM wraps an IOException around a GeneralSecurityException
             // it should be safe to swallow a GeneralSecurityException
@@ -350,7 +351,8 @@ public abstract class SecurityHandler
             {
                 throw exception;
             }
-            LOG.debug("A GeneralSecurityException occured when decrypting some stream data", exception);
+            LOG.debug("A GeneralSecurityException occured when decrypting some stream data",
+                    exception);
         }
         finally
         {
@@ -413,15 +415,14 @@ public abstract class SecurityHandler
             return;
         }
         decryptDictionary(stream, objNum, genNum);
-        byte[] encrypted = IOUtils.toByteArray(stream.getFilteredStream());
+        byte[] encrypted = org.apache.commons.io.IOUtils.toByteArray(stream.getFilteredStream());
         ByteArrayInputStream encryptedStream = new ByteArrayInputStream(encrypted);
         encryptData(objNum, genNum, encryptedStream, stream.createFilteredStream(), true /* decrypt */);
     }
 
     /**
-     * This will encrypt a stream, but not the dictionary as the dictionary is
-     * encrypted by visitFromString() in COSWriter and we don't want to encrypt
-     * it twice.
+     * This will encrypt a stream, but not the dictionary as the dictionary is encrypted by visitFromString() in
+     * COSWriter and we don't want to encrypt it twice.
      *
      * @param stream The stream to decrypt.
      * @param objNum The object number.
@@ -431,7 +432,7 @@ public abstract class SecurityHandler
      */
     public void encryptStream(COSStream stream, long objNum, int genNum) throws IOException
     {
-        byte[] rawData = IOUtils.toByteArray(stream.getFilteredStream());
+        byte[] rawData = org.apache.commons.io.IOUtils.toByteArray(stream.getFilteredStream());
         ByteArrayInputStream encryptedStream = new ByteArrayInputStream(rawData);
         encryptData(objNum, genNum, encryptedStream, stream.createFilteredStream(), false /* encrypt */);
     }
@@ -445,16 +446,19 @@ public abstract class SecurityHandler
      *
      * @throws IOException If there is an error creating a new string.
      */
-    private void decryptDictionary(COSDictionary dictionary, long objNum, long genNum) throws IOException
+    private void decryptDictionary(COSDictionary dictionary, long objNum, long genNum)
+            throws IOException
     {
         // skip dictionary containing the signature
-        if (!COSName.SIG.equals(dictionary.getItem(COSName.TYPE)) && !COSName.SIG.equals(dictionary.getItem(COSName.FT)))
+        if (!COSName.SIG.equals(dictionary.getItem(COSName.TYPE))
+                && !COSName.SIG.equals(dictionary.getItem(COSName.FT)))
         {
             for (Map.Entry<COSName, COSBase> entry : dictionary.entrySet())
             {
                 COSBase value = entry.getValue();
                 // within a dictionary only the following kind of COS objects have to be decrypted
-                if (value instanceof COSString || value instanceof COSArray || value instanceof COSDictionary)
+                if (value instanceof COSString || value instanceof COSArray
+                        || value instanceof COSDictionary)
                 {
                     decrypt(value, objNum, genNum);
                 }
@@ -515,7 +519,8 @@ public abstract class SecurityHandler
 
     /**
      * Getter of the property <tt>keyLength</tt>.
-     * @return  Returns the keyLength.
+     * 
+     * @return Returns the keyLength.
      */
     public int getKeyLength()
     {
@@ -525,7 +530,7 @@ public abstract class SecurityHandler
     /**
      * Setter of the property <tt>keyLength</tt>.
      *
-     * @param keyLen  The keyLength to set.
+     * @param keyLen The keyLength to set.
      */
     public void setKeyLength(int keyLen)
     {
@@ -543,8 +548,8 @@ public abstract class SecurityHandler
     }
 
     /**
-     * Returns the access permissions that were computed during document decryption.
-     * The returned object is in read only mode.
+     * Returns the access permissions that were computed during document decryption. The returned object is in read only
+     * mode.
      *
      * @return the access permissions or null if the document was not decrypted.
      */

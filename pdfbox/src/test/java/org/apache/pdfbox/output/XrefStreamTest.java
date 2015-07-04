@@ -27,11 +27,11 @@ import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSInteger;
 import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.input.source.SeekableSource;
 import org.apache.pdfbox.xref.CompressedXrefEntry;
 import org.apache.pdfbox.xref.XrefEntry;
 import org.junit.Before;
 import org.junit.Test;
+import org.sejda.io.SeekableSource;
 
 /**
  * @author Andrea Vacondio

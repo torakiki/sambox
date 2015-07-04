@@ -18,7 +18,7 @@ package org.apache.pdfbox.output;
 
 import static org.apache.pdfbox.util.CharUtils.isDigit;
 import static org.apache.pdfbox.util.CharUtils.isLetter;
-import static org.apache.pdfbox.util.RequireUtils.requireNotNullArg;
+import static org.sejda.util.RequireUtils.requireNotNullArg;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -40,7 +40,7 @@ import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.cos.COSVisitor;
 import org.apache.pdfbox.cos.IndirectCOSObjectReference;
 import org.apache.pdfbox.util.Charsets;
-import org.apache.pdfbox.util.IOUtils;
+import org.sejda.util.IOUtils;
 
 /**
  * Component capable of writing COS objects using the given {@link BufferedDestinationWriter}.

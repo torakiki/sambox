@@ -21,7 +21,7 @@ import static org.apache.pdfbox.input.BaseCOSParser.ENDOBJ;
 import static org.apache.pdfbox.input.BaseCOSParser.ENDSTREAM;
 import static org.apache.pdfbox.input.BaseCOSParser.STREAM;
 import static org.apache.pdfbox.input.SourceReader.OBJ;
-import static org.apache.pdfbox.util.RequireUtils.requireIOCondition;
+import static org.sejda.util.RequireUtils.requireIOCondition;
 
 import java.io.IOException;
 import java.util.Map;
@@ -37,11 +37,11 @@ import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSObjectKey;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.pdmodel.encryption.SecurityHandler;
-import org.apache.pdfbox.util.IOUtils;
 import org.apache.pdfbox.xref.CompressedXrefEntry;
 import org.apache.pdfbox.xref.Xref;
 import org.apache.pdfbox.xref.XrefEntry;
 import org.apache.pdfbox.xref.XrefType;
+import org.sejda.util.IOUtils;
 
 /**
  * @author Andrea Vacondio

@@ -17,8 +17,8 @@
 package org.apache.pdfbox.input;
 
 import static java.util.Objects.requireNonNull;
-import static org.apache.pdfbox.util.RequireUtils.requireIOCondition;
 import static org.apache.pdfbox.util.SpecVersionUtils.PDF_HEADER;
+import static org.sejda.util.RequireUtils.requireIOCondition;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -26,15 +26,14 @@ import java.util.Optional;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSDocument;
-import org.apache.pdfbox.input.source.SeekableSource;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.encryption.DecryptionMaterial;
 import org.apache.pdfbox.pdmodel.encryption.PDEncryption;
 import org.apache.pdfbox.pdmodel.encryption.SecurityHandler;
 import org.apache.pdfbox.pdmodel.encryption.StandardDecryptionMaterial;
-import org.apache.pdfbox.util.IOUtils;
 import org.apache.pdfbox.util.SpecVersionUtils;
-
+import org.sejda.io.SeekableSource;
+import org.sejda.util.IOUtils;
 /**
  * Provides public entry point to parse a {@link SeekableSource} and obtain a {@link PDDocument}.
  * 

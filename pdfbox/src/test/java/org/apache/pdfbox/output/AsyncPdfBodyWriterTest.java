@@ -31,11 +31,11 @@ import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.IndirectCOSObjectReference;
 import org.apache.pdfbox.input.PDFParser;
-import org.apache.pdfbox.input.source.SeekableSources;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.Before;
 import org.junit.Test;
+import org.sejda.io.SeekableSources;
 
 /**
  * @author Andrea Vacondio

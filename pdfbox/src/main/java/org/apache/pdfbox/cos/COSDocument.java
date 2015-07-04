@@ -16,8 +16,8 @@
  */
 package org.apache.pdfbox.cos;
 
-import static org.apache.pdfbox.util.RequireUtils.requireNotBlank;
-import static org.apache.pdfbox.util.RequireUtils.requireNotNullArg;
+import static org.sejda.util.RequireUtils.requireNotBlank;
+import static org.sejda.util.RequireUtils.requireNotNullArg;
 
 import java.io.IOException;
 import java.util.Optional;

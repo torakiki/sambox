@@ -37,14 +37,15 @@ import org.apache.pdfbox.cos.COSNumber;
 import org.apache.pdfbox.cos.COSObjectKey;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.cos.COSString;
-import org.apache.pdfbox.input.source.SeekableSource;
 import org.apache.pdfbox.util.Charsets;
+import org.sejda.io.SeekableSource;
 
 /**
+ * Parser for COS objects providing methods to get parsed objects from the given {@link SeekableSource}
+ * 
  * @author Andrea Vacondio
- *
  */
-final class BaseCOSParser extends SourceReader
+class BaseCOSParser extends SourceReader
 {
 
     private static final Log LOG = LogFactory.getLog(BaseCOSParser.class);

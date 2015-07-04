@@ -21,7 +21,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import org.apache.pdfbox.cos.COSDictionary;
-import org.apache.pdfbox.util.IOUtils;
+import org.sejda.util.IOUtils;
 
 /**
  * Decodes data encoded in an ASCII base-85 representation, reproducing the original binary data.

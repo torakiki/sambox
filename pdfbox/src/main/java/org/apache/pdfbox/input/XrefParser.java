@@ -17,7 +17,7 @@
 package org.apache.pdfbox.input;
 
 import static org.apache.pdfbox.input.AbstractXrefTableParser.XREF;
-import static org.apache.pdfbox.util.RequireUtils.requireIOCondition;
+import static org.sejda.util.RequireUtils.requireIOCondition;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -28,7 +28,6 @@ import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.util.Charsets;
 import org.apache.pdfbox.xref.XrefEntry;
-
 /**
  * @author Andrea Vacondio
  *

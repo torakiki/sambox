@@ -16,8 +16,8 @@
  */
 package org.apache.pdfbox.cos;
 
-import static org.apache.pdfbox.input.source.SeekableSources.inMemorySeekableSourceFrom;
-import static org.apache.pdfbox.input.source.SeekableSources.inputStreamFrom;
+import static org.sejda.io.SeekableSources.inMemorySeekableSourceFrom;
+import static org.sejda.io.SeekableSources.inputStreamFrom;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -32,9 +32,8 @@ import java.util.function.Consumer;
 import org.apache.pdfbox.filter.DecodeResult;
 import org.apache.pdfbox.filter.Filter;
 import org.apache.pdfbox.filter.FilterFactory;
-import org.apache.pdfbox.input.source.SeekableSource;
-import org.apache.pdfbox.util.IOUtils;
-
+import org.sejda.io.SeekableSource;
+import org.sejda.util.IOUtils;
 /**
  * This class represents a stream object in a PDF document.
  *
@@ -414,7 +413,7 @@ public class COSStream extends COSDictionary implements Closeable
                     this.unfiltered = bytes;
                 }))
                 {
-                    IOUtils.copy(in, out);
+                    org.apache.commons.io.IOUtils.copy(in, out);
                 }
 
             }
