@@ -73,7 +73,6 @@ abstract class AbstractXrefTableParser
     {
         parseXrefTable(tableOffset);
         parser.skipSpaces();
-        // PDFBOX-1739 skip extra xref entries in RegisSTAR documents
         while (parser.source().peek() != 't')
         {
             LOG.warn("Expected trailer object at position " + parser.position()
@@ -113,8 +112,6 @@ abstract class AbstractXrefTableParser
                     LOG.warn("Invalid xref line: " + currentLine);
                     break;
                 }
-                // TODO add a unit test instead of comment?
-                // This supports the corrupt table as reported in PDFBOX-474 (XXXX XXX XX n)
                 String entryType = splitString[splitString.length - 1];
                 if ("n".equals(entryType))
                 {

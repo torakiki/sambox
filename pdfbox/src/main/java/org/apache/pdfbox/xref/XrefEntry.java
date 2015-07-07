@@ -24,7 +24,6 @@ import org.apache.pdfbox.cos.COSObjectKey;
  * Entry of the xref table or stream
  * 
  * @author Andrea Vacondio
- *
  */
 public class XrefEntry
 {
