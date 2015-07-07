@@ -53,7 +53,6 @@ class BaseCOSParser extends SourceReader
     public static final String ENDOBJ = "endobj";
     public static final String STREAM = "stream";
     public static final String ENDSTREAM = "endstream";
-    private static final String DEF = "def";
 
     private IndirectObjectsProvider provider;
 
@@ -147,28 +146,14 @@ class BaseCOSParser extends SourceReader
         skipExpected("<<");
         skipSpaces();
         COSDictionary dictionary = new COSDictionary();
-        char c;
-        while (((c = (char) source().peek()) != -1) && c != '>')
+        int c;
+        while ((c = source().peek()) != -1 && c != '>')
         {
             if (c != '/')
             {
-                // an invalid dictionary, we are expecting the key, read until we can recover
-                LOG.warn("Invalid dictionary, expected '/' but was '" + c + "'");
-                while (((c = (char) source().peek()) != -1) && c != '>' && c != '/')
-                {
-                    // in addition to stopping when we find / or >, we also want
-                    // to stop when we find endstream or endobj.
-                    if (skipTokenIfValue(ENDOBJ, ENDSTREAM))
-                    {
-                        return dictionary;
-                    }
-                    else
-                    {
-                        source().read();
-                    }
-
-                }
-                if (c == -1)
+                LOG.warn("Invalid dictionary key, expected '/' but was '" + (char) c + "' at "
+                        + position());
+                if (!consumeInvalidDictionaryKey())
                 {
                     return dictionary;
                 }
@@ -177,14 +162,6 @@ class BaseCOSParser extends SourceReader
             {
                 COSName key = nextName();
                 COSBase value = nextParsedToken();
-                skipSpaces();
-                if (source().peek() == 'd')
-                {
-                    // if the next string is 'def' then we are parsing a cmap stream
-                    // and want to ignore it, otherwise throw an exception.
-                    skipTokenIfValue(DEF);
-                }
-
                 if (value == null)
                 {
                     LOG.warn(String.format("Bad dictionary declaration for key '%s'", key));
@@ -198,6 +175,31 @@ class BaseCOSParser extends SourceReader
         }
         skipExpected(">>");
         return dictionary;
+    }
+
+    /**
+     * Consumes an invalid dictionary key
+     * 
+     * @return true if the dictionary has been recovered and parsing can go on
+     * @throws IOException
+     */
+    private boolean consumeInvalidDictionaryKey() throws IOException
+    {
+        int c;
+        while ((c = source().peek()) != -1 && c != '>' && c != '/')
+        {
+            // in addition to stopping when we find / or >, we also want
+            // to stop when we find endstream or endobj.
+            if (isNextToken(ENDOBJ, ENDSTREAM))
+            {
+                LOG.warn("Found unexpected 'endobj or 'endstream' at position " + position()
+                        + ", assuming end of dictionary");
+                return false;
+            }
+            source().read();
+
+        }
+        return c != -1;
     }
 
     /**
@@ -223,6 +225,8 @@ class BaseCOSParser extends SourceReader
                 // the array has ended.
                 if (isNextToken(ENDOBJ, ENDSTREAM))
                 {
+                    LOG.warn("Found unexpected 'endobj or 'endstream' at position " + position()
+                            + ", assuming end of array");
                     return array;
                 }
             }
@@ -393,7 +397,7 @@ class BaseCOSParser extends SourceReader
         }
 
         final COSStream stream;
-        long length = streamLength(streamDictionary);
+        long length = streamLengthFrom(streamDictionary);
         if (length > 0)
         {
             stream = new COSStream(streamDictionary, source(), position(), length);
@@ -420,10 +424,23 @@ class BaseCOSParser extends SourceReader
      * @return the stream length if found in the dictionary. -1 if nothing is found or if the length is incorrect.
      * @throws IOException
      */
-    private long streamLength(COSDictionary streamDictionary) throws IOException
+    private long streamLengthFrom(COSDictionary streamDictionary) throws IOException
+    {
+        long start = position();
+        COSBase lengthBaseObj = streamDictionary.getItem(COSName.LENGTH);
+        try
+        {
+            return doStreamLengthFrom(lengthBaseObj);
+        }
+        finally
+        {
+            position(start);
+        }
+    }
+
+    private long doStreamLengthFrom(COSBase lengthBaseObj) throws IOException
     {
         long startingOffset = position();
-        COSBase lengthBaseObj = streamDictionary.getItem(COSName.LENGTH);
         if (lengthBaseObj == null)
         {
             LOG.warn("Invalid stream length. No length provided");
@@ -448,7 +465,6 @@ class BaseCOSParser extends SourceReader
             LOG.warn("Invalid stream length. Expected '" + ENDSTREAM + "' at " + endStreamOffset);
             return -1;
         }
-        position(startingOffset);
         return length;
     }
 
@@ -463,6 +479,18 @@ class BaseCOSParser extends SourceReader
     private long findStreamLength() throws IOException
     {
         long start = position();
+        try
+        {
+            return doFindStreamLength(start);
+        }
+        finally
+        {
+            position(start);
+        }
+    }
+
+    public long doFindStreamLength(long start) throws IOException
+    {
         Pattern pattern = Pattern.compile("endstream|endobj");
         while (true)
         {
@@ -471,12 +499,22 @@ class BaseCOSParser extends SourceReader
             if (matcher.find())
             {
                 source().back(currentLine.length() - matcher.start());
-                source().back();
-                if (isSpace(source().read()))
+                long length = position() - start;
+                int prevChar = source().back().peek();
+                if (isCarriageReturn(prevChar))
                 {
-                    return position() - start - 1;
+                    return length - 1;
                 }
-                return position() - start;
+                if (isLineFeed(prevChar))
+                {
+                    prevChar = source().back().peek();
+                    if (isCarriageReturn(prevChar))
+                    {
+                        return length - 2;
+                    }
+                    return length - 1;
+                }
+                return length;
             }
         }
     }

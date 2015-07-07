@@ -1,0 +1,7 @@
+stream   
+BT
+/F1 12 Tf
+72 712 Td
+(A stream with an indirect length) Tj
+ET
+endstream

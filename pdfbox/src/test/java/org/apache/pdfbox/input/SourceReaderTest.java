@@ -112,8 +112,9 @@ public class SourceReaderTest
     public void skipTokenFailing() throws IOException
     {
         victim = new SourceReader(inMemorySeekableSourceFrom("Chuck Norris".getBytes()));
-        assertFalse(victim.skipTokenIfValue("Norris"));
-        assertEquals(0, victim.position());
+        victim.position(5);
+        assertFalse(victim.skipTokenIfValue("Segal", "Van Damme"));
+        assertEquals(5, victim.position());
     }
 
     @Test
@@ -181,8 +182,9 @@ public class SourceReaderTest
     public void isNextToken() throws IOException
     {
         victim = new SourceReader(inMemorySeekableSourceFrom("10 0 obj <</key value>>".getBytes()));
-        victim.position(16);
+        victim.position(15);
         assertTrue(victim.isNextToken("steven", "value"));
+        assertEquals(15, victim.position());
     }
 
     @Test

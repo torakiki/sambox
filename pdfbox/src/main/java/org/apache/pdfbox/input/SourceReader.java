@@ -45,6 +45,7 @@ import org.apache.pdfbox.util.Charsets;
 import org.apache.pdfbox.util.Pool;
 import org.sejda.io.SeekableSource;
 import org.sejda.util.IOUtils;
+
 /**
  * Component responsible for reading a {@link SeekableSource}. Methods to read expected kind of tokens are available as
  * well as methods to skip them. This implementation uses a pool of {@link StringBuilder}s to minimize garbage
@@ -152,10 +153,11 @@ class SourceReader implements Closeable
      */
     public boolean skipTokenIfValue(String... values) throws IOException
     {
+        long pos = position();
         String token = readToken();
         if (!asList(values).contains(token))
         {
-            source.back(token.getBytes(Charsets.ISO_8859_1).length);
+            source.position(pos);
             return false;
         }
         return true;
@@ -237,8 +239,9 @@ class SourceReader implements Closeable
      */
     public boolean isNextToken(String... values) throws IOException
     {
+        long pos = position();
         String token = readToken();
-        source.back(token.getBytes(Charsets.ISO_8859_1).length);
+        position(pos);
         return asList(values).contains(token);
     }
 
