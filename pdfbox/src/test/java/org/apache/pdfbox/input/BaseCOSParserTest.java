@@ -477,4 +477,33 @@ public class BaseCOSParserTest
                 "/input/stream_trunkated.txt")));
         victim.nextStream(new COSDictionary());
     }
+
+    @Test
+    public void nextParsedToken() throws IOException
+    {
+        victim = new BaseCOSParser(
+                inMemorySeekableSourceFrom("   3 true false (Chuck Norris) <436875636B204E6f72726973> [10 (A String)] null <</R 10>> +2 /R"
+                        .getBytes()));
+        assertEquals(COSInteger.THREE, victim.nextParsedToken());
+        assertEquals(COSBoolean.TRUE, victim.nextParsedToken());
+        assertEquals(COSBoolean.FALSE, victim.nextParsedToken());
+        COSString expected = COSString.newInstance("Chuck Norris".getBytes(Charsets.ISO_8859_1));
+        assertEquals(expected, victim.nextParsedToken());
+        expected.setForceHexForm(true);
+        assertEquals(expected, victim.nextParsedToken());
+        COSBase array = victim.nextParsedToken();
+        assertThat(array, is(instanceOf(COSArray.class)));
+        assertEquals(COSNull.NULL, victim.nextParsedToken());
+        assertThat(victim.nextParsedToken(), is(instanceOf(COSDictionary.class)));
+        assertEquals(COSInteger.TWO, victim.nextParsedToken());
+        assertEquals(COSName.R, victim.nextParsedToken());
+        assertNull(victim.nextParsedToken());
+    }
+
+    @Test
+    public void nextBadParsedToken() throws IOException
+    {
+        victim = new BaseCOSParser(inMemorySeekableSourceFrom(" Chuck".getBytes()));
+        assertNull(victim.nextParsedToken());
+    }
 }
