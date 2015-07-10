@@ -29,8 +29,13 @@ import org.apache.pdfbox.util.Charsets;
 import org.apache.pdfbox.xref.XrefEntry;
 
 /**
+ * Component responsible for finding and parsing the xref chain (either tables and streams). In case of errors while
+ * parsing the xref chain (Ex. invalid offset, bad dictionaries etc) it has a fallback mechanism performing a document
+ * full scan searching for xrefs. When parsing the document, xref info are passed to the {@link BaseCOSParser} which
+ * will use them to retrieve COS objects on demand.
+ * 
  * @author Andrea Vacondio
- *
+ * @see XrefFullScanner
  */
 class XrefParser
 {

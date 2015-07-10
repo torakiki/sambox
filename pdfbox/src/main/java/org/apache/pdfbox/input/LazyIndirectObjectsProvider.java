@@ -44,8 +44,12 @@ import org.apache.pdfbox.xref.XrefType;
 import org.sejda.util.IOUtils;
 
 /**
+ * A lazy implementation of the {@link IndirectObjectsProvider} that retrieves {@link COSBase} objects parsing the
+ * underlying source on demand (ie. when the {@link IndirectObjectsProvider#get(COSObjectKey)} method is called). Parsed
+ * objects are stored in a cache to be reused. If for given a {@link COSObjectKey} no entry is found in the xref, a
+ * fallback mechanism is activated performing a full scan of the document to retrieve all the objects defined in it.
+ * 
  * @author Andrea Vacondio
- *
  */
 class LazyIndirectObjectsProvider implements IndirectObjectsProvider
 {
@@ -76,19 +80,21 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
     }
 
     @Override
-    public void addEntryIfAbsent(XrefEntry entry)
+    public XrefEntry addEntryIfAbsent(XrefEntry entry)
     {
-        if (xref.addIfAbsent(entry) == null)
+        XrefEntry retVal = xref.addIfAbsent(entry);
+        if (retVal == null)
         {
             LOG.trace("Added xref entry " + entry);
         }
+        return retVal;
     }
 
     @Override
-    public void addEntry(XrefEntry entry)
+    public XrefEntry addEntry(XrefEntry entry)
     {
         LOG.trace("Added xref entry " + entry);
-        xref.add(entry);
+        return xref.add(entry);
     }
 
     @Override
