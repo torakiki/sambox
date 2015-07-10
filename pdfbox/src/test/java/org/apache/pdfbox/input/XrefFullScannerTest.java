@@ -53,7 +53,7 @@ public class XrefFullScannerTest
                 .getResourceAsStream("/input/test_multiple_xref_tables.pdf")));
         victim = new XrefFullScanner(parser);
         victim.scan();
-        assertEquals(406, victim.trailer().getInt(COSName.PREV));
+        assertEquals(408, victim.trailer().getInt(COSName.PREV));
         assertEquals(8, victim.trailer().getInt(COSName.SIZE));
         assertNotNull(victim.trailer().getDictionaryObject(COSName.ROOT));
         COSDictionary overriddenObj = (COSDictionary) parser.provider().get(new COSObjectKey(3, 0))

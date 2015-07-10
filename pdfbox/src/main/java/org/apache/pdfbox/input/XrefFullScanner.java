@@ -133,6 +133,7 @@ class XrefFullScanner
     {
         try (COSStream xrefStream = parser.nextStream(trailer))
         {
+            xrefStreamParser.onTrailerFound(trailer);
             xrefStreamParser.parseStream(xrefStream);
         }
         LOG.debug("Done parsing xref stream");

@@ -79,12 +79,28 @@ startxref
 /MediaBox [0 0 500 800] 
 /Contents 5 0 R>>
 endobj
+6 0 obj
+<<
+/Type /Annot
+/Subtype /Text
+/Rect [175 720 175 720]
+/Contents (Hello Banana!)
+/Open true
+>>
+endobj
+xref
+6 1
+0000000919 00000 n
+trailer <</Size 1 /Root 1 0 R>>
+startxref
+1142
+%%EOF
 xref
 0 1
 0000000000 65535 f
 3 1
 0000000814 00000 n
-trailer <</Size 9 /Root 1 0 R /Prev 562>>
+trailer <</Size 9 /Root 1 0 R /Prev 1029 /XRefStm 562>>
 startxref
-919
+1110
 %%EOF
