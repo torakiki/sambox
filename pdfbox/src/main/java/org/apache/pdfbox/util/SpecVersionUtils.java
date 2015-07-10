@@ -22,8 +22,9 @@ import java.io.IOException;
 import java.util.regex.Pattern;
 
 /**
+ * Utility class with pdf spec versions related methods and constants
+ * 
  * @author Andrea Vacondio
- *
  */
 public class SpecVersionUtils
 {

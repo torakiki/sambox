@@ -96,6 +96,7 @@ public class PDFParser
             throws IOException
     {
         String headerVersion = readHeader(parser);
+        LOG.trace("Parsed header version: " + headerVersion);
         XrefParser xrefParser = new XrefParser(parser);
         xrefParser.parse();
 
