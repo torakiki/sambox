@@ -16,12 +16,9 @@
  */
 package org.apache.pdfbox.contentstream;
 
-import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.graphics.image.PDImage;
-
 import java.awt.geom.Point2D;
 import java.io.IOException;
+
 import org.apache.pdfbox.contentstream.operator.color.SetNonStrokingColor;
 import org.apache.pdfbox.contentstream.operator.color.SetNonStrokingColorN;
 import org.apache.pdfbox.contentstream.operator.color.SetNonStrokingColorSpace;
@@ -70,20 +67,23 @@ import org.apache.pdfbox.contentstream.operator.state.SetMatrix;
 import org.apache.pdfbox.contentstream.operator.state.SetRenderingIntent;
 import org.apache.pdfbox.contentstream.operator.text.BeginText;
 import org.apache.pdfbox.contentstream.operator.text.EndText;
-import org.apache.pdfbox.contentstream.operator.text.SetFontAndSize;
-import org.apache.pdfbox.contentstream.operator.text.SetTextHorizontalScaling;
-import org.apache.pdfbox.contentstream.operator.text.ShowTextAdjusted;
-import org.apache.pdfbox.contentstream.operator.text.ShowTextLine;
-import org.apache.pdfbox.contentstream.operator.text.ShowTextLineAndSpace;
 import org.apache.pdfbox.contentstream.operator.text.MoveText;
 import org.apache.pdfbox.contentstream.operator.text.MoveTextSetLeading;
 import org.apache.pdfbox.contentstream.operator.text.NextLine;
 import org.apache.pdfbox.contentstream.operator.text.SetCharSpacing;
+import org.apache.pdfbox.contentstream.operator.text.SetFontAndSize;
+import org.apache.pdfbox.contentstream.operator.text.SetTextHorizontalScaling;
 import org.apache.pdfbox.contentstream.operator.text.SetTextLeading;
 import org.apache.pdfbox.contentstream.operator.text.SetTextRenderingMode;
 import org.apache.pdfbox.contentstream.operator.text.SetTextRise;
 import org.apache.pdfbox.contentstream.operator.text.SetWordSpacing;
 import org.apache.pdfbox.contentstream.operator.text.ShowText;
+import org.apache.pdfbox.contentstream.operator.text.ShowTextAdjusted;
+import org.apache.pdfbox.contentstream.operator.text.ShowTextLine;
+import org.apache.pdfbox.contentstream.operator.text.ShowTextLineAndSpace;
+import org.apache.pdfbox.cos.COSName;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImage;
 
 /**
  * PDFStreamEngine subclass for advanced processing of graphics.

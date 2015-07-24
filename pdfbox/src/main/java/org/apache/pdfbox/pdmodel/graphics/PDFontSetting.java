@@ -16,6 +16,8 @@
  */
 package org.apache.pdfbox.pdmodel.graphics;
 
+import java.io.IOException;
+
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
@@ -24,8 +26,6 @@ import org.apache.pdfbox.cos.COSNumber;
 import org.apache.pdfbox.cos.COSObjectable;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDFontFactory;
-
-import java.io.IOException;
 
 /**
  * This class represents a font setting used for the graphics state.  A font setting is a font and a

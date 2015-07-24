@@ -1,0 +1,8 @@
+BI
+/F /DCTDecode
+/BPC 8
+/H 362
+/CS /DeviceRGB
+/W 232
+ID
+Some data HEREEI

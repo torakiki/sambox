@@ -40,7 +40,7 @@ public class PDActionJavaScript extends PDAction
     public PDActionJavaScript()
     {
         super();
-        setSubType( SUB_TYPE );
+        setSubType(SUB_TYPE);
     }
 
     /**
@@ -48,7 +48,7 @@ public class PDActionJavaScript extends PDAction
      *
      * @param js Some javascript code.
      */
-    public PDActionJavaScript( String js )
+    public PDActionJavaScript(String js)
     {
         this();
         setAction(js);
@@ -57,13 +57,13 @@ public class PDActionJavaScript extends PDAction
     /**
      * Constructor #2.
      *
-     *  @param a The action dictionary.
+     * @param a The action dictionary.
      */
     public PDActionJavaScript(COSDictionary a)
     {
         super(a);
     }
-    
+
     /**
      * @param sAction The JavaScript.
      */
@@ -77,18 +77,15 @@ public class PDActionJavaScript extends PDAction
      */
     public String getAction()
     {
-        COSBase base = action.getDictionaryObject( COSName.JS );
+        COSBase base = action.getDictionaryObject(COSName.JS);
         if (base instanceof COSString)
         {
-            return ((COSString)base).getString();
+            return ((COSString) base).getString();
         }
         else if (base instanceof COSStream)
         {
-            return ((COSStream)base).getString();
+            return ((COSStream) base).asTextString();
         }
-        else
-        {
-            return null;
-        }
+        return null;
     }
 }

@@ -18,8 +18,6 @@ package org.apache.pdfbox.pdmodel.graphics.state;
 
 import java.io.IOException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
@@ -28,6 +26,8 @@ import org.apache.pdfbox.cos.COSObjectable;
 import org.apache.pdfbox.pdmodel.common.function.PDFunction;
 import org.apache.pdfbox.pdmodel.graphics.PDXObject;
 import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Soft mask.
@@ -66,7 +66,7 @@ public final class PDSoftMask implements COSObjectable
         }
     }
 
-    private static final Log LOG = LogFactory.getLog(PDSoftMask.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PDSoftMask.class);
 
     private final COSDictionary dictionary;
     private COSName subType = null;

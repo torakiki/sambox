@@ -42,7 +42,7 @@ public class AbstractXrefStreamParserTest
     {
         Set<XrefEntry> found = new HashSet<>();
         AbstractXrefStreamParser victim = new AbstractXrefStreamParser(
-                new BaseCOSParser(inMemorySeekableSourceFrom(getClass().getResourceAsStream(
+                new COSParser(inMemorySeekableSourceFrom(getClass().getResourceAsStream(
                         "/input/xref_stream.txt"))))
         {
             @Override
@@ -73,7 +73,7 @@ public class AbstractXrefStreamParserTest
     public void parseNoIdex() throws IOException
     {
         Set<XrefEntry> found = new HashSet<>();
-        AbstractXrefStreamParser victim = new AbstractXrefStreamParser(new BaseCOSParser(
+        AbstractXrefStreamParser victim = new AbstractXrefStreamParser(new COSParser(
                 inMemorySeekableSourceFrom(getClass().getResourceAsStream(
                         "/input/xref_stream_no_index.txt"))))
         {

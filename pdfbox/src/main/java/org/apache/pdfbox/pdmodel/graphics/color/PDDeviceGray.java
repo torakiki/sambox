@@ -16,11 +16,11 @@
  */
 package org.apache.pdfbox.pdmodel.graphics.color;
 
-import org.apache.pdfbox.cos.COSName;
-
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
+
+import org.apache.pdfbox.cos.COSName;
 
 /**
  * A color space with black, white, and intermediate shades of gray.

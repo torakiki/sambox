@@ -16,13 +16,13 @@
  */
 package org.apache.pdfbox.pdmodel.graphics;
 
+import java.util.Arrays;
+
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSArrayList;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSInteger;
 import org.apache.pdfbox.cos.COSObjectable;
-
-import java.util.Arrays;
 
 /**
  * A line dash pattern for stroking paths.

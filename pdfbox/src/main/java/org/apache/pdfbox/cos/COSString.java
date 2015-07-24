@@ -89,7 +89,7 @@ public final class COSString extends COSBase
     }
 
     /**
-     * @return the content of this string as a PDF <i>text string</i>.
+     * @return the content PDF text string as defined in Chap 7.9 of PDF 32000-1:2008.
      */
     public String getString()
     {

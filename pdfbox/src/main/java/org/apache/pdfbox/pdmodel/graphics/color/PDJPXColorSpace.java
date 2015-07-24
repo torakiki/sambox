@@ -16,12 +16,12 @@
  */
 package org.apache.pdfbox.pdmodel.graphics.color;
 
-import org.apache.pdfbox.cos.COSBase;
-
 import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
+
+import org.apache.pdfbox.cos.COSBase;
 
 /**
  * A color space embedded in a JPX file.

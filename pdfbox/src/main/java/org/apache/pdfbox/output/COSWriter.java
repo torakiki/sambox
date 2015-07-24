@@ -40,10 +40,12 @@ import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.cos.COSVisitor;
 import org.apache.pdfbox.cos.IndirectCOSObjectReference;
 import org.apache.pdfbox.util.Charsets;
+import org.sejda.io.BufferedCountingChannelWriter;
+import org.sejda.io.CountingWritableByteChannel;
 import org.sejda.util.IOUtils;
 
 /**
- * Component capable of writing COS objects using the given {@link BufferedDestinationWriter}.
+ * Component capable of writing COS objects using the given {@link BufferedCountingChannelWriter}.
  * 
  * @author Andrea Vacondio
  */
@@ -62,9 +64,15 @@ class COSWriter implements COSVisitor, Closeable
     private static final byte RIGHT_SQUARE_BRACKET = 0x5D;
     private static final byte[] STREAM = "stream".getBytes(Charsets.US_ASCII);
     private static final byte[] ENDSTREAM = "endstream".getBytes(Charsets.US_ASCII);
-    private BufferedDestinationWriter writer;
+    private BufferedCountingChannelWriter writer;
 
-    public COSWriter(BufferedDestinationWriter writer)
+    public COSWriter(CountingWritableByteChannel channel)
+    {
+        requireNotNullArg(channel, "Cannot write to a null channel");
+        this.writer = new BufferedCountingChannelWriter(channel);
+    }
+
+    public COSWriter(BufferedCountingChannelWriter writer)
     {
         requireNotNullArg(writer, "Cannot write to a null writer");
         this.writer = writer;
@@ -84,7 +92,7 @@ class COSWriter implements COSVisitor, Closeable
             }
         }
         writer.write(RIGHT_SQUARE_BRACKET);
-        writer.writeEOL();
+        writeComplexObjectSeparator();
     }
 
     @Override
@@ -112,7 +120,7 @@ class COSWriter implements COSVisitor, Closeable
         }
         writer.write(GREATER_THEN);
         writer.write(GREATER_THEN);
-        writer.writeEOL();
+        writeComplexObjectSeparator();
     }
 
     @Override
@@ -164,7 +172,7 @@ class COSWriter implements COSVisitor, Closeable
         IOUtils.close(value);
         writer.write(CRLF);
         writer.write(ENDSTREAM);
-        writer.writeEOL();
+        writeComplexObjectSeparator();
     }
 
     @Override
@@ -213,13 +221,23 @@ class COSWriter implements COSVisitor, Closeable
         // nothing to do
     }
 
+    /**
+     * writes the separator after a {@link COSArray} or a {@link COSDictionary} or a {@link COSStream} are written.
+     * 
+     * @throws IOException
+     */
+    protected void writeComplexObjectSeparator() throws IOException
+    {
+        writer.writeEOL();
+    }
+
     @Override
     public void close() throws IOException
     {
         IOUtils.close(writer);
     }
 
-    BufferedDestinationWriter writer()
+    BufferedCountingChannelWriter writer()
     {
         return this.writer;
     }

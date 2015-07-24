@@ -22,13 +22,13 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.xref.XrefEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Component scanning for xref tables/streams. It scans top to bottom parsing any xref table/stream found with the
@@ -38,15 +38,15 @@ import org.apache.pdfbox.xref.XrefEntry;
  */
 class XrefFullScanner
 {
-    private static final Log LOG = LogFactory.getLog(XrefFullScanner.class);
+    private static final Logger LOG = LoggerFactory.getLogger(XrefFullScanner.class);
 
     private COSDictionary trailer = new COSDictionary();
     private AbstractXrefStreamParser xrefStreamParser;
     private AbstractXrefTableParser xrefTableParser;
-    private BaseCOSParser parser;
+    private COSParser parser;
     private Pattern objectDefPatter = Pattern.compile("^(\\d+)[\\s](\\d+)[\\s]obj");
 
-    XrefFullScanner(BaseCOSParser parser)
+    XrefFullScanner(COSParser parser)
     {
         this.parser = parser;
         this.xrefStreamParser = new AbstractXrefStreamParser(parser)

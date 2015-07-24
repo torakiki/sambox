@@ -19,10 +19,10 @@ package org.apache.pdfbox.contentstream.operator.graphics;
 import java.io.IOException;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.contentstream.operator.Operator;
+import org.apache.pdfbox.cos.COSBase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * h Close the path.
@@ -31,7 +31,7 @@ import org.apache.pdfbox.contentstream.operator.Operator;
  */
 public final class ClosePath extends GraphicsOperatorProcessor
 {
-    private static final Log LOG = LogFactory.getLog(ClosePath.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ClosePath.class);
     
     @Override
     public void process(Operator operator, List<COSBase> operands) throws IOException

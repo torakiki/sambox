@@ -16,12 +16,12 @@
  */
 package org.apache.pdfbox.pdmodel.graphics.blend;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSName;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Blend mode.

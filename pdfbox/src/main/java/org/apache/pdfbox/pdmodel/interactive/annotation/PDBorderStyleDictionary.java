@@ -16,8 +16,8 @@
  */
 package org.apache.pdfbox.pdmodel.interactive.annotation;
 
-import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSArray;
+import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSInteger;
 import org.apache.pdfbox.cos.COSObjectable;
 import org.apache.pdfbox.pdmodel.graphics.PDLineDashPattern;

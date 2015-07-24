@@ -29,12 +29,12 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSInteger;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Decompresses data encoded using the JBIG2 standard, reproducing the original
@@ -48,7 +48,7 @@ import org.apache.pdfbox.cos.COSStream;
  */
 final class JBIG2Filter extends Filter
 {
-    private static final Log LOG = LogFactory.getLog(JBIG2Filter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JBIG2Filter.class);
 
     @Override
     public DecodeResult decode(InputStream encoded, OutputStream decoded,

@@ -16,13 +16,14 @@
  */
 package org.apache.pdfbox.pdmodel.graphics.color;
 
+import java.awt.image.BufferedImage;
+import java.awt.image.WritableRaster;
+import java.io.IOException;
+
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSFloat;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.common.PDRange;
-import java.awt.image.BufferedImage;
-import java.awt.image.WritableRaster;
-import java.io.IOException;
 
 /**
  * A Lab colour space is a CIE-based ABC colour space with two transformation stages.

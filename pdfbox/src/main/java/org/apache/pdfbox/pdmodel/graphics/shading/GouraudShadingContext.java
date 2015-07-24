@@ -26,11 +26,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.imageio.stream.ImageInputStream;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
 import org.apache.pdfbox.pdmodel.common.PDRange;
 import org.apache.pdfbox.util.Matrix;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Shades Gouraud triangles for Type4ShadingContext and Type5ShadingContext.
@@ -40,7 +42,7 @@ import org.apache.pdfbox.util.Matrix;
  */
 abstract class GouraudShadingContext extends TriangleBasedShadingContext
 {
-    private static final Log LOG = LogFactory.getLog(GouraudShadingContext.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GouraudShadingContext.class);
 
     /**
      * triangle list.

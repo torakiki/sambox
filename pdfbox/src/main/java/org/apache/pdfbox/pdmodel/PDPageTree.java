@@ -17,7 +17,9 @@
 package org.apache.pdfbox.pdmodel;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Queue;
 
 import org.apache.pdfbox.cos.COSArray;
@@ -26,9 +28,6 @@ import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSInteger;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSObjectable;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The page tree, which defines the ordering of pages in the document in an efficient manner.

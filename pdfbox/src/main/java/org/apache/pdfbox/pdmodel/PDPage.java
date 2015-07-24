@@ -20,8 +20,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.contentstream.PDContentStream;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSArrayList;
@@ -41,6 +39,8 @@ import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotation;
 import org.apache.pdfbox.pdmodel.interactive.pagenavigation.PDThreadBead;
 import org.apache.pdfbox.pdmodel.interactive.pagenavigation.PDTransition;
 import org.apache.pdfbox.util.Matrix;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A page in a PDF document.
@@ -49,7 +49,7 @@ import org.apache.pdfbox.util.Matrix;
  */
 public class PDPage implements COSObjectable, PDContentStream
 {
-    private static final Log LOG = LogFactory.getLog(PDPage.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PDPage.class);
     
     private final COSDictionary page;
     private PDResources pageResources;

@@ -16,10 +16,11 @@
  */
 package org.apache.pdfbox.contentstream.operator;
 
-import org.apache.pdfbox.cos.COSBase;
-import org.apache.pdfbox.contentstream.PDFStreamEngine;
-import java.util.List;
 import java.io.IOException;
+import java.util.List;
+
+import org.apache.pdfbox.contentstream.PDFStreamEngine;
+import org.apache.pdfbox.cos.COSBase;
 
 /**
  * Processes a PDF operator.

@@ -16,21 +16,10 @@
  */
 package org.apache.pdfbox.text;
 
-import java.io.InputStream;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.pdfbox.contentstream.PDFStreamEngine;
-import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.font.encoding.GlyphList;
-import org.apache.pdfbox.pdmodel.common.PDRectangle;
-import org.apache.pdfbox.pdmodel.font.PDFont;
-import org.apache.pdfbox.pdmodel.font.PDSimpleFont;
-import org.apache.pdfbox.pdmodel.font.PDType3Font;
-import org.apache.pdfbox.pdmodel.graphics.state.PDGraphicsState;
-
 import java.io.IOException;
-import org.apache.pdfbox.util.Matrix;
-import org.apache.pdfbox.util.Vector;
+import java.io.InputStream;
+
+import org.apache.pdfbox.contentstream.PDFStreamEngine;
 import org.apache.pdfbox.contentstream.operator.DrawObject;
 import org.apache.pdfbox.contentstream.operator.state.Concatenate;
 import org.apache.pdfbox.contentstream.operator.state.Restore;
@@ -39,20 +28,31 @@ import org.apache.pdfbox.contentstream.operator.state.SetGraphicsStateParameters
 import org.apache.pdfbox.contentstream.operator.state.SetMatrix;
 import org.apache.pdfbox.contentstream.operator.text.BeginText;
 import org.apache.pdfbox.contentstream.operator.text.EndText;
-import org.apache.pdfbox.contentstream.operator.text.SetFontAndSize;
-import org.apache.pdfbox.contentstream.operator.text.SetTextHorizontalScaling;
-import org.apache.pdfbox.contentstream.operator.text.ShowTextAdjusted;
-import org.apache.pdfbox.contentstream.operator.text.ShowTextLine;
-import org.apache.pdfbox.contentstream.operator.text.ShowTextLineAndSpace;
 import org.apache.pdfbox.contentstream.operator.text.MoveText;
 import org.apache.pdfbox.contentstream.operator.text.MoveTextSetLeading;
 import org.apache.pdfbox.contentstream.operator.text.NextLine;
 import org.apache.pdfbox.contentstream.operator.text.SetCharSpacing;
+import org.apache.pdfbox.contentstream.operator.text.SetFontAndSize;
+import org.apache.pdfbox.contentstream.operator.text.SetTextHorizontalScaling;
 import org.apache.pdfbox.contentstream.operator.text.SetTextLeading;
 import org.apache.pdfbox.contentstream.operator.text.SetTextRenderingMode;
 import org.apache.pdfbox.contentstream.operator.text.SetTextRise;
 import org.apache.pdfbox.contentstream.operator.text.SetWordSpacing;
 import org.apache.pdfbox.contentstream.operator.text.ShowText;
+import org.apache.pdfbox.contentstream.operator.text.ShowTextAdjusted;
+import org.apache.pdfbox.contentstream.operator.text.ShowTextLine;
+import org.apache.pdfbox.contentstream.operator.text.ShowTextLineAndSpace;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.font.PDFont;
+import org.apache.pdfbox.pdmodel.font.PDSimpleFont;
+import org.apache.pdfbox.pdmodel.font.PDType3Font;
+import org.apache.pdfbox.pdmodel.font.encoding.GlyphList;
+import org.apache.pdfbox.pdmodel.graphics.state.PDGraphicsState;
+import org.apache.pdfbox.util.Matrix;
+import org.apache.pdfbox.util.Vector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * PDFStreamEngine subclass for advanced processing of text via TextPosition.
@@ -63,7 +63,7 @@ import org.apache.pdfbox.contentstream.operator.text.ShowText;
  */
 class PDFTextStreamEngine extends PDFStreamEngine
 {
-    private static final Log LOG = LogFactory.getLog(PDFTextStreamEngine.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PDFTextStreamEngine.class);
 
     private int pageRotation;
     private PDRectangle pageSize;
@@ -187,7 +187,7 @@ class PDFTextStreamEngine extends PDFStreamEngine
         }
         catch (Throwable exception)
         {
-            LOG.warn(exception, exception);
+            LOG.warn(exception.getMessage(), exception);
         }
 
         if (spaceWidthText == 0)

@@ -30,7 +30,6 @@ import javax.imageio.stream.ImageInputStream;
 
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.pdmodel.graphics.color.PDJPXColorSpace;
 
 /**
  * Decompress data encoded using the wavelet-based JPEG 2000 standard,
@@ -108,7 +107,7 @@ public final class JPXFilter extends Filter
             // extract embedded color space
             if (!parameters.containsKey(COSName.COLORSPACE))
             {
-                result.setColorSpace(new PDJPXColorSpace(image.getColorModel().getColorSpace()));
+                // result.setColorSpace(new PDJPXColorSpace(image.getColorModel().getColorSpace()));
             }
 
             return image;

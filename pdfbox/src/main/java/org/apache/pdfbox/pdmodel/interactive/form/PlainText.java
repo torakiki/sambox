@@ -17,9 +17,9 @@
 package org.apache.pdfbox.pdmodel.interactive.form;
 
 import java.io.IOException;
+import java.text.AttributedCharacterIterator.Attribute;
 import java.text.AttributedString;
 import java.text.BreakIterator;
-import java.text.AttributedCharacterIterator.Attribute;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

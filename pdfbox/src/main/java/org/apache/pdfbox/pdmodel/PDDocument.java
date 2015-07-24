@@ -34,8 +34,6 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
@@ -57,6 +55,8 @@ import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.util.Charsets;
 import org.sejda.io.CountingWritableByteChannel;
 import org.sejda.util.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This is the in-memory representation of the PDF document.
@@ -65,7 +65,7 @@ import org.sejda.util.IOUtils;
  */
 public class PDDocument implements Closeable
 {
-    private static final Log LOG = LogFactory.getLog(PDDocument.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PDDocument.class);
 
     private final COSDocument document;
     private PDDocumentCatalog documentCatalog;

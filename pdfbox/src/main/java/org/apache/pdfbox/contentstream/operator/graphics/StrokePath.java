@@ -16,12 +16,11 @@
  */
 package org.apache.pdfbox.contentstream.operator.graphics;
 
+import java.io.IOException;
 import java.util.List;
 
-import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.contentstream.operator.Operator;
-
-import java.io.IOException;
+import org.apache.pdfbox.cos.COSBase;
 
 /**
  * S Stroke the path.

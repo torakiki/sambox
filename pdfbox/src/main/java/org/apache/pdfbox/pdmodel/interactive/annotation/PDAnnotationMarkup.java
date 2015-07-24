@@ -174,12 +174,9 @@ public class PDAnnotationMarkup extends PDAnnotation
         }
         else if (base instanceof COSStream)
         {
-            return ((COSStream) base).getString();
+            return ((COSStream) base).asTextString();
         }
-        else
-        {
-            return null;
-        }
+        return null;
     }
 
     /**

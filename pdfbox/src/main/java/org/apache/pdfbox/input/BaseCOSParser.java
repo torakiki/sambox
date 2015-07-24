@@ -17,7 +17,6 @@
 package org.apache.pdfbox.input;
 
 import static org.apache.pdfbox.util.CharUtils.isCarriageReturn;
-import static org.apache.pdfbox.util.CharUtils.isDigit;
 import static org.apache.pdfbox.util.CharUtils.isLineFeed;
 import static org.apache.pdfbox.util.CharUtils.isSpace;
 
@@ -25,8 +24,6 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSBoolean;
@@ -34,107 +31,37 @@ import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSNull;
 import org.apache.pdfbox.cos.COSNumber;
-import org.apache.pdfbox.cos.COSObjectKey;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.util.Charsets;
 import org.sejda.io.SeekableSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * Parser for COS objects providing methods to get parsed objects from the given {@link SeekableSource}
+ * Base parser for COS objects providing methods to get parsed objects from the given {@link SeekableSource}
  * 
  * @author Andrea Vacondio
  */
-class BaseCOSParser extends SourceReader
+abstract class BaseCOSParser extends SourceReader
 {
-
-    private static final Log LOG = LogFactory.getLog(BaseCOSParser.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BaseCOSParser.class);
 
     public static final String ENDOBJ = "endobj";
     public static final String STREAM = "stream";
     public static final String ENDSTREAM = "endstream";
 
-    private IndirectObjectsProvider provider;
-
     BaseCOSParser(SeekableSource source)
     {
         super(source);
-        this.provider = new LazyIndirectObjectsProvider().initializeWith(this);
-    }
-
-    BaseCOSParser(SeekableSource source, IndirectObjectsProvider provider)
-    {
-        super(source);
-        this.provider = provider;
     }
 
     /**
-     * @return The next parsed basic type object from the stream. Basic types are defined in Chap 7.3 of PDF
-     * 32000-1:2008
+     * @return The next parsed basic type object from the stream or null if the next token is not a COSBase. Basic types
+     * are defined in Chap 7.3 of PDF 32000-1:2008
      * @throws IOException If there is an error during parsing.
      */
-    public COSBase nextParsedToken() throws IOException
-    {
-        skipSpaces();
-        char c = (char) source().peek();
-        switch (c)
-        {
-        case '<':
-        {
-            source().read();
-            c = (char) source().peek();
-            source().back();
-            if (c == '<')
-            {
-                return nextDictionary();
-            }
-            return nextHexadecimalString();
-        }
-        case '[':
-            return nextArray();
-        case '(':
-            return nextLiteralString();
-        case '/':
-            return nextName();
-        case 'n':
-            return nextNull();
-        case 't':
-        case 'f':
-            return nextBoolean();
-        case '.':
-        case '-':
-        case '+':
-            return nextNumber();
-        case '0':
-        case '1':
-        case '2':
-        case '3':
-        case '4':
-        case '5':
-        case '6':
-        case '7':
-        case '8':
-        case '9':
-            return nextNumberOrIndirectReference();
-        case (char) -1:
-            return null;
-        default:
-        {
-            String badString = readToken();
-            // if it's an endstream/endobj, we want to put it back so the caller will see it
-            if (ENDOBJ.equals(badString) || ENDSTREAM.equals(badString))
-            {
-                source().back(badString.getBytes(Charsets.ISO_8859_1).length);
-            }
-            else
-            {
-                LOG.warn(String.format("Unknown token with value '%s' ending at offset %d",
-                        badString, position()));
-            }
-        }
-        }
-        return null;
-    }
+    public abstract COSBase nextParsedToken() throws IOException;
 
     /**
      * @return The next parsed dictionary object from the stream. Dictionary objects are defined in Chap 7.3.7 of PDF
@@ -164,7 +91,7 @@ class BaseCOSParser extends SourceReader
                 COSBase value = nextParsedToken();
                 if (value == null)
                 {
-                    LOG.warn(String.format("Bad dictionary declaration for key '%s'", key));
+                    LOG.warn("Bad dictionary declaration for key '{}'", key);
                 }
                 else
                 {
@@ -261,42 +188,6 @@ class BaseCOSParser extends SourceReader
     public COSNumber nextNumber() throws IOException
     {
         return COSNumber.get(readNumber());
-    }
-
-    /**
-     * @return The next parsed numeric object from the stream or the next indirect object in case the number is an
-     * object number . Numeric objects are defined in Chap 7.3.3 of PDF 32000-1:2008. Indirect objects are defined in
-     * Chap 7.3.10 of PDF 32000-1:2008
-     * @throws IOException If there is an error during parsing.
-     * @see #nextNumber()
-     */
-    public COSBase nextNumberOrIndirectReference() throws IOException
-    {
-        String first = readNumber();
-        long offset = position();
-        skipSpaces();
-        if (isDigit(source().peek()))
-        {
-            String second = readIntegerNumber();
-            skipSpaces();
-            if ('R' == source().read())
-            {
-                try
-                {
-                    return new ExistingIndirectCOSObject(new COSObjectKey(Long.parseLong(first),
-                            Integer.parseInt(second)), provider);
-                }
-                catch (NumberFormatException nfe)
-                {
-                    throw new IOException(
-                            String.format(
-                                    "Unable to parse an object indirect reference with object number '%s' and generation number '%s'",
-                                    first, second), nfe);
-                }
-            }
-        }
-        position(offset);
-        return COSNumber.get(first);
     }
 
     /**
@@ -489,7 +380,7 @@ class BaseCOSParser extends SourceReader
         }
     }
 
-    public long doFindStreamLength(long start) throws IOException
+    private long doFindStreamLength(long start) throws IOException
     {
         Pattern pattern = Pattern.compile("endstream|endobj");
         while (true)
@@ -517,19 +408,5 @@ class BaseCOSParser extends SourceReader
                 return length;
             }
         }
-    }
-
-    public IndirectObjectsProvider provider()
-    {
-        return provider;
-    }
-
-    /**
-     * Closes the parser but not the associated provider
-     */
-    @Override
-    public void close() throws IOException
-    {
-        super.close();
     }
 }

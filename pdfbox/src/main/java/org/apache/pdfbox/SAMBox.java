@@ -25,11 +25,6 @@ package org.apache.pdfbox;
 public final class SAMBox
 {
     /**
-     * Buffer size for org.apache.pdfbox.output.BufferedDestinationWriter
-     */
-    public static final String OUTPUT_BUFFER_SIZE_PROPERTY = "org.pdfbox.buffered.output.size";
-
-    /**
      * Pool size used in org.apache.pdfbox.input.SourceReader
      */
     public static final String BUFFERS_POOL_SIZE_PROPERTY = "org.pdfbox.buffers.pool.size";

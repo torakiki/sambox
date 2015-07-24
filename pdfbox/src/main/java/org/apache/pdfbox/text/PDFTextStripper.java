@@ -315,7 +315,7 @@ public class PDFTextStripper extends PDFTextStreamEngine
      * @param document The PDF document that is being processed.
      * @throws IOException If an IO error occurs.
      */
-    protected void startDocument(PDDocument document) throws IOException
+    protected void startDocument(PDDocument document)
     {
         // no default implementation, but available for subclasses
     }
@@ -327,7 +327,7 @@ public class PDFTextStripper extends PDFTextStreamEngine
      * @param document The PDF document that is being processed.
      * @throws IOException If an IO error occurs.
      */
-    protected void endDocument(PDDocument document) throws IOException
+    protected void endDocument(PDDocument document)
     {
         // no default implementation, but available for subclasses
     }
@@ -420,7 +420,7 @@ public class PDFTextStripper extends PDFTextStreamEngine
      *
      * @throws IOException If there is any error writing to the stream.
      */
-    protected void startPage(PDPage page) throws IOException
+    protected void startPage(PDPage page)
     {
         // default is to do nothing
     }
@@ -433,7 +433,7 @@ public class PDFTextStripper extends PDFTextStreamEngine
      *
      * @throws IOException If there is any error writing to the stream.
      */
-    protected void endPage(PDPage page) throws IOException
+    protected void endPage(PDPage page)
     {
         // default is to do nothing
     }

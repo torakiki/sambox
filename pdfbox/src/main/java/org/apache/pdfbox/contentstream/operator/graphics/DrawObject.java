@@ -19,13 +19,13 @@ package org.apache.pdfbox.contentstream.operator.graphics;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.pdfbox.contentstream.operator.Operator;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.MissingResourceException;
+import org.apache.pdfbox.pdmodel.graphics.PDXObject;
 import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
-import org.apache.pdfbox.pdmodel.graphics.PDXObject;
-import org.apache.pdfbox.contentstream.operator.Operator;
 
 /**
  * Do: Draws an XObject.

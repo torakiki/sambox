@@ -21,26 +21,26 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.pdfbox.pdmodel.font.PDType1Equivalent;
+import org.apache.pdfbox.pdmodel.font.PDSimpleFont;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Glyph to GeneralPath conversion for Type 1 PFB and CFF, and TrueType fonts with a 'post' table.
  */
 final class Type1Glyph2D implements Glyph2D
 {
-    private static final Log LOG = LogFactory.getLog(Type1Glyph2D.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Type1Glyph2D.class);
 
     private final Map<Integer, GeneralPath> cache = new HashMap<Integer, GeneralPath>();
-    private final PDType1Equivalent font;
+    private final PDSimpleFont font;
 
     /**
      * Constructor.
      *
      * @param font PDF Type1 font.
      */
-    Type1Glyph2D(PDType1Equivalent font)
+    Type1Glyph2D(PDSimpleFont font)
     {
         this.font = font;
     }
@@ -57,8 +57,8 @@ final class Type1Glyph2D implements Glyph2D
         // fetch
         try
         {
-            String name = font.codeToName(code);
-            if (name.equals(".notdef"))
+            String name = font.getEncoding().getName(code);
+            if (!font.hasGlyph(name))
             {
                 LOG.warn("No glyph for " + code + " (" + name + ") in font " + font.getName());
             }

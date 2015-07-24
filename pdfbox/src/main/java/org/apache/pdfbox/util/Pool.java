@@ -23,8 +23,8 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A simple object pool implementation that requires a {@link Supplier} which is used to create instances to pool and
@@ -34,7 +34,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class Pool<T>
 {
-    private static final Log LOG = LogFactory.getLog(Pool.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Pool.class);
 
     private final ArrayBlockingQueue<T> pool;
     private Supplier<T> supplier;

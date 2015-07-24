@@ -16,14 +16,14 @@
  */
 package org.apache.pdfbox.contentstream.operator;
 
+import java.io.IOException;
+import java.util.List;
+
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.graphics.PDXObject;
 import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
 import org.apache.pdfbox.text.PDFMarkedContentExtractor;
-
-import java.io.IOException;
-import java.util.List;
 
 /**
  * Do: Draws an XObject.

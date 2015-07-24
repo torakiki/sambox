@@ -39,25 +39,32 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
+import org.sejda.io.BufferedCountingChannelWriter;
+import org.sejda.io.CountingWritableByteChannel;
 
 public class PDFWriterTest
 {
-    private BufferedDestinationWriter writer;
+    private BufferedCountingChannelWriter writer;
     private PDFWriter victim;
 
     @Before
     public void setUp()
     {
-        writer = mock(BufferedDestinationWriter.class);
+        writer = mock(BufferedCountingChannelWriter.class);
         victim = new PDFWriter(writer);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void nullConstructor()
+    public void nullWriterConstructor()
     {
-        new PDFWriter(null);
+        new PDFWriter((BufferedCountingChannelWriter) null);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void nullChannelConstructor()
+    {
+        new PDFWriter((CountingWritableByteChannel) null);
+    }
     @Test
     public void writeHeader() throws IOException
     {

@@ -26,8 +26,6 @@ import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSBoolean;
@@ -43,6 +41,8 @@ import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.cos.COSVisitor;
 import org.apache.pdfbox.cos.IndirectCOSObjectReference;
 import org.apache.pdfbox.input.ExistingIndirectCOSObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Base component providing methods to write the body of a pdf document. This implementation starts from the document
@@ -57,7 +57,7 @@ import org.apache.pdfbox.input.ExistingIndirectCOSObject;
  */
 abstract class AbstractPdfBodyWriter implements COSVisitor, Closeable
 {
-    private static final Log LOG = LogFactory.getLog(AbstractPdfBodyWriter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractPdfBodyWriter.class);
 
     private Map<String, Map<COSObjectKey, IndirectCOSObjectReference>> bySourceExistingIndirectToNewXref = new HashMap<>();
     private Map<COSBase, IndirectCOSObjectReference> newObjects = new HashMap<>();

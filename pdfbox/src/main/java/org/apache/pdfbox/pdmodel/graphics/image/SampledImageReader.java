@@ -31,14 +31,14 @@ import java.util.Arrays;
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.MemoryCacheImageInputStream;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.commons.io.IOUtils;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSNumber;
 import org.apache.pdfbox.pdmodel.common.PDMemoryStream;
 import org.apache.pdfbox.pdmodel.graphics.color.PDColorSpace;
 import org.apache.pdfbox.pdmodel.graphics.color.PDIndexed;
-import org.apache.pdfbox.util.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Reads a sampled image from a PDF file.
@@ -46,7 +46,7 @@ import org.apache.pdfbox.util.IOUtils;
  */
 final class SampledImageReader
 {
-    private static final Log LOG = LogFactory.getLog(SampledImageReader.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SampledImageReader.class);
     
     private SampledImageReader()
     {

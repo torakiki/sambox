@@ -27,8 +27,8 @@ import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.pdmodel.PDResources;
 
 /**
- * Base class for fields which use "Variable Text".
- * These fields construct an appearance stream dynamically at viewing time.
+ * Base class for fields which use "Variable Text". These fields construct an appearance stream dynamically at viewing
+ * time.
  *
  * @author Ben Litchfield
  */
@@ -65,8 +65,8 @@ public abstract class PDVariableText extends PDTerminalField
      * 
      * This is an inheritable attribute.
      * 
-     * The default appearance contains a set of default graphics and text operators
-     * to define the field’s text size and color.
+     * The default appearance contains a set of default graphics and text operators to define the field’s text size and
+     * color.
      * 
      * @return the DA element of the dictionary object
      */
@@ -81,8 +81,8 @@ public abstract class PDVariableText extends PDTerminalField
      *
      * This is an inheritable attribute.
      *
-     * The default appearance contains a set of default graphics and text operators
-     * to define the field’s text size and color.
+     * The default appearance contains a set of default graphics and text operators to define the field’s text size and
+     * color.
      *
      * @return the DA element of the dictionary object
      */
@@ -96,8 +96,8 @@ public abstract class PDVariableText extends PDTerminalField
     /**
      * Set the default appearance.
      * 
-     * This will set the local default appearance for the variable text field only not 
-     * affecting a default appearance in the parent hierarchy.
+     * This will set the local default appearance for the variable text field only not affecting a default appearance in
+     * the parent hierarchy.
      * 
      * Providing null as the value will remove the local default appearance.
      * 
@@ -111,8 +111,7 @@ public abstract class PDVariableText extends PDTerminalField
     /**
      * Get the default style string.
      * 
-     * The default style string defines the default style for
-     * rich text fields.
+     * The default style string defines the default style for rich text fields.
      * 
      * @return the DS element of the dictionary object
      */
@@ -139,7 +138,7 @@ public abstract class PDVariableText extends PDTerminalField
         {
             dictionary.removeItem(COSName.DS);
         }
-    }    
+    }
 
     /**
      * This will get the 'quadding' or justification of the text to be displayed.
@@ -157,8 +156,8 @@ public abstract class PDVariableText extends PDTerminalField
     {
         int retval = 0;
 
-        COSNumber number = (COSNumber)getInheritableAttribute(COSName.Q);
-        
+        COSNumber number = (COSNumber) getInheritableAttribute(COSName.Q);
+
         if (number != null)
         {
             retval = number.intValue();
@@ -167,7 +166,7 @@ public abstract class PDVariableText extends PDTerminalField
     }
 
     /**
-     * This will set the quadding/justification of the text.  See QUADDING constants.
+     * This will set the quadding/justification of the text. See QUADDING constants.
      *
      * @param q The new text justification.
      */
@@ -175,7 +174,7 @@ public abstract class PDVariableText extends PDTerminalField
     {
         dictionary.setInt(COSName.Q, q);
     }
-    
+
     /**
      * Get the fields rich text value.
      * 
@@ -186,16 +185,14 @@ public abstract class PDVariableText extends PDTerminalField
     {
         return getStringOrStream(getInheritableAttribute(COSName.RV));
     }
-    
+
     /**
      * Set the fields rich text value.
      * 
      * <p>
-     * Setting the rich text value will not generate the appearance
-     * for the field.
-     * <br/>
-     * You can set {@link PDAcroForm#setNeedAppearances(Boolean)} to
-     * signal a conforming reader to generate the appearance stream.
+     * Setting the rich text value will not generate the appearance for the field. <br/>
+     * You can set {@link PDAcroForm#setNeedAppearances(Boolean)} to signal a conforming reader to generate the
+     * appearance stream.
      * </p>
      * 
      * Providing null as the value will remove the default style string.
@@ -211,7 +208,7 @@ public abstract class PDVariableText extends PDTerminalField
         else
         {
             dictionary.removeItem(COSName.RV);
-        }        
+        }
     }
 
     /**
@@ -224,21 +221,14 @@ public abstract class PDVariableText extends PDTerminalField
      */
     protected final String getStringOrStream(COSBase base)
     {
-        if (base == null)
+        if (base instanceof COSString)
         {
-            return "";
-        }
-        else if (base instanceof COSString)
-        {
-            return ((COSString)base).getString();
+            return ((COSString) base).getString();
         }
         else if (base instanceof COSStream)
         {
-            return ((COSStream)base).getString();
+            return ((COSStream) base).asTextString();
         }
-        else
-        {
-            return "";
-        }
+        return "";
     }
 }

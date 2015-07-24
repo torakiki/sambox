@@ -24,8 +24,9 @@ import java.awt.color.ColorSpace;
 import java.awt.image.ColorModel;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * AWT composite for blend modes.
@@ -37,7 +38,7 @@ public final class BlendComposite implements Composite
     /**
      * Log instance.
      */
-    private static final Log LOG = LogFactory.getLog(BlendComposite.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BlendComposite.class);
 
     /**
      * Creates a blend composite
@@ -220,6 +221,11 @@ public final class BlendComposite implements Composite
                     dstOut.setDataElements(dstOutXShift + x, dstOutYShift + y, dstPixel);
                 }
             }
+        }
+
+        public RenderingHints getHints()
+        {
+            return hints;
         }
     }
 }

@@ -30,8 +30,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSArrayList;
 import org.apache.pdfbox.cos.COSBase;
@@ -42,6 +40,8 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.common.PDRange;
 import org.apache.pdfbox.pdmodel.common.PDStream;
 import org.apache.pdfbox.util.Charsets;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * ICCBased colour spaces are based on a cross-platform colour profile as defined by the
@@ -52,7 +52,7 @@ import org.apache.pdfbox.util.Charsets;
  */
 public final class PDICCBased extends PDCIEBasedColorSpace
 {
-    private static final Log LOG = LogFactory.getLog(PDICCBased.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PDICCBased.class);
 
     private final PDStream stream;
     private int numberOfComponents = -1;

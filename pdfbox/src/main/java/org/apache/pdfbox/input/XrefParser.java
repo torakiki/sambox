@@ -21,17 +21,17 @@ import static org.apache.pdfbox.input.AbstractXrefTableParser.XREF;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.util.Charsets;
 import org.apache.pdfbox.xref.XrefEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Component responsible for finding and parsing the xref chain (either tables and streams). In case of errors while
  * parsing the xref chain (Ex. invalid offset, bad dictionaries etc) it has a fallback mechanism performing a document
- * full scan searching for xrefs. When parsing the document, xref info are passed to the {@link BaseCOSParser} which
+ * full scan searching for xrefs. When parsing the document, xref info are passed to the {@link COSParser} which
  * will use them to retrieve COS objects on demand.
  * 
  * @author Andrea Vacondio
@@ -39,7 +39,7 @@ import org.apache.pdfbox.xref.XrefEntry;
  */
 class XrefParser
 {
-    private static final Log LOG = LogFactory.getLog(XrefParser.class);
+    private static final Logger LOG = LoggerFactory.getLogger(XrefParser.class);
     /**
      * How many trailing bytes to read for EOF marker.
      */
@@ -49,9 +49,9 @@ class XrefParser
     private COSDictionary trailer = new COSDictionary();
     private AbstractXrefStreamParser xrefStreamParser;
     private AbstractXrefTableParser xrefTableParser;
-    private BaseCOSParser parser;
+    private COSParser parser;
 
-    public XrefParser(BaseCOSParser parser)
+    public XrefParser(COSParser parser)
     {
         this.parser = parser;
         this.xrefStreamParser = new AbstractXrefStreamParser(parser)

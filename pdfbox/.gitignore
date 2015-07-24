@@ -1,1 +1,13 @@
-/target/
+*.class
+
+.classpath
+.project
+.launch
+.settings/
+target/
+.externalToolBuilders/
+
+# Package Files #
+*.jar
+*.war
+*.ear

@@ -16,14 +16,15 @@
  */
 package org.apache.pdfbox.pdmodel.font;
 
+import java.awt.geom.GeneralPath;
 import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.fontbox.cff.Type2CharString;
 import org.apache.fontbox.cmap.CMap;
 import org.apache.fontbox.ttf.CmapSubtable;
+import org.apache.fontbox.ttf.GlyphData;
 import org.apache.fontbox.ttf.OTFParser;
 import org.apache.fontbox.ttf.OpenTypeFont;
 import org.apache.fontbox.ttf.TTFParser;
@@ -35,6 +36,8 @@ import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.pdmodel.common.PDStream;
 import org.apache.pdfbox.util.Matrix;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Type 2 CIDFont (TrueType).
@@ -43,7 +46,7 @@ import org.apache.pdfbox.util.Matrix;
  */
 public class PDCIDFontType2 extends PDCIDFont
 {
-    private static final Log LOG = LogFactory.getLog(PDCIDFontType2.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PDCIDFontType2.class);
 
     private final TrueTypeFont ttf;
     private final int[] cid2gid;
@@ -131,17 +134,22 @@ public class PDCIDFontType2 extends PDCIDFont
 
         if (ttfFont == null)
         {
-            // substitute
-            TrueTypeFont ttfSubstitute = ExternalFonts.getTrueTypeFont(getBaseFont());
-            if (ttfSubstitute != null)
+            // find font or substitute
+            CIDFontMapping mapping = FontMapper.getCIDFont(getBaseFont(), getFontDescriptor(),
+                                                           getCIDSystemInfo());
+
+            if (mapping.isCIDFont())
             {
-                ttfFont = ttfSubstitute;
+                ttfFont = mapping.getFont();
             }
             else
             {
-                // fallback
-                ttfFont = ExternalFonts.getTrueTypeFallbackFont(getFontDescriptor());
-                LOG.warn("Using fallback font '" + ttfFont + "' for '" + getBaseFont() + "'");
+                ttfFont = (TrueTypeFont)mapping.getTrueTypeFont();
+            }
+
+            if (mapping.isFallback())
+            {
+                LOG.warn("Using fallback font " + ttfFont.getName() + " for CID-keyed TrueType font " + getBaseFont());
             }
         }
         ttf = ttfFont;
@@ -251,7 +259,7 @@ public class PDCIDFontType2 extends PDCIDFont
                     LOG.warn("Trying to map multi-byte character using 'cmap', result will be poor");
                 }
                 
-                // a non-embedded font always has a cmap (otherwise ExternalFonts won't load it)
+                // a non-embedded font always has a cmap (otherwise FontMapper won't load it)
                 return cmap.getGlyphId(unicode.codePointAt(0));
             }
         }
@@ -370,10 +378,38 @@ public class PDCIDFontType2 extends PDCIDFont
     }
 
     /**
-     * Returns the embedded or substituted TrueType font.
+     * Returns the embedded or substituted TrueType font. May be an OpenType font if the font is
+     * not embedded.
      */
     public TrueTypeFont getTrueTypeFont()
     {
         return ttf;
+    }
+
+    @Override
+    public GeneralPath getPath(int code) throws IOException
+    {
+        if (ttf instanceof OpenTypeFont && ((OpenTypeFont)ttf).isPostScript())
+        {
+            int cid = codeToCID(code);
+            Type2CharString charstring = ((OpenTypeFont)ttf).getCFF().getFont().getType2CharString(cid);
+            return charstring.getPath();
+        }
+        else
+        {
+            int gid = codeToGID(code);
+            GlyphData glyph = ttf.getGlyph().getGlyph(gid);
+            if (glyph != null)
+            {
+                return glyph.getPath();
+            }
+            return new GeneralPath();
+        }
+    }
+
+    @Override
+    public boolean hasGlyph(int code) throws IOException
+    {
+        return codeToGID(code) != 0;
     }
 }

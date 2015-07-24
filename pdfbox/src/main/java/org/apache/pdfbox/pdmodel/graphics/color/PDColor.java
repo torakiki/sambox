@@ -16,12 +16,12 @@
  */
 package org.apache.pdfbox.pdmodel.graphics.color;
 
+import java.io.IOException;
+import java.util.Arrays;
+
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSNumber;
-
-import java.io.IOException;
-import java.util.Arrays;
 
 /**
  * A color value, consisting of one or more color components, or for pattern color spaces,

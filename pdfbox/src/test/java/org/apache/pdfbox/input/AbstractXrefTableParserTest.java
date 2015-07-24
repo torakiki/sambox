@@ -40,7 +40,7 @@ public class AbstractXrefTableParserTest
     {
         Set<XrefEntry> found = new HashSet<>();
         AbstractXrefTableParser victim = new AbstractXrefTableParser(
-                new BaseCOSParser(inMemorySeekableSourceFrom(getClass().getResourceAsStream(
+                new COSParser(inMemorySeekableSourceFrom(getClass().getResourceAsStream(
                         "/input/xref_table.txt"))))
         {
             @Override
@@ -63,7 +63,7 @@ public class AbstractXrefTableParserTest
     @Test(expected = IOException.class)
     public void parseCorrupted() throws IOException
     {
-        AbstractXrefTableParser victim = new AbstractXrefTableParser(new BaseCOSParser(
+        AbstractXrefTableParser victim = new AbstractXrefTableParser(new COSParser(
                 inMemorySeekableSourceFrom(getClass().getResourceAsStream(
                         "/input/xref_table_corrupted.txt"))))
         {
@@ -85,7 +85,7 @@ public class AbstractXrefTableParserTest
     @Test(expected = IOException.class)
     public void parseCorruptedObjectNumber() throws IOException
     {
-        AbstractXrefTableParser victim = new AbstractXrefTableParser(new BaseCOSParser(
+        AbstractXrefTableParser victim = new AbstractXrefTableParser(new COSParser(
                 inMemorySeekableSourceFrom(getClass().getResourceAsStream(
                         "/input/xref_table_corrupted_on.txt"))))
         {
@@ -107,7 +107,7 @@ public class AbstractXrefTableParserTest
     @Test(expected = IOException.class)
     public void parseCorruptedGenerationNumber() throws IOException
     {
-        AbstractXrefTableParser victim = new AbstractXrefTableParser(new BaseCOSParser(
+        AbstractXrefTableParser victim = new AbstractXrefTableParser(new COSParser(
                 inMemorySeekableSourceFrom(getClass().getResourceAsStream(
                         "/input/xref_table_corrupted_gn.txt"))))
         {
@@ -129,7 +129,7 @@ public class AbstractXrefTableParserTest
     @Test
     public void parseEmptyTable() throws IOException
     {
-        AbstractXrefTableParser victim = new AbstractXrefTableParser(new BaseCOSParser(
+        AbstractXrefTableParser victim = new AbstractXrefTableParser(new COSParser(
                 inMemorySeekableSourceFrom(getClass().getResourceAsStream(
                         "/input/xref_empty_table.txt"))))
         {
@@ -152,7 +152,7 @@ public class AbstractXrefTableParserTest
     public void parseSkipsInvalidRow() throws IOException
     {
         Set<XrefEntry> found = new HashSet<>();
-        AbstractXrefTableParser victim = new AbstractXrefTableParser(new BaseCOSParser(
+        AbstractXrefTableParser victim = new AbstractXrefTableParser(new COSParser(
                 inMemorySeekableSourceFrom(getClass().getResourceAsStream(
                         "/input/xref_table_invalid_row.txt"))))
         {
@@ -182,7 +182,7 @@ public class AbstractXrefTableParserTest
     public void parseSkipsUnexpectedRows() throws IOException
     {
         Set<XrefEntry> found = new HashSet<>();
-        AbstractXrefTableParser victim = new AbstractXrefTableParser(new BaseCOSParser(
+        AbstractXrefTableParser victim = new AbstractXrefTableParser(new COSParser(
                 inMemorySeekableSourceFrom(getClass().getResourceAsStream(
                         "/input/xref_table_wrong_size.txt"))))
         {
@@ -212,7 +212,7 @@ public class AbstractXrefTableParserTest
     public void parseInvalidTokensNumber() throws IOException
     {
         Set<XrefEntry> found = new HashSet<>();
-        AbstractXrefTableParser victim = new AbstractXrefTableParser(new BaseCOSParser(
+        AbstractXrefTableParser victim = new AbstractXrefTableParser(new COSParser(
                 inMemorySeekableSourceFrom(getClass().getResourceAsStream(
                         "/input/xref_table_invalid_tokens_number.txt"))))
         {

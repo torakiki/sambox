@@ -22,10 +22,10 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.xref.Xref;
 import org.apache.pdfbox.xref.XrefEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * Component performing a full scan of the document and retrieving objects definition and the corresponding offset. This
  * implementation is lazy and the full scan is performed the first time the entries are accessed.
@@ -34,7 +34,7 @@ import org.apache.pdfbox.xref.XrefEntry;
  */
 class ObjectsFullScanner
 {
-    private static final Log LOG = LogFactory.getLog(ObjectsFullScanner.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ObjectsFullScanner.class);
     private static final Pattern OBJECT_DEF_PATTERN = Pattern.compile("^(\\d+)[\\s](\\d+)[\\s]obj");
 
     private Xref xref = new Xref();

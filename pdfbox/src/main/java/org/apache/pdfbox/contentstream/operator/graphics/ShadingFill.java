@@ -19,9 +19,9 @@ package org.apache.pdfbox.contentstream.operator.graphics;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.pdfbox.contentstream.operator.Operator;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.contentstream.operator.Operator;
 
 /**
  * sh Fills the clipping area with the given shading pattern.

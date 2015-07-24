@@ -38,7 +38,7 @@ public class XrefFullScannerTest
 {
 
     private XrefFullScanner victim;
-    private BaseCOSParser parser;
+    private COSParser parser;
 
     @After
     public void tearDown() throws IOException
@@ -49,7 +49,7 @@ public class XrefFullScannerTest
     @Test
     public void scanMultipleTables() throws IOException
     {
-        parser = new BaseCOSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
+        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
                 .getResourceAsStream("/input/test_multiple_xref_tables.pdf")));
         victim = new XrefFullScanner(parser);
         victim.scan();
@@ -64,12 +64,12 @@ public class XrefFullScannerTest
     @Test
     public void scanStreamAndTable() throws IOException
     {
-        parser = new BaseCOSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
+        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
                 .getResourceAsStream("/input/test_xref_stream_and_table.pdf")));
         victim = new XrefFullScanner(parser);
         victim.scan();
         assertEquals(562, victim.trailer().getInt(COSName.PREV));
-        assertEquals(8, victim.trailer().getInt(COSName.SIZE));
+        assertEquals(9, victim.trailer().getInt(COSName.SIZE));
         assertNotNull(victim.trailer().getDictionaryObject(COSName.ROOT));
         COSDictionary overriddenObj = (COSDictionary) parser.provider().get(new COSObjectKey(3, 0))
                 .getCOSObject();

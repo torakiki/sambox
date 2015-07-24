@@ -278,6 +278,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName JBIG2_DECODE = newCommonInstance("JBIG2Decode");
     public static final COSName JBIG2_GLOBALS = newCommonInstance("JBIG2Globals");
     public static final COSName JPX_DECODE = newCommonInstance("JPXDecode");
+    public static final COSName JS = newCommonInstance("JS");
     // K
     public static final COSName K = newCommonInstance("K");
     public static final COSName KEYWORDS = newCommonInstance("Keywords");
@@ -372,6 +373,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName PAGE_MODE = newCommonInstance("PageMode");
     public static final COSName PAGES = newCommonInstance("Pages");
     public static final COSName PAINT_TYPE = newCommonInstance("PaintType");
+    public static final COSName PANOSE = newCommonInstance("Panose");
     public static final COSName PARAMS = newCommonInstance("Params");
     public static final COSName PARENT = newCommonInstance("Parent");
     public static final COSName PARENT_TREE = newCommonInstance("ParentTree");
@@ -396,6 +398,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName PUB_SEC = newCommonInstance("PubSec");
     // Q
     public static final COSName Q = newCommonInstance("Q");
+    public static final COSName QUADPOINTS = newCommonInstance("QuadPoints");
     // R
     public static final COSName R = newCommonInstance("R");
     public static final COSName RANGE = newCommonInstance("Range");
@@ -448,6 +451,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName STRUCT_PARENT = newCommonInstance("StructParent");
     public static final COSName STRUCT_PARENTS = newCommonInstance("StructParents");
     public static final COSName STRUCT_TREE_ROOT = newCommonInstance("StructTreeRoot");
+    public static final COSName STYLE = newCommonInstance("Style");
     public static final COSName SUB_FILTER = newCommonInstance("SubFilter");
     public static final COSName SUBJ = newCommonInstance("Subj");
     public static final COSName SUBJECT = newCommonInstance("Subject");
@@ -515,6 +519,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName XREF_STM = newCommonInstance("XRefStm");
     // Y
     public static final COSName Y_STEP = newCommonInstance("YStep");
+    public static final COSName YES = newCommonInstance("Yes");
 
     private final String name;
 

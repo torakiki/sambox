@@ -23,10 +23,10 @@ import static org.apache.pdfbox.xref.XrefEntry.inUseEntry;
 
 import java.io.IOException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.xref.XrefEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Base class for an xref table parser. Implementors will decide what to do when the parser finds a new trailer or a new
@@ -37,13 +37,13 @@ import org.apache.pdfbox.xref.XrefEntry;
  */
 abstract class AbstractXrefTableParser
 {
-    private static final Log LOG = LogFactory.getLog(AbstractXrefTableParser.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractXrefTableParser.class);
     private static final String TRAILER = "trailer";
     static final String XREF = "xref";
 
-    private BaseCOSParser parser;
+    private COSParser parser;
 
-    AbstractXrefTableParser(BaseCOSParser parser)
+    AbstractXrefTableParser(COSParser parser)
     {
         this.parser = parser;
     }
@@ -153,7 +153,7 @@ abstract class AbstractXrefTableParser
         return dictionary;
     }
 
-    BaseCOSParser parser()
+    COSParser parser()
     {
         return parser;
     }

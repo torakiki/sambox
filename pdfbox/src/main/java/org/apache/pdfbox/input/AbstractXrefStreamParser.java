@@ -25,8 +25,6 @@ import java.io.InputStream;
 import java.util.PrimitiveIterator.OfLong;
 import java.util.stream.LongStream;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
@@ -34,6 +32,8 @@ import org.apache.pdfbox.cos.COSNumber;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.xref.CompressedXrefEntry;
 import org.apache.pdfbox.xref.XrefEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Base class for an xref stream parser. Implementors will decide what to do when the parser finds a new trailer or a
@@ -44,11 +44,11 @@ import org.apache.pdfbox.xref.XrefEntry;
  */
 abstract class AbstractXrefStreamParser
 {
-    private static final Log LOG = LogFactory.getLog(AbstractXrefStreamParser.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractXrefStreamParser.class);
 
-    private BaseCOSParser parser;
+    private COSParser parser;
 
-    AbstractXrefStreamParser(BaseCOSParser parser)
+    AbstractXrefStreamParser(COSParser parser)
     {
         this.parser = parser;
     }
@@ -165,7 +165,7 @@ abstract class AbstractXrefStreamParser
         }
     }
 
-    BaseCOSParser parser()
+    COSParser parser()
     {
         return parser;
     }

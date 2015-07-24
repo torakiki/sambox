@@ -18,6 +18,7 @@ package org.apache.pdfbox.pdmodel.interactive.form;
 
 import java.io.IOException;
 import java.util.List;
+
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
@@ -32,11 +33,6 @@ import org.apache.pdfbox.pdmodel.interactive.annotation.PDAppearanceEntry;
  */
 public final class PDRadioButton extends PDButton
 {
-    /**
-     * A Ff flag.
-     */
-    private static final int FLAG_NO_TOGGLE_TO_OFF = 1 << 14;
-    
     /**
      * @see PDField#PDField(PDAcroForm)
      *

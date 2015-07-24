@@ -23,8 +23,6 @@ import static org.sejda.util.RequireUtils.requireIOCondition;
 import java.io.IOException;
 import java.util.Optional;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.encryption.DecryptionMaterial;
@@ -34,6 +32,8 @@ import org.apache.pdfbox.pdmodel.encryption.StandardDecryptionMaterial;
 import org.apache.pdfbox.util.SpecVersionUtils;
 import org.sejda.io.SeekableSource;
 import org.sejda.util.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * Provides public entry point to parse a {@link SeekableSource} and obtain a {@link PDDocument}.
  * 
@@ -41,7 +41,7 @@ import org.sejda.util.IOUtils;
  */
 public class PDFParser
 {
-    private static final Log LOG = LogFactory.getLog(PDFParser.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PDFParser.class);
 
     /**
      * Parses the given {@link SeekableSource} returning the corresponding {@link PDDocument}.
@@ -83,7 +83,7 @@ public class PDFParser
             throws IOException
     {
         requireNonNull(source);
-        BaseCOSParser parser = new BaseCOSParser(source);
+        COSParser parser = new COSParser(source);
         PDDocument document = doParse(decryptionMaterial, parser);
         document.setOnCloseAction(() -> {
             IOUtils.close(parser.provider());
@@ -92,7 +92,7 @@ public class PDFParser
         return document;
     }
 
-    private static PDDocument doParse(DecryptionMaterial decryptionMaterial, BaseCOSParser parser)
+    private static PDDocument doParse(DecryptionMaterial decryptionMaterial, COSParser parser)
             throws IOException
     {
         String headerVersion = readHeader(parser);
@@ -115,7 +115,7 @@ public class PDFParser
         return new PDDocument(document);
     }
 
-    private static String readHeader(BaseCOSParser parser) throws IOException
+    private static String readHeader(COSParser parser) throws IOException
     {
         parser.position(0);
         int headerIndex = -1;

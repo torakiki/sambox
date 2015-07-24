@@ -22,10 +22,11 @@ import java.awt.image.ColorModel;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
 import org.apache.pdfbox.pdmodel.graphics.color.PDColorSpace;
 import org.apache.pdfbox.util.Matrix;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * AWT PaintContext for function-based (Type 1) shading.
@@ -34,7 +35,7 @@ import org.apache.pdfbox.util.Matrix;
  */
 class Type1ShadingContext extends ShadingContext implements PaintContext
 {
-    private static final Log LOG = LogFactory.getLog(Type1ShadingContext.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Type1ShadingContext.class);
 
     private PDShadingType1 type1ShadingType;
     private AffineTransform rat;
@@ -77,7 +78,7 @@ class Type1ShadingContext extends ShadingContext implements PaintContext
         }
         catch (NoninvertibleTransformException ex)
         {
-            LOG.error(ex, ex);
+            LOG.error(ex.getMessage(), ex);
         }
     }
 

@@ -32,9 +32,9 @@ import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.metadata.IIOMetadataNode;
 import javax.imageio.stream.ImageInputStream;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSDictionary;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -46,7 +46,7 @@ import org.w3c.dom.NodeList;
  */
 final class DCTFilter extends Filter
 {
-    private static final Log LOG = LogFactory.getLog(DCTFilter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DCTFilter.class);
 
     @Override
     public DecodeResult decode(InputStream encoded, OutputStream decoded,

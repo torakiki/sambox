@@ -25,12 +25,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.IndirectCOSObjectReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * Asynchronous implementation of an {@link AbstractPdfBodyWriter} where a objects are written subbmitting a task to a
+ * Asynchronous implementation of an {@link AbstractPdfBodyWriter} where a objects are written submitting a task to a
  * single thread executor service.
  * 
  * @author Andrea Vacondio
@@ -38,7 +38,7 @@ import org.apache.pdfbox.cos.IndirectCOSObjectReference;
  */
 class AsyncPdfBodyWriter extends AbstractPdfBodyWriter
 {
-    private static final Log LOG = LogFactory.getLog(AsyncPdfBodyWriter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AsyncPdfBodyWriter.class);
 
     private ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactory()
     {

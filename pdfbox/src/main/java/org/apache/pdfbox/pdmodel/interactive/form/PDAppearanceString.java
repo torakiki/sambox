@@ -16,19 +16,20 @@
  */
 package org.apache.pdfbox.pdmodel.interactive.form;
 
-import java.io.ByteArrayInputStream;
+import static org.sejda.io.SeekableSources.inMemorySeekableSourceFrom;
+
 import java.io.IOException;
 import java.util.List;
+
 import org.apache.pdfbox.contentstream.operator.Operator;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSNumber;
 import org.apache.pdfbox.cos.COSString;
-import org.apache.pdfbox.pdfparser.PDFStreamParser;
+import org.apache.pdfbox.input.ContentStreamParser;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.PDResources;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAppearanceStream;
-
 /**
  * Represents a default appearance string, as found in the /DA entry of free text annotations.
  * 
@@ -63,12 +64,11 @@ class PDAppearanceString
             throw new IllegalArgumentException("/DR is a required entry");
         }
         
-        ByteArrayInputStream stream = new ByteArrayInputStream(defaultAppearance.getBytes());
-        PDFStreamParser parser = new PDFStreamParser(stream);
-        parser.parse();
-        tokens = parser.getTokens();
-        parser.close();
-        
+        try (ContentStreamParser parser = new ContentStreamParser(
+                inMemorySeekableSourceFrom(defaultAppearance.getBytes())))
+        {
+            tokens = parser.tokens();
+        }
         this.defaultResources = defaultResources;
     }
     

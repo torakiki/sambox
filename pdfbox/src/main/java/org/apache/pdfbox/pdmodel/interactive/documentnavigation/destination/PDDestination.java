@@ -22,7 +22,6 @@ import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSString;
-
 import org.apache.pdfbox.pdmodel.common.PDDestinationOrAction;
 
 /**

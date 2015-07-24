@@ -17,9 +17,9 @@
 package org.apache.pdfbox.input;
 
 import static java.util.Objects.requireNonNull;
-import static org.apache.pdfbox.input.BaseCOSParser.ENDOBJ;
-import static org.apache.pdfbox.input.BaseCOSParser.ENDSTREAM;
-import static org.apache.pdfbox.input.BaseCOSParser.STREAM;
+import static org.apache.pdfbox.input.COSParser.ENDOBJ;
+import static org.apache.pdfbox.input.COSParser.ENDSTREAM;
+import static org.apache.pdfbox.input.COSParser.STREAM;
 import static org.apache.pdfbox.input.SourceReader.OBJ;
 import static org.sejda.util.RequireUtils.requireIOCondition;
 
@@ -29,8 +29,6 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
@@ -42,6 +40,8 @@ import org.apache.pdfbox.xref.Xref;
 import org.apache.pdfbox.xref.XrefEntry;
 import org.apache.pdfbox.xref.XrefType;
 import org.sejda.util.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A lazy implementation of the {@link IndirectObjectsProvider} that retrieves {@link COSBase} objects parsing the
@@ -53,14 +53,14 @@ import org.sejda.util.IOUtils;
  */
 class LazyIndirectObjectsProvider implements IndirectObjectsProvider
 {
-    private static final Log LOG = LogFactory.getLog(LazyIndirectObjectsProvider.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LazyIndirectObjectsProvider.class);
 
     private Xref xref = new Xref();
     private ObjectsFullScanner scanner;
     // TODO references that the GC can claim
     private Map<COSObjectKey, COSBase> store = new ConcurrentHashMap<>();
     private SecurityHandler securityHandler = null;
-    private BaseCOSParser parser;
+    private COSParser parser;
 
     @Override
     public COSBase get(COSObjectKey key)
@@ -98,7 +98,7 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
     }
 
     @Override
-    public LazyIndirectObjectsProvider initializeWith(BaseCOSParser parser)
+    public LazyIndirectObjectsProvider initializeWith(COSParser parser)
     {
         requireNonNull(parser);
         this.parser = parser;
@@ -128,7 +128,7 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
         }
     }
 
-    private void doParseFallbackObject(COSObjectKey key, BaseCOSParser parser)
+    private void doParseFallbackObject(COSObjectKey key, COSParser parser)
     {
         LOG.info("Applying fallback strategy for " + key);
         XrefEntry xrefEntry = scanner.entries().get(key);
@@ -149,7 +149,7 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
         }
     }
 
-    private void doParse(XrefEntry xrefEntry, BaseCOSParser parser) throws IOException
+    private void doParse(XrefEntry xrefEntry, COSParser parser) throws IOException
     {
         LOG.trace("Parsing indirect object " + xrefEntry);
         if (xrefEntry.getType() == XrefType.IN_USE)
@@ -215,7 +215,7 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
     private void parseObjectStream(XrefEntry containingStreamEntry, COSStream stream)
             throws IOException
     {
-        try (BaseCOSParser streamParser = new BaseCOSParser(stream.getUnfilteredSource(), this))
+        try (COSParser streamParser = new COSParser(stream.getUnfilteredSource(), this))
         {
             int numberOfObjects = stream.getInt(COSName.N);
             requireIOCondition(numberOfObjects >= 0,

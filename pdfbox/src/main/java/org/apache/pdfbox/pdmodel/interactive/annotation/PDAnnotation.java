@@ -18,8 +18,6 @@ package org.apache.pdfbox.pdmodel.interactive.annotation;
 
 import java.io.IOException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
@@ -33,6 +31,8 @@ import org.apache.pdfbox.pdmodel.graphics.color.PDColorSpace;
 import org.apache.pdfbox.pdmodel.graphics.color.PDDeviceCMYK;
 import org.apache.pdfbox.pdmodel.graphics.color.PDDeviceGray;
 import org.apache.pdfbox.pdmodel.graphics.color.PDDeviceRGB;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A PDF annotation.
@@ -44,7 +44,7 @@ public abstract class PDAnnotation implements COSObjectable
     /**
      * Log instance.
      */
-    private static final Log LOG = LogFactory.getLog(PDAnnotation.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PDAnnotation.class);
 
     /**
      * An annotation flag.

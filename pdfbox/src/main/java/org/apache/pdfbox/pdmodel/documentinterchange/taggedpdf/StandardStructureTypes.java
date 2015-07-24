@@ -21,8 +21,9 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The standard structure types.
@@ -35,12 +36,11 @@ public class StandardStructureTypes
     /**
      * Log instance.
      */
-    private static final Log LOG = LogFactory.getLog(StandardStructureTypes.class);
-    
+    private static final Logger LOG = LoggerFactory.getLogger(StandardStructureTypes.class);
+
     private StandardStructureTypes()
     {
     }
-
 
     // Grouping Elements
     /**
@@ -102,7 +102,6 @@ public class StandardStructureTypes
      * Private
      */
     public static final String PRIVATE = "Private";
-
 
     // Block-Level Structure Elements
     /**
@@ -200,7 +199,6 @@ public class StandardStructureTypes
      */
     public static final String T_FOOT = "TFoot";
 
-
     // Inline-Level Structure Elements
     /**
      * Span
@@ -277,7 +275,6 @@ public class StandardStructureTypes
      */
     public static final String WP = "WP";
 
-
     // Illustration Elements
     /**
      * Figure
@@ -310,13 +307,9 @@ public class StandardStructureTypes
                 {
                     types.add(field.get(null).toString());
                 }
-                catch (IllegalArgumentException e)
+                catch (IllegalArgumentException | IllegalAccessException e)
                 {
-                    LOG.error(e,e);
-                }
-                catch (IllegalAccessException e)
-                {
-                    LOG.error(e,e);
+                    LOG.error(e.getMessage(), e);
                 }
             }
         }

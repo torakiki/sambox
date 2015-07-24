@@ -206,9 +206,9 @@ public class PDFRenderer
     }
 
     /**
-     * @return a new PageDrawer instance, using the given parameters. May be overridden.
+     * Returns a new PageDrawer instance, using the given parameters. May be overridden.
      */
-    protected PageDrawer createPageDrawer(PageDrawerParameters parameters)
+    protected PageDrawer createPageDrawer(PageDrawerParameters parameters) throws IOException
     {
         return new PageDrawer(parameters);
     }

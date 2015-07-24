@@ -20,10 +20,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.util.Hex;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Decodes data encoded in an ASCII hexadecimal form, reproducing the original binary data.
@@ -32,7 +32,7 @@ import org.apache.pdfbox.util.Hex;
  */
 final class ASCIIHexFilter extends Filter
 {
-    private static final Log LOG = LogFactory.getLog(ASCIIHexFilter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ASCIIHexFilter.class);
 
     private static final int[] REVERSE_HEX = {
       /*   0 */  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,

@@ -24,9 +24,10 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.ColorModel;
 import java.io.IOException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
 import org.apache.pdfbox.util.Matrix;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * AWT Paint for tensor-product patch meshes (Type 7) shading. This was done as
@@ -36,14 +37,14 @@ import org.apache.pdfbox.util.Matrix;
  */
 class Type7ShadingPaint implements Paint
 {
-    private static final Log LOG = LogFactory.getLog(Type7ShadingPaint.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Type7ShadingPaint.class);
 
     private final PDShadingType7 shading;
     private final Matrix matrix;
 
     /**
      * Constructor.
-     *
+     * 
      * @param shading the shading resources
      * @param matrix the pattern matrix concatenated with that of the parent content stream
      */

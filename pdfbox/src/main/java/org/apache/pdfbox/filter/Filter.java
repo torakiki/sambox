@@ -24,12 +24,12 @@ import java.util.Iterator;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A filter for stream data.
@@ -39,7 +39,7 @@ import org.apache.pdfbox.cos.COSName;
  */
 public abstract class Filter
 {
-    private static final Log LOG = LogFactory.getLog(Filter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Filter.class);
 
     protected Filter()
     {

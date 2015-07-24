@@ -32,7 +32,6 @@ final class PDFieldFactory
     private static final String FIELD_TYPE_TEXT = "Tx";
     private static final String FIELD_TYPE_BUTTON = "Btn";
     private static final String FIELD_TYPE_CHOICE = "Ch";
-    private static final String FIELD_TYPE_SIGNATURE = "Sig";
 
     /**
      * Creates a COSField subclass from the given field.

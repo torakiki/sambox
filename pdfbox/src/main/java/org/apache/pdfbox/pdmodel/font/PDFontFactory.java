@@ -21,8 +21,8 @@ import java.io.IOException;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Creates the appropriate font subtype based on information in the dictionary.
@@ -30,7 +30,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public final class PDFontFactory
 {
-    private static final Log LOG = LogFactory.getLog(PDFontFactory.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PDFontFactory.class);
 
     private PDFontFactory()
     {

@@ -21,13 +21,13 @@ import java.io.IOException;
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.MemoryCacheImageInputStream;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSInteger;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.common.PDRange;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class represents a type 0 function in a PDF document.
@@ -42,7 +42,7 @@ public class PDFunctionType0 extends PDFunction
     /**
      * Log instance.
      */
-    private static final Log LOG = LogFactory.getLog(PDFunctionType0.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PDFunctionType0.class);
 
     /**
      * An array of 2 x m numbers specifying the linear mapping of input values 

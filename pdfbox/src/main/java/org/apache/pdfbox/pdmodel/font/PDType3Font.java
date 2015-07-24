@@ -16,11 +16,11 @@
  */
 package org.apache.pdfbox.pdmodel.font;
 
+import java.awt.geom.GeneralPath;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.fontbox.FontBoxFont;
 import org.apache.fontbox.util.BoundingBox;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSDictionary;
@@ -33,6 +33,8 @@ import org.apache.pdfbox.pdmodel.font.encoding.Encoding;
 import org.apache.pdfbox.pdmodel.font.encoding.GlyphList;
 import org.apache.pdfbox.util.Matrix;
 import org.apache.pdfbox.util.Vector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A PostScript Type 3 Font.
@@ -41,7 +43,7 @@ import org.apache.pdfbox.util.Vector;
  */
 public class PDType3Font extends PDSimpleFont
 {
-    private static final Log LOG = LogFactory.getLog(PDType3Font.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PDType3Font.class);
 
     private PDResources resources;
     private COSDictionary charProcs;
@@ -73,7 +75,7 @@ public class PDType3Font extends PDSimpleFont
     }
     
     @Override
-    protected Encoding readEncodingFromFont()
+    protected Encoding readEncodingFromFont() throws IOException
     {
         // Type 3 fonts do not have a built-in encoding
         throw new UnsupportedOperationException("not supported for Type 3 fonts");
@@ -86,13 +88,34 @@ public class PDType3Font extends PDSimpleFont
     }
 
     @Override
-    public Vector getDisplacement(int code)
+    public GeneralPath getPath(String name) throws IOException
+    {
+        // Type 3 fonts do not use vector paths
+        throw new UnsupportedOperationException("not supported for Type 3 fonts");
+    }
+
+    @Override
+    public boolean hasGlyph(String name) throws IOException
+    {
+        COSStream stream = (COSStream) getCharProcs().getDictionaryObject(COSName.getPDFName(name));
+        return stream != null;
+    }
+
+    @Override
+    public FontBoxFont getFontBoxFont()
+    {
+        // Type 3 fonts do not use FontBox fonts
+        throw new UnsupportedOperationException("not supported for Type 3 fonts");
+    }
+
+    @Override
+    public Vector getDisplacement(int code) throws IOException
     {
         return getFontMatrix().transform(new Vector(getWidth(code), 0));
     }
 
     @Override
-    public float getWidth(int code)
+    public float getWidth(int code) throws IOException
     {
         int firstChar = dict.getInt(COSName.FIRST_CHAR, -1);
         int lastChar = dict.getInt(COSName.LAST_CHAR, -1);
@@ -130,7 +153,7 @@ public class PDType3Font extends PDSimpleFont
     }
 
     @Override
-    public float getHeight(int code)
+    public float getHeight(int code) throws IOException
     {
         PDFontDescriptor desc = getFontDescriptor();
         if (desc != null)
@@ -166,7 +189,7 @@ public class PDType3Font extends PDSimpleFont
     }
 
     @Override
-    protected byte[] encode(int unicode)
+    protected byte[] encode(int unicode) throws IOException
     {
         throw new UnsupportedOperationException("Not implemented: Type3");
     }

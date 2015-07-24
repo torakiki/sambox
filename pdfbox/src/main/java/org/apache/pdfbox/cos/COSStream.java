@@ -17,7 +17,6 @@
 package org.apache.pdfbox.cos;
 
 import static org.sejda.io.SeekableSources.inMemorySeekableSourceFrom;
-import static org.sejda.io.SeekableSources.inputStreamFrom;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -34,6 +33,9 @@ import org.apache.pdfbox.filter.Filter;
 import org.apache.pdfbox.filter.FilterFactory;
 import org.sejda.io.SeekableSource;
 import org.sejda.util.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * This class represents a stream object in a PDF document.
  *
@@ -41,6 +43,7 @@ import org.sejda.util.IOUtils;
  */
 public class COSStream extends COSDictionary implements Closeable
 {
+    private static final Logger LOG = LoggerFactory.getLogger(COSStream.class);
     private LazySeekableSourceViewHolder existing;
     private byte[] filtered;
     private byte[] unfiltered;
@@ -81,7 +84,7 @@ public class COSStream extends COSDictionary implements Closeable
     {
         if (existing != null)
         {
-            return inputStreamFrom(existing.get());
+            return existing.get().asInputStream();
         }
         if (getFilters() != null)
         {
@@ -278,7 +281,7 @@ public class COSStream extends COSDictionary implements Closeable
     {
         if (existing != null)
         {
-            return inputStreamFrom(existing.get());
+            return existing.get().asInputStream();
         }
         return new MyByteArrayInputStream(filtered);
     }
@@ -443,6 +446,23 @@ public class COSStream extends COSDictionary implements Closeable
         });
     }
 
+    /**
+     * @return the contents of the stream as a text string. Text string as defined in Chap 7.9 of PDF 32000-1:2008.
+     */
+    public String asTextString()
+    {
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream())
+        {
+            org.apache.commons.io.IOUtils.copy(getUnfilteredStream(), out);
+            return COSString.newInstance(out.toByteArray()).getString();
+        }
+        catch (IOException e)
+        {
+            LOG.warn("Unable to convert the COSStream to a text string", e);
+            return "";
+        }
+    }
+
     @Override
     public void close()
     {
@@ -517,6 +537,7 @@ public class COSStream extends COSDictionary implements Closeable
                                         "The original SeekableSource has been closed"));
                 view = source.view(startingPosition, length);
             }
+            view.position(0);
             return view;
         }
 

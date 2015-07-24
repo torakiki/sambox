@@ -25,16 +25,17 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.ColorModel;
 import java.io.IOException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
 import org.apache.pdfbox.util.Matrix;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * AWT PaintContext for Gouraud Triangle Mesh (Type 4) shading.
  */
 class Type4ShadingPaint implements Paint
 {
-    private static final Log LOG = LogFactory.getLog(Type4ShadingPaint.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Type4ShadingPaint.class);
 
     private final PDShadingType4 shading;
     private final Matrix matrix;

@@ -43,6 +43,8 @@ import org.junit.Test;
 import org.mockito.AdditionalMatchers;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
+import org.sejda.io.BufferedCountingChannelWriter;
+import org.sejda.io.CountingWritableByteChannel;
 
 /**
  * @author Andrea Vacondio
@@ -50,20 +52,26 @@ import org.mockito.Mockito;
  */
 public class COSWriterTest
 {
-    private BufferedDestinationWriter writer;
+    private BufferedCountingChannelWriter writer;
     private COSWriter victim;
 
     @Before
     public void setUp()
     {
-        writer = mock(BufferedDestinationWriter.class);
+        writer = mock(BufferedCountingChannelWriter.class);
         victim = new COSWriter(writer);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void nullConstructor()
+    public void nullWriterConstructor()
     {
-        new COSWriter(null);
+        new COSWriter((BufferedCountingChannelWriter) null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void nullChannelConstructor()
+    {
+        new COSWriter((CountingWritableByteChannel) null);
     }
 
     @Test

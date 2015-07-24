@@ -41,8 +41,6 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
@@ -51,6 +49,8 @@ import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.sejda.util.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A security handler as described in the PDF specifications. A security handler is responsible of documents protection.
@@ -61,7 +61,7 @@ import org.sejda.util.IOUtils;
  */
 public abstract class SecurityHandler
 {
-    private static final Log LOG = LogFactory.getLog(SecurityHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SecurityHandler.class);
 
     private static final int DEFAULT_KEY_LENGTH = 40;
 

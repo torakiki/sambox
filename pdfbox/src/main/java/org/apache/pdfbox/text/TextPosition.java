@@ -19,6 +19,7 @@ package org.apache.pdfbox.text;
 import java.text.Normalizer;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.util.Matrix;
 

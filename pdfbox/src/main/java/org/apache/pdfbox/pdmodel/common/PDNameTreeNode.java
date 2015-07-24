@@ -24,8 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSArrayList;
 import org.apache.pdfbox.cos.COSBase;
@@ -33,6 +31,8 @@ import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSObjectable;
 import org.apache.pdfbox.cos.COSString;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class represents a node in a name tree.
@@ -41,7 +41,7 @@ import org.apache.pdfbox.cos.COSString;
  */
 public abstract class PDNameTreeNode<T extends COSObjectable> implements COSObjectable
 {
-    private static final Log LOG = LogFactory.getLog(PDNameTreeNode.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PDNameTreeNode.class);
     
     private final COSDictionary node;
     private PDNameTreeNode parent;

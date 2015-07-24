@@ -22,25 +22,27 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.TreeMap;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.IndirectCOSObjectReference;
 import org.apache.pdfbox.util.Charsets;
 import org.apache.pdfbox.xref.XrefEntry;
+import org.sejda.io.BufferedCountingChannelWriter;
+import org.sejda.io.CountingWritableByteChannel;
 import org.sejda.util.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Component capable of writing parts of a PDF document (header, xref, body...) using the given
- * {@link BufferedDestinationWriter}.
+ * {@link BufferedCountingChannelWriter}.
  * 
  * @author Andrea Vacondio
  */
 class PDFWriter extends COSWriter
 {
-    private static final Log LOG = LogFactory.getLog(PDFWriter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PDFWriter.class);
 
     private static final byte COMMENT = '%';
     private static final byte[] GARBAGE = new byte[] { (byte) 0xA7, (byte) 0xE3, (byte) 0xF1,
@@ -50,7 +52,12 @@ class PDFWriter extends COSWriter
 
     private TreeMap<Long, XrefEntry> written = new TreeMap<>();
 
-    public PDFWriter(BufferedDestinationWriter writer)
+    public PDFWriter(CountingWritableByteChannel channel)
+    {
+        super(channel);
+    }
+
+    public PDFWriter(BufferedCountingChannelWriter writer)
     {
         super(writer);
     }

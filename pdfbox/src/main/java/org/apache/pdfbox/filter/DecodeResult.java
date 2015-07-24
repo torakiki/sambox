@@ -20,8 +20,8 @@ import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.pdmodel.graphics.color.PDJPXColorSpace;
 
 /**
- * The result of a filter decode operation. Allows information such as color space to be
- * extracted from image streams, and for stream parameters to be repaired during reading.
+ * The result of a filter decode operation. Allows information such as color space to be extracted from image streams,
+ * and for stream parameters to be repaired during reading.
  *
  * @author John Hewson
  */
@@ -55,6 +55,7 @@ public final class DecodeResult
 
     /**
      * Returns the embedded JPX color space, if any.
+     * 
      * @return the the embedded JPX color space, or null if there is none.
      */
     public PDJPXColorSpace getJPXColorSpace()
@@ -67,4 +68,5 @@ public final class DecodeResult
     {
         this.colorSpace = colorSpace;
     }
+
 }

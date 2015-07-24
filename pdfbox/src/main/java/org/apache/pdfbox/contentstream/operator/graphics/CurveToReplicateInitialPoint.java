@@ -20,11 +20,11 @@ import java.awt.geom.Point2D;
 import java.io.IOException;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.pdfbox.contentstream.operator.Operator;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSNumber;
-import org.apache.pdfbox.contentstream.operator.Operator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * v Append curved segment to path with the initial point replicated.
@@ -33,7 +33,7 @@ import org.apache.pdfbox.contentstream.operator.Operator;
  */
 public class CurveToReplicateInitialPoint extends GraphicsOperatorProcessor
 {
-    private static final Log LOG = LogFactory.getLog(CurveToReplicateInitialPoint.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CurveToReplicateInitialPoint.class);
     
     @Override
     public void process(Operator operator, List<COSBase> operands) throws IOException

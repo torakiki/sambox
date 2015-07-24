@@ -19,11 +19,11 @@ package org.apache.pdfbox.contentstream.operator.color;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.pdfbox.contentstream.operator.Operator;
+import org.apache.pdfbox.contentstream.operator.OperatorProcessor;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.graphics.color.PDColorSpace;
-import org.apache.pdfbox.contentstream.operator.Operator;
-import org.apache.pdfbox.contentstream.operator.OperatorProcessor;
 
 /**
  * CS: Set color space for stroking operations.

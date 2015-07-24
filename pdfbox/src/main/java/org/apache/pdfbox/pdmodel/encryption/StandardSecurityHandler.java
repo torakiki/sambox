@@ -31,13 +31,13 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.util.Charsets;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The standard security handler. This security handler protects document with password.
@@ -51,7 +51,7 @@ public final class StandardSecurityHandler extends SecurityHandler
     /**
      * Log instance.
      */
-    private static final Log LOG = LogFactory.getLog(StandardSecurityHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(StandardSecurityHandler.class);
 
     /** Type of security handler. */
     public static final String FILTER = "Standard";

@@ -19,7 +19,6 @@ package org.apache.pdfbox.pdmodel.graphics.color;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSFloat;
 import org.apache.pdfbox.cos.COSName;
-
 import org.apache.pdfbox.util.Matrix;
 
 /**

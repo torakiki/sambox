@@ -36,8 +36,7 @@ import java.awt.image.Raster;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
 import org.apache.pdfbox.contentstream.PDFGraphicsStreamEngine;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSName;
@@ -66,6 +65,8 @@ import org.apache.pdfbox.pdmodel.graphics.state.RenderingMode;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotation;
 import org.apache.pdfbox.util.Matrix;
 import org.apache.pdfbox.util.Vector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Paints a page in a PDF document to a Graphics context. May be subclassed to provide custom
@@ -79,7 +80,7 @@ import org.apache.pdfbox.util.Vector;
  */
 public class PageDrawer extends PDFGraphicsStreamEngine
 {
-    private static final Log LOG = LogFactory.getLog(PageDrawer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PageDrawer.class);
 
     // parent document renderer - note: this is needed for not-yet-implemented resource caching
     private final PDFRenderer renderer;
@@ -108,8 +109,9 @@ public class PageDrawer extends PDFGraphicsStreamEngine
      * Constructor.
      *
      * @param parameters Parameters for page drawing.
+     * @throws IOException If there is an error loading properties from the file.
      */
-    public PageDrawer(PageDrawerParameters parameters)
+    public PageDrawer(PageDrawerParameters parameters) throws IOException
     {
         super(parameters.getPage());
         this.renderer = parameters.getRenderer();
@@ -276,7 +278,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
     }
 
     @Override
-    public void beginText()
+    public void beginText() throws IOException
     {
         setClip();
     }

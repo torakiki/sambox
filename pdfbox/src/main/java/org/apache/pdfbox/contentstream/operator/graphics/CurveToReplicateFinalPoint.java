@@ -16,13 +16,13 @@
  */
 package org.apache.pdfbox.contentstream.operator.graphics;
 
+import java.awt.geom.Point2D;
 import java.io.IOException;
 import java.util.List;
-import java.awt.geom.Point2D;
 
+import org.apache.pdfbox.contentstream.operator.Operator;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSNumber;
-import org.apache.pdfbox.contentstream.operator.Operator;
 
 /**
  * y Append curved segment to path with final point replicated.

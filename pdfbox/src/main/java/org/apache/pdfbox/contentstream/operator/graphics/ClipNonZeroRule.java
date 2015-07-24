@@ -20,8 +20,8 @@ import java.awt.geom.GeneralPath;
 import java.io.IOException;
 import java.util.List;
 
-import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.contentstream.operator.Operator;
+import org.apache.pdfbox.cos.COSBase;
 
 /**
  * W Set the clipping path using non zero winding rule.

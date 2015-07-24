@@ -20,7 +20,6 @@ package org.apache.pdfbox.util;
  * Utility class providing chars related helper methods
  * 
  * @author Andrea Vacondio
- *
  */
 public final class CharUtils
 {

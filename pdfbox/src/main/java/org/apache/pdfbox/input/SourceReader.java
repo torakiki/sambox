@@ -36,8 +36,6 @@ import static org.sejda.util.RequireUtils.requireNotNullArg;
 import java.io.Closeable;
 import java.io.IOException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.SAMBox;
 import org.apache.pdfbox.cos.COSObjectKey;
 import org.apache.pdfbox.util.CharUtils;
@@ -45,6 +43,8 @@ import org.apache.pdfbox.util.Charsets;
 import org.apache.pdfbox.util.Pool;
 import org.sejda.io.SeekableSource;
 import org.sejda.util.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Component responsible for reading a {@link SeekableSource}. Methods to read expected kind of tokens are available as
@@ -56,7 +56,7 @@ import org.sejda.util.IOUtils;
 class SourceReader implements Closeable
 {
 
-    private static final Log LOG = LogFactory.getLog(SourceReader.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SourceReader.class);
 
     private static final long OBJECT_NUMBER_THRESHOLD = 10000000000L;
     private static final int GENERATION_NUMBER_THRESHOLD = 65535;
@@ -214,7 +214,6 @@ class SourceReader implements Closeable
     public String readToken() throws IOException
     {
         skipSpaces();
-
         StringBuilder builder = pool.borrow();
         try
         {
@@ -689,6 +688,9 @@ class SourceReader implements Closeable
         }
     }
 
+    /**
+     * Closes the {@link SeekableSource} this reader was created from.
+     */
     @Override
     public void close() throws IOException
     {

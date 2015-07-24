@@ -25,16 +25,17 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.ColorModel;
 import java.io.IOException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
 import org.apache.pdfbox.util.Matrix;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * AWT PaintContext for function-based (Type 1) shading.
  */
 class Type1ShadingPaint implements Paint
 {
-    private static final Log LOG = LogFactory.getLog(Type1ShadingPaint.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Type1ShadingPaint.class);
 
     private final PDShadingType1 shading;
     private final Matrix matrix;

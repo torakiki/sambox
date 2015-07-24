@@ -16,14 +16,14 @@
  */
 package org.apache.pdfbox.pdmodel.font;
 
+import java.awt.geom.GeneralPath;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.fontbox.FontBoxFont;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
@@ -33,6 +33,8 @@ import org.apache.pdfbox.pdmodel.font.encoding.GlyphList;
 import org.apache.pdfbox.pdmodel.font.encoding.MacRomanEncoding;
 import org.apache.pdfbox.pdmodel.font.encoding.StandardEncoding;
 import org.apache.pdfbox.pdmodel.font.encoding.WinAnsiEncoding;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A simple font. Simple fonts use a PostScript encoding vector.
@@ -41,7 +43,7 @@ import org.apache.pdfbox.pdmodel.font.encoding.WinAnsiEncoding;
  */
 public abstract class PDSimpleFont extends PDFont
 {
-    private static final Log LOG = LogFactory.getLog(PDSimpleFont.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PDSimpleFont.class);
 
     protected Encoding encoding;
     protected GlyphList glyphList;
@@ -123,16 +125,7 @@ public abstract class PDSimpleFont extends PDFont
                 {
                     symbolic = false;
                 }
-
-                if (builtIn == null && !encodingDict.containsKey(COSName.BASE_ENCODING) && symbolic)
-                {
-                    // TTF built-in encoding is handled by PDTrueTypeFont#codeToGID
-                    this.encoding = null;
-                }
-                else
-                {
-                    this.encoding = new DictionaryEncoding(encodingDict, !symbolic, builtIn);
-                }
+                this.encoding = new DictionaryEncoding(encodingDict, !symbolic, builtIn);
             }
         }
         else
@@ -140,22 +133,8 @@ public abstract class PDSimpleFont extends PDFont
             this.encoding = readEncodingFromFont();
         }
 
-        // TTFs may have null encoding, but if it's non-symbolic then we have Standard Encoding
-        if (this.encoding == null && getSymbolicFlag() != null && !getSymbolicFlag())
-        {
-            this.encoding = StandardEncoding.INSTANCE;
-        }
-
         // normalise the standard 14 name, e.g "Symbol,Italic" -> "Symbol"
         String standard14Name = Standard14Fonts.getMappedFontName(getName());
-        
-        // TTFs may have null encoding, but if it's standard 14 then we know it's Standard Encoding
-        if (this.encoding == null && isStandard14() &&
-                !standard14Name.equals("Symbol") &&
-                !standard14Name.equals("ZapfDingbats"))
-        {
-            this.encoding = StandardEncoding.INSTANCE;
-        }
 
         // assign the glyph list based on the font
         if ("ZapfDingbats".equals(standard14Name))
@@ -313,13 +292,13 @@ public abstract class PDSimpleFont extends PDFont
     }
 
     @Override
-    public String toUnicode(int code)
+    public String toUnicode(int code) throws IOException
     {
         return toUnicode(code, GlyphList.getAdobeGlyphList());
     }
 
     @Override
-    public String toUnicode(int code, GlyphList customGlyphList)
+    public String toUnicode(int code, GlyphList customGlyphList) throws IOException
     {
         // allow the glyph list to be overridden for the purpose of extracting Unicode
         // we only do this when the font's glyph list is the AGL, to avoid breaking Zapf Dingbats
@@ -426,6 +405,27 @@ public abstract class PDSimpleFont extends PDFont
         return super.isStandard14();
     }
 
+    /**
+     * Returns the path for the character with the given name. For some fonts, GIDs may be used
+     * instead of names when calling this method.
+     *
+     * @return glyph path
+     * @throws IOException if the path could not be read
+     */
+    public abstract GeneralPath getPath(String name) throws IOException;
+
+    /**
+     * Returns true if the font contains the character with the given name.
+     *
+     * @throws IOException if the path could not be read
+     */
+    public abstract boolean hasGlyph(String name) throws IOException;
+
+    /**
+     * Returns the embedded or system font used for rendering. This is never null.
+     */
+    public abstract FontBoxFont getFontBoxFont();
+
     @Override
     public void addToSubset(int codePoint)
     {
@@ -433,7 +433,7 @@ public abstract class PDSimpleFont extends PDFont
     }
 
     @Override
-    public void subset()
+    public void subset() throws IOException
     {
         // only TTF subsetting via PDType0Font is currently supported
         throw new UnsupportedOperationException();

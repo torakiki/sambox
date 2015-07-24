@@ -26,14 +26,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.MemoryCacheImageInputStream;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.pdmodel.common.PDRange;
 import org.apache.pdfbox.util.Matrix;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is extended in Type6ShadingContext and Type7ShadingContext. This
@@ -43,7 +45,7 @@ import org.apache.pdfbox.util.Matrix;
  */
 abstract class PatchMeshesShadingContext extends TriangleBasedShadingContext
 {
-    private static final Log LOG = LogFactory.getLog(PatchMeshesShadingContext.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PatchMeshesShadingContext.class);
 
     /**
      * patch list
@@ -111,7 +113,7 @@ abstract class PatchMeshesShadingContext extends TriangleBasedShadingContext
             }
             catch (EOFException ex)
             {
-                LOG.error(ex);
+                LOG.error(ex.getMessage());
             }
 
             while (true)

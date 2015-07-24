@@ -24,8 +24,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.fontbox.afm.FontMetrics;
 import org.apache.fontbox.cmap.CMap;
 import org.apache.fontbox.util.BoundingBox;
@@ -40,6 +38,8 @@ import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.pdmodel.font.encoding.GlyphList;
 import org.apache.pdfbox.util.Matrix;
 import org.apache.pdfbox.util.Vector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This is the base class for all PDF fonts.
@@ -48,7 +48,7 @@ import org.apache.pdfbox.util.Vector;
  */
 public abstract class PDFont implements COSObjectable, PDFontLike
 {
-    private static final Log LOG = LogFactory.getLog(PDFont.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PDFont.class);
     protected static final Matrix DEFAULT_FONT_MATRIX = new Matrix(0.001f, 0, 0, 0.001f, 0, 0);
 
     protected final COSDictionary dict;
@@ -383,7 +383,7 @@ public abstract class PDFont implements COSObjectable, PDFontLike
      * @param customGlyphList a custom glyph list to use instead of the Adobe Glyph List
      * @return Unicode character(s)
      */
-    public String toUnicode(int code, GlyphList customGlyphList)
+    public String toUnicode(int code, GlyphList customGlyphList) throws IOException
     {
         return toUnicode(code);
     }
@@ -394,7 +394,7 @@ public abstract class PDFont implements COSObjectable, PDFontLike
      * @param code character code
      * @return Unicode character(s)
      */
-    public String toUnicode(int code)
+    public String toUnicode(int code) throws IOException
     {
         // if the font dictionary containsName a ToUnicode CMap, use that CMap
         if (toUnicodeCMap != null)

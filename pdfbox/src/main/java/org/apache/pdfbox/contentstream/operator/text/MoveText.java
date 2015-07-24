@@ -18,14 +18,14 @@ package org.apache.pdfbox.contentstream.operator.text;
 
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.contentstream.operator.MissingOperandException;
 import org.apache.pdfbox.contentstream.operator.Operator;
 import org.apache.pdfbox.contentstream.operator.OperatorProcessor;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSNumber;
 import org.apache.pdfbox.util.Matrix;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Td: Move text position.
@@ -34,7 +34,7 @@ import org.apache.pdfbox.util.Matrix;
  */
 public class MoveText extends OperatorProcessor
 {
-    private static final Log LOG = LogFactory.getLog(MoveText.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MoveText.class);
 
     @Override
     public void process(Operator operator, List<COSBase> arguments) throws MissingOperandException

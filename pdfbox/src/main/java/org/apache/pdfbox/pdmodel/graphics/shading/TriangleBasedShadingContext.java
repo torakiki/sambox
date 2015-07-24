@@ -25,9 +25,10 @@ import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
 import org.apache.pdfbox.util.Matrix;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Intermediate class extended by the shading types 4,5,6 and 7 that contains the common methods
@@ -38,7 +39,7 @@ import org.apache.pdfbox.util.Matrix;
  */
 abstract class TriangleBasedShadingContext extends ShadingContext implements PaintContext
 {
-    private static final Log LOG = LogFactory.getLog(TriangleBasedShadingContext.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TriangleBasedShadingContext.class);
 
     protected int bitsPerCoordinate;
     protected int bitsPerColorComponent;

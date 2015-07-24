@@ -44,14 +44,14 @@ import org.sejda.io.SeekableSources;
 public class LazyIndirectObjectsProviderTest
 {
     private LazyIndirectObjectsProvider victim;
-    private BaseCOSParser parser;
+    private COSParser parser;
 
     @Before
     public void setUp() throws IOException
     {
 
         victim = new LazyIndirectObjectsProvider();
-        parser = new BaseCOSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
+        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
                 .getResourceAsStream("/input/simple_test.pdf")), victim);
         victim.initializeWith(parser);
         XrefParser xrefParser = new XrefParser(parser);
@@ -83,7 +83,7 @@ public class LazyIndirectObjectsProviderTest
     public void getCompressed() throws IOException
     {
         victim = new LazyIndirectObjectsProvider();
-        parser = new BaseCOSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
+        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
                 .getResourceAsStream("/input/simple_test_objstm.pdf")), victim);
         victim.initializeWith(parser);
         XrefParser xrefParser = new XrefParser(parser);
@@ -95,7 +95,7 @@ public class LazyIndirectObjectsProviderTest
     public void getCompressedWrongOwningStream() throws IOException
     {
         victim = new LazyIndirectObjectsProvider();
-        parser = new BaseCOSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
+        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
                 .getResourceAsStream("/input/simple_test_objstm.pdf")), victim);
         victim.initializeWith(parser);
         XrefParser xrefParser = new XrefParser(parser);
@@ -108,7 +108,7 @@ public class LazyIndirectObjectsProviderTest
     public void getCompressedWrongOwningStreamCompressed() throws IOException
     {
         victim = new LazyIndirectObjectsProvider();
-        parser = new BaseCOSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
+        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
                 .getResourceAsStream("/input/simple_test_objstm.pdf")), victim);
         victim.initializeWith(parser);
         XrefParser xrefParser = new XrefParser(parser);
@@ -121,7 +121,7 @@ public class LazyIndirectObjectsProviderTest
     public void getCompressedNullContainingStream() throws IOException
     {
         victim = new LazyIndirectObjectsProvider();
-        parser = new BaseCOSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
+        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
                 .getResourceAsStream("/input/simple_test_objstm.pdf")), victim);
         victim.initializeWith(parser);
         XrefParser xrefParser = new XrefParser(parser);
@@ -134,7 +134,7 @@ public class LazyIndirectObjectsProviderTest
     public void fallbackDoesntWorkForObjStm() throws IOException
     {
         victim = new LazyIndirectObjectsProvider();
-        parser = new BaseCOSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
+        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
                 .getResourceAsStream("/input/bad_objstm.pdf")), victim);
         victim.initializeWith(parser);
         XrefParser xrefParser = new XrefParser(parser);
@@ -146,7 +146,7 @@ public class LazyIndirectObjectsProviderTest
     public void fallbackKicksIn() throws IOException
     {
         victim = new LazyIndirectObjectsProvider();
-        parser = new BaseCOSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
+        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
                 .getResourceAsStream("/input/test_multiple_xref_tables_wrong_obj_offset.pdf")),
                 victim);
         victim.initializeWith(parser);

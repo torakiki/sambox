@@ -16,13 +16,12 @@
  */
 package org.apache.pdfbox.pdmodel.font;
 
+import java.awt.geom.GeneralPath;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.fontbox.cmap.CMap;
 import org.apache.fontbox.util.BoundingBox;
 import org.apache.pdfbox.cos.COSArray;
@@ -32,15 +31,17 @@ import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.util.Matrix;
 import org.apache.pdfbox.util.Vector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A Composite (Type 0) font.
  *
  * @author Ben Litchfield
  */
-public class PDType0Font extends PDFont
+public class PDType0Font extends PDFont implements PDVectorFont
 {
-    private static final Log LOG = LogFactory.getLog(PDType0Font.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PDType0Font.class);
 
     private final PDCIDFont descendantFont;
     private CMap cMap, cMapUCS2;
@@ -49,7 +50,7 @@ public class PDType0Font extends PDFont
     private PDCIDFontType2Embedder embedder;
     
     /**
-    * Loads a TTF to be embedded into a document.
+    * Loads a TTF to be embedded into a document as a Type 0 font.
     *
     * @param doc The PDF document that will hold the embedded font.
     * @param file A TrueType font.
@@ -62,7 +63,7 @@ public class PDType0Font extends PDFont
     }
 
     /**
-    * Loads a TTF to be embedded into a document.
+    * Loads a TTF to be embedded into a document as a Type 0 font.
     *
     * @param doc The PDF document that will hold the embedded font.
     * @param input A TrueType font.
@@ -75,7 +76,7 @@ public class PDType0Font extends PDFont
     }
 
     /**
-     * Loads a TTF to be embedded into a document.
+     * Loads a TTF to be embedded into a document as a Type 0 font.
      *
      * @param doc The PDF document that will hold the embedded font.
      * @param input A TrueType font.
@@ -388,7 +389,7 @@ public class PDType0Font extends PDFont
     }
 
     @Override
-    public String toUnicode(int code)
+    public String toUnicode(int code) throws IOException
     {
         // try to use a ToUnicode CMap
         String unicode = super.toUnicode(code);
@@ -478,5 +479,17 @@ public class PDType0Font extends PDFont
             descendant = getDescendantFont().getClass().getSimpleName();
         }
         return getClass().getSimpleName() + "/" + descendant + " " + getBaseFont();
+    }
+
+    @Override
+    public GeneralPath getPath(int code) throws IOException
+    {
+        return descendantFont.getPath(code);
+    }
+
+    @Override
+    public boolean hasGlyph(int code) throws IOException
+    {
+        return descendantFont.hasGlyph(code);
     }
 }

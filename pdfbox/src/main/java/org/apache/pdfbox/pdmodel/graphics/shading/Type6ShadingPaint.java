@@ -24,9 +24,10 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.ColorModel;
 import java.io.IOException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
 import org.apache.pdfbox.util.Matrix;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * AWT Paint for coons patch meshes (Type 6) shading. This was done as part of
@@ -36,7 +37,7 @@ import org.apache.pdfbox.util.Matrix;
  */
 class Type6ShadingPaint implements Paint
 {
-    private static final Log LOG = LogFactory.getLog(Type6ShadingPaint.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Type6ShadingPaint.class);
 
     private final PDShadingType6 shading;
     private final Matrix matrix;

@@ -24,12 +24,13 @@ import java.awt.image.ColorModel;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBoolean;
 import org.apache.pdfbox.pdmodel.common.function.PDFunction;
 import org.apache.pdfbox.util.Matrix;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * AWT PaintContext for radial shading.
@@ -40,7 +41,7 @@ import org.apache.pdfbox.util.Matrix;
  */
 public class RadialShadingContext extends ShadingContext implements PaintContext
 {
-    private static final Log LOG = LogFactory.getLog(RadialShadingContext.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RadialShadingContext.class);
 
     private PDShadingType3 radialShadingType;
 
@@ -122,7 +123,7 @@ public class RadialShadingContext extends ShadingContext implements PaintContext
         }
         catch (NoninvertibleTransformException ex)
         {
-            LOG.error(ex, ex);
+            LOG.error(ex.getMessage(), ex);
         }
 
         // transform the distance to actual pixel space

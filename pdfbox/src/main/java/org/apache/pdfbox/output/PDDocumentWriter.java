@@ -42,7 +42,7 @@ public class PDDocumentWriter implements Closeable
     public PDDocumentWriter(CountingWritableByteChannel channel)
     {
         requireNotNullArg(channel, "Cannot write to a null channel");
-        this.writer = new PDFWriter(new BufferedDestinationWriter(channel));
+        this.writer = new PDFWriter(channel);
     }
 
     /**

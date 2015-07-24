@@ -16,13 +16,12 @@
  */
 package org.apache.pdfbox.contentstream.operator.graphics;
 
-import java.util.List;
-
-import org.apache.pdfbox.cos.COSBase;
-import org.apache.pdfbox.contentstream.operator.Operator;
-
 import java.awt.geom.GeneralPath;
 import java.io.IOException;
+import java.util.List;
+
+import org.apache.pdfbox.contentstream.operator.Operator;
+import org.apache.pdfbox.cos.COSBase;
 
 /**
  * B Fill and then stroke the path, using the nonzero winding number rule to determine the region
