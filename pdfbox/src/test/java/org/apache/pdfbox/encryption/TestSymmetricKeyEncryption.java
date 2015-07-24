@@ -31,8 +31,7 @@ import javax.crypto.Cipher;
 
 import junit.framework.TestCase;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.commons.io.IOUtils;
 import org.apache.pdfbox.cos.COSObjectable;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -45,8 +44,9 @@ import org.apache.pdfbox.pdmodel.encryption.AccessPermission;
 import org.apache.pdfbox.pdmodel.encryption.StandardProtectionPolicy;
 import org.apache.pdfbox.pdmodel.graphics.image.ValidateXImage;
 import org.apache.pdfbox.rendering.PDFRenderer;
-import org.apache.pdfbox.util.IOUtils;
 import org.junit.Assert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Tests for symmetric key encryption.
@@ -65,7 +65,7 @@ public class TestSymmetricKeyEncryption extends TestCase
     /**
      * Logger instance.
      */
-    private static final Log LOG = LogFactory.getLog(TestSymmetricKeyEncryption.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TestSymmetricKeyEncryption.class);
 
     private final File testResultsDir = new File("target/test-output/crypto");
 

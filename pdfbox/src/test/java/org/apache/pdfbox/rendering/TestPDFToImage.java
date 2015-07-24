@@ -31,9 +31,9 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Test suite for rendering.
@@ -62,10 +62,7 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 public class TestPDFToImage extends TestCase
 {
 
-    /**
-     * Logger instance.
-     */
-    private static final Log LOG = LogFactory.getLog(TestPDFToImage.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TestPDFToImage.class);
 
     String inDir = "src/test/resources/input/rendering";
     String outDir = "target/test-output/rendering/";
