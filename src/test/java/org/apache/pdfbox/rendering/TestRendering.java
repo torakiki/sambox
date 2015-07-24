@@ -17,18 +17,20 @@
 
 package org.apache.pdfbox.rendering;
 
-import org.apache.pdfbox.ParallelParameterized;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized.Parameters;
-
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import org.apache.pdfbox.ParallelParameterized;
+import org.apache.pdfbox.input.PDFParser;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized.Parameters;
+import org.sejda.io.SeekableSources;
 
 /**
  * Functional test for PDF rendering. This test simply tries to render
@@ -74,15 +76,15 @@ public class TestRendering
     public void render() throws IOException
     {
         File file = new File(INPUT_DIR, fileName);
-        PDDocument document = PDDocument.load(file);
+        try (PDDocument document = PDFParser.parse(SeekableSources.seekableSourceFrom(file)))
+        {
         PDFRenderer renderer = new PDFRenderer(document);
         renderer.renderImage(0);
-
+        }
         // We don't actually do anything with the image for the same reason that
         // TestPDFToImage is disabled - different JVMs produce different results
         // but at least we can make sure that PDFBox did not throw any exceptions
         // during the rendering process.
 
-        document.close();
     }
 }

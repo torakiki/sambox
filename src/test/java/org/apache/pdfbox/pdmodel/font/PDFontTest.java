@@ -20,8 +20,11 @@
 package org.apache.pdfbox.pdmodel.font;
 
 import junit.framework.TestCase;
+
+import org.apache.pdfbox.input.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
+import org.sejda.io.SeekableSources;
 
 /**
  * 
@@ -35,20 +38,12 @@ public class PDFontTest extends TestCase
      */
     public void testPDFBox988() throws Exception
     {
-        PDDocument doc = null;
-        try
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(getClass()
+                .getResourceAsStream("F001u_3_7j.pdf"))))
         {
-            doc = PDDocument.load(PDFontTest.class.getResourceAsStream("F001u_3_7j.pdf"));
             PDFRenderer renderer = new PDFRenderer(doc);
             renderer.renderImage(0);
             // the allegation is that renderImage() will crash the JVM or hang
-        }
-        finally
-        {
-            if (doc != null)
-            {
-                doc.close();
-            }
         }
     }
 }

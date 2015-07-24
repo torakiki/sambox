@@ -21,7 +21,10 @@ import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
 
+import junit.framework.TestCase;
+
 import org.apache.pdfbox.cos.COSObjectable;
+import org.apache.pdfbox.input.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
 import org.apache.pdfbox.pdmodel.PDDocumentNameDictionary;
@@ -29,8 +32,7 @@ import org.apache.pdfbox.pdmodel.PDEmbeddedFilesNameTreeNode;
 import org.apache.pdfbox.pdmodel.common.filespecification.PDComplexFileSpecification;
 import org.apache.pdfbox.pdmodel.common.filespecification.PDEmbeddedFile;
 import org.junit.Test;
-
-import junit.framework.TestCase;
+import org.sejda.io.SeekableSources;
 
 public class TestEmbeddedFiles extends TestCase
 {
@@ -39,34 +41,29 @@ public class TestEmbeddedFiles extends TestCase
     {
         PDEmbeddedFile embeddedFile = null;
         boolean ok = false;
-        try
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(getClass()
+                .getResourceAsStream("null_PDComplexFileSpecification.pdf"))))
         {
-            PDDocument doc = PDDocument.load(TestEmbeddedFiles.class.getResourceAsStream(
-                "null_PDComplexFileSpecification.pdf"));
 
             PDDocumentCatalog catalog = doc.getDocumentCatalog();
             PDDocumentNameDictionary names = catalog.getNames();
             assertEquals("expected two files", 2, names.getEmbeddedFiles().getNames().size());
             PDEmbeddedFilesNameTreeNode embeddedFiles = names.getEmbeddedFiles();
 
-            PDComplexFileSpecification spec = (PDComplexFileSpecification)
-                                            embeddedFiles.getNames().get("non-existent-file.docx");
+            PDComplexFileSpecification spec = (PDComplexFileSpecification) embeddedFiles.getNames()
+                    .get("non-existent-file.docx");
 
             if (spec != null)
             {
                 embeddedFile = spec.getEmbeddedFile();
                 ok = true;
             }
-            //now test for actual attachment
-            spec = (PDComplexFileSpecification)embeddedFiles.getNames().get("My first attachment");
+            // now test for actual attachment
+            spec = (PDComplexFileSpecification) embeddedFiles.getNames().get("My first attachment");
             assertNotNull("one attachment actually exists", spec);
             assertEquals("existing file length", 17660, spec.getEmbeddedFile().getLength());
-            spec = (PDComplexFileSpecification)embeddedFiles
-                                                    .getNames().get("non-existent-file.docx");
-        }
-        catch (NullPointerException e)
-        {
-            assertNotNull("null pointer exception", null);
+            spec = (PDComplexFileSpecification) embeddedFiles.getNames().get(
+                    "non-existent-file.docx");
         }
         assertTrue("Was able to get file without exception", ok);
         assertNull("EmbeddedFile was correctly null", embeddedFile);
@@ -80,34 +77,37 @@ public class TestEmbeddedFiles extends TestCase
         PDEmbeddedFile dosFile = null;
         PDEmbeddedFile unixFile = null;
 
-        PDDocument doc = PDDocument.load(TestEmbeddedFiles.class
-                .getResourceAsStream("testPDF_multiFormatEmbFiles.pdf"));
-
-        PDDocumentCatalog catalog = doc.getDocumentCatalog();
-        PDDocumentNameDictionary names = catalog.getNames();
-        PDEmbeddedFilesNameTreeNode treeNode = names.getEmbeddedFiles();
-        List<PDNameTreeNode<PDComplexFileSpecification>> kids = treeNode.getKids();
-        for (PDNameTreeNode kid : kids)
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(getClass()
+                .getResourceAsStream("testPDF_multiFormatEmbFiles.pdf"))))
         {
-            Map<String, PDComplexFileSpecification> tmpNames = kid.getNames();
-            COSObjectable obj = tmpNames.get("My first attachment");
-            
-            PDComplexFileSpecification spec = (PDComplexFileSpecification) obj;
-            nonOSFile = spec.getEmbeddedFile();
-            macFile = spec.getEmbeddedFileMac();
-            dosFile = spec.getEmbeddedFileDos();
-            unixFile = spec.getEmbeddedFileUnix();
+            PDDocumentCatalog catalog = doc.getDocumentCatalog();
+            PDDocumentNameDictionary names = catalog.getNames();
+            PDEmbeddedFilesNameTreeNode treeNode = names.getEmbeddedFiles();
+            List<PDNameTreeNode<PDComplexFileSpecification>> kids = treeNode.getKids();
+            for (PDNameTreeNode kid : kids)
+            {
+                Map<String, PDComplexFileSpecification> tmpNames = kid.getNames();
+                COSObjectable obj = tmpNames.get("My first attachment");
+
+                PDComplexFileSpecification spec = (PDComplexFileSpecification) obj;
+                nonOSFile = spec.getEmbeddedFile();
+                macFile = spec.getEmbeddedFileMac();
+                dosFile = spec.getEmbeddedFileDos();
+                unixFile = spec.getEmbeddedFileUnix();
+            }
+
+            assertTrue("non os specific",
+                    byteArrayContainsLC("non os specific", nonOSFile.getByteArray(), "ISO-8859-1"));
+
+            assertTrue("mac",
+                    byteArrayContainsLC("mac embedded", macFile.getByteArray(), "ISO-8859-1"));
+
+            assertTrue("dos",
+                    byteArrayContainsLC("dos embedded", dosFile.getByteArray(), "ISO-8859-1"));
+
+            assertTrue("unix",
+                    byteArrayContainsLC("unix embedded", unixFile.getByteArray(), "ISO-8859-1"));
         }
-
-        assertTrue("non os specific",
-                byteArrayContainsLC("non os specific", nonOSFile.getByteArray(), "ISO-8859-1"));
-
-        assertTrue("mac", byteArrayContainsLC("mac embedded", macFile.getByteArray(), "ISO-8859-1"));
-
-        assertTrue("dos", byteArrayContainsLC("dos embedded", dosFile.getByteArray(), "ISO-8859-1"));
-
-        assertTrue("unix",
-                byteArrayContainsLC("unix embedded", unixFile.getByteArray(), "ISO-8859-1"));
 
     }
 

@@ -23,7 +23,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import org.apache.pdfbox.util.IOUtils;
+import org.apache.commons.io.IOUtils;
 
 /**
  * Tests the CCITT Fax G3 1D decoder.

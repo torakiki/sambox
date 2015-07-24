@@ -18,14 +18,17 @@
 package org.apache.pdfbox.pdmodel.font;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
+
 import junit.framework.TestCase;
+
+import org.apache.pdfbox.input.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.text.PDFTextStripper;
+import org.sejda.io.SeekableSources;
 
 /**
  * Tests font embedding.
@@ -81,18 +84,16 @@ public class TestFontEmbedding extends TestCase
         stream.close();
         
         File file = new File(OUT_DIR, "CIDFontType2.pdf");
-        document.save(file);
+        document.writeTo(file);
         document.close();
 
         // check that the extracted text matches what we wrote
-        String extracted = getUnicodeText(file);
-        assertEquals(text, extracted.trim());
+        try (PDDocument document2 = PDFParser.parse(SeekableSources.seekableSourceFrom(file)))
+        {
+            PDFTextStripper stripper = new PDFTextStripper();
+            assertEquals(text, stripper.getText(document2).trim());
+        }
     }
 
-    private String getUnicodeText(File file) throws IOException
-    {
-        PDDocument document = PDDocument.load(file);
-        PDFTextStripper stripper = new PDFTextStripper();
-        return stripper.getText(document);
-    }
+
 }
