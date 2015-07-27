@@ -43,7 +43,7 @@ public class TestPDPageContentStream extends TestCase
         contentStream.close();
 
         // now read the PDF stream and verify that the CMYK values are correct
-        try (ContentStreamParser parser = new ContentStreamParser(page.getStream().getStream()))
+        try (ContentStreamParser parser = new ContentStreamParser(page))
         {
             List<Object> pageTokens = parser.tokens();
             // expected five tokens :
@@ -68,7 +68,7 @@ public class TestPDPageContentStream extends TestCase
         contentStream.close();
 
         // now read the PDF stream and verify that the CMYK values are correct
-        try (ContentStreamParser parser = new ContentStreamParser(page.getStream().getStream()))
+        try (ContentStreamParser parser = new ContentStreamParser(page))
         {
             List<Object> pageTokens = parser.tokens();
             // expected five tokens :

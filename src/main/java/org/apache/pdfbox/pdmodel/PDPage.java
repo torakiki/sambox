@@ -16,8 +16,13 @@
  */
 package org.apache.pdfbox.pdmodel;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.SequenceInputStream;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.pdfbox.contentstream.PDContentStream;
@@ -30,7 +35,6 @@ import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSNumber;
 import org.apache.pdfbox.cos.COSObjectable;
 import org.apache.pdfbox.cos.COSStream;
-import org.apache.pdfbox.cos.COSStreamArray;
 import org.apache.pdfbox.pdmodel.common.PDMetadata;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.common.PDStream;
@@ -50,7 +54,7 @@ import org.slf4j.LoggerFactory;
 public class PDPage implements COSObjectable, PDContentStream
 {
     private static final Logger LOG = LoggerFactory.getLogger(PDPage.class);
-    
+
     private final COSDictionary page;
     private PDResources pageResources;
     private PDRectangle mediaBox;
@@ -96,19 +100,70 @@ public class PDPage implements COSObjectable, PDContentStream
         return page;
     }
 
+    /**
+     * Returns the content streams which make up this page.
+     * 
+     * @return content stream iterator
+     */
+    public Iterator<PDStream> getContentStreams()
+    {
+        List<PDStream> streams = new ArrayList<>();
+        COSBase base = page.getDictionaryObject(COSName.CONTENTS);
+        if (base instanceof COSStream)
+        {
+            streams.add(new PDStream((COSStream) base));
+        }
+        else if (base instanceof COSArray && ((COSArray) base).size() > 0)
+        {
+            COSArray array = (COSArray) base;
+            for (int i = 0; i < streams.size(); i++)
+            {
+                COSStream stream = (COSStream) array.getObject(i);
+                streams.add(new PDStream(stream));
+            }
+        }
+        return streams.iterator();
+    }
+
     @Override
-    public COSStream getContentStream()
+    public InputStream getContents() throws IOException
     {
         COSBase base = page.getDictionaryObject(COSName.CONTENTS);
         if (base instanceof COSStream)
         {
-            return (COSStream)base;
+            return ((COSStream) base).getUnfilteredStream();
         }
         else if (base instanceof COSArray && ((COSArray) base).size() > 0)
         {
-            return new COSStreamArray((COSArray) base);
+            COSArray streams = (COSArray) base;
+            byte[] delimiter = new byte[] { '\n' };
+            List<InputStream> inputStreams = new ArrayList<>();
+            for (int i = 0; i < streams.size(); i++)
+            {
+                COSStream stream = (COSStream) streams.getObject(i);
+                inputStreams.add(stream.getUnfilteredStream());
+                inputStreams.add(new ByteArrayInputStream(delimiter));
+            }
+            return new SequenceInputStream(Collections.enumeration(inputStreams));
         }
         return null;
+    }
+
+    /**
+     * Returns true if this page has contents.
+     */
+    public boolean hasContents()
+    {
+        COSBase contents = page.getDictionaryObject(COSName.CONTENTS);
+        if (contents instanceof COSStream)
+        {
+            return ((COSStream) contents).size() > 0;
+        }
+        else if (contents instanceof COSArray)
+        {
+            return ((COSArray) contents).size() > 0;
+        }
+        return false;
     }
 
     /**
@@ -119,8 +174,8 @@ public class PDPage implements COSObjectable, PDContentStream
     {
         if (pageResources == null)
         {
-            COSDictionary resources = (COSDictionary)
-                    PDPageTree.getInheritableAttribute(page, COSName.RESOURCES);
+            COSDictionary resources = (COSDictionary) PDPageTree.getInheritableAttribute(page,
+                    COSName.RESOURCES);
 
             // note: it's an error for resources to not be present
             if (resources != null)
@@ -183,8 +238,8 @@ public class PDPage implements COSObjectable, PDContentStream
     }
 
     /**
-     * A rectangle, expressed in default user space units, defining the boundaries of the physical
-     * medium on which the page is intended to be displayed or printed.
+     * A rectangle, expressed in default user space units, defining the boundaries of the physical medium on which the
+     * page is intended to be displayed or printed.
      */
     public PDRectangle getMediaBox()
     {
@@ -223,9 +278,8 @@ public class PDPage implements COSObjectable, PDContentStream
     }
 
     /**
-     * A rectangle, expressed in default user space units, defining the visible region of default
-     * user space. When the page is displayed or printed, its contents are to be clipped (cropped)
-     * to this rectangle.
+     * A rectangle, expressed in default user space units, defining the visible region of default user space. When the
+     * page is displayed or printed, its contents are to be clipped (cropped) to this rectangle.
      */
     public PDRectangle getCropBox()
     {
@@ -258,9 +312,8 @@ public class PDPage implements COSObjectable, PDContentStream
     }
 
     /**
-     * A rectangle, expressed in default user space units, defining the region to which the contents
-     * of the page should be clipped when output in a production environment. The default is the
-     * CropBox.
+     * A rectangle, expressed in default user space units, defining the region to which the contents of the page should
+     * be clipped when output in a production environment. The default is the CropBox.
      * 
      * @return The BleedBox attribute.
      */
@@ -297,8 +350,8 @@ public class PDPage implements COSObjectable, PDContentStream
     }
 
     /**
-     * A rectangle, expressed in default user space units, defining the intended dimensions of the
-     * finished page after trimming. The default is the CropBox.
+     * A rectangle, expressed in default user space units, defining the intended dimensions of the finished page after
+     * trimming. The default is the CropBox.
      * 
      * @return The TrimBox attribute.
      */
@@ -335,9 +388,8 @@ public class PDPage implements COSObjectable, PDContentStream
     }
 
     /**
-     * A rectangle, expressed in default user space units, defining the extent of the page's
-     * meaningful content (including potential white space) as intended by the page's creator The
-     * default is the CropBox.
+     * A rectangle, expressed in default user space units, defining the extent of the page's meaningful content
+     * (including potential white space) as intended by the page's creator The default is the CropBox.
      * 
      * @return The ArtBox attribute.
      */
@@ -372,7 +424,7 @@ public class PDPage implements COSObjectable, PDContentStream
             page.setItem(COSName.ART_BOX, artBox);
         }
     }
-    
+
     /**
      * Clips the given box to the bounds of the media box.
      */
@@ -388,12 +440,11 @@ public class PDPage implements COSObjectable, PDContentStream
     }
 
     /**
-     * Returns the rotation angle in degrees by which the page should be rotated
-     * clockwise when displayed or printed. Valid values in a PDF must be a
-     * multiple of 90.
+     * Returns the rotation angle in degrees by which the page should be rotated clockwise when displayed or printed.
+     * Valid values in a PDF must be a multiple of 90.
      *
-     * @return The rotation angle in degrees in normalized form (0, 90, 180 or
-     * 270) or 0 if invalid or not set at this level.
+     * @return The rotation angle in degrees in normalized form (0, 90, 180 or 270) or 0 if invalid or not set at this
+     * level.
      */
     public int getRotation()
     {
@@ -420,19 +471,7 @@ public class PDPage implements COSObjectable, PDContentStream
     }
 
     /**
-     * This will get the contents of the PDF Page, in the case that the contents of the page is an
-     * array then then the entire array of streams will be be wrapped and appear as a single stream.
-     * 
-     * @return The page content stream.
-     * @throws IOException If there is an error obtaining the stream.
-     */
-    public PDStream getStream() throws IOException
-    {
-        return PDStream.createFromCOS(page.getDictionaryObject(COSName.CONTENTS));
-    }
-
-    /**
-     * This will set the contents of this page.
+     * This will set the contents of this page.treams will be be wrapped and appear as a single stream.
      * 
      * @param contents The new contents of the page.
      */
@@ -442,8 +481,23 @@ public class PDPage implements COSObjectable, PDContentStream
     }
 
     /**
-     * This will get a list of PDThreadBead objects, which are article threads in the document.
-     * This will return an empty list of there are no thread beads.
+     * This will set the contents of this page.
+     * 
+     * @param contents Array of new contents of the page.
+     */
+    public void setContents(List<PDStream> contents)
+    {
+        COSArray array = new COSArray();
+        for (PDStream stream : contents)
+        {
+            array.add(stream);
+        }
+        page.setItem(COSName.CONTENTS, array);
+    }
+
+    /**
+     * This will get a list of PDThreadBead objects, which are article threads in the document. This will return an
+     * empty list of there are no thread beads.
      * 
      * @return A list of article threads on this page.
      */
@@ -481,8 +535,8 @@ public class PDPage implements COSObjectable, PDContentStream
     }
 
     /**
-     * Get the metadata that is part of the document catalog. This will return null if there is
-     * no meta data for this object.
+     * Get the metadata that is part of the document catalog. This will return null if there is no meta data for this
+     * object.
      * 
      * @return The metadata for this object.
      */
@@ -538,7 +592,8 @@ public class PDPage implements COSObjectable, PDContentStream
      */
     public PDTransition getTransition()
     {
-        COSDictionary transitionDictionary = (COSDictionary) page.getDictionaryObject(COSName.TRANS);
+        COSDictionary transitionDictionary = (COSDictionary) page
+                .getDictionaryObject(COSName.TRANS);
         return transitionDictionary == null ? null : new PDTransition(transitionDictionary);
     }
 

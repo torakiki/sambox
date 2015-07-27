@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.common.PDStream;
 
 /**
  * This will extract text from a specified region in the PDF.
@@ -119,8 +118,7 @@ public class PDFTextStripperByArea extends PDFTextStripper
             regionText.put( regionName, new StringWriter() );
         }
 
-        PDStream contentStream = page.getStream();
-        if( contentStream != null )
+        if (page.hasContents())
         {
             processPage( page );
         }

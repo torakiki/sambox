@@ -38,7 +38,6 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageTree;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
-import org.apache.pdfbox.pdmodel.common.PDStream;
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline.PDOutlineItem;
 import org.apache.pdfbox.pdmodel.interactive.pagenavigation.PDThreadBead;
 import org.apache.pdfbox.util.QuickSort;
@@ -299,9 +298,8 @@ public class PDFTextStripper extends PDFTextStreamEngine
 
         for (PDPage page : pages)
         {
-            PDStream contentStream = page.getStream();
             currentPageNo++;
-            if (contentStream != null)
+            if (page.hasContents())
             {
                 processPage(page);
             }

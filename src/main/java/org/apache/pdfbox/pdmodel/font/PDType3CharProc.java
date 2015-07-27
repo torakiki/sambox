@@ -17,11 +17,15 @@
 
 package org.apache.pdfbox.pdmodel.font;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.apache.pdfbox.contentstream.PDContentStream;
 import org.apache.pdfbox.cos.COSObjectable;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.pdmodel.PDResources;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.common.PDStream;
 import org.apache.pdfbox.util.Matrix;
 
 /**
@@ -51,10 +55,15 @@ public final class PDType3CharProc implements COSObjectable, PDContentStream
         return font;
     }
 
-    @Override
-    public COSStream getContentStream()
+    public PDStream getContentStream()
     {
-        return charStream;
+        return new PDStream(charStream);
+    }
+
+    @Override
+    public InputStream getContents() throws IOException
+    {
+        return charStream.getUnfilteredStream();
     }
 
     @Override

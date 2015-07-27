@@ -124,7 +124,7 @@ class AppearanceGeneratorHelper
      */
     private List<Object> tokenize(PDAppearanceStream appearanceStream) throws IOException
     {
-        return new ContentStreamParser(appearanceStream.getCOSStream()).tokens();
+        return new ContentStreamParser(appearanceStream).tokens();
     }
 
     /**

@@ -28,12 +28,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.pdfbox.contentstream.PDContentStream;
 import org.apache.pdfbox.contentstream.operator.Operator;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.cos.COSStream;
 import org.sejda.io.SeekableSource;
+import org.sejda.io.SeekableSources;
 import org.sejda.util.IOUtils;
 /**
  * Component responsible for parsing a a content stream to extract operands and such.
@@ -45,9 +46,9 @@ public class ContentStreamParser extends SourceReader
     private ContentStreamCOSParser cosParser;
     private List<Object> tokens = new ArrayList<>();
 
-    public ContentStreamParser(COSStream stream) throws IOException
+    public ContentStreamParser(PDContentStream stream) throws IOException
     {
-        this(stream.getUnfilteredSource());
+        this(SeekableSources.inMemorySeekableSourceFrom(stream.getContents()));
     }
 
     public ContentStreamParser(SeekableSource source)

@@ -141,7 +141,7 @@ public abstract class PDFStreamEngine
     public void processPage(PDPage page) throws IOException
     {
         initPage(page);
-        if (page.getStream() != null)
+        if (page.hasContents())
         {
             isProcessingPage = true;
             processStream(page);
@@ -446,7 +446,7 @@ public abstract class PDFStreamEngine
     private void processStreamOperators(PDContentStream contentStream) throws IOException
     {
         List<COSBase> arguments = new ArrayList<>();
-        ContentStreamParser parser = new ContentStreamParser(contentStream.getContentStream());
+        ContentStreamParser parser = new ContentStreamParser(contentStream);
         Object token;
         while ((token = parser.nextParsedToken()) != null)
         {

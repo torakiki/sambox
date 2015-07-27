@@ -22,7 +22,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 
-import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.pdmodel.common.filespecification.PDFileSpecification;
 
@@ -66,7 +65,7 @@ public class PDMemoryStream extends PDStream
      * @return The cos object that matches this Java object.
      */
     @Override
-    public COSBase getCOSObject()
+    public COSStream getCOSObject()
     {
         throw new UnsupportedOperationException( "not supported for memory stream" );
     }

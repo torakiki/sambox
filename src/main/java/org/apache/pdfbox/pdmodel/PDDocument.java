@@ -40,7 +40,6 @@ import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.cos.COSInteger;
 import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.cos.DirectCOSObject;
 import org.apache.pdfbox.output.PDDocumentWriter;
@@ -161,26 +160,22 @@ public class PDDocument implements Closeable
     {
         requireOpen();
         PDPage importedPage = new PDPage(new COSDictionary(page.getCOSObject()));
-        InputStream is = null;
-        OutputStream os = null;
+        InputStream in = null;
         try
         {
-            PDStream src = page.getStream();
-            if (src != null)
+            in = page.getContents();
+            if (in != null)
             {
-                PDStream dest = new PDStream(new COSStream());
+                PDStream dest = new PDStream(this, page.getContents());
                 dest.addCompression();
                 importedPage.setContents(dest);
-                is = src.createInputStream();
-                os = dest.createOutputStream();
-                org.apache.commons.io.IOUtils.copy(is, os);
+
             }
             addPage(importedPage);
         }
-        finally
+        catch (IOException e)
         {
-            IOUtils.close(is);
-            IOUtils.close(os);
+            IOUtils.close(in);
         }
         return importedPage;
     }

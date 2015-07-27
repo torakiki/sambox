@@ -49,6 +49,11 @@
 			</snapshots>
 			<url>http://repository.apache.org/snapshots/</url>
 		</repository>
+		<repository>
+			<id>jbig2.googlecode</id>
+			<name>JBIG2 ImageIO-Plugin repository at googlecode.com</name>
+			<url>http://jbig2-imageio.googlecode.com/svn/maven-repository/</url>
+		</repository>
 	</repositories>
 
 	<distributionManagement>
