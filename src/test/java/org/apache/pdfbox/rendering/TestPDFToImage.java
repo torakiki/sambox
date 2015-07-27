@@ -230,7 +230,6 @@ public class TestPDFToImage extends TestCase
             // test to see whether file is destroyed in pdfbox
             new FileOutputStream(new File(outDir, file.getName() + ".saveerror")).close();
             File tmpFile = File.createTempFile("pdfbox", ".pdf");
-            document.setAllSecurityToBeRemoved(true);
             document.writeTo(tmpFile);
             new File(outDir, file.getName() + ".saveerror").delete();
             new FileOutputStream(new File(outDir, file.getName() + ".reloaderror")).close();
