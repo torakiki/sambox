@@ -151,6 +151,9 @@ public class COSStream extends COSDictionary implements Closeable
             {
                 doDecode();
             }
+        }
+        if (unfiltered != null)
+        {
             return new MyByteArrayInputStream(unfiltered);
         }
         return getStreamToDecode();

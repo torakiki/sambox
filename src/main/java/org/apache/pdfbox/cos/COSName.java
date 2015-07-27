@@ -103,7 +103,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName CENTER_WINDOW = newCommonInstance("CenterWindow");
     public static final COSName CF = newCommonInstance("CF");
     public static final COSName CFM = newCommonInstance("CFM");
-    public static final COSName CH = newCommonInstance("CH");
+    public static final COSName CH = newCommonInstance("Ch");
     public static final COSName CHAR_PROCS = newCommonInstance("CharProcs");
     public static final COSName CHAR_SET = newCommonInstance("CharSet");
     public static final COSName CICI_SIGNIT = newCommonInstance("CICI.SignIt");

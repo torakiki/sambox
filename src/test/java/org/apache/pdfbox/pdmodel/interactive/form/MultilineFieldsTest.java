@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.pdfbox.input.PDFParser;
+import org.apache.pdfbox.output.WriteOption;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.TestPDFToImage;
 import org.junit.After;
@@ -91,7 +92,7 @@ public class MultilineFieldsTest
         
         // compare rendering
         File file = new File(OUT_DIR, NAME_OF_PDF);
-        document.writeTo(file);
+        document.writeTo(file, WriteOption.SYNC_BODY_WRITE);
         TestPDFToImage testPDFToImage = new TestPDFToImage(TestPDFToImage.class.getName());
         if (!testPDFToImage.doTestFile(file, IN_DIR.getAbsolutePath(), OUT_DIR.getAbsolutePath()))
         {

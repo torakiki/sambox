@@ -273,7 +273,6 @@ class AppearanceGeneratorHelper
 
         contents.endText();
         contents.restoreGraphicsState();
-        contents.close();
     }
 
     private boolean isMultiLine()
