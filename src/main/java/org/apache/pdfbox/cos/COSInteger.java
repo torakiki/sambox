@@ -69,7 +69,7 @@ public final class COSInteger extends COSNumber
     @Override
     public boolean equals(Object o)
     {
-        return o instanceof COSInteger && ((COSInteger)o).intValue() == intValue();
+        return o instanceof COSInteger && ((COSInteger) o).intValue() == intValue();
     }
 
     @Override
@@ -81,7 +81,7 @@ public final class COSInteger extends COSNumber
     @Override
     public String toString()
     {
-        return "COSInteger{" + Long.toString(value) + "}";
+        return Long.toString(value);
     }
 
     @Override
@@ -99,7 +99,7 @@ public final class COSInteger extends COSNumber
     @Override
     public int intValue()
     {
-        return (int)value;
+        return (int) value;
     }
 
     @Override
