@@ -16,16 +16,18 @@
  */
 package org.apache.pdfbox.pdmodel;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
+import org.apache.pdfbox.input.PDFParser;
 import org.apache.pdfbox.pdmodel.graphics.color.PDOutputIntent;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
+import org.sejda.io.SeekableSources;
+import org.sejda.util.IOUtils;
 
 /**
  * Test PDDocument Catalog functionality.
@@ -37,19 +39,17 @@ public class TestPDDocumentCatalog
     /**
      * Test getPageLabels().
      * 
-     * Test case for
-     * <a href="https://issues.apache.org/jira/browse/PDFBOX-90"
-     *   >PDFBOX-90</a> - Support explicit retrieval of page labels.
-     *   
+     * Test case for <a href="https://issues.apache.org/jira/browse/PDFBOX-90" >PDFBOX-90</a> - Support explicit
+     * retrieval of page labels.
+     * 
      * @throws IOException in case the document can not be parsed.
      */
     @Test
     public void retrievePageLabels() throws IOException
     {
-        PDDocument doc = null;
-        try
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(getClass()
+                .getResourceAsStream("test_pagelabels.pdf"))))
         {
-            doc = PDDocument.load(TestPDDocumentCatalog.class.getResourceAsStream("test_pagelabels.pdf"));
             PDDocumentCatalog cat = doc.getDocumentCatalog();
             String[] labels = cat.getPageLabels().getLabelsByPageIndices();
             assertEquals(12, labels.length);
@@ -66,127 +66,90 @@ public class TestPDDocumentCatalog
             assertEquals("Appendix I", labels[10]);
             assertEquals("Appendix II", labels[11]);
         }
-        finally
-        {
-            if(doc != null)
-            {
-                doc.close();
-            }
-        }
     }
 
     /**
      * Test page labels for malformed PDF.
      * 
-     * Test case for
-     * <a href="https://issues.apache.org/jira/browse/PDFBOX-900"
-     *   >PDFBOX-900</a> - Handle malformed PDFs
-     *   
+     * Test case for <a href="https://issues.apache.org/jira/browse/PDFBOX-900" >PDFBOX-900</a> - Handle malformed PDFs
+     * 
      * @throws IOException in case the document can not be parsed.
      */
     @Test
     public void retrievePageLabelsOnMalformedPdf() throws IOException
     {
-        PDDocument doc = null;
-        try
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(getClass()
+                .getResourceAsStream("badpagelabels.pdf"))))
         {
-            doc = PDDocument.load(TestPDDocumentCatalog.class.getResourceAsStream("badpagelabels.pdf"));
             PDDocumentCatalog cat = doc.getDocumentCatalog();
             // getLabelsByPageIndices() should not throw an exception
             cat.getPageLabels().getLabelsByPageIndices();
-        }
-        finally
-        {
-            if(doc != null)
-            {
-                doc.close();
-            }
         }
     }
 
     /**
      * Test getNumberOfPages().
      * 
-     * Test case for
-     * <a href="https://issues.apache.org/jira/browse/PDFBOX-911"
-     *   >PDFBOX-911</a> - Method PDDocument.getNumberOfPages() returns wrong
-     * number of pages
+     * Test case for <a href="https://issues.apache.org/jira/browse/PDFBOX-911" >PDFBOX-911</a> - Method
+     * PDDocument.getNumberOfPages() returns wrong number of pages
      * 
      * @throws IOException in case the document can not be parsed.
      */
     @Test
     public void retrieveNumberOfPages() throws IOException
     {
-        PDDocument doc = null;
-        try
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(getClass()
+                .getResourceAsStream("test.unc.pdf"))))
         {
-            doc = PDDocument.load(TestPDDocumentCatalog.class.getResourceAsStream("test.unc.pdf"));
             assertEquals(4, doc.getNumberOfPages());
         }
-        finally
-        {
-            if(doc != null)
-            {
-                doc.close();
-            }
-        }
     }
-    
+
     /**
      * Test OutputIntents functionality.
      * 
-     * Test case for
-     * <a https://issues.apache.org/jira/browse/PDFBOX-2687">PDFBOX-2687</a>
-     * ClassCastException when trying to get OutputIntents or add to it.
+     * Test case for <a https://issues.apache.org/jira/browse/PDFBOX-2687">PDFBOX-2687</a> ClassCastException when
+     * trying to get OutputIntents or add to it.
      * 
      * @throws IOException in case the document can not be parsed.
      */
     @Test
     public void handleOutputIntents() throws IOException
     {
-        PDDocument doc = null;
         InputStream colorProfile = null;
-        try
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(getClass()
+                .getResourceAsStream("test.unc.pdf"))))
         {
-            
-            doc = PDDocument.load(TestPDDocumentCatalog.class.getResourceAsStream("test.unc.pdf"));
             PDDocumentCatalog catalog = doc.getDocumentCatalog();
 
             // retrieve OutputIntents
             List<PDOutputIntent> outputIntents = catalog.getOutputIntents();
             assertTrue(outputIntents.isEmpty());
-            
+
             // add an OutputIntent
-            colorProfile = TestPDDocumentCatalog.class.getResourceAsStream("sRGB Color Space Profile.icm");
+            colorProfile = TestPDDocumentCatalog.class
+                    .getResourceAsStream("sRGB Color Space Profile.icm");
             // create output intent
-            PDOutputIntent oi = new PDOutputIntent(doc, colorProfile); 
-            oi.setInfo("sRGB IEC61966-2.1"); 
-            oi.setOutputCondition("sRGB IEC61966-2.1"); 
-            oi.setOutputConditionIdentifier("sRGB IEC61966-2.1"); 
-            oi.setRegistryName("http://www.color.org"); 
+            PDOutputIntent oi = new PDOutputIntent(doc, colorProfile);
+            oi.setInfo("sRGB IEC61966-2.1");
+            oi.setOutputCondition("sRGB IEC61966-2.1");
+            oi.setOutputConditionIdentifier("sRGB IEC61966-2.1");
+            oi.setRegistryName("http://www.color.org");
             doc.getDocumentCatalog().addOutputIntent(oi);
-            
+
             // retrieve OutputIntents
             outputIntents = catalog.getOutputIntents();
-            assertEquals(1,outputIntents.size());
-            
+            assertEquals(1, outputIntents.size());
+
             // set OutputIntents
             catalog.setOutputIntents(outputIntents);
             outputIntents = catalog.getOutputIntents();
-            assertEquals(1,outputIntents.size());            
-            
+            assertEquals(1, outputIntents.size());
+
         }
         finally
         {
-            if(doc != null)
-            {
-                doc.close();
-            }
-            
-            if (colorProfile != null)
-            {
-                colorProfile.close();
-            }
+            IOUtils.close(colorProfile);
         }
     }
 }

@@ -19,11 +19,15 @@ package org.apache.pdfbox.pdmodel.interactive.form;
 
 import java.io.File;
 import java.io.IOException;
+
+import org.apache.pdfbox.input.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.TestPDFToImage;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.sejda.io.SeekableSources;
+import org.sejda.util.IOUtils;
 
 public class MultilineFieldsTest
 {
@@ -40,7 +44,8 @@ public class MultilineFieldsTest
     @Before
     public void setUp() throws IOException
     {
-        document = PDDocument.load(new File(IN_DIR, NAME_OF_PDF));
+        document = PDFParser.parse(SeekableSources
+                .seekableSourceFrom(new File(IN_DIR, NAME_OF_PDF)));
         acroForm = document.getDocumentCatalog().getAcroForm();
         OUT_DIR.mkdirs();
     }
@@ -86,7 +91,7 @@ public class MultilineFieldsTest
         
         // compare rendering
         File file = new File(OUT_DIR, NAME_OF_PDF);
-        document.save(file);
+        document.writeTo(file);
         TestPDFToImage testPDFToImage = new TestPDFToImage(TestPDFToImage.class.getName());
         if (!testPDFToImage.doTestFile(file, IN_DIR.getAbsolutePath(), OUT_DIR.getAbsolutePath()))
         {
@@ -98,7 +103,7 @@ public class MultilineFieldsTest
     @After
     public void tearDown() throws IOException
     {
-        document.close();
+        IOUtils.close(document);
     }
     
 }

@@ -19,27 +19,31 @@ package org.apache.pdfbox.pdmodel.interactive.form;
 import java.io.File;
 import java.io.IOException;
 
+import org.apache.pdfbox.input.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.TestPDFToImage;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.sejda.io.SeekableSources;
+import org.sejda.util.IOUtils;
 
 public class AlignmentTest
 {
     private static final File OUT_DIR = new File("target/test-output");
-    private static final File IN_DIR = new File("src/test/resources/org/apache/pdfbox/pdmodel/interactive/form");
+    private static final File IN_DIR = new File(
+            "src/test/resources/org/apache/pdfbox/pdmodel/interactive/form");
     private static final String NAME_OF_PDF = "AlignmentTests.pdf";
     private static final String TEST_VALUE = "sdfASDF1234äöü";
 
-    
     private PDDocument document;
     private PDAcroForm acroForm;
 
     @Before
     public void setUp() throws IOException
     {
-        document = PDDocument.load(new File(IN_DIR, NAME_OF_PDF));
+        document = PDFParser.parse(SeekableSources
+                .seekableSourceFrom(new File(IN_DIR, NAME_OF_PDF)));
         acroForm = document.getDocumentCatalog().getAcroForm();
         OUT_DIR.mkdirs();
     }
@@ -49,10 +53,10 @@ public class AlignmentTest
     {
         PDTextField field = (PDTextField) acroForm.getField("AlignLeft");
         field.setValue(TEST_VALUE);
-        
+
         field = (PDTextField) acroForm.getField("AlignLeft-Border_Small");
         field.setValue(TEST_VALUE);
-        
+
         field = (PDTextField) acroForm.getField("AlignLeft-Border_Medium");
         field.setValue(TEST_VALUE);
 
@@ -67,7 +71,7 @@ public class AlignmentTest
 
         field = (PDTextField) acroForm.getField("AlignMiddle");
         field.setValue(TEST_VALUE);
-        
+
         field = (PDTextField) acroForm.getField("AlignMiddle-Border_Small");
         field.setValue(TEST_VALUE);
 
@@ -100,22 +104,24 @@ public class AlignmentTest
 
         field = (PDTextField) acroForm.getField("AlignRight-Border_Wide_Outside");
         field.setValue(TEST_VALUE);
-        
+
         // compare rendering
         File file = new File(OUT_DIR, NAME_OF_PDF);
-        document.save(file);
+        document.writeTo(file);
         TestPDFToImage testPDFToImage = new TestPDFToImage(TestPDFToImage.class.getName());
         if (!testPDFToImage.doTestFile(file, IN_DIR.getAbsolutePath(), OUT_DIR.getAbsolutePath()))
         {
             // don't fail, rendering is different on different systems, result must be viewed manually
-            System.err.println ("Rendering of " + file + " failed or is not identical to expected rendering in " + IN_DIR + " directory");
-        }       
+            System.err.println("Rendering of " + file
+                    + " failed or is not identical to expected rendering in " + IN_DIR
+                    + " directory");
+        }
     }
-    
+
     @After
     public void tearDown() throws IOException
     {
-        document.close();
+        IOUtils.close(document);
     }
 
 }

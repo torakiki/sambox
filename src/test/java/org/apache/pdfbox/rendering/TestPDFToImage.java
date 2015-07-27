@@ -31,7 +31,9 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.apache.pdfbox.input.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.sejda.io.SeekableSources;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -198,7 +200,7 @@ public class TestPDFToImage extends TestCase
         try
         {
             new FileOutputStream(new File(outDir, file.getName() + ".parseerror")).close();
-            document = PDDocument.load(file, null);
+            document = PDFParser.parse(SeekableSources.seekableSourceFrom(file));
             String outputPrefix = outDir + '/' + file.getName() + "-";
             int numPages = document.getNumberOfPages();
             if (numPages < 1)
@@ -229,10 +231,10 @@ public class TestPDFToImage extends TestCase
             new FileOutputStream(new File(outDir, file.getName() + ".saveerror")).close();
             File tmpFile = File.createTempFile("pdfbox", ".pdf");
             document.setAllSecurityToBeRemoved(true);
-            document.save(tmpFile);
+            document.writeTo(tmpFile);
             new File(outDir, file.getName() + ".saveerror").delete();
             new FileOutputStream(new File(outDir, file.getName() + ".reloaderror")).close();
-            PDDocument.load(tmpFile, null).close();
+            PDFParser.parse(SeekableSources.seekableSourceFrom(tmpFile)).close();
             new File(outDir, file.getName() + ".reloaderror").delete();
             tmpFile.delete();
         }

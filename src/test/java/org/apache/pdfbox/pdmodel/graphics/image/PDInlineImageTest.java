@@ -21,16 +21,21 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+
 import javax.imageio.ImageIO;
+
 import junit.framework.TestCase;
+
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSInteger;
 import org.apache.pdfbox.cos.COSName;
+import org.apache.pdfbox.input.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.rendering.PDFRenderer;
+import org.sejda.io.SeekableSources;
 
 /**
  * Unit tests for PDInlineImage
@@ -49,8 +54,7 @@ public class PDInlineImageTest extends TestCase
     }
 
     /**
-     * Tests PDInlineImage#PDInlineImage(COSDictionary parameters, byte[] data,
-     * Map<String, PDColorSpace> colorSpaces)
+     * Tests PDInlineImage#PDInlineImage(COSDictionary parameters, byte[] data, Map<String, PDColorSpace> colorSpaces)
      */
     public void testInlineImage() throws IOException
     {
@@ -65,11 +69,11 @@ public class PDInlineImageTest extends TestCase
         if (rowbytes * 8 < width)
         {
             // PDF spec:
-            // If the number of data bits per row is not a multiple of 8, 
-            // the end of the row is padded with extra bits to fill out the last byte. 
+            // If the number of data bits per row is not a multiple of 8,
+            // the end of the row is padded with extra bits to fill out the last byte.
             ++rowbytes;
         }
-        
+
         // draw a grid
         int datalen = rowbytes * height;
         byte[] data = new byte[datalen];
@@ -77,22 +81,22 @@ public class PDInlineImageTest extends TestCase
         {
             data[i] = (i / 4 % 2 == 0) ? (byte) Integer.parseInt("10101010", 2) : 0;
         }
-        
+
         PDInlineImage inlineImage1 = new PDInlineImage(dict, data, null);
         assertTrue(inlineImage1.isStencil());
         assertEquals(width, inlineImage1.getWidth());
         assertEquals(height, inlineImage1.getHeight());
         assertEquals(1, inlineImage1.getBitsPerComponent());
         assertEquals(data.length, inlineImage1.getStream().getLength());
-        
+
         COSDictionary dict2 = new COSDictionary();
         dict2.addAll(dict);
         // use decode array to revert in image2
         COSArray decodeArray = new COSArray();
         decodeArray.add(COSInteger.ONE);
-        decodeArray.add(COSInteger.ZERO);                
+        decodeArray.add(COSInteger.ZERO);
         dict2.setItem(COSName.DECODE, decodeArray);
-     
+
         PDInlineImage inlineImage2 = new PDInlineImage(dict2, data, null);
 
         Paint paint = new Color(0, 0, 0);
@@ -103,7 +107,7 @@ public class PDInlineImageTest extends TestCase
         BufferedImage stencilImage2 = inlineImage2.getStencilImage(paint);
         assertEquals(width, stencilImage2.getWidth());
         assertEquals(height, stencilImage2.getHeight());
-        
+
         BufferedImage image1 = inlineImage1.getImage();
         assertEquals(width, image1.getWidth());
         assertEquals(height, image1.getHeight());
@@ -113,22 +117,21 @@ public class PDInlineImageTest extends TestCase
         assertEquals(height, image2.getHeight());
 
         // write and read
-        boolean writeOk = ImageIO.write(image1, "png",
-                new FileOutputStream(new File(testResultsDir + "/inline-grid1.png")));
+        boolean writeOk = ImageIO.write(image1, "png", new FileOutputStream(new File(testResultsDir
+                + "/inline-grid1.png")));
         assertTrue(writeOk);
         BufferedImage bim1 = ImageIO.read(new File(testResultsDir + "/inline-grid1.png"));
         assertNotNull(bim1);
         assertEquals(width, bim1.getWidth());
         assertEquals(height, bim1.getHeight());
-        
-        writeOk = ImageIO.write(image2, "png",
-                new FileOutputStream(new File(testResultsDir + "/inline-grid2.png")));
+
+        writeOk = ImageIO.write(image2, "png", new FileOutputStream(new File(testResultsDir
+                + "/inline-grid2.png")));
         assertTrue(writeOk);
         BufferedImage bim2 = ImageIO.read(new File(testResultsDir + "/inline-grid2.png"));
         assertNotNull(bim2);
         assertEquals(width, bim2.getWidth());
         assertEquals(height, bim2.getHeight());
-        
 
         // compare: pixels with even coordinates are white (FF), all others are black (0)
         for (int x = 0; x < width; ++x)
@@ -145,7 +148,7 @@ public class PDInlineImageTest extends TestCase
                 }
             }
         }
-        
+
         // compare: pixels with odd coordinates are white (FF), all others are black (0)
         for (int x = 0; x < width; ++x)
         {
@@ -160,28 +163,31 @@ public class PDInlineImageTest extends TestCase
                     assertEquals(0xFFFFFF, bim2.getRGB(x, y) & 0xFFFFFF);
                 }
             }
-        }        
-
-        PDDocument document = new PDDocument();
-        PDPage page = new PDPage();
-        document.addPage(page);
-        PDPageContentStream contentStream = new PDPageContentStream(document, page, true, false);
-        contentStream.drawImage(inlineImage1, 150, 400);
-        contentStream.drawImage(inlineImage1, 150, 500, inlineImage1.getWidth() * 2, inlineImage1.getHeight() * 2);
-        contentStream.drawImage(inlineImage1, 150, 600, inlineImage1.getWidth() * 4, inlineImage1.getHeight() * 4);
-        contentStream.drawImage(inlineImage2, 350, 400);
-        contentStream.drawImage(inlineImage2, 350, 500, inlineImage2.getWidth() * 2, inlineImage2.getHeight() * 2);
-        contentStream.drawImage(inlineImage2, 350, 600, inlineImage2.getWidth() * 4, inlineImage2.getHeight() * 4);
-        contentStream.close();
-
+        }
         File pdfFile = new File(testResultsDir, "inline.pdf");
-        document.save(pdfFile);
-        document.close();
+        try (PDDocument document = new PDDocument())
+        {
+            PDPage page = new PDPage();
+            document.addPage(page);
+            PDPageContentStream contentStream = new PDPageContentStream(document, page, true, false);
+            contentStream.drawImage(inlineImage1, 150, 400);
+            contentStream.drawImage(inlineImage1, 150, 500, inlineImage1.getWidth() * 2,
+                    inlineImage1.getHeight() * 2);
+            contentStream.drawImage(inlineImage1, 150, 600, inlineImage1.getWidth() * 4,
+                    inlineImage1.getHeight() * 4);
+            contentStream.drawImage(inlineImage2, 350, 400);
+            contentStream.drawImage(inlineImage2, 350, 500, inlineImage2.getWidth() * 2,
+                    inlineImage2.getHeight() * 2);
+            contentStream.drawImage(inlineImage2, 350, 600, inlineImage2.getWidth() * 4,
+                    inlineImage2.getHeight() * 4);
+            contentStream.close();
 
-        document = PDDocument.load(pdfFile, null);
-        new PDFRenderer(document).renderImage(0);
-        document.close();
+            document.writeTo(pdfFile);
+        }
 
+        try (PDDocument document = PDFParser.parse(SeekableSources.seekableSourceFrom(pdfFile)))
+        {
+            new PDFRenderer(document).renderImage(0);
+        }
     }
 }
-

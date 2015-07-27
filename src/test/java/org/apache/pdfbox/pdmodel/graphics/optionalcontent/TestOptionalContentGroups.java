@@ -25,14 +25,17 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.apache.pdfbox.cos.COSName;
+import org.apache.pdfbox.input.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
 import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.PDResources;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.PDResources;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.graphics.optionalcontent.PDOptionalContentProperties.BaseState;
+import org.apache.pdfbox.util.SpecVersionUtils;
+import org.sejda.io.SeekableSources;
 
 /**
  * Tests optional content group functionality (also called layers).
@@ -133,7 +136,7 @@ public class TestOptionalContentGroups extends TestCase
             contentStream.close();
 
             File targetFile = new File(testResultsDir, "ocg-generation.pdf");
-            doc.save(targetFile.getAbsolutePath());
+            doc.writeTo(targetFile);
         }
         finally
         {
@@ -153,10 +156,9 @@ public class TestOptionalContentGroups extends TestCase
             testOCGGeneration();
         }
 
-        PDDocument doc = PDDocument.load(pdfFile);
-        try
+        try (PDDocument doc = PDFParser.parse(SeekableSources.seekableSourceFrom(pdfFile)))
         {
-            assertEquals(1.5f, doc.getVersion());
+            assertEquals(SpecVersionUtils.V1_5, doc.getVersion());
             PDDocumentCatalog catalog = doc.getDocumentCatalog();
 
             PDPage page = doc.getPage(0);
@@ -189,10 +191,6 @@ public class TestOptionalContentGroups extends TestCase
             Collection<PDOptionalContentGroup> coll = ocgs.getOptionalContentGroups();
             coll.contains(background);
 
-        }
-        finally
-        {
-            doc.close();
         }
     }
 

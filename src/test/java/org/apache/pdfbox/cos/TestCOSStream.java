@@ -24,9 +24,10 @@ import java.util.Arrays;
 
 import junit.framework.TestCase;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.pdfbox.filter.Filter;
 import org.apache.pdfbox.filter.FilterFactory;
-import org.apache.pdfbox.util.IOUtils;
+import org.junit.Assert;
 
 public class TestCOSStream extends TestCase
 {
@@ -153,6 +154,6 @@ public class TestCOSStream extends TestCase
     {
         byte[] unfiltered = IOUtils.toByteArray(stream.getUnfilteredStream());
         stream.close();
-        assertTrue("Unfiltered data doesn't match filtered data", Arrays.equals(testString, unfiltered));
+        Assert.assertArrayEquals(testString, unfiltered);
     }
 }

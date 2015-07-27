@@ -16,6 +16,8 @@
  */
 package org.apache.pdfbox.cos;
 
+import static org.sejda.util.RequireUtils.requireNotBlank;
+
 import java.io.IOException;
 
 /**
@@ -55,6 +57,7 @@ public abstract class COSNumber extends COSBase
      */
     public static COSNumber get(String number) throws IOException
     {
+        requireNotBlank(number, "Cannot get a number from a blank string");
         if (number.length() == 1)
         {
             char digit = number.charAt(0);
@@ -67,19 +70,12 @@ public abstract class COSNumber extends COSBase
                 // See https://issues.apache.org/jira/browse/PDFBOX-592
                 return COSInteger.ZERO;
             }
-            else
-            {
-                throw new IOException("Expected a number but was " + number);
-            }
+            throw new IOException("Expected a number but was " + number);
         }
         else if (number.indexOf('.') == -1 && (number.toLowerCase().indexOf('e') == -1))
         {
             try
             {
-                if (number.charAt(0) == '+')
-                {
-                    return COSInteger.get(Long.parseLong(number.substring(1)));
-                }
                 return COSInteger.get(Long.parseLong(number));
             }
             catch (NumberFormatException e)
@@ -87,9 +83,6 @@ public abstract class COSNumber extends COSBase
                 throw new IOException("Value is not an integer: " + number, e);
             }
         }
-        else
-        {
-            return new COSFloat(number);
-        }
+        return new COSFloat(number);
     }
 }

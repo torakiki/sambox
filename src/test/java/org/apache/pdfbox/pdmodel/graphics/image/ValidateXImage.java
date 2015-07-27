@@ -15,24 +15,27 @@
  */
 package org.apache.pdfbox.pdmodel.graphics.image;
 
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertNotNull;
+import static junit.framework.TestCase.assertTrue;
+
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+
 import javax.imageio.ImageIO;
+
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSStream;
+import org.apache.pdfbox.input.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.rendering.PDFRenderer;
-
-
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertNotNull;
-import static junit.framework.TestCase.assertTrue;
+import org.sejda.io.SeekableSources;
 
 /**
  * Helper class to do some validations for PDImageXObject.
@@ -104,13 +107,15 @@ public class ValidateXImage
         // check that the resource map is up-to-date
         assertEquals(1, count(document.getPage(0).getResources().getXObjectNames()));
 
-        document.save(pdfFile);
+        document.writeTo(pdfFile);
         document.close();
 
-        document = PDDocument.load(pdfFile, null);
-        assertEquals(1, count(document.getPage(0).getResources().getXObjectNames()));
-        new PDFRenderer(document).renderImage(0);
-        document.close();
+        try (PDDocument doc = PDFParser.parse(SeekableSources.seekableSourceFrom(pdfFile)))
+        {
+            assertEquals(1, count(doc.getPage(0).getResources().getXObjectNames()));
+            new PDFRenderer(doc).renderImage(0);
+        }
+        
     }
 
     private static int count(Iterable<COSName> iterable)

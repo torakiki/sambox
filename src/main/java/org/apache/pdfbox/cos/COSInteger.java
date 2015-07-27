@@ -81,7 +81,7 @@ public final class COSInteger extends COSNumber
     @Override
     public String toString()
     {
-        return Long.toString(value);
+        return "COSInteger{" + Long.toString(value) + "}";
     }
 
     @Override

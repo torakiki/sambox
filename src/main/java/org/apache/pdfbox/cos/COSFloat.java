@@ -96,7 +96,7 @@ public class COSFloat extends COSNumber
     @Override
     public String toString()
     {
-        return value.stripTrailingZeros().toPlainString();
+        return "COSFloat{" + value.stripTrailingZeros().toPlainString() + "}";
     }
 
     @Override

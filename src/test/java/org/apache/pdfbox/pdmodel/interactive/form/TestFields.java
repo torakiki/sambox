@@ -18,12 +18,16 @@ package org.apache.pdfbox.pdmodel.interactive.form;
 
 import java.io.File;
 import java.io.IOException;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSString;
+import org.apache.pdfbox.input.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.sejda.io.SeekableSources;
 
 /**
  * This will test the form fields in PDFBox.
@@ -32,19 +36,18 @@ import org.apache.pdfbox.pdmodel.PDDocument;
  */
 public class TestFields extends TestCase
 {
-    //private static Logger log = Logger.getLogger(TestFDF.class);
+    // private static Logger log = Logger.getLogger(TestFDF.class);
 
     private static final String PATH_OF_PDF = "src/test/resources/org/apache/pdfbox/pdmodel/interactive/form/AcroFormsBasicFields.pdf";
 
-    
     /**
      * Constructor.
      *
      * @param name The name of the test to run.
      */
-    public TestFields( String name )
+    public TestFields(String name)
     {
-        super( name );
+        super(name);
     }
 
     /**
@@ -54,7 +57,7 @@ public class TestFields extends TestCase
      */
     public static Test suite()
     {
-        return new TestSuite( TestFields.class );
+        return new TestSuite(TestFields.class);
     }
 
     /**
@@ -62,10 +65,10 @@ public class TestFields extends TestCase
      *
      * @param args The command line arguments.
      */
-    public static void main( String[] args )
+    public static void main(String[] args)
     {
-        String[] arg = {TestFields.class.getName() };
-        junit.textui.TestRunner.main( arg );
+        String[] arg = { TestFields.class.getName() };
+        junit.textui.TestRunner.main(arg);
     }
 
     /**
@@ -79,130 +82,119 @@ public class TestFields extends TestCase
         try
         {
             doc = new PDDocument();
-            PDAcroForm form = new PDAcroForm( doc );
+            PDAcroForm form = new PDAcroForm(doc);
             PDTextField textBox = new PDTextField(form);
 
-            //assert that default is false.
-            assertFalse( textBox.isComb() );
+            // assert that default is false.
+            assertFalse(textBox.isComb());
 
-            //try setting and clearing a single field
-            textBox.setComb( true );
-            assertTrue( textBox.isComb() );
-            textBox.setComb( false );
-            assertFalse( textBox.isComb() );
+            // try setting and clearing a single field
+            textBox.setComb(true);
+            assertTrue(textBox.isComb());
+            textBox.setComb(false);
+            assertFalse(textBox.isComb());
 
-            //try setting and clearing multiple fields
-            textBox.setComb( true );
-            textBox.setDoNotScroll( true );
-            assertTrue( textBox.isComb() );
-            assertTrue( textBox.doNotScroll() );
+            // try setting and clearing multiple fields
+            textBox.setComb(true);
+            textBox.setDoNotScroll(true);
+            assertTrue(textBox.isComb());
+            assertTrue(textBox.doNotScroll());
 
-            textBox.setComb( false );
-            textBox.setDoNotScroll( false );
-            assertFalse( textBox.isComb() );
-            assertFalse( textBox.doNotScroll() );
+            textBox.setComb(false);
+            textBox.setDoNotScroll(false);
+            assertFalse(textBox.isComb());
+            assertFalse(textBox.doNotScroll());
 
-            //assert that setting a field to false multiple times works
-            textBox.setComb( false );
-            assertFalse( textBox.isComb() );
-            textBox.setComb( false );
-            assertFalse( textBox.isComb() );
+            // assert that setting a field to false multiple times works
+            textBox.setComb(false);
+            assertFalse(textBox.isComb());
+            textBox.setComb(false);
+            assertFalse(textBox.isComb());
 
-            //assert that setting a field to true multiple times works
-            textBox.setComb( true );
-            assertTrue( textBox.isComb() );
-            textBox.setComb( true );
-            assertTrue( textBox.isComb() );
+            // assert that setting a field to true multiple times works
+            textBox.setComb(true);
+            assertTrue(textBox.isComb());
+            textBox.setComb(true);
+            assertTrue(textBox.isComb());
         }
         finally
         {
-            if( doc != null )
+            if (doc != null)
             {
                 doc.close();
             }
         }
     }
-    
+
     /**
-     * This will test some form fields functionality based with 
-     * a sample form.
+     * This will test some form fields functionality based with a sample form.
      *
      * @throws IOException If there is an error creating the field.
      */
     public void testAcroFormsBasicFields() throws IOException
     {
-        PDDocument doc = null;
-        
-        try
+        try (PDDocument doc = PDFParser.parse(SeekableSources.seekableSourceFrom(new File(
+                PATH_OF_PDF))))
         {
-            doc = PDDocument.load(new File(PATH_OF_PDF));
-            
+
             // get and assert that there is a form
             PDAcroForm form = doc.getDocumentCatalog().getAcroForm();
             assertNotNull(form);
-            
+
             // assert that there is no value, set the field value and
-            // ensure it has been set 
-            PDTextField textField = (PDTextField)form.getField("TextField");
+            // ensure it has been set
+            PDTextField textField = (PDTextField) form.getField("TextField");
             assertNull(textField.getCOSObject().getItem(COSName.V));
             textField.setValue("field value");
             assertNotNull(textField.getCOSObject().getItem(COSName.V));
-            assertEquals(textField.getValue(),"field value");
-            
+            assertEquals(textField.getValue(), "field value");
+
             // assert when setting to null the key has also been removed
             assertNotNull(textField.getCOSObject().getItem(COSName.V));
             textField.setValue(null);
             assertNull(textField.getCOSObject().getItem(COSName.V));
-            
+
             // get the RadioButton with a DV entry
-            PDRadioButton radio = (PDRadioButton)form.getField("RadioButtonGroup-DefaultValue");
+            PDRadioButton radio = (PDRadioButton) form.getField("RadioButtonGroup-DefaultValue");
             assertNotNull(radio);
-            assertEquals(radio.getDefaultValue(),"RadioButton01");
-            assertEquals(COSName.getPDFName(radio.getDefaultValue()),
-                    radio.getCOSObject().getDictionaryObject(COSName.DV));
+            assertEquals(radio.getDefaultValue(), "RadioButton01");
+            assertEquals(COSName.getPDFName(radio.getDefaultValue()), radio.getCOSObject()
+                    .getDictionaryObject(COSName.DV));
 
             // get the Checkbox with a DV entry
-            PDCheckbox checkBox = (PDCheckbox)form.getField("Checkbox-DefaultValue");
+            PDCheckbox checkBox = (PDCheckbox) form.getField("Checkbox-DefaultValue");
             assertNotNull(checkBox);
             assertEquals(Boolean.TRUE, checkBox.getDefaultValue());
             assertEquals(COSName.YES, checkBox.getCOSObject().getDictionaryObject(COSName.DV));
-            
-            // get the TextField with a DV entry
-            textField = (PDTextField)form.getField("TextField-DefaultValue");
-            assertNotNull(textField);
-            assertEquals(textField.getDefaultValue(),"DefaultValue");
-            assertEquals(textField.getDefaultValue(),
-                    ((COSString)textField.getCOSObject().getDictionaryObject(COSName.DV)).getString());
-            assertEquals(textField.getDefaultAppearance(),"/Helv 12 Tf 0 g");
 
-            // get a rich text field with a  DV entry
-            textField = (PDTextField)form.getField("RichTextField-DefaultValue");
+            // get the TextField with a DV entry
+            textField = (PDTextField) form.getField("TextField-DefaultValue");
             assertNotNull(textField);
-            assertEquals(textField.getDefaultValue(),"DefaultValue");
-            assertEquals(textField.getDefaultValue(),
-                    ((COSString)textField.getCOSObject().getDictionaryObject(COSName.DV)).getString());
+            assertEquals(textField.getDefaultValue(), "DefaultValue");
+            assertEquals(textField.getDefaultValue(), ((COSString) textField.getCOSObject()
+                    .getDictionaryObject(COSName.DV)).getString());
+            assertEquals(textField.getDefaultAppearance(), "/Helv 12 Tf 0 g");
+
+            // get a rich text field with a DV entry
+            textField = (PDTextField) form.getField("RichTextField-DefaultValue");
+            assertNotNull(textField);
+            assertEquals(textField.getDefaultValue(), "DefaultValue");
+            assertEquals(textField.getDefaultValue(), ((COSString) textField.getCOSObject()
+                    .getDictionaryObject(COSName.DV)).getString());
             assertEquals(textField.getValue(), "DefaultValue");
             assertEquals(textField.getDefaultAppearance(), "/Helv 12 Tf 0 g");
             assertEquals(textField.getDefaultStyleString(),
                     "font: Helvetica,sans-serif 12.0pt; text-align:left; color:#000000 ");
             // do not test for the full content as this is a rather long xml string
-            assertEquals(textField.getRichTextValue().length(),338);
-            
+            assertEquals(textField.getRichTextValue().length(), 338);
+
             // get a rich text field with a text stream for the value
-            textField = (PDTextField)form.getField("LongRichTextField");
+            textField = (PDTextField) form.getField("LongRichTextField");
             assertNotNull(textField);
-            assertEquals(textField.getCOSObject().getDictionaryObject(
-                    COSName.V).getClass().getName(),
-                    "org.apache.pdfbox.cos.COSStream");
-            assertEquals(textField.getValue().length(),145396);
-            
-        }
-        finally
-        {
-            if( doc != null )
-            {
-                doc.close();
-            }
+            assertEquals(textField.getCOSObject().getDictionaryObject(COSName.V).getClass()
+                    .getName(), "org.apache.pdfbox.cos.COSStream");
+            assertEquals(textField.getValue().length(), 145396);
+
         }
     }
 }
