@@ -11,3 +11,7 @@ target/
 *.jar
 *.war
 *.ear
+
+.idea/
+*.iml
+*.ipr
