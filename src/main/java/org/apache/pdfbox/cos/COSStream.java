@@ -107,15 +107,7 @@ public class COSStream extends COSDictionary implements Closeable
         {
             return existing.get();
         }
-        if (getFilters() != null)
-        {
-            if (filtered == null)
-            {
-                doEncode();
-            }
-            return inMemorySeekableSourceFrom(filtered);
-        }
-        return inMemorySeekableSourceFrom(unfiltered);
+        return inMemorySeekableSourceFrom(getFilteredStream());
     }
 
     /**
@@ -317,10 +309,6 @@ public class COSStream extends COSDictionary implements Closeable
             {
                 decodeResult = filter.decode(toDecode, out, this, filterIndex);
                 return out.toByteArray();
-            }
-            finally
-            {
-                IOUtils.close(toDecode);
             }
         }
         return new byte[0];
