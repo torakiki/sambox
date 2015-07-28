@@ -107,7 +107,7 @@ abstract class AbstractXrefStreamParser
             for (int i = 0; i < index.size(); i += 2)
             {
                 long start = ((COSNumber) index.get(i)).longValue();
-                long end = start + ((COSNumber) index.get(i + 1)).longValue();
+                long end = start + Math.max(((COSNumber) index.get(i + 1)).longValue() - 1, 0);
                 LOG.trace(String.format("Adding expected range from %d to %d", start, end));
                 objectNumbers = concat(objectNumbers, rangeClosed(start, end));
             }

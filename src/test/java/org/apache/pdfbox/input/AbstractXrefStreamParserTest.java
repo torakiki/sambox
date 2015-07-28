@@ -18,6 +18,7 @@ package org.apache.pdfbox.input;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.sejda.io.SeekableSources.inMemorySeekableSourceFrom;
 
 import java.io.IOException;
@@ -92,5 +93,38 @@ public class AbstractXrefStreamParserTest
         };
         victim.parse(17);
         assertEquals(10, found.size());
+    }
+
+    @Test
+    public void parseRanges() throws IOException
+    {
+        Set<XrefEntry> found = new HashSet<>();
+        AbstractXrefStreamParser victim = new AbstractXrefStreamParser(new COSParser(
+                inMemorySeekableSourceFrom(getClass().getResourceAsStream(
+                        "/input/xref_stream_multiple_ranges.txt"))))
+        {
+            @Override
+            void onTrailerFound(COSDictionary trailer)
+            {
+                assertNotNull(trailer);
+            }
+
+            @Override
+            void onEntryFound(XrefEntry entry)
+            {
+                assertNotNull(entry);
+                System.out.println("Found " + entry);
+                found.add(entry);
+            }
+        };
+        victim.parse(17);
+        assertEquals(10, found.size());
+        for (XrefEntry entry : found)
+        {
+            if (entry.getType() != XrefType.COMPRESSED)
+            {
+                assertTrue(entry.getObjectNumber() == 501 || entry.getObjectNumber() == 2);
+            }
+        }
     }
 }
