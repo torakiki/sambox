@@ -67,7 +67,11 @@ public class PDDocumentWriterTest
     public void writeBodySync() throws Exception
     {
         PDDocument document = new PDDocument();
-        victim.write(document, WriteOption.SYNC_BODY_WRITE);
+        this.victim = new PDDocumentWriter(
+                CountingWritableByteChannel.from(new ByteArrayOutputStream()),
+                WriteOption.SYNC_BODY_WRITE);
+        TestUtils.setProperty(victim, "writer", this.writer);
+        victim.write(document);
         verify(writer).writeBody(eq(document.getDocument()), isA(SyncPdfBodyWriter.class));
     }
 
@@ -92,7 +96,11 @@ public class PDDocumentWriterTest
     public void writeXrefStream() throws Exception
     {
         PDDocument document = new PDDocument();
-        victim.write(document, WriteOption.XREF_STREAM);
+        this.victim = new PDDocumentWriter(
+                CountingWritableByteChannel.from(new ByteArrayOutputStream()),
+                WriteOption.XREF_STREAM);
+        TestUtils.setProperty(victim, "writer", this.writer);
+        victim.write(document);
         verify(writer).writeXrefStream(document.getDocument().getTrailer());
     }
 

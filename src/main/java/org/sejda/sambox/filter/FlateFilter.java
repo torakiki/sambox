@@ -117,7 +117,7 @@ final class FlateFilter extends Filter
     }
     
     @Override
-    protected void encode(InputStream input, OutputStream encoded, COSDictionary parameters)
+    public void encode(InputStream input, OutputStream encoded, COSDictionary parameters)
             throws IOException
     {
         DeflaterOutputStream out = new DeflaterOutputStream(encoded);

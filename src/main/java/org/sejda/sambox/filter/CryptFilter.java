@@ -45,7 +45,7 @@ final class CryptFilter extends Filter
     }
 
     @Override
-    protected void encode(InputStream input, OutputStream encoded, COSDictionary parameters)
+    public void encode(InputStream input, OutputStream encoded, COSDictionary parameters)
             throws IOException
     {
         COSName encryptionName = (COSName) parameters.getDictionaryObject(COSName.NAME);

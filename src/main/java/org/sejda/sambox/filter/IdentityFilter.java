@@ -48,7 +48,7 @@ final class IdentityFilter extends Filter
     }
 
     @Override
-    protected void encode(InputStream input, OutputStream encoded, COSDictionary parameters)
+    public void encode(InputStream input, OutputStream encoded, COSDictionary parameters)
         throws IOException
     {
         byte[] buffer = new byte[BUFFER_SIZE];

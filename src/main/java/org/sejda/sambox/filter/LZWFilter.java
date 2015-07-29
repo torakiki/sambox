@@ -152,11 +152,8 @@ public class LZWFilter extends Filter
         decoded.flush();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    protected void encode(InputStream rawData, OutputStream encoded, COSDictionary parameters)
+    public void encode(InputStream rawData, OutputStream encoded, COSDictionary parameters)
             throws IOException
     {
         List<byte[]> codeTable = createCodeTable();

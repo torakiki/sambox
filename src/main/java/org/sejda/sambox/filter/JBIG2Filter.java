@@ -138,7 +138,7 @@ final class JBIG2Filter extends Filter
     }
 
     @Override
-    protected void encode(InputStream input, OutputStream encoded, COSDictionary parameters)
+    public void encode(InputStream input, OutputStream encoded, COSDictionary parameters)
     {
         throw new UnsupportedOperationException("JBIG2 encoding not implemented");
     }

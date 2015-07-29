@@ -38,7 +38,7 @@ import org.sejda.sambox.util.Charsets;
  * 
  * @author Andrea Vacondio
  */
-public class ContentStreamWriter extends COSWriter
+public class ContentStreamWriter extends DefaultCOSWriter
 {
 
     public ContentStreamWriter(CountingWritableByteChannel channel)
@@ -138,7 +138,7 @@ public class ContentStreamWriter extends COSWriter
     }
 
     @Override
-    protected void writeComplexObjectSeparator()
+    public void writeComplexObjectSeparator()
     {
         // write nothing
     }

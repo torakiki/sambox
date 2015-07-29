@@ -25,6 +25,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.ref.WeakReference;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -43,6 +45,10 @@ import org.slf4j.LoggerFactory;
  */
 public class COSStream extends COSDictionary implements Closeable
 {
+    private static final List<COSName> CAN_COMPRESS = Arrays.asList(COSName.ASCII_HEX_DECODE,
+            COSName.ASCII_HEX_DECODE_ABBREVIATION, COSName.ASCII85_DECODE,
+            COSName.ASCII85_DECODE_ABBREVIATION, COSName.RUN_LENGTH_DECODE,
+            COSName.RUN_LENGTH_DECODE_ABBREVIATION);
     private static final Logger LOG = LoggerFactory.getLogger(COSStream.class);
     private LazySeekableSourceViewHolder existing;
     private byte[] filtered;
@@ -324,7 +330,7 @@ public class COSStream extends COSDictionary implements Closeable
         COSBase filters = getFilters();
         if (filters instanceof COSName)
         {
-            filtered = encode((COSName) filters, 0, new MyByteArrayInputStream(unfiltered));
+            filtered = encode((COSName) filters, new MyByteArrayInputStream(unfiltered));
         }
         else if (filters instanceof COSArray)
         {
@@ -332,13 +338,12 @@ public class COSStream extends COSDictionary implements Closeable
         }
     }
 
-    private byte[] encode(COSName filterName, int filterIndex, InputStream toEncode)
-            throws IOException
+    private byte[] encode(COSName filterName, InputStream toEncode) throws IOException
     {
         Filter filter = FilterFactory.INSTANCE.getFilter(filterName);
         try (MyByteArrayOutputStream encoded = new MyByteArrayOutputStream())
         {
-            filter.encode(toEncode, encoded, this, filterIndex);
+            filter.encode(toEncode, encoded, this);
             return encoded.toByteArray();
         }
     }
@@ -352,7 +357,7 @@ public class COSStream extends COSDictionary implements Closeable
             for (int i = filters.size() - 1; i >= 0; i--)
             {
                 COSName filterName = (COSName) filters.getObject(i);
-                tmpResult = encode(filterName, i, input);
+                tmpResult = encode(filterName, input);
                 input = new MyByteArrayInputStream(tmpResult);
             }
             return tmpResult;
@@ -415,6 +420,52 @@ public class COSStream extends COSDictionary implements Closeable
         IOUtils.closeQuietly(existing);
         existing = null;
         filtered = null;
+    }
+
+    /**
+     * Adds Flate decode filter to the current filters list if possible
+     */
+    public void addCompression() throws IOException
+    {
+        if (canCompress())
+        {
+            COSArray newFilters = new COSArray(COSName.FLATE_DECODE);
+            COSBase filters = getFilters();
+            if (filters instanceof COSName)
+            {
+                newFilters.add(filters);
+                setFilters(newFilters);
+            }
+            else if (filters instanceof COSArray)
+            {
+                newFilters.addAll((COSArray) filters);
+                setFilters(newFilters);
+            }
+            setFilters(newFilters);
+        }
+    }
+
+    /**
+     * @return true if we can add compression to the current filters
+     */
+    private boolean canCompress()
+    {
+        if (getDictionaryObject(COSName.DECODE_PARMS, COSName.DP) != null)
+        {
+            // we currently don't compress if there's a filter with params.
+            return false;
+        }
+        COSBase filters = getFilters();
+        if (filters instanceof COSName)
+        {
+            return CAN_COMPRESS.contains(filters);
+        }
+        if (filters instanceof COSArray)
+        {
+            return ((COSArray) filters).stream().allMatch(CAN_COMPRESS::contains);
+
+        }
+        return true;
     }
 
     /**
@@ -536,5 +587,4 @@ public class COSStream extends COSDictionary implements Closeable
             IOUtils.close(view);
         }
     }
-
 }

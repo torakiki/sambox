@@ -24,8 +24,10 @@ import java.nio.channels.WritableByteChannel;
 import java.util.Arrays;
 import java.util.List;
 
+import org.sejda.io.BufferedCountingChannelWriter;
 import org.sejda.io.CountingWritableByteChannel;
 import org.sejda.sambox.pdmodel.PDDocument;
+import org.sejda.sambox.util.SpecVersionUtils;
 import org.sejda.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,23 +42,37 @@ public class PDDocumentWriter implements Closeable
 {
     private static final Logger LOG = LoggerFactory.getLogger(PDDocumentWriter.class);
     private PDFWriter writer;
+    private List<WriteOption> opts;
 
-    public PDDocumentWriter(CountingWritableByteChannel channel)
+    public PDDocumentWriter(CountingWritableByteChannel channel, WriteOption... options)
     {
         requireNotNullArg(channel, "Cannot write to a null channel");
-        this.writer = new PDFWriter(channel);
+        this.opts = Arrays.asList(options);
+        if (opts.contains(WriteOption.COMPRESS_STREAMS))
+        {
+            this.writer = new PDFWriter(new CompressedStreamsCOSWriter(new DefaultCOSWriter(
+                    new BufferedCountingChannelWriter(channel))));
+        }
+        else
+        {
+            this.writer = new PDFWriter(new DefaultCOSWriter(new BufferedCountingChannelWriter(
+                    channel)));
+        }
     }
 
     /**
      * Writes the {@link PDDocument}.
      * 
      * @param document
-     * @param options
      * @throws IOException
      */
-    public void write(PDDocument document, WriteOption... options) throws IOException
+    public void write(PDDocument document) throws IOException
     {
         requireNotNullArg(document, "PDDocument cannot be null");
+        if (opts.contains(WriteOption.XREF_STREAM))
+        {
+            document.requireMinVersion(SpecVersionUtils.V1_5);
+        }
         if (document.getEncryption() != null)
         {
             // TODO refactor the encrypt/decrypt
@@ -64,12 +80,11 @@ public class PDDocumentWriter implements Closeable
 
         }
         writer.writeHeader(document.getDocument().getHeaderVersion());
-        List<WriteOption> opts = Arrays.asList(options);
-        writeBody(document, opts);
-        writeXref(document, opts);
+        writeBody(document);
+        writeXref(document);
     }
 
-    private void writeBody(PDDocument document, List<WriteOption> opts) throws IOException
+    private void writeBody(PDDocument document) throws IOException
     {
         if (opts.contains(WriteOption.SYNC_BODY_WRITE))
         {
@@ -81,7 +96,7 @@ public class PDDocumentWriter implements Closeable
         }
     }
 
-    private void writeXref(PDDocument document, List<WriteOption> opts) throws IOException
+    private void writeXref(PDDocument document) throws IOException
     {
         if (opts.contains(WriteOption.XREF_STREAM))
         {

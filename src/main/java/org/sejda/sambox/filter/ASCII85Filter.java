@@ -53,7 +53,7 @@ final class ASCII85Filter extends Filter
     }
 
     @Override
-    protected void encode(InputStream input, OutputStream encoded, COSDictionary parameters)
+    public void encode(InputStream input, OutputStream encoded, COSDictionary parameters)
         throws IOException
     {
         ASCII85OutputStream os = new ASCII85OutputStream(encoded);

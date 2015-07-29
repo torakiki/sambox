@@ -126,7 +126,7 @@ final class CCITTFaxFilter extends Filter
     }
 
     @Override
-    protected void encode(InputStream input, OutputStream encoded, COSDictionary parameters)
+    public void encode(InputStream input, OutputStream encoded, COSDictionary parameters)
     {
         LOG.warn("CCITTFaxDecode.encode is not implemented yet, skipping this stream.");
     }

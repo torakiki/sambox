@@ -512,9 +512,9 @@ public class PDDocument implements Closeable
         }
         fontsToSubset.clear();
         generateFileIdentifier();
-        try (PDDocumentWriter writer = new PDDocumentWriter(output))
+        try (PDDocumentWriter writer = new PDDocumentWriter(output, options))
         {
-            writer.write(this, options);
+            writer.write(this);
         }
         finally
         {

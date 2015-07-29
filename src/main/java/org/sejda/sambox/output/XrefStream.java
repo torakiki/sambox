@@ -52,6 +52,7 @@ class XrefStream extends COSStream
         removeItem(COSName.XREF_STM);
         removeItem(COSName.DOC_CHECKSUM);
         removeItem(COSName.DECODE_PARMS);
+        removeItem(COSName.FILTER);
         removeItem(COSName.F_DECODE_PARMS);
         removeItem(COSName.F_FILTER);
         removeItem(COSName.F);
@@ -74,7 +75,7 @@ class XrefStream extends COSStream
             }
         }
         setLong(COSName.DL, getUnfilteredLength());
-        setFilters(COSName.FLATE_DECODE);
+        addCompression();
     }
 
     private static int sizeOf(long number)

@@ -62,17 +62,9 @@ public abstract class Filter
      * @param input the byte stream to encode
      * @param encoded the stream where encoded data will be written
      * @param parameters the parameters used for encoding
-     * @param index the index to the filter being encoded
      * @throws IOException if the stream cannot be encoded
      */
-    public final void encode(InputStream input, OutputStream encoded, COSDictionary parameters,
-                            int index) throws IOException
-    {
-        encode(input, encoded, parameters.asUnmodifiableDictionary());
-    }
-
-    // implemented in subclasses
-    protected abstract void encode(InputStream input, OutputStream encoded,
+    public abstract void encode(InputStream input, OutputStream encoded,
                                    COSDictionary parameters) throws IOException;
 
     // gets the decode params for a specific filter index, this is used to

@@ -31,7 +31,6 @@ import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
 import org.sejda.io.BufferedCountingChannelWriter;
-import org.sejda.io.CountingWritableByteChannel;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSDocument;
 import org.sejda.sambox.cos.COSInteger;
@@ -51,20 +50,15 @@ public class PDFWriterTest
     public void setUp()
     {
         writer = mock(BufferedCountingChannelWriter.class);
-        victim = new PDFWriter(writer);
+        victim = new PDFWriter(new DefaultCOSWriter(writer));
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void nullWriterConstructor()
+    public void nullConstructor()
     {
-        new PDFWriter((BufferedCountingChannelWriter) null);
+        new PDFWriter(null);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void nullChannelConstructor()
-    {
-        new PDFWriter((CountingWritableByteChannel) null);
-    }
     @Test
     public void writeHeader() throws IOException
     {
@@ -87,9 +81,9 @@ public class PDFWriterTest
         InOrder inOrder = Mockito.inOrder(writer);
         victim.writerObject(ref);
         inOrder.verify(writer).write("123");
-        inOrder.verify(writer).write(COSWriter.SPACE);
+        inOrder.verify(writer).write(DefaultCOSWriter.SPACE);
         inOrder.verify(writer).write("0");
-        inOrder.verify(writer).write(COSWriter.SPACE);
+        inOrder.verify(writer).write(DefaultCOSWriter.SPACE);
         inOrder.verify(writer).write(aryEq("obj".getBytes(Charsets.US_ASCII)));
         inOrder.verify(writer).writeEOL();
         inOrder.verify(writer).write("100");
@@ -227,9 +221,9 @@ public class PDFWriterTest
         InOrder inOrder = Mockito.inOrder(writer);
         victim.writeXrefStream(existingTrailer);
         inOrder.verify(writer).write("2");
-        inOrder.verify(writer).write(COSWriter.SPACE);
+        inOrder.verify(writer).write(DefaultCOSWriter.SPACE);
         inOrder.verify(writer).write("0");
-        inOrder.verify(writer).write(COSWriter.SPACE);
+        inOrder.verify(writer).write(DefaultCOSWriter.SPACE);
         inOrder.verify(writer).write(aryEq("obj".getBytes(Charsets.US_ASCII)));
         inOrder.verify(writer).writeEOL();
         // write the stream

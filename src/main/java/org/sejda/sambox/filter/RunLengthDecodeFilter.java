@@ -67,7 +67,7 @@ final class RunLengthDecodeFilter extends Filter
     }
 
     @Override
-    protected void encode(InputStream input, OutputStream encoded, COSDictionary parameters)
+    public void encode(InputStream input, OutputStream encoded, COSDictionary parameters)
     {
         LOG.warn("RunLengthDecodeFilter.encode is not implemented yet, skipping this stream.");
     }

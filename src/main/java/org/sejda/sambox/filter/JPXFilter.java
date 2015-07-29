@@ -123,7 +123,7 @@ public final class JPXFilter extends Filter
     }
 
     @Override
-    protected void encode(InputStream input, OutputStream encoded, COSDictionary parameters)
+    public void encode(InputStream input, OutputStream encoded, COSDictionary parameters)
     {
         throw new UnsupportedOperationException("JPX encoding not implemented");
     }

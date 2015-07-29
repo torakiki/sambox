@@ -16,14 +16,16 @@
  */
 package org.sejda.sambox.output;
 
+import static org.sejda.sambox.output.DefaultCOSWriter.SPACE;
 import static org.sejda.sambox.util.SpecVersionUtils.PDF_HEADER;
+import static org.sejda.util.RequireUtils.requireNotNullArg;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.TreeMap;
 
 import org.sejda.io.BufferedCountingChannelWriter;
-import org.sejda.io.CountingWritableByteChannel;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSDocument;
 import org.sejda.sambox.cos.COSName;
@@ -40,7 +42,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Andrea Vacondio
  */
-class PDFWriter extends COSWriter
+class PDFWriter implements Closeable
 {
     private static final Logger LOG = LoggerFactory.getLogger(PDFWriter.class);
 
@@ -51,15 +53,12 @@ class PDFWriter extends COSWriter
     private static final byte[] ENDOBJ = "endobj".getBytes(Charsets.US_ASCII);
 
     private TreeMap<Long, XrefEntry> written = new TreeMap<>();
+    private COSWriter writer;
 
-    public PDFWriter(CountingWritableByteChannel channel)
+    public PDFWriter(COSWriter writer)
     {
-        super(channel);
-    }
-
-    public PDFWriter(BufferedCountingChannelWriter writer)
-    {
-        super(writer);
+        requireNotNullArg(writer, "Cannot write to a null COSWriter");
+        this.writer = writer;
     }
 
     void writeHeader(String version) throws IOException
@@ -100,7 +99,7 @@ class PDFWriter extends COSWriter
         writer().write(SPACE);
         writer().write(OBJ);
         writer().writeEOL();
-        object.getCOSObject().accept(this);
+        object.getCOSObject().accept(writer);
         writer().writeEOL();
         writer().write(ENDOBJ);
         writer().writeEOL();
@@ -162,7 +161,7 @@ class PDFWriter extends COSWriter
         trailer.setLong(COSName.SIZE, written.lastKey() + 1);
         writer().write("trailer".getBytes(Charsets.US_ASCII));
         writer().writeEOL();
-        trailer.getCOSObject().accept(this);
+        trailer.getCOSObject().accept(writer);
         writer().write("startxref".getBytes(Charsets.US_ASCII));
         writer().writeEOL();
         writer().write(Long.toString(startxref));
@@ -187,10 +186,15 @@ class PDFWriter extends COSWriter
         writer().writeEOL();
     }
 
+    private BufferedCountingChannelWriter writer()
+    {
+        return writer.writer();
+    }
+
     @Override
     public void close() throws IOException
     {
         written.clear();
-        super.close();
+        IOUtils.close(writer);
     }
 }

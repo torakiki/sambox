@@ -50,28 +50,28 @@ import org.sejda.sambox.util.Charsets;
  * @author Andrea Vacondio
  *
  */
-public class COSWriterTest
+public class DefaultCOSWriterTest
 {
     private BufferedCountingChannelWriter writer;
-    private COSWriter victim;
+    private DefaultCOSWriter victim;
 
     @Before
     public void setUp()
     {
         writer = mock(BufferedCountingChannelWriter.class);
-        victim = new COSWriter(writer);
+        victim = new DefaultCOSWriter(writer);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void nullWriterConstructor()
     {
-        new COSWriter((BufferedCountingChannelWriter) null);
+        new DefaultCOSWriter((BufferedCountingChannelWriter) null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void nullChannelConstructor()
     {
-        new COSWriter((CountingWritableByteChannel) null);
+        new DefaultCOSWriter((CountingWritableByteChannel) null);
     }
 
     @Test

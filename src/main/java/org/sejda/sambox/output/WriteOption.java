@@ -23,5 +23,20 @@ package org.sejda.sambox.output;
  */
 public enum WriteOption
 {
-    XREF_STREAM, SYNC_BODY_WRITE, OBJECT_STREAMS;
+    /**
+     * Writes the xref data as stream
+     */
+    XREF_STREAM,
+    /**
+     * Writes the document using the synchronous writer as opposed to the default async one
+     */
+    SYNC_BODY_WRITE,
+    /**
+     * Writes pdf objects using objects stream
+     */
+    OBJECT_STREAMS,
+    /**
+     * Adds a Flate filter to the streams if not already there
+     */
+    COMPRESS_STREAMS;
 }

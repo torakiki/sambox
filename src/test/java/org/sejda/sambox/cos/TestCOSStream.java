@@ -20,7 +20,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Arrays;
 
 import junit.framework.TestCase;
 
@@ -39,7 +38,8 @@ public class TestCOSStream extends TestCase
      */
     public void testUncompressedStreamEncode() throws IOException
     {
-        byte[] testString = "This is a test string to be used as input for TestCOSStream".getBytes("ASCII");
+        byte[] testString = "This is a test string to be used as input for TestCOSStream"
+                .getBytes("ASCII");
         COSStream stream = createStream(testString);
         encodeCOSStream(stream, testString);
     }
@@ -51,7 +51,8 @@ public class TestCOSStream extends TestCase
      */
     public void testUncompressedStreamDecode() throws IOException
     {
-        byte[] testString = "This is a test string to be used as input for TestCOSStream".getBytes("ASCII");
+        byte[] testString = "This is a test string to be used as input for TestCOSStream"
+                .getBytes("ASCII");
         COSStream stream = createStream(testString);
         decodeCOSStream(stream, testString);
     }
@@ -63,10 +64,21 @@ public class TestCOSStream extends TestCase
      */
     public void testCompressedStream1Encode() throws IOException
     {
-        byte[] testString = "This is a test string to be used as input for TestCOSStream".getBytes("ASCII");
+        byte[] testString = "This is a test string to be used as input for TestCOSStream"
+                .getBytes("ASCII");
         byte[] testStringEncoded = encodeData(testString, COSName.FLATE_DECODE);
         COSStream stream = createStream(testString);
         stream.setFilters(COSName.FLATE_DECODE);
+        encodeCOSStream(stream, testStringEncoded);
+    }
+
+    public void testCompressedStreamAddCompression() throws IOException
+    {
+        byte[] testString = "This is a test string to be used as input for TestCOSStream"
+                .getBytes("ASCII");
+        byte[] testStringEncoded = encodeData(testString, COSName.FLATE_DECODE);
+        COSStream stream = createStream(testString);
+        stream.addCompression();
         encodeCOSStream(stream, testStringEncoded);
     }
 
@@ -77,7 +89,8 @@ public class TestCOSStream extends TestCase
      */
     public void testCompressedStream1Decode() throws IOException
     {
-        byte[] testString = "This is a test string to be used as input for TestCOSStream".getBytes("ASCII");
+        byte[] testString = "This is a test string to be used as input for TestCOSStream"
+                .getBytes("ASCII");
         byte[] testStringEncoded = encodeData(testString, COSName.FLATE_DECODE);
         COSStream stream = new COSStream();
         stream.setFilters(COSName.FLATE_DECODE);
@@ -94,7 +107,8 @@ public class TestCOSStream extends TestCase
      */
     public void testCompressedStream2Encode() throws IOException
     {
-        byte[] testString = "This is a test string to be used as input for TestCOSStream".getBytes("ASCII");
+        byte[] testString = "This is a test string to be used as input for TestCOSStream"
+                .getBytes("ASCII");
         byte[] testStringEncoded = encodeData(testString, COSName.FLATE_DECODE);
         testStringEncoded = encodeData(testStringEncoded, COSName.ASCII85_DECODE);
         COSStream stream = createStream(testString);
@@ -106,13 +120,31 @@ public class TestCOSStream extends TestCase
     }
 
     /**
+     * Tests encoding of a stream with 2 filters applied.
+     *
+     * @throws IOException
+     */
+    public void testCompressedStream2AddCompression() throws IOException
+    {
+        byte[] testString = "This is a test string to be used as input for TestCOSStream"
+                .getBytes("ASCII");
+        byte[] testStringEncoded = encodeData(testString, COSName.ASCII85_DECODE);
+        testStringEncoded = encodeData(testStringEncoded, COSName.FLATE_DECODE);
+        COSStream stream = createStream(testString);
+        stream.setFilters(COSName.ASCII85_DECODE);
+        stream.addCompression();
+        encodeCOSStream(stream, testStringEncoded);
+    }
+
+    /**
      * Tests decoding of a stream with 2 filters applied.
      *
      * @throws IOException
      */
     public void testCompressedStream2Decode() throws IOException
     {
-        byte[] testString = "This is a test string to be used as input for TestCOSStream".getBytes("ASCII");
+        byte[] testString = "This is a test string to be used as input for TestCOSStream"
+                .getBytes("ASCII");
         byte[] testStringEncoded = encodeData(testString, COSName.FLATE_DECODE);
         testStringEncoded = encodeData(testStringEncoded, COSName.ASCII85_DECODE);
         COSStream stream = new COSStream();
@@ -130,7 +162,7 @@ public class TestCOSStream extends TestCase
     {
         Filter encodingFilter = FilterFactory.INSTANCE.getFilter(filter);
         ByteArrayOutputStream encoded = new ByteArrayOutputStream();
-        encodingFilter.encode(new ByteArrayInputStream(original), encoded, new COSDictionary(), 0);
+        encodingFilter.encode(new ByteArrayInputStream(original), encoded, new COSDictionary());
         return encoded.toByteArray();
     }
 
@@ -147,7 +179,7 @@ public class TestCOSStream extends TestCase
     {
         byte[] filtered = IOUtils.toByteArray(stream.getFilteredStream());
         stream.close();
-        assertTrue("Filtered data doesn't match unfiltered data", Arrays.equals(testString, filtered));
+        Assert.assertArrayEquals(testString, filtered);
     }
 
     private void decodeCOSStream(COSStream stream, byte[] testString) throws IOException
