@@ -181,7 +181,7 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
         }
         if (securityHandler != null)
         {
-            LOG.trace("Decrypting stream");
+            LOG.trace("Decrypting entry {}", xrefEntry);
             securityHandler.decrypt(found, xrefEntry.getObjectNumber(),
                     xrefEntry.getGenerationNumber());
         }

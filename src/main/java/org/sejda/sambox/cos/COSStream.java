@@ -86,12 +86,9 @@ public class COSStream extends COSDictionary implements Closeable
         {
             return existing.get().asInputStream();
         }
-        if (getFilters() != null)
+        encodeIfRequired();
+        if (filtered != null)
         {
-            if (filtered == null)
-            {
-                doEncode();
-            }
             return new MyByteArrayInputStream(filtered);
         }
         return new MyByteArrayInputStream(unfiltered);
@@ -120,15 +117,23 @@ public class COSStream extends COSDictionary implements Closeable
         {
             return existing.length;
         }
+        encodeIfRequired();
+        if (filtered != null)
+        {
+            return Optional.ofNullable(filtered).map(f -> f.length).orElse(0);
+        }
+        return Optional.ofNullable(unfiltered).map(f -> f.length).orElse(0);
+    }
+
+    private void encodeIfRequired() throws IOException
+    {
         if (getFilters() != null)
         {
             if (filtered == null)
             {
                 doEncode();
             }
-            return Optional.ofNullable(filtered).map(f -> f.length).orElse(0);
         }
-        return Optional.ofNullable(unfiltered).map(f -> f.length).orElse(0);
     }
 
     /**
@@ -137,13 +142,7 @@ public class COSStream extends COSDictionary implements Closeable
      */
     public InputStream getUnfilteredStream() throws IOException
     {
-        if (getFilters() != null)
-        {
-            if (unfiltered == null)
-            {
-                doDecode();
-            }
-        }
+        decodeIfRequired();
         if (unfiltered != null)
         {
             return new MyByteArrayInputStream(unfiltered);
@@ -157,13 +156,7 @@ public class COSStream extends COSDictionary implements Closeable
      */
     public SeekableSource getUnfilteredSource() throws IOException
     {
-        if (getFilters() != null)
-        {
-            if (unfiltered == null)
-            {
-                doDecode();
-            }
-        }
+        decodeIfRequired();
         if (unfiltered != null)
         {
             return inMemorySeekableSourceFrom(unfiltered);
@@ -181,13 +174,7 @@ public class COSStream extends COSDictionary implements Closeable
      */
     public long getUnfilteredLength() throws IOException
     {
-        if (getFilters() != null)
-        {
-            if (unfiltered == null)
-            {
-                doDecode();
-            }
-        }
+        decodeIfRequired();
         if (unfiltered != null)
         {
             return Optional.ofNullable(unfiltered).map(f -> f.length).orElse(0);
@@ -197,6 +184,17 @@ public class COSStream extends COSDictionary implements Closeable
             return existing.length;
         }
         return Optional.ofNullable(filtered).map(f -> f.length).orElse(0);
+    }
+
+    private void decodeIfRequired() throws IOException
+    {
+        if (getFilters() != null)
+        {
+            if (unfiltered == null)
+            {
+                doDecode();
+            }
+        }
     }
 
     /**

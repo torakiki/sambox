@@ -26,8 +26,9 @@ import java.util.List;
 
 import org.sejda.io.CountingWritableByteChannel;
 import org.sejda.sambox.pdmodel.PDDocument;
-import org.sejda.sambox.pdmodel.encryption.SecurityHandler;
 import org.sejda.util.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Writer for a {@link PDDocument}. This component wraps a required {@link PDDocument} and provides methods to write it
@@ -37,6 +38,7 @@ import org.sejda.util.IOUtils;
  */
 public class PDDocumentWriter implements Closeable
 {
+    private static final Logger LOG = LoggerFactory.getLogger(PDDocumentWriter.class);
     private PDFWriter writer;
 
     public PDDocumentWriter(CountingWritableByteChannel channel)
@@ -58,14 +60,8 @@ public class PDDocumentWriter implements Closeable
         if (document.getEncryption() != null)
         {
             // TODO refactor the encrypt/decrypt
-            SecurityHandler securityHandler = document.getEncryption().getSecurityHandler();
-            if (!securityHandler.hasProtectionPolicy())
-            {
-                throw new IllegalStateException(
-                        "PDF contains an encryption dictionary, please remove it with "
-                                + "setAllSecurityToBeRemoved() or set a protection policy with protect()");
-            }
-            securityHandler.prepareDocumentForEncryption(document);
+            LOG.warn("Encryption is not supported yet, the document will be written decrypted");
+
         }
         writer.writeHeader(document.getDocument().getHeaderVersion());
         List<WriteOption> opts = Arrays.asList(options);
