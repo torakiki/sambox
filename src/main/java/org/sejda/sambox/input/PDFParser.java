@@ -34,6 +34,7 @@ import org.sejda.sambox.util.SpecVersionUtils;
 import org.sejda.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 /**
  * Provides public entry point to parse a {@link SeekableSource} and obtain a {@link PDDocument}.
  * 
@@ -101,14 +102,14 @@ public class PDFParser
         xrefParser.parse();
 
         COSDocument document = new COSDocument(xrefParser.trailer(), headerVersion);
-        if (document.isEncrypted() && decryptionMaterial != null)
+        if (document.isEncrypted())
         {
             LOG.debug("Preparing for document decryption");
             PDEncryption encryption = new PDEncryption(document.getEncryptionDictionary());
 
             SecurityHandler securityHandler = encryption.getSecurityHandler();
-            securityHandler.prepareForDecryption(encryption, document.getDocumentID(),
-                    decryptionMaterial);
+            securityHandler.prepareForDecryption(encryption, document.getDocumentID(), Optional
+                    .ofNullable(decryptionMaterial).orElse(new StandardDecryptionMaterial("")));
             parser.provider().initializeWith(securityHandler);
             return new PDDocument(document, securityHandler.getCurrentAccessPermission());
         }
