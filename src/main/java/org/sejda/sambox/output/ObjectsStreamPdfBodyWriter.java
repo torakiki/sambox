@@ -23,9 +23,9 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.SequenceInputStream;
 import java.util.zip.DeflaterInputStream;
 
-import org.bouncycastle.util.Arrays;
 import org.sejda.io.CountingWritableByteChannel;
 import org.sejda.sambox.SAMBox;
 import org.sejda.sambox.cos.COSName;
@@ -170,8 +170,9 @@ class ObjectsStreamPdfBodyWriter extends AbstractPdfBodyWriter
             setInt(COSName.N, counter);
             setInt(COSName.FIRST, header.size());
             setItem(COSName.FILTER, COSName.FLATE_DECODE);
-            this.filtered = new DeflaterInputStream(new ByteArrayInputStream(Arrays.concatenate(
-                    header.toByteArray(), data.toByteArray())));
+            this.filtered = new DeflaterInputStream(new SequenceInputStream(
+                    new ByteArrayInputStream(header.toByteArray()), new ByteArrayInputStream(
+                            data.toByteArray())));
             this.header = null;
             this.data = null;
         }
