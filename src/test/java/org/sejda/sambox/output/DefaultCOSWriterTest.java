@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.output;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyByte;
 import static org.mockito.Mockito.mock;
@@ -23,9 +24,12 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import org.apache.commons.io.IOUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.AdditionalMatchers;
@@ -60,6 +64,12 @@ public class DefaultCOSWriterTest
     {
         writer = mock(BufferedCountingChannelWriter.class);
         victim = new DefaultCOSWriter(writer);
+    }
+
+    @After
+    public void tearDown()
+    {
+        IOUtils.closeQuietly(victim);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -195,6 +205,23 @@ public class DefaultCOSWriterTest
         inOrder.verify(writer).write(
                 AdditionalMatchers.aryEq("endstream".getBytes(Charsets.US_ASCII)));
         inOrder.verify(writer).writeEOL();
+    }
+
+    @Test
+    public void visitCOSStreamIndirectLength() throws Exception
+    {
+        victim = new DefaultCOSWriter(new BufferedCountingChannelWriter(
+                CountingWritableByteChannel.from(new ByteArrayOutputStream())));
+        byte[] data = new byte[] { (byte) 0x41, (byte) 0x42, (byte) 0x43 };
+        COSStream stream = new COSStream();
+        stream.setInt(COSName.B, 2);
+        try (OutputStream out = stream.createUnfilteredStream())
+        {
+            out.write(data);
+        }
+        stream.setItem(COSName.LENGTH, new IndirectCOSObjectReference(10, 0, COSNull.NULL));
+        victim.visit(stream);
+        assertEquals(COSInteger.THREE, stream.getDictionaryObject(COSName.LENGTH).getCOSObject());
     }
 
     @Test

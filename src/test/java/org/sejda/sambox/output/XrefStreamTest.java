@@ -19,9 +19,9 @@ package org.sejda.sambox.output;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
-import java.util.TreeMap;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -39,13 +39,14 @@ import org.sejda.sambox.xref.XrefEntry;
  */
 public class XrefStreamTest
 {
-    private TreeMap<Long, XrefEntry> elements = new TreeMap<>();
+    private IndirectObjectsWriter writer;
 
     @Before
     public void setUp()
     {
-        elements.put(2L, CompressedXrefEntry.compressedEntry(2, 4, 1));
-        elements.put(4L, XrefEntry.inUseEntry(4, 256, 0));
+        writer = new IndirectObjectsWriter(mock(COSWriter.class));
+        writer.put(CompressedXrefEntry.compressedEntry(2, 4, 1));
+        writer.put(XrefEntry.inUseEntry(4, 256, 0));
     }
 
     @Test
@@ -62,7 +63,7 @@ public class XrefStreamTest
         // TODO remove this test once encryption is implemented
         existingTrailer.setName(COSName.ENCRYPT, "value");
 
-        try (XrefStream victim = new XrefStream(existingTrailer, elements))
+        try (XrefStream victim = new XrefStream(existingTrailer, writer))
         {
             assertFalse(victim.containsKey(COSName.PREV));
             assertFalse(victim.containsKey(COSName.XREF_STM));
@@ -78,7 +79,7 @@ public class XrefStreamTest
     @Test
     public void keysArePopulated() throws IOException
     {
-        try (XrefStream victim = new XrefStream(new COSDictionary(), elements))
+        try (XrefStream victim = new XrefStream(new COSDictionary(), writer))
         {
             assertEquals(COSName.XREF, victim.getCOSName(COSName.TYPE));
             assertEquals(5, victim.getLong(COSName.SIZE));
@@ -97,7 +98,7 @@ public class XrefStreamTest
     @Test
     public void streamIsPopulated() throws IOException
     {
-        try (XrefStream victim = new XrefStream(new COSDictionary(), elements))
+        try (XrefStream victim = new XrefStream(new COSDictionary(), writer))
         {
             SeekableSource source = victim.getUnfilteredSource();
             assertEquals(0b00000010, source.read());

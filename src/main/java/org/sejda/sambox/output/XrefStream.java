@@ -21,14 +21,13 @@ import static org.sejda.sambox.xref.XrefEntry.freeEntry;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Optional;
-import java.util.TreeMap;
 
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSStream;
-import org.sejda.sambox.xref.XrefEntry;
+
 /**
  * A {@link COSStream} that represent and xref stream as defined in Chap 7.5.8 of PDF 32000-1:2008
  * 
@@ -38,14 +37,14 @@ class XrefStream extends COSStream
 {
 
     /**
-     * Creates an xref stream from the given dictionary. The stream will contain the given entries and it assumes the
-     * last entry is the one with highest offset.
+     * Creates an xref stream from the given dictionary. The stream will contain the gentries that have been written by
+     * the given writer
      * 
      * @param dictionary
-     * @param entries
+     * @param writer
      * @throws IOException
      */
-    XrefStream(COSDictionary dictionary, TreeMap<Long, XrefEntry> entries) throws IOException
+    XrefStream(COSDictionary dictionary, IndirectObjectsWriter writer) throws IOException
     {
         super(dictionary);
         removeItem(COSName.PREV);
@@ -59,18 +58,20 @@ class XrefStream extends COSStream
         // TODO fix this once encryption is implemented
         removeItem(COSName.ENCRYPT);
         setName(COSName.TYPE, COSName.XREF.getName());
-        setLong(COSName.SIZE, entries.lastKey() + 1);
+        setLong(COSName.SIZE, writer.highest().getObjectNumber() + 1);
         setItem(COSName.INDEX,
-                new COSArray(COSInteger.get(entries.firstKey()), COSInteger.get(entries.lastKey()
-                        - entries.firstKey() + 1)));
-        int secondFieldLength = sizeOf(entries.lastEntry().getValue().getByteOffset());
+                new COSArray(COSInteger.get(writer.lowest().getObjectNumber()), COSInteger
+                        .get(writer.highest().getObjectNumber() - writer.lowest().getObjectNumber()
+                                + 1)));
+        int secondFieldLength = sizeOf(writer.highest().getByteOffset());
         setItem(COSName.W, new COSArray(COSInteger.get(1), COSInteger.get(secondFieldLength),
                 COSInteger.get(2)));
         try (OutputStream out = createUnfilteredStream())
         {
-            for (long key = entries.firstKey(); key <= entries.lastKey(); key++)
+            for (long key = writer.lowest().getObjectNumber(); key <= writer.highest()
+                    .getObjectNumber(); key++)
             {
-                out.write(Optional.ofNullable(entries.get(key)).orElse(freeEntry(key, 0))
+                out.write(Optional.ofNullable(writer.get(key)).orElse(freeEntry(key, 0))
                         .toXrefStreamEntry(secondFieldLength, 2));
             }
         }

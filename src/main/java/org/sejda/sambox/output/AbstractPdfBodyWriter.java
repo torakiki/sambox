@@ -46,12 +46,12 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Base component providing methods to write the body of a pdf document. This implementation starts from the document
- * trailer and visits the whole document graph replacing {@link COSDictionary} and {@link ExistingIndirectCOSObject} with a
- * newly created {@link IndirectCOSObjectReference}. {@link IndirectCOSObjectReference}s are cached and reused if the
- * corresponding {@link COSDictionary}/{@link ExistingIndirectCOSObject} is found again while exploring the graph. Once all the
- * values of a {@link COSDictionary} or {@link COSArray} have been processed, the {@link COSDictionary}/{@link COSArray}
- * is written as an object, this allows an async implementation to write objects while the writer is still perfoming its
- * algorithm.
+ * trailer and visits the whole document graph replacing {@link COSDictionary} and {@link ExistingIndirectCOSObject}
+ * with a newly created {@link IndirectCOSObjectReference}. {@link IndirectCOSObjectReference}s are cached and reused if
+ * the corresponding {@link COSDictionary}/{@link ExistingIndirectCOSObject} is found again while exploring the graph.
+ * Once all the values of a {@link COSDictionary} or {@link COSArray} have been processed, the {@link COSDictionary}/
+ * {@link COSArray} is written as an object, this allows an async implementation to write objects while the writer is
+ * still perfoming its algorithm.
  * 
  * @author Andrea Vacondio
  */
@@ -99,9 +99,22 @@ abstract class AbstractPdfBodyWriter implements COSVisitor, Closeable
         onCompletion();
     }
 
+    /**
+     * writes the given object
+     * 
+     * @param ref
+     * @throws IOException
+     */
     abstract void writeObject(IndirectCOSObjectReference ref) throws IOException;
 
+    /**
+     * callback to perform once all the objects have been written
+     * 
+     * @throws IOException
+     */
     abstract void onCompletion() throws IOException;
+
+    abstract IndirectObjectsWriter writer();
 
     @Override
     public void visit(COSArray array) throws IOException
@@ -147,7 +160,7 @@ abstract class AbstractPdfBodyWriter implements COSVisitor, Closeable
 
     }
 
-    private IndirectCOSObjectReference getOrCreateIndirectReferenceFor(COSBase item)
+    protected IndirectCOSObjectReference getOrCreateIndirectReferenceFor(COSBase item)
     {
         if (item instanceof ExistingIndirectCOSObject)
         {
@@ -163,8 +176,10 @@ abstract class AbstractPdfBodyWriter implements COSVisitor, Closeable
             return Optional.ofNullable(indirectsForSource.get(key)).orElseGet(
                     () -> {
                         IndirectCOSObjectReference newRef = nextReferenceFor(item);
-                        LOG.trace("Created new indirect reference " + newRef
-                                + " replacing the existing one " + key);
+                        LOG.trace(
+                                "Created new indirect reference {} replacing the existing one {}",
+                                newRef, key);
+                        stack.add(newRef);
                         indirectsForSource.put(key, newRef);
                         return newRef;
                     });
@@ -173,7 +188,8 @@ abstract class AbstractPdfBodyWriter implements COSVisitor, Closeable
         {
             return Optional.ofNullable(newObjects.get(item)).orElseGet(() -> {
                 IndirectCOSObjectReference newRef = nextReferenceFor(item);
-                LOG.trace("Created new indirect reference '" + newRef + "' for dictionary item");
+                LOG.trace("Created new indirect reference '{}' for dictionary item", newRef);
+                stack.add(newRef);
                 newObjects.put(item, newRef);
                 return newRef;
             });
@@ -182,11 +198,10 @@ abstract class AbstractPdfBodyWriter implements COSVisitor, Closeable
                 + item.getClass());
     }
 
-    private IndirectCOSObjectReference nextReferenceFor(COSBase baseObject)
+    protected IndirectCOSObjectReference nextReferenceFor(COSBase baseObject)
     {
         IndirectCOSObjectReference ref = new IndirectCOSObjectReference(
                 objectsCounter.incrementAndGet(), 0, baseObject);
-        stack.add(ref);
         return ref;
     }
 

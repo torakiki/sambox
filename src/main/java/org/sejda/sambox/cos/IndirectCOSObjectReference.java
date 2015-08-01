@@ -49,6 +49,11 @@ public class IndirectCOSObjectReference extends COSBase implements DisposableCOS
         return xrefEntry;
     }
 
+    public void setValue(COSBase baseObject)
+    {
+        this.baseObject = baseObject;
+    }
+
     @Override
     public COSBase getCOSObject()
     {
@@ -71,4 +76,5 @@ public class IndirectCOSObjectReference extends COSBase implements DisposableCOS
         return Long.toString(xrefEntry().key().getNumber()) + " "
                 + Integer.toString(xrefEntry().key().getGeneration()) + " R";
     }
+
 }

@@ -30,7 +30,7 @@ import org.sejda.sambox.util.SpecVersionUtils;
  * @author Ben Litchfield
  * 
  */
-public final class COSDocument extends COSBase
+public class COSDocument extends COSBase
 {
 
     private String headerVersion;

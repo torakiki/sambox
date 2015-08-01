@@ -49,9 +49,9 @@ class AsyncPdfBodyWriter extends AbstractPdfBodyWriter
         }
     });
     private AtomicReference<IOException> executionException = new AtomicReference<>();
-    private PDFWriter writer;
+    private IndirectObjectsWriter writer;
 
-    AsyncPdfBodyWriter(PDFWriter writer)
+    AsyncPdfBodyWriter(IndirectObjectsWriter writer)
     {
         requireNotNullArg(writer, "Cannot write to a null writer");
         this.writer = writer;
@@ -92,12 +92,16 @@ class AsyncPdfBodyWriter extends AbstractPdfBodyWriter
             {
                 if (executionException.get() == null)
                 {
-                    writer.writerObject(ref);
+                    writer.writeObjectIfNotWritten(ref);
                 }
             }
             catch (IOException e)
             {
                 executionException.set(e);
+            }
+            catch (Exception e)
+            {
+                executionException.set(new IOException(e));
             }
         });
     }
@@ -117,5 +121,11 @@ class AsyncPdfBodyWriter extends AbstractPdfBodyWriter
     {
         super.close();
         executor.shutdown();
+    }
+
+    @Override
+    IndirectObjectsWriter writer()
+    {
+        return writer;
     }
 }

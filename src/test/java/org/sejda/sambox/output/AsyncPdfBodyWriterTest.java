@@ -44,14 +44,14 @@ import org.sejda.sambox.pdmodel.PDDocument;
 public class AsyncPdfBodyWriterTest
 {
 
-    private PDFWriter writer;
+    private IndirectObjectsWriter writer;
     private AsyncPdfBodyWriter victim;
     private PDDocument document;
 
     @Before
     public void setUp()
     {
-        writer = mock(PDFWriter.class);
+        writer = mock(IndirectObjectsWriter.class);
         victim = new AsyncPdfBodyWriter(writer);
         document = new PDDocument();
         document.getDocumentInformation().setAuthor("Chuck Norris");
@@ -75,13 +75,13 @@ public class AsyncPdfBodyWriterTest
                 .getCatalog().getItem(COSName.H));
         assertThat(document.getDocument().getCatalog().getItem(COSName.G), new IsInstanceOf(
                 IndirectCOSObjectReference.class));
-        verify(writer, timeout(1000).times(4)).writerObject(any()); // catalog,info,pages,someDic
+        verify(writer, timeout(1000).times(4)).writeObjectIfNotWritten(any()); // catalog,info,pages,someDic
     }
 
     @Test(expected = IOException.class)
     public void asyncExceptionIsProcessed() throws IOException
     {
-        doThrow(IOException.class).when(writer).writerObject(any());
+        doThrow(IOException.class).when(writer).writeObjectIfNotWritten(any());
         victim.write(document.getDocument());
     }
 
@@ -101,6 +101,6 @@ public class AsyncPdfBodyWriterTest
         {
             victim.write(document.getDocument());
         }
-        verify(writer, timeout(1000).times(8)).writerObject(any());
+        verify(writer, timeout(1000).times(8)).writeObjectIfNotWritten(any());
     }
 }

@@ -42,14 +42,14 @@ import org.sejda.sambox.pdmodel.PDDocument;
 public class SyncPdfBodyWriterTest
 {
 
-    private PDFWriter writer;
+    private IndirectObjectsWriter writer;
     private SyncPdfBodyWriter victim;
     private PDDocument document;
 
     @Before
     public void setUp()
     {
-        writer = mock(PDFWriter.class);
+        writer = mock(IndirectObjectsWriter.class);
         victim = new SyncPdfBodyWriter(writer);
         document = new PDDocument();
         document.getDocumentInformation().setAuthor("Chuck Norris");
@@ -73,7 +73,7 @@ public class SyncPdfBodyWriterTest
                 .getCatalog().getItem(COSName.H));
         assertThat(document.getDocument().getCatalog().getItem(COSName.G), new IsInstanceOf(
                 IndirectCOSObjectReference.class));
-        verify(writer, times(4)).writerObject(any()); // catalog,info,pages,someDic
+        verify(writer, times(4)).writeObjectIfNotWritten(any()); // catalog,info,pages,someDic
     }
 
     @Test
@@ -92,6 +92,6 @@ public class SyncPdfBodyWriterTest
         {
             victim.write(document.getDocument());
         }
-        verify(writer, times(8)).writerObject(any());
+        verify(writer, times(8)).writeObjectIfNotWritten(any());
     }
 }

@@ -18,7 +18,6 @@ package org.sejda.sambox.output;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
 import static org.mockito.AdditionalMatchers.aryEq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -32,31 +31,31 @@ import org.mockito.InOrder;
 import org.mockito.Mockito;
 import org.sejda.io.BufferedCountingChannelWriter;
 import org.sejda.sambox.cos.COSDictionary;
-import org.sejda.sambox.cos.COSDocument;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
 import org.sejda.sambox.util.Charsets;
 import org.sejda.sambox.util.SpecVersionUtils;
 import org.sejda.sambox.xref.XrefEntry;
 
-public class PDFWriterTest
+public class DefaultPDFWriterTest
 {
     private BufferedCountingChannelWriter writer;
-    private PDFWriter victim;
+    private IndirectObjectsWriter objectWriter;
+    private DefaultPDFWriter victim;
 
     @Before
     public void setUp()
     {
         writer = mock(BufferedCountingChannelWriter.class);
-        victim = new PDFWriter(new DefaultCOSWriter(writer));
+        objectWriter = new IndirectObjectsWriter(new DefaultCOSWriter(writer));
+        victim = new DefaultPDFWriter(objectWriter);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void nullConstructor()
     {
-        new PDFWriter(null);
+        new DefaultPDFWriter(null);
     }
 
     @Test
@@ -74,75 +73,15 @@ public class PDFWriterTest
     }
 
     @Test
-    public void writerObject() throws IOException
-    {
-        when(writer.offset()).thenReturn(12345l);
-        IndirectCOSObjectReference ref = new IndirectCOSObjectReference(123, 0, COSInteger.get(100));
-        InOrder inOrder = Mockito.inOrder(writer);
-        victim.writerObject(ref);
-        inOrder.verify(writer).write("123");
-        inOrder.verify(writer).write(DefaultCOSWriter.SPACE);
-        inOrder.verify(writer).write("0");
-        inOrder.verify(writer).write(DefaultCOSWriter.SPACE);
-        inOrder.verify(writer).write(aryEq("obj".getBytes(Charsets.US_ASCII)));
-        inOrder.verify(writer).writeEOL();
-        inOrder.verify(writer).write("100");
-        inOrder.verify(writer).writeEOL();
-        inOrder.verify(writer).write(aryEq("endobj".getBytes(Charsets.US_ASCII)));
-        inOrder.verify(writer).writeEOL();
-        assertEquals(12345, ref.xrefEntry().getByteOffset());
-    }
-
-    @Test
-    public void writerObjectOffsetIsSet() throws IOException
-    {
-        when(writer.offset()).thenReturn(12345l);
-        IndirectCOSObjectReference ref = new IndirectCOSObjectReference(123, 0, COSInteger.get(100));
-        victim.writerObject(ref);
-        assertEquals(12345, ref.xrefEntry().getByteOffset());
-    }
-
-    @Test
-    public void writerObjectReleaseIsCalled() throws IOException
-    {
-        IndirectCOSObjectReference ref = new IndirectCOSObjectReference(123, 0, COSInteger.get(100));
-        assertNotEquals(COSNull.NULL, ref.getCOSObject());
-        victim.writerObject(ref);
-        assertEquals(COSNull.NULL, ref.getCOSObject());
-    }
-
-    @Test
-    public void writerObjectMultipleTimesWritesOnce() throws IOException
-    {
-        IndirectCOSObjectReference ref = new IndirectCOSObjectReference(123, 0, COSInteger.get(100));
-        victim.writerObject(ref);
-        victim.writerObject(ref);
-        victim.writerObject(ref);
-        victim.writerObject(ref);
-        verify(writer).write("123");
-    }
-
-    @Test
-    public void writeBody() throws IOException
-    {
-        COSDocument document = new COSDocument();
-        AbstractPdfBodyWriter bodyWriter = mock(AbstractPdfBodyWriter.class);
-        InOrder inOrder = Mockito.inOrder(bodyWriter);
-        victim.writeBody(document, bodyWriter);
-        inOrder.verify(bodyWriter).write(document);
-        inOrder.verify(bodyWriter).close();
-    }
-
-    @Test
     public void writeXrefTable() throws IOException
     {
         IndirectCOSObjectReference ref = new IndirectCOSObjectReference(1, 0, COSInteger.get(100));
         IndirectCOSObjectReference ref2 = new IndirectCOSObjectReference(3, 0, COSInteger.get(200));
         InOrder inOrder = Mockito.inOrder(writer);
         when(writer.offset()).thenReturn(12345l);
-        victim.writerObject(ref);
+        objectWriter.writeObject(ref);
         when(writer.offset()).thenReturn(54321l);
-        victim.writerObject(ref2);
+        objectWriter.writeObject(ref2);
         when(writer.offset()).thenReturn(98765l);
         assertEquals(98765, victim.writeXrefTable());
         inOrder.verify(writer).write("xref");
@@ -159,7 +98,7 @@ public class PDFWriterTest
     public void writeTrailerSomeKeysAreRemoved() throws IOException
     {
         IndirectCOSObjectReference ref = new IndirectCOSObjectReference(1, 0, COSInteger.get(100));
-        victim.writerObject(ref);
+        objectWriter.writeObject(ref);
         COSDictionary existingTrailer = new COSDictionary();
         existingTrailer.setName(COSName.PREV, "value");
         existingTrailer.setName(COSName.XREF_STM, "value");
@@ -186,8 +125,8 @@ public class PDFWriterTest
     {
         IndirectCOSObjectReference ref = new IndirectCOSObjectReference(1, 0, COSInteger.get(100));
         IndirectCOSObjectReference ref2 = new IndirectCOSObjectReference(3, 0, COSInteger.get(100));
-        victim.writerObject(ref);
-        victim.writerObject(ref2);
+        objectWriter.writeObject(ref);
+        objectWriter.writeObject(ref2);
         COSDictionary existingTrailer = new COSDictionary();
         victim.writeTrailer(existingTrailer, 1);
         assertEquals(4, existingTrailer.getInt(COSName.SIZE));
@@ -198,7 +137,7 @@ public class PDFWriterTest
     {
         IndirectCOSObjectReference ref = new IndirectCOSObjectReference(1, 0, COSInteger.get(100));
         InOrder inOrder = Mockito.inOrder(writer);
-        victim.writerObject(ref);
+        objectWriter.writeObject(ref);
         COSDictionary existingTrailer = new COSDictionary();
         victim.writeTrailer(existingTrailer, 10);
         inOrder.verify(writer).write(aryEq("trailer".getBytes(Charsets.US_ASCII)));
@@ -217,7 +156,7 @@ public class PDFWriterTest
         COSDictionary existingTrailer = new COSDictionary();
         IndirectCOSObjectReference ref = new IndirectCOSObjectReference(1, 0, COSInteger.get(100));
         when(writer.offset()).thenReturn(12345l);
-        victim.writerObject(ref);
+        objectWriter.writeObject(ref);
         InOrder inOrder = Mockito.inOrder(writer);
         victim.writeXrefStream(existingTrailer);
         inOrder.verify(writer).write("2");

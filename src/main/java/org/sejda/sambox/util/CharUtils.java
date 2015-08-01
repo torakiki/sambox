@@ -35,7 +35,7 @@ public final class CharUtils
     private static final byte ASCII_NINE = 57;
 
     public static final byte ASCII_NULL = 0;
-    private static final byte ASCII_SPACE = 32;
+    public static final byte ASCII_SPACE = 32;
 
     private static final byte ASCII_UPPERCASE_A = 65;
     private static final byte ASCII_UPPERCASE_Z = 90;

@@ -21,6 +21,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayOutputStream;
 
@@ -28,6 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.sejda.io.CountingWritableByteChannel;
 import org.sejda.sambox.TestUtils;
+import org.sejda.sambox.cos.COSDocument;
 import org.sejda.sambox.pdmodel.PDDocument;
 
 /**
@@ -38,12 +40,15 @@ public class PDDocumentWriterTest
 {
 
     private PDDocumentWriter victim;
-    private PDFWriter writer;
+    private DefaultPDFWriter writer;
+    private IndirectObjectsWriter objectsWriter;
 
     @Before
     public void setUp()
     {
-        this.writer = mock(PDFWriter.class);
+        this.writer = mock(DefaultPDFWriter.class);
+        this.objectsWriter = mock(IndirectObjectsWriter.class);
+        when(writer.writer()).thenReturn(objectsWriter);
         this.victim = new PDDocumentWriter(
                 CountingWritableByteChannel.from(new ByteArrayOutputStream()));
         TestUtils.setProperty(victim, "writer", this.writer);
@@ -66,21 +71,25 @@ public class PDDocumentWriterTest
     @Test
     public void writeBodySync() throws Exception
     {
-        PDDocument document = new PDDocument();
+        PDDocument document = mock(PDDocument.class);
+        COSDocument cosDoc = mock(COSDocument.class);
+        when(document.getDocument()).thenReturn(cosDoc);
         this.victim = new PDDocumentWriter(
                 CountingWritableByteChannel.from(new ByteArrayOutputStream()),
                 WriteOption.SYNC_BODY_WRITE);
         TestUtils.setProperty(victim, "writer", this.writer);
         victim.write(document);
-        verify(writer).writeBody(eq(document.getDocument()), isA(SyncPdfBodyWriter.class));
+        verify(cosDoc).accept(isA(SyncPdfBodyWriter.class));
     }
 
     @Test
     public void writeBodyAsync() throws Exception
     {
-        PDDocument document = new PDDocument();
+        PDDocument document = mock(PDDocument.class);
+        COSDocument cosDoc = mock(COSDocument.class);
+        when(document.getDocument()).thenReturn(cosDoc);
         victim.write(document);
-        verify(writer).writeBody(eq(document.getDocument()), isA(AsyncPdfBodyWriter.class));
+        verify(cosDoc).accept(isA(AsyncPdfBodyWriter.class));
     }
 
     @Test

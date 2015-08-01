@@ -163,11 +163,21 @@ class DefaultCOSWriter implements COSWriter
     @Override
     public void visit(COSStream value) throws IOException
     {
-        value.setLong(COSName.LENGTH, value.getFilteredLength());
+        COSBase length = value.getItem(COSName.LENGTH);
+        if (length == null)
+        {
+            value.setLong(COSName.LENGTH, value.getFilteredLength());
+        }
         visit((COSDictionary) value);
         writer.write(STREAM);
         writer.write(CRLF);
+        long streamStartingPosition = writer.offset();
         writer.write(value.getFilteredStream());
+        if (length instanceof IndirectCOSObjectReference)
+        {
+            ((IndirectCOSObjectReference) length).setValue(COSInteger.get(writer.offset()
+                    - streamStartingPosition));
+        }
         IOUtils.close(value);
         writer.write(CRLF);
         writer.write(ENDSTREAM);

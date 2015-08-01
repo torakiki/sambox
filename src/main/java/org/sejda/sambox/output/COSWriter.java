@@ -18,6 +18,7 @@ package org.sejda.sambox.output;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.List;
 
 import org.sejda.io.BufferedCountingChannelWriter;
 import org.sejda.sambox.cos.COSArray;
@@ -50,4 +51,21 @@ interface COSWriter extends COSVisitor, Closeable
     }
 
     BufferedCountingChannelWriter writer();
+
+    /**
+     * Factory method for {@link COSWriter}s returning the correct instance based on the given options
+     * 
+     * @param writer
+     * @param opts
+     * @return
+     */
+    static COSWriter get(BufferedCountingChannelWriter writer, List<WriteOption> opts)
+    {
+        if (opts.contains(WriteOption.COMPRESS_STREAMS))
+        {
+            return new CompressedStreamsCOSWriter(new DefaultCOSWriter(writer));
+        }
+        return new DefaultCOSWriter(writer);
+    }
+
 }

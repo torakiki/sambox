@@ -30,9 +30,9 @@ import org.sejda.sambox.cos.IndirectCOSObjectReference;
  */
 class SyncPdfBodyWriter extends AbstractPdfBodyWriter
 {
-    private PDFWriter writer;
+    private IndirectObjectsWriter writer;
 
-    SyncPdfBodyWriter(PDFWriter writer)
+    SyncPdfBodyWriter(IndirectObjectsWriter writer)
     {
         requireNotNullArg(writer, "Cannot write to a null writer");
         this.writer = writer;
@@ -41,12 +41,18 @@ class SyncPdfBodyWriter extends AbstractPdfBodyWriter
     @Override
     void writeObject(IndirectCOSObjectReference ref) throws IOException
     {
-        writer.writerObject(ref);
+        writer.writeObjectIfNotWritten(ref);
     }
 
     @Override
     void onCompletion()
     {
         // no op
+    }
+
+    @Override
+    IndirectObjectsWriter writer()
+    {
+        return writer;
     }
 }
