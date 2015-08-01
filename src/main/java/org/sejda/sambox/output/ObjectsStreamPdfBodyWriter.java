@@ -27,6 +27,7 @@ import java.util.zip.DeflaterInputStream;
 
 import org.bouncycastle.util.Arrays;
 import org.sejda.io.CountingWritableByteChannel;
+import org.sejda.sambox.SAMBox;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.COSStream;
@@ -61,7 +62,7 @@ class ObjectsStreamPdfBodyWriter extends AbstractPdfBodyWriter
     @Override
     void writeObject(IndirectCOSObjectReference ref) throws IOException
     {
-        if (ref.getCOSObject() instanceof COSStream)
+        if (ref.getCOSObject().getCOSObject() instanceof COSStream)
         {
             wrapped.writeObject(ref);
         }
@@ -119,13 +120,12 @@ class ObjectsStreamPdfBodyWriter extends AbstractPdfBodyWriter
 
     private class ObjectsStream extends COSStream implements DisposableCOSObject
     {
-        private static final int MAX_OBJECTS = 100;
         private int counter;
         private ByteArrayOutputStream header = new ByteArrayOutputStream();
         private ByteArrayOutputStream data = new ByteArrayOutputStream();
         private DefaultCOSWriter dataWriter = new DefaultCOSWriter(
                 CountingWritableByteChannel.from(data));
-        private DeflaterInputStream filtered;
+        private InputStream filtered;
         private IndirectCOSObjectReference reference;
 
         public ObjectsStream()
@@ -155,7 +155,7 @@ class ObjectsStreamPdfBodyWriter extends AbstractPdfBodyWriter
 
         boolean isFull()
         {
-            return counter >= MAX_OBJECTS;
+            return counter >= Integer.getInteger(SAMBox.OBJECTS_STREAM_SIZE_PROPERTY, 100);
         }
 
         @Override
