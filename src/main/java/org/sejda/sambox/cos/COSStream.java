@@ -441,7 +441,10 @@ public class COSStream extends COSDictionary implements Closeable
                 newFilters.addAll((COSArray) filters);
                 setFilters(newFilters);
             }
-            setFilters(newFilters);
+            else
+            {
+                setFilters(COSName.FLATE_DECODE);
+            }
         }
     }
 

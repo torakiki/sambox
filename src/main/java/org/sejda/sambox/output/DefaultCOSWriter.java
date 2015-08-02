@@ -105,7 +105,7 @@ class DefaultCOSWriter implements COSWriter
     {
         writer.write(LESS_THEN);
         writer.write(LESS_THEN);
-        writer.writeEOL();
+        writeDictionaryItemsSeparator();
         for (Map.Entry<COSName, COSBase> entry : dictionary.entrySet())
         {
             COSBase value = entry.getValue();
@@ -114,7 +114,7 @@ class DefaultCOSWriter implements COSWriter
                 entry.getKey().accept(this);
                 writer.write(SPACE);
                 entry.getValue().accept(this);
-                writer.writeEOL();
+                writeDictionaryItemsSeparator();
             }
         }
         writer.write(GREATER_THEN);

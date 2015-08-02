@@ -44,6 +44,16 @@ interface COSWriter extends COSVisitor, Closeable
         writer().writeEOL();
     }
 
+    /**
+     * writes the separator after a {@link COSDictionary} value is written, before the next key/value is written.
+     * 
+     * @throws IOException
+     */
+    default void writeDictionaryItemsSeparator() throws IOException
+    {
+        writer().writeEOL();
+    }
+
     @Override
     default void close() throws IOException
     {

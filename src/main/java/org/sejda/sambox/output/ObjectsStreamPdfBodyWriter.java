@@ -84,7 +84,7 @@ class ObjectsStreamPdfBodyWriter extends AbstractPdfBodyWriter
 
     private void doWriteObjectsStream() throws IOException
     {
-        LOG.trace("Writing object stream {}", currentStream.reference);
+        LOG.debug("Writing object stream {}", currentStream.reference);
         currentStream.prepareForWriting();
         IndirectCOSObjectReference length = nextReferenceFor(COSNull.NULL);
         currentStream.setItem(COSName.LENGTH, length);
@@ -124,7 +124,19 @@ class ObjectsStreamPdfBodyWriter extends AbstractPdfBodyWriter
         private ByteArrayOutputStream header = new ByteArrayOutputStream();
         private ByteArrayOutputStream data = new ByteArrayOutputStream();
         private DefaultCOSWriter dataWriter = new DefaultCOSWriter(
-                CountingWritableByteChannel.from(data));
+                CountingWritableByteChannel.from(data))
+        {
+            @Override
+            public void writeComplexObjectSeparator() throws IOException
+            {
+                writer().write(ASCII_SPACE);
+            }
+
+            @Override
+            public void writeDictionaryItemsSeparator() throws IOException
+            {
+            }
+        };
         private InputStream filtered;
         private IndirectCOSObjectReference reference;
 
@@ -149,7 +161,6 @@ class ObjectsStreamPdfBodyWriter extends AbstractPdfBodyWriter
                     Charsets.US_ASCII));
             header.write(ASCII_SPACE);
             ref.getCOSObject().accept(dataWriter);
-            dataWriter.writer().write(ASCII_SPACE);
             ref.releaseCOSObject();
         }
 
