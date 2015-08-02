@@ -17,6 +17,7 @@
 package org.sejda.sambox.output;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -70,12 +71,27 @@ public class CompressedStreamsCOSWriterTest
         {
             out.write(data);
         }
-        assertNull(stream.getFilters());
+        stream.setFilters(COSName.ASCII_HEX_DECODE);
+        assertEquals(COSName.ASCII_HEX_DECODE, stream.getFilters());
         victim.visit(stream);
-        assertArrayEquals(new COSArray(COSName.FLATE_DECODE).toArray(),
+        assertArrayEquals(new COSArray(COSName.FLATE_DECODE, COSName.ASCII_HEX_DECODE).toArray(),
                 ((COSArray) stream.getFilters()).toArray());
     }
 
+    @Test
+    public void visitCOSStreamSingleFilter() throws Exception
+    {
+        byte[] data = new byte[] { (byte) 0x41, (byte) 0x42, (byte) 0x43 };
+        COSStream stream = new COSStream();
+        stream.setInt(COSName.B, 2);
+        try (OutputStream out = stream.createUnfilteredStream())
+        {
+            out.write(data);
+        }
+        assertNull(stream.getFilters());
+        victim.visit(stream);
+        assertEquals(COSName.FLATE_DECODE, stream.getFilters());
+    }
     @Test
     public void visitCOSArray() throws Exception
     {
