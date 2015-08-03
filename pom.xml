@@ -44,10 +44,17 @@
 	<repositories>
 		<repository>
 			<id>pdfbox-snapshot</id>
+			<url>http://repository.apache.org/snapshots/</url>
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
-			<url>http://repository.apache.org/snapshots/</url>
+		</repository>
+		<repository>
+			<id>sonatype-snapshot</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
 		</repository>
 	</repositories>
 

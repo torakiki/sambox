@@ -66,6 +66,12 @@ public class SyncPdfBodyWriterTest
     }
 
     @Test
+    public void writer()
+    {
+        assertEquals(writer, victim.writer());
+    }
+
+    @Test
     public void writeBodyReusesDictionaryRef() throws IOException
     {
         victim.write(document.getDocument());
