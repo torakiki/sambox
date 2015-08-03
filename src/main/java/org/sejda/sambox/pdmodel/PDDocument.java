@@ -71,6 +71,7 @@ public class PDDocument implements Closeable
     private AccessPermission accessPermission;
     private boolean open = true;
     private OnClose onClose;
+    private ResourceCache resourceCache = new DefaultResourceCache();
 
     // fonts to subset before saving
     private final Set<PDFont> fontsToSubset = new HashSet<>();
@@ -561,4 +562,13 @@ public class PDDocument implements Closeable
          */
         void onClose() throws IOException;
     }
+
+    /**
+     * Returns the resource cache associated with this document, or null if there is none.
+     */
+    public ResourceCache getResourceCache()
+    {
+        return resourceCache;
+    }
+
 }

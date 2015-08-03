@@ -123,7 +123,7 @@ public class PDDocumentCatalog implements COSObjectable
     public PDPageTree getPages()
     {
         // TODO cache this since it's probably going to be called often and we want to reduce GC
-        return new PDPageTree((COSDictionary)root.getDictionaryObject(COSName.PAGES));
+        return new PDPageTree((COSDictionary) root.getDictionaryObject(COSName.PAGES), document);
     }
 
     /**

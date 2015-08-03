@@ -37,6 +37,7 @@ import org.sejda.sambox.cos.COSObjectable;
 public class PDPageTree implements COSObjectable, Iterable<PDPage>
 {
     private final COSDictionary root;
+    private final PDDocument document;
 
     /**
      * Constructor for embedding.
@@ -47,6 +48,7 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
         root.setItem(COSName.TYPE, COSName.PAGES);
         root.setItem(COSName.KIDS, new COSArray());
         root.setItem(COSName.COUNT, COSInteger.ZERO);
+        document = null;
     }
 
     /**
@@ -61,6 +63,23 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
             throw new IllegalArgumentException("root cannot be null");
         }
         this.root = root;
+        document = null;
+    }
+
+    /**
+     * Constructor for reading.
+     *
+     * @param root A page tree root.
+     * @param document The document which contains "root".
+     */
+    PDPageTree(COSDictionary root, PDDocument document)
+    {
+        if (root == null)
+        {
+            throw new IllegalArgumentException("root cannot be null");
+        }
+        this.root = root;
+        this.document = document;
     }
 
     /**
@@ -167,7 +186,8 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
                 throw new IllegalStateException("Expected Page but got " + next);
             }
 
-            return new PDPage(next);
+            ResourceCache resourceCache = document != null ? document.getResourceCache() : null;
+            return new PDPage(next, resourceCache);
         }
 
         @Override
@@ -192,7 +212,8 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
             throw new IllegalStateException("Expected Page but got " + dict);
         }
 
-        return new PDPage(dict);
+        ResourceCache resourceCache = document != null ? document.getResourceCache() : null;
+        return new PDPage(dict, resourceCache);
     }
 
     /**
@@ -306,7 +327,7 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
             {
                 context.visitPage(kid);
             }
-        }         
+        }
         return context.found;
     }
 
@@ -329,8 +350,7 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
     }
 
     /**
-     * Returns the number of leaf nodes (page objects) that are descendants of this root within the
-     * page tree.
+     * Returns the number of leaf nodes (page objects) that are descendants of this root within the page tree.
      */
     public int getCount()
     {
@@ -388,6 +408,8 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
 
     /**
      * Adds the given page to this page tree.
+     * 
+     * @param page The page to add.
      */
     public void add(PDPage page)
     {

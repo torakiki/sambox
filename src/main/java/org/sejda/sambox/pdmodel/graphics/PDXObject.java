@@ -24,6 +24,7 @@ import org.sejda.sambox.cos.COSObjectable;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.PDResources;
+import org.sejda.sambox.pdmodel.ResourceCache;
 import org.sejda.sambox.pdmodel.common.PDStream;
 import org.sejda.sambox.pdmodel.graphics.form.PDFormXObject;
 import org.sejda.sambox.pdmodel.graphics.image.PDImageXObject;
@@ -45,8 +46,7 @@ public class PDXObject implements COSObjectable
      * @return A new XObject instance.
      * @throws java.io.IOException if there is an error creating the XObject.
      */
-    public static PDXObject createXObject(COSBase base, String name, PDResources resources)
-            throws IOException
+    public static PDXObject createXObject(COSBase base, PDResources resources) throws IOException
     {
         if (base == null)
         {
@@ -59,7 +59,7 @@ public class PDXObject implements COSObjectable
             throw new IOException("Unexpected object type: " + base.getClass().getName());
         }
 
-        COSStream stream = (COSStream)base;
+        COSStream stream = (COSStream) base;
         String subtype = stream.getNameAsString(COSName.SUBTYPE);
 
         if (COSName.IMAGE.getName().equals(subtype))
@@ -68,7 +68,8 @@ public class PDXObject implements COSObjectable
         }
         else if (COSName.FORM.getName().equals(subtype))
         {
-            return new PDFormXObject(new PDStream(stream), name);
+            ResourceCache cache = resources != null ? resources.getResourceCache() : null;
+            return new PDFormXObject(new PDStream(stream), cache);
         }
         else if (COSName.PS.getName().equals(subtype))
         {
@@ -82,6 +83,7 @@ public class PDXObject implements COSObjectable
 
     /**
      * Creates a new XObject from the given stream and subtype.
+     * 
      * @param stream The stream to read.
      */
     protected PDXObject(PDStream stream, COSName subtype)
@@ -94,6 +96,7 @@ public class PDXObject implements COSObjectable
 
     /**
      * Creates a new XObject of the given subtype for writing.
+     * 
      * @param document The document in which to create the XObject.
      * @param subtype The subtype of the new XObject.
      */
@@ -105,8 +108,7 @@ public class PDXObject implements COSObjectable
     }
 
     /**
-     * Returns the stream.
-     * {@inheritDoc}
+     * Returns the stream. {@inheritDoc}
      */
     @Override
     public final COSBase getCOSObject()
@@ -116,6 +118,7 @@ public class PDXObject implements COSObjectable
 
     /**
      * Returns the stream.
+     * 
      * @return The stream for this object.
      */
     public final COSStream getCOSStream()
@@ -125,6 +128,7 @@ public class PDXObject implements COSObjectable
 
     /**
      * Returns the stream.
+     * 
      * @return The stream for this object.
      */
     public final PDStream getPDStream()

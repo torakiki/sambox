@@ -27,6 +27,7 @@ import org.sejda.sambox.cos.COSFloat;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.PDResources;
+import org.sejda.sambox.pdmodel.ResourceCache;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.common.PDStream;
 import org.sejda.sambox.pdmodel.graphics.PDXObject;
@@ -53,44 +54,41 @@ import org.sejda.sambox.util.Matrix;
  */
 public class PDFormXObject extends PDXObject implements PDContentStream
 {
-    private String name;
     private PDGroup group;
+    private final ResourceCache cache;
 
     /**
      * Creates a Form XObject for reading.
-     * 
      * @param stream The XObject stream
      */
     public PDFormXObject(PDStream stream)
     {
         super(stream, COSName.FORM);
+        cache = null;
     }
 
     /**
      * Creates a Form XObject for reading.
-     * 
      * @param stream The XObject stream
-     * @param name The name of the form XObject, to prevent recursion.
      */
-    public PDFormXObject(PDStream stream, String name)
+    public PDFormXObject(PDStream stream, ResourceCache cache)
     {
         super(stream, COSName.FORM);
-        this.name = name;
+        this.cache = cache;
     }
-
+    
     /**
      * Creates a Form Image XObject for writing, in the given document.
-     * 
      * @param document The current document
      */
     public PDFormXObject(PDDocument document)
     {
         super(document, COSName.FORM);
+        cache = null;
     }
 
     /**
      * This will get the form type, currently 1 is the only form type.
-     * 
      * @return The form type.
      */
     public int getFormType()
@@ -100,7 +98,6 @@ public class PDFormXObject extends PDXObject implements PDContentStream
 
     /**
      * Set the form type.
-     * 
      * @param formType The new form type.
      */
     public void setFormType(int formType)
@@ -115,17 +112,17 @@ public class PDFormXObject extends PDXObject implements PDContentStream
      */
     public PDGroup getGroup()
     {
-        if (group == null)
+        if( group == null ) 
         {
             COSDictionary dic = (COSDictionary) getCOSStream().getDictionaryObject(COSName.GROUP);
-            if (dic != null)
+            if( dic != null ) 
             {
                 group = new PDGroup(dic);
             }
         }
         return group;
     }
-
+    
     public PDStream getContentStream()
     {
         return new PDStream(getCOSStream());
@@ -138,26 +135,24 @@ public class PDFormXObject extends PDXObject implements PDContentStream
     }
 
     /**
-     * This will get the resources at this page and not look up the hierarchy. This attribute is inheritable, and
-     * findResources() should probably used. This will return null if no resources are available at this level.
-     * 
+     * This will get the resources at this page and not look up the hierarchy.
+     * This attribute is inheritable, and findResources() should probably used.
+     * This will return null if no resources are available at this level.
      * @return The resources at this level in the hierarchy.
      */
     @Override
     public PDResources getResources()
     {
-        COSDictionary resources = (COSDictionary) getCOSStream().getDictionaryObject(
-                COSName.RESOURCES);
+        COSDictionary resources = (COSDictionary) getCOSStream().getDictionaryObject(COSName.RESOURCES);
         if (resources != null)
         {
-            return new PDResources(resources);
+            return new PDResources(resources, cache);
         }
         return null;
     }
 
     /**
      * This will set the resources for this page.
-     * 
      * @param resources The new resources for this page.
      */
     public void setResources(PDResources resources)
@@ -166,10 +161,10 @@ public class PDFormXObject extends PDXObject implements PDContentStream
     }
 
     /**
-     * An array of four numbers in the form coordinate system (see below), giving the coordinates of the left, bottom,
-     * right, and top edges, respectively, of the form XObject's bounding box. These boundaries are used to clip the
-     * form XObject and to determine its size for caching.
-     * 
+     * An array of four numbers in the form coordinate system (see below),
+     * giving the coordinates of the left, bottom, right, and top edges, respectively,
+     * of the form XObject's bounding box.
+     * These boundaries are used to clip the form XObject and to determine its size for caching.
      * @return The BBox of the form.
      */
     @Override
@@ -186,7 +181,6 @@ public class PDFormXObject extends PDXObject implements PDContentStream
 
     /**
      * This will set the BBox (bounding box) for this form.
-     * 
      * @param bbox The new BBox for this form.
      */
     public void setBBox(PDRectangle bbox)
@@ -203,7 +197,6 @@ public class PDFormXObject extends PDXObject implements PDContentStream
 
     /**
      * This will get the optional Matrix of an XObjectForm. It maps the form space to user space.
-     * 
      * @return the form matrix if available, or the identity matrix.
      */
     @Override
@@ -223,7 +216,6 @@ public class PDFormXObject extends PDXObject implements PDContentStream
 
     /**
      * Sets the optional Matrix entry for the form XObject.
-     * 
      * @param transform the transformation matrix
      */
     public void setMatrix(AffineTransform transform)
@@ -239,9 +231,9 @@ public class PDFormXObject extends PDXObject implements PDContentStream
     }
 
     /**
-     * This will get the key of this XObjectForm in the structural parent tree. Required if the form XObject contains
-     * marked-content sequences that are structural content items.
-     * 
+     * This will get the key of this XObjectForm in the structural parent tree.
+     * Required if the form XObject contains marked-content sequences that are
+     * structural content items.
      * @return the integer key of the XObjectForm's entry in the structural parent tree
      */
     public int getStructParents()
@@ -251,16 +243,10 @@ public class PDFormXObject extends PDXObject implements PDContentStream
 
     /**
      * This will set the key for this XObjectForm in the structural parent tree.
-     * 
      * @param structParent The new key for this XObjectForm.
      */
     public void setStructParents(int structParent)
     {
         getCOSStream().setInt(COSName.STRUCT_PARENTS, structParent);
-    }
-
-    public String getName()
-    {
-        return name;
     }
 }

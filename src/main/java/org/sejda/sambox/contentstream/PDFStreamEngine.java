@@ -450,7 +450,6 @@ public abstract class PDFStreamEngine
         Object token;
         while ((token = parser.nextParsedToken()) != null)
         {
-            System.out.println("Found " + token);
             if (token instanceof Operator)
             {
                 processOperator((Operator) token, arguments);
