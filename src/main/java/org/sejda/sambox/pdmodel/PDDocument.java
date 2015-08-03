@@ -154,9 +154,8 @@ public class PDDocument implements Closeable
      * @param page The page to import.
      * @return The page that was imported.
      * 
-     * @throws IOException If there is an error copying the page.
      */
-    public PDPage importPage(PDPage page) throws IOException
+    public PDPage importPage(PDPage page)
     {
         requireOpen();
         PDPage importedPage = new PDPage(new COSDictionary(page.getCOSObject()));
@@ -175,7 +174,7 @@ public class PDDocument implements Closeable
         }
         catch (IOException e)
         {
-            IOUtils.close(in);
+            IOUtils.closeQuietly(in);
         }
         return importedPage;
     }
