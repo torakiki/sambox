@@ -40,17 +40,11 @@ import org.sejda.sambox.pdmodel.graphics.state.PDExtendedGraphicsState;
 public class DefaultResourceCache implements ResourceCache
 {
     private final Map<COSObjectKey, SoftReference<PDFont>> fonts = new HashMap<>();
-
     private final Map<COSObjectKey, SoftReference<PDColorSpace>> colorSpaces = new HashMap<>();
-
     private final Map<COSObjectKey, SoftReference<PDXObject>> xobjects = new HashMap<>();
-
     private final Map<COSObjectKey, SoftReference<PDExtendedGraphicsState>> extGStates = new HashMap<>();
-
     private final Map<COSObjectKey, SoftReference<PDShading>> shadings = new HashMap<>();
-
     private final Map<COSObjectKey, SoftReference<PDAbstractPattern>> patterns = new HashMap<>();
-
     private final Map<COSObjectKey, SoftReference<PDPropertyList>> properties = new HashMap<>();
 
     @Override
@@ -135,5 +129,17 @@ public class DefaultResourceCache implements ResourceCache
     public void put(COSObjectKey key, PDXObject xobject)
     {
         xobjects.put(key, new SoftReference<>(xobject));
+    }
+
+    @Override
+    public void clear()
+    {
+        fonts.clear();
+        colorSpaces.clear();
+        extGStates.clear();
+        patterns.clear();
+        properties.clear();
+        shadings.clear();
+        xobjects.clear();
     }
 }

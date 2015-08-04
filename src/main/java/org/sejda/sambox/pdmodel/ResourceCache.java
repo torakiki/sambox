@@ -104,4 +104,9 @@ public interface ResourceCache
      * Puts the given key XObject resource in the cache.
      */
     void put(COSObjectKey key, PDXObject xobject) throws IOException;
+
+    /**
+     * Clears the cache
+     */
+    void clear();
 }

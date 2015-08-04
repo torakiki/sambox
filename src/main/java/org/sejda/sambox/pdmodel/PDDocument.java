@@ -56,6 +56,7 @@ import org.sejda.sambox.util.Charsets;
 import org.sejda.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 /**
  * This is the in-memory representation of the PDF document.
  * 
@@ -543,6 +544,7 @@ public class PDDocument implements Closeable
         {
             onClose.onClose();
         }
+        this.resourceCache.clear();
         this.open = false;
     }
 
