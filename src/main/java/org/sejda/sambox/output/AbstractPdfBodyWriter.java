@@ -121,7 +121,7 @@ abstract class AbstractPdfBodyWriter implements COSVisitor, Closeable
     {
         for (int i = 0; i < array.size(); i++)
         {
-            COSBase item = array.get(i);
+            COSBase item = Optional.ofNullable(array.get(i)).orElse(COSNull.NULL);
             if (item instanceof ExistingIndirectCOSObject || item instanceof COSDictionary)
             {
                 IndirectCOSObjectReference ref = getOrCreateIndirectReferenceFor(item);
@@ -139,7 +139,7 @@ abstract class AbstractPdfBodyWriter implements COSVisitor, Closeable
     {
         for (COSName key : value.keySet())
         {
-            COSBase item = value.getItem(key);
+            COSBase item = Optional.ofNullable(value.getItem(key)).orElse(COSNull.NULL);
             if (item instanceof ExistingIndirectCOSObject || item instanceof COSDictionary)
             {
                 IndirectCOSObjectReference ref = getOrCreateIndirectReferenceFor(item);

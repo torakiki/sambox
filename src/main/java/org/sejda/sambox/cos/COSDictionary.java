@@ -1239,8 +1239,13 @@ public class COSDictionary extends COSBase
             retVal.append("(");
             retVal.append(key);
             retVal.append(":");
-            retVal.append(Optional.ofNullable(getDictionaryObject(key)).orElse(COSNull.NULL)
-                    .toString());
+            retVal.append(Optional.ofNullable(getItem(key)).map(v -> {
+                if (v instanceof COSDictionary)
+                {
+                    return "COSDictionary{.." + ((COSDictionary) v).size() + " items ..}";
+                }
+                return v.toString();
+            }).orElse("null"));
             retVal.append(") ");
         }
         retVal.append("}");
