@@ -1,0 +1,74 @@
+%PDF-1.4
+%§ãññ
+1 0 obj
+<<
+/Type /Catalog
+/Pages 3 0 R
+>>
+endobj
+2 0 obj
+<<
+/Producer (SAMBox 1.0.0-SNAPSHOT \(sejda.org\))
+>>
+endobj
+3 0 obj
+<<
+/Type /Pages
+/Kids [4 0 R]
+/Count 1
+>>
+endobj
+4 0 obj
+<<
+/Type /Page
+/Parent 3 0 R
+/Resources 5 0 R
+/MediaBox [0 0 500 800]
+/Contents 6 0 R
+/Annots [7 0 R]
+>>
+endobj
+5 0 obj
+<<
+/Font 8 0 R
+>>
+endobj
+6 0 obj
+<<
+/Length 44
+>>
+stream
+BT /F1 24 Tf 175 720 Td (Hello World!)Tj ET
+
+endstream
+endobj
+7 0 obj
+<<
+/Type /Annot
+/Subtype /Text
+/Rect [175 720 175 720]
+/Contents (Hello Annotation!)
+/Open true
+>>
+endobj
+8 0 obj
+<<
+/F1 9 0 R
+>>
+endobj
+9 0 obj
+<<
+/Type /Font
+/Subtype /Type1
+/BaseFont /Helvetica
+>>
+endobj
+<<
+/Size 10
+/Root 1 0 R
+/Info 2 0 R
+/ID [<5E0D0FA324BC80325653972E5674AF92> <5E0D0FA324BC80325653972E5674AF92>]
+>>
+startxref
+654
+%%EOF

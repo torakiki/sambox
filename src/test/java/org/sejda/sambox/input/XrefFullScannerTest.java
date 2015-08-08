@@ -86,4 +86,14 @@ public class XrefFullScannerTest
         assertEquals(10, victim.trailer().getInt(COSName.SIZE));
         assertNotNull(victim.trailer().getDictionaryObject(COSName.ROOT));
     }
+
+    @Test(expected = IOException.class)
+    public void missingXref() throws IOException
+    {
+        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
+                .getResourceAsStream("/input/test_xref_missing_xref.pdf")));
+        victim = new XrefFullScanner(parser);
+        victim.scan();
+
+    }
 }
