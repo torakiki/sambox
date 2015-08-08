@@ -24,9 +24,8 @@ import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSNumber;
 
 /**
- * A color value, consisting of one or more color components, or for pattern color spaces,
- * a name and optional color components.
- * Color values are not associated with any given color space.
+ * A color value, consisting of one or more color components, or for pattern color spaces, a name and optional color
+ * components. Color values are not associated with any given color space.
  *
  * Instances of PDColor are immutable.
  *
@@ -40,6 +39,7 @@ public final class PDColor
 
     /**
      * Creates a PDColor containing the given color value.
+     * 
      * @param array a COS array containing the color value
      * @param colorSpace color space in which the color value is defined
      */
@@ -51,11 +51,11 @@ public final class PDColor
             components = new float[array.size() - 1];
             for (int i = 0; i < array.size() - 1; i++)
             {
-                components[i] = ((COSNumber)array.get(i)).floatValue();
+                components[i] = ((COSNumber) array.get(i)).floatValue();
             }
 
             // pattern name (required)
-            patternName = (COSName)array.get(array.size() - 1);
+            patternName = (COSName) array.get(array.size() - 1);
         }
         else
         {
@@ -63,7 +63,7 @@ public final class PDColor
             components = new float[array.size()];
             for (int i = 0; i < array.size(); i++)
             {
-                components[i] = ((COSNumber)array.get(i)).floatValue();
+                components[i] = ((COSNumber) array.get(i)).floatValue();
             }
             patternName = null;
         }
@@ -72,6 +72,7 @@ public final class PDColor
 
     /**
      * Creates a PDColor containing the given color component values.
+     * 
      * @param components array of color component values
      * @param colorSpace color space in which the components are defined
      */
@@ -84,6 +85,7 @@ public final class PDColor
 
     /**
      * Creates a PDColor containing the given pattern name.
+     * 
      * @param patternName the name of a pattern in a pattern dictionary
      * @param colorSpace color space in which the pattern is defined
      */
@@ -96,6 +98,7 @@ public final class PDColor
 
     /**
      * Creates a PDColor containing the given color component values and pattern name.
+     * 
      * @param components array of color component values
      * @param patternName the name of a pattern in a pattern dictionary
      * @param colorSpace color space in which the pattern/components are defined
@@ -109,6 +112,7 @@ public final class PDColor
 
     /**
      * Returns the components of this color value.
+     * 
      * @return the components of this color value
      */
     public float[] getComponents()
@@ -118,6 +122,7 @@ public final class PDColor
 
     /**
      * Returns the pattern name from this color value.
+     * 
      * @return the pattern name from this color value
      */
     public COSName getPatternName()
@@ -127,6 +132,7 @@ public final class PDColor
 
     /**
      * Returns true if this color value is a pattern.
+     * 
      * @return true if this color value is a pattern
      */
     public boolean isPattern()
@@ -136,6 +142,7 @@ public final class PDColor
 
     /**
      * Returns the packed RGB value for this color, if any.
+     * 
      * @return RGB
      * @throws IOException if the color conversion fails
      * @throws IllegalStateException if this color value is a pattern.
@@ -154,6 +161,7 @@ public final class PDColor
 
     /**
      * Returns this color value as a COS array
+     * 
      * @return the color value as a COS array
      */
     public COSArray toCOSArray()
@@ -168,6 +176,16 @@ public final class PDColor
     }
 
     /**
+     * @return the color value as a COSarray containing onlye the components values, no pattern name.
+     */
+    public COSArray toComponentsCOSArray()
+    {
+        COSArray array = new COSArray();
+        array.setFloatArray(components);
+        return array;
+    }
+
+    /**
      * Returns the color space in which this color value is defined.
      */
     public PDColorSpace getColorSpace()
@@ -178,7 +196,7 @@ public final class PDColor
     @Override
     public String toString()
     {
-        return "PDColor{components=" + Arrays.toString(components) +
-                ", patternName=" + patternName + "}";
+        return "PDColor{components=" + Arrays.toString(components) + ", patternName=" + patternName
+                + "}";
     }
 }

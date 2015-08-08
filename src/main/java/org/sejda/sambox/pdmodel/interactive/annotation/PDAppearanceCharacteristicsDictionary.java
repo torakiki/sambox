@@ -97,7 +97,7 @@ public class PDAppearanceCharacteristicsDictionary implements COSObjectable
      */
     public void setBorderColour(PDColor c)
     {
-        this.getCOSObject().setItem(COSName.BC, c.toCOSArray());
+        this.getCOSObject().setItem(COSName.BC, c.toComponentsCOSArray());
     }
 
     /**
@@ -117,7 +117,7 @@ public class PDAppearanceCharacteristicsDictionary implements COSObjectable
      */
     public void setBackground(PDColor c)
     {
-        this.getCOSObject().setItem(COSName.BG, c.toCOSArray());
+        this.getCOSObject().setItem(COSName.BG, c.toComponentsCOSArray());
     }
 
     /**

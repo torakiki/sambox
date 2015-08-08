@@ -70,7 +70,6 @@ public class PDDocumentWriter implements Closeable
         {
             // TODO refactor the encrypt/decrypt
             LOG.warn("Encryption is not supported yet, the document will be written decrypted");
-
         }
         writer.writeHeader(document.getDocument().getHeaderVersion());
         writeBody(document.getDocument());

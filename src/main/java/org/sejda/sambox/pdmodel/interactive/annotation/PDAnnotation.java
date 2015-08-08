@@ -620,7 +620,7 @@ public abstract class PDAnnotation implements COSObjectable
      */
     public void setColor(PDColor c)
     {
-        getCOSObject().setItem(COSName.C, c.toCOSArray());
+        getCOSObject().setItem(COSName.C, c.toComponentsCOSArray());
     }
 
     /**

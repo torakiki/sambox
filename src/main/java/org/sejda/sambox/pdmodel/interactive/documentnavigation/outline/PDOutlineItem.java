@@ -372,7 +372,7 @@ public final class PDOutlineItem extends PDOutlineNode
      */
     public void setTextColor( PDColor textColor )
     {
-        getCOSObject().setItem(COSName.C, textColor.toCOSArray());
+        getCOSObject().setItem(COSName.C, textColor.toComponentsCOSArray());
     }
 
     /**

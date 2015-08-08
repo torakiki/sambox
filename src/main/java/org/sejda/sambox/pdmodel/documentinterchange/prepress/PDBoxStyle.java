@@ -102,12 +102,10 @@ public class PDBoxStyle implements COSObjectable
      */
     public void setGuideLineColor( PDColor color )
     {
-        COSArray values = null;
         if( color != null )
         {
-            values = color.toCOSArray();
+            dictionary.setItem(COSName.C, color.toComponentsCOSArray());
         }
-        dictionary.setItem(COSName.C, values);
     }
 
     /**

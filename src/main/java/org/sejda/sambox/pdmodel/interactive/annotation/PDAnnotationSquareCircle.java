@@ -68,7 +68,7 @@ public class PDAnnotationSquareCircle extends PDAnnotationMarkup
      */
     public void setInteriorColor(PDColor ic)
     {
-        getCOSObject().setItem(COSName.IC, ic.toCOSArray());
+        getCOSObject().setItem(COSName.IC, ic.toComponentsCOSArray());
     }
 
     /**
