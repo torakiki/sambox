@@ -46,7 +46,7 @@ public final class Version
             {
                 Properties properties = new Properties();
                 properties.load(stream);
-                return properties.getProperty("sambox.version", null);
+                return properties.getProperty("sambox.version", "");
             }
         }
         catch (IOException io)

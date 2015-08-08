@@ -53,6 +53,7 @@ import org.sejda.sambox.pdmodel.encryption.SecurityHandler;
 import org.sejda.sambox.pdmodel.encryption.SecurityHandlerFactory;
 import org.sejda.sambox.pdmodel.font.PDFont;
 import org.sejda.sambox.util.Charsets;
+import org.sejda.sambox.util.Version;
 import org.sejda.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -507,6 +508,7 @@ public class PDDocument implements Closeable
             throws IOException
     {
         requireOpen();
+        getDocumentInformation().setProducer("SAMBox " + Version.getVersion() + " (sejda.org)");
         for (PDFont font : fontsToSubset)
         {
             font.subset();

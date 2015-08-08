@@ -34,5 +34,5 @@ public final class SAMBox
      */
     public static final String OBJECTS_STREAM_SIZE_PROPERTY = "org.sejda.sambox.objects.stream.size";
 
-    public static final String SAMBOX_PROPERTIES = "org/sejda/sambox/resources/sambox.properties";
+    public static final String SAMBOX_PROPERTIES = "org/sejda/sambox/resources/version.properties";
 }
