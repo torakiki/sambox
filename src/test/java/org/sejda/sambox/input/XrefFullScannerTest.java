@@ -75,4 +75,15 @@ public class XrefFullScannerTest
                 .getCOSObject();
         assertNull(overriddenObj.getDictionaryObject(COSName.ANNOTS));
     }
+
+    @Test
+    public void scanWrongStartxrefAndMissingXref() throws IOException
+    {
+        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
+                .getResourceAsStream("/input/test_xref_issue23.pdf")));
+        victim = new XrefFullScanner(parser);
+        victim.scan();
+        assertEquals(10, victim.trailer().getInt(COSName.SIZE));
+        assertNotNull(victim.trailer().getDictionaryObject(COSName.ROOT));
+    }
 }
