@@ -16,8 +16,8 @@
  */
 package org.sejda.sambox.output;
 
-import static java.util.Objects.requireNonNull;
 import static org.sejda.sambox.util.CharUtils.ASCII_SPACE;
+import static org.sejda.util.RequireUtils.requireNotNullArg;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * {@link AbstractPdfBodyWriter} implementation where objects are written to an Object Stream and later the stream is
- * written as COSStream using the decorated {@link AbstractPdfBodyWriter}
+ * written as COSStream using the wrapped {@link AbstractPdfBodyWriter}
  * 
  * @author Andrea Vacondio
  *
@@ -55,7 +55,7 @@ class ObjectsStreamPdfBodyWriter extends AbstractPdfBodyWriter
 
     public ObjectsStreamPdfBodyWriter(AbstractPdfBodyWriter wrapped)
     {
-        requireNonNull(wrapped);
+        requireNotNullArg(wrapped, "Wrapped writer cannot be null");
         this.wrapped = wrapped;
     }
 
@@ -91,7 +91,6 @@ class ObjectsStreamPdfBodyWriter extends AbstractPdfBodyWriter
         wrapped.writeObject(currentStream.reference);
         LOG.trace("Writing object stream length {}", length);
         wrapped.writeObject(length);
-
     }
 
     @Override
@@ -133,8 +132,9 @@ class ObjectsStreamPdfBodyWriter extends AbstractPdfBodyWriter
             }
 
             @Override
-            public void writeDictionaryItemsSeparator() throws IOException
+            public void writeDictionaryItemsSeparator()
             {
+                // nothing
             }
         };
         private InputStream filtered;
