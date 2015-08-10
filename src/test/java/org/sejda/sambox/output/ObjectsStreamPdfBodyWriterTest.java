@@ -91,6 +91,7 @@ public class ObjectsStreamPdfBodyWriterTest
         victim.writeObject(new IndirectCOSObjectReference(3, 0, COSInteger.THREE));
         // stream and length
         verify(writer, times(2)).writeObject(any());
+        System.getProperties().remove(SAMBox.OBJECTS_STREAM_SIZE_PROPERTY);
     }
 
     @Test

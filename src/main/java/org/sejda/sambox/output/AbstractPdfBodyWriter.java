@@ -24,7 +24,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
@@ -61,9 +60,8 @@ abstract class AbstractPdfBodyWriter implements COSVisitor, Closeable
 
     private Map<String, Map<COSObjectKey, IndirectCOSObjectReference>> bySourceExistingIndirectToNewXref = new HashMap<>();
     private Map<COSBase, IndirectCOSObjectReference> newObjects = new HashMap<>();
-    private AtomicInteger objectsCounter = new AtomicInteger(0);
-
     private Queue<IndirectCOSObjectReference> stack = new LinkedList<>();
+    private IndirectReferenceProvider referencesProvider = new IndirectReferenceProvider();
 
     /**
      * Writes the body of the given document
@@ -175,7 +173,8 @@ abstract class AbstractPdfBodyWriter implements COSVisitor, Closeable
             COSObjectKey key = ((ExistingIndirectCOSObject) item).key();
             return Optional.ofNullable(indirectsForSource.get(key)).orElseGet(
                     () -> {
-                        IndirectCOSObjectReference newRef = nextReferenceFor(item);
+                        IndirectCOSObjectReference newRef = referencesProvider
+                                .nextReferenceFor(item);
                         LOG.trace(
                                 "Created new indirect reference {} replacing the existing one {}",
                                 newRef, key);
@@ -187,7 +186,7 @@ abstract class AbstractPdfBodyWriter implements COSVisitor, Closeable
         else if (item instanceof COSDictionary)
         {
             return Optional.ofNullable(newObjects.get(item)).orElseGet(() -> {
-                IndirectCOSObjectReference newRef = nextReferenceFor(item);
+                IndirectCOSObjectReference newRef = referencesProvider.nextReferenceFor(item);
                 LOG.trace("Created new indirect reference '{}' for dictionary item", newRef);
                 stack.add(newRef);
                 newObjects.put(item, newRef);
@@ -198,11 +197,13 @@ abstract class AbstractPdfBodyWriter implements COSVisitor, Closeable
                 + item.getClass());
     }
 
-    protected IndirectCOSObjectReference nextReferenceFor(COSBase baseObject)
+    /**
+     * @return the component that keeps track of the object numbers used by the body writer and provides the next
+     * available reference.
+     */
+    protected IndirectReferenceProvider referencesProvider()
     {
-        IndirectCOSObjectReference ref = new IndirectCOSObjectReference(
-                objectsCounter.incrementAndGet(), 0, baseObject);
-        return ref;
+        return referencesProvider;
     }
 
     @Override
