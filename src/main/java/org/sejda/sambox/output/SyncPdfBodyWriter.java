@@ -19,6 +19,7 @@ package org.sejda.sambox.output;
 import static org.sejda.util.RequireUtils.requireNotNullArg;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
 
@@ -32,8 +33,9 @@ class SyncPdfBodyWriter extends AbstractPdfBodyWriter
 {
     private IndirectObjectsWriter writer;
 
-    SyncPdfBodyWriter(IndirectObjectsWriter writer)
+    SyncPdfBodyWriter(IndirectObjectsWriter writer, List<WriteOption> opts)
     {
+        super(opts);
         requireNotNullArg(writer, "Cannot write to a null writer");
         this.writer = writer;
     }

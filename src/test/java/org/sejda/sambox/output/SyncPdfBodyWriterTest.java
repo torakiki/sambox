@@ -50,7 +50,7 @@ public class SyncPdfBodyWriterTest
     public void setUp()
     {
         writer = mock(IndirectObjectsWriter.class);
-        victim = new SyncPdfBodyWriter(writer);
+        victim = new SyncPdfBodyWriter(writer, null);
         document = new PDDocument();
         document.getDocumentInformation().setAuthor("Chuck Norris");
         COSDictionary someDic = new COSDictionary();
@@ -62,7 +62,7 @@ public class SyncPdfBodyWriterTest
     @Test(expected = IllegalArgumentException.class)
     public void nullConstructor()
     {
-        new SyncPdfBodyWriter(null);
+        new SyncPdfBodyWriter(null, null);
     }
 
     @Test

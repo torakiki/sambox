@@ -19,8 +19,10 @@ package org.sejda.sambox.output;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
@@ -50,7 +52,7 @@ import org.slf4j.LoggerFactory;
  * the corresponding {@link COSDictionary}/{@link ExistingIndirectCOSObject} is found again while exploring the graph.
  * Once all the values of a {@link COSDictionary} or {@link COSArray} have been processed, the {@link COSDictionary}/
  * {@link COSArray} is written as an object, this allows an async implementation to write objects while the writer is
- * still perfoming its algorithm.
+ * still performing its algorithm.
  * 
  * @author Andrea Vacondio
  */
@@ -62,6 +64,12 @@ abstract class AbstractPdfBodyWriter implements COSVisitor, Closeable
     private Map<COSBase, IndirectCOSObjectReference> newObjects = new HashMap<>();
     private Queue<IndirectCOSObjectReference> stack = new LinkedList<>();
     private IndirectReferenceProvider referencesProvider = new IndirectReferenceProvider();
+    private List<WriteOption> opts;
+
+    AbstractPdfBodyWriter(List<WriteOption> opts)
+    {
+        this.opts = Optional.ofNullable(opts).orElse(Collections.emptyList());
+    }
 
     /**
      * Writes the body of the given document
@@ -154,6 +162,10 @@ abstract class AbstractPdfBodyWriter implements COSVisitor, Closeable
     public void visit(COSStream value) throws IOException
     {
         value.removeItem(COSName.LENGTH);
+        if (opts.contains(WriteOption.COMPRESS_STREAMS))
+        {
+            value.addCompression();
+        }
         this.visit((COSDictionary) value);
 
     }

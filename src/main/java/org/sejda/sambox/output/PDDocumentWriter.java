@@ -49,8 +49,8 @@ public class PDDocumentWriter implements Closeable
     {
         requireNotNullArg(channel, "Cannot write to a null channel");
         this.opts = Arrays.asList(options);
-        this.writer = new DefaultPDFWriter(new IndirectObjectsWriter(COSWriter.get(
-                new BufferedCountingChannelWriter(channel), opts)));
+        this.writer = new DefaultPDFWriter(new IndirectObjectsWriter(new DefaultCOSWriter(
+                new BufferedCountingChannelWriter(channel))));
     }
 
     /**
@@ -89,16 +89,16 @@ public class PDDocumentWriter implements Closeable
     {
         if (opts.contains(WriteOption.SYNC_BODY_WRITE))
         {
-            return new SyncPdfBodyWriter(writer.writer());
+            return new SyncPdfBodyWriter(writer.writer(), opts);
         }
-        return new AsyncPdfBodyWriter(writer.writer());
+        return new AsyncPdfBodyWriter(writer.writer(), opts);
     }
 
     private AbstractPdfBodyWriter objectStreamWriter(AbstractPdfBodyWriter wrapped)
     {
         if (opts.contains(WriteOption.OBJECT_STREAMS))
         {
-            return new ObjectsStreamPdfBodyWriter(wrapped);
+            return new ObjectsStreamPdfBodyWriter(wrapped, opts);
         }
         return wrapped;
     }

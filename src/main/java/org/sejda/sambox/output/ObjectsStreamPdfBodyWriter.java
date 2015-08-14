@@ -24,6 +24,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.SequenceInputStream;
+import java.util.List;
 import java.util.zip.DeflaterInputStream;
 
 import org.sejda.io.CountingWritableByteChannel;
@@ -53,8 +54,9 @@ class ObjectsStreamPdfBodyWriter extends AbstractPdfBodyWriter
     private AbstractPdfBodyWriter wrapped;
     private ObjectsStream currentStream;
 
-    public ObjectsStreamPdfBodyWriter(AbstractPdfBodyWriter wrapped)
+    public ObjectsStreamPdfBodyWriter(AbstractPdfBodyWriter wrapped, List<WriteOption> opts)
     {
+        super(opts);
         requireNotNullArg(wrapped, "Wrapped writer cannot be null");
         this.wrapped = wrapped;
         this.currentStream = new ObjectsStream(referencesProvider());

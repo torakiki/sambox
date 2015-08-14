@@ -19,6 +19,7 @@ package org.sejda.sambox.output;
 import static org.sejda.util.RequireUtils.requireNotNullArg;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -51,8 +52,9 @@ class AsyncPdfBodyWriter extends AbstractPdfBodyWriter
     private AtomicReference<IOException> executionException = new AtomicReference<>();
     private IndirectObjectsWriter writer;
 
-    AsyncPdfBodyWriter(IndirectObjectsWriter writer)
+    AsyncPdfBodyWriter(IndirectObjectsWriter writer, List<WriteOption> opts)
     {
+        super(opts);
         requireNotNullArg(writer, "Cannot write to a null writer");
         this.writer = writer;
     }

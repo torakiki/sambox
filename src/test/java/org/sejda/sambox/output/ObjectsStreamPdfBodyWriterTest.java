@@ -46,13 +46,13 @@ public class ObjectsStreamPdfBodyWriterTest
     public void setUp()
     {
         this.writer = mock(AbstractPdfBodyWriter.class);
-        this.victim = new ObjectsStreamPdfBodyWriter(writer);
+        this.victim = new ObjectsStreamPdfBodyWriter(writer, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void nullConstructor()
     {
-        new ObjectsStreamPdfBodyWriter(null);
+        new ObjectsStreamPdfBodyWriter(null, null);
     }
 
     @Test
