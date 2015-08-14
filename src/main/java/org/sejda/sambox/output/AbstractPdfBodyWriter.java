@@ -146,7 +146,8 @@ abstract class AbstractPdfBodyWriter implements COSVisitor, Closeable
         for (COSName key : value.keySet())
         {
             COSBase item = Optional.ofNullable(value.getItem(key)).orElse(COSNull.NULL);
-            if (item instanceof ExistingIndirectCOSObject || item instanceof COSDictionary)
+            if (item instanceof ExistingIndirectCOSObject || item instanceof COSDictionary
+                    || COSName.THREADS.equals(key))
             {
                 IndirectCOSObjectReference ref = getOrCreateIndirectReferenceFor(item);
                 value.setItem(key, ref);

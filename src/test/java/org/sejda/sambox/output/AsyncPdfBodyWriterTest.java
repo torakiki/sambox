@@ -16,9 +16,7 @@
  */
 package org.sejda.sambox.output;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
@@ -27,7 +25,6 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.concurrent.RejectedExecutionException;
 
@@ -37,10 +34,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.sejda.io.SeekableSources;
-import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.PDDocument;
@@ -122,56 +117,5 @@ public class AsyncPdfBodyWriterTest
             victim.write(document.getDocument());
         }
         verify(writer, timeout(1000).times(8)).writeObjectIfNotWritten(any());
-    }
-
-    @Test
-    public void writeCompressedStream() throws IOException
-    {
-        byte[] data = new byte[] { (byte) 0x41, (byte) 0x42, (byte) 0x43 };
-        COSStream stream = new COSStream();
-        stream.setInt(COSName.B, 2);
-        try (OutputStream out = stream.createUnfilteredStream())
-        {
-            out.write(data);
-        }
-        assertNull(stream.getFilters());
-        document.getDocument().getCatalog().setItem(COSName.SA, stream);
-        victim.write(document.getDocument());
-        assertEquals(COSName.FLATE_DECODE, stream.getFilters());
-    }
-
-    @Test
-    public void writeUncompressedStream() throws IOException
-    {
-        victim = new AsyncPdfBodyWriter(writer, null);
-        byte[] data = new byte[] { (byte) 0x41, (byte) 0x42, (byte) 0x43 };
-        COSStream stream = new COSStream();
-        stream.setInt(COSName.B, 2);
-        try (OutputStream out = stream.createUnfilteredStream())
-        {
-            out.write(data);
-        }
-        assertNull(stream.getFilters());
-        document.getDocument().getCatalog().setItem(COSName.SA, stream);
-        victim.write(document.getDocument());
-        assertNull(stream.getFilters());
-    }
-
-    @Test
-    public void writeCompressedStreamMultipleFilters() throws Exception
-    {
-        byte[] data = new byte[] { (byte) 0x41, (byte) 0x42, (byte) 0x43 };
-        COSStream stream = new COSStream();
-        stream.setInt(COSName.B, 2);
-        try (OutputStream out = stream.createUnfilteredStream())
-        {
-            out.write(data);
-        }
-        stream.setFilters(COSName.ASCII_HEX_DECODE);
-        assertEquals(COSName.ASCII_HEX_DECODE, stream.getFilters());
-        document.getDocument().getCatalog().setItem(COSName.SA, stream);
-        victim.write(document.getDocument());
-        assertArrayEquals(new COSArray(COSName.FLATE_DECODE, COSName.ASCII_HEX_DECODE).toArray(),
-                ((COSArray) stream.getFilters()).toArray());
     }
 }
