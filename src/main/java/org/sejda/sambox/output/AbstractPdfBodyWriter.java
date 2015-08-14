@@ -146,7 +146,8 @@ abstract class AbstractPdfBodyWriter implements COSVisitor, Closeable
         for (COSName key : value.keySet())
         {
             COSBase item = Optional.ofNullable(value.getItem(key)).orElse(COSNull.NULL);
-            if (item instanceof ExistingIndirectCOSObject || item instanceof COSDictionary)
+            if (item instanceof ExistingIndirectCOSObject || item instanceof COSDictionary
+                    || COSName.THREADS.equals(key))
             {
                 IndirectCOSObjectReference ref = getOrCreateIndirectReferenceFor(item);
                 value.setItem(key, ref);
@@ -170,7 +171,7 @@ abstract class AbstractPdfBodyWriter implements COSVisitor, Closeable
 
     }
 
-    protected IndirectCOSObjectReference getOrCreateIndirectReferenceFor(COSBase item)
+    private IndirectCOSObjectReference getOrCreateIndirectReferenceFor(COSBase item)
     {
         if (item instanceof ExistingIndirectCOSObject)
         {
@@ -195,18 +196,13 @@ abstract class AbstractPdfBodyWriter implements COSVisitor, Closeable
                         return newRef;
                     });
         }
-        else if (item instanceof COSDictionary)
-        {
-            return Optional.ofNullable(newObjects.get(item)).orElseGet(() -> {
-                IndirectCOSObjectReference newRef = referencesProvider.nextReferenceFor(item);
-                LOG.trace("Created new indirect reference '{}' for dictionary item", newRef);
-                stack.add(newRef);
-                newObjects.put(item, newRef);
-                return newRef;
-            });
-        }
-        throw new IllegalArgumentException("Indirect reference is not supperted for type "
-                + item.getClass());
+        return Optional.ofNullable(newObjects.get(item)).orElseGet(() -> {
+            IndirectCOSObjectReference newRef = referencesProvider.nextReferenceFor(item);
+            LOG.trace("Created new indirect reference '{}' for dictionary item", newRef);
+            stack.add(newRef);
+            newObjects.put(item, newRef);
+            return newRef;
+        });
     }
 
     /**

@@ -35,6 +35,7 @@ import org.junit.Test;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
@@ -86,6 +87,16 @@ public class SyncPdfBodyWriterTest
         assertThat(document.getDocument().getCatalog().getItem(COSName.G), new IsInstanceOf(
                 IndirectCOSObjectReference.class));
         verify(writer, times(4)).writeObjectIfNotWritten(any()); // catalog,info,pages,someDic
+    }
+
+    @Test
+    public void writeThreads() throws IOException
+    {
+        document.getDocument().getCatalog()
+                .setItem(COSName.THREADS, new COSArray(COSInteger.THREE, COSInteger.ONE));
+        victim.write(document.getDocument());
+        assertThat(document.getDocument().getCatalog().getItem(COSName.THREADS), new IsInstanceOf(
+                IndirectCOSObjectReference.class));
     }
 
     @Test
