@@ -138,11 +138,12 @@ public class COSArray extends COSBase implements List<COSBase>
      */
     public void set(int index, COSObjectable object)
     {
+        COSBase base = null;
         if (object != null)
         {
-            objects.set(index, object.getCOSObject());
+            base = object.getCOSObject();
         }
-        objects.set(index, COSNull.NULL);
+        set(index, base);
     }
 
     /**
