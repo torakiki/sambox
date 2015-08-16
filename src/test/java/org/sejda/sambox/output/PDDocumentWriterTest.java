@@ -83,6 +83,20 @@ public class PDDocumentWriterTest
     }
 
     @Test
+    public void writeBodyCompressed() throws Exception
+    {
+        PDDocument document = mock(PDDocument.class);
+        COSDocument cosDoc = mock(COSDocument.class);
+        when(document.getDocument()).thenReturn(cosDoc);
+        this.victim = new PDDocumentWriter(
+                CountingWritableByteChannel.from(new ByteArrayOutputStream()),
+                WriteOption.SYNC_BODY_WRITE, WriteOption.OBJECT_STREAMS);
+        TestUtils.setProperty(victim, "writer", this.writer);
+        victim.write(document);
+        verify(cosDoc).accept(isA(ObjectsStreamPdfBodyWriter.class));
+    }
+
+    @Test
     public void writeBodyAsync() throws Exception
     {
         PDDocument document = mock(PDDocument.class);
@@ -95,22 +109,26 @@ public class PDDocumentWriterTest
     @Test
     public void writeXrefTable() throws Exception
     {
-        PDDocument document = new PDDocument();
-        victim.write(document);
-        verify(writer).writeXrefTable();
-        verify(writer).writeTrailer(eq(document.getDocument().getTrailer()), anyLong());
+        try (PDDocument document = new PDDocument())
+        {
+            victim.write(document);
+            verify(writer).writeXrefTable();
+            verify(writer).writeTrailer(eq(document.getDocument().getTrailer()), anyLong());
+        }
     }
 
     @Test
     public void writeXrefStream() throws Exception
     {
-        PDDocument document = new PDDocument();
-        this.victim = new PDDocumentWriter(
-                CountingWritableByteChannel.from(new ByteArrayOutputStream()),
-                WriteOption.XREF_STREAM);
-        TestUtils.setProperty(victim, "writer", this.writer);
-        victim.write(document);
-        verify(writer).writeXrefStream(document.getDocument().getTrailer());
+        try (PDDocument document = new PDDocument())
+        {
+            this.victim = new PDDocumentWriter(
+                    CountingWritableByteChannel.from(new ByteArrayOutputStream()),
+                    WriteOption.XREF_STREAM);
+            TestUtils.setProperty(victim, "writer", this.writer);
+            victim.write(document);
+            verify(writer).writeXrefStream(document.getDocument().getTrailer());
+        }
     }
 
     @Test

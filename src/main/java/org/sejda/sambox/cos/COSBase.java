@@ -17,6 +17,7 @@
 package org.sejda.sambox.cos;
 
 import java.io.IOException;
+import java.util.UUID;
 
 /**
  * The base object that all objects in the PDF document will extend.
@@ -25,6 +26,12 @@ import java.io.IOException;
  */
 public abstract class COSBase implements COSObjectable
 {
+    private String id;
+
+    public COSBase()
+    {
+        this.id = UUID.randomUUID().toString();
+    }
 
     /**
      * Convert this standard java object to a COS object.
@@ -44,4 +51,13 @@ public abstract class COSBase implements COSObjectable
      * @throws IOException
      */
     public abstract void accept(COSVisitor visitor) throws IOException;
+
+    /**
+     * @return a unique identifier for this {@link COSBase} instance.
+     */
+    public String id()
+    {
+        return id;
+    }
+
 }

@@ -41,6 +41,7 @@ import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.PDDocument;
+import org.sejda.sambox.pdmodel.PDPageTree;
 
 /**
  * @author Andrea Vacondio
@@ -116,6 +117,28 @@ public class SyncPdfBodyWriterTest
             victim.write(document.getDocument());
         }
         verify(writer, times(8)).writeObjectIfNotWritten(any());
+    }
+
+    @Test
+    public void writeExistingObjectAsRefAndDirect() throws Exception
+    {
+        try (PDDocument dest = new PDDocument())
+        {
+            try (PDDocument document = PDFParser.parse(SeekableSources
+                    .inMemorySeekableSourceFrom(getClass().getResourceAsStream(
+                            "/input/simple_test.pdf"))))
+            {
+
+                dest.addPage(document.getPage(0));
+                PDPageTree pages = document.getDocumentCatalog().getPages();
+                COSArray kids = (COSArray) pages.getCOSObject().getDictionaryObject(COSName.KIDS);
+                dest.getDocumentCatalog().getCOSObject().setItem(COSName.T, kids.get(0));
+                victim.write(dest.getDocument());
+            }
+            PDPageTree pages = dest.getDocumentCatalog().getPages();
+            COSArray kids = (COSArray) pages.getCOSObject().getDictionaryObject(COSName.KIDS);
+            assertEquals(kids.get(0), dest.getDocumentCatalog().getCOSObject().getItem(COSName.T));
+        }
     }
 
     @Test

@@ -81,7 +81,7 @@ public class ExistingIndirectCOSObjectTest
     @Test
     public void sourceId()
     {
-        assertEquals("sourceId", victim.sourceId());
+        assertEquals("sourceId 10 0", victim.id());
     }
 
     @Test

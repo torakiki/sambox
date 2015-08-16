@@ -36,7 +36,6 @@ import org.sejda.sambox.cos.COSFloat;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSNull;
-import org.sejda.sambox.cos.COSObjectKey;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.cos.COSString;
 import org.sejda.sambox.cos.COSVisitor;
@@ -60,8 +59,7 @@ abstract class AbstractPdfBodyWriter implements COSVisitor, Closeable
 {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractPdfBodyWriter.class);
 
-    private Map<String, Map<COSObjectKey, IndirectCOSObjectReference>> bySourceExistingIndirectToNewXref = new HashMap<>();
-    private Map<COSBase, IndirectCOSObjectReference> newObjects = new HashMap<>();
+    private Map<String, IndirectCOSObjectReference> lookupNewRef = new HashMap<>();
     private Queue<IndirectCOSObjectReference> stack = new LinkedList<>();
     private IndirectReferenceProvider referencesProvider = new IndirectReferenceProvider();
     private List<WriteOption> opts;
@@ -173,36 +171,40 @@ abstract class AbstractPdfBodyWriter implements COSVisitor, Closeable
 
     private IndirectCOSObjectReference getOrCreateIndirectReferenceFor(COSBase item)
     {
-        if (item instanceof ExistingIndirectCOSObject)
-        {
-            String sourceId = ((ExistingIndirectCOSObject) item).sourceId();
-            Map<COSObjectKey, IndirectCOSObjectReference> indirectsForSource = Optional.ofNullable(
-                    bySourceExistingIndirectToNewXref.get(sourceId)).orElseGet(() -> {
-                HashMap<COSObjectKey, IndirectCOSObjectReference> newMap = new HashMap<>();
-                bySourceExistingIndirectToNewXref.put(sourceId, newMap);
-                return newMap;
-            });
 
-            COSObjectKey key = ((ExistingIndirectCOSObject) item).key();
-            return Optional.ofNullable(indirectsForSource.get(key)).orElseGet(
-                    () -> {
+        return Optional
+        // I met it already
+                .ofNullable(lookupNewRef.get(item.getCOSObject().id()))
+                .orElseGet(() -> {
+                    // It's an existing indirect object
+                        if (item instanceof ExistingIndirectCOSObject)
+                        {
+                            ExistingIndirectCOSObject existingItem = (ExistingIndirectCOSObject) item;
+                            return Optional
+                                    .ofNullable(lookupNewRef.get(existingItem.id()))
+                                    .orElseGet(
+                                            () -> {
+                                                IndirectCOSObjectReference newRef = referencesProvider
+                                                        .nextReferenceFor(existingItem);
+                                                LOG.trace(
+                                                        "Created new indirect reference {} replacing the existing one {}",
+                                                        newRef, existingItem.key());
+                                                stack.add(newRef);
+                                                lookupNewRef.put(existingItem.id(), newRef);
+                                                lookupNewRef.put(existingItem.getCOSObject().id(),
+                                                        newRef);
+                                                return newRef;
+                                            });
+
+                        }
+                        // it's a new COSBase
                         IndirectCOSObjectReference newRef = referencesProvider
                                 .nextReferenceFor(item);
-                        LOG.trace(
-                                "Created new indirect reference {} replacing the existing one {}",
-                                newRef, key);
+                        LOG.trace("Created new indirect reference '{}' ", newRef);
                         stack.add(newRef);
-                        indirectsForSource.put(key, newRef);
+                        lookupNewRef.put(item.getCOSObject().id(), newRef);
                         return newRef;
                     });
-        }
-        return Optional.ofNullable(newObjects.get(item)).orElseGet(() -> {
-            IndirectCOSObjectReference newRef = referencesProvider.nextReferenceFor(item);
-            LOG.trace("Created new indirect reference '{}' for dictionary item", newRef);
-            stack.add(newRef);
-            newObjects.put(item, newRef);
-            return newRef;
-        });
     }
 
     /**
@@ -259,8 +261,7 @@ abstract class AbstractPdfBodyWriter implements COSVisitor, Closeable
     @Override
     public void close()
     {
-        bySourceExistingIndirectToNewXref.clear();
-        newObjects.clear();
+        lookupNewRef.clear();
     }
 
 }

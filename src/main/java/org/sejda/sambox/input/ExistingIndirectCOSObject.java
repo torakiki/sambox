@@ -76,13 +76,10 @@ public class ExistingIndirectCOSObject extends COSBase implements DisposableCOSO
         return key;
     }
 
-    /**
-     * @return the id of the source this indirect object was read from, this is used to identify objects read from the
-     * same pdf document.
-     */
-    public String sourceId()
+    @Override
+    public String id()
     {
-        return sourceId;
+        return String.format("%s %d %d", sourceId, key.getNumber(), key.getGeneration());
     }
 
 }
