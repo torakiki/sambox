@@ -16,7 +16,7 @@
  */
 package org.sejda.sambox.output;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
@@ -29,7 +29,7 @@ import org.sejda.sambox.cos.IndirectCOSObjectReference;
  */
 class IndirectReferenceProvider
 {
-    private AtomicInteger referencesCounter = new AtomicInteger(0);
+    private AtomicLong referencesCounter = new AtomicLong(0);
 
     IndirectCOSObjectReference nextReferenceFor(COSBase baseObject)
     {
