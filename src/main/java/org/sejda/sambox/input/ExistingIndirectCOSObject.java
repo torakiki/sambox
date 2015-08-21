@@ -38,13 +38,15 @@ public class ExistingIndirectCOSObject extends COSBase implements DisposableCOSO
     private COSBase baseObject;
     private COSObjectKey key;
     private IndirectObjectsProvider provider;
-    private String sourceId;
+    private String writerKey;
 
     ExistingIndirectCOSObject(COSObjectKey key, IndirectObjectsProvider provider)
     {
         this.key = key;
         this.provider = provider;
-        this.sourceId = provider.id();
+        this.writerKey = String.format("%s %d %d", provider.id(), key.getNumber(),
+                key.getGeneration());
+        ;
     }
 
     @Override
@@ -54,6 +56,7 @@ public class ExistingIndirectCOSObject extends COSBase implements DisposableCOSO
         if (baseObject == null)
         {
             baseObject = Optional.ofNullable(provider.get(key)).orElse(COSNull.NULL);
+            baseObject.writerKeyIfAbsent(this.writerKey());
         }
         return baseObject;
     }
@@ -77,9 +80,9 @@ public class ExistingIndirectCOSObject extends COSBase implements DisposableCOSO
     }
 
     @Override
-    public String id()
+    public String writerKey()
     {
-        return String.format("%s %d %d", sourceId, key.getNumber(), key.getGeneration());
+        return writerKey;
     }
 
 }

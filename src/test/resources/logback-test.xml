@@ -7,7 +7,7 @@
 		</encoder>
 	</appender>
 
-	<logger name="org.apache.pdfbox" level="TRACE" />
+	<logger name="org.sejda.sambox" level="TRACE" />
 	<root level="TRACE">
 		<appender-ref ref="STDOUT" />
 	</root>

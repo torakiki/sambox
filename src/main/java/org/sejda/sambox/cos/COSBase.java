@@ -17,7 +17,6 @@
 package org.sejda.sambox.cos;
 
 import java.io.IOException;
-import java.util.UUID;
 
 /**
  * The base object that all objects in the PDF document will extend.
@@ -26,12 +25,7 @@ import java.util.UUID;
  */
 public abstract class COSBase implements COSObjectable
 {
-    private String id;
-
-    public COSBase()
-    {
-        this.id = UUID.randomUUID().toString();
-    }
+    private String writerKey;
 
     /**
      * Convert this standard java object to a COS object.
@@ -53,11 +47,30 @@ public abstract class COSBase implements COSObjectable
     public abstract void accept(COSVisitor visitor) throws IOException;
 
     /**
-     * @return a unique identifier for this {@link COSBase} instance.
+     * @return a key that a writer can use to identify this {@link COSBase} and find out if it has been already written.
      */
-    public String id()
+    public String writerKey()
     {
-        return id;
+        return writerKey;
+    }
+
+    /**
+     * Assign a writer key to this {@link COSBase} if it doesn't have one already. It can later be used by the writer to
+     * find out if the {@link COSBase} was already written and with what object number.
+     * 
+     * @param writerKey
+     */
+    public void writerKeyIfAbsent(String writerKey)
+    {
+        if (!hasWriterKey() && writerKey != null)
+        {
+            this.writerKey = writerKey.trim();
+        }
+    }
+
+    private boolean hasWriterKey()
+    {
+        return this.writerKey != null && this.writerKey.length() > 0;
     }
 
 }

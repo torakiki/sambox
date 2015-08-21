@@ -34,11 +34,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSArray;
+import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
+import org.sejda.sambox.input.ExistingIndirectCOSObject;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.PDPageTree;
@@ -129,10 +131,14 @@ public class SyncPdfBodyWriterTest
                             "/input/simple_test.pdf"))))
             {
 
+                // we add it direct
                 dest.addPage(document.getPage(0));
                 PDPageTree pages = document.getDocumentCatalog().getPages();
                 COSArray kids = (COSArray) pages.getCOSObject().getDictionaryObject(COSName.KIDS);
-                dest.getDocumentCatalog().getCOSObject().setItem(COSName.T, kids.get(0));
+                COSBase page = kids.get(0);
+                assertThat(page, new IsInstanceOf(ExistingIndirectCOSObject.class));
+                // we add it wrapped
+                dest.getDocumentCatalog().getCOSObject().setItem(COSName.T, page);
                 victim.write(dest.getDocument());
             }
             PDPageTree pages = dest.getDocumentCatalog().getPages();

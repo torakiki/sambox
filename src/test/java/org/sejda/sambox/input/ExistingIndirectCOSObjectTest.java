@@ -69,6 +69,14 @@ public class ExistingIndirectCOSObjectTest
     }
 
     @Test
+    public void getAssignSamWriterKey()
+    {
+        COSBase value = COSInteger.ONE;
+        when(provider.get(key)).thenReturn(value);
+        assertEquals(victim.writerKey(), victim.getCOSObject().writerKey());
+    }
+
+    @Test
     public void accept() throws IOException
     {
         COSDictionary value = mock(COSDictionary.class);
@@ -81,7 +89,7 @@ public class ExistingIndirectCOSObjectTest
     @Test
     public void sourceId()
     {
-        assertEquals("sourceId 10 0", victim.id());
+        assertEquals("sourceId 10 0", victim.writerKey());
     }
 
     @Test
