@@ -159,9 +159,8 @@ public abstract class PDShading implements COSObjectable
     }
 
     /**
-     * An array of four numbers in the form coordinate system (see below),
-     * giving the coordinates of the left, bottom, right, and top edges,
-     * respectively, of the shading's bounding box.
+     * An array of four numbers in the form coordinate system (see below), giving the coordinates of the left, bottom,
+     * right, and top edges, respectively, of the shading's bounding box.
      *
      * @return the BBox of the form
      */
@@ -226,7 +225,8 @@ public abstract class PDShading implements COSObjectable
     {
         if (colorSpace == null)
         {
-            COSBase colorSpaceDictionary = dictionary.getDictionaryObject(COSName.CS, COSName.COLORSPACE);
+            COSBase colorSpaceDictionary = dictionary.getDictionaryObject(COSName.CS,
+                    COSName.COLORSPACE);
             colorSpace = PDColorSpace.create(colorSpaceDictionary);
         }
         return colorSpace;
@@ -263,29 +263,29 @@ public abstract class PDShading implements COSObjectable
         int shadingType = resourceDictionary.getInt(COSName.SHADING_TYPE, 0);
         switch (shadingType)
         {
-            case SHADING_TYPE1:
-                shading = new PDShadingType1(resourceDictionary);
-                break;
-            case SHADING_TYPE2:
-                shading = new PDShadingType2(resourceDictionary);
-                break;
-            case SHADING_TYPE3:
-                shading = new PDShadingType3(resourceDictionary);
-                break;
-            case SHADING_TYPE4:
-                shading = new PDShadingType4(resourceDictionary);
-                break;
-            case SHADING_TYPE5:
-                shading = new PDShadingType5(resourceDictionary);
-                break;
-            case SHADING_TYPE6:
-                shading = new PDShadingType6(resourceDictionary);
-                break;
-            case SHADING_TYPE7:
-                shading = new PDShadingType7(resourceDictionary);
-                break;
-            default:
-                throw new IOException("Error: Unknown shading type " + shadingType);
+        case SHADING_TYPE1:
+            shading = new PDShadingType1(resourceDictionary);
+            break;
+        case SHADING_TYPE2:
+            shading = new PDShadingType2(resourceDictionary);
+            break;
+        case SHADING_TYPE3:
+            shading = new PDShadingType3(resourceDictionary);
+            break;
+        case SHADING_TYPE4:
+            shading = new PDShadingType4(resourceDictionary);
+            break;
+        case SHADING_TYPE5:
+            shading = new PDShadingType5(resourceDictionary);
+            break;
+        case SHADING_TYPE6:
+            shading = new PDShadingType6(resourceDictionary);
+            break;
+        case SHADING_TYPE7:
+            shading = new PDShadingType7(resourceDictionary);
+            break;
+        default:
+            throw new IOException("Error: Unknown shading type " + shadingType);
         }
         return shading;
     }
@@ -349,7 +349,7 @@ public abstract class PDShading implements COSObjectable
                 functionArray = new PDFunction[1];
                 functionArray[0] = PDFunction.create(functionObject);
             }
-            else
+            else if (functionObject instanceof COSArray)
             {
                 COSArray functionCOSArray = (COSArray) functionObject;
                 int numberOfFunctions = functionCOSArray.size();
@@ -358,6 +358,11 @@ public abstract class PDShading implements COSObjectable
                 {
                     functionArray[i] = PDFunction.create(functionCOSArray.get(i));
                 }
+            }
+            else
+            {
+                throw new IOException(
+                        "mandatory /Function element must be a dictionary or an array");
             }
         }
         return functionArray;
@@ -401,7 +406,7 @@ public abstract class PDShading implements COSObjectable
             }
         }
         // From the PDF spec:
-        // "If the value returned by the function for a given colour component 
+        // "If the value returned by the function for a given colour component
         // is out of range, it shall be adjusted to the nearest valid value."
         for (int i = 0; i < returnValues.length; ++i)
         {
@@ -420,8 +425,8 @@ public abstract class PDShading implements COSObjectable
     /**
      * Returns an AWT paint which corresponds to this shading
      *
-     * @param matrix the pattern matrix concatenated with that of the parent content stream,
-     *               this matrix which maps the pattern's internal coordinate system to user space
+     * @param matrix the pattern matrix concatenated with that of the parent content stream, this matrix which maps the
+     * pattern's internal coordinate system to user space
      * @return an AWT Paint instance
      */
     public abstract Paint toPaint(Matrix matrix);

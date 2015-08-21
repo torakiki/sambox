@@ -17,9 +17,9 @@
 package org.sejda.sambox.pdmodel.graphics.shading;
 
 import java.awt.PaintContext;
+import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
-import java.awt.geom.Point2D;
 import java.awt.image.ColorModel;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
@@ -51,8 +51,6 @@ public class RadialShadingContext extends ShadingContext implements PaintContext
     private final double x1x0;
     private final double y1y0;
     private final double r1r0;
-    private final double x1x0pow2;
-    private final double y1y0pow2;
     private final double r0pow2;
     private final float d1d0;
     private final double denom;
@@ -69,10 +67,11 @@ public class RadialShadingContext extends ShadingContext implements PaintContext
      * @param colorModel the color model to be used
      * @param xform transformation for user to device space
      * @param matrix the pattern matrix concatenated with that of the parent content stream
-     * @throws java.io.IOException if there is an error getting the color space or doing color conversion.
+     * @param deviceBounds the bounds of the area to paint, in device units
+     * @throws IOException if there is an error getting the color space or doing color conversion.
      */
     public RadialShadingContext(PDShadingType3 shading, ColorModel colorModel,
-                                AffineTransform xform, Matrix matrix)
+            AffineTransform xform, Matrix matrix, Rectangle deviceBounds)
                                 throws IOException
     {
         super(shading, colorModel, xform, matrix);
@@ -107,12 +106,9 @@ public class RadialShadingContext extends ShadingContext implements PaintContext
         x1x0 = coords[3] - coords[0];
         y1y0 = coords[4] - coords[1];
         r1r0 = coords[5] - coords[2];
-        x1x0pow2 = Math.pow(x1x0, 2);
-        y1y0pow2 = Math.pow(y1y0, 2);
         r0pow2 = Math.pow(coords[2], 2);
-        denom = x1x0pow2 + y1y0pow2 - Math.pow(r1r0, 2);
+        denom = Math.pow(x1x0, 2) + Math.pow(y1y0, 2) - Math.pow(r1r0, 2);
         d1d0 = domain[1] - domain[0];
-        double longestDistance = getLongestDistance();
 
         try
         {
@@ -126,38 +122,17 @@ public class RadialShadingContext extends ShadingContext implements PaintContext
             LOG.error(ex.getMessage(), ex);
         }
 
-        // transform the distance to actual pixel space
-        // use transform, because xform.getScaleX() does not return correct scaling on 90° rotated matrix
-        Point2D point = new Point2D.Double(longestDistance, longestDistance);
-        matrix.transform(point);
-        xform.transform(point, point);
-        factor = (int) Math.max(Math.abs(point.getX()), Math.abs(point.getY()));
-        colorTable = calcColorTable();
-    }
+        // shading space -> device space
+        AffineTransform shadingToDevice = (AffineTransform) xform.clone();
+        shadingToDevice.concatenate(matrix.createAffineTransform());
 
-    // get the longest distance of two points which are located on these two circles
-    private double getLongestDistance()
-    {
-        double centerToCenter = Math.sqrt(x1x0pow2 + y1y0pow2);
-        double rmin, rmax;
-        if (coords[2] < coords[5])
-        {
-            rmin = coords[2];
-            rmax = coords[5];
-        }
-        else
-        {
-            rmin = coords[5];
-            rmax = coords[2];
-        }
-        if (centerToCenter + rmin <= rmax)
-        {
-            return 2 * rmax;
-        }
-        else
-        {
-            return rmin + centerToCenter + coords[5];
-        }
+        // worst case for the number of steps is opposite diagonal corners, so use that
+        double dist = Math.sqrt(Math.pow(deviceBounds.getMaxX() - deviceBounds.getMinX(), 2)
+                + Math.pow(deviceBounds.getMaxY() - deviceBounds.getMinY(), 2));
+        factor = (int) Math.ceil(dist);
+
+        // build the color table for the given number of steps
+        colorTable = calcColorTable();
     }
 
     /**

@@ -208,7 +208,7 @@ public final class PDPageContentStream implements Closeable
      * @param appearance The appearance stream to write to.
      * @throws IOException If there is an error writing to the page contents.
      */
-    public PDPageContentStream(PDDocument doc, PDAppearanceStream appearance) throws IOException
+    public PDPageContentStream(PDDocument doc, PDAppearanceStream appearance)
     {
         this.document = doc;
 
@@ -228,7 +228,7 @@ public final class PDPageContentStream implements Closeable
      * @throws IOException If there is an error writing to the page contents.
      */
     public PDPageContentStream(PDDocument doc, PDAppearanceStream appearance,
-            ContentStreamWriter writer) throws IOException
+            ContentStreamWriter writer)
     {
         this.document = doc;
         this.writer = writer;

@@ -16,19 +16,22 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
+import java.io.IOException;
+import java.util.List;
+
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 
 /**
- * A combo box consisting of a drop-down list.
- * May be accompanied by an editable text box in which non-predefined values may be entered.
+ * A combo box consisting of a drop-down list. May be accompanied by an editable text box in which non-predefined values
+ * may be entered.
  * 
  * @author John Hewson
  */
 public final class PDComboBox extends PDChoice
 {
     private static final int FLAG_EDIT = 1 << 18;
-    
+
     /**
      * @see PDField#PDField(PDAcroForm)
      *
@@ -38,7 +41,7 @@ public final class PDComboBox extends PDChoice
     {
         super(acroForm);
         setCombo(true);
-    }    
+    }
 
     /**
      * Constructor.
@@ -70,5 +73,22 @@ public final class PDComboBox extends PDChoice
     public void setEdit(boolean edit)
     {
         dictionary.setFlag(COSName.FF, FLAG_EDIT, edit);
+    }
+
+    @Override
+    void constructAppearances() throws IOException
+    {
+        AppearanceGeneratorHelper apHelper;
+        apHelper = new AppearanceGeneratorHelper(this);
+        List<String> values = getValue();
+
+        if (!values.isEmpty())
+        {
+            apHelper.setAppearanceValue(values.get(0));
+        }
+        else
+        {
+            apHelper.setAppearanceValue("");
+        }
     }
 }

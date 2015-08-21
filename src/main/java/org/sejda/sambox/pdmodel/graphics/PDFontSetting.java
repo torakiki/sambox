@@ -60,6 +60,7 @@ public class PDFontSetting implements COSObjectable
     /**
      * {@inheritDoc}
      */
+    @Override
     public COSBase getCOSObject()
     {
         return fontSetting;
@@ -75,7 +76,7 @@ public class PDFontSetting implements COSObjectable
     public PDFont getFont() throws IOException
     {
         PDFont retval = null;
-        COSBase font = fontSetting.get( 0 );
+        COSBase font = fontSetting.getObject(0);
         if( font instanceof COSDictionary )
         {
             retval = PDFontFactory.createFont( (COSDictionary)font );

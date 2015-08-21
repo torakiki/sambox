@@ -30,11 +30,14 @@ import org.sejda.sambox.output.ContentStreamWriter;
 import org.sejda.sambox.pdmodel.PDPageContentStream;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.font.PDFont;
+import org.sejda.sambox.pdmodel.graphics.color.PDColor;
 import org.sejda.sambox.pdmodel.interactive.action.PDFormFieldAdditionalActions;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
+import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceCharacteristicsDictionary;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceDictionary;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceEntry;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceStream;
+import org.sejda.sambox.pdmodel.interactive.annotation.PDBorderStyleDictionary;
 
 /**
  * Create the AcroForms field appearance helper.
@@ -48,7 +51,7 @@ class AppearanceGeneratorHelper
     private static final Operator EMC = Operator.getOperator("EMC");
 
     private final PDVariableText field;
-    private final PDAppearanceString defaultAppearance;
+    private final PDDefaultAppearanceString defaultAppearance;
     private String value;
 
     /**
@@ -59,6 +62,21 @@ class AppearanceGeneratorHelper
      * Regardless of other settings in an existing appearance stream Adobe will always use this value.
      */
     private static final int[] HIGHLIGHT_COLOR = { 153, 193, 215 };
+
+    /**
+     * The scaling factor for font units to PDF units
+     */
+    private static final int FONTSCALE = 1000;
+
+    /**
+     * The default font size used for multiline text
+     */
+    private static final float DEFAULT_FONT_SIZE = 12;
+
+    /**
+     * The default padding applied by Acrobat to the fields bbox.
+     */
+    private static final float DEFAULT_PADDING = 0.5f;
 
     /**
      * Constructs a COSAppearance from the given field.
@@ -113,8 +131,66 @@ class AppearanceGeneratorHelper
                     appearanceDict.setNormalAppearance(appearanceStream);
                     // TODO support appearances other than "normal"
                 }
-
+                /*
+                 * Adobe Acrobat always recreates the complete appearance stream if there is an appearance
+                 * characteristics entry (the widget dictionaries MK entry). In addition if there is no content yet also
+                 * create the apperance stream from the entries.
+                 */
+                if (widget.getAppearanceCharacteristics() != null
+                        || appearanceStream.getContentStream().getLength() == 0)
+                {
+                    initializeAppearanceContent(widget, appearanceStream);
+                }
                 setAppearanceContent(widget, appearanceStream);
+            }
+        }
+    }
+
+    /**
+     * Initialize the content of the appearance stream.
+     * 
+     * Get settings like border style, border width and colors to be used to draw a rectangle and background color
+     * around the widget
+     * 
+     * @param widget the field widget
+     * @param appearanceStream the appearance stream to be used
+     * @throws IOException in case we can't write to the appearance stream
+     */
+    private void initializeAppearanceContent(PDAnnotationWidget widget,
+            PDAppearanceStream appearanceStream) throws IOException
+    {
+        try (PDPageContentStream contents = new PDPageContentStream(field.getAcroForm()
+                .getDocument(), appearanceStream))
+        {
+            PDAppearanceCharacteristicsDictionary appearanceCharacteristics = widget
+                    .getAppearanceCharacteristics();
+
+            // TODO: support more entries like patterns, background color etc.
+            if (appearanceCharacteristics != null)
+            {
+                float lineWidth = 0f;
+                PDColor borderColour = appearanceCharacteristics.getBorderColour();
+                if (borderColour != null)
+                {
+                    contents.setNonStrokingColor(borderColour);
+                    lineWidth = 1f;
+                }
+                PDBorderStyleDictionary borderStyle = widget.getBorderStyle();
+                if (borderStyle != null && borderStyle.getWidth() > 0)
+                {
+                    lineWidth = borderStyle.getWidth();
+                }
+
+                if (lineWidth > 0)
+                {
+                    contents.setLineWidth(lineWidth);
+                    PDRectangle bbox = resolveBoundingBox(widget, appearanceStream);
+                    PDRectangle clipRect = applyPadding(bbox,
+                            Math.max(DEFAULT_PADDING, lineWidth / 2));
+                    contents.addRect(clipRect.getLowerLeftX(), clipRect.getLowerLeftY(),
+                            clipRect.getWidth(), clipRect.getHeight());
+                    contents.closeAndStroke();
+                }
             }
         }
     }
@@ -223,22 +299,43 @@ class AppearanceGeneratorHelper
 
         // write the /DA string
         field.getDefaultAppearanceString().writeTo(contents, fontSize);
-
         // calculate the y-position of the baseline
         float y;
 
-        // calculate the Y fontScale at fontSize
-        float fontScaleY = font.getFontMatrix().getScaleY() * fontSize;
+        // calculate font metrics at font size
+        float fontScaleY = fontSize / FONTSCALE;
+        ;
+        float fontBoundingBoxAtSize = font.getBoundingBox().getHeight() * fontScaleY;
+        float fontCapAtSize = font.getFontDescriptor().getCapHeight() * fontScaleY;
+        float fontDescentAtSize = font.getFontDescriptor().getDescent() * fontScaleY;
 
         if (field instanceof PDTextField && ((PDTextField) field).isMultiline())
         {
-            float height = font.getBoundingBox().getHeight() * fontScaleY;
-            y = contentRect.getUpperRightY() - height;
+            y = contentRect.getUpperRightY() - fontBoundingBoxAtSize;
         }
         else
         {
-            float capHeigth = font.getFontDescriptor().getCapHeight() * fontScaleY;
-            y = Math.max((bbox.getHeight() - capHeigth) / 2f, 0);
+            // Adobe shows the text 'shiftet up' in case the caps don't fit into the clipping area
+            if (fontCapAtSize > clipRect.getHeight())
+            {
+                y = clipRect.getLowerLeftY() + -fontDescentAtSize;
+            }
+            else
+            {
+                // calculate the position based on the content rectangle
+                y = clipRect.getLowerLeftY() + (clipRect.getHeight() - fontCapAtSize) / 2;
+
+                // check to ensure that ascents and descents fit
+                if (y - clipRect.getLowerLeftY() < -fontDescentAtSize)
+                {
+
+                    float fontDescentBased = -fontDescentAtSize + contentRect.getLowerLeftY();
+                    float fontCapBased = contentRect.getHeight() - contentRect.getLowerLeftY()
+                            - fontCapAtSize;
+
+                    y = Math.min(fontDescentBased, Math.max(y, fontCapBased));
+                }
+            }
         }
 
         // show the text
@@ -320,7 +417,7 @@ class AppearanceGeneratorHelper
         PDRectangle paddingEdge = applyPadding(appearanceStream.getBBox(), 1);
 
         float combWidth = appearanceStream.getBBox().getWidth() / maxLen;
-        float ascentAtFontSize = font.getFontDescriptor().getAscent() / 1000 * fontSize;
+        float ascentAtFontSize = font.getFontDescriptor().getAscent() / FONTSCALE * fontSize;
         float baselineOffset = paddingEdge.getLowerLeftY()
                 + (appearanceStream.getBBox().getHeight() - ascentAtFontSize) / 2;
 
@@ -334,7 +431,7 @@ class AppearanceGeneratorHelper
         for (int i = 0; i < numChars; i++)
         {
             combString = value.substring(i, i + 1);
-            currCharWidth = font.getStringWidth(combString) / 1000 * fontSize / 2;
+            currCharWidth = font.getStringWidth(combString) / FONTSCALE * fontSize / 2;
 
             xOffset = xOffset + prevCharWidth / 2 - currCharWidth / 2;
 
@@ -375,7 +472,7 @@ class AppearanceGeneratorHelper
         // display starts with the first entry in Opt.
         int topIndex = ((PDListBox) field).getTopIndex();
 
-        float highlightBoxHeight = font.getBoundingBox().getHeight() * fontSize / 1000 - 2f;
+        float highlightBoxHeight = font.getBoundingBox().getHeight() * fontSize / FONTSCALE - 2f;
 
         // the padding area
         PDRectangle paddingEdge = applyPadding(appearanceStream.getBBox(), 1);
@@ -396,14 +493,10 @@ class AppearanceGeneratorHelper
         contents.setNonStrokingColor(0);
 
         int q = field.getQ();
-        if (q == PDVariableText.QUADDING_LEFT)
-        {
-            // do nothing because left is default
-        }
-        else if (q == PDVariableText.QUADDING_CENTERED || q == PDVariableText.QUADDING_RIGHT)
+        if (q == PDVariableText.QUADDING_CENTERED || q == PDVariableText.QUADDING_RIGHT)
         {
             float fieldWidth = appearanceStream.getBBox().getWidth();
-            float stringWidth = (font.getStringWidth(value) / 1000) * fontSize;
+            float stringWidth = (font.getStringWidth(value) / FONTSCALE) * fontSize;
             float adjustAmount = fieldWidth - stringWidth - 4;
 
             if (q == PDVariableText.QUADDING_CENTERED)
@@ -413,34 +506,35 @@ class AppearanceGeneratorHelper
 
             contents.newLineAtOffset(adjustAmount, 0);
         }
-        else
+        else if (q != PDVariableText.QUADDING_LEFT)
         {
             throw new IOException("Error: Unknown justification value:" + q);
         }
 
         List<String> options = ((PDListBox) field).getOptionsDisplayValues();
+        int numOptions = options.size();
 
         float yTextPos = contentRect.getUpperRightY();
 
         int topIndex = ((PDListBox) field).getTopIndex();
 
-        for (int i = topIndex; i < options.size(); i++)
+        for (int i = topIndex; i < numOptions; i++)
         {
 
             if (i == topIndex)
             {
-                yTextPos = yTextPos - font.getFontDescriptor().getAscent() / 1000 * fontSize;
+                yTextPos = yTextPos - font.getFontDescriptor().getAscent() / FONTSCALE * fontSize;
             }
             else
             {
-                yTextPos = yTextPos - font.getBoundingBox().getHeight() / 1000 * fontSize;
+                yTextPos = yTextPos - font.getBoundingBox().getHeight() / FONTSCALE * fontSize;
                 contents.beginText();
             }
 
             contents.newLineAtOffset(contentRect.getLowerLeftX(), yTextPos);
             contents.showText(options.get(i));
 
-            if (i - topIndex != (options.size() - 1))
+            if (i - topIndex != (numOptions - 1))
             {
                 contents.endText();
             }
@@ -463,10 +557,10 @@ class AppearanceGeneratorHelper
             if (isMultiLine())
             {
                 // Acrobat defaults to 12 for multiline text with size 0
-                return 12f;
+                return DEFAULT_FONT_SIZE;
             }
-            float yScalingFactor = 1000 * font.getFontMatrix().getScaleY();
-            float xScalingFactor = 1000 * font.getFontMatrix().getScaleX();
+            float yScalingFactor = FONTSCALE * font.getFontMatrix().getScaleY();
+            float xScalingFactor = FONTSCALE * font.getFontMatrix().getScaleX();
 
             // fit width
             float width = font.getStringWidth(value) * font.getFontMatrix().getScaleX();

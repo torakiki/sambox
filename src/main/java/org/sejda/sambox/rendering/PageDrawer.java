@@ -38,7 +38,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.sejda.sambox.contentstream.PDFGraphicsStreamEngine;
-import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.font.PDCIDFontType0;
@@ -278,24 +277,15 @@ public class PageDrawer extends PDFGraphicsStreamEngine
     }
 
     @Override
-    public void beginText() throws IOException
+    public void beginText()
     {
         setClip();
-    }
-    
-    @Override
-    public void showTextString(byte[] string) throws IOException
-    {
         beginTextClip();
-        super.showTextString(string);
-        endTextClip();
     }
 
     @Override
-    public void showTextStrings(COSArray array) throws IOException
+    public void endText()
     {
-        beginTextClip();
-        super.showTextStrings(array);
         endTextClip();
     }
 
@@ -304,14 +294,8 @@ public class PageDrawer extends PDFGraphicsStreamEngine
      */
     private void beginTextClip()
     {
-        PDGraphicsState state = getGraphicsState();
-        RenderingMode renderingMode = state.getTextState().getRenderingMode();
-
         // buffer the text clip because it represents a single clipping area
-        if (renderingMode.isClip())
-        {
-            textClippingArea = new Area();
-        }
+        textClippingArea = new Area();
     }
 
     /**
@@ -323,7 +307,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         RenderingMode renderingMode = state.getTextState().getRenderingMode();
         
         // apply the buffered clip as one area
-        if (renderingMode.isClip())
+        if (renderingMode.isClip() && !textClippingArea.isEmpty())
         {
             state.intersectClippingPath(textClippingArea);
             textClippingArea = null;
@@ -506,11 +490,17 @@ public class PageDrawer extends PDFGraphicsStreamEngine
 
     private Paint applySoftMaskToPaint(Paint parentPaint, PDSoftMask softMask) throws IOException
     {
-        if (softMask != null) 
+        if (softMask != null)
         {
+            // TODO PDFBOX-2934
+            if (COSName.ALPHA.equals(softMask.getSubType()))
+            {
+                LOG.info("alpha smask not implemented yet, is ignored");
+                return parentPaint;
+            }
             return new SoftMaskPaint(parentPaint, createSoftMaskRaster(softMask));
         }
-        else 
+        else
         {
             return parentPaint;
         }
@@ -553,7 +543,11 @@ public class PageDrawer extends PDFGraphicsStreamEngine
             for (int i = 0; i < dashArray.length; ++i)
             {
                 // minimum line dash width avoids JVM crash, see PDFBOX-2373
-                dashArray[i] = Math.max(transformWidth(dashArray[i]), 0.016f);
+                float w = transformWidth(dashArray[i]);
+                if (w != 0)
+                {
+                    dashArray[i] = Math.max(w, 0.016f);
+                }
             }
             phaseStart = (int)transformWidth(phaseStart);
 
@@ -600,6 +594,18 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         }
 
         graphics.fill(linePath);
+        if (!(graphics.getPaint() instanceof Color))
+        {
+            // apply clip to path to avoid oversized device bounds in shading contexts (PDFBOX-2901)
+            Area area = new Area(linePath);
+            area.intersect(new Area(graphics.getClip()));
+            graphics.fill(area);
+        }
+        else
+        {
+            graphics.fill(linePath);
+        }
+
         linePath.reset();
 
         if (noAntiAlias)

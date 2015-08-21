@@ -30,21 +30,27 @@ import org.sejda.sambox.pdmodel.PDPageContentStream;
 import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.font.PDFont;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceStream;
+
 /**
  * Represents a default appearance string, as found in the /DA entry of free text annotations.
  * 
- * <p>The default appearance string (DA) contains any graphics state or text state operators needed
- * to establish the graphics state parameters, such as text size and colour, for displaying the
- * field’s variable text. Only operators that are allowed within text objects shall occur in this
- * string.
+ * <p>
+ * The default appearance string (DA) contains any graphics state or text state operators needed to establish the
+ * graphics state parameters, such as text size and colour, for displaying the field’s variable text. Only operators
+ * that are allowed within text objects shall occur in this string.
  * 
  * Note: This class is not yet public, as its API is still unstable.
  */
-class PDAppearanceString
+class PDDefaultAppearanceString
 {
+    /**
+     * The default font size used by Acrobat.
+     */
+    private static final float DEFAULT_FONT_SIZE = 12;
+
     private final List<Object> tokens;
     private final PDResources defaultResources;
-    
+
     /**
      * Constructor for reading an existing DA string.
      * 
@@ -52,18 +58,19 @@ class PDAppearanceString
      * @param defaultAppearance DA entry
      * @throws IOException If the DA could not be parsed
      */
-    PDAppearanceString(COSString defaultAppearance, PDResources defaultResources) throws IOException
+    PDDefaultAppearanceString(COSString defaultAppearance, PDResources defaultResources)
+            throws IOException
     {
         if (defaultAppearance == null)
         {
             throw new IllegalArgumentException("/DA is a required entry");
         }
-        
+
         if (defaultResources == null)
         {
             throw new IllegalArgumentException("/DR is a required entry");
         }
-        
+
         try (ContentStreamParser parser = new ContentStreamParser(
                 inMemorySeekableSourceFrom(defaultAppearance.getBytes())))
         {
@@ -71,7 +78,7 @@ class PDAppearanceString
         }
         this.defaultResources = defaultResources;
     }
-    
+
     /**
      * Returns the font size.
      */
@@ -89,9 +96,9 @@ class PDAppearanceString
         }
 
         // default font size is 12 in Acrobat
-        return 12;
+        return DEFAULT_FONT_SIZE;
     }
-    
+
     /**
      * w in an appearance stream represents the lineWidth.
      *
@@ -122,13 +129,13 @@ class PDAppearanceString
     {
         COSName name = getFontResourceName();
         PDFont font = defaultResources.getFont(name);
-        
+
         // todo: handle cases where font == null with special mapping logic (see PDFBOX-2661)
         if (font == null)
         {
             throw new IOException("Could not find font: /" + name.getName());
         }
-        
+
         return font;
     }
 
@@ -156,8 +163,8 @@ class PDAppearanceString
     }
 
     /**
-     * Copies any needed resources from the document’s DR dictionary into the stream’s Resources
-     * dictionary. Resources with the same name shall be left intact.
+     * Copies any needed resources from the document’s DR dictionary into the stream’s Resources dictionary. Resources
+     * with the same name shall be left intact.
      */
     void copyNeededResourcesTo(PDAppearanceStream appearanceStream) throws IOException
     {
@@ -168,7 +175,7 @@ class PDAppearanceString
             streamResources = new PDResources();
             appearanceStream.setResources(streamResources);
         }
-        
+
         // fonts
         COSName fontName = getFontResourceName();
         if (streamResources.getFont(fontName) == null)

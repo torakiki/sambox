@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.pdmodel.graphics.blend;
 
+import java.awt.Graphics;
 import java.awt.Paint;
 import java.awt.PaintContext;
 import java.awt.Point;
@@ -122,6 +123,9 @@ public final class SoftMaskPaint implements Paint
                             colorModel.createCompatibleSampleModel(w, h), new Point(0, 0));
                     BufferedImage resultImage = new BufferedImage(colorModel, result, false, null);
                     resultImage.getGraphics().drawImage(parentImage, 0, 0, null);
+                    Graphics graphics = resultImage.getGraphics();
+                    graphics.drawImage(parentImage, 0, 0, null);
+                    graphics.dispose();
                 }
             }
             else
