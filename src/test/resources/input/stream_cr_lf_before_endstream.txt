@@ -5,3 +5,4 @@ BT
 (A stream with an indirect length) Tj
 ET
 endstream
+endobj
