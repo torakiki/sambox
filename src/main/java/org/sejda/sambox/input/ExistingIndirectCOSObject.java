@@ -85,4 +85,10 @@ public class ExistingIndirectCOSObject extends COSBase implements DisposableCOSO
         return writerKey;
     }
 
+    @Override
+    public String toString()
+    {
+        return String.format("%s[%s]", super.toString(), key.toString());
+    }
+
 }
