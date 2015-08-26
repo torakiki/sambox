@@ -135,7 +135,9 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
         for (int i = 0, size = kids.size(); i < size; i++)
         {
             // TODO investigate this, does it load? Should it load?
-            result.add((COSDictionary) kids.getObject(i).getCOSObject());
+            if(kids.getObject(i) != null) {
+                result.add((COSDictionary) kids.getObject(i).getCOSObject());
+            }
         }
 
         return result;
