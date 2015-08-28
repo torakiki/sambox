@@ -72,19 +72,19 @@ class DefaultPDFWriter implements Closeable
     {
         long startxref = writer().offset();
         LOG.debug("Writing xref table at offset " + startxref);
-        if (writer.put(XrefEntry.DEFAULT_FREE_ENTRY) != null)
+        if (writer.context().putWritten(XrefEntry.DEFAULT_FREE_ENTRY) != null)
         {
             LOG.warn("Reserved object number 0 has been overwritten with the expected free entry");
         }
         writer().write("xref");
         writer().writeEOL();
-        writer().write("0 " + writer.size());
+        writer().write("0 " + writer.context().written());
         writer().writeEOL();
-        for (long key = 0; key <= writer.highest().getObjectNumber(); key++)
+        for (long key = 0; key <= writer.context().highestWritten().getObjectNumber(); key++)
         {
             writer().write(
-                    Optional.ofNullable(writer.get(key)).orElse(XrefEntry.DEFAULT_FREE_ENTRY)
-                            .toXrefTableEntry());
+                    Optional.ofNullable(writer.context().getWritten(key))
+                            .orElse(XrefEntry.DEFAULT_FREE_ENTRY).toXrefTableEntry());
         }
         return startxref;
     }
@@ -101,7 +101,7 @@ class DefaultPDFWriter implements Closeable
         trailer.removeItem(COSName.F);
         // TODO fix this once encryption is implemented
         trailer.removeItem(COSName.ENCRYPT);
-        trailer.setLong(COSName.SIZE, writer.highest().getObjectNumber() + 1);
+        trailer.setLong(COSName.SIZE, writer.context().highestWritten().getObjectNumber() + 1);
         writer.write("trailer".getBytes(Charsets.US_ASCII));
         writer.writeEOL();
         trailer.getCOSObject().accept(writer.writer());
@@ -117,11 +117,11 @@ class DefaultPDFWriter implements Closeable
     {
         long startxref = writer().offset();
         LOG.debug("Writing xref stream at offset " + startxref);
-        XrefEntry entry = XrefEntry
-                .inUseEntry(writer.highest().getObjectNumber() + 1, startxref, 0);
-        writer.put(entry);
+        XrefEntry entry = XrefEntry.inUseEntry(
+                writer.context().highestWritten().getObjectNumber() + 1, startxref, 0);
+        writer.context().putWritten(entry);
         writer.writeObject(new IndirectCOSObjectReference(entry.getObjectNumber(), entry
-                .getGenerationNumber(), new XrefStream(trailer, writer)));
+                .getGenerationNumber(), new XrefStream(trailer, writer.context())));
         writer.write("startxref".getBytes(Charsets.US_ASCII));
         writer.writeEOL();
         writer.write(Long.toString(startxref));

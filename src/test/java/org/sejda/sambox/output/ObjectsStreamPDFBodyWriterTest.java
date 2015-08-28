@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.output;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -25,6 +27,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 
+import org.hamcrest.core.IsInstanceOf;
 import org.junit.Before;
 import org.junit.Test;
 import org.sejda.sambox.SAMBox;
@@ -37,22 +40,25 @@ import org.sejda.sambox.xref.CompressedXrefEntry;
  * @author Andrea Vacondio
  *
  */
-public class ObjectsStreamPdfBodyWriterTest
+public class ObjectsStreamPDFBodyWriterTest
 {
-    private AbstractPdfBodyWriter writer;
-    private ObjectsStreamPdfBodyWriter victim;
+    private AbstractPDFBodyWriter writer;
+    private ObjectsStreamPDFBodyWriter victim;
+    private PDFWriteContext context;
 
     @Before
     public void setUp()
     {
-        this.writer = mock(AbstractPdfBodyWriter.class);
-        this.victim = new ObjectsStreamPdfBodyWriter(writer, null);
+        this.writer = mock(AbstractPDFBodyWriter.class);
+        context = new PDFWriteContext();
+        when(writer.context()).thenReturn(context);
+        this.victim = new ObjectsStreamPDFBodyWriter(writer);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void nullConstructor()
     {
-        new ObjectsStreamPdfBodyWriter(null, null);
+        new ObjectsStreamPDFBodyWriter(null);
     }
 
     @Test
@@ -66,11 +72,10 @@ public class ObjectsStreamPdfBodyWriterTest
     @Test
     public void compressedXrefEntryIsAdded() throws IOException
     {
-        IndirectObjectsWriter indirectObjWriter = mock(IndirectObjectsWriter.class);
-        when(writer.writer()).thenReturn(indirectObjWriter);
         IndirectCOSObjectReference ref = new IndirectCOSObjectReference(2, 0, COSInteger.THREE);
         this.victim.writeObject(ref);
-        verify(indirectObjWriter).put(any(CompressedXrefEntry.class));
+        assertEquals(1, context.written());
+        assertThat(context.getWritten(2L), new IsInstanceOf(CompressedXrefEntry.class));
     }
 
     @Test
@@ -83,8 +88,6 @@ public class ObjectsStreamPdfBodyWriterTest
     @Test
     public void fillingStreamWritesItDown() throws IOException
     {
-        IndirectObjectsWriter indirectObjWriter = mock(IndirectObjectsWriter.class);
-        when(writer.writer()).thenReturn(indirectObjWriter);
         System.setProperty(SAMBox.OBJECTS_STREAM_SIZE_PROPERTY, "2");
         victim.writeObject(new IndirectCOSObjectReference(2, 0, COSInteger.THREE));
         verify(writer, never()).writeObject(any());
@@ -97,8 +100,6 @@ public class ObjectsStreamPdfBodyWriterTest
     @Test
     public void onCompletionWritesDown() throws IOException
     {
-        IndirectObjectsWriter indirectObjWriter = mock(IndirectObjectsWriter.class);
-        when(writer.writer()).thenReturn(indirectObjWriter);
         victim.writeObject(new IndirectCOSObjectReference(2, 0, COSInteger.THREE));
         victim.writeObject(new IndirectCOSObjectReference(3, 0, COSInteger.THREE));
         verify(writer, never()).writeObject(any());

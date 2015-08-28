@@ -17,6 +17,8 @@
 package org.sejda.sambox.input;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -69,11 +71,14 @@ public class ExistingIndirectCOSObjectTest
     }
 
     @Test
-    public void getAssignSamWriterKey()
+    public void getAssignSameId()
     {
-        COSBase value = COSInteger.ONE;
+        COSBase value = new COSDictionary();
+        assertFalse(value.hasId());
         when(provider.get(key)).thenReturn(value);
-        assertEquals(victim.writerKey(), victim.getCOSObject().writerKey());
+        assertEquals(victim.id(), victim.getCOSObject().id());
+        assertTrue(value.hasId());
+
     }
 
     @Test
@@ -89,7 +94,7 @@ public class ExistingIndirectCOSObjectTest
     @Test
     public void sourceId()
     {
-        assertEquals("sourceId 10 0", victim.writerKey());
+        assertEquals("sourceId 10 0", victim.id());
     }
 
     @Test
