@@ -16,17 +16,15 @@
  */
 package org.sejda.sambox.output;
 
+import static org.sejda.util.RequireUtils.requireNotNullArg;
+import static org.sejda.util.RequireUtils.requireState;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
-import java.util.UUID;
 
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
@@ -42,34 +40,32 @@ import org.sejda.sambox.cos.COSString;
 import org.sejda.sambox.cos.COSVisitor;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
 import org.sejda.sambox.input.ExistingIndirectCOSObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Base component providing methods to write the body of a pdf document. This implementation starts from the document
- * trailer and visits the whole document graph replacing {@link COSDictionary} and {@link ExistingIndirectCOSObject}
- * with a newly created {@link IndirectCOSObjectReference}. {@link IndirectCOSObjectReference}s are cached and reused if
- * the corresponding {@link COSDictionary}/{@link ExistingIndirectCOSObject} is found again while exploring the graph.
- * Once all the values of a {@link COSDictionary} or {@link COSArray} have been processed, the {@link COSDictionary}/
- * {@link COSArray} is written as an object, this allows an async implementation to write objects while the writer is
- * still performing its algorithm.
+ * trailer and visits the whole document graph updating the {@link PDFWriteContext}. An
+ * {@link IndirectCOSObjectReference} is created by the context for each {@link COSDictionary} and
+ * {@link ExistingIndirectCOSObject}, if not previously created. Once all the values of a {@link COSDictionary} or
+ * {@link COSArray} have been explored, the {@link COSDictionary}/ {@link COSArray} is written as a pdf object, this
+ * allows an async implementation to write objects while the body writer is still performing its algorithm.
  * 
  * @author Andrea Vacondio
  */
-abstract class AbstractPdfBodyWriter implements COSVisitor, Closeable
+abstract class AbstractPDFBodyWriter implements COSVisitor, Closeable
 {
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractPdfBodyWriter.class);
-
-    private String writerId = UUID.randomUUID().toString();
-
-    private Map<String, IndirectCOSObjectReference> lookupNewRef = new HashMap<>();
     private Queue<IndirectCOSObjectReference> stack = new LinkedList<>();
-    private IndirectReferenceProvider referencesProvider = new IndirectReferenceProvider();
-    private List<WriteOption> opts;
+    private PDFWriteContext context;
+    private boolean open = true;
 
-    AbstractPdfBodyWriter(List<WriteOption> opts)
+    AbstractPDFBodyWriter(PDFWriteContext context)
     {
-        this.opts = Optional.ofNullable(opts).orElse(Collections.emptyList());
+        requireNotNullArg(context, "Write context cannot be null");
+        this.context = context;
+    }
+
+    PDFWriteContext context()
+    {
+        return context;
     }
 
     /**
@@ -80,6 +76,7 @@ abstract class AbstractPdfBodyWriter implements COSVisitor, Closeable
      */
     public void write(COSDocument document) throws IOException
     {
+        requireState(open, "The writer is closed");
         document.accept(this);
     }
 
@@ -93,8 +90,7 @@ abstract class AbstractPdfBodyWriter implements COSVisitor, Closeable
             COSBase value = document.getTrailer().getItem(k);
             if (value != null)
             {
-                IndirectCOSObjectReference ref = getOrCreateIndirectReferenceFor(value);
-                document.getTrailer().setItem(k, ref);
+                createIndirectReferenceIfNeededFor(value);
             }
         }
         IndirectCOSObjectReference item;
@@ -121,8 +117,6 @@ abstract class AbstractPdfBodyWriter implements COSVisitor, Closeable
      */
     abstract void onCompletion() throws IOException;
 
-    abstract IndirectObjectsWriter writer();
-
     @Override
     public void visit(COSArray array) throws IOException
     {
@@ -131,8 +125,7 @@ abstract class AbstractPdfBodyWriter implements COSVisitor, Closeable
             COSBase item = Optional.ofNullable(array.get(i)).orElse(COSNull.NULL);
             if (item instanceof ExistingIndirectCOSObject || item instanceof COSDictionary)
             {
-                IndirectCOSObjectReference ref = getOrCreateIndirectReferenceFor(item);
-                array.set(i, ref);
+                createIndirectReferenceIfNeededFor(item);
             }
             else
             {
@@ -150,8 +143,7 @@ abstract class AbstractPdfBodyWriter implements COSVisitor, Closeable
             if (item instanceof ExistingIndirectCOSObject || item instanceof COSDictionary
                     || COSName.THREADS.equals(key))
             {
-                IndirectCOSObjectReference ref = getOrCreateIndirectReferenceFor(item);
-                value.setItem(key, ref);
+                createIndirectReferenceIfNeededFor(item);
             }
             else
             {
@@ -164,7 +156,7 @@ abstract class AbstractPdfBodyWriter implements COSVisitor, Closeable
     public void visit(COSStream value) throws IOException
     {
         value.removeItem(COSName.LENGTH);
-        if (opts.contains(WriteOption.COMPRESS_STREAMS))
+        if (context.hasWriteOption(WriteOption.COMPRESS_STREAMS))
         {
             value.addCompression();
         }
@@ -172,46 +164,12 @@ abstract class AbstractPdfBodyWriter implements COSVisitor, Closeable
 
     }
 
-    private IndirectCOSObjectReference getOrCreateIndirectReferenceFor(COSBase item)
+    private void createIndirectReferenceIfNeededFor(COSBase item)
     {
-
-        return Optional
-        // I met it already
-                .ofNullable(lookupNewRef.get(item.writerKey()))
-                .orElseGet(() -> {
-                    // It's an existing indirect object
-                        if (item instanceof ExistingIndirectCOSObject)
-                        {
-                            ExistingIndirectCOSObject existingItem = (ExistingIndirectCOSObject) item;
-                            IndirectCOSObjectReference newRef = referencesProvider
-                                    .nextReferenceFor(existingItem);
-                            LOG.trace(
-                                    "Created new indirect reference {} replacing the existing one {}",
-                                    newRef, existingItem.key());
-                            stack.add(newRef);
-                            lookupNewRef.put(existingItem.writerKey(), newRef);
-                            return newRef;
-
-                        }
-                        // it's a new COSBase
-                        IndirectCOSObjectReference newRef = referencesProvider
-                                .nextReferenceFor(item);
-                        LOG.trace("Created new indirect reference '{}' ", newRef);
-                        stack.add(newRef);
-                        item.writerKeyIfAbsent(String.format("%s %d", writerId, newRef.xrefEntry()
-                                .key().getNumber()));
-                        lookupNewRef.put(item.writerKey(), newRef);
-                        return newRef;
-                    });
-    }
-
-    /**
-     * @return the component that keeps track of the object numbers used by the body writer and provides the next
-     * available reference.
-     */
-    protected IndirectReferenceProvider referencesProvider()
-    {
-        return referencesProvider;
+        if (!context.hasIndirectReferenceFor(item))
+        {
+            stack.add(context.getOrCreateIndirectReferenceFor(item));
+        }
     }
 
     @Override
@@ -259,7 +217,8 @@ abstract class AbstractPdfBodyWriter implements COSVisitor, Closeable
     @Override
     public void close()
     {
-        lookupNewRef.clear();
+        context = null;
+        this.open = false;
     }
 
 }

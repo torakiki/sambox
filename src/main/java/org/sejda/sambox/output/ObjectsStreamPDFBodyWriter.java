@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.output;
 
+import static java.util.Optional.ofNullable;
 import static org.sejda.sambox.util.CharUtils.ASCII_SPACE;
 import static org.sejda.util.RequireUtils.requireNotNullArg;
 
@@ -24,7 +25,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.SequenceInputStream;
-import java.util.List;
 import java.util.zip.DeflaterInputStream;
 
 import org.sejda.io.CountingWritableByteChannel;
@@ -41,25 +41,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * {@link AbstractPdfBodyWriter} implementation where objects are written to an Object Stream and later the stream is
- * written as COSStream using the wrapped {@link AbstractPdfBodyWriter}
+ * {@link AbstractPDFBodyWriter} implementation where objects are written to an Object Stream and later the stream is
+ * written as COSStream using the wrapped {@link AbstractPDFBodyWriter}
  * 
  * @author Andrea Vacondio
  *
  */
-class ObjectsStreamPdfBodyWriter extends AbstractPdfBodyWriter
+class ObjectsStreamPDFBodyWriter extends AbstractPDFBodyWriter
 {
-    private static final Logger LOG = LoggerFactory.getLogger(ObjectsStreamPdfBodyWriter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ObjectsStreamPDFBodyWriter.class);
 
-    private AbstractPdfBodyWriter wrapped;
+    private AbstractPDFBodyWriter wrapped;
     private ObjectsStream currentStream;
 
-    public ObjectsStreamPdfBodyWriter(AbstractPdfBodyWriter wrapped, List<WriteOption> opts)
+    public ObjectsStreamPDFBodyWriter(AbstractPDFBodyWriter wrapped)
     {
-        super(opts);
+        super(ofNullable(wrapped).map(AbstractPDFBodyWriter::context).orElseThrow(
+                () -> new IllegalArgumentException("Wrapped writer cannot be null")));
         requireNotNullArg(wrapped, "Wrapped writer cannot be null");
         this.wrapped = wrapped;
-        this.currentStream = new ObjectsStream(referencesProvider());
+        currentStream = new ObjectsStream(context());
+        context().createIndirectReferenceFor(currentStream);
     }
 
     @Override
@@ -71,27 +73,29 @@ class ObjectsStreamPdfBodyWriter extends AbstractPdfBodyWriter
         }
         else
         {
-            wrapped.writer().put(
+            IndirectCOSObjectReference streamRef = context().getIndirectReferenceFor(currentStream);
+            context().putWritten(
                     CompressedXrefEntry.compressedEntry(ref.xrefEntry().getObjectNumber(),
-                            currentStream.reference.xrefEntry().getObjectNumber(),
-                            currentStream.counter));
+                            streamRef.xrefEntry().getObjectNumber(), currentStream.counter));
             currentStream.addItem(ref);
-            LOG.trace("Added ref {} to object stream {}", ref, currentStream.reference);
+            LOG.trace("Added ref {} to object stream {}", ref, streamRef);
         }
         if (currentStream.isFull())
         {
             doWriteObjectsStream();
-            currentStream = new ObjectsStream(referencesProvider());
+            currentStream = new ObjectsStream(context());
+            context().createIndirectReferenceFor(currentStream);
         }
     }
 
     private void doWriteObjectsStream() throws IOException
     {
-        LOG.debug("Writing object stream {}", currentStream.reference);
+        IndirectCOSObjectReference ref = context().getIndirectReferenceFor(currentStream);
+        LOG.debug("Writing object stream {}", ref);
         currentStream.prepareForWriting();
-        IndirectCOSObjectReference length = referencesProvider().nextReferenceFor(COSNull.NULL);
+        IndirectCOSObjectReference length = context().createIndirectReferenceFor(COSNull.NULL);
         currentStream.setItem(COSName.LENGTH, length);
-        wrapped.writeObject(currentStream.reference);
+        wrapped.writeObject(ref);
         LOG.trace("Writing object stream length {}", length);
         wrapped.writeObject(length);
     }
@@ -108,12 +112,6 @@ class ObjectsStreamPdfBodyWriter extends AbstractPdfBodyWriter
     }
 
     @Override
-    IndirectObjectsWriter writer()
-    {
-        return wrapped.writer();
-    }
-
-    @Override
     public void close()
     {
         super.close();
@@ -125,28 +123,27 @@ class ObjectsStreamPdfBodyWriter extends AbstractPdfBodyWriter
         private int counter;
         private ByteArrayOutputStream header = new ByteArrayOutputStream();
         private ByteArrayOutputStream data = new ByteArrayOutputStream();
-        private DefaultCOSWriter dataWriter = new DefaultCOSWriter(
-                CountingWritableByteChannel.from(data))
-        {
-            @Override
-            public void writeComplexObjectSeparator()
-            {
-                // nothing
-            }
-
-            @Override
-            public void writeDictionaryItemsSeparator()
-            {
-                // nothing
-            }
-        };
+        private DefaultCOSWriter dataWriter;
         private InputStream filtered;
-        private IndirectCOSObjectReference reference;
 
-        public ObjectsStream(IndirectReferenceProvider referencesProvider)
+        public ObjectsStream(PDFWriteContext context)
         {
             setName(COSName.TYPE, COSName.OBJ_STM.getName());
-            this.reference = referencesProvider.nextReferenceFor(this);
+            dataWriter = new IndirectReferencesAwareCOSWriter(
+                    CountingWritableByteChannel.from(data), context)
+            {
+                @Override
+                public void writeComplexObjectSeparator()
+                {
+                    // nothing
+                }
+
+                @Override
+                public void writeDictionaryItemsSeparator()
+                {
+                    // nothing
+                }
+            };
         }
 
         public boolean hasItems()

@@ -21,12 +21,11 @@ import static org.sejda.util.RequireUtils.requireNotNullArg;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.TreeMap;
 
 import org.sejda.io.BufferedCountingChannelWriter;
+import org.sejda.io.CountingWritableByteChannel;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
 import org.sejda.sambox.util.Charsets;
-import org.sejda.sambox.xref.XrefEntry;
 import org.sejda.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,13 +42,25 @@ class IndirectObjectsWriter implements Closeable
 
     private static final Logger LOG = LoggerFactory.getLogger(DefaultPDFWriter.class);
 
-    private TreeMap<Long, XrefEntry> written = new TreeMap<>();
     private COSWriter writer;
+    private PDFWriteContext context;
 
-    public IndirectObjectsWriter(COSWriter writer)
+    IndirectObjectsWriter(CountingWritableByteChannel channel, PDFWriteContext context)
     {
-        requireNotNullArg(writer, "Cannot write to a null COSWriter");
-        this.writer = writer;
+        this(new BufferedCountingChannelWriter(channel), context);
+    }
+
+    IndirectObjectsWriter(BufferedCountingChannelWriter writer, PDFWriteContext context)
+    {
+        requireNotNullArg(writer, "Writer cannot be null");
+        requireNotNullArg(context, "Write context cannot be null");
+        this.writer = new IndirectReferencesAwareCOSWriter(writer, context);
+        this.context = context;
+    }
+
+    PDFWriteContext context()
+    {
+        return context;
     }
 
     /**
@@ -61,7 +72,7 @@ class IndirectObjectsWriter implements Closeable
      */
     public void writeObjectIfNotWritten(IndirectCOSObjectReference object) throws IOException
     {
-        if (!written.containsKey(object.xrefEntry().getObjectNumber()))
+        if (!context.hasWritten(object.xrefEntry()))
         {
             writeObject(object);
         }
@@ -76,7 +87,7 @@ class IndirectObjectsWriter implements Closeable
     public void writeObject(IndirectCOSObjectReference object) throws IOException
     {
         doWriteObject(object);
-        written.put(object.xrefEntry().getObjectNumber(), object.xrefEntry());
+        context.putWritten(object.xrefEntry());
         object.releaseCOSObject();
         LOG.trace("Released " + object);
     }
@@ -95,51 +106,6 @@ class IndirectObjectsWriter implements Closeable
         writer.writer().write(ENDOBJ);
         writer.writer().writeEOL();
         LOG.trace("Written object " + object.xrefEntry());
-    }
-
-    /**
-     * @return number of written objects so far.
-     */
-    public int size()
-    {
-        return written.size();
-    }
-
-    /**
-     * Adds an entry to the list of the written entries
-     * 
-     * @param entry
-     * @return the previous value if an entry with the same object number has been already written, null otherwise.
-     */
-    public XrefEntry put(XrefEntry entry)
-    {
-        return written.put(entry.getObjectNumber(), entry);
-    }
-
-    /**
-     * @return the written entry with the highest object number
-     */
-    public XrefEntry highest()
-    {
-        return written.lastEntry().getValue();
-    }
-
-    /**
-     * @return the written entry with the lowest object number
-     */
-    public XrefEntry lowest()
-    {
-        return written.firstEntry().getValue();
-    }
-
-    /**
-     * 
-     * @param objectNumber
-     * @return the written entry with the given object number if any, null otherwise.
-     */
-    public XrefEntry get(Long objectNumber)
-    {
-        return written.get(objectNumber);
     }
 
     /**
@@ -202,6 +168,6 @@ class IndirectObjectsWriter implements Closeable
     public void close() throws IOException
     {
         IOUtils.close(writer);
-        written.clear();
+        context = null;
     }
 }

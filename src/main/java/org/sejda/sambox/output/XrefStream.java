@@ -37,14 +37,14 @@ class XrefStream extends COSStream
 {
 
     /**
-     * Creates an xref stream from the given dictionary. The stream will contain the gentries that have been written by
-     * the given writer
+     * Creates an xref stream from the given dictionary. The stream will contain all the entries that have been written
+     * using the given context
      * 
      * @param dictionary
-     * @param writer
+     * @param context
      * @throws IOException
      */
-    XrefStream(COSDictionary dictionary, IndirectObjectsWriter writer) throws IOException
+    XrefStream(COSDictionary dictionary, PDFWriteContext context) throws IOException
     {
         super(dictionary);
         removeItem(COSName.PREV);
@@ -58,20 +58,20 @@ class XrefStream extends COSStream
         // TODO fix this once encryption is implemented
         removeItem(COSName.ENCRYPT);
         setName(COSName.TYPE, COSName.XREF.getName());
-        setLong(COSName.SIZE, writer.highest().getObjectNumber() + 1);
+        setLong(COSName.SIZE, context.highestWritten().getObjectNumber() + 1);
         setItem(COSName.INDEX,
-                new COSArray(COSInteger.get(writer.lowest().getObjectNumber()), COSInteger
-                        .get(writer.highest().getObjectNumber() - writer.lowest().getObjectNumber()
-                                + 1)));
-        int secondFieldLength = sizeOf(writer.highest().getByteOffset());
+                new COSArray(COSInteger.get(context.lowestWritten().getObjectNumber()), COSInteger
+                        .get(context.highestWritten().getObjectNumber()
+                                - context.lowestWritten().getObjectNumber() + 1)));
+        int secondFieldLength = sizeOf(context.highestWritten().getByteOffset());
         setItem(COSName.W, new COSArray(COSInteger.get(1), COSInteger.get(secondFieldLength),
                 COSInteger.get(2)));
         try (OutputStream out = createUnfilteredStream())
         {
-            for (long key = writer.lowest().getObjectNumber(); key <= writer.highest()
-                    .getObjectNumber(); key++)
+            for (long key = context.lowestWritten().getObjectNumber(); key <= context
+                    .highestWritten().getObjectNumber(); key++)
             {
-                out.write(Optional.ofNullable(writer.get(key)).orElse(freeEntry(key, 0))
+                out.write(Optional.ofNullable(context.getWritten(key)).orElse(freeEntry(key, 0))
                         .toXrefStreamEntry(secondFieldLength, 2));
             }
         }

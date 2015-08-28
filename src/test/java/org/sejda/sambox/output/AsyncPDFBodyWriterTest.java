@@ -17,7 +17,7 @@
 package org.sejda.sambox.output;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -25,18 +25,14 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.concurrent.RejectedExecutionException;
 
 import org.apache.commons.io.IOUtils;
-import org.hamcrest.core.IsInstanceOf;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.cos.IndirectCOSObjectReference;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.PDDocument;
 
@@ -44,18 +40,20 @@ import org.sejda.sambox.pdmodel.PDDocument;
  * @author Andrea Vacondio
  *
  */
-public class AsyncPdfBodyWriterTest
+public class AsyncPDFBodyWriterTest
 {
 
     private IndirectObjectsWriter writer;
-    private AsyncPdfBodyWriter victim;
+    private AsyncPDFBodyWriter victim;
     private PDDocument document;
+    private PDFWriteContext context;
 
     @Before
     public void setUp()
     {
+        context = new PDFWriteContext(WriteOption.COMPRESS_STREAMS);
         writer = mock(IndirectObjectsWriter.class);
-        victim = new AsyncPdfBodyWriter(writer, Arrays.asList(WriteOption.COMPRESS_STREAMS));
+        victim = new AsyncPDFBodyWriter(writer, context);
         document = new PDDocument();
         document.getDocumentInformation().setAuthor("Chuck Norris");
         COSDictionary someDic = new COSDictionary();
@@ -73,13 +71,7 @@ public class AsyncPdfBodyWriterTest
     @Test(expected = IllegalArgumentException.class)
     public void nullConstructor()
     {
-        new AsyncPdfBodyWriter(null, null);
-    }
-
-    @Test
-    public void writer()
-    {
-        assertEquals(writer, victim.writer());
+        new AsyncPDFBodyWriter(null, null);
     }
 
     @Test
@@ -88,8 +80,7 @@ public class AsyncPdfBodyWriterTest
         victim.write(document.getDocument());
         assertEquals(document.getDocument().getCatalog().getItem(COSName.G), document.getDocument()
                 .getCatalog().getItem(COSName.H));
-        assertThat(document.getDocument().getCatalog().getItem(COSName.G), new IsInstanceOf(
-                IndirectCOSObjectReference.class));
+        assertTrue(context.hasIndirectReferenceFor(document.getDocument().getCatalog().getItem(COSName.G)));
         verify(writer, timeout(1000).times(4)).writeObjectIfNotWritten(any()); // catalog,info,pages,someDic
     }
 
@@ -100,7 +91,7 @@ public class AsyncPdfBodyWriterTest
         victim.write(document.getDocument());
     }
 
-    @Test(expected = RejectedExecutionException.class)
+    @Test(expected = IllegalStateException.class)
     public void cantWriteToClosedWriter() throws IOException
     {
         victim.close();

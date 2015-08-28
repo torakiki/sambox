@@ -79,7 +79,7 @@ public class PDDocumentWriterTest
                 WriteOption.SYNC_BODY_WRITE);
         TestUtils.setProperty(victim, "writer", this.writer);
         victim.write(document);
-        verify(cosDoc).accept(isA(SyncPdfBodyWriter.class));
+        verify(cosDoc).accept(isA(SyncPDFBodyWriter.class));
     }
 
     @Test
@@ -93,7 +93,7 @@ public class PDDocumentWriterTest
                 WriteOption.SYNC_BODY_WRITE, WriteOption.OBJECT_STREAMS);
         TestUtils.setProperty(victim, "writer", this.writer);
         victim.write(document);
-        verify(cosDoc).accept(isA(ObjectsStreamPdfBodyWriter.class));
+        verify(cosDoc).accept(isA(ObjectsStreamPDFBodyWriter.class));
     }
 
     @Test
@@ -103,7 +103,7 @@ public class PDDocumentWriterTest
         COSDocument cosDoc = mock(COSDocument.class);
         when(document.getDocument()).thenReturn(cosDoc);
         victim.write(document);
-        verify(cosDoc).accept(isA(AsyncPdfBodyWriter.class));
+        verify(cosDoc).accept(isA(AsyncPDFBodyWriter.class));
     }
 
     @Test

@@ -21,10 +21,7 @@ import static org.sejda.util.RequireUtils.requireNotNullArg;
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.channels.WritableByteChannel;
-import java.util.Arrays;
-import java.util.List;
 
-import org.sejda.io.BufferedCountingChannelWriter;
 import org.sejda.io.CountingWritableByteChannel;
 import org.sejda.sambox.cos.COSDocument;
 import org.sejda.sambox.pdmodel.PDDocument;
@@ -43,14 +40,13 @@ public class PDDocumentWriter implements Closeable
 {
     private static final Logger LOG = LoggerFactory.getLogger(PDDocumentWriter.class);
     private DefaultPDFWriter writer;
-    private List<WriteOption> opts;
+    private PDFWriteContext context;
 
     public PDDocumentWriter(CountingWritableByteChannel channel, WriteOption... options)
     {
         requireNotNullArg(channel, "Cannot write to a null channel");
-        this.opts = Arrays.asList(options);
-        this.writer = new DefaultPDFWriter(new IndirectObjectsWriter(new DefaultCOSWriter(
-                new BufferedCountingChannelWriter(channel))));
+        context = new PDFWriteContext(options);
+        this.writer = new DefaultPDFWriter(new IndirectObjectsWriter(channel, context));
     }
 
     /**
@@ -62,7 +58,8 @@ public class PDDocumentWriter implements Closeable
     public void write(PDDocument document) throws IOException
     {
         requireNotNullArg(document, "PDDocument cannot be null");
-        if (opts.contains(WriteOption.XREF_STREAM) || opts.contains(WriteOption.OBJECT_STREAMS))
+        if (context.hasWriteOption(WriteOption.XREF_STREAM)
+                || context.hasWriteOption(WriteOption.OBJECT_STREAMS))
         {
             document.requireMinVersion(SpecVersionUtils.V1_5);
         }
@@ -78,34 +75,35 @@ public class PDDocumentWriter implements Closeable
 
     private void writeBody(COSDocument document) throws IOException
     {
-        try (AbstractPdfBodyWriter bodyWriter = objectStreamWriter(bodyWriter()))
+        try (AbstractPDFBodyWriter bodyWriter = objectStreamWriter(bodyWriter()))
         {
             LOG.debug("Writing body using " + bodyWriter.getClass());
             bodyWriter.write(document);
         }
     }
 
-    private AbstractPdfBodyWriter bodyWriter()
+    private AbstractPDFBodyWriter bodyWriter()
     {
-        if (opts.contains(WriteOption.SYNC_BODY_WRITE))
+        if (context.hasWriteOption(WriteOption.SYNC_BODY_WRITE))
         {
-            return new SyncPdfBodyWriter(writer.writer(), opts);
+            return new SyncPDFBodyWriter(writer.writer(), context);
         }
-        return new AsyncPdfBodyWriter(writer.writer(), opts);
+        return new AsyncPDFBodyWriter(writer.writer(), context);
     }
 
-    private AbstractPdfBodyWriter objectStreamWriter(AbstractPdfBodyWriter wrapped)
+    private AbstractPDFBodyWriter objectStreamWriter(AbstractPDFBodyWriter wrapped)
     {
-        if (opts.contains(WriteOption.OBJECT_STREAMS))
+        if (context.hasWriteOption(WriteOption.OBJECT_STREAMS))
         {
-            return new ObjectsStreamPdfBodyWriter(wrapped, opts);
+            return new ObjectsStreamPDFBodyWriter(wrapped);
         }
         return wrapped;
     }
 
     private void writeXref(PDDocument document) throws IOException
     {
-        if (opts.contains(WriteOption.XREF_STREAM) || opts.contains(WriteOption.OBJECT_STREAMS))
+        if (context.hasWriteOption(WriteOption.XREF_STREAM)
+                || context.hasWriteOption(WriteOption.OBJECT_STREAMS))
         {
             writer.writeXrefStream(document.getDocument().getTrailer());
         }

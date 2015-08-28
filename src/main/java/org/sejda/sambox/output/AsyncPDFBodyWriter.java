@@ -19,7 +19,6 @@ package org.sejda.sambox.output;
 import static org.sejda.util.RequireUtils.requireNotNullArg;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -31,15 +30,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Asynchronous implementation of an {@link AbstractPdfBodyWriter} where a objects are written submitting a task to a
+ * Asynchronous implementation of an {@link AbstractPDFBodyWriter} where a objects are written submitting a task to a
  * single thread executor service.
  * 
  * @author Andrea Vacondio
  *
  */
-class AsyncPdfBodyWriter extends AbstractPdfBodyWriter
+class AsyncPDFBodyWriter extends AbstractPDFBodyWriter
 {
-    private static final Logger LOG = LoggerFactory.getLogger(AsyncPdfBodyWriter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AsyncPDFBodyWriter.class);
 
     private ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactory()
     {
@@ -52,9 +51,9 @@ class AsyncPdfBodyWriter extends AbstractPdfBodyWriter
     private AtomicReference<IOException> executionException = new AtomicReference<>();
     private IndirectObjectsWriter writer;
 
-    AsyncPdfBodyWriter(IndirectObjectsWriter writer, List<WriteOption> opts)
+    AsyncPDFBodyWriter(IndirectObjectsWriter writer, PDFWriteContext context)
     {
-        super(opts);
+        super(context);
         requireNotNullArg(writer, "Cannot write to a null writer");
         this.writer = writer;
     }
@@ -125,9 +124,4 @@ class AsyncPdfBodyWriter extends AbstractPdfBodyWriter
         executor.shutdown();
     }
 
-    @Override
-    IndirectObjectsWriter writer()
-    {
-        return writer;
-    }
 }
