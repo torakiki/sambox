@@ -97,6 +97,16 @@ abstract class AbstractPdfBodyWriter implements COSVisitor, Closeable
                 document.getTrailer().setItem(k, ref);
             }
         }
+        startWriting();
+    }
+
+    /**
+     * Starts writing whatever has been stacked
+     * 
+     * @throws IOException
+     */
+    void startWriting() throws IOException
+    {
         IndirectCOSObjectReference item;
         while ((item = stack.poll()) != null)
         {
@@ -172,7 +182,7 @@ abstract class AbstractPdfBodyWriter implements COSVisitor, Closeable
 
     }
 
-    private IndirectCOSObjectReference getOrCreateIndirectReferenceFor(COSBase item)
+    IndirectCOSObjectReference getOrCreateIndirectReferenceFor(COSBase item)
     {
 
         return Optional
@@ -256,8 +266,13 @@ abstract class AbstractPdfBodyWriter implements COSVisitor, Closeable
         // nothing to do
     }
 
+    List<WriteOption> opts()
+    {
+        return opts;
+    }
+
     @Override
-    public void close()
+    public void close() throws IOException
     {
         lookupNewRef.clear();
     }

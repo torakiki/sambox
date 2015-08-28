@@ -119,7 +119,7 @@ class AsyncPdfBodyWriter extends AbstractPdfBodyWriter
     }
 
     @Override
-    public void close()
+    public void close() throws IOException
     {
         super.close();
         executor.shutdown();

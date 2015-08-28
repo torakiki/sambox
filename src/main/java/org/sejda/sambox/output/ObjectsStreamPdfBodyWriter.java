@@ -114,7 +114,7 @@ class ObjectsStreamPdfBodyWriter extends AbstractPdfBodyWriter
     }
 
     @Override
-    public void close()
+    public void close() throws IOException
     {
         super.close();
         currentStream = null;

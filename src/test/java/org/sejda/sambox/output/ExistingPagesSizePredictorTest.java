@@ -18,6 +18,7 @@ package org.sejda.sambox.output;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -30,7 +31,7 @@ import org.sejda.sambox.pdmodel.PDPage;
  * @author Andrea Vacondio
  *
  */
-public class DocumentSizePredictorTest
+public class ExistingPagesSizePredictorTest
 {
 
     /**
@@ -42,18 +43,18 @@ public class DocumentSizePredictorTest
     }
 
     @Test
-        public void testPredictedSize() throws IOException
+    public void testPredictedPagesSize() throws IOException
         {
-            PDDocument document = PDFParser.parse(SeekableSources.seekableSourceFrom(new File(
-                    "/home/torakiki/Scrivania/test_merge/test_outline.pdf")));
-            DocumentSizePredictor victim = new DocumentSizePredictor();
-            for (PDPage page : document.getPages())
-            {
-                victim.addPage(page);
-                System.out.println(victim.predictedSize());
-                System.out.println(victim.items());
-                System.out.println("-----");
-    
-            }
+        PDDocument document = PDFParser.parse(SeekableSources.seekableSourceFrom(new File(
+                "/home/torakiki/Scrivania/test_merge/test_outline.pdf")));
+        ExistingPagesSizePredictor victim = new ExistingPagesSizePredictor(Collections.EMPTY_LIST);
+        for (PDPage page : document.getPages())
+        {
+            victim.addPage(page);
+            System.out.println(victim.predictedPagesSize());
+            System.out.println(victim.predictedXrefTableSize());
+            System.out.println("-----");
+
+        }
         }
 }
