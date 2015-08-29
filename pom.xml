@@ -57,7 +57,7 @@
 			</snapshots>
 		</repository>
 	</repositories>
-
+        
 	<distributionManagement>
 		<snapshotRepository>
 			<id>sonatype-nexus-snapshots</id>
@@ -139,6 +139,15 @@
 					</execution>
 				</executions>
 			</plugin>
+			 <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <argLine>-Xmx768m</argLine>
+                    <excludes>
+                        <exclude>org/sejda/sambox/rendering/TestPDFToImage.java</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
 		</plugins>
 	</build>
 
