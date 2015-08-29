@@ -113,7 +113,6 @@ public class AbstractXrefStreamParserTest
             void onEntryFound(XrefEntry entry)
             {
                 assertNotNull(entry);
-                System.out.println("Found " + entry);
                 found.add(entry);
             }
         };
