@@ -32,8 +32,9 @@ public class COSBaseTest
     @Test
     public void noId()
     {
-        assertNull(COSInteger.ONE.id());
-        assertFalse(COSInteger.TWO.hasId());
+        COSDictionary victim = new COSDictionary();
+        assertNull(victim.id());
+        assertFalse(victim.hasId());
     }
 
     @Test

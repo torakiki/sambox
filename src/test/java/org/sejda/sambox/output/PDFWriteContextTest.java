@@ -22,6 +22,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -62,6 +63,7 @@ public class PDFWriteContextTest
         IndirectCOSObjectReference ref2 = context.createIndirectReferenceFor(dic);
         assertNotEquals(ref, ref2);
         ExistingIndirectCOSObject existing = mock(ExistingIndirectCOSObject.class);
+        when(existing.id()).thenReturn("the id");
         IndirectCOSObjectReference ref3 = context.createIndirectReferenceFor(existing);
         assertEquals(existing, ref3.getCOSObject());
     }

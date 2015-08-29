@@ -39,6 +39,7 @@ import org.sejda.io.SeekableSources;
 import org.sejda.sambox.ParallelParameterized;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.PDDocument;
+import org.sejda.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -271,15 +272,12 @@ public class TestPDFToImage
         catch (IOException e)
         {
             failed = true;
-            LOG.error("Error converting file " + file.getName());
+            LOG.error("Error converting file " + file.getName(), e);
             throw e;
         }
         finally
         {
-            if (document != null)
-            {
-                document.close();
-            }
+            IOUtils.close(document);
         }
 
         LOG.info("Comparing: " + file.getName());
