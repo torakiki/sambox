@@ -19,9 +19,10 @@ package org.sejda.sambox.output;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.SortedMap;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
@@ -46,7 +47,7 @@ class PDFWriteContext
     private IndirectReferenceProvider referencesProvider = new IndirectReferenceProvider();
     private Map<String, IndirectCOSObjectReference> lookupNewRef = new ConcurrentHashMap<>();
     private List<WriteOption> opts;
-    private TreeMap<Long, XrefEntry> written = new TreeMap<>();
+    private SortedMap<Long, XrefEntry> written = new ConcurrentSkipListMap<>();
 
     PDFWriteContext(WriteOption... options)
     {
@@ -75,8 +76,7 @@ class PDFWriteContext
         // it's a new COSBase
         IndirectCOSObjectReference newRef = referencesProvider.nextReferenceFor(item);
         LOG.trace("Created new indirect reference '{}' ", newRef);
-        item.idIfAbsent(String.format("%s %d", contextId, newRef.xrefEntry().key()
-                .getNumber()));
+        item.idIfAbsent(String.format("%s %d", contextId, newRef.xrefEntry().key().getNumber()));
         lookupNewRef.put(item.id(), newRef);
         return newRef;
     }
@@ -160,7 +160,7 @@ class PDFWriteContext
      */
     XrefEntry highestWritten()
     {
-        return written.lastEntry().getValue();
+        return written.get(written.lastKey());
     }
 
     /**
@@ -168,7 +168,7 @@ class PDFWriteContext
      */
     XrefEntry lowestWritten()
     {
-        return written.firstEntry().getValue();
+        return written.get(written.firstKey());
     }
 
     /**
