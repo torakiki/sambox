@@ -104,8 +104,7 @@ public class COSParserTest
     @Test
     public void nextName() throws IOException
     {
-        victim = new COSParser(
-                inMemorySeekableSourceFrom("53 0 obj <</Creator me>>".getBytes()));
+        victim = new COSParser(inMemorySeekableSourceFrom("53 0 obj <</Creator me>>".getBytes()));
         victim.position(11);
         assertEquals(COSName.CREATOR, victim.nextName());
     }
@@ -129,8 +128,7 @@ public class COSParserTest
     @Test
     public void nextHexString() throws IOException
     {
-        victim = new COSParser(
-                inMemorySeekableSourceFrom("<436875636B204E6f72726973>".getBytes()));
+        victim = new COSParser(inMemorySeekableSourceFrom("<436875636B204E6f72726973>".getBytes()));
         COSString expected = COSString.newInstance("Chuck Norris".getBytes(Charsets.ISO_8859_1));
         expected.setForceHexForm(true);
         assertEquals(expected, victim.nextHexadecimalString());
@@ -184,8 +182,7 @@ public class COSParserTest
     @Test
     public void nextArrayWorkaroundEndstream() throws IOException
     {
-        victim = new COSParser(
-                inMemorySeekableSourceFrom("[10 (A String) endstream".getBytes()));
+        victim = new COSParser(inMemorySeekableSourceFrom("[10 (A String) endstream".getBytes()));
         COSArray result = victim.nextArray();
         assertEquals(10, result.getInt(0));
         assertEquals(COSString.newInstance("A String".getBytes(Charsets.ISO_8859_1)), result.get(1));
@@ -476,6 +473,19 @@ public class COSParserTest
         victim = new COSParser(inMemorySeekableSourceFrom(getClass().getResourceAsStream(
                 "/input/stream_trunkated.txt")));
         victim.nextStream(new COSDictionary());
+    }
+
+    @Test
+    public void nextStreamEmpty() throws IOException
+    {
+        victim = new COSParser(inMemorySeekableSourceFrom(getClass().getResourceAsStream(
+                "/input/stream_empty.txt")));
+        COSDictionary streamDictionary = new COSDictionary();
+        streamDictionary.setInt(COSName.LENGTH, 0);
+        try (COSStream result = victim.nextStream(streamDictionary))
+        {
+            assertEquals(0, result.getFilteredLength());
+        }
     }
 
     @Test

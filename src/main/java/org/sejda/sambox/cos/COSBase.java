@@ -25,7 +25,7 @@ import java.io.IOException;
  */
 public abstract class COSBase implements COSObjectable
 {
-    private String writerKey;
+    private String id;
 
     /**
      * Convert this standard java object to a COS object.
@@ -47,30 +47,33 @@ public abstract class COSBase implements COSObjectable
     public abstract void accept(COSVisitor visitor) throws IOException;
 
     /**
-     * @return a key that a writer can use to identify this {@link COSBase} and find out if it has been already written.
+     * @return an id that can be used to identify this {@link COSBase}.
      */
-    public String writerKey()
+    public String id()
     {
-        return writerKey;
+        return id;
     }
 
     /**
-     * Assign a writer key to this {@link COSBase} if it doesn't have one already. It can later be used by the writer to
-     * find out if the {@link COSBase} was already written and with what object number.
+     * Assign an id to this {@link COSBase} if it doesn't have one already.
      * 
-     * @param writerKey
+     * @param id
      */
-    public void writerKeyIfAbsent(String writerKey)
+    public void idIfAbsent(String id)
     {
-        if (!hasWriterKey() && writerKey != null)
+        if (!hasId() && id != null)
         {
-            this.writerKey = writerKey.trim();
+            this.id = id.trim();
         }
     }
 
-    private boolean hasWriterKey()
+    /**
+     * 
+     * @return true if the {@link COSBase} has an id assigned to it
+     */
+    public boolean hasId()
     {
-        return this.writerKey != null && this.writerKey.length() > 0;
+        return id() != null && id().length() > 0;
     }
 
 }

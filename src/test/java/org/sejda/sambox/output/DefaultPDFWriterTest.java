@@ -43,12 +43,14 @@ public class DefaultPDFWriterTest
     private BufferedCountingChannelWriter writer;
     private IndirectObjectsWriter objectWriter;
     private DefaultPDFWriter victim;
+    private PDFWriteContext context;
 
     @Before
     public void setUp()
     {
+        context = new PDFWriteContext();
         writer = mock(BufferedCountingChannelWriter.class);
-        objectWriter = new IndirectObjectsWriter(new DefaultCOSWriter(writer));
+        objectWriter = new IndirectObjectsWriter(writer, context);
         victim = new DefaultPDFWriter(objectWriter);
     }
 

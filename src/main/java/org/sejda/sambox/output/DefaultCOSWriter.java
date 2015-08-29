@@ -84,7 +84,7 @@ class DefaultCOSWriter implements COSWriter
         for (Iterator<COSBase> i = value.iterator(); i.hasNext();)
         {
             COSBase current = i.next();
-            Optional.ofNullable(current).orElse(COSNull.NULL).accept(this);
+            writeValue(Optional.ofNullable(current).orElse(COSNull.NULL));
             if (i.hasNext())
             {
                 writer.write(SPACE);
@@ -113,7 +113,7 @@ class DefaultCOSWriter implements COSWriter
             {
                 entry.getKey().accept(this);
                 writer.write(SPACE);
-                entry.getValue().accept(this);
+                writeValue(entry.getValue());
                 writeDictionaryItemsSeparator();
             }
         }
@@ -163,25 +163,31 @@ class DefaultCOSWriter implements COSWriter
     @Override
     public void visit(COSStream value) throws IOException
     {
-        COSBase length = value.getItem(COSName.LENGTH);
-        if (length == null)
+        try
         {
-            value.setLong(COSName.LENGTH, value.getFilteredLength());
+            COSBase length = value.getItem(COSName.LENGTH);
+            if (length == null)
+            {
+                value.setLong(COSName.LENGTH, value.getFilteredLength());
+            }
+            visit((COSDictionary) value);
+            writer.write(STREAM);
+            writer.write(CRLF);
+            long streamStartingPosition = writer.offset();
+            writer.write(value.getFilteredStream());
+            if (length instanceof IndirectCOSObjectReference)
+            {
+                ((IndirectCOSObjectReference) length).setValue(COSInteger.get(writer.offset()
+                        - streamStartingPosition));
+            }
+            writer.write(CRLF);
+            writer.write(ENDSTREAM);
+            writeComplexObjectSeparator();
         }
-        visit((COSDictionary) value);
-        writer.write(STREAM);
-        writer.write(CRLF);
-        long streamStartingPosition = writer.offset();
-        writer.write(value.getFilteredStream());
-        if (length instanceof IndirectCOSObjectReference)
+        finally
         {
-            ((IndirectCOSObjectReference) length).setValue(COSInteger.get(writer.offset()
-                    - streamStartingPosition));
+            IOUtils.closeQuietly(value);
         }
-        IOUtils.close(value);
-        writer.write(CRLF);
-        writer.write(ENDSTREAM);
-        writeComplexObjectSeparator();
     }
 
     @Override
@@ -228,6 +234,16 @@ class DefaultCOSWriter implements COSWriter
     public void visit(COSDocument value)
     {
         // nothing to do
+    }
+
+    /**
+     * writes the given dictionary or array value item
+     * 
+     * @throws IOException
+     */
+    void writeValue(COSBase value) throws IOException
+    {
+        value.accept(this);
     }
 
     @Override

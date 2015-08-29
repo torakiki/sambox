@@ -19,7 +19,6 @@ package org.sejda.sambox.output;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
 
@@ -39,14 +38,14 @@ import org.sejda.sambox.xref.XrefEntry;
  */
 public class XrefStreamTest
 {
-    private IndirectObjectsWriter writer;
+    private PDFWriteContext context;
 
     @Before
     public void setUp()
     {
-        writer = new IndirectObjectsWriter(mock(COSWriter.class));
-        writer.put(CompressedXrefEntry.compressedEntry(2, 4, 1));
-        writer.put(XrefEntry.inUseEntry(4, 256, 0));
+        context = new PDFWriteContext();
+        context.putWritten(CompressedXrefEntry.compressedEntry(2, 4, 1));
+        context.putWritten(XrefEntry.inUseEntry(4, 256, 0));
     }
 
     @Test
@@ -63,7 +62,7 @@ public class XrefStreamTest
         // TODO remove this test once encryption is implemented
         existingTrailer.setName(COSName.ENCRYPT, "value");
 
-        try (XrefStream victim = new XrefStream(existingTrailer, writer))
+        try (XrefStream victim = new XrefStream(existingTrailer, context))
         {
             assertFalse(victim.containsKey(COSName.PREV));
             assertFalse(victim.containsKey(COSName.XREF_STM));
@@ -79,7 +78,7 @@ public class XrefStreamTest
     @Test
     public void keysArePopulated() throws IOException
     {
-        try (XrefStream victim = new XrefStream(new COSDictionary(), writer))
+        try (XrefStream victim = new XrefStream(new COSDictionary(), context))
         {
             assertEquals(COSName.XREF, victim.getCOSName(COSName.TYPE));
             assertEquals(5, victim.getLong(COSName.SIZE));
@@ -98,7 +97,7 @@ public class XrefStreamTest
     @Test
     public void streamIsPopulated() throws IOException
     {
-        try (XrefStream victim = new XrefStream(new COSDictionary(), writer))
+        try (XrefStream victim = new XrefStream(new COSDictionary(), context))
         {
             SeekableSource source = victim.getUnfilteredSource();
             assertEquals(0b00000010, source.read());

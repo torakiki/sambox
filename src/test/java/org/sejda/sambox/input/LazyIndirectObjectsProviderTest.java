@@ -23,18 +23,24 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.sejda.io.SeekableSources;
+import org.sejda.sambox.TestUtils;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSObjectKey;
+import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.xref.CompressedXrefEntry;
 import org.sejda.sambox.xref.XrefEntry;
 
@@ -187,5 +193,17 @@ public class LazyIndirectObjectsProviderTest
         XrefEntry alreadyThere = victim.addEntry(notThere2);
         assertNotNull(alreadyThere);
         assertEquals(1991, alreadyThere.getByteOffset());
+    }
+
+    @Test
+    public void close()
+    {
+        Map<COSObjectKey, COSBase> store = new ConcurrentHashMap<>();
+        COSStream item = mock(COSStream.class);
+        COSObjectKey key = new COSObjectKey(1, 0);
+        store.put(key, item);
+        TestUtils.setProperty(victim, "store", store);
+        victim.close();
+        verify(item).close();
     }
 }

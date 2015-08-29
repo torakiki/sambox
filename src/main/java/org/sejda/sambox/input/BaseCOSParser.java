@@ -288,16 +288,14 @@ abstract class BaseCOSParser extends SourceReader
         }
 
         final COSStream stream;
-        long length = streamLengthFrom(streamDictionary);
+        long length = streamLength(streamDictionary);
         if (length > 0)
         {
             stream = new COSStream(streamDictionary, source(), position(), length);
         }
         else
         {
-            LOG.info("Using fallback strategy reading until 'endstream' or 'endobj' is found. Starting at offset "
-                    + position());
-            stream = new COSStream(streamDictionary, source(), position(), findStreamLength());
+            stream = new COSStream(streamDictionary);
         }
         source().forward(stream.getFilteredLength());
         if (!skipTokenIfValue(ENDSTREAM))
@@ -308,6 +306,26 @@ abstract class BaseCOSParser extends SourceReader
             }
         }
         return stream;
+    }
+
+    /**
+     * Retrieves the stream length. It gets it from the dictionary, if not present there it applies fallback strategy
+     * searching for endstream or endobj keywords.
+     * 
+     * @param streamDictionary
+     * @return the length
+     * @throws IOException
+     */
+    private long streamLength(COSDictionary streamDictionary) throws IOException
+    {
+        long length = streamLengthFrom(streamDictionary);
+        if (length <= 0)
+        {
+            LOG.info("Using fallback strategy reading until 'endstream' or 'endobj' is found. Starting at offset "
+                    + position());
+            length = findStreamLength();
+        }
+        return length;
     }
 
     /**
@@ -385,11 +403,12 @@ abstract class BaseCOSParser extends SourceReader
         Pattern pattern = Pattern.compile("endstream|endobj");
         while (true)
         {
+            long currentPosition = position();
             String currentLine = readLine();
             Matcher matcher = pattern.matcher(currentLine);
             if (matcher.find())
             {
-                source().back(currentLine.length() - matcher.start());
+                position(currentPosition + matcher.start());
                 long length = position() - start;
                 int prevChar = source().back().peek();
                 if (isCarriageReturn(prevChar))

@@ -32,7 +32,7 @@ public final class COSNull extends COSBase
 
     private COSNull()
     {
-        //limit creation to one instance.
+        // limit creation to one instance.
     }
 
     @Override

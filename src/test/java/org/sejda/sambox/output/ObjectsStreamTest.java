@@ -32,7 +32,7 @@ import org.junit.Test;
 import org.sejda.sambox.SAMBox;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.output.ObjectsStreamPdfBodyWriter.ObjectsStream;
+import org.sejda.sambox.output.ObjectsStreamPDFBodyWriter.ObjectsStream;
 
 /**
  * @author Andrea Vacondio
@@ -42,13 +42,13 @@ public class ObjectsStreamTest
 {
 
     private ObjectsStream victim;
-    private IndirectReferenceProvider referencesProvider;
+    private PDFWriteContext context;
 
     @Before
     public void setUp()
     {
-        referencesProvider = new IndirectReferenceProvider();
-        victim = new ObjectsStream(referencesProvider);
+        context = new PDFWriteContext();
+        victim = new ObjectsStream(context);
     }
 
     @After
@@ -61,7 +61,7 @@ public class ObjectsStreamTest
     public void hasItems() throws IOException
     {
         assertFalse(victim.hasItems());
-        victim.addItem(referencesProvider.nextReferenceFor(COSInteger.ZERO));
+        victim.addItem(context.createIndirectReferenceFor(COSInteger.ZERO));
         assertTrue(victim.hasItems());
     }
 
@@ -70,9 +70,9 @@ public class ObjectsStreamTest
     {
         System.setProperty(SAMBox.OBJECTS_STREAM_SIZE_PROPERTY, "2");
         assertFalse(victim.isFull());
-        victim.addItem(referencesProvider.nextReferenceFor(COSInteger.ZERO));
+        victim.addItem(context.createIndirectReferenceFor(COSInteger.ZERO));
         assertFalse(victim.isFull());
-        victim.addItem(referencesProvider.nextReferenceFor(COSInteger.ZERO));
+        victim.addItem(context.createIndirectReferenceFor(COSInteger.ZERO));
         assertTrue(victim.isFull());
         System.getProperties().remove(SAMBox.OBJECTS_STREAM_SIZE_PROPERTY);
     }
@@ -80,15 +80,15 @@ public class ObjectsStreamTest
     @Test
     public void addItem() throws IOException
     {
-        victim.addItem(referencesProvider.nextReferenceFor(COSInteger.ZERO));
-        victim.addItem(referencesProvider.nextReferenceFor(COSInteger.THREE));
+        victim.addItem(context.createIndirectReferenceFor(COSInteger.ZERO));
+        victim.addItem(context.createIndirectReferenceFor(COSInteger.THREE));
         victim.prepareForWriting();
         assertEquals(COSName.OBJ_STM.getName(), victim.getNameAsString(COSName.TYPE));
         assertEquals(2, victim.getInt(COSName.N));
         assertEquals(8, victim.getInt(COSName.FIRST));
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         IOUtils.copy(victim.getFilteredStream(), new InflaterOutputStream(out));
-        byte[] data = new byte[] { 50, 32, 48, 32, 51, 32, 50, 32, 48, 32, 51, 32 };
+        byte[] data = new byte[] { 49, 32, 48, 32, 50, 32, 50, 32, 48, 32, 51, 32 };
         assertArrayEquals(data, out.toByteArray());
     }
 }

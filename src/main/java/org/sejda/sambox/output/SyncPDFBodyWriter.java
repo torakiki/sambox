@@ -19,23 +19,22 @@ package org.sejda.sambox.output;
 import static org.sejda.util.RequireUtils.requireNotNullArg;
 
 import java.io.IOException;
-import java.util.List;
 
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
 
 /**
- * Synchronous implementation of an {@link AbstractPdfBodyWriter}.
+ * Synchronous implementation of an {@link AbstractPDFBodyWriter}.
  * 
  * @author Andrea Vacondio
  *
  */
-class SyncPdfBodyWriter extends AbstractPdfBodyWriter
+class SyncPDFBodyWriter extends AbstractPDFBodyWriter
 {
     private IndirectObjectsWriter writer;
 
-    SyncPdfBodyWriter(IndirectObjectsWriter writer, List<WriteOption> opts)
+    SyncPDFBodyWriter(IndirectObjectsWriter writer, PDFWriteContext context)
     {
-        super(opts);
+        super(context);
         requireNotNullArg(writer, "Cannot write to a null writer");
         this.writer = writer;
     }
@@ -52,9 +51,4 @@ class SyncPdfBodyWriter extends AbstractPdfBodyWriter
         // no op
     }
 
-    @Override
-    IndirectObjectsWriter writer()
-    {
-        return writer;
-    }
 }

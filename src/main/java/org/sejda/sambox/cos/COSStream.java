@@ -588,6 +588,7 @@ public class COSStream extends COSDictionary implements Closeable
         public void close() throws IOException
         {
             IOUtils.close(view);
+            view = null;
         }
     }
 }
