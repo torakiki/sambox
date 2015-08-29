@@ -17,11 +17,11 @@
 package org.sejda.sambox.output;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
@@ -44,7 +44,7 @@ class PDFWriteContext
 
     private String contextId = UUID.randomUUID().toString();
     private IndirectReferenceProvider referencesProvider = new IndirectReferenceProvider();
-    private Map<String, IndirectCOSObjectReference> lookupNewRef = new HashMap<>();
+    private Map<String, IndirectCOSObjectReference> lookupNewRef = new ConcurrentHashMap<>();
     private List<WriteOption> opts;
     private TreeMap<Long, XrefEntry> written = new TreeMap<>();
 
