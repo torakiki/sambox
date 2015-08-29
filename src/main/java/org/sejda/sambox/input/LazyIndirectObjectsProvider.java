@@ -23,6 +23,7 @@ import static org.sejda.sambox.input.BaseCOSParser.STREAM;
 import static org.sejda.sambox.input.SourceReader.OBJ;
 import static org.sejda.util.RequireUtils.requireIOCondition;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -42,6 +43,7 @@ import org.sejda.sambox.xref.XrefType;
 import org.sejda.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 /**
  * A lazy implementation of the {@link IndirectObjectsProvider} that retrieves {@link COSBase} objects parsing the
  * underlying source on demand (ie. when the {@link IndirectObjectsProvider#get(COSObjectKey)} method is called). Parsed
@@ -118,16 +120,16 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
         try
         {
             requireIOCondition(xrefEntry != null, "Unable to find xref data for " + key);
-            doParse(xrefEntry, parser);
+            doParse(xrefEntry);
         }
         catch (IOException e)
         {
             LOG.warn("An error occurred while parsing " + xrefEntry + ", trying fallback", e);
-            doParseFallbackObject(key, parser);
+            doParseFallbackObject(key);
         }
     }
 
-    private void doParseFallbackObject(COSObjectKey key, COSParser parser)
+    private void doParseFallbackObject(COSObjectKey key)
     {
         LOG.info("Applying fallback strategy for " + key);
         XrefEntry xrefEntry = scanner.entries().get(key);
@@ -135,7 +137,7 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
         {
             try
             {
-                doParse(xrefEntry, parser);
+                doParse(xrefEntry);
             }
             catch (IOException e)
             {
@@ -148,7 +150,7 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
         }
     }
 
-    private void doParse(XrefEntry xrefEntry, COSParser parser) throws IOException
+    private void doParse(XrefEntry xrefEntry) throws IOException
     {
         LOG.trace("Parsing indirect object " + xrefEntry);
         if (xrefEntry.getType() == XrefType.IN_USE)
@@ -263,6 +265,8 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
     @Override
     public void close()
     {
+        store.values().stream().filter(o -> o instanceof Closeable).map(o -> (Closeable) o)
+                .forEach(IOUtils::closeQuietly);
         store.clear();
     }
 

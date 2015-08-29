@@ -163,25 +163,31 @@ class DefaultCOSWriter implements COSWriter
     @Override
     public void visit(COSStream value) throws IOException
     {
-        COSBase length = value.getItem(COSName.LENGTH);
-        if (length == null)
+        try
         {
-            value.setLong(COSName.LENGTH, value.getFilteredLength());
+            COSBase length = value.getItem(COSName.LENGTH);
+            if (length == null)
+            {
+                value.setLong(COSName.LENGTH, value.getFilteredLength());
+            }
+            visit((COSDictionary) value);
+            writer.write(STREAM);
+            writer.write(CRLF);
+            long streamStartingPosition = writer.offset();
+            writer.write(value.getFilteredStream());
+            if (length instanceof IndirectCOSObjectReference)
+            {
+                ((IndirectCOSObjectReference) length).setValue(COSInteger.get(writer.offset()
+                        - streamStartingPosition));
+            }
+            writer.write(CRLF);
+            writer.write(ENDSTREAM);
+            writeComplexObjectSeparator();
         }
-        visit((COSDictionary) value);
-        writer.write(STREAM);
-        writer.write(CRLF);
-        long streamStartingPosition = writer.offset();
-        writer.write(value.getFilteredStream());
-        if (length instanceof IndirectCOSObjectReference)
+        finally
         {
-            ((IndirectCOSObjectReference) length).setValue(COSInteger.get(writer.offset()
-                    - streamStartingPosition));
+            IOUtils.closeQuietly(value);
         }
-        IOUtils.close(value);
-        writer.write(CRLF);
-        writer.write(ENDSTREAM);
-        writeComplexObjectSeparator();
     }
 
     @Override
