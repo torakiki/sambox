@@ -272,7 +272,10 @@ public abstract class SecurityHandler
             int n;
             while ((n = data.read(buffer)) != -1)
             {
-                output.write(decryptCipher.update(buffer, 0, n));
+                byte[] update = decryptCipher.update(buffer, 0, n);
+                if(update != null) {
+                    output.write(update);
+                }
             }
             output.write(decryptCipher.doFinal());
         }
