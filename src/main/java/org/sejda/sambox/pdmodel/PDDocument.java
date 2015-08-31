@@ -30,6 +30,7 @@ import java.io.OutputStream;
 import java.nio.channels.WritableByteChannel;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -508,7 +509,8 @@ public class PDDocument implements Closeable
             throws IOException
     {
         requireOpen();
-        getDocumentInformation().setProducer("SAMBox " + Version.getVersion() + " (sejda.org)");
+        getDocumentInformation().setProducer("SAMBox " + Version.getVersion() + " (www.sejda.org)");
+        getDocumentInformation().setModificationDate(Calendar.getInstance());
         for (PDFont font : fontsToSubset)
         {
             font.subset();
