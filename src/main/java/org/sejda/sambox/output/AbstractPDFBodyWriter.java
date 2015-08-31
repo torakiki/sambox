@@ -93,6 +93,16 @@ abstract class AbstractPDFBodyWriter implements COSVisitor, Closeable
                 createIndirectReferenceIfNeededFor(value);
             }
         }
+        startWriting();
+    }
+
+    /**
+     * Starts writing whatever has been stacked
+     * 
+     * @throws IOException
+     */
+    void startWriting() throws IOException
+    {
         IndirectCOSObjectReference item;
         while ((item = stack.poll()) != null)
         {
@@ -164,7 +174,7 @@ abstract class AbstractPDFBodyWriter implements COSVisitor, Closeable
 
     }
 
-    private void createIndirectReferenceIfNeededFor(COSBase item)
+    void createIndirectReferenceIfNeededFor(COSBase item)
     {
         if (!context.hasIndirectReferenceFor(item))
         {
@@ -215,7 +225,7 @@ abstract class AbstractPDFBodyWriter implements COSVisitor, Closeable
     }
 
     @Override
-    public void close()
+    public void close() throws IOException
     {
         context = null;
         this.open = false;

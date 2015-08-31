@@ -17,9 +17,7 @@
 package org.sejda.sambox.output;
 
 import java.io.IOException;
-import java.util.List;
 
-import org.sejda.io.BufferedCountingChannelWriter;
 import org.sejda.io.CountingWritableByteChannel;
 import org.sejda.io.DevNullWritableByteChannel;
 import org.sejda.sambox.cos.COSArray;
@@ -27,6 +25,7 @@ import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSDocument;
 import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.cos.COSObjectable;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
 import org.sejda.sambox.pdmodel.PDPage;
@@ -35,13 +34,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Component that tries to predict the size of a resulting document if existing pages are added to it. The component
- * does its best to return exact predicted values and it does that by simulating an actual write, despite that, the
- * predicted values should be considered rough estimations and not a byte precision ones.
+ * Component that tries to predict the size of a resulting document if {@link PDPage}s and {@link COSObjectable}s are
+ * added to it. The component does its best to return exact predicted values and it does that by simulating an actual
+ * write, despite that, the predicted values should be considered rough estimations and not a byte precision ones.
  * 
  * @author Andrea Vacondio
  */
-public class ExistingPagesSizePredictor extends AbstractPdfBodyWriter
+public class ExistingPagesSizePredictor extends AbstractPDFBodyWriter
 {
     private static final Logger LOG = LoggerFactory.getLogger(ExistingPagesSizePredictor.class);
 
@@ -54,65 +53,63 @@ public class ExistingPagesSizePredictor extends AbstractPdfBodyWriter
     private long streamsSize;
     private long pages;
 
-    public ExistingPagesSizePredictor(List<WriteOption> opts)
+    public ExistingPagesSizePredictor(WriteOption... opts)
     {
-        super(opts);
-        this.writer = new IndirectObjectsWriter(new DefaultCOSWriter(
-                new BufferedCountingChannelWriter(channel)));
+        super(new PDFWriteContext(opts));
+        this.writer = new IndirectObjectsWriter(channel, context())
+        {
+            @Override
+            protected void onWritten(IndirectCOSObjectReference ref)
+            {
+                // don't release
+            }
+        };
     }
 
     /**
-     * Adds an existing, unmodified page to the predicted size. This component is intended to be used on existing and
-     * unmodified pages, mainly for split purposes. It simulates the page write to a {@link DevNullWritableByteChannel}
-     * and will release the page objects once written, this means that every modification made to the existing page will
-     * be lost.
+     * Adds a {@link PDPage} to the predicted size. This component simulates the page write to a
+     * {@link DevNullWritableByteChannel} and does not release the page objects once written.
      * 
      * @param page
      * @throws IOException
      */
     public void addPage(PDPage page) throws IOException
     {
-        pages++;
-        COSDictionary pageCopy = new COSDictionary(page.getCOSObject());
-        pageCopy.removeItem(COSName.PARENT);
-        getOrCreateIndirectReferenceFor(pageCopy);
-        startWriting();
-        LOG.trace("Page {} addition simlated, now at {} body bytes and {} xref bytes", page,
-                predictedPagesSize(), predictedXrefTableSize());
+        if (page != null)
+        {
+            pages++;
+            COSDictionary pageCopy = new COSDictionary(page.getCOSObject());
+            pageCopy.removeItem(COSName.PARENT);
+            createIndirectReferenceIfNeededFor(pageCopy);
+            startWriting();
+            LOG.debug("Page {} addition simulated, now at {} body bytes and {} xref bytes", page,
+                    predictedPagesSize(), predictedXrefTableSize());
+        }
     }
 
     /**
-     * Adds the object to the predicted size. The object is added as an indirect reference and is supposed to be written
-     * as is, specifically, in case of {@link COSDictionary} or {@link COSArray}, no indirect reference is created for
-     * their values.
+     * Adds the {@link COSObjectable} to the predicted size. The object is added as an indirect reference and is
+     * processed, specifically, in case of {@link COSDictionary} or {@link COSArray}, indirect reference might be
+     * created for their values.
      * 
-     * @param object
+     * @param value
      * @throws IOException
      */
-    public void addCOSBase(COSBase object) throws IOException
+    public void addIndirectReferenceFor(COSObjectable value) throws IOException
     {
-        writer.writeObject(referencesProvider().nextReferenceFor(object));
+        if (value != null)
+        {
+            createIndirectReferenceIfNeededFor(value.getCOSObject());
+            startWriting();
+            LOG.debug("{} addition simulated, now at {} body bytes and {} xref bytes",
+                    value.getCOSObject(), predictedPagesSize(), predictedXrefTableSize());
+        }
     }
 
     @Override
     public void visit(COSDocument document)
     {
         // nothing
-    }
-
-    @Override
-    public void visit(COSStream value) throws IOException
-    {
-        if (opts().contains(WriteOption.COMPRESS_STREAMS))
-        {
-            value.addCompression();
-        }
-        // we don't simulate the write of the whole stream, we just save the expected size and simulate the dictionary
-        // write
-        streamsSize += value.getFilteredLength();
-        streamsSize += STREAM_WRAPPING_SIZE;
-        // a copy
-        visit(new COSDictionary(value));
     }
 
     /**
@@ -132,13 +129,26 @@ public class ExistingPagesSizePredictor extends AbstractPdfBodyWriter
     public long predictedXrefTableSize()
     {
         // each entry is 21 bytes plus the xref keyword and section header
-        return (21 * (writer.size() + 1)) + 10;
+        return (21 * (context().written() + 1)) + 10;
     }
 
     @Override
     void writeObject(IndirectCOSObjectReference ref) throws IOException
     {
-        writer.writeObjectIfNotWritten(ref);
+        if (!context().hasWritten(ref.xrefEntry()))
+        {
+            COSBase wrapped = ref.getCOSObject().getCOSObject();
+            if (wrapped instanceof COSStream)
+            {
+                COSStream stream = (COSStream) wrapped;
+                // we don't simulate the write of the whole stream, we just save the expected size and simulate the
+                // dictionary write
+                streamsSize += stream.getFilteredLength();
+                streamsSize += STREAM_WRAPPING_SIZE;
+                ref.setValue(new COSDictionary(stream));
+            }
+        }
+        writer.writeObject(ref);
     }
 
     @Override
@@ -147,15 +157,20 @@ public class ExistingPagesSizePredictor extends AbstractPdfBodyWriter
         // no op
     }
 
-    @Override
-    IndirectObjectsWriter writer()
-    {
-        return writer;
-    }
-
+    /**
+     * @return true if some page has been written
+     */
     public boolean hasPages()
     {
         return pages > 0;
+    }
+
+    /**
+     * @return the current number of written pages
+     */
+    public long pages()
+    {
+        return pages;
     }
 
     @Override

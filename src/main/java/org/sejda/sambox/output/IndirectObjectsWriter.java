@@ -88,8 +88,18 @@ class IndirectObjectsWriter implements Closeable
     {
         doWriteObject(object);
         context.putWritten(object.xrefEntry());
-        object.releaseCOSObject();
-        LOG.trace("Released " + object);
+        onWritten(object);
+    }
+
+    /**
+     * Called when the input indirect references has just been written
+     * 
+     * @param object
+     */
+    protected void onWritten(IndirectCOSObjectReference ref)
+    {
+        ref.releaseCOSObject();
+        LOG.trace("Released " + ref);
     }
 
     private void doWriteObject(IndirectCOSObjectReference object) throws IOException

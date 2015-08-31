@@ -112,7 +112,7 @@ class ObjectsStreamPDFBodyWriter extends AbstractPDFBodyWriter
     }
 
     @Override
-    public void close()
+    public void close() throws IOException
     {
         super.close();
         currentStream = null;

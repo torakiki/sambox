@@ -105,12 +105,7 @@ class DefaultPDFWriter implements Closeable
         writer.write("trailer".getBytes(Charsets.US_ASCII));
         writer.writeEOL();
         trailer.getCOSObject().accept(writer.writer());
-        writer.write("startxref".getBytes(Charsets.US_ASCII));
-        writer.writeEOL();
-        writer.write(Long.toString(startxref));
-        writer.writeEOL();
-        writer.write("%%EOF".getBytes(Charsets.US_ASCII));
-        writer.writeEOL();
+        writeXrefFooter(startxref);
     }
 
     public void writeXrefStream(COSDictionary trailer) throws IOException
@@ -122,6 +117,11 @@ class DefaultPDFWriter implements Closeable
         writer.context().putWritten(entry);
         writer.writeObject(new IndirectCOSObjectReference(entry.getObjectNumber(), entry
                 .getGenerationNumber(), new XrefStream(trailer, writer.context())));
+        writeXrefFooter(startxref);
+    }
+
+    private void writeXrefFooter(long startxref) throws IOException
+    {
         writer.write("startxref".getBytes(Charsets.US_ASCII));
         writer.writeEOL();
         writer.write(Long.toString(startxref));

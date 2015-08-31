@@ -249,7 +249,7 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
                     // make sure the xref points to this copy of the object and not one in another more recent stream
                     if (containingStreamEntry.owns(xref.get(key)))
                     {
-                        LOG.debug("Parsed compressed object " + key + " " + object.getClass());
+                        LOG.trace("Parsed compressed object " + key + " " + object.getClass());
                         store.put(key, object);
                     }
                 }
