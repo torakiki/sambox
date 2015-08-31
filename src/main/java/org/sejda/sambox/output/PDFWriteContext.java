@@ -76,7 +76,7 @@ class PDFWriteContext
         // it's a new COSBase
         IndirectCOSObjectReference newRef = referencesProvider.nextReferenceFor(item);
         LOG.trace("Created new indirect reference '{}' ", newRef);
-        item.idIfAbsent(String.format("%s %d", contextId, newRef.xrefEntry().key().getNumber()));
+        item.idIfAbsent(String.format("%d %s", newRef.xrefEntry().key().getNumber(), contextId));
         lookupNewRef.put(item.id(), newRef);
         return newRef;
     }

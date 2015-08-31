@@ -44,8 +44,7 @@ public class ExistingIndirectCOSObject extends COSBase implements DisposableCOSO
     {
         this.key = key;
         this.provider = provider;
-        this.id = String.format("%s %d %d", provider.id(), key.getNumber(),
-                key.getGeneration());
+        this.id = String.format("%d %d %s", key.getNumber(), key.getGeneration(), provider.id());
         ;
     }
 
