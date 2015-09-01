@@ -59,6 +59,7 @@ public class XrefStreamTest
         existingTrailer.setName(COSName.F_DECODE_PARMS, "value");
         existingTrailer.setName(COSName.F_FILTER, "value");
         existingTrailer.setName(COSName.F, "value");
+        existingTrailer.setInt(COSName.LENGTH, 10);
         // TODO remove this test once encryption is implemented
         existingTrailer.setName(COSName.ENCRYPT, "value");
 
@@ -72,6 +73,7 @@ public class XrefStreamTest
             assertFalse(victim.containsKey(COSName.F_FILTER));
             assertFalse(victim.containsKey(COSName.F));
             assertFalse(victim.containsKey(COSName.ENCRYPT));
+            assertFalse(victim.containsKey(COSName.LENGTH));
         }
     }
 

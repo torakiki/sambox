@@ -55,6 +55,7 @@ class XrefStream extends COSStream
         removeItem(COSName.F_DECODE_PARMS);
         removeItem(COSName.F_FILTER);
         removeItem(COSName.F);
+        removeItem(COSName.LENGTH);
         // TODO fix this once encryption is implemented
         removeItem(COSName.ENCRYPT);
         setName(COSName.TYPE, COSName.XREF.getName());
