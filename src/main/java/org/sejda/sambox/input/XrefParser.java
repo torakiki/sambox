@@ -27,11 +27,12 @@ import org.sejda.sambox.util.Charsets;
 import org.sejda.sambox.xref.XrefEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 /**
  * Component responsible for finding and parsing the xref chain (either tables and streams). In case of errors while
  * parsing the xref chain (Ex. invalid offset, bad dictionaries etc) it has a fallback mechanism performing a document
- * full scan searching for xrefs. When parsing the document, xref info are passed to the {@link COSParser} which
- * will use them to retrieve COS objects on demand.
+ * full scan searching for xrefs. When parsing the document, xref info are passed to the {@link COSParser} which will
+ * use them to retrieve COS objects on demand.
  * 
  * @author Andrea Vacondio
  * @see XrefFullScanner
@@ -95,8 +96,32 @@ class XrefParser
         if (xrefOffset <= 0 || !parseXref(xrefOffset))
         {
             XrefFullScanner fallbackFullScanner = new XrefFullScanner(parser);
-            fallbackFullScanner.scan();
-            this.trailer = fallbackFullScanner.trailer();
+            if (fallbackFullScanner.scan())
+            {
+                this.trailer = fallbackFullScanner.trailer();
+            }
+            else
+            {
+                LOG.warn("Xref full scan was unable to find an xref table or stream, performing Objects full scan");
+                ObjectsFullScanner objectsFullScanner = new ObjectsFullScanner(parser)
+                {
+                    @Override
+                    protected void onNonObjectDefinitionLine(String line) throws IOException
+                    {
+                        if (line != null && line.startsWith(AbstractXrefTableParser.TRAILER))
+                        {
+                            long offset = parser.position();
+                            LOG.debug("Parsing trailer at " + offset);
+                            parser.skipSpaces();
+                            trailer.mergeWithoutOverwriting(parser.nextDictionary());
+                            parser.skipSpaces();
+                        }
+                    }
+                };
+                objectsFullScanner.entries().values().stream()
+                        .forEach(e -> parser.provider().addEntry(e));
+
+            }
         }
     }
 

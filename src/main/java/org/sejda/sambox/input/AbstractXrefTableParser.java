@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 abstract class AbstractXrefTableParser
 {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractXrefTableParser.class);
-    private static final String TRAILER = "trailer";
+    static final String TRAILER = "trailer";
     static final String XREF = "xref";
 
     private COSParser parser;

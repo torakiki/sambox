@@ -175,4 +175,15 @@ public class XrefParserTest
                 .getCOSObject();
         assertNull(overriddenObj.getDictionaryObject(COSName.ANNOTS));
     }
+
+    @Test
+    public void scanWrongStartxrefAndMissingXref() throws IOException
+    {
+        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
+                .getResourceAsStream("/input/test_xref_issue23.pdf")));
+        victim = new XrefParser(parser);
+        victim.parse();
+        assertEquals(10, victim.trailer().getInt(COSName.SIZE));
+        assertNotNull(victim.trailer().getDictionaryObject(COSName.ROOT));
+    }
 }

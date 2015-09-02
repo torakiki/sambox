@@ -26,6 +26,7 @@ import org.sejda.sambox.xref.Xref;
 import org.sejda.sambox.xref.XrefEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 /**
  * Component performing a full scan of the document and retrieving objects definition and the corresponding offset. This
  * implementation is lazy and the full scan is performed the first time the entries are accessed.
@@ -69,7 +70,7 @@ class ObjectsFullScanner
         }
     }
 
-    private void addEntryIfObjectDefinition(long offset, String line)
+    private void addEntryIfObjectDefinition(long offset, String line) throws IOException
     {
         Matcher matcher = OBJECT_DEF_PATTERN.matcher(line);
         if (matcher.find())
@@ -77,6 +78,21 @@ class ObjectsFullScanner
             xref.add(XrefEntry.inUseEntry(Long.parseUnsignedLong(matcher.group(1)), offset,
                     Integer.parseUnsignedInt(matcher.group(2))));
         }
+        else
+        {
+            onNonObjectDefinitionLine(line);
+        }
+    }
+
+    /**
+     * Called when the the scanner has read a line which is not an object definition
+     * 
+     * @param line
+     * @throws IOException
+     */
+    protected void onNonObjectDefinitionLine(String line) throws IOException
+    {
+        // nothing
     }
 
     /**
