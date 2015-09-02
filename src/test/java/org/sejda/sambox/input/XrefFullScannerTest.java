@@ -17,6 +17,7 @@
 package org.sejda.sambox.input;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
@@ -77,23 +78,11 @@ public class XrefFullScannerTest
     }
 
     @Test
-    public void scanWrongStartxrefAndMissingXref() throws IOException
-    {
-        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
-                .getResourceAsStream("/input/test_xref_issue23.pdf")));
-        victim = new XrefFullScanner(parser);
-        victim.scan();
-        assertEquals(10, victim.trailer().getInt(COSName.SIZE));
-        assertNotNull(victim.trailer().getDictionaryObject(COSName.ROOT));
-    }
-
-    @Test(expected = IOException.class)
     public void missingXref() throws IOException
     {
         parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
                 .getResourceAsStream("/input/test_xref_missing_xref.pdf")));
         victim = new XrefFullScanner(parser);
-        victim.scan();
-
+        assertFalse(victim.scan());
     }
 }

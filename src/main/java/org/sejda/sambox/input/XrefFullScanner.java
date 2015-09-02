@@ -29,6 +29,7 @@ import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.xref.XrefEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 /**
  * Component scanning for xref tables/streams. It scans top to bottom parsing any xref table/stream found with the
  * assumption that xrefs found later in the file are more recent.
@@ -44,6 +45,7 @@ class XrefFullScanner
     private AbstractXrefTableParser xrefTableParser;
     private COSParser parser;
     private Pattern objectDefPatter = Pattern.compile("^(\\d+)[\\s](\\d+)[\\s]obj");
+    private boolean xrefFound = false;
 
     XrefFullScanner(COSParser parser)
     {
@@ -79,7 +81,7 @@ class XrefFullScanner
         };
     }
 
-    void scan() throws IOException
+    boolean scan() throws IOException
     {
         LOG.info("Performing full scan looking for xrefs");
         long savedPos = parser.position();
@@ -91,6 +93,7 @@ class XrefFullScanner
             String line = parser.readLine();
             if (line.startsWith(XREF))
             {
+                this.xrefFound = true;
                 parseFoundXrefTable(offset);
             }
             Matcher matcher = objectDefPatter.matcher(line);
@@ -101,6 +104,7 @@ class XrefFullScanner
             parser.skipSpaces();
         }
         parser.position(savedPos);
+        return xrefFound;
     }
 
     private void parseFoundXrefTable(long offset) throws IOException
@@ -130,6 +134,7 @@ class XrefFullScanner
 
     private void parseFoundXrefStream(COSDictionary trailer) throws IOException
     {
+        this.xrefFound = true;
         try (COSStream xrefStream = parser.nextStream(trailer))
         {
             xrefStreamParser.onTrailerFound(trailer);
