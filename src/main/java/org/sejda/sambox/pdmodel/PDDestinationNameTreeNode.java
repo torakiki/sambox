@@ -45,27 +45,24 @@ public class PDDestinationNameTreeNode extends PDNameTreeNode<PDPageDestination>
      *
      * @param dic The COS dictionary.
      */
-    public PDDestinationNameTreeNode( COSDictionary dic )
+    public PDDestinationNameTreeNode(COSDictionary dic)
     {
         super(dic);
     }
 
     @Override
-    protected PDPageDestination convertCOSToPD( COSBase base ) throws IOException
+    protected PDPageDestination convertCOSToPD(COSBase base) throws IOException
     {
-        COSBase destination = base;
-        if( base instanceof COSDictionary )
+        if (base instanceof COSDictionary)
         {
-            //the destination is sometimes stored in the D dictionary
-            //entry instead of being directly an array, so just dereference
-            //it for now
-            destination = ((COSDictionary)base).getDictionaryObject( COSName.D );
+            return (PDPageDestination) PDDestination.create(((COSDictionary) base)
+                    .getDictionaryObject(COSName.D));
         }
-        return (PDPageDestination)PDDestination.create( destination );
+        return (PDPageDestination) PDDestination.create(base);
     }
 
     @Override
-    protected PDNameTreeNode createChildNode( COSDictionary dic )
+    protected PDNameTreeNode createChildNode(COSDictionary dic)
     {
         return new PDDestinationNameTreeNode(dic);
     }

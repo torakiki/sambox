@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.pdmodel;
 
+import static java.util.Optional.ofNullable;
 import static org.sejda.sambox.util.SpecVersionUtils.V1_5;
 
 import java.io.IOException;
@@ -40,6 +41,8 @@ import org.sejda.sambox.pdmodel.interactive.action.PDActionFactory;
 import org.sejda.sambox.pdmodel.interactive.action.PDDocumentCatalogAdditionalActions;
 import org.sejda.sambox.pdmodel.interactive.action.PDURIDictionary;
 import org.sejda.sambox.pdmodel.interactive.documentnavigation.destination.PDDestination;
+import org.sejda.sambox.pdmodel.interactive.documentnavigation.destination.PDNamedDestination;
+import org.sejda.sambox.pdmodel.interactive.documentnavigation.destination.PDPageDestination;
 import org.sejda.sambox.pdmodel.interactive.documentnavigation.outline.PDDocumentOutline;
 import org.sejda.sambox.pdmodel.interactive.form.PDAcroForm;
 import org.sejda.sambox.pdmodel.interactive.pagenavigation.PDThread;
@@ -291,7 +294,7 @@ public class PDDocumentCatalog implements COSObjectable
     public PDDocumentNameDictionary getNames()
     {
         COSDictionary names = (COSDictionary) root.getDictionaryObject(COSName.NAMES);
-        return names == null ? null : new PDDocumentNameDictionary(this, names);
+        return names == null ? null : new PDDocumentNameDictionary(names);
     }
 
     /**
@@ -559,5 +562,31 @@ public class PDDocumentCatalog implements COSObjectable
         {
             document.requireMinVersion(V1_5);
         }
+    }
+
+    /**
+     * Looks up for the {@link PDPageDestination} referenced by the given {@link PDNamedDestination}
+     * 
+     * @param namedDest
+     * @return the destination or null if nothing is fond
+     * @throws IOException
+     */
+    public PDPageDestination findNamedDestinationPage(PDNamedDestination namedDest)
+            throws IOException
+    {
+        PDPageDestination namesDest = ofNullable(getNames())
+                .map(PDDocumentNameDictionary::getDests)
+                .map(tree -> tree.getValue(namedDest.getNamedDestination())).orElse(null);
+        if (namesDest == null)
+        {
+            // Look up /Dests dictionary from catalog
+            PDDocumentNameDestinationDictionary nameDestDict = getDests();
+            if (nameDestDict != null)
+            {
+                return (PDPageDestination) nameDestDict.getDestination(namedDest
+                        .getNamedDestination());
+            }
+        }
+        return namesDest;
     }
 }

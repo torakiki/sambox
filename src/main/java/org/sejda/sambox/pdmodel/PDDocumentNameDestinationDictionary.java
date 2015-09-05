@@ -19,12 +19,13 @@ import java.io.IOException;
 
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSObjectable;
 import org.sejda.sambox.pdmodel.interactive.documentnavigation.destination.PDDestination;
 
 /**
- * This encapsulates the "dictionary of names and corresponding destinations" for the /Dest entry in
- * the document catalog.
+ * This encapsulates the "dictionary of names and corresponding destinations" for the /Dest entry in the document
+ * catalog.
  *
  * @author Tilman Hausherr
  */
@@ -32,7 +33,7 @@ public class PDDocumentNameDestinationDictionary implements COSObjectable
 {
     private final COSDictionary nameDictionary;
 
-     /**
+    /**
      * Constructor.
      *
      * @param dict The dictionary of names and corresponding destinations.
@@ -52,7 +53,7 @@ public class PDDocumentNameDestinationDictionary implements COSObjectable
     {
         return nameDictionary;
     }
-    
+
     /**
      * Returns the destination corresponding to the parameter.
      *
@@ -64,8 +65,11 @@ public class PDDocumentNameDestinationDictionary implements COSObjectable
     public PDDestination getDestination(String name) throws IOException
     {
         COSBase item = nameDictionary.getDictionaryObject(name);
+        if (item instanceof COSDictionary)
+        {
+            return PDDestination.create(((COSDictionary) item).getDictionaryObject(COSName.D));
+        }
         return PDDestination.create(item);
     }
-    
 
 }
