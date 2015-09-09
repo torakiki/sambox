@@ -30,18 +30,10 @@ import org.sejda.sambox.pdmodel.interactive.action.PDAnnotationAdditionalActions
  */
 public class PDAnnotationWidget extends PDAnnotation
 {
-    /**
-     * The type of annotation.
-     */
-    public static final String SUB_TYPE = "Widget";
-
-    /**
-     * Constructor.
-     */
     public PDAnnotationWidget()
     {
         super();
-        getCOSObject().setName(COSName.SUBTYPE, SUB_TYPE);
+        getCOSObject().setName(COSName.SUBTYPE, COSName.WIDGET.getName());
     }
 
     /**
@@ -52,7 +44,7 @@ public class PDAnnotationWidget extends PDAnnotation
     public PDAnnotationWidget(COSDictionary field)
     {
         super(field);
-        getCOSObject().setName(COSName.SUBTYPE, SUB_TYPE);
+        getCOSObject().setName(COSName.SUBTYPE, COSName.WIDGET.getName());
     }
 
     /**

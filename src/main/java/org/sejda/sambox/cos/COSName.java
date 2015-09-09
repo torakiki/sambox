@@ -140,6 +140,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName D = newCommonInstance("D");
     public static final COSName DA = newCommonInstance("DA");
     public static final COSName DARKEN = newCommonInstance("Darken");
+    public static final COSName DATAPREP = newCommonInstance("DataPrep");
     public static final COSName DATE = newCommonInstance("Date");
     public static final COSName DCT_DECODE = newCommonInstance("DCTDecode");
     public static final COSName DCT_DECODE_ABBREVIATION = newCommonInstance("DCT");
@@ -304,6 +305,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName LLE = newCommonInstance("LLE");
     public static final COSName LLO = newCommonInstance("LLO");
     public static final COSName LOCATION = newCommonInstance("Location");
+    public static final COSName LOCK = newCommonInstance("Lock");
     public static final COSName LUMINOSITY = newCommonInstance("Luminosity");
     public static final COSName LW = newCommonInstance("LW");
     public static final COSName LZW_DECODE = newCommonInstance("LZWDecode");
@@ -507,6 +509,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName W = newCommonInstance("W");
     public static final COSName W2 = newCommonInstance("W2");
     public static final COSName WHITE_POINT = newCommonInstance("WhitePoint");
+    public static final COSName WIDGET = newCommonInstance("Widget");
     public static final COSName WIDTH = newCommonInstance("Width");
     public static final COSName WIDTHS = newCommonInstance("Widths");
     public static final COSName WIN_ANSI_ENCODING = newCommonInstance("WinAnsiEncoding");

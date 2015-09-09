@@ -17,6 +17,7 @@
 package org.sejda.sambox.cos;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -1104,6 +1105,16 @@ public class COSDictionary extends COSBase
     public void removeItem(COSName key)
     {
         items.remove(key);
+    }
+
+    /**
+     * Remove the items for the dictionary. This will do nothing of the object does not exist.
+     *
+     * @param keys The keys to the item to remove from the dictionary.
+     */
+    public void removeItems(COSName... keys)
+    {
+        Arrays.stream(keys).forEach(items::remove);
     }
 
     /**
