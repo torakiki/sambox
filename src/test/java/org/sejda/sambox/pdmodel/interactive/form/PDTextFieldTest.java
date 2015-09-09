@@ -61,7 +61,8 @@ public class PDTextFieldTest
         PDAnnotationWidget widget = textField.getWidgets().get(0);
         
         assertEquals(COSName.ANNOT, textField.getCOSObject().getItem(COSName.TYPE));
-        assertEquals(PDAnnotationWidget.SUB_TYPE, textField.getCOSObject().getNameAsString(COSName.SUBTYPE));
+        assertEquals(COSName.WIDGET.getName(),
+                textField.getCOSObject().getNameAsString(COSName.SUBTYPE));
         
         assertEquals(widget.getCOSObject(), textField.getCOSObject());
     }
