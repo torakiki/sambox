@@ -47,6 +47,8 @@ import org.sejda.sambox.pdmodel.interactive.documentnavigation.outline.PDDocumen
 import org.sejda.sambox.pdmodel.interactive.form.PDAcroForm;
 import org.sejda.sambox.pdmodel.interactive.pagenavigation.PDThread;
 import org.sejda.sambox.pdmodel.interactive.viewerpreferences.PDViewerPreferences;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The Document Catalog of a PDF.
@@ -55,6 +57,8 @@ import org.sejda.sambox.pdmodel.interactive.viewerpreferences.PDViewerPreference
  */
 public class PDDocumentCatalog implements COSObjectable
 {
+    private static final Logger LOG = LoggerFactory.getLogger(PDDocumentCatalog.class);
+
     private final COSDictionary root;
     private final PDDocument document;
     private PDAcroForm cachedAcroForm;
@@ -401,7 +405,11 @@ public class PDDocumentCatalog implements COSObjectable
         String mode = root.getNameAsString(COSName.PAGE_MODE);
         if (mode != null)
         {
-            return PageMode.fromString(mode);
+            try {
+                return PageMode.fromString(mode);
+            } catch (IllegalArgumentException ex) {
+                LOG.debug(String.format("Unrecognized page mode %s", mode));
+            }
         }
         return PageMode.USE_NONE;
     }
