@@ -16,10 +16,10 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -46,7 +46,7 @@ public final class PDAcroForm implements COSObjectable
 
     private final PDDocument document;
     private final COSDictionary dictionary;
-    
+
     private Map<String, PDField> fieldCache;
 
     /**
@@ -82,7 +82,7 @@ public final class PDAcroForm implements COSObjectable
     {
         return document;
     }
-    
+
     @Override
     public COSDictionary getCOSObject()
     {
@@ -92,12 +92,12 @@ public final class PDAcroForm implements COSObjectable
     /**
      * This will return all of the documents root fields.
      * 
-     * A field might have children that are fields (non-terminal field) or does not
-     * have children which are fields (terminal fields).
+     * A field might have children that are fields (non-terminal field) or does not have children which are fields
+     * (terminal fields).
      * 
-     * The fields within an AcroForm are organized in a tree structure. The documents root fields 
-     * might either be terminal fields, non-terminal fields or a mixture of both. Non-terminal fields
-     * mark branches which contents can be retrieved using {@link PDNonTerminalField#getChildren()}.
+     * The fields within an AcroForm are organized in a tree structure. The documents root fields might either be
+     * terminal fields, non-terminal fields or a mixture of both. Non-terminal fields mark branches which contents can
+     * be retrieved using {@link PDNonTerminalField#getChildren()}.
      * 
      * @return A list of the documents root fields.
      * 
@@ -109,17 +109,20 @@ public final class PDAcroForm implements COSObjectable
         {
             return Collections.emptyList();
         }
-        List<PDField> pdFields = new ArrayList<PDField>();
+        List<PDField> pdFields = new ArrayList<>();
         for (int i = 0; i < cosFields.size(); i++)
         {
             COSDictionary element = (COSDictionary) cosFields.getObject(i);
             if (element != null)
             {
                 PDField field = PDField.fromDictionary(this, element, null);
-                pdFields.add(field);
+                if (field != null)
+                {
+                    pdFields.add(field);
+                }
             }
         }
-        return new COSArrayList<PDField>(pdFields, cosFields);
+        return new COSArrayList<>(pdFields, cosFields);
     }
 
     /**
@@ -133,22 +136,34 @@ public final class PDAcroForm implements COSObjectable
     }
 
     /**
-     * This will tell this form to cache the fields into a Map structure
-     * for fast access via the getField method.  The default is false.  You would
-     * want this to be false if you were changing the COSDictionary behind the scenes,
+     * Returns an iterator which walks all fields in the field tree, in order.
+     */
+    public Iterator<PDField> getFieldIterator()
+    {
+        return new PDFieldTree(this).iterator();
+    }
+
+    /**
+     * Return the field tree representing all form fields
+     */
+    public PDFieldTree getFieldTree()
+    {
+        return new PDFieldTree(this);
+    }
+
+    /**
+     * This will tell this form to cache the fields into a Map structure for fast access via the getField method. The
+     * default is false. You would want this to be false if you were changing the COSDictionary behind the scenes,
      * otherwise setting this to true is acceptable.
      *
      * @param cache A boolean telling if we should cache the fields.
-     * @throws IOException If there is an error while caching the fields.
      */
-    public void setCacheFields(boolean cache) throws IOException
+    public void setCacheFields(boolean cache)
     {
         if (cache)
         {
-            fieldCache = new HashMap<String, PDField>();
-            // fixme: this code does not cache non-terminal fields or their kids
-            List<PDField> fields = getFields();
-            for (PDField field : fields)
+            fieldCache = new HashMap<>();
+            for (PDField field : getFieldTree())
             {
                 fieldCache.put(field.getFullyQualifiedName(), field);
             }
@@ -174,9 +189,8 @@ public final class PDAcroForm implements COSObjectable
      *
      * @param fullyQualifiedName The name of the field to get.
      * @return The field with that name of null if one was not found.
-     * @throws IOException If there is an error getting the field type.
      */
-    public PDField getField(String fullyQualifiedName) throws IOException
+    public PDField getField(String fullyQualifiedName)
     {
         PDField retval = null;
         if (fieldCache != null)
@@ -188,33 +202,37 @@ public final class PDAcroForm implements COSObjectable
             String[] nameSubSection = fullyQualifiedName.split("\\.");
             COSArray fields = (COSArray) dictionary.getDictionaryObject(COSName.FIELDS);
 
-            for (int i = 0; i < fields.size() && retval == null; i++)
+            if (fields != null)
             {
-                COSDictionary element = (COSDictionary) fields.getObject(i);
-                if (element != null)
+                for (int i = 0; i < fields.size() && retval == null; i++)
                 {
-                    COSString fieldName =
-                        (COSString)element.getDictionaryObject(COSName.T);
-                    if (fieldName.getString().equals(fullyQualifiedName) ||
-                        fieldName.getString().equals(nameSubSection[0]))
+                    COSDictionary element = (COSDictionary) fields.getObject(i);
+                    if (element != null)
                     {
-                        PDField root = PDField.fromDictionary(this, element, null);
-
-                        if (nameSubSection.length > 1)
+                        COSString fieldName = (COSString) element.getDictionaryObject(COSName.T);
+                        if (fieldName.getString().equals(fullyQualifiedName)
+                                || fieldName.getString().equals(nameSubSection[0]))
                         {
-                            PDField kid = root.findKid(nameSubSection, 1);
-                            if (kid != null)
+                            PDField root = PDField.fromDictionary(this, element, null);
+                            if (root != null)
                             {
-                                retval = kid;
+                                if (nameSubSection.length > 1)
+                                {
+                                    PDField kid = root.findKid(nameSubSection, 1);
+                                    if (kid != null)
+                                    {
+                                        retval = kid;
+                                    }
+                                    else
+                                    {
+                                        retval = root;
+                                    }
+                                }
+                                else
+                                {
+                                    retval = root;
+                                }
                             }
-                            else
-                            {
-                                retval = root;
-                            }
-                        }
-                        else
-                        {
-                            retval = root;
                         }
                     }
                 }
@@ -245,8 +263,8 @@ public final class PDAcroForm implements COSObjectable
     }
 
     /**
-     * True if the viewing application should construct the appearances of all field widgets.
-     * The default value is false.
+     * True if the viewing application should construct the appearances of all field widgets. The default value is
+     * false.
      * 
      * @return the value of NeedAppearances, false if the value isn't set
      */
@@ -256,8 +274,7 @@ public final class PDAcroForm implements COSObjectable
     }
 
     /**
-     * Set the NeedAppearances value. If this is false, PDFBox will create appearances for all field
-     * widget.
+     * Set the NeedAppearances value. If this is false, PDFBox will create appearances for all field widget.
      * 
      * @param value the value for NeedAppearances
      */
@@ -265,7 +282,7 @@ public final class PDAcroForm implements COSObjectable
     {
         dictionary.setBoolean(COSName.NEED_APPEARANCES, value);
     }
-    
+
     /**
      * This will get the default resources for the acro form.
      *
@@ -311,7 +328,7 @@ public final class PDAcroForm implements COSObjectable
     {
         return hasXFA() && getFields().isEmpty();
     }
-    
+
     /**
      * Get the XFA resource, the XFA resource is only used for PDF 1.5+ forms.
      *
@@ -337,10 +354,9 @@ public final class PDAcroForm implements COSObjectable
     {
         dictionary.setItem(COSName.XFA, xfa);
     }
-    
+
     /**
-     * This will get the 'quadding' or justification of the text to be displayed.
-     * 0 - Left(default)<br/>
+     * This will get the 'quadding' or justification of the text to be displayed. 0 - Left(default)<br/>
      * 1 - Centered<br />
      * 2 - Right<br />
      * Please see the QUADDING_CONSTANTS.
@@ -350,7 +366,7 @@ public final class PDAcroForm implements COSObjectable
     public int getQ()
     {
         int retval = 0;
-        COSNumber number = (COSNumber)dictionary.getDictionaryObject(COSName.Q);
+        COSNumber number = (COSNumber) dictionary.getDictionaryObject(COSName.Q);
         if (number != null)
         {
             retval = number.intValue();
@@ -359,7 +375,7 @@ public final class PDAcroForm implements COSObjectable
     }
 
     /**
-     * This will set the quadding/justification of the text.  See QUADDING constants.
+     * This will set the quadding/justification of the text. See QUADDING constants.
      *
      * @param q The new text justification.
      */
