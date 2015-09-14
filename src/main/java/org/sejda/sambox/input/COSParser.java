@@ -108,6 +108,11 @@ class COSParser extends BaseCOSParser
             {
                 LOG.warn(String.format("Unknown token with value '%s' ending at offset %d",
                         badString, position()));
+                if (badString.length() <= 0)
+                {
+                    // we are at a zero length end of token, we try to skip it and hopefully recover
+                    source().read();
+                }
             }
         }
         }
