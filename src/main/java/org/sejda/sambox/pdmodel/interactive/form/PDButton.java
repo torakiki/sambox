@@ -60,7 +60,7 @@ public abstract class PDButton extends PDTerminalField
     public PDButton(PDAcroForm acroForm)
     {
         super(acroForm);
-        dictionary.setItem(COSName.FT, COSName.BTN);
+        getCOSObject().setItem(COSName.FT, COSName.BTN);
     }
     
     /**
@@ -82,7 +82,7 @@ public abstract class PDButton extends PDTerminalField
      */
     public boolean isPushButton()
     {
-        return dictionary.getFlag(COSName.FF, FLAG_PUSHBUTTON);
+        return getCOSObject().getFlag(COSName.FF, FLAG_PUSHBUTTON);
     }
 
     /**
@@ -92,7 +92,7 @@ public abstract class PDButton extends PDTerminalField
      */
     public void setPushButton(boolean pushbutton)
     {
-        dictionary.setFlag(COSName.FF, FLAG_PUSHBUTTON, pushbutton);
+        getCOSObject().setFlag(COSName.FF, FLAG_PUSHBUTTON, pushbutton);
     }
 
     /**
@@ -102,7 +102,7 @@ public abstract class PDButton extends PDTerminalField
      */
     public boolean isRadioButton()
     {
-        return dictionary.getFlag(COSName.FF, FLAG_RADIO);
+        return getCOSObject().getFlag(COSName.FF, FLAG_RADIO);
     }
 
     /**
@@ -112,7 +112,7 @@ public abstract class PDButton extends PDTerminalField
      */
     public void setRadioButton(boolean radiobutton)
     {
-        dictionary.setFlag(COSName.FF, FLAG_RADIO, radiobutton);
+        getCOSObject().setFlag(COSName.FF, FLAG_RADIO, radiobutton);
     }
     
     /**
@@ -136,7 +136,7 @@ public abstract class PDButton extends PDTerminalField
         COSBase value = getInheritableAttribute(COSName.OPT);
         if (value instanceof COSString)
         {
-            List<String> array = new ArrayList<String>();
+            List<String> array = new ArrayList<>();
             array.add(((COSString) value).getString());
             return array;
         }
@@ -160,7 +160,7 @@ public abstract class PDButton extends PDTerminalField
         {
             cosValues = COSArrayList.convertStringListToCOSStringCOSArray(values);
         }
-        dictionary.setItem(COSName.OPT, cosValues);
+        getCOSObject().setItem(COSName.OPT, cosValues);
     }
 
     @Override

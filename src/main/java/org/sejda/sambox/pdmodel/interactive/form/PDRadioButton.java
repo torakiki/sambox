@@ -66,7 +66,7 @@ public final class PDRadioButton extends PDButton
      */
     public void setRadiosInUnison(boolean radiosInUnison)
     {
-        dictionary.setFlag(COSName.FF, FLAG_RADIOS_IN_UNISON, radiosInUnison);
+        getCOSObject().setFlag(COSName.FF, FLAG_RADIOS_IN_UNISON, radiosInUnison);
     }
 
     /**
@@ -75,7 +75,7 @@ public final class PDRadioButton extends PDButton
      */
     public boolean isRadiosInUnison()
     {
-        return dictionary.getFlag(COSName.FF, FLAG_RADIOS_IN_UNISON);
+        return getCOSObject().getFlag(COSName.FF, FLAG_RADIOS_IN_UNISON);
     }
 
     /**
@@ -93,7 +93,7 @@ public final class PDRadioButton extends PDButton
      * @return the export value of the field.
      * @throws IOException in case the fields value can not be retrieved
      */
-    public String getExportValue() throws IOException
+    public String getExportValue()
     {
         List<String> options = getOptions();
         if (options.isEmpty())
@@ -139,10 +139,7 @@ public final class PDRadioButton extends PDButton
         {
             return ((COSName)value).getName();
         }
-        else
-        {
             return "";
-        }
     }
 
     /**
@@ -157,10 +154,7 @@ public final class PDRadioButton extends PDButton
         {
             return ((COSName)value).getName();
         }
-        else
-        {
             return "";
-        }
     }
 
     @Override
@@ -177,7 +171,7 @@ public final class PDRadioButton extends PDButton
      */
     public void setValue(String value) throws IOException
     {
-        dictionary.setName(COSName.V, value);
+        getCOSObject().setName(COSName.V, value);
         // update the appearance state (AS)
         for (PDAnnotationWidget widget : getWidgets())
         {
@@ -200,8 +194,8 @@ public final class PDRadioButton extends PDButton
      * @param value Name of radio button to select
      * @throws IOException if the value could not be set
      */
-    public void setDefaultValue(String value) throws IOException
+    public void setDefaultValue(String value)
     {
-        dictionary.setName(COSName.DV, value);
+        getCOSObject().setName(COSName.DV, value);
     }
 }

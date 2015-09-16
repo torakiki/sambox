@@ -105,7 +105,7 @@ public abstract class PDVariableText extends PDTerminalField
      */
     public void setDefaultAppearance(String daValue)
     {
-        dictionary.setString(COSName.DA, daValue);
+        getCOSObject().setString(COSName.DA, daValue);
     }
 
     /**
@@ -117,7 +117,7 @@ public abstract class PDVariableText extends PDTerminalField
      */
     public String getDefaultStyleString()
     {
-        COSString defaultStyleString = (COSString) dictionary.getDictionaryObject(COSName.DS);
+        COSString defaultStyleString = (COSString) getCOSObject().getDictionaryObject(COSName.DS);
         return defaultStyleString.getString();
     }
 
@@ -132,11 +132,11 @@ public abstract class PDVariableText extends PDTerminalField
     {
         if (defaultStyleString != null)
         {
-            dictionary.setItem(COSName.DS, COSString.parseLiteral(defaultStyleString));
+            getCOSObject().setItem(COSName.DS, COSString.parseLiteral(defaultStyleString));
         }
         else
         {
-            dictionary.removeItem(COSName.DS);
+            getCOSObject().removeItem(COSName.DS);
         }
     }
 
@@ -172,16 +172,15 @@ public abstract class PDVariableText extends PDTerminalField
      */
     public void setQ(int q)
     {
-        dictionary.setInt(COSName.Q, q);
+        getCOSObject().setInt(COSName.Q, q);
     }
 
     /**
      * Get the fields rich text value.
      * 
      * @return the rich text value string
-     * @throws IOException if the field dictionary entry is not a text type
      */
-    public String getRichTextValue() throws IOException
+    public String getRichTextValue()
     {
         return getStringOrStream(getInheritableAttribute(COSName.RV));
     }
@@ -203,11 +202,11 @@ public abstract class PDVariableText extends PDTerminalField
     {
         if (richTextValue != null)
         {
-            dictionary.setItem(COSName.RV, COSString.parseLiteral(richTextValue));
+            getCOSObject().setItem(COSName.RV, COSString.parseLiteral(richTextValue));
         }
         else
         {
-            dictionary.removeItem(COSName.RV);
+            getCOSObject().removeItem(COSName.RV);
         }
     }
 

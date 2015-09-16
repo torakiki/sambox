@@ -1241,6 +1241,14 @@ public class COSDictionary extends COSBase
         return new UnmodifiableCOSDictionary(this);
     }
 
+    /**
+     * @return a new {@link COSDictionary} that is a duplicate of this
+     */
+    public COSDictionary duplicate()
+    {
+        return new COSDictionary(this);
+    }
+
     @Override
     public String toString()
     {
@@ -1254,6 +1262,10 @@ public class COSDictionary extends COSBase
                 if (v instanceof COSDictionary)
                 {
                     return "COSDictionary{.." + ((COSDictionary) v).size() + " items ..}";
+                }
+                else if (v instanceof COSArray)
+                {
+                    return "COSArray{.." + ((COSArray) v).size() + " items ..}";
                 }
                 return v.toString();
             }).orElse("null"));

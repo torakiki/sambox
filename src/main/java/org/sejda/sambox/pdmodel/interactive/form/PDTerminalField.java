@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
+import static java.util.Objects.nonNull;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,12 +28,12 @@ import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.pdmodel.interactive.action.PDFormFieldAdditionalActions;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
 
 /**
- * A field in an interactive form.
- * Fields may be one of four types: button, text, choice, or signature.
+ * A field in an interactive form. Fields may be one of four types: button, text, choice, or signature.
  *
  * @author sug
  */
@@ -66,32 +68,32 @@ public abstract class PDTerminalField extends PDField
      */
     public void setActions(PDFormFieldAdditionalActions actions)
     {
-        dictionary.setItem(COSName.AA, actions);
+        getCOSObject().setItem(COSName.AA, actions);
     }
-    
+
     @Override
     public int getFieldFlags()
     {
         int retval = 0;
-        COSInteger ff = (COSInteger) dictionary.getDictionaryObject(COSName.FF);
+        COSInteger ff = (COSInteger) getCOSObject().getDictionaryObject(COSName.FF);
         if (ff != null)
         {
             retval = ff.intValue();
         }
-        else if (parent != null)
+        else if (getParent() != null)
         {
-            retval = parent.getFieldFlags();
+            retval = getParent().getFieldFlags();
         }
         return retval;
     }
-    
+
     @Override
     public String getFieldType()
     {
-        String fieldType = dictionary.getNameAsString(COSName.FT);
-        if (fieldType == null && parent != null)
+        String fieldType = getCOSObject().getNameAsString(COSName.FT);
+        if (fieldType == null && getParent() != null)
         {
-            fieldType = parent.getFieldType();
+            fieldType = getParent().getFieldType();
         }
         return fieldType;
     }
@@ -103,26 +105,49 @@ public abstract class PDTerminalField extends PDField
      */
     public List<PDAnnotationWidget> getWidgets()
     {
-        List<PDAnnotationWidget> widgets = new ArrayList<PDAnnotationWidget>();
-        COSArray kids = (COSArray)dictionary.getDictionaryObject(COSName.KIDS);
+        List<PDAnnotationWidget> widgets = new ArrayList<>();
+        COSArray kids = (COSArray) getCOSObject().getDictionaryObject(COSName.KIDS);
         if (kids == null)
         {
             // the field itself is a widget
-            widgets.add(new PDAnnotationWidget(dictionary));
+            widgets.add(new PDAnnotationWidget(getCOSObject()));
         }
         else if (kids.size() > 0)
         {
             // there are multiple widgets
-            for (int i = 0; i < kids.size(); i++)
+            for (COSBase kid : kids)
             {
-                COSBase kid = kids.getObject(i);
-                if (kid instanceof COSDictionary)
+                if (!COSNull.NULL.equals(kid) && nonNull(kid))
                 {
-                    widgets.add(new PDAnnotationWidget((COSDictionary)kid));
+                    widgets.add(new PDAnnotationWidget((COSDictionary) kid.getCOSObject()));
                 }
             }
         }
         return widgets;
+    }
+
+    /**
+     * Adds the given widget as child of this fields, only if not already present
+     * 
+     * @param widget
+     */
+    public void addWidgetIfMissing(PDAnnotationWidget widget)
+    {
+        if (nonNull(widget))
+        {
+            COSArray kids = (COSArray) getCOSObject().getDictionaryObject(COSName.KIDS);
+            if (kids == null)
+            {
+                kids = new COSArray(widget.getCOSObject());
+                widget.getCOSObject().setItem(COSName.PARENT, this);
+                getCOSObject().setItem(COSName.KIDS, kids);
+            }
+            else if (!kids.contains(widget.getCOSObject()))
+            {
+                kids.add(widget.getCOSObject());
+                widget.getCOSObject().setItem(COSName.PARENT, this);
+            }
+        }
     }
 
     /**
@@ -132,23 +157,7 @@ public abstract class PDTerminalField extends PDField
      */
     public void setWidgets(List<PDAnnotationWidget> children)
     {
-        COSArray kidsArray = COSArrayList.converterToCOSArray(children);
-        dictionary.setItem(COSName.KIDS, kidsArray);
-    }
-    
-    /**
-     * This will get the single associated widget that is part of this field. This occurs when the
-     * Widget is embedded in the fields dictionary. Sometimes there are multiple sub widgets
-     * associated with this field, in which case you want to use getWidgets(). If the kids entry is
-     * specified, then the first entry in that list will be returned.
-     * 
-     * @return The widget that is associated with this field.
-     * @deprecated Fields may have more than one widget, call {@link #getWidgets()} instead.
-     */
-    @Deprecated
-    public PDAnnotationWidget getWidget()
-    {
-        return getWidgets().get(0);
+        getCOSObject().setItem(COSName.KIDS, COSArrayList.converterToCOSArray(children));
     }
 
     /**
@@ -158,18 +167,24 @@ public abstract class PDTerminalField extends PDField
      */
     protected final void applyChange() throws IOException
     {
-        if (!acroForm.getNeedAppearances())
+        if (!getAcroForm().getNeedAppearances())
         {
             constructAppearances();
         }
         // if we supported JavaScript we would raise a field changed event here
     }
-    
+
     /**
-     * Constructs appearance streams and appearance dictionaries for all widget annotations.
-     * Subclasses should not call this method directly but via {@link #applyChange()}.
+     * Constructs appearance streams and appearance dictionaries for all widget annotations. Subclasses should not call
+     * this method directly but via {@link #applyChange()}.
      * 
      * @throws IOException if the appearance couldn't be generated
      */
     abstract void constructAppearances() throws IOException;
+
+    @Override
+    public boolean isTerminal()
+    {
+        return true;
+    }
 }

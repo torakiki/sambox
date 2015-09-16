@@ -20,18 +20,18 @@ import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.cos.COSObjectable;
+import org.sejda.sambox.pdmodel.common.PDDictionaryWrapper;
 import org.sejda.sambox.pdmodel.interactive.action.PDFormFieldAdditionalActions;
 
 /**
  * A field in an interactive form.
  */
-public abstract class PDField implements COSObjectable
+public abstract class PDField extends PDDictionaryWrapper
 {
     private static final int FLAG_READ_ONLY = 1;
     private static final int FLAG_REQUIRED = 1 << 1;
     private static final int FLAG_NO_EXPORT = 1 << 2;
-    
+
     /**
      * Creates a COSField subclass from the given COS field. This is for reading fields from PDFs.
      *
@@ -45,9 +45,8 @@ public abstract class PDField implements COSObjectable
         return PDFieldFactory.createField(form, field, parent);
     }
 
-    protected final PDAcroForm acroForm;
-    protected final PDNonTerminalField parent;
-    protected final COSDictionary dictionary;
+    private final PDAcroForm acroForm;
+    private final PDNonTerminalField parent;
 
     /**
      * Constructor.
@@ -61,17 +60,22 @@ public abstract class PDField implements COSObjectable
 
     /**
      * Constructor.
-     *  @param acroForm The form that this field is part of.
-     * @param field the PDF object to represent as a field.
+     * 
+     * @param acroForm The form that this field is part of.
+     * @param dictionary the PDF object to represent as a field.
      * @param parent the parent node of the node
      */
-    PDField(PDAcroForm acroForm, COSDictionary field, PDNonTerminalField parent)
+    PDField(PDAcroForm acroForm, COSDictionary dictionary, PDNonTerminalField parent)
     {
+        super(dictionary);
         this.acroForm = acroForm;
-        this.dictionary = field;
         this.parent = parent;
+        if (parent != null)
+        {
+            parent.addChild(this);
+        }
     }
-    
+
     /**
      * Returns the given attribute, inheriting from parent nodes if necessary.
      *
@@ -80,9 +84,9 @@ public abstract class PDField implements COSObjectable
      */
     protected COSBase getInheritableAttribute(COSName key)
     {
-        if (dictionary.containsKey(key))
+        if (getCOSObject().containsKey(key))
         {
-            return dictionary.getDictionaryObject(key);
+            return getCOSObject().getDictionaryObject(key);
         }
         else if (parent != null)
         {
@@ -93,7 +97,7 @@ public abstract class PDField implements COSObjectable
             return acroForm.getCOSObject().getDictionaryObject(key);
         }
     }
-    
+
     /**
      * Get the FT entry of the field. This is a read only field and is set depending on the actual type. The field type
      * is an inheritable attribute.
@@ -109,7 +113,7 @@ public abstract class PDField implements COSObjectable
      * @return A non-null string.
      */
     public abstract String getValueAsString();
-    
+
     /**
      * sets the field to be read-only.
      * 
@@ -117,7 +121,7 @@ public abstract class PDField implements COSObjectable
      */
     public void setReadonly(boolean readonly)
     {
-        dictionary.setFlag(COSName.FF, FLAG_READ_ONLY, readonly);
+        getCOSObject().setFlag(COSName.FF, FLAG_READ_ONLY, readonly);
     }
 
     /**
@@ -126,7 +130,7 @@ public abstract class PDField implements COSObjectable
      */
     public boolean isReadonly()
     {
-        return dictionary.getFlag(COSName.FF, FLAG_READ_ONLY);
+        return getCOSObject().getFlag(COSName.FF, FLAG_READ_ONLY);
     }
 
     /**
@@ -136,7 +140,7 @@ public abstract class PDField implements COSObjectable
      */
     public void setRequired(boolean required)
     {
-        dictionary.setFlag(COSName.FF, FLAG_REQUIRED, required);
+        getCOSObject().setFlag(COSName.FF, FLAG_REQUIRED, required);
     }
 
     /**
@@ -145,7 +149,7 @@ public abstract class PDField implements COSObjectable
      */
     public boolean isRequired()
     {
-        return dictionary.getFlag(COSName.FF, FLAG_REQUIRED);
+        return getCOSObject().getFlag(COSName.FF, FLAG_REQUIRED);
     }
 
     /**
@@ -155,7 +159,7 @@ public abstract class PDField implements COSObjectable
      */
     public void setNoExport(boolean noExport)
     {
-        dictionary.setFlag(COSName.FF, FLAG_NO_EXPORT, noExport);
+        getCOSObject().setFlag(COSName.FF, FLAG_NO_EXPORT, noExport);
     }
 
     /**
@@ -164,7 +168,7 @@ public abstract class PDField implements COSObjectable
      */
     public boolean isNoExport()
     {
-        return dictionary.getFlag(COSName.FF, FLAG_NO_EXPORT);
+        return getCOSObject().getFlag(COSName.FF, FLAG_NO_EXPORT);
     }
 
     /**
@@ -181,25 +185,25 @@ public abstract class PDField implements COSObjectable
      */
     public void setFieldFlags(int flags)
     {
-        dictionary.setInt(COSName.FF, flags);
+        getCOSObject().setInt(COSName.FF, flags);
     }
 
     /**
-     * Get the additional actions for this field. This will return null if there
-     * are no additional actions for this field.
+     * Get the additional actions for this field. This will return null if there are no additional actions for this
+     * field.
      *
      * @return The actions of the field.
      */
     public PDFormFieldAdditionalActions getActions()
     {
-        COSDictionary aa = (COSDictionary) dictionary.getDictionaryObject(COSName.AA);
+        COSDictionary aa = (COSDictionary) getCOSObject().getDictionaryObject(COSName.AA);
         if (aa != null)
         {
             return new PDFormFieldAdditionalActions(aa);
         }
         return null;
     }
-    
+
     /**
      * Get the parent field to this field, or null if none exists.
      * 
@@ -222,7 +226,7 @@ public abstract class PDField implements COSObjectable
     PDField findKid(String[] name, int nameIndex)
     {
         PDField retval = null;
-        COSArray kids = (COSArray) dictionary.getDictionaryObject(COSName.KIDS);
+        COSArray kids = (COSArray) getCOSObject().getDictionaryObject(COSName.KIDS);
         if (kids != null)
         {
             for (int i = 0; retval == null && i < kids.size(); i++)
@@ -231,7 +235,7 @@ public abstract class PDField implements COSObjectable
                 if (name[nameIndex].equals(kidDictionary.getString(COSName.T)))
                 {
                     retval = PDField.fromDictionary(acroForm, kidDictionary,
-                                                    (PDNonTerminalField)this);
+                            (PDNonTerminalField) this);
                     if (name.length > nameIndex + 1)
                     {
                         retval = retval.findKid(name, nameIndex + 1);
@@ -253,25 +257,15 @@ public abstract class PDField implements COSObjectable
     }
 
     /**
-     * This will get the dictionary associated with this field.
-     * 
-     * @return the dictionary that this class wraps.
-     */
-    @Override
-    public COSDictionary getCOSObject()
-    {
-        return dictionary;
-    }
-
-    /**
      * Returns the partial name of the field.
      * 
      * @return the name of the field
      */
     public String getPartialName()
     {
-        return dictionary.getString(COSName.T);
+        return getCOSObject().getString(COSName.T);
     }
+
     /**
      * This will set the partial name of the field.
      * 
@@ -279,7 +273,7 @@ public abstract class PDField implements COSObjectable
      */
     public void setPartialName(String name)
     {
-        dictionary.setString(COSName.T, name);
+        getCOSObject().setString(COSName.T, name);
     }
 
     /**
@@ -312,7 +306,7 @@ public abstract class PDField implements COSObjectable
      */
     public String getAlternateFieldName()
     {
-        return dictionary.getString(COSName.TU);
+        return getCOSObject().getString(COSName.TU);
     }
 
     /**
@@ -322,20 +316,19 @@ public abstract class PDField implements COSObjectable
      */
     public void setAlternateFieldName(String alternateFieldName)
     {
-        dictionary.setString(COSName.TU, alternateFieldName);
+        getCOSObject().setString(COSName.TU, alternateFieldName);
     }
-    
+
     /**
      * Gets the mapping name of the field.
      * 
-     * The mapping name shall be used when exporting interactive form field
-     * data from the document.
+     * The mapping name shall be used when exporting interactive form field data from the document.
      * 
      * @return the mapping name of the field
      */
     public String getMappingName()
     {
-        return dictionary.getString(COSName.TM);
+        return getCOSObject().getString(COSName.TM);
     }
 
     /**
@@ -345,13 +338,15 @@ public abstract class PDField implements COSObjectable
      */
     public void setMappingName(String mappingName)
     {
-        dictionary.setString(COSName.TM, mappingName);
+        getCOSObject().setString(COSName.TM, mappingName);
     }
+
+    public abstract boolean isTerminal();
 
     @Override
     public String toString()
     {
-        return getFullyQualifiedName() + "{type: " + getClass().getSimpleName() + " value: " +
-                getInheritableAttribute(COSName.V) + "}";
+        return getFullyQualifiedName() + "{type: " + getClass().getSimpleName() + " value: "
+                + getInheritableAttribute(COSName.V) + "}";
     }
 }

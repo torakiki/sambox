@@ -16,8 +16,9 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
+import static java.util.Objects.nonNull;
+
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -28,6 +29,7 @@ import org.sejda.sambox.cos.COSArrayList;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.COSNumber;
 import org.sejda.sambox.cos.COSObjectable;
 import org.sejda.sambox.cos.COSString;
@@ -104,25 +106,39 @@ public final class PDAcroForm implements COSObjectable
      */
     public List<PDField> getFields()
     {
-        COSArray cosFields = (COSArray) dictionary.getDictionaryObject(COSName.FIELDS);
-        if (cosFields == null)
-        {
-            return Collections.emptyList();
-        }
         List<PDField> pdFields = new ArrayList<>();
-        for (int i = 0; i < cosFields.size(); i++)
+        COSArray fields = (COSArray) getCOSObject().getDictionaryObject(COSName.FIELDS);
+        if (fields != null)
         {
-            COSDictionary element = (COSDictionary) cosFields.getObject(i);
-            if (element != null)
+            for (COSBase field : fields)
             {
-                PDField field = PDField.fromDictionary(this, element, null);
-                if (field != null)
+                if (!COSNull.NULL.equals(field) && nonNull(field))
                 {
-                    pdFields.add(field);
+                    pdFields.add(PDField.fromDictionary(this, (COSDictionary) field.getCOSObject(),
+                            null));
                 }
             }
         }
-        return new COSArrayList<>(pdFields, cosFields);
+        return pdFields;
+    }
+
+    /**
+     * Adds the fields to this form
+     * 
+     * @param fields
+     */
+    public void addFields(List<PDField> toAdd)
+    {
+        COSArray fields = (COSArray) getCOSObject().getDictionaryObject(COSName.FIELDS);
+        if (fields == null)
+        {
+            fields = new COSArray();
+        }
+        for (PDField field : toAdd)
+        {
+            fields.add(field);
+        }
+        getCOSObject().setItem(COSName.FIELDS, fields);
     }
 
     /**

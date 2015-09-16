@@ -78,7 +78,7 @@ public class ExistingPagesSizePredictor extends AbstractPDFBodyWriter
         if (page != null)
         {
             pages++;
-            COSDictionary pageCopy = new COSDictionary(page.getCOSObject());
+            COSDictionary pageCopy = page.getCOSObject().duplicate();
             pageCopy.removeItem(COSName.PARENT);
             createIndirectReferenceIfNeededFor(pageCopy);
             startWriting();
@@ -145,7 +145,7 @@ public class ExistingPagesSizePredictor extends AbstractPDFBodyWriter
                 // dictionary write
                 streamsSize += stream.getFilteredLength();
                 streamsSize += STREAM_WRAPPING_SIZE;
-                ref.setValue(new COSDictionary(stream));
+                ref.setValue(stream.duplicate());
             }
         }
         writer.writeObject(ref);

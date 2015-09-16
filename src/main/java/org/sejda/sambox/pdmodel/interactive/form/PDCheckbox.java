@@ -120,10 +120,10 @@ public final class PDCheckbox extends PDButton
     public void setValue(boolean value) throws IOException
     {
         COSName name = value ? COSName.YES : COSName.OFF;
-        dictionary.setItem(COSName.V, name);
+        getCOSObject().setItem(COSName.V, name);
         
         // update the appearance state (AS)
-        dictionary.setItem(COSName.AS, name);
+        getCOSObject().setItem(COSName.AS, name);
         
         applyChange();
     }
@@ -132,11 +132,9 @@ public final class PDCheckbox extends PDButton
      * Sets the default value.
      *
      * @param value True if checked
-     * @throws IOException if the value could not be set
      */
-    public void setDefaultValue(boolean value) throws IOException
+    public void setDefaultValue(boolean value)
     {
-        COSName name = value ? COSName.YES : COSName.OFF;
-        dictionary.setItem(COSName.DV, name);
+        getCOSObject().setItem(COSName.DV, value ? COSName.YES : COSName.OFF);
     }
 }

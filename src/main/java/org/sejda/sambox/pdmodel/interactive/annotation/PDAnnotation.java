@@ -16,15 +16,15 @@
  */
 package org.sejda.sambox.pdmodel.interactive.annotation;
 
-import java.io.IOException;
+import static org.sejda.util.RequireUtils.requireArg;
 
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSNumber;
-import org.sejda.sambox.cos.COSObjectable;
 import org.sejda.sambox.pdmodel.PDPage;
+import org.sejda.sambox.pdmodel.common.PDDictionaryWrapper;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.graphics.color.PDColor;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Ben Litchfield
  */
-public abstract class PDAnnotation implements COSObjectable
+public abstract class PDAnnotation extends PDDictionaryWrapper
 {
     /**
      * Log instance.
@@ -83,109 +83,86 @@ public abstract class PDAnnotation implements COSObjectable
      */
     public static final int FLAG_TOGGLE_NO_VIEW = 1 << 8;
 
-    private final COSDictionary dictionary;
-
     /**
      * Create the correct annotation from the base COS object.
      * 
      * @param base The COS object that is the annotation.
      * @return The correctly typed annotation object.
-     * @throws IOException If there is an error while creating the annotation.
      */
-    public static PDAnnotation createAnnotation(COSBase base) throws IOException
+    public static PDAnnotation createAnnotation(COSBase base)
     {
-        PDAnnotation annot = null;
-        if (base instanceof COSDictionary)
+        requireArg(base instanceof COSDictionary, "Illegal annotation type " + base);
+        COSDictionary annotDic = (COSDictionary) base;
+        String subtype = annotDic.getNameAsString(COSName.SUBTYPE);
+        if (PDAnnotationFileAttachment.SUB_TYPE.equals(subtype))
         {
-            COSDictionary annotDic = (COSDictionary) base;
-            String subtype = annotDic.getNameAsString(COSName.SUBTYPE);
-            if (PDAnnotationFileAttachment.SUB_TYPE.equals(subtype))
-            {
-                annot = new PDAnnotationFileAttachment(annotDic);
-            }
-            else if (PDAnnotationLine.SUB_TYPE.equals(subtype))
-            {
-                annot = new PDAnnotationLine(annotDic);
-            }
-            else if (PDAnnotationLink.SUB_TYPE.equals(subtype))
-            {
-                annot = new PDAnnotationLink(annotDic);
-            }
-            else if (PDAnnotationPopup.SUB_TYPE.equals(subtype))
-            {
-                annot = new PDAnnotationPopup(annotDic);
-            }
-            else if (PDAnnotationRubberStamp.SUB_TYPE.equals(subtype))
-            {
-                annot = new PDAnnotationRubberStamp(annotDic);
-            }
-            else if (PDAnnotationSquareCircle.SUB_TYPE_SQUARE.equals(subtype)
-                    || PDAnnotationSquareCircle.SUB_TYPE_CIRCLE.equals(subtype))
-            {
-                annot = new PDAnnotationSquareCircle(annotDic);
-            }
-            else if (PDAnnotationText.SUB_TYPE.equals(subtype))
-            {
-                annot = new PDAnnotationText(annotDic);
-            }
-            else if (PDAnnotationTextMarkup.SUB_TYPE_HIGHLIGHT.equals(subtype)
-                    || PDAnnotationTextMarkup.SUB_TYPE_UNDERLINE.equals(subtype)
-                    || PDAnnotationTextMarkup.SUB_TYPE_SQUIGGLY.equals(subtype)
-                    || PDAnnotationTextMarkup.SUB_TYPE_STRIKEOUT.equals(subtype))
-            {
-                annot = new PDAnnotationTextMarkup(annotDic);
-            }
-            else if (PDAnnotationLink.SUB_TYPE.equals(subtype))
-            {
-                annot = new PDAnnotationLink(annotDic);
-            }
-            else if (COSName.WIDGET.getName().equals(subtype))
-            {
-                annot = new PDAnnotationWidget(annotDic);
-            }
-            else if (PDAnnotationMarkup.SUB_TYPE_FREETEXT.equals(subtype)
-                    || PDAnnotationMarkup.SUB_TYPE_POLYGON.equals(subtype)
-                    || PDAnnotationMarkup.SUB_TYPE_POLYLINE.equals(subtype)
-                    || PDAnnotationMarkup.SUB_TYPE_CARET.equals(subtype)
-                    || PDAnnotationMarkup.SUB_TYPE_INK.equals(subtype)
-                    || PDAnnotationMarkup.SUB_TYPE_SOUND.equals(subtype))
-            {
-                annot = new PDAnnotationMarkup(annotDic);
-            }
-            else
-            {
-                // TODO not yet implemented:
-                // Movie, Screen, PrinterMark, TrapNet, Watermark, 3D, Redact
-                annot = new PDAnnotationUnknown(annotDic);
-                LOG.debug("Unknown or unsupported annotation subtype " + subtype);
-            }
+            return new PDAnnotationFileAttachment(annotDic);
         }
-        else
+        else if (PDAnnotationLine.SUB_TYPE.equals(subtype))
         {
-            throw new IOException("Error: Unknown annotation type " + base);
+            return new PDAnnotationLine(annotDic);
         }
+        else if (PDAnnotationLink.SUB_TYPE.equals(subtype))
+        {
+            return new PDAnnotationLink(annotDic);
+        }
+        else if (PDAnnotationPopup.SUB_TYPE.equals(subtype))
+        {
+            return new PDAnnotationPopup(annotDic);
+        }
+        else if (PDAnnotationRubberStamp.SUB_TYPE.equals(subtype))
+        {
+            return new PDAnnotationRubberStamp(annotDic);
+        }
+        else if (PDAnnotationSquareCircle.SUB_TYPE_SQUARE.equals(subtype)
+                || PDAnnotationSquareCircle.SUB_TYPE_CIRCLE.equals(subtype))
+        {
+            return new PDAnnotationSquareCircle(annotDic);
+        }
+        else if (PDAnnotationText.SUB_TYPE.equals(subtype))
+        {
+            return new PDAnnotationText(annotDic);
+        }
+        else if (PDAnnotationTextMarkup.SUB_TYPE_HIGHLIGHT.equals(subtype)
+                || PDAnnotationTextMarkup.SUB_TYPE_UNDERLINE.equals(subtype)
+                || PDAnnotationTextMarkup.SUB_TYPE_SQUIGGLY.equals(subtype)
+                || PDAnnotationTextMarkup.SUB_TYPE_STRIKEOUT.equals(subtype))
+        {
+            return new PDAnnotationTextMarkup(annotDic);
+        }
+        else if (PDAnnotationLink.SUB_TYPE.equals(subtype))
+        {
+            return new PDAnnotationLink(annotDic);
+        }
+        else if (COSName.WIDGET.getName().equals(subtype))
+        {
+            return new PDAnnotationWidget(annotDic);
+        }
+        else if (PDAnnotationMarkup.SUB_TYPE_FREETEXT.equals(subtype)
+                || PDAnnotationMarkup.SUB_TYPE_POLYGON.equals(subtype)
+                || PDAnnotationMarkup.SUB_TYPE_POLYLINE.equals(subtype)
+                || PDAnnotationMarkup.SUB_TYPE_CARET.equals(subtype)
+                || PDAnnotationMarkup.SUB_TYPE_INK.equals(subtype)
+                || PDAnnotationMarkup.SUB_TYPE_SOUND.equals(subtype))
+        {
+            return new PDAnnotationMarkup(annotDic);
+        }
+        LOG.warn("Unsupported annotation subtype " + subtype);
+        // TODO not yet implemented:
+        // Movie, Screen, PrinterMark, TrapNet, Watermark, 3D, Redact
+        return new PDAnnotationUnknown(annotDic);
 
-        return annot;
     }
 
-    /**
-     * Constructor.
-     */
     public PDAnnotation()
     {
-        dictionary = new COSDictionary();
-        dictionary.setItem(COSName.TYPE, COSName.ANNOT);
+        getCOSObject().setItem(COSName.TYPE, COSName.ANNOT);
     }
 
-    /**
-     * Constructor.
-     * 
-     * @param dict The annotations dictionary.
-     */
-    public PDAnnotation(COSDictionary dict)
+    public PDAnnotation(COSDictionary dictionary)
     {
-        dictionary = dict;
-        dictionary.setItem(COSName.TYPE, COSName.ANNOT);
+        super(dictionary);
+        getCOSObject().setItem(COSName.TYPE, COSName.ANNOT);
     }
 
     /**
@@ -197,7 +174,7 @@ public abstract class PDAnnotation implements COSObjectable
      */
     public PDRectangle getRectangle()
     {
-        COSArray rectArray = (COSArray) dictionary.getDictionaryObject(COSName.RECT);
+        COSArray rectArray = (COSArray) getCOSObject().getDictionaryObject(COSName.RECT);
         PDRectangle rectangle = null;
         if (rectArray != null)
         {
@@ -223,7 +200,7 @@ public abstract class PDAnnotation implements COSObjectable
      */
     public void setRectangle(PDRectangle rectangle)
     {
-        dictionary.setItem(COSName.RECT, rectangle.getCOSArray());
+        getCOSObject().setItem(COSName.RECT, rectangle.getCOSArray());
     }
 
     /**
@@ -244,17 +221,6 @@ public abstract class PDAnnotation implements COSObjectable
     public void setAnnotationFlags(int flags)
     {
         getCOSObject().setInt(COSName.F, flags);
-    }
-
-    /**
-     * Interface method for COSObjectable.
-     * 
-     * @return This object as a standard COS object.
-     */
-    @Override
-    public COSDictionary getCOSObject()
-    {
-        return dictionary;
     }
 
     /**
@@ -295,7 +261,7 @@ public abstract class PDAnnotation implements COSObjectable
      */
     public PDAppearanceDictionary getAppearance()
     {
-        COSDictionary apDic = (COSDictionary) dictionary.getDictionaryObject(COSName.AP);
+        COSDictionary apDic = (COSDictionary) getCOSObject().getDictionaryObject(COSName.AP);
         if (apDic != null)
         {
             return new PDAppearanceDictionary(apDic);
@@ -315,7 +281,7 @@ public abstract class PDAnnotation implements COSObjectable
         {
             ap = appearance.getCOSObject();
         }
-        dictionary.setItem(COSName.AP, ap);
+        getCOSObject().setItem(COSName.AP, ap);
     }
 
     /**
@@ -341,10 +307,7 @@ public abstract class PDAnnotation implements COSObjectable
             COSName state = getAppearanceState();
             return normalAppearance.getSubDictionary().get(state);
         }
-        else
-        {
-            return normalAppearance.getAppearanceStream();
-        }
+        return normalAppearance.getAppearanceStream();
     }
 
     /**
@@ -534,7 +497,7 @@ public abstract class PDAnnotation implements COSObjectable
      */
     public String getContents()
     {
-        return dictionary.getString(COSName.CONTENTS);
+        return getCOSObject().getString(COSName.CONTENTS);
     }
 
     /**
@@ -544,7 +507,7 @@ public abstract class PDAnnotation implements COSObjectable
      */
     public void setContents(String value)
     {
-        dictionary.setString(COSName.CONTENTS, value);
+        getCOSObject().setString(COSName.CONTENTS, value);
     }
 
     /**

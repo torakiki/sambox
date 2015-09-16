@@ -161,7 +161,7 @@ public class PDDocument implements Closeable
     public PDPage importPage(PDPage page)
     {
         requireOpen();
-        PDPage importedPage = new PDPage(new COSDictionary(page.getCOSObject()));
+        PDPage importedPage = new PDPage(page.getCOSObject().duplicate());
         InputStream in = null;
         try
         {

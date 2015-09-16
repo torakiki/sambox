@@ -634,9 +634,8 @@ public class PDPage implements COSObjectable, PDContentStream
      * This will return a list of the Annotations for this page.
      * 
      * @return List of the PDAnnotation objects, never null.
-     * @throws IOException If there is an error while creating the annotation list.
      */
-    public List<PDAnnotation> getAnnotations() throws IOException
+    public List<PDAnnotation> getAnnotations()
     {
         COSArrayList<PDAnnotation> retval;
         COSArray annots = (COSArray) page.getDictionaryObject(COSName.ANNOTS);
@@ -644,21 +643,20 @@ public class PDPage implements COSObjectable, PDContentStream
         {
             annots = new COSArray();
             page.setItem(COSName.ANNOTS, annots);
-            retval = new COSArrayList<PDAnnotation>(new ArrayList<PDAnnotation>(), annots);
+            retval = new COSArrayList<>(new ArrayList<PDAnnotation>(), annots);
         }
         else
         {
-            List<PDAnnotation> actuals = new ArrayList<PDAnnotation>();
+            List<PDAnnotation> actuals = new ArrayList<>();
             for (int i = 0; i < annots.size(); i++)
             {
                 COSBase item = annots.getObject(i);
-                if (item == null)
+                if (item != null)
                 {
-                    continue;
+                    actuals.add(PDAnnotation.createAnnotation(item));
                 }
-                actuals.add(PDAnnotation.createAnnotation(item));
             }
-            retval = new COSArrayList<PDAnnotation>(actuals, annots);
+            retval = new COSArrayList<>(actuals, annots);
         }
         return retval;
     }

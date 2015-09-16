@@ -217,7 +217,7 @@ public class PDAnnotationMarkup extends PDAnnotation
      * @return the other annotation.
      * @throws IOException if there is an error with the annotation.
      */
-    public PDAnnotation getInReplyTo() throws IOException
+    public PDAnnotation getInReplyTo()
     {
         COSBase irt = getCOSObject().getDictionaryObject("IRT");
         return PDAnnotation.createAnnotation(irt);

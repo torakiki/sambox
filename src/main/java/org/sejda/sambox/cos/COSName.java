@@ -41,6 +41,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName ADBE_X509_RSA_SHA1 = newCommonInstance("adbe.x509.rsa_sha1");
     public static final COSName ADOBE_PPKLITE = newCommonInstance("Adobe.PPKLite");
     public static final COSName AESV3 = newCommonInstance("AESV3");
+    public static final COSName AF = newCommonInstance("AF");
     public static final COSName AFTER = newCommonInstance("After");
     public static final COSName AIS = newCommonInstance("AIS");
     public static final COSName ALT = newCommonInstance("Alt");
@@ -82,6 +83,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName BLACK_POINT = newCommonInstance("BlackPoint");
     public static final COSName BLEED_BOX = newCommonInstance("BleedBox");
     public static final COSName BM = newCommonInstance("BM");
+    public static final COSName BORDER = newCommonInstance("Border");
     public static final COSName BOUNDS = newCommonInstance("Bounds");
     public static final COSName BPC = newCommonInstance("BPC");
     public static final COSName BS = newCommonInstance("BS");
@@ -385,6 +387,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName PDF_DOC_ENCODING = newCommonInstance("PDFDocEncoding");
     public static final COSName PERMS = newCommonInstance("Perms");
     public static final COSName PG = newCommonInstance("Pg");
+    public static final COSName PMD = newCommonInstance("PMD");
     public static final COSName PRE_RELEASE = newCommonInstance("PreRelease");
     public static final COSName PREDICTOR = newCommonInstance("Predictor");
     public static final COSName PREV = newCommonInstance("Prev");

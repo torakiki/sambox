@@ -16,8 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.interactive.annotation;
 
-import java.io.IOException;
-
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 
@@ -90,17 +88,8 @@ public class PDAnnotationPopup extends PDAnnotation
      */
     public PDAnnotationMarkup getParent()
     {
-        PDAnnotationMarkup am = null;
-        try
-        {
-            am = (PDAnnotationMarkup) PDAnnotation.createAnnotation(getCOSObject()
-                    .getDictionaryObject(COSName.PARENT, COSName.P));
-        }
-        catch (IOException ioe)
-        {
-            // Couldn't construct the annotation, so return null i.e. do nothing
-        }
-        return am;
+        return (PDAnnotationMarkup) PDAnnotation
+                .createAnnotation(getCOSObject().getDictionaryObject(COSName.PARENT, COSName.P));
     }
 
 }

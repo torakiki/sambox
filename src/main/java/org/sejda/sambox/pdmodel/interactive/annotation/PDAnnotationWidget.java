@@ -32,15 +32,9 @@ public class PDAnnotationWidget extends PDAnnotation
 {
     public PDAnnotationWidget()
     {
-        super();
         getCOSObject().setName(COSName.SUBTYPE, COSName.WIDGET.getName());
     }
 
-    /**
-     * Creates a PDWidget from a COSDictionary, expected to be a correct object definition for a field in PDF.
-     *
-     * @param field the PDF object to represent as a field.
-     */
     public PDAnnotationWidget(COSDictionary field)
     {
         super(field);
@@ -98,8 +92,8 @@ public class PDAnnotationWidget extends PDAnnotation
         }
         else
         {
-            throw new IllegalArgumentException("Valid values for highlighting mode are "
-                    + "'N', 'N', 'O', 'P' or 'T'");
+            throw new IllegalArgumentException(
+                    "Valid values for highlighting mode are " + "'N', 'N', 'O', 'P' or 'T'");
         }
     }
 
@@ -136,8 +130,8 @@ public class PDAnnotationWidget extends PDAnnotation
      */
     public PDAction getAction()
     {
-        COSDictionary action = (COSDictionary) this.getCOSObject().getDictionaryObject(COSName.A);
-        return PDActionFactory.createAction(action);
+        return PDActionFactory
+                .createAction((COSDictionary) this.getCOSObject().getDictionaryObject(COSName.A));
     }
 
     /**
@@ -159,12 +153,11 @@ public class PDAnnotationWidget extends PDAnnotation
     public PDAnnotationAdditionalActions getActions()
     {
         COSDictionary aa = (COSDictionary) this.getCOSObject().getDictionaryObject("AA");
-        PDAnnotationAdditionalActions retval = null;
         if (aa != null)
         {
-            retval = new PDAnnotationAdditionalActions(aa);
+            return new PDAnnotationAdditionalActions(aa);
         }
-        return retval;
+        return null;
     }
 
     /**
@@ -200,10 +193,7 @@ public class PDAnnotationWidget extends PDAnnotation
         {
             return new PDBorderStyleDictionary(bs);
         }
-        else
-        {
-            return null;
-        }
+        return null;
     }
 
     // TODO where to get acroForm from?

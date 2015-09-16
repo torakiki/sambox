@@ -197,10 +197,7 @@ public class PDAnnotationLink extends PDAnnotation
         {
             return new PDActionURI(pa);
         }
-        else
-        {
-            return null;
-        }
+        return null;
     }
 
     /**
@@ -227,9 +224,6 @@ public class PDAnnotationLink extends PDAnnotation
         {
             return quadPoints.toFloatArray();
         }
-        else
-        {
-            return null; // Should never happen as this is a required item
-        }
+        return null; // Should never happen as this is a required item
     }
 }

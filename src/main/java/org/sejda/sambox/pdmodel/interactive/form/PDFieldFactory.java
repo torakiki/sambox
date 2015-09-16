@@ -23,12 +23,12 @@ import org.sejda.sambox.cos.COSName;
 /**
  * A PDField factory.
  */
-final class PDFieldFactory
+public final class PDFieldFactory
 {
     private PDFieldFactory()
     {
     }
-    
+
     private static final String FIELD_TYPE_TEXT = "Tx";
     private static final String FIELD_TYPE_BUTTON = "Btn";
     private static final String FIELD_TYPE_CHOICE = "Ch";
@@ -38,10 +38,11 @@ final class PDFieldFactory
      *
      * @param form the form that the field is part of
      * @param field the dictionary representing a field element
-     * @param parent the parent node of the node to be created 
+     * @param parent the parent node of the node to be created
      * @return the corresponding PDField instance
      */
-    static PDField createField(PDAcroForm form, COSDictionary field, PDNonTerminalField parent)
+    public static PDField createField(PDAcroForm form, COSDictionary field,
+            PDNonTerminalField parent)
     {
         String fieldType = findFieldType(field);
         if (FIELD_TYPE_CHOICE.equals(fieldType))
@@ -56,28 +57,22 @@ final class PDFieldFactory
         {
             return createButtonSubType(form, field, parent);
         }
-        else
-        {
-            return new PDNonTerminalField(form, field, parent);
-        }
+        return new PDNonTerminalField(form, field, parent);
     }
 
     private static PDField createChoiceSubType(PDAcroForm form, COSDictionary field,
-                                               PDNonTerminalField parent)
+            PDNonTerminalField parent)
     {
         int flags = field.getInt(COSName.FF, 0);
         if ((flags & PDChoice.FLAG_COMBO) != 0)
         {
             return new PDComboBox(form, field, parent);
         }
-        else
-        {
-            return new PDListBox(form, field, parent);
-        }
+        return new PDListBox(form, field, parent);
     }
 
     private static PDField createButtonSubType(PDAcroForm form, COSDictionary field,
-                                               PDNonTerminalField parent)
+            PDNonTerminalField parent)
     {
         int flags = field.getInt(COSName.FF, 0);
         // BJL: I have found that the radio flag bit is not always set
