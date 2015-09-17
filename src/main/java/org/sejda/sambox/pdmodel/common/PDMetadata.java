@@ -22,7 +22,6 @@ import java.io.OutputStream;
 
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSStream;
-import org.sejda.sambox.pdmodel.PDDocument;
 
 /**
  * This class represents metadata for various objects in a PDF document.
@@ -34,12 +33,10 @@ public class PDMetadata extends PDStream
 
     /**
      * This will create a new PDMetadata object.
-     *
-     * @param document The document that the stream will be part of.
      */
-    public PDMetadata( PDDocument document )
+    public PDMetadata()
     {
-        super( document );
+        super();
         getStream().setName( COSName.TYPE, "Metadata" );
         getStream().setName( COSName.SUBTYPE, "XML" );
     }
@@ -48,14 +45,13 @@ public class PDMetadata extends PDStream
      * Constructor.  Reads all data from the input stream and embeds it into the
      * document, this will close the InputStream.
      *
-     * @param doc The document that will hold the stream.
      * @param str The stream parameter.
      * @param filtered True if the stream already has a filter applied.
      * @throws IOException If there is an error creating the stream in the document.
      */
-    public PDMetadata( PDDocument doc, InputStream str, boolean filtered ) throws IOException
+    public PDMetadata(InputStream str, boolean filtered) throws IOException
     {
-        super( doc, str, filtered );
+        super(str, filtered);
         getStream().setName( COSName.TYPE, "Metadata" );
         getStream().setName( COSName.SUBTYPE, "XML" );
     }

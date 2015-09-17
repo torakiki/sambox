@@ -126,7 +126,7 @@ class AppearanceGeneratorHelper
                 }
                 else
                 {
-                    appearanceStream = new PDAppearanceStream(field.getAcroForm().getDocument());
+                    appearanceStream = new PDAppearanceStream();
                     appearanceStream.setBBox(widget.getRectangle().createRetranslatedRectangle());
                     appearanceDict.setNormalAppearance(appearanceStream);
                     // TODO support appearances other than "normal"
@@ -304,7 +304,6 @@ class AppearanceGeneratorHelper
 
         // calculate font metrics at font size
         float fontScaleY = fontSize / FONTSCALE;
-        ;
         float fontBoundingBoxAtSize = font.getBoundingBox().getHeight() * fontScaleY;
         float fontCapAtSize = font.getFontDescriptor().getCapHeight() * fontScaleY;
         float fontDescentAtSize = font.getFontDescriptor().getDescent() * fontScaleY;

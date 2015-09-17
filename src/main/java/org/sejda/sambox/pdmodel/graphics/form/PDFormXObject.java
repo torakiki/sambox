@@ -25,7 +25,6 @@ import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSFloat;
 import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.ResourceCache;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
@@ -81,9 +80,9 @@ public class PDFormXObject extends PDXObject implements PDContentStream
      * Creates a Form Image XObject for writing, in the given document.
      * @param document The current document
      */
-    public PDFormXObject(PDDocument document)
+    public PDFormXObject()
     {
-        super(document, COSName.FORM);
+        super(COSName.FORM);
         cache = null;
     }
 

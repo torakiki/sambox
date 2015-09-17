@@ -22,7 +22,6 @@ import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSObjectable;
 import org.sejda.sambox.cos.COSStream;
-import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.ResourceCache;
 import org.sejda.sambox.pdmodel.common.PDStream;
@@ -100,9 +99,9 @@ public class PDXObject implements COSObjectable
      * @param document The document in which to create the XObject.
      * @param subtype The subtype of the new XObject.
      */
-    protected PDXObject(PDDocument document, COSName subtype)
+    protected PDXObject(COSName subtype)
     {
-        stream = new PDStream(document);
+        stream = new PDStream();
         stream.getStream().setName(COSName.TYPE, COSName.XOBJECT.getName());
         stream.getStream().setName(COSName.SUBTYPE, subtype.getName());
     }

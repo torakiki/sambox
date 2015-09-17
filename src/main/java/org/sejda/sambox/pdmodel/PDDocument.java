@@ -168,7 +168,7 @@ public class PDDocument implements Closeable
             in = page.getContents();
             if (in != null)
             {
-                PDStream dest = new PDStream(this, page.getContents());
+                PDStream dest = new PDStream(page.getContents());
                 dest.addCompression();
                 importedPage.setContents(dest);
 

@@ -42,7 +42,6 @@ import org.sejda.sambox.pdmodel.font.encoding.GlyphList;
 import org.sejda.sambox.pdmodel.font.encoding.MacOSRomanEncoding;
 import org.sejda.sambox.pdmodel.font.encoding.StandardEncoding;
 import org.sejda.sambox.pdmodel.font.encoding.Type1Encoding;
-import org.sejda.sambox.pdmodel.font.encoding.WinAnsiEncoding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,16 +77,15 @@ public class PDTrueTypeFont extends PDSimpleFont implements PDVectorFont
      * <p><b>Note:</b> Simple fonts only support 256 characters. For Unicode support, use
      * {@link PDType0Font#load(PDDocument, File)} instead.</p>
      *
-     * @param doc The PDF document that will hold the embedded font.
      * @param file A TTF file.
      * @param encoding The PostScript encoding vector to be used for embedding.
      * @return a PDTrueTypeFont instance.
      * @throws IOException If there is an error loading the data.
      */
-    public static PDTrueTypeFont load(PDDocument doc, File file, Encoding encoding)
+    public static PDTrueTypeFont load(File file, Encoding encoding)
             throws IOException
     {
-        return new PDTrueTypeFont(doc, new FileInputStream(file), encoding);
+        return new PDTrueTypeFont(new FileInputStream(file), encoding);
     }
 
     /**
@@ -96,49 +94,17 @@ public class PDTrueTypeFont extends PDSimpleFont implements PDVectorFont
      * <p><b>Note:</b> Simple fonts only support 256 characters. For Unicode support, use
      * {@link PDType0Font#load(PDDocument, InputStream)} instead.</p>
      * 
-     * @param doc The PDF document that will hold the embedded font.
      * @param input A TTF file stream
      * @param encoding The PostScript encoding vector to be used for embedding.
      * @return a PDTrueTypeFont instance.
      * @throws IOException If there is an error loading the data.
      */
-    public static PDTrueTypeFont load(PDDocument doc, InputStream input, Encoding encoding)
+    public static PDTrueTypeFont load(InputStream input, Encoding encoding)
             throws IOException
     {
-        return new PDTrueTypeFont(doc, input, encoding);
+        return new PDTrueTypeFont(input, encoding);
     }
     
-    /**
-     * Loads a TTF to be embedded into a document as a simple font. Only supports WinAnsiEncoding.
-     *
-     * @param doc The PDF document that will hold the embedded font.
-     * @param file A TTF file.
-     * @return a PDTrueTypeFont instance.
-     * @throws IOException If there is an error loading the data.
-     *
-     * @deprecated Use {@link PDType0Font#load(PDDocument, File)} instead.
-     */
-    @Deprecated
-    public static PDTrueTypeFont loadTTF(PDDocument doc, File file) throws IOException
-    {
-        return new PDTrueTypeFont(doc, new FileInputStream(file), WinAnsiEncoding.INSTANCE);
-    }
-
-    /**
-     * Loads a TTF to be embedded into a document as a simple font. Only supports WinAnsiEncoding.
-     *
-     * @param doc The PDF document that will hold the embedded font.
-     * @param input A TTF file stream
-     * @return a PDTrueTypeFont instance.
-     * @throws IOException If there is an error loading the data.
-     *
-     * @deprecated Use {@link PDType0Font#load(PDDocument, InputStream)} instead.
-     */
-    @Deprecated
-    public static PDTrueTypeFont loadTTF(PDDocument doc, InputStream input) throws IOException
-    {
-        return new PDTrueTypeFont(doc, input, WinAnsiEncoding.INSTANCE);
-    }
 
     private CmapSubtable cmapWinUnicode = null;
     private CmapSubtable cmapWinSymbol = null;
@@ -269,10 +235,10 @@ public class PDTrueTypeFont extends PDSimpleFont implements PDVectorFont
     /**
      * Creates a new TrueType font for embedding.
      */
-    private PDTrueTypeFont(PDDocument document, InputStream ttfStream, Encoding encoding)
+    private PDTrueTypeFont(InputStream ttfStream, Encoding encoding)
             throws IOException
     {
-        PDTrueTypeFontEmbedder embedder = new PDTrueTypeFontEmbedder(document, dict, ttfStream,
+        PDTrueTypeFontEmbedder embedder = new PDTrueTypeFontEmbedder(dict, ttfStream,
                                                                      encoding);
         this.encoding = encoding;
         ttf = embedder.getTrueTypeFont();

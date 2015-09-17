@@ -18,7 +18,6 @@
 package org.sejda.sambox.pdmodel.interactive.annotation;
 
 import org.sejda.sambox.cos.COSStream;
-import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.common.PDStream;
 import org.sejda.sambox.pdmodel.graphics.form.PDFormXObject;
 
@@ -31,6 +30,11 @@ import org.sejda.sambox.pdmodel.graphics.form.PDFormXObject;
  */
 public class PDAppearanceStream extends PDFormXObject
 {
+    public PDAppearanceStream()
+    {
+        super();
+    }
+
     /**
      * Creates a Form XObject for reading.
      * 
@@ -41,13 +45,5 @@ public class PDAppearanceStream extends PDFormXObject
         super(new PDStream(stream));
     }
 
-    /**
-     * Creates a Form Image XObject for writing, in the given document.
-     * 
-     * @param document The current document
-     */
-    public PDAppearanceStream(PDDocument document)
-    {
-        super(document);
-    }
+
 }

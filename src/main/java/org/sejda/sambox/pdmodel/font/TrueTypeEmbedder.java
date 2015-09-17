@@ -37,7 +37,6 @@ import org.apache.fontbox.ttf.TTFSubsetter;
 import org.apache.fontbox.ttf.TrueTypeFont;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.common.PDStream;
 import org.sejda.util.IOUtils;
@@ -54,20 +53,18 @@ abstract class TrueTypeEmbedder implements Subsetter
     private static final int OBLIQUE = 256;
     private static final String BASE25 = "BCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-    private final PDDocument document;
     protected TrueTypeFont ttf;
     protected PDFontDescriptor fontDescriptor;
     protected final CmapSubtable cmap;
-    private final Set<Integer> subsetCodePoints = new HashSet<Integer>();
+    private final Set<Integer> subsetCodePoints = new HashSet<>();
     private final boolean embedSubset;
 
     /**
      * Creates a new TrueType font for embedding.
      */
-    TrueTypeEmbedder(PDDocument document, COSDictionary dict, InputStream ttfStream,
+    TrueTypeEmbedder(COSDictionary dict, InputStream ttfStream,
                      boolean embedSubset) throws IOException
     {
-        this.document = document;
         this.embedSubset = embedSubset;
 
         buildFontFile2(ttfStream);
@@ -79,7 +76,7 @@ abstract class TrueTypeEmbedder implements Subsetter
 
     public void buildFontFile2(InputStream ttfStream) throws IOException
     {
-        PDStream stream = new PDStream(document, ttfStream, false);
+        PDStream stream = new PDStream(ttfStream, false);
         stream.getStream().setInt(COSName.LENGTH1, stream.getByteArray().length);
         stream.addCompression();
 

@@ -60,7 +60,7 @@ final class PDCIDFontType2Embedder extends TrueTypeEmbedder
     PDCIDFontType2Embedder(PDDocument document, COSDictionary dict, InputStream ttfStream,
                            boolean embedSubset, PDType0Font parent) throws IOException
     {
-        super(document, dict, ttfStream, embedSubset);
+        super(dict, ttfStream, embedSubset);
         this.document = document;
         this.dict = dict;
         this.parent = parent;
@@ -157,7 +157,7 @@ final class PDCIDFontType2Embedder extends TrueTypeEmbedder
         toUniWriter.writeTo(out);
         InputStream cMapStream = new ByteArrayInputStream(out.toByteArray());
 
-        PDStream stream = new PDStream(document, cMapStream, false);
+        PDStream stream = new PDStream(cMapStream, false);
         stream.addCompression();
 
         // surrogate code points, requires PDF 1.5
@@ -234,7 +234,7 @@ final class PDCIDFontType2Embedder extends TrueTypeEmbedder
         }
 
         InputStream input = new ByteArrayInputStream(out.toByteArray());
-        PDStream stream = new PDStream(document, input, false);
+        PDStream stream = new PDStream(input, false);
         stream.getStream().setInt(COSName.LENGTH1, stream.getByteArray().length);
         stream.addCompression();
 
@@ -254,7 +254,7 @@ final class PDCIDFontType2Embedder extends TrueTypeEmbedder
         }
 
         InputStream input = new ByteArrayInputStream(bytes);
-        PDStream stream = new PDStream(document, input);
+        PDStream stream = new PDStream(input);
         stream.addCompression();
 
         fontDescriptor.setCIDSet(stream);

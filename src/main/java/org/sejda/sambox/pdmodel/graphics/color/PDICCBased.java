@@ -36,7 +36,6 @@ import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSFloat;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSStream;
-import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.common.PDRange;
 import org.sejda.sambox.pdmodel.common.PDStream;
 import org.sejda.sambox.util.Charsets;
@@ -63,13 +62,12 @@ public final class PDICCBased extends PDCIEBasedColorSpace
 
     /**
      * Creates a new ICC color space with an empty stream.
-     * @param doc the document to store the ICC data
      */
-    public PDICCBased(PDDocument doc)
+    public PDICCBased()
     {
         array = new COSArray();
         array.add(COSName.ICCBASED);
-        stream = new PDStream(doc);
+        stream = new PDStream();
         array.add(stream);
     }
 

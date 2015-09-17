@@ -126,7 +126,7 @@ public final class PDPageContentStream implements Closeable
         {
 
             // Create a pdstream to append new content
-            PDStream contentsToAppend = new PDStream(document);
+            PDStream contentsToAppend = new PDStream();
             // Add new stream to contents array
             COSBase contents = sourcePage.getCOSObject().getDictionaryObject(COSName.CONTENTS);
             COSArray array;
@@ -152,7 +152,7 @@ public final class PDPageContentStream implements Closeable
             if (resetContext)
             {
                 // create a new stream to encapsulate the existing stream
-                PDStream saveGraphics = new PDStream(document);
+                PDStream saveGraphics = new PDStream();
                 this.writer = new ContentStreamWriter(from(saveGraphics.createOutputStream()));
                 // save the initial/unmodified graphics context
                 saveGraphicsState();
@@ -180,7 +180,7 @@ public final class PDPageContentStream implements Closeable
             {
                 LOG.warn("You are overwriting an existing content, you should use the append mode");
             }
-            PDStream contents = new PDStream(document);
+            PDStream contents = new PDStream();
             if (compress)
             {
                 contents.addCompression();

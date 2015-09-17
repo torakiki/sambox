@@ -19,7 +19,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
-import org.sejda.sambox.pdmodel.PDDocument;
 
 /**
  *
@@ -38,8 +37,7 @@ public class PDICCBasedTest
     @Test
     public void testConstructor()
     {
-        PDDocument doc = new PDDocument();
-        PDICCBased iccBased = new PDICCBased(doc);
+        PDICCBased iccBased = new PDICCBased();
         assertEquals("ICCBased", iccBased.getName());
         assertNotNull(iccBased.getPDStream());
     }

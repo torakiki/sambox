@@ -79,9 +79,9 @@ public final class PDImageXObject extends PDXObject implements PDImage
      * @param document the current document
      * @throws java.io.IOException if there is an error creating the XObject.
      */
-    public PDImageXObject(PDDocument document) throws IOException
+    public PDImageXObject() throws IOException
     {
-        this(new PDStream(document), null);
+        this(new PDStream(), null);
     }
 
     /**
@@ -99,7 +99,7 @@ public final class PDImageXObject extends PDXObject implements PDImage
             COSBase cosFilter, int width, int height, int bitsPerComponent, 
             PDColorSpace initColorSpace) throws IOException
     {
-        super(new PDStream(document, filteredStream, true), COSName.IMAGE);
+        super(new PDStream(filteredStream, true), COSName.IMAGE);
         getCOSStream().setItem(COSName.FILTER, cosFilter);
         resources = null;
         colorSpace = null;

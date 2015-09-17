@@ -35,7 +35,6 @@ import org.sejda.sambox.cos.COSObjectable;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.filter.Filter;
 import org.sejda.sambox.filter.FilterFactory;
-import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.common.filespecification.PDFileSpecification;
 import org.sejda.util.IOUtils;
 
@@ -51,17 +50,7 @@ public class PDStream implements COSObjectable
     /**
      * This will create a new PDStream object.
      */
-    protected PDStream()
-    {
-        // should only be called by PDMemoryStream
-    }
-
-    /**
-     * This will create a new PDStream object.
-     * 
-     * @param document The document that the stream will be part of.
-     */
-    public PDStream(PDDocument document)
+    public PDStream()
     {
         stream = new COSStream();
     }
@@ -80,25 +69,23 @@ public class PDStream implements COSObjectable
      * Constructor. Reads all data from the input stream and embeds it into the document, this will close the
      * InputStream.
      * 
-     * @param doc The document that will hold the stream.
      * @param str The stream parameter.
      * @throws IOException If there is an error creating the stream in the document.
      */
-    public PDStream(PDDocument doc, InputStream str) throws IOException
+    public PDStream(InputStream str) throws IOException
     {
-        this(doc, str, false);
+        this(str, false);
     }
 
     /**
      * Constructor. Reads all data from the input stream and embeds it into the document, this will close the
      * InputStream.
      * 
-     * @param doc The document that will hold the stream.
      * @param str The stream parameter.
      * @param filtered True if the stream already has a filter applied.
      * @throws IOException If there is an error creating the stream in the document.
      */
-    public PDStream(PDDocument doc, InputStream str, boolean filtered) throws IOException
+    public PDStream(InputStream str, boolean filtered) throws IOException
     {
         OutputStream output = null;
         try
