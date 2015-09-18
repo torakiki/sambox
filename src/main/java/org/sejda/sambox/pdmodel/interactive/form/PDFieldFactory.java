@@ -34,6 +34,7 @@ public final class PDFieldFactory
     private static final String FIELD_TYPE_TEXT = "Tx";
     private static final String FIELD_TYPE_BUTTON = "Btn";
     private static final String FIELD_TYPE_CHOICE = "Ch";
+    private static final String FIELD_TYPE_SIGNATURE = "Sig";
 
     /**
      * Creates and sets it as a child of the given parent {@link PDNonTerminalField}
@@ -70,6 +71,10 @@ public final class PDFieldFactory
         else if (FIELD_TYPE_TEXT.equals(fieldType))
         {
             return new PDTextField(form, field, parent);
+        }
+        else if (FIELD_TYPE_SIGNATURE.equals(fieldType))
+        {
+            return new PDSignatureField(form, field, parent);
         }
         else if (FIELD_TYPE_BUTTON.equals(fieldType))
         {
