@@ -36,6 +36,19 @@
 		<tag>HEAD</tag>
 	</scm>
 
+	<developers>
+		<developer>
+			<id>torakiki</id>
+			<name>Andrea Vacondio</name>
+			<email>andrea.vacondio@gmail.com</email>
+		</developer>
+		<developer>
+			<id>ediweissmann</id>
+			<name>Eduard Weissmann</name>
+			<email>edi.weissmann@gmail.com</email>
+		</developer>
+	</developers>
+	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.javadoc.failOnError>false</maven.javadoc.failOnError>
