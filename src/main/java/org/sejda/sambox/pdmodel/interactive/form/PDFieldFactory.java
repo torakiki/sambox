@@ -17,6 +17,8 @@
 
 package org.sejda.sambox.pdmodel.interactive.form;
 
+import java.util.Optional;
+
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 
@@ -34,7 +36,23 @@ public final class PDFieldFactory
     private static final String FIELD_TYPE_CHOICE = "Ch";
 
     /**
-     * Creates a COSField subclass from the given field.
+     * Creates and sets it as a child of the given parent {@link PDNonTerminalField}
+     * 
+     * @param form
+     * @param field
+     * @param parent
+     * @return
+     */
+    public static PDField createFielAddingChildToParent(PDAcroForm form, COSDictionary field,
+            PDNonTerminalField parent)
+    {
+        PDField retField = createField(form, field, parent);
+        Optional.ofNullable(retField.getParent()).ifPresent(p -> p.addChild(retField));
+        return retField;
+    }
+
+    /**
+     * Creates a {@link PDField} subclass from the given field.
      *
      * @param form the form that the field is part of
      * @param field the dictionary representing a field element

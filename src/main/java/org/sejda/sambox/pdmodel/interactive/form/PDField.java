@@ -70,10 +70,6 @@ public abstract class PDField extends PDDictionaryWrapper
         super(dictionary);
         this.acroForm = acroForm;
         this.parent = parent;
-        if (parent != null)
-        {
-            parent.addChild(this);
-        }
     }
 
     /**

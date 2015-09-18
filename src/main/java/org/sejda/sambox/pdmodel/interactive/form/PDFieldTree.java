@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Queue;
 
 /**
- * The field tree.
+ * The field tree allowing a post-order iteration of the nodes.
  */
 public class PDFieldTree implements Iterable<PDField>
 {
@@ -43,7 +43,7 @@ public class PDFieldTree implements Iterable<PDField>
     }
 
     /**
-     * Returns an iterator which walks all fields in the tree, in order.
+     * Returns an iterator which walks all fields in the tree, post-order.
      */
     @Override
     public Iterator<PDField> iterator()
@@ -52,12 +52,12 @@ public class PDFieldTree implements Iterable<PDField>
     }
 
     /**
-     * Iterator which walks all fields in the tree, in order.
+     * Iterator which walks all fields in the tree, post-order.
      */
     private final class FieldIterator implements Iterator<PDField>
     {
         private final Queue<PDField> queue = new ArrayDeque<>();
-        
+
         private FieldIterator(PDAcroForm form)
         {
             List<PDField> fields = form.getFields();
@@ -84,10 +84,9 @@ public class PDFieldTree implements Iterable<PDField>
         {
             throw new UnsupportedOperationException();
         }
-        
+
         private void enqueueKids(PDField node)
         {
-            queue.add(node);
             if (node instanceof PDNonTerminalField)
             {
                 List<PDField> kids = ((PDNonTerminalField) node).getChildren();
@@ -96,6 +95,7 @@ public class PDFieldTree implements Iterable<PDField>
                     enqueueKids(kid);
                 }
             }
+            queue.add(node);
         }
     }
 }

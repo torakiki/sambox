@@ -56,7 +56,7 @@ public class PDNonTerminalField extends PDField
      * @param field the PDF object to represent as a field.
      * @param parent the parent node of the node to be created
      */
-    public PDNonTerminalField(PDAcroForm acroForm, COSDictionary field, PDNonTerminalField parent)
+    PDNonTerminalField(PDAcroForm acroForm, COSDictionary field, PDNonTerminalField parent)
     {
         super(acroForm, field, parent);
     }
@@ -96,6 +96,15 @@ public class PDNonTerminalField extends PDField
     }
 
     /**
+     * 
+     * @return true if the field has at least one child
+     */
+    public boolean hasChildren()
+    {
+        return getChildren().size() > 0;
+    }
+
+    /**
      * Sets the child fields.
      *
      * @param children The list of child fields.
@@ -117,9 +126,26 @@ public class PDNonTerminalField extends PDField
         {
             kids = new COSArray();
         }
-        kids.add(field);
-        field.getCOSObject().setItem(COSName.PARENT, this);
-        getCOSObject().setItem(COSName.KIDS, kids);
+        if (!kids.contains(field))
+        {
+            kids.add(field);
+            field.getCOSObject().setItem(COSName.PARENT, this);
+            getCOSObject().setItem(COSName.KIDS, kids);
+        }
+    }
+
+    /**
+     * Removes the given node from the children list
+     * 
+     * @param field
+     */
+    public void removeChild(PDField field)
+    {
+        COSArray kids = (COSArray) getCOSObject().getDictionaryObject(COSName.KIDS);
+        if (kids != null && kids.contains(field))
+        {
+            kids.remove(field);
+        }
     }
 
     /**

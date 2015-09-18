@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSArrayList;
@@ -123,7 +124,7 @@ public final class PDAcroForm implements COSObjectable
     }
 
     /**
-     * Adds the fields to this form
+     * Adds the fields to the root fields of the form
      * 
      * @param fields
      */
@@ -139,6 +140,20 @@ public final class PDAcroForm implements COSObjectable
             fields.add(field);
         }
         getCOSObject().setItem(COSName.FIELDS, fields);
+        Optional.ofNullable(fieldCache).ifPresent(c -> c.clear());
+    }
+
+    /**
+     * removes the given field from the root fields of the form
+     */
+    public void removeField(PDField remove)
+    {
+        COSArray fields = (COSArray) getCOSObject().getDictionaryObject(COSName.FIELDS);
+        if (fields != null && fields.contains(remove))
+        {
+            fields.remove(remove);
+            Optional.ofNullable(fieldCache).ifPresent(c -> c.clear());
+        }
     }
 
     /**
@@ -160,7 +175,7 @@ public final class PDAcroForm implements COSObjectable
     }
 
     /**
-     * Return the field tree representing all form fields
+     * @return the field tree representing all form fields and allowing a post-order visit of the tree
      */
     public PDFieldTree getFieldTree()
     {
