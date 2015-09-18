@@ -39,6 +39,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.javadoc.failOnError>false</maven.javadoc.failOnError>
 	</properties>
 
 	<repositories>
@@ -93,6 +94,7 @@
 						<version>2.5.2</version>
 						<configuration>
 							<tagNameFormat>v@{project.version}</tagNameFormat>
+							<allowTimestampedSnapshots>true</allowTimestampedSnapshots>
 							<preparationGoals>clean install</preparationGoals>
 						</configuration>
 					</plugin>
