@@ -55,6 +55,9 @@ public enum PageLayout
         else if (value.equals("TwoColumnLeft"))
         {
             return TWO_COLUMN_LEFT;
+        } else if(value.equals("TwoColumnRight"))
+        {
+            return TWO_COLUMN_RIGHT;
         }
         else if (value.equals("TwoPageLeft"))
         {
