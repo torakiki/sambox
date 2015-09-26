@@ -31,7 +31,6 @@ import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSNull;
-import org.sejda.sambox.cos.COSNumber;
 import org.sejda.sambox.cos.COSObjectable;
 import org.sejda.sambox.cos.COSString;
 import org.sejda.sambox.pdmodel.PDDocument;
@@ -268,14 +267,12 @@ public final class PDAcroForm implements COSObjectable
     }
 
     /**
-     * Get the default appearance.
-     * 
-     * @return the DA element of the dictionary object
+     * @return the DA element of the dictionary object or null if nothing is defined
      */
     public String getDefaultAppearance()
     {
-        COSString defaultAppearance = (COSString) dictionary.getItem(COSName.DA);
-        return defaultAppearance.getString();
+        return Optional.ofNullable(dictionary.getItem(COSName.DA)).map(i -> (COSString) i)
+                .map(COSString::getString).orElse(null);
     }
 
     /**
@@ -294,7 +291,7 @@ public final class PDAcroForm implements COSObjectable
      * 
      * @return the value of NeedAppearances, false if the value isn't set
      */
-    public boolean getNeedAppearances()
+    public boolean isNeedAppearances()
     {
         return dictionary.getBoolean(COSName.NEED_APPEARANCES, false);
     }
@@ -389,15 +386,9 @@ public final class PDAcroForm implements COSObjectable
      *
      * @return The justification of the text strings.
      */
-    public int getQ()
+    public int getQuadding()
     {
-        int retval = 0;
-        COSNumber number = (COSNumber) dictionary.getDictionaryObject(COSName.Q);
-        if (number != null)
-        {
-            retval = number.intValue();
-        }
-        return retval;
+        return dictionary.getInt(COSName.Q, 0);
     }
 
     /**
@@ -405,7 +396,7 @@ public final class PDAcroForm implements COSObjectable
      *
      * @param q The new text justification.
      */
-    public void setQ(int q)
+    public void setQuadding(int q)
     {
         dictionary.setInt(COSName.Q, q);
     }

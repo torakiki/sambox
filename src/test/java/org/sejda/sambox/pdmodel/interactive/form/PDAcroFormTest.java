@@ -34,10 +34,10 @@ import org.sejda.sambox.pdmodel.PDDocument;
  */
 public class PDAcroFormTest
 {
-    
+
     private PDDocument document;
     private PDAcroForm acroForm;
-    
+
     @Before
     public void setUp()
     {
@@ -52,21 +52,22 @@ public class PDAcroFormTest
         // the /Fields entry has been created with the AcroForm
         // as this is a required entry
         assertNotNull(acroForm.getFields());
-        assertEquals(acroForm.getFields().size(),0);
-        
-        // there shouldn't be an exception if there is no such field
-        assertNull(acroForm.getField("foo"));
-        
-        // remove the required entry which is the case for some
-        // PDFs (see PDFBOX-2965)
-        acroForm.getCOSObject().removeItem(COSName.FIELDS);
-        
-        // ensure there is always an empty collection returned
-        assertNotNull(acroForm.getFields());
-        assertEquals(acroForm.getFields().size(),0);
+        assertEquals(acroForm.getFields().size(), 0);
 
         // there shouldn't be an exception if there is no such field
         assertNull(acroForm.getField("foo"));
+
+        // remove the required entry which is the case for some
+        // PDFs (see PDFBOX-2965)
+        acroForm.getCOSObject().removeItem(COSName.FIELDS);
+
+        // ensure there is always an empty collection returned
+        assertNotNull(acroForm.getFields());
+        assertEquals(acroForm.getFields().size(), 0);
+
+        // there shouldn't be an exception if there is no such field
+        assertNull(acroForm.getField("foo"));
+        assertNull(acroForm.getDefaultAppearance());
     }
 
     @After
@@ -76,4 +77,3 @@ public class PDAcroFormTest
     }
 
 }
-
