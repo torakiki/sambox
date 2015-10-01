@@ -19,6 +19,7 @@ package org.sejda.sambox.pdmodel.interactive.form;
 import java.util.ArrayDeque;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Queue;
 
 /**
@@ -54,7 +55,7 @@ public class PDFieldTree implements Iterable<PDField>
     /**
      * Iterator which walks all fields in the tree, post-order.
      */
-    private final class FieldIterator implements Iterator<PDField>
+    private static final class FieldIterator implements Iterator<PDField>
     {
         private final Queue<PDField> queue = new ArrayDeque<>();
 
@@ -76,6 +77,10 @@ public class PDFieldTree implements Iterable<PDField>
         @Override
         public PDField next()
         {
+            if (!hasNext())
+            {
+                throw new NoSuchElementException();
+            }
             return queue.poll();
         }
 

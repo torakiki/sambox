@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.List;
 
 import org.sejda.sambox.pdmodel.PDPageContentStream;
-import org.sejda.sambox.pdmodel.font.PDFont;
 import org.sejda.sambox.pdmodel.interactive.form.PlainText.Line;
 import org.sejda.sambox.pdmodel.interactive.form.PlainText.Paragraph;
 import org.sejda.sambox.pdmodel.interactive.form.PlainText.TextAttribute;
@@ -29,29 +28,28 @@ import org.sejda.sambox.pdmodel.interactive.form.PlainText.Word;
 /**
  * TextFormatter to handle plain text formatting.
  * 
- * The text formatter will take a single value or an array of values which
- * are treated as paragraphs.
+ * The text formatter will take a single value or an array of values which are treated as paragraphs.
  */
 
 class PlainTextFormatter
 {
-    
+
     enum TextAlign
     {
         LEFT(0), CENTER(1), RIGHT(2), JUSTIFY(4);
-        
+
         private final int alignment;
-        
+
         private TextAlign(int alignment)
         {
             this.alignment = alignment;
         }
-        
+
         int getTextAlign()
         {
             return alignment;
         }
-        
+
         public static TextAlign valueOf(int alignment)
         {
             for (TextAlign textAlignment : TextAlign.values())
@@ -64,18 +62,23 @@ class PlainTextFormatter
             return TextAlign.LEFT;
         }
     }
-    
-    private AppearanceStyle appearanceStyle;
+
+    /**
+     * The scaling factor for font units to PDF units
+     */
+    private static final int FONTSCALE = 1000;
+
+    private final AppearanceStyle appearanceStyle;
     private final boolean wrapLines;
     private final float width;
-    
+
     private final PDPageContentStream contents;
     private final PlainText textContent;
     private final TextAlign textAlignment;
-    
+
     private float horizontalOffset;
     private float verticalOffset;
-    
+
     static class Builder
     {
 
@@ -88,13 +91,12 @@ class PlainTextFormatter
         private float width = 0f;
         private PlainText textContent;
         private TextAlign textAlignment = TextAlign.LEFT;
-        
-       
+
         // initial offset from where to start the position of the first line
         private float horizontalOffset = 0f;
         private float verticalOffset = 0f;
-        
-        public Builder(PDPageContentStream contents)
+
+        Builder(PDPageContentStream contents)
         {
             this.contents = contents;
         }
@@ -104,7 +106,7 @@ class PlainTextFormatter
             this.appearanceStyle = appearanceStyle;
             return this;
         }
-        
+
         Builder wrapLines(boolean wrapLines)
         {
             this.wrapLines = wrapLines;
@@ -119,36 +121,35 @@ class PlainTextFormatter
 
         Builder textAlign(int alignment)
         {
-            this.textAlignment  = TextAlign.valueOf(alignment);
+            this.textAlignment = TextAlign.valueOf(alignment);
             return this;
         }
-        
+
         Builder textAlign(TextAlign alignment)
         {
-            this.textAlignment  = alignment;
+            this.textAlignment = alignment;
             return this;
         }
-        
-        
+
         Builder text(PlainText textContent)
         {
-            this.textContent  = textContent;
+            this.textContent = textContent;
             return this;
         }
-        
+
         Builder initialOffset(float horizontalOffset, float verticalOffset)
         {
             this.horizontalOffset = horizontalOffset;
             this.verticalOffset = verticalOffset;
             return this;
         }
-        
+
         PlainTextFormatter build()
         {
             return new PlainTextFormatter(this);
         }
     }
-    
+
     private PlainTextFormatter(Builder builder)
     {
         appearanceStyle = builder.appearanceStyle;
@@ -160,7 +161,7 @@ class PlainTextFormatter
         horizontalOffset = builder.horizontalOffset;
         verticalOffset = builder.verticalOffset;
     }
-    
+
     /**
      * Format the text block.
      * 
@@ -174,15 +175,34 @@ class PlainTextFormatter
             {
                 if (wrapLines)
                 {
-                    List<Line> lines = paragraph.getLines(
-                                appearanceStyle.getFont(), 
-                                appearanceStyle.getFontSize(), 
-                                width
-                            );
+                    List<Line> lines = paragraph.getLines(appearanceStyle.getFont(),
+                            appearanceStyle.getFontSize(), width);
                     processLines(lines);
                 }
                 else
                 {
+                    float startOffset = 0f;
+
+                    float lineWidth = appearanceStyle.getFont().getStringWidth(paragraph.getText())
+                            * appearanceStyle.getFontSize() / FONTSCALE;
+
+                    if (lineWidth < width)
+                    {
+                        switch (textAlignment)
+                        {
+                        case CENTER:
+                            startOffset = (width - lineWidth) / 2;
+                            break;
+                        case RIGHT:
+                            startOffset = width - lineWidth;
+                            break;
+                        case JUSTIFY:
+                        default:
+                            startOffset = 0f;
+                        }
+                    }
+
+                    contents.newLineAtOffset(horizontalOffset + startOffset, verticalOffset);
                     contents.showText(paragraph.getText());
                 }
             }
@@ -190,17 +210,15 @@ class PlainTextFormatter
     }
 
     /**
-     * Process lines for output. 
+     * Process lines for output.
      *
-     * Process lines for an individual paragraph and generate the 
-     * commands for the content stream to show the text.
+     * Process lines for an individual paragraph and generate the commands for the content stream to show the text.
      * 
      * @param lines the lines to process.
      * @throws IOException if there is an error writing to the stream.
      */
     private void processLines(List<Line> lines) throws IOException
     {
-        PDFont font = appearanceStyle.getFont();
         float wordWidth = 0f;
 
         float lastPos = 0f;
@@ -212,13 +230,13 @@ class PlainTextFormatter
             switch (textAlignment)
             {
             case CENTER:
-                startOffset = (width - line.getWidth())/2;
+                startOffset = (width - line.getWidth()) / 2;
                 break;
             case RIGHT:
                 startOffset = width - line.getWidth();
                 break;
             case JUSTIFY:
-                if (lines.indexOf(line) != lines.size() -1)
+                if (lines.indexOf(line) != lines.size() - 1)
                 {
                     interWordSpacing = line.getInterWordSpacing(width);
                 }
@@ -226,9 +244,9 @@ class PlainTextFormatter
             default:
                 startOffset = 0f;
             }
-            
+
             float offset = -lastPos + startOffset + horizontalOffset;
-            
+
             if (lines.indexOf(line) == 0)
             {
                 contents.newLineAtOffset(offset, verticalOffset);
@@ -242,20 +260,21 @@ class PlainTextFormatter
                 verticalOffset = verticalOffset - appearanceStyle.getLeading();
                 contents.newLineAtOffset(offset, -appearanceStyle.getLeading());
             }
-            lastPos = startOffset; 
+            lastPos = startOffset;
 
             List<Word> words = line.getWords();
             for (Word word : words)
             {
                 contents.showText(word.getText());
-                wordWidth = (Float) word.getAttributes().getIterator().getAttribute(TextAttribute.WIDTH);
-                if (words.indexOf(word) != words.size() -1)
+                wordWidth = (Float) word.getAttributes().getIterator()
+                        .getAttribute(TextAttribute.WIDTH);
+                if (words.indexOf(word) != words.size() - 1)
                 {
                     contents.newLineAtOffset(wordWidth + interWordSpacing, 0f);
                     lastPos = lastPos + wordWidth + interWordSpacing;
                 }
             }
         }
-        horizontalOffset = horizontalOffset -lastPos;
+        horizontalOffset = horizontalOffset - lastPos;
     }
 }

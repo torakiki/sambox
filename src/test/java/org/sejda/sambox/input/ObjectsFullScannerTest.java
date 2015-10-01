@@ -42,7 +42,7 @@ public class ObjectsFullScannerTest
     public void setUp() throws Exception
     {
         reader = new SourceReader(SeekableSources.inMemorySeekableSourceFrom(getClass()
-                .getResourceAsStream("/input/test_multiple_xref_tables.pdf")));
+.getResourceAsStream("/sambox/test_multiple_xref_tables.pdf")));
         victim = new ObjectsFullScanner(reader);
     }
 

@@ -19,6 +19,7 @@ package org.sejda.sambox.pdmodel.interactive.form;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
@@ -67,7 +68,15 @@ public class PDAcroFormTest
 
         // there shouldn't be an exception if there is no such field
         assertNull(acroForm.getField("foo"));
-        assertNull(acroForm.getDefaultAppearance());
+        assertEquals("", acroForm.getDefaultAppearance());
+    }
+
+    @Test
+    public void testAcroFormProperties()
+    {
+        assertTrue(acroForm.getDefaultAppearance().isEmpty());
+        acroForm.setDefaultAppearance("/Helv 0 Tf 0 g");
+        assertEquals(acroForm.getDefaultAppearance(), "/Helv 0 Tf 0 g");
     }
 
     @After

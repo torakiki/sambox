@@ -42,7 +42,6 @@ import javax.imageio.stream.ImageOutputStream;
 import org.apache.commons.io.IOUtils;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.filter.MissingImageReaderException;
-import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceCMYK;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
@@ -51,6 +50,7 @@ import org.w3c.dom.Element;
 
 /**
  * Factory for creating a PDImageXObject containing a JPEG compressed image.
+ * 
  * @author John Hewson
  */
 public final class JPEGFactory
@@ -63,14 +63,14 @@ public final class JPEGFactory
      * Creates a new JPEG Image XObject from an input stream containing JPEG data.
      * 
      * The input stream data will be preserved and embedded in the PDF file without modification.
+     * 
      * @param document the document where the image will be created
      * @param stream a stream of JPEG data
      * @return a new Image XObject
      * 
      * @throws IOException if the input stream cannot be read
      */
-    public static PDImageXObject createFromStream(PDDocument document, InputStream stream)
-            throws IOException
+    public static PDImageXObject createFromStream(InputStream stream) throws IOException
     {
         // copy stream
         ByteArrayInputStream byteStream = new ByteArrayInputStream(IOUtils.toByteArray(stream));
@@ -80,10 +80,9 @@ public final class JPEGFactory
         byteStream.reset();
 
         // create Image XObject from stream
-        PDImageXObject pdImage = new PDImageXObject(document, byteStream, 
-                COSName.DCT_DECODE, awtImage.getWidth(), awtImage.getHeight(), 
-                awtImage.getColorModel().getComponentSize(0),
-                getColorSpaceFromAWT(awtImage));
+        PDImageXObject pdImage = new PDImageXObject(byteStream, COSName.DCT_DECODE,
+                awtImage.getWidth(), awtImage.getHeight(),
+                awtImage.getColorModel().getComponentSize(0), getColorSpaceFromAWT(awtImage));
 
         // no alpha
         if (awtImage.getColorModel().hasAlpha())
@@ -110,74 +109,65 @@ public final class JPEGFactory
 
         if (reader == null)
         {
-            throw new MissingImageReaderException("Cannot read JPEG image: " +
-                    "a suitable JAI I/O image filter is not installed");
+            throw new MissingImageReaderException("Cannot read JPEG image: "
+                    + "a suitable JAI I/O image filter is not installed");
         }
 
-        ImageInputStream iis = null;
-        try
+        try (ImageInputStream iis = ImageIO.createImageInputStream(stream))
         {
-            iis = ImageIO.createImageInputStream(stream);
             reader.setInput(iis);
-
             ImageIO.setUseCache(false);
             return reader.read(0);
         }
         finally
         {
-            if (iis != null)
-            {
-                iis.close();
-            }
             reader.dispose();
         }
     }
 
     /**
      * Creates a new JPEG Image XObject from a Buffered Image.
-     * @param document the document where the image will be created
+     * 
      * @param image the buffered image to embed
      * @return a new Image XObject
      * @throws IOException if the JPEG data cannot be written
      */
-    public static PDImageXObject createFromImage(PDDocument document, BufferedImage image)
-        throws IOException
+    public static PDImageXObject createFromImage(BufferedImage image) throws IOException
     {
-        return createFromImage(document, image, 0.75f);
+        return createFromImage(image, 0.75f);
     }
 
     /**
-     * Creates a new JPEG Image XObject from a Buffered Image and a given quality.
-     * The image will be created at 72 DPI.
-     * @param document the document where the image will be created
+     * Creates a new JPEG Image XObject from a Buffered Image and a given quality. The image will be created at 72 DPI.
+     * 
      * @param image the buffered image to embed
      * @param quality the desired JPEG compression quality
      * @return a new Image XObject
      * @throws IOException if the JPEG data cannot be written
      */
-    public static PDImageXObject createFromImage(PDDocument document, BufferedImage image,
-                                                 float quality) throws IOException
+    public static PDImageXObject createFromImage(BufferedImage image, float quality)
+            throws IOException
     {
-        return createFromImage(document, image, quality, 72);
+        return createFromImage(image, quality, 72);
     }
 
     /**
      * Creates a new JPEG Image XObject from a Buffered Image, a given quality and DPI.
-     * @param document the document where the image will be created
+     * 
      * @param image the buffered image to embed
      * @param quality the desired JPEG compression quality
      * @param dpi the desired DPI (resolution) of the JPEG
      * @return a new Image XObject
      * @throws IOException if the JPEG data cannot be written
      */
-    public static PDImageXObject createFromImage(PDDocument document, BufferedImage image,
-                                                 float quality, int dpi) throws IOException
+    public static PDImageXObject createFromImage(BufferedImage image, float quality, int dpi)
+            throws IOException
     {
-        return createJPEG(document, image, quality, dpi);
+        return createJPEG(image, quality, dpi);
     }
-    
+
     // returns the alpha channel of an image
-    private static BufferedImage getAlphaImage(BufferedImage image) throws IOException
+    private static BufferedImage getAlphaImage(BufferedImage image)
     {
         if (!image.getColorModel().hasAlpha())
         {
@@ -185,8 +175,8 @@ public final class JPEGFactory
         }
         if (image.getTransparency() == Transparency.BITMASK)
         {
-            throw new UnsupportedOperationException("BITMASK Transparency JPEG compression is not" +
-                    " useful, use LosslessImageFactory instead");
+            throw new UnsupportedOperationException("BITMASK Transparency JPEG compression is not"
+                    + " useful, use LosslessImageFactory instead");
         }
         WritableRaster alphaRaster = image.getAlphaRaster();
         if (alphaRaster == null)
@@ -199,10 +189,10 @@ public final class JPEGFactory
         alphaImage.setData(alphaRaster);
         return alphaImage;
     }
-    
+
     // Creates an Image XObject from a Buffered Image using JAI Image I/O
-    private static PDImageXObject createJPEG(PDDocument document, BufferedImage image,
-                                             float quality, int dpi) throws IOException
+    private static PDImageXObject createJPEG(BufferedImage image, float quality, int dpi)
+            throws IOException
     {
         // extract alpha channel (if any)
         BufferedImage awtColorImage = getColorImage(image);
@@ -212,16 +202,16 @@ public final class JPEGFactory
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         encodeImageToJPEGStream(awtColorImage, quality, dpi, baos);
         ByteArrayInputStream byteStream = new ByteArrayInputStream(baos.toByteArray());
-        
-        PDImageXObject pdImage = new PDImageXObject(document, byteStream, 
-                COSName.DCT_DECODE, awtColorImage.getWidth(), awtColorImage.getHeight(), 
+
+        PDImageXObject pdImage = new PDImageXObject(byteStream, COSName.DCT_DECODE,
+                awtColorImage.getWidth(), awtColorImage.getHeight(),
                 awtColorImage.getColorModel().getComponentSize(0),
                 getColorSpaceFromAWT(awtColorImage));
 
         // alpha -> soft mask
         if (awtAlphaImage != null)
         {
-            PDImage xAlpha = JPEGFactory.createFromImage(document, awtAlphaImage, quality);
+            PDImage xAlpha = JPEGFactory.createFromImage(awtAlphaImage, quality);
             pdImage.getCOSStream().setItem(COSName.SMASK, xAlpha);
         }
 
@@ -229,7 +219,7 @@ public final class JPEGFactory
     }
 
     private static void encodeImageToJPEGStream(BufferedImage image, float quality, int dpi,
-                                                OutputStream out) throws IOException
+            OutputStream out) throws IOException
     {
         // encode to JPEG
         ImageOutputStream ios = null;
@@ -242,15 +232,16 @@ public final class JPEGFactory
             imageWriter.setOutput(ios);
 
             // add compression
-            JPEGImageWriteParam jpegParam = (JPEGImageWriteParam)imageWriter.getDefaultWriteParam();
+            JPEGImageWriteParam jpegParam = (JPEGImageWriteParam) imageWriter
+                    .getDefaultWriteParam();
             jpegParam.setCompressionMode(JPEGImageWriteParam.MODE_EXPLICIT);
             jpegParam.setCompressionQuality(quality);
 
             // add metadata
             ImageTypeSpecifier imageTypeSpecifier = new ImageTypeSpecifier(image);
             IIOMetadata data = imageWriter.getDefaultImageMetadata(imageTypeSpecifier, jpegParam);
-            Element tree = (Element)data.getAsTree("javax_imageio_jpeg_image_1.0");
-            Element jfif = (Element)tree.getElementsByTagName("app0JFIF").item(0);
+            Element tree = (Element) data.getAsTree("javax_imageio_jpeg_image_1.0");
+            Element jfif = (Element) tree.getElementsByTagName("app0JFIF").item(0);
             jfif.setAttribute("Xdensity", Integer.toString(dpi));
             jfif.setAttribute("Ydensity", Integer.toString(dpi));
             jfif.setAttribute("resUnits", "1"); // 1 = dots/inch
@@ -272,7 +263,7 @@ public final class JPEGFactory
             }
         }
     }
-    
+
     // returns a PDColorSpace for a given BufferedImage
     private static PDColorSpace getColorSpaceFromAWT(BufferedImage awtImage)
     {
@@ -281,24 +272,24 @@ public final class JPEGFactory
             // 256 color (gray) JPEG
             return PDDeviceGray.INSTANCE;
         }
-        
+
         ColorSpace awtColorSpace = awtImage.getColorModel().getColorSpace();
         if (awtColorSpace instanceof ICC_ColorSpace && !awtColorSpace.isCS_sRGB())
         {
             throw new UnsupportedOperationException("ICC color spaces not implemented");
         }
-        
+
         switch (awtColorSpace.getType())
         {
-            case ColorSpace.TYPE_RGB:
-                return PDDeviceRGB.INSTANCE;
-            case ColorSpace.TYPE_GRAY:
-                return PDDeviceGray.INSTANCE;
-            case ColorSpace.TYPE_CMYK:
-                return PDDeviceCMYK.INSTANCE;
-            default:
-                throw new UnsupportedOperationException("color space not implemented: "
-                        + awtColorSpace.getType());
+        case ColorSpace.TYPE_RGB:
+            return PDDeviceRGB.INSTANCE;
+        case ColorSpace.TYPE_GRAY:
+            return PDDeviceGray.INSTANCE;
+        case ColorSpace.TYPE_CMYK:
+            return PDDeviceCMYK.INSTANCE;
+        default:
+            throw new UnsupportedOperationException(
+                    "color space not implemented: " + awtColorSpace.getType());
         }
     }
 
@@ -316,13 +307,11 @@ public final class JPEGFactory
         }
 
         // create an RGB image without alpha
-        //BEWARE: the previous solution in the history 
+        // BEWARE: the previous solution in the history
         // g.setComposite(AlphaComposite.Src) and g.drawImage()
         // didn't work properly for TYPE_4BYTE_ABGR.
         // alpha values of 0 result in a black dest pixel!!!
-        BufferedImage rgbImage = new BufferedImage(
-                image.getWidth(),
-                image.getHeight(),
+        BufferedImage rgbImage = new BufferedImage(image.getWidth(), image.getHeight(),
                 BufferedImage.TYPE_3BYTE_BGR);
         return new ColorConvertOp(null).filter(image, rgbImage);
     }

@@ -34,7 +34,6 @@ import javax.imageio.stream.MemoryCacheImageInputStream;
 import org.apache.commons.io.IOUtils;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSNumber;
-import org.sejda.sambox.pdmodel.common.PDMemoryStream;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
 import org.sejda.sambox.pdmodel.graphics.color.PDIndexed;
 import org.slf4j.Logger;
@@ -112,15 +111,8 @@ final class SampledImageReader
      */
     public static BufferedImage getRGBImage(PDImage pdImage, COSArray colorKey) throws IOException
     {
-        if (pdImage.getStream() instanceof PDMemoryStream)
-        {
-            // for inline images
-            if (pdImage.getStream().getLength() == 0)
-            {
-                throw new IOException("Image stream is empty");
-            }
-        }
-        else if (pdImage.getStream().getStream().getFilteredLength() == 0)
+
+        if (pdImage.isEmpty())
         {
             throw new IOException("Image stream is empty");
         }
@@ -172,7 +164,7 @@ final class SampledImageReader
         try
         {
             // create stream
-            iis = pdImage.getStream().createInputStream();
+            iis = pdImage.createInputStream();
             final boolean isIndexed = colorSpace instanceof PDIndexed;
 
             int rowLen = width / 8;
@@ -236,7 +228,7 @@ final class SampledImageReader
     private static BufferedImage from8bit(PDImage pdImage, WritableRaster raster)
             throws IOException
     {
-        InputStream input = pdImage.getStream().createInputStream();
+        InputStream input = pdImage.createInputStream();
         try
         {
             // get the raster's underlying byte buffer
@@ -283,7 +275,7 @@ final class SampledImageReader
         try
         {
             // create stream
-            iis = new MemoryCacheImageInputStream(pdImage.getStream().createInputStream());
+            iis = new MemoryCacheImageInputStream(pdImage.createInputStream());
             final float sampleMax = (float)Math.pow(2, bitsPerComponent) - 1f;
             final boolean isIndexed = colorSpace instanceof PDIndexed;
 

@@ -125,6 +125,7 @@ public class LZWFilter extends Filter
                         decoded.write(data);
                         if (prevCommand != -1)
                         {
+                            checkIndexBounds(codeTable, prevCommand, in);
                             data = codeTable.get((int) prevCommand);
                             byte[] newData = Arrays.copyOf(data, data.length + 1);
                             newData[data.length] = firstByte;
@@ -133,6 +134,7 @@ public class LZWFilter extends Filter
                     }
                     else
                     {
+                        checkIndexBounds(codeTable, prevCommand, in);
                         byte[] data = codeTable.get((int) prevCommand);
                         byte[] newData = Arrays.copyOf(data, data.length + 1);
                         newData[data.length] = data[0];
@@ -150,6 +152,21 @@ public class LZWFilter extends Filter
             LOG.warn("Premature EOF in LZW stream, EOD code missing");
         }
         decoded.flush();
+    }
+
+    private void checkIndexBounds(List codeTable, long index, MemoryCacheImageInputStream in)
+            throws IOException
+    {
+        if (index < 0)
+        {
+            throw new IOException(
+                    "negative array index: " + index + " near offset " + in.getStreamPosition());
+        }
+        if (index >= codeTable.size())
+        {
+            throw new IOException("array index overflow: " + index + " >= " + codeTable.size()
+                    + " near offset " + in.getStreamPosition());
+        }
     }
 
     @Override

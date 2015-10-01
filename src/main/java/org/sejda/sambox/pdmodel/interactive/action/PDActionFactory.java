@@ -17,6 +17,7 @@
 package org.sejda.sambox.pdmodel.interactive.action;
 
 import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSName;
 
 /**
  * This class will take a dictionary and determine which type of action to create.
@@ -31,49 +32,75 @@ public final class PDActionFactory
      */
     private PDActionFactory()
     {
-        //utility class
+        // utility class
     }
 
     /**
-     * This will create the correct type of action based on the type specified
-     * in the dictionary.
+     * This will create the correct type of action based on the type specified in the dictionary.
      *
      * @param action An action dictionary.
      *
      * @return An action of the correct type.
      */
-    public static PDAction createAction( COSDictionary action )
+    public static PDAction createAction(COSDictionary action)
     {
-        PDAction retval = null;
-        if( action != null )
+        if (action != null)
         {
-            String type = action.getNameAsString( "S" );
-            if( PDActionJavaScript.SUB_TYPE.equals( type ) )
+            String type = action.getNameAsString(COSName.S);
+            if (PDActionJavaScript.SUB_TYPE.equals(type))
             {
-                retval = new PDActionJavaScript( action );
+                return new PDActionJavaScript(action);
             }
-            else if( PDActionGoTo.SUB_TYPE.equals( type ) )
+            if (PDActionGoTo.SUB_TYPE.equals(type))
             {
-                retval = new PDActionGoTo( action );
+                return new PDActionGoTo(action);
             }
-            else if( PDActionLaunch.SUB_TYPE.equals( type ) )
+            if (PDActionLaunch.SUB_TYPE.equals(type))
             {
-                retval = new PDActionLaunch( action );
+                return new PDActionLaunch(action);
             }
-            else if( PDActionRemoteGoTo.SUB_TYPE.equals( type ) )
+            if (PDActionRemoteGoTo.SUB_TYPE.equals(type))
             {
-                retval = new PDActionRemoteGoTo( action );
+                return new PDActionRemoteGoTo(action);
             }
-            else if( PDActionURI.SUB_TYPE.equals( type ) )
+            if (PDActionURI.SUB_TYPE.equals(type))
             {
-                retval = new PDActionURI( action );
+                return new PDActionURI(action);
             }
-            else if (PDActionNamed.SUB_TYPE.equals(type))
+            if (PDActionNamed.SUB_TYPE.equals(type))
             {
-                retval = new PDActionNamed(action);
+                return new PDActionNamed(action);
+            }
+            if (PDActionSound.SUB_TYPE.equals(type))
+            {
+                return new PDActionSound(action);
+            }
+            if (PDActionMovie.SUB_TYPE.equals(type))
+            {
+                return new PDActionMovie(action);
+            }
+            if (PDActionImportData.SUB_TYPE.equals(type))
+            {
+                return new PDActionImportData(action);
+            }
+            if (PDActionResetForm.SUB_TYPE.equals(type))
+            {
+                return new PDActionResetForm(action);
+            }
+            if (PDActionHide.SUB_TYPE.equals(type))
+            {
+                return new PDActionHide(action);
+            }
+            if (PDActionSubmitForm.SUB_TYPE.equals(type))
+            {
+                return new PDActionSubmitForm(action);
+            }
+            if (PDActionThread.SUB_TYPE.equals(type))
+            {
+                return new PDActionThread(action);
             }
         }
-        return retval;
+        return null;
     }
 
 }

@@ -52,17 +52,19 @@ public enum RenderingIntent
         }
         else if (value.equals("RelativeColorimetric"))
         {
-          return RELATIVE_COLORIMETRIC;
+            return RELATIVE_COLORIMETRIC;
         }
         else if (value.equals("Saturation"))
         {
-          return SATURATION;
+            return SATURATION;
         }
         else if (value.equals("Perceptual"))
         {
-          return PERCEPTUAL;
+            return PERCEPTUAL;
         }
-        throw new IllegalArgumentException(value);
+        // "If a conforming reader does not recognize the specified name,
+        // it shall use the RelativeColorimetric intent by default."
+        return RELATIVE_COLORIMETRIC;
     }
 
     private final String value;

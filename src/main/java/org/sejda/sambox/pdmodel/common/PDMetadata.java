@@ -49,9 +49,9 @@ public class PDMetadata extends PDStream
      * @param filtered True if the stream already has a filter applied.
      * @throws IOException If there is an error creating the stream in the document.
      */
-    public PDMetadata(InputStream str, boolean filtered) throws IOException
+    public PDMetadata(InputStream str) throws IOException
     {
-        super(str, filtered);
+        super(str);
         getStream().setName( COSName.TYPE, "Metadata" );
         getStream().setName( COSName.SUBTYPE, "XML" );
     }

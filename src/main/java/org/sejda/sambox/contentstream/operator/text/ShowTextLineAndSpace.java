@@ -19,6 +19,7 @@ package org.sejda.sambox.contentstream.operator.text;
 import java.io.IOException;
 import java.util.List;
 
+import org.sejda.sambox.contentstream.operator.MissingOperandException;
 import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.contentstream.operator.OperatorProcessor;
 import org.sejda.sambox.cos.COSBase;
@@ -33,9 +34,13 @@ public class ShowTextLineAndSpace extends OperatorProcessor
     @Override
     public void process(Operator operator, List<COSBase> arguments) throws IOException
     {
-        context.processOperator("Tw", arguments.subList(0,1));
-        context.processOperator("Tc", arguments.subList(1,2));
-        context.processOperator("'", arguments.subList(2,3));
+        if (arguments.size() < 3)
+        {
+            throw new MissingOperandException(operator, arguments);
+        }
+        context.processOperator("Tw", arguments.subList(0, 1));
+        context.processOperator("Tc", arguments.subList(1, 2));
+        context.processOperator("'", arguments.subList(2, 3));
     }
 
     @Override

@@ -58,8 +58,8 @@ public abstract class Encoding implements COSObjectable
         }
     }
 
-    protected final Map<Integer, String> codeToName = new HashMap<Integer, String>();
-    protected final Set<String> names = new HashSet<String>();
+    protected final Map<Integer, String> codeToName = new HashMap<>();
+    private Set<String> names;
 
     /**
      * Returns an unmodifiable view of the Code2Name mapping.
@@ -80,7 +80,6 @@ public abstract class Encoding implements COSObjectable
     protected void add(int code, String name)
     {
         codeToName.put(code, name);
-        names.add(name);
     }
 
     /**
@@ -90,6 +89,13 @@ public abstract class Encoding implements COSObjectable
      */
     public boolean contains(String name)
     {
+        // we have to wait until all add() calls are done before building the name cache
+        // otherwise /Differences won't be accounted for
+        if (names == null)
+        {
+            names = new HashSet<>();
+            names.addAll(codeToName.values());
+        }
         return names.contains(name);
     }
 
@@ -111,11 +117,11 @@ public abstract class Encoding implements COSObjectable
      */
     public String getName(int code)
     {
-       String name = codeToName.get(code);
-       if (name != null)
-       {
-          return name;
-       }
-       return ".notdef";
+        String name = codeToName.get(code);
+        if (name != null)
+        {
+            return name;
+        }
+        return ".notdef";
     }
 }

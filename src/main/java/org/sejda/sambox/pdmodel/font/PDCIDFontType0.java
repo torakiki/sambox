@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.pdmodel.font;
 
+import static org.sejda.sambox.pdmodel.font.UniUtil.getUniNameOfCodePoint;
+
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
@@ -37,7 +39,6 @@ import org.sejda.sambox.pdmodel.common.PDStream;
 import org.sejda.sambox.util.Matrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 /**
  * Type 0 CIDFont (CFF).
  * 
@@ -51,7 +52,7 @@ public class PDCIDFontType0 extends PDCIDFont
     private final CFFCIDFont cidFont; // Top DICT that uses CIDFont operators
     private final FontBoxFont t1Font; // Top DICT that does not use CIDFont operators
 
-    private final Map<Integer, Float> glyphHeights = new HashMap<Integer, Float>();
+    private final Map<Integer, Float> glyphHeights = new HashMap<>();
     private final boolean isEmbedded;
     private final boolean isDamaged;
 
@@ -121,8 +122,8 @@ public class PDCIDFontType0 extends PDCIDFont
         else
         {
             // find font or substitute
-            CIDFontMapping mapping = FontMapper.getCIDFont(getBaseFont(), getFontDescriptor(),
-                    getCIDSystemInfo());
+            CIDFontMapping mapping = FontMappers.instance().getCIDFont(getBaseFont(),
+                    getFontDescriptor(), getCIDSystemInfo());
             FontBoxFont font;
             if (mapping.isCIDFont())
             {
@@ -264,7 +265,7 @@ public class PDCIDFontType0 extends PDCIDFont
         {
             return ".notdef";
         }
-        return String.format("uni%04X", unicodes.codePointAt(0));
+        return getUniNameOfCodePoint(unicodes.codePointAt(0));
     }
 
     @Override

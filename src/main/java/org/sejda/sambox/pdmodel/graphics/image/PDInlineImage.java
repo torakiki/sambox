@@ -21,6 +21,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 import org.sejda.sambox.cos.COSArray;
@@ -32,14 +33,12 @@ import org.sejda.sambox.filter.DecodeResult;
 import org.sejda.sambox.filter.Filter;
 import org.sejda.sambox.filter.FilterFactory;
 import org.sejda.sambox.pdmodel.PDResources;
-import org.sejda.sambox.pdmodel.common.PDMemoryStream;
-import org.sejda.sambox.pdmodel.common.PDStream;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
 
 /**
- * An inline image object which uses a special syntax to express the data for a
- * small image directly within the content stream.
+ * An inline image object which uses a special syntax to express the data for a small image directly within the content
+ * stream.
  *
  * @author Ben Litchfield
  * @author John Hewson
@@ -53,7 +52,8 @@ public final class PDInlineImage implements PDImage
     private final PDResources resources;
 
     // image data
-    private final PDStream stream;
+    private final byte[] rawData;
+    private final byte[] decodedData;
 
     /**
      * Creates an inline image from the given parameters and data.
@@ -67,12 +67,13 @@ public final class PDInlineImage implements PDImage
     {
         this.parameters = parameters;
         this.resources = resources;
+        this.rawData = data;
 
         DecodeResult decodeResult = null;
         List<String> filters = getFilters();
         if (filters == null || filters.isEmpty())
         {
-            this.stream = new PDMemoryStream(data);
+            this.decodedData = data;
         }
         else
         {
@@ -86,8 +87,7 @@ public final class PDInlineImage implements PDImage
                 decodeResult = filter.decode(in, out, parameters, i);
                 in = new ByteArrayInputStream(out.toByteArray());
             }
-            byte[] finalData = out.toByteArray();
-            this.stream = new PDMemoryStream(finalData);
+            this.decodedData = out.toByteArray();
         }
 
         // repair parameters
@@ -110,10 +110,7 @@ public final class PDInlineImage implements PDImage
         {
             return 1;
         }
-        else
-        {
-            return parameters.getInt(COSName.BPC, COSName.BITS_PER_COMPONENT, -1);
-        }
+        return parameters.getInt(COSName.BPC, COSName.BITS_PER_COMPONENT, -1);
     }
 
     @Override
@@ -196,8 +193,7 @@ public final class PDInlineImage implements PDImage
     }
 
     /**
-     * Returns a list of filters applied to this stream, or null if there are
-     * none.
+     * Returns a list of filters applied to this stream, or null if there are none.
      *
      * @return a list of filters applied to this stream
      */
@@ -254,9 +250,44 @@ public final class PDInlineImage implements PDImage
     }
 
     @Override
-    public PDStream getStream() throws IOException
+    public InputStream createInputStream()
     {
-        return stream;
+        return new ByteArrayInputStream(decodedData);
+    }
+
+    @Override
+    public InputStream createInputStream(List<String> stopFilters) throws IOException
+    {
+        List<String> filters = getFilters();
+        ByteArrayInputStream in = new ByteArrayInputStream(rawData);
+        ByteArrayOutputStream out = new ByteArrayOutputStream(rawData.length);
+        for (int i = 0; i < filters.size(); i++)
+        {
+            // TODO handling of abbreviated names belongs here, rather than in other classes
+            out.reset();
+            if (stopFilters.contains(filters.get(i)))
+            {
+                break;
+            }
+            Filter filter = FilterFactory.INSTANCE.getFilter(filters.get(i));
+            filter.decode(in, out, parameters, i);
+            in = new ByteArrayInputStream(out.toByteArray());
+        }
+        return new ByteArrayInputStream(out.toByteArray());
+    }
+
+    @Override
+    public boolean isEmpty()
+    {
+        return decodedData.length == 0;
+    }
+
+    /**
+     * Returns the inline image data.
+     */
+    public byte[] getData()
+    {
+        return decodedData;
     }
 
     @Override
@@ -276,8 +307,7 @@ public final class PDInlineImage implements PDImage
     }
 
     /**
-     * Returns the color key mask array associated with this image, or null if
-     * there is none.
+     * Returns the color key mask array associated with this image, or null if there is none.
      *
      * @return Mask Image XObject
      */

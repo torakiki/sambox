@@ -19,10 +19,16 @@ package org.sejda.sambox.pdmodel.font;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.sejda.sambox.contentstream.PDContentStream;
+import org.sejda.sambox.contentstream.operator.Operator;
+import org.sejda.sambox.cos.COSBase;
+import org.sejda.sambox.cos.COSNumber;
 import org.sejda.sambox.cos.COSObjectable;
 import org.sejda.sambox.cos.COSStream;
+import org.sejda.sambox.input.ContentStreamParser;
 import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.common.PDStream;
@@ -84,5 +90,46 @@ public final class PDType3CharProc implements COSObjectable, PDContentStream
         return font.getFontMatrix();
     }
 
-    // todo: add methods for getting the character's width from the stream
+    /**
+     * todo.
+     * 
+     * @return
+     * @throws IOException
+     */
+    public float getWidth() throws IOException
+    {
+        List<COSBase> arguments = new ArrayList<>();
+        ContentStreamParser parser = new ContentStreamParser(this);
+        Object token = null;
+        while ((token = parser.nextParsedToken()) != null)
+        {
+            if (token instanceof Operator)
+            {
+                return parseWidth((Operator) token, arguments);
+            }
+            arguments.add(((COSBase) token).getCOSObject());
+        }
+        throw new IOException("Unexpected end of stream");
+    }
+
+    private float parseWidth(Operator operator, List arguments) throws IOException
+    {
+        if (operator.getName().equals("d0") || operator.getName().equals("d1"))
+        {
+            Object obj = arguments.get(0);
+            if (obj instanceof Number)
+            {
+                return ((Number) obj).floatValue();
+            }
+            else if (obj instanceof COSNumber)
+            {
+                return ((COSNumber) obj).floatValue();
+            }
+            else
+            {
+                throw new IOException("Unexpected argument type: " + obj.getClass().getName());
+            }
+        }
+        throw new IOException("First operator must be d0 or d1");
+    }
 }

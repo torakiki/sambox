@@ -39,8 +39,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 /**
- * Decompresses data encoded using a DCT (discrete cosine transform)
- * technique based on the JPEG standard.
+ * Decompresses data encoded using a DCT (discrete cosine transform) technique based on the JPEG standard.
  *
  * @author John Hewson
  */
@@ -49,10 +48,11 @@ final class DCTFilter extends Filter
     private static final Logger LOG = LoggerFactory.getLogger(DCTFilter.class);
 
     @Override
-    public DecodeResult decode(InputStream encoded, OutputStream decoded,
-                                         COSDictionary parameters, int index) throws IOException
+    public DecodeResult decode(InputStream encoded, OutputStream decoded, COSDictionary parameters,
+            int index) throws IOException
     {
-        ImageReader reader = findImageReader("JPEG", "a suitable JAI I/O image filter is not installed");
+        ImageReader reader = findImageReader("JPEG",
+                "a suitable JAI I/O image filter is not installed");
         ImageInputStream iis = null;
         try
         {
@@ -63,9 +63,9 @@ final class DCTFilter extends Filter
             {
                 iis.seek(0);
             }
-            
+
             reader.setInput(iis);
-            
+
             String numChannels = getNumChannels(reader);
 
             // get the raster using horrible JAI workarounds
@@ -73,7 +73,7 @@ final class DCTFilter extends Filter
             Raster raster;
 
             // Strategy: use read() for RGB or "can't get metadata"
-            // use readRaster() for CMYK and gray and as fallback if read() fails 
+            // use readRaster() for CMYK and gray and as fallback if read() fails
             // after "can't get metadata" because "no meta" file was CMYK
             if ("3".equals(numChannels) || numChannels.isEmpty())
             {
@@ -113,13 +113,14 @@ final class DCTFilter extends Filter
                     // image or by a CMYK image which the decoder has problems reading
                     try
                     {
-                        // if this is Sun's decoder, use reflection to determine if the 
+                        // if this is Sun's decoder, use reflection to determine if the
                         // color space is CMYK or YCCK
                         Field field = reader.getClass().getDeclaredField("colorSpaceCode");
                         field.setAccessible(true);
                         int colorSpaceCode = field.getInt(reader);
-                        
-                        if (colorSpaceCode == 7 || colorSpaceCode == 8 || colorSpaceCode == 9 || colorSpaceCode == 11)
+
+                        if (colorSpaceCode == 7 || colorSpaceCode == 8 || colorSpaceCode == 9
+                                || colorSpaceCode == 11)
                         {
                             // YCCK
                             transform = 2;
@@ -150,18 +151,18 @@ final class DCTFilter extends Filter
                 // 0 = Unknown (RGB or CMYK), 1 = YCbCr, 2 = YCCK
                 switch (colorTransform)
                 {
-                    case 0:
-                        // already CMYK
-                        break;
-                    case 1:
-                        // TODO YCbCr
-                        LOG.warn("YCbCr JPEGs not implemented");
-                        break;
-                    case 2:
-                        raster = fromYCCKtoCMYK(raster);
-                        break;
-                    default:
-                        throw new IllegalArgumentException("Unknown colorTransform");
+                case 0:
+                    // already CMYK
+                    break;
+                case 1:
+                    // TODO YCbCr
+                    LOG.warn("YCbCr JPEGs not implemented");
+                    break;
+                case 2:
+                    raster = fromYCCKtoCMYK(raster);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown colorTransform");
                 }
             }
             else if (raster.getNumBands() == 3)
@@ -170,7 +171,7 @@ final class DCTFilter extends Filter
                 raster = fromBGRtoRGB(raster);
             }
 
-            DataBufferByte dataBuffer = (DataBufferByte)raster.getDataBuffer();
+            DataBufferByte dataBuffer = (DataBufferByte) raster.getDataBuffer();
             decoded.write(dataBuffer.getData());
         }
         finally
@@ -187,8 +188,8 @@ final class DCTFilter extends Filter
     // reads the APP14 Adobe transform tag and returns its value, or 0 if unknown
     private Integer getAdobeTransform(IIOMetadata metadata)
     {
-        Element tree = (Element)metadata.getAsTree("javax_imageio_jpeg_image_1.0");
-        Element markerSequence = (Element)tree.getElementsByTagName("markerSequence").item(0);
+        Element tree = (Element) metadata.getAsTree("javax_imageio_jpeg_image_1.0");
+        Element markerSequence = (Element) tree.getElementsByTagName("markerSequence").item(0);
         NodeList app14AdobeNodeList = markerSequence.getElementsByTagName("app14Adobe");
         if (app14AdobeNodeList != null && app14AdobeNodeList.getLength() > 0)
         {
@@ -232,7 +233,7 @@ final class DCTFilter extends Filter
                 value[0] = cyan;
                 value[1] = magenta;
                 value[2] = yellow;
-                value[3] = (int)K;
+                value[3] = (int) K;
                 writableRaster.setPixel(x, y, value);
             }
         }
@@ -248,7 +249,7 @@ final class DCTFilter extends Filter
         int height = raster.getHeight();
         int w3 = width * 3;
         int[] tab = new int[w3];
-        //BEWARE: handling the full image at a time is slower than one line at a time        
+        // BEWARE: handling the full image at a time is slower than one line at a time
         for (int y = 0; y < height; y++)
         {
             raster.getPixels(0, y, width, 1, tab);
@@ -262,7 +263,7 @@ final class DCTFilter extends Filter
         }
         return writableRaster;
     }
-    
+
     // returns the number of channels as a string, or an empty string if there is an error getting the meta data
     private String getNumChannels(ImageReader reader)
     {
@@ -273,8 +274,10 @@ final class DCTFilter extends Filter
             {
                 return "";
             }
-            IIOMetadataNode metaTree = (IIOMetadataNode) imageMetadata.getAsTree("javax_imageio_1.0");
-            Element numChannelsItem = (Element) metaTree.getElementsByTagName("NumChannels").item(0);
+            IIOMetadataNode metaTree = (IIOMetadataNode) imageMetadata
+                    .getAsTree("javax_imageio_1.0");
+            Element numChannelsItem = (Element) metaTree.getElementsByTagName("NumChannels")
+                    .item(0);
             if (numChannelsItem == null)
             {
                 return "";
@@ -285,17 +288,18 @@ final class DCTFilter extends Filter
         {
             return "";
         }
-    }    
+    }
 
     // clamps value to 0-255 range
     private int clamp(float value)
     {
-        return (int)((value < 0) ? 0 : ((value > 255) ? 255 : value));
+        return (int) ((value < 0) ? 0 : ((value > 255) ? 255 : value));
     }
 
     @Override
     public void encode(InputStream input, OutputStream encoded, COSDictionary parameters)
     {
-        LOG.warn("DCTFilter#encode is not implemented yet, skipping this stream.");
+        throw new UnsupportedOperationException(
+                "DCTFilter encoding not implemented, use the JPEGFactory methods instead");
     }
 }

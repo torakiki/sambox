@@ -27,8 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * PostScript glyph list, maps glyph names to sequences of Unicode characters.
- * Instances of GlyphList are immutable.
+ * PostScript glyph list, maps glyph names to sequences of Unicode characters. Instances of GlyphList are immutable.
  */
 public final class GlyphList
 {
@@ -36,10 +35,10 @@ public final class GlyphList
 
     // Adobe Glyph List (AGL)
     private static final GlyphList DEFAULT = load("glyphlist.txt");
-    
+
     // Zapf Dingbats has its own glyph list
     private static final GlyphList ZAPF_DINGBATS = load("zapfdingbats.txt");
-    
+
     /**
      * Loads a glyph list from disk.
      */
@@ -69,12 +68,12 @@ public final class GlyphList
                         + "use GlyphList.DEFAULT.addGlyphs(Properties) instead");
             }
         }
-        catch (SecurityException e)  // can occur on System.getProperty
+        catch (SecurityException e) // can occur on System.getProperty
         {
             // PDFBOX-1946 ignore and continue
         }
     }
-    
+
     /**
      * Returns the Adobe Glyph List (AGL).
      */
@@ -94,9 +93,9 @@ public final class GlyphList
     // read-only mappings, never modified outside GlyphList's constructor
     private final Map<String, String> nameToUnicode;
     private final Map<String, String> unicodeToName;
-    
+
     // additional read/write cache for uniXXXX names
-    private final Map<String, String> uniNameToUnicodeCache = new HashMap<String, String>();
+    private final Map<String, String> uniNameToUnicodeCache = new HashMap<>();
 
     /**
      * Creates a new GlyphList from a glyph list file.
@@ -106,8 +105,8 @@ public final class GlyphList
      */
     public GlyphList(InputStream input) throws IOException
     {
-        nameToUnicode = new HashMap<String, String>();
-        unicodeToName = new HashMap<String, String>();
+        nameToUnicode = new HashMap<>();
+        unicodeToName = new HashMap<>();
         loadList(input);
     }
 
@@ -120,20 +119,20 @@ public final class GlyphList
      */
     public GlyphList(GlyphList glyphList, InputStream input) throws IOException
     {
-        nameToUnicode = new HashMap<String, String>(glyphList.nameToUnicode);
-        unicodeToName = new HashMap<String, String>(glyphList.unicodeToName);
+        nameToUnicode = new HashMap<>(glyphList.nameToUnicode);
+        unicodeToName = new HashMap<>(glyphList.unicodeToName);
         loadList(input);
     }
 
     private void loadList(InputStream input) throws IOException
     {
-        BufferedReader in = new BufferedReader(new InputStreamReader(input, "ISO-8859-1"));
-        try
+
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(input, "ISO-8859-1")))
         {
             while (in.ready())
             {
                 String line = in.readLine();
-                if (!line.startsWith("#"))
+                if (line != null && !line.startsWith("#"))
                 {
                     String[] parts = line.split(";");
                     if (parts.length < 2)
@@ -146,8 +145,8 @@ public final class GlyphList
 
                     if (nameToUnicode.containsKey(name))
                     {
-                        LOG.warn("duplicate value for " + name + " -> " + parts[1] + " " +
-                                 nameToUnicode.get(name));
+                        LOG.warn("duplicate value for " + name + " -> " + parts[1] + " "
+                                + nameToUnicode.get(name));
                     }
 
                     int[] codePoints = new int[unicodeList.length];
@@ -156,7 +155,7 @@ public final class GlyphList
                     {
                         codePoints[index++] = Integer.parseInt(hex, 16);
                     }
-                    String string = new String(codePoints, 0 , codePoints.length);
+                    String string = new String(codePoints, 0, codePoints.length);
 
                     // forward mapping
                     nameToUnicode.put(name, string);
@@ -169,10 +168,6 @@ public final class GlyphList
                 }
             }
         }
-        finally
-        {
-            in.close();
-        }
     }
 
     /**
@@ -183,7 +178,7 @@ public final class GlyphList
      */
     public String codePointToName(int codePoint)
     {
-        String name = unicodeToName.get(new String(new int[] { codePoint }, 0 , 1));
+        String name = unicodeToName.get(new String(new int[] { codePoint }, 0, 1));
         if (name == null)
         {
             return ".notdef";
@@ -225,7 +220,7 @@ public final class GlyphList
         {
             return unicode;
         }
-        
+
         // separate read/write cache for thread safety
         unicode = uniNameToUnicodeCache.get(name);
         if (unicode == null)
@@ -247,7 +242,7 @@ public final class GlyphList
                         int codePoint = Integer.parseInt(name.substring(chPos, chPos + 4), 16);
                         if (codePoint > 0xD7FF && codePoint < 0xE000)
                         {
-                            LOG.warn("Unicode character name with disallowed code area: " + name);
+                            LOG.warn("Unicode character name with disallowed code area: {} ", name);
                         }
                         else
                         {
@@ -258,7 +253,7 @@ public final class GlyphList
                 }
                 catch (NumberFormatException nfe)
                 {
-                    LOG.warn("Not a number in Unicode character name: " + name);
+                    LOG.warn("Not a number in Unicode character name: {}", name);
                 }
             }
             else if (name.startsWith("u") && name.length() == 5)
@@ -269,7 +264,7 @@ public final class GlyphList
                     int codePoint = Integer.parseInt(name.substring(1), 16);
                     if (codePoint > 0xD7FF && codePoint < 0xE000)
                     {
-                        LOG.warn("Unicode character name with disallowed code area: " + name);
+                        LOG.warn("Unicode character name with disallowed code area: {}", name);
                     }
                     else
                     {
@@ -278,7 +273,7 @@ public final class GlyphList
                 }
                 catch (NumberFormatException nfe)
                 {
-                    LOG.warn("Not a number in Unicode character name: " + name);
+                    LOG.warn("Not a number in Unicode character name: {}", name);
                 }
             }
             uniNameToUnicodeCache.put(name, unicode);

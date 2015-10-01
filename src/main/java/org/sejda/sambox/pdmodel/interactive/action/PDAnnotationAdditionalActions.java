@@ -17,10 +17,11 @@
 package org.sejda.sambox.pdmodel.interactive.action;
 
 import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSObjectable;
+
 /**
- * This class represents an annotation's dictionary of actions
- * that occur due to events.
+ * This class represents an annotation's dictionary of actions that occur due to events.
  *
  * @author Ben Litchfield
  * @author Panagiotis Toumasis
@@ -42,7 +43,7 @@ public class PDAnnotationAdditionalActions implements COSObjectable
      *
      * @param a The action dictionary.
      */
-    public PDAnnotationAdditionalActions( COSDictionary a )
+    public PDAnnotationAdditionalActions(COSDictionary a)
     {
         actions = a;
     }
@@ -59,294 +60,278 @@ public class PDAnnotationAdditionalActions implements COSObjectable
     }
 
     /**
-     * This will get an action to be performed when the cursor
-     * enters the annotation's active area.
+     * This will get an action to be performed when the cursor enters the annotation's active area.
      *
      * @return The E entry of annotation's additional actions dictionary.
      */
     public PDAction getE()
     {
-        COSDictionary e = (COSDictionary)actions.getDictionaryObject( "E" );
+        COSDictionary e = (COSDictionary) actions.getDictionaryObject(COSName.E);
         PDAction retval = null;
-        if( e != null )
+        if (e != null)
         {
-            retval = PDActionFactory.createAction( e );
+            retval = PDActionFactory.createAction(e);
         }
         return retval;
     }
 
     /**
-     * This will set an action to be performed when the cursor
-     * enters the annotation's active area.
+     * This will set an action to be performed when the cursor enters the annotation's active area.
      *
      * @param e The action to be performed.
      */
-    public void setE( PDAction e )
+    public void setE(PDAction e)
     {
-        actions.setItem( "E", e );
+        actions.setItem(COSName.E, e);
     }
 
     /**
-     * This will get an action to be performed when the cursor
-     * exits the annotation's active area.
+     * This will get an action to be performed when the cursor exits the annotation's active area.
      *
      * @return The X entry of annotation's additional actions dictionary.
      */
     public PDAction getX()
     {
-        COSDictionary x = (COSDictionary)actions.getDictionaryObject( "X" );
+        COSDictionary x = (COSDictionary) actions.getDictionaryObject("X");
         PDAction retval = null;
-        if( x != null )
+        if (x != null)
         {
-            retval = PDActionFactory.createAction( x );
+            retval = PDActionFactory.createAction(x);
         }
         return retval;
     }
 
     /**
-     * This will set an action to be performed when the cursor
-     * exits the annotation's active area.
+     * This will set an action to be performed when the cursor exits the annotation's active area.
      *
      * @param x The action to be performed.
      */
-    public void setX( PDAction x )
+    public void setX(PDAction x)
     {
-        actions.setItem( "X", x );
+        actions.setItem("X", x);
     }
 
     /**
-     * This will get an action to be performed when the mouse button
-     * is pressed inside the annotation's active area.
-     * The name D stands for "down".
+     * This will get an action to be performed when the mouse button is pressed inside the annotation's active area. The
+     * name D stands for "down".
      *
      * @return The d entry of annotation's additional actions dictionary.
      */
     public PDAction getD()
     {
-        COSDictionary d = (COSDictionary)actions.getDictionaryObject( "D" );
+        COSDictionary d = (COSDictionary) actions.getDictionaryObject(COSName.D);
         PDAction retval = null;
-        if( d != null )
+        if (d != null)
         {
-            retval = PDActionFactory.createAction( d );
+            retval = PDActionFactory.createAction(d);
         }
         return retval;
     }
 
     /**
-     * This will set an action to be performed when the mouse button
-     * is pressed inside the annotation's active area.
-     * The name D stands for "down".
+     * This will set an action to be performed when the mouse button is pressed inside the annotation's active area. The
+     * name D stands for "down".
      *
      * @param d The action to be performed.
      */
-    public void setD( PDAction d )
+    public void setD(PDAction d)
     {
-        actions.setItem( "D", d );
+        actions.setItem(COSName.D, d);
     }
 
     /**
-     * This will get an action to be performed when the mouse button
-     * is released inside the annotation's active area.
+     * This will get an action to be performed when the mouse button is released inside the annotation's active area.
      * The name U stands for "up".
      *
      * @return The U entry of annotation's additional actions dictionary.
      */
     public PDAction getU()
     {
-        COSDictionary u = (COSDictionary)actions.getDictionaryObject( "U" );
+        COSDictionary u = (COSDictionary) actions.getDictionaryObject("U");
         PDAction retval = null;
-        if( u != null )
+        if (u != null)
         {
-            retval = PDActionFactory.createAction( u );
+            retval = PDActionFactory.createAction(u);
         }
         return retval;
     }
 
     /**
-     * This will set an action to be performed when the mouse button
-     * is released inside the annotation's active area.
+     * This will set an action to be performed when the mouse button is released inside the annotation's active area.
      * The name U stands for "up".
      *
      * @param u The action to be performed.
      */
-    public void setU( PDAction u )
+    public void setU(PDAction u)
     {
-        actions.setItem( "U", u );
+        actions.setItem(COSName.U, u);
     }
 
     /**
-     * This will get an action to be performed when the annotation
-     * receives the input focus.
+     * This will get an action to be performed when the annotation receives the input focus.
      *
      * @return The Fo entry of annotation's additional actions dictionary.
      */
     public PDAction getFo()
     {
-        COSDictionary fo = (COSDictionary)actions.getDictionaryObject( "Fo" );
+        COSDictionary fo = (COSDictionary) actions.getDictionaryObject("Fo");
         PDAction retval = null;
-        if( fo != null )
+        if (fo != null)
         {
-            retval = PDActionFactory.createAction( fo );
+            retval = PDActionFactory.createAction(fo);
         }
         return retval;
     }
 
     /**
-     * This will set an action to be performed when the annotation
-     * receives the input focus.
+     * This will set an action to be performed when the annotation receives the input focus.
      *
      * @param fo The action to be performed.
      */
-    public void setFo( PDAction fo )
+    public void setFo(PDAction fo)
     {
-        actions.setItem( "Fo", fo );
+        actions.setItem("Fo", fo);
     }
 
     /**
-     * This will get an action to be performed when the annotation
-     * loses the input focus.
-     * The name Bl stands for "blurred".
+     * This will get an action to be performed when the annotation loses the input focus. The name Bl stands for
+     * "blurred".
      *
      * @return The Bl entry of annotation's additional actions dictionary.
      */
     public PDAction getBl()
     {
-        COSDictionary bl = (COSDictionary)actions.getDictionaryObject( "Bl" );
+        COSDictionary bl = (COSDictionary) actions.getDictionaryObject("Bl");
         PDAction retval = null;
-        if( bl != null )
+        if (bl != null)
         {
-            retval = PDActionFactory.createAction( bl );
+            retval = PDActionFactory.createAction(bl);
         }
         return retval;
     }
 
     /**
-     * This will set an action to be performed when the annotation
-     * loses the input focus.
-     * The name Bl stands for "blurred".
+     * This will set an action to be performed when the annotation loses the input focus. The name Bl stands for
+     * "blurred".
      *
      * @param bl The action to be performed.
      */
-    public void setBl( PDAction bl )
+    public void setBl(PDAction bl)
     {
-        actions.setItem( "Bl", bl );
+        actions.setItem("Bl", bl);
     }
 
     /**
-     * This will get an action to be performed when the page containing
-     * the annotation is opened. The action is executed after the O action
-     * in the page's additional actions dictionary and the OpenAction entry
-     * in the document catalog, if such actions are present.
+     * This will get an action to be performed when the page containing the annotation is opened. The action is executed
+     * after the O action in the page's additional actions dictionary and the OpenAction entry in the document catalog,
+     * if such actions are present.
      *
      * @return The PO entry of annotation's additional actions dictionary.
      */
     public PDAction getPO()
     {
-        COSDictionary po = (COSDictionary)actions.getDictionaryObject( "PO" );
+        COSDictionary po = (COSDictionary) actions.getDictionaryObject("PO");
         PDAction retval = null;
-        if( po != null )
+        if (po != null)
         {
-            retval = PDActionFactory.createAction( po );
+            retval = PDActionFactory.createAction(po);
         }
         return retval;
     }
 
     /**
-     * This will set an action to be performed when the page containing
-     * the annotation is opened. The action is executed after the O action
-     * in the page's additional actions dictionary and the OpenAction entry
-     * in the document catalog, if such actions are present.
+     * This will set an action to be performed when the page containing the annotation is opened. The action is executed
+     * after the O action in the page's additional actions dictionary and the OpenAction entry in the document catalog,
+     * if such actions are present.
      *
      * @param po The action to be performed.
      */
-    public void setPO( PDAction po )
+    public void setPO(PDAction po)
     {
-        actions.setItem( "PO", po );
+        actions.setItem("PO", po);
     }
 
     /**
-     * This will get an action to be performed when the page containing
-     * the annotation is closed. The action is executed before the C action
-     * in the page's additional actions dictionary, if present.
+     * This will get an action to be performed when the page containing the annotation is closed. The action is executed
+     * before the C action in the page's additional actions dictionary, if present.
      *
      * @return The PC entry of annotation's additional actions dictionary.
      */
     public PDAction getPC()
     {
-        COSDictionary pc = (COSDictionary)actions.getDictionaryObject( "PC" );
+        COSDictionary pc = (COSDictionary) actions.getDictionaryObject("PC");
         PDAction retval = null;
-        if( pc != null )
+        if (pc != null)
         {
-            retval = PDActionFactory.createAction( pc );
+            retval = PDActionFactory.createAction(pc);
         }
         return retval;
     }
 
     /**
-     * This will set an action to be performed when the page containing
-     * the annotation is closed. The action is executed before the C action
-     * in the page's additional actions dictionary, if present.
+     * This will set an action to be performed when the page containing the annotation is closed. The action is executed
+     * before the C action in the page's additional actions dictionary, if present.
      *
      * @param pc The action to be performed.
      */
-    public void setPC( PDAction pc )
+    public void setPC(PDAction pc)
     {
-        actions.setItem( "PC", pc );
+        actions.setItem("PC", pc);
     }
 
     /**
-     * This will get an action to be performed when the page containing
-     * the annotation becomes visible in the viewer application's user interface.
+     * This will get an action to be performed when the page containing the annotation becomes visible in the viewer
+     * application's user interface.
      *
      * @return The PV entry of annotation's additional actions dictionary.
      */
     public PDAction getPV()
     {
-        COSDictionary pv = (COSDictionary)actions.getDictionaryObject( "PV" );
+        COSDictionary pv = (COSDictionary) actions.getDictionaryObject("PV");
         PDAction retval = null;
-        if( pv != null )
+        if (pv != null)
         {
-            retval = PDActionFactory.createAction( pv );
+            retval = PDActionFactory.createAction(pv);
         }
         return retval;
     }
 
     /**
-     * This will set an action to be performed when the page containing
-     * the annotation becomes visible in the viewer application's user interface.
+     * This will set an action to be performed when the page containing the annotation becomes visible in the viewer
+     * application's user interface.
      *
      * @param pv The action to be performed.
      */
-    public void setPV( PDAction pv )
+    public void setPV(PDAction pv)
     {
-        actions.setItem( "PV", pv );
+        actions.setItem("PV", pv);
     }
 
     /**
-     * This will get an action to be performed when the page containing the annotation
-     * is no longer visible in the viewer application's user interface.
+     * This will get an action to be performed when the page containing the annotation is no longer visible in the
+     * viewer application's user interface.
      *
      * @return The PI entry of annotation's additional actions dictionary.
      */
     public PDAction getPI()
     {
-        COSDictionary pi = (COSDictionary)actions.getDictionaryObject( "PI" );
+        COSDictionary pi = (COSDictionary) actions.getDictionaryObject("PI");
         PDAction retval = null;
-        if( pi != null )
+        if (pi != null)
         {
-            retval = PDActionFactory.createAction( pi );
+            retval = PDActionFactory.createAction(pi);
         }
         return retval;
     }
 
     /**
-     * This will set an action to be performed when the page containing the annotation
-     * is no longer visible in the viewer application's user interface.
+     * This will set an action to be performed when the page containing the annotation is no longer visible in the
+     * viewer application's user interface.
      *
      * @param pi The action to be performed.
      */
-    public void setPI( PDAction pi )
+    public void setPI(PDAction pi)
     {
-        actions.setItem( "PI", pi );
+        actions.setItem("PI", pi);
     }
 }

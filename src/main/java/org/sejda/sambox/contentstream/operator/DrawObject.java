@@ -23,6 +23,7 @@ import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.graphics.PDXObject;
 import org.sejda.sambox.pdmodel.graphics.form.PDFormXObject;
+import org.sejda.sambox.pdmodel.graphics.form.PDTransparencyGroup;
 import org.sejda.sambox.text.PDFMarkedContentExtractor;
 
 /**
@@ -36,16 +37,29 @@ public class DrawObject extends OperatorProcessor
     @Override
     public void process(Operator operator, List<COSBase> arguments) throws IOException
     {
-        COSName name = (COSName) arguments.get(0);
-        PDXObject xobject =  context.getResources().getXObject(name);
+        if (arguments.size() < 1)
+        {
+            throw new MissingOperandException(operator, arguments);
+        }
+        COSBase base0 = arguments.get(0);
+        if (!(base0 instanceof COSName))
+        {
+            return;
+        }
+        COSName name = (COSName) base0;
+        PDXObject xobject = context.getResources().getXObject(name);
         if (context instanceof PDFMarkedContentExtractor)
         {
             ((PDFMarkedContentExtractor) context).xobject(xobject);
         }
 
-        if(xobject instanceof PDFormXObject)
+        if (xobject instanceof PDTransparencyGroup)
         {
-            PDFormXObject form = (PDFormXObject)xobject;
+            context.showTransparencyGroup((PDTransparencyGroup) xobject);
+        }
+        else if (xobject instanceof PDFormXObject)
+        {
+            PDFormXObject form = (PDFormXObject) xobject;
             context.showForm(form);
         }
     }

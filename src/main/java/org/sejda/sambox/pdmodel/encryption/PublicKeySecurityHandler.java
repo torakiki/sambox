@@ -29,7 +29,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.SecureRandom;
-import java.security.Security;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.Iterator;
@@ -65,7 +64,6 @@ import org.bouncycastle.cms.KeyTransRecipientId;
 import org.bouncycastle.cms.RecipientId;
 import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSString;
 import org.sejda.sambox.pdmodel.PDDocument;
@@ -287,8 +285,6 @@ public final class PublicKeySecurityHandler extends SecurityHandler
         }
         try
         {
-            Security.addProvider(new BouncyCastleProvider());
-
             PDEncryption dictionary = doc.getEncryption();
             if (dictionary == null) 
             {

@@ -69,57 +69,58 @@ public class PDStream implements COSObjectable
      * Constructor. Reads all data from the input stream and embeds it into the document, this will close the
      * InputStream.
      * 
-     * @param str The stream parameter.
+     * @param input The stream parameter.
      * @throws IOException If there is an error creating the stream in the document.
      */
-    public PDStream(InputStream str) throws IOException
+    public PDStream(InputStream input) throws IOException
     {
-        this(str, false);
+        this(input, (COSBase) null);
+    }
+
+    /**
+     * Constructor. Reads all data from the input stream and embeds it into the document with the given filter applied.
+     * This method closes the InputStream.
+     *
+     * @param input The stream parameter.
+     * @param filter Filter to apply to the stream.
+     * @throws IOException If there is an error creating the stream in the document.
+     */
+    public PDStream(InputStream input, COSName filter) throws IOException
+    {
+        this(input, (COSBase) filter);
+    }
+
+    /**
+     * Constructor. Reads all data from the input stream and embeds it into the document with the given filters applied.
+     * This method closes the InputStream.
+     *
+     * @param input The stream parameter.
+     * @param filters Filters to apply to the stream.
+     * @throws IOException If there is an error creating the stream in the document.
+     */
+    public PDStream(InputStream input, COSArray filters) throws IOException
+    {
+        this(input, (COSBase) filters);
     }
 
     /**
      * Constructor. Reads all data from the input stream and embeds it into the document, this will close the
      * InputStream.
      * 
-     * @param str The stream parameter.
-     * @param filtered True if the stream already has a filter applied.
+     * @param input The stream parameter.
+     * @param filter Filter to apply to the stream.
      * @throws IOException If there is an error creating the stream in the document.
      */
-    public PDStream(InputStream str, boolean filtered) throws IOException
+    public PDStream(InputStream input, COSBase filter) throws IOException
     {
-        OutputStream output = null;
-        try
+        stream = new COSStream();
+        try (OutputStream output = stream.createFilteredStream(filter))
         {
-            stream = new COSStream();
-            if (filtered)
-            {
-                output = stream.createFilteredStream();
-            }
-            else
-            {
-                output = stream.createUnfilteredStream();
-            }
-            org.apache.commons.io.IOUtils.copy(str, output);
+            org.apache.commons.io.IOUtils.copy(input, output);
         }
         finally
         {
-            IOUtils.close(str);
-            IOUtils.close(output);
-        }
-    }
-
-    /**
-     * If there are not compression filters on the current stream then this will add a compression filter, flate
-     * compression for example.
-     */
-    public void addCompression()
-    {
-        List<COSName> filters = getFilters();
-        if (filters == null)
-        {
-            filters = new ArrayList<COSName>();
-            filters.add(COSName.FLATE_DECODE);
-            setFilters(filters);
+            IOUtils.close(input);
         }
     }
 
@@ -147,6 +148,18 @@ public class PDStream implements COSObjectable
     }
 
     /**
+     * This will get a stream that can be written to, with the given filter.
+     *
+     * @param filter the filter to be used.
+     * @return An output stream to write data to.
+     * @throws IOException If an IO error occurs during writing.
+     */
+    public OutputStream createOutputStream(COSName filter)
+    {
+        return stream.createFilteredStream(filter);
+    }
+
+    /**
      * This will get a stream that can be read from.
      * 
      * @return An input stream that can be read from.
@@ -166,21 +179,20 @@ public class PDStream implements COSObjectable
      * @return A stream with decoded data.
      * @throws IOException If there is an error processing the stream.
      */
-    public InputStream getPartiallyFilteredStream(List<String> stopFilters) throws IOException
+    public InputStream createInputStream(List<String> stopFilters) throws IOException
     {
         InputStream is = stream.getFilteredStream();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         List<COSName> filters = getFilters();
-        boolean done = false;
-        for (int i = 0; i < filters.size() && !done; i++)
+        if (filters != null)
         {
-            COSName nextFilter = filters.get(i);
-            if (stopFilters.contains(nextFilter.getName()))
+            for (int i = 0; i < filters.size(); i++)
             {
-                done = true;
-            }
-            else
-            {
+                COSName nextFilter = filters.get(i);
+                if ((stopFilters != null) && stopFilters.contains(nextFilter.getName()))
+                {
+                    break;
+                }
                 Filter filter = FilterFactory.INSTANCE.getFilter(nextFilter);
                 filter.decode(is, os, stream, i);
                 IOUtils.closeQuietly(is);
@@ -219,18 +231,17 @@ public class PDStream implements COSObjectable
      */
     public List<COSName> getFilters()
     {
-        List<COSName> retval = null;
         COSBase filters = stream.getFilters();
         if (filters instanceof COSName)
         {
             COSName name = (COSName) filters;
-            retval = new COSArrayList<COSName>(name, name, stream, COSName.FILTER);
+            return new COSArrayList<>(name, name, stream, COSName.FILTER);
         }
         else if (filters instanceof COSArray)
         {
-            retval = (List<COSName>) ((COSArray) filters).toList();
+            return (List<COSName>) ((COSArray) filters).toList();
         }
-        return retval;
+        return null;
     }
 
     /**
@@ -273,8 +284,8 @@ public class PDStream implements COSObjectable
             List<Object> actuals = new ArrayList<Object>();
             for (int i = 0; i < array.size(); i++)
             {
-                actuals.add(COSDictionaryMap.convertBasicTypesToMap((COSDictionary) array
-                        .getObject(i)));
+                actuals.add(COSDictionaryMap
+                        .convertBasicTypesToMap((COSDictionary) array.getObject(i)));
             }
             retval = new COSArrayList<Object>(actuals, array);
         }
@@ -370,8 +381,8 @@ public class PDStream implements COSObjectable
             List<Object> actuals = new ArrayList<Object>();
             for (int i = 0; i < array.size(); i++)
             {
-                actuals.add(COSDictionaryMap.convertBasicTypesToMap((COSDictionary) array
-                        .getObject(i)));
+                actuals.add(COSDictionaryMap
+                        .convertBasicTypesToMap((COSDictionary) array.getObject(i)));
             }
             retval = new COSArrayList<Object>(actuals, array);
         }
@@ -395,41 +406,19 @@ public class PDStream implements COSObjectable
      * @return The byte array of the filteredStream
      * @throws IOException When getFilteredStream did not work
      */
-    public byte[] getByteArray() throws IOException
+    public byte[] toByteArray() throws IOException
     {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         byte[] buf = new byte[1024];
-        InputStream is = null;
-        try
+        try (InputStream is = createInputStream())
         {
-            is = createInputStream();
             int amountRead;
             while ((amountRead = is.read(buf)) != -1)
             {
                 output.write(buf, 0, amountRead);
             }
         }
-        finally
-        {
-            if (is != null)
-            {
-                is.close();
-            }
-        }
         return output.toByteArray();
-    }
-
-    /**
-     * A convenience method to get this stream as a string. The string is returned using ISO-8559-1 encoding.
-     * 
-     * @return a String representation of this (input) stream using IS0-8559-1 encoding.
-     * 
-     * @throws IOException if there is an error while converting the stream to a string.
-     */
-    public String getInputStreamAsString() throws IOException
-    {
-        byte[] bStream = getByteArray();
-        return new String(bStream, "ISO-8859-1");
     }
 
     /**
@@ -455,8 +444,8 @@ public class PDStream implements COSObjectable
             }
             else
             {
-                throw new IllegalStateException("Expected a COSStream but was a "
-                        + mdStream.getClass().getSimpleName());
+                throw new IllegalStateException(
+                        "Expected a COSStream but was a " + mdStream.getClass().getSimpleName());
             }
         }
         return retval;

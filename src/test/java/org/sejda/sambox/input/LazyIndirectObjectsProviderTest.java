@@ -58,7 +58,7 @@ public class LazyIndirectObjectsProviderTest
 
         victim = new LazyIndirectObjectsProvider();
         parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
-                .getResourceAsStream("/input/simple_test.pdf")), victim);
+.getResourceAsStream("/sambox/simple_test.pdf")), victim);
         victim.initializeWith(parser);
         XrefParser xrefParser = new XrefParser(parser);
         xrefParser.parse();
@@ -90,7 +90,7 @@ public class LazyIndirectObjectsProviderTest
     {
         victim = new LazyIndirectObjectsProvider();
         parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
-                .getResourceAsStream("/input/simple_test_objstm.pdf")), victim);
+.getResourceAsStream("/sambox/simple_test_objstm.pdf")), victim);
         victim.initializeWith(parser);
         XrefParser xrefParser = new XrefParser(parser);
         xrefParser.parse();
@@ -102,7 +102,7 @@ public class LazyIndirectObjectsProviderTest
     {
         victim = new LazyIndirectObjectsProvider();
         parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
-                .getResourceAsStream("/input/simple_test_objstm.pdf")), victim);
+.getResourceAsStream("/sambox/simple_test_objstm.pdf")), victim);
         victim.initializeWith(parser);
         XrefParser xrefParser = new XrefParser(parser);
         xrefParser.parse();
@@ -115,7 +115,7 @@ public class LazyIndirectObjectsProviderTest
     {
         victim = new LazyIndirectObjectsProvider();
         parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
-                .getResourceAsStream("/input/simple_test_objstm.pdf")), victim);
+.getResourceAsStream("/sambox/simple_test_objstm.pdf")), victim);
         victim.initializeWith(parser);
         XrefParser xrefParser = new XrefParser(parser);
         xrefParser.parse();
@@ -128,7 +128,7 @@ public class LazyIndirectObjectsProviderTest
     {
         victim = new LazyIndirectObjectsProvider();
         parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
-                .getResourceAsStream("/input/simple_test_objstm.pdf")), victim);
+.getResourceAsStream("/sambox/simple_test_objstm.pdf")), victim);
         victim.initializeWith(parser);
         XrefParser xrefParser = new XrefParser(parser);
         xrefParser.parse();
@@ -141,7 +141,7 @@ public class LazyIndirectObjectsProviderTest
     {
         victim = new LazyIndirectObjectsProvider();
         parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
-                .getResourceAsStream("/input/bad_objstm.pdf")), victim);
+.getResourceAsStream("/sambox/bad_objstm.pdf")), victim);
         victim.initializeWith(parser);
         XrefParser xrefParser = new XrefParser(parser);
         xrefParser.parse();
@@ -153,7 +153,7 @@ public class LazyIndirectObjectsProviderTest
     {
         victim = new LazyIndirectObjectsProvider();
         parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
-                .getResourceAsStream("/input/test_multiple_xref_tables_wrong_obj_offset.pdf")),
+                .getResourceAsStream("/sambox/test_multiple_xref_tables_wrong_obj_offset.pdf")),
                 victim);
         victim.initializeWith(parser);
         XrefParser xrefParser = new XrefParser(parser);

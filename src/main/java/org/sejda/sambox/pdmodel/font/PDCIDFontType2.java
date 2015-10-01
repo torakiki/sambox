@@ -60,6 +60,8 @@ public class PDCIDFontType2 extends PDCIDFont
      * Constructor.
      * 
      * @param fontDictionary The font dictionary according to the PDF specification.
+     * @param parent The parent font.
+     * @throws IOException
      */
     public PDCIDFontType2(COSDictionary fontDictionary, PDType0Font parent) throws IOException
     {
@@ -135,8 +137,8 @@ public class PDCIDFontType2 extends PDCIDFont
         if (ttfFont == null)
         {
             // find font or substitute
-            CIDFontMapping mapping = FontMapper.getCIDFont(getBaseFont(), getFontDescriptor(),
-                                                           getCIDSystemInfo());
+            CIDFontMapping mapping = FontMappers.instance().getCIDFont(getBaseFont(),
+                    getFontDescriptor(), getCIDSystemInfo());
 
             if (mapping.isCIDFont())
             {
@@ -221,6 +223,7 @@ public class PDCIDFontType2 extends PDCIDFont
      * @param code character code
      * @return GID
      */
+    @Override
     public int codeToGID(int code) throws IOException
     {
         if (!isEmbedded)
@@ -229,7 +232,7 @@ public class PDCIDFontType2 extends PDCIDFont
             // encoding specified by the predefined CMap to one of the encodings in the TrueType
             // font's 'cmap' table. The means by which this is accomplished are implementation-
             // dependent.
-            
+
             boolean hasUnicodeMap = parent.getCMapUCS2() != null;
 
             if (cid2gid != null)
@@ -256,46 +259,35 @@ public class PDCIDFontType2 extends PDCIDFont
                 }
                 else if (unicode.length() > 1)
                 {
-                    LOG.warn("Trying to map multi-byte character using 'cmap', result will be poor");
+                    LOG.warn(
+                            "Trying to map multi-byte character using 'cmap', result will be poor");
                 }
-                
+
                 // a non-embedded font always has a cmap (otherwise FontMapper won't load it)
                 return cmap.getGlyphId(unicode.codePointAt(0));
             }
         }
-        else
-        {
-            // If the TrueType font program is embedded, the Type 2 CIDFont dictionary shall contain
-            // a CIDToGIDMap entry that maps CIDs to the glyph indices for the appropriate glyph
-            // descriptions in that font program.
+        // If the TrueType font program is embedded, the Type 2 CIDFont dictionary shall contain
+        // a CIDToGIDMap entry that maps CIDs to the glyph indices for the appropriate glyph
+        // descriptions in that font program.
 
-            int cid = codeToCID(code);
-            if (cid2gid != null)
+        int cid = codeToCID(code);
+        if (cid2gid != null)
+        {
+            // use CIDToGIDMap
+            if (cid < cid2gid.length)
             {
-                // use CIDToGIDMap
-                if (cid < cid2gid.length)
-                {
-                    return cid2gid[cid];
-                }
-                else
-                {
-                    return 0;
-                }
+                return cid2gid[cid];
             }
-            else
-            {
-                // "Identity" is the default CIDToGIDMap
-                if (cid < ttf.getNumberOfGlyphs())
-                {
-                    return cid;
-                }
-                else
-                {
-                    // out of range CIDs map to GID 0
-                    return 0;
-                }
-            }
+            return 0;
         }
+        // "Identity" is the default CIDToGIDMap
+        if (cid < ttf.getNumberOfGlyphs())
+        {
+            return cid;
+        }
+        // out of range CIDs map to GID 0
+        return 0;
     }
 
     @Override

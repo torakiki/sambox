@@ -41,7 +41,7 @@ public class AbstractXrefTableParserTest
         Set<XrefEntry> found = new HashSet<>();
         AbstractXrefTableParser victim = new AbstractXrefTableParser(
                 new COSParser(inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-                        "/input/xref_table.txt"))))
+"/sambox/xref_table.txt"))))
         {
             @Override
             void onTrailerFound(COSDictionary trailer)
@@ -65,7 +65,7 @@ public class AbstractXrefTableParserTest
     {
         AbstractXrefTableParser victim = new AbstractXrefTableParser(new COSParser(
                 inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-                        "/input/xref_table_corrupted.txt"))))
+"/sambox/xref_table_corrupted.txt"))))
         {
             @Override
             void onTrailerFound(COSDictionary trailer)
@@ -87,7 +87,7 @@ public class AbstractXrefTableParserTest
     {
         AbstractXrefTableParser victim = new AbstractXrefTableParser(new COSParser(
                 inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-                        "/input/xref_table_corrupted_on.txt"))))
+"/sambox/xref_table_corrupted_on.txt"))))
         {
             @Override
             void onTrailerFound(COSDictionary trailer)
@@ -109,7 +109,7 @@ public class AbstractXrefTableParserTest
     {
         AbstractXrefTableParser victim = new AbstractXrefTableParser(new COSParser(
                 inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-                        "/input/xref_table_corrupted_gn.txt"))))
+"/sambox/xref_table_corrupted_gn.txt"))))
         {
             @Override
             void onTrailerFound(COSDictionary trailer)
@@ -131,7 +131,7 @@ public class AbstractXrefTableParserTest
     {
         AbstractXrefTableParser victim = new AbstractXrefTableParser(new COSParser(
                 inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-                        "/input/xref_empty_table.txt"))))
+"/sambox/xref_empty_table.txt"))))
         {
             @Override
             void onTrailerFound(COSDictionary trailer)
@@ -154,7 +154,7 @@ public class AbstractXrefTableParserTest
         Set<XrefEntry> found = new HashSet<>();
         AbstractXrefTableParser victim = new AbstractXrefTableParser(new COSParser(
                 inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-                        "/input/xref_table_invalid_row.txt"))))
+"/sambox/xref_table_invalid_row.txt"))))
         {
             @Override
             void onTrailerFound(COSDictionary trailer)
@@ -184,7 +184,7 @@ public class AbstractXrefTableParserTest
         Set<XrefEntry> found = new HashSet<>();
         AbstractXrefTableParser victim = new AbstractXrefTableParser(new COSParser(
                 inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-                        "/input/xref_table_wrong_size.txt"))))
+"/sambox/xref_table_wrong_size.txt"))))
         {
             @Override
             void onTrailerFound(COSDictionary trailer)
@@ -214,7 +214,7 @@ public class AbstractXrefTableParserTest
         Set<XrefEntry> found = new HashSet<>();
         AbstractXrefTableParser victim = new AbstractXrefTableParser(new COSParser(
                 inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-                        "/input/xref_table_invalid_tokens_number.txt"))))
+"/sambox/xref_table_invalid_tokens_number.txt"))))
         {
             @Override
             void onTrailerFound(COSDictionary trailer)

@@ -168,8 +168,7 @@ public class PDDocument implements Closeable
             in = page.getContents();
             if (in != null)
             {
-                PDStream dest = new PDStream(page.getContents());
-                dest.addCompression();
+                PDStream dest = new PDStream(page.getContents(), COSName.FLATE_DECODE);
                 importedPage.setContents(dest);
 
             }

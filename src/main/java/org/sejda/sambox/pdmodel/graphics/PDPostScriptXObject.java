@@ -17,7 +17,7 @@
 package org.sejda.sambox.pdmodel.graphics;
 
 import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.pdmodel.common.PDStream;
+import org.sejda.sambox.cos.COSStream;
 
 /**
  * A PostScript XObject.
@@ -31,7 +31,7 @@ public class PDPostScriptXObject extends PDXObject
      * Creates a PostScript XObject.
      * @param stream The XObject stream
      */
-    public PDPostScriptXObject(PDStream stream)
+    public PDPostScriptXObject(COSStream stream)
     {
         super(stream, COSName.PS);
     }

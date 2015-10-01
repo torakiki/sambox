@@ -51,7 +51,7 @@ public class XrefFullScannerTest
     public void scanMultipleTables() throws IOException
     {
         parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
-                .getResourceAsStream("/input/test_multiple_xref_tables.pdf")));
+.getResourceAsStream("/sambox/test_multiple_xref_tables.pdf")));
         victim = new XrefFullScanner(parser);
         victim.scan();
         assertEquals(408, victim.trailer().getInt(COSName.PREV));
@@ -66,7 +66,7 @@ public class XrefFullScannerTest
     public void scanStreamAndTable() throws IOException
     {
         parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
-                .getResourceAsStream("/input/test_xref_stream_and_table.pdf")));
+.getResourceAsStream("/sambox/test_xref_stream_and_table.pdf")));
         victim = new XrefFullScanner(parser);
         victim.scan();
         assertEquals(562, victim.trailer().getInt(COSName.PREV));
@@ -81,7 +81,7 @@ public class XrefFullScannerTest
     public void missingXref() throws IOException
     {
         parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
-                .getResourceAsStream("/input/test_xref_missing_xref.pdf")));
+.getResourceAsStream("/sambox/test_xref_missing_xref.pdf")));
         victim = new XrefFullScanner(parser);
         assertFalse(victim.scan());
     }

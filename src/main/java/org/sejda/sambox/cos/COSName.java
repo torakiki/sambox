@@ -353,6 +353,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName OCPROPERTIES = newCommonInstance("OCProperties");
     public static final COSName OE = newCommonInstance("OE");
     public static final COSName OFF = newCommonInstance("OFF");
+    public static final COSName Off = newCommonInstance("Off");
     public static final COSName ON = newCommonInstance("ON");
     public static final COSName OP = newCommonInstance("OP");
     public static final COSName OP_NS = newCommonInstance("op");

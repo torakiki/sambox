@@ -273,7 +273,8 @@ public abstract class SecurityHandler
             while ((n = data.read(buffer)) != -1)
             {
                 byte[] update = decryptCipher.update(buffer, 0, n);
-                if(update != null) {
+                if (update != null)
+                {
                     output.write(update);
                 }
             }
@@ -420,7 +421,10 @@ public abstract class SecurityHandler
         decryptDictionary(stream, objNum, genNum);
         byte[] encrypted = org.apache.commons.io.IOUtils.toByteArray(stream.getFilteredStream());
         ByteArrayInputStream encryptedStream = new ByteArrayInputStream(encrypted);
-        encryptData(objNum, genNum, encryptedStream, stream.createFilteredStream(), true /* decrypt */);
+        try (OutputStream output = stream.createFilteredStream())
+        {
+            encryptData(objNum, genNum, encryptedStream, output, true /* decrypt */);
+        }
     }
 
     /**
@@ -437,7 +441,10 @@ public abstract class SecurityHandler
     {
         byte[] rawData = org.apache.commons.io.IOUtils.toByteArray(stream.getFilteredStream());
         ByteArrayInputStream encryptedStream = new ByteArrayInputStream(rawData);
-        encryptData(objNum, genNum, encryptedStream, stream.createFilteredStream(), false /* encrypt */);
+        try (OutputStream output = stream.createFilteredStream())
+        {
+            encryptData(objNum, genNum, encryptedStream, output, false /* encrypt */);
+        }
     }
 
     /**

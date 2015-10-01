@@ -53,6 +53,7 @@ import org.sejda.sambox.pdmodel.graphics.color.PDColor;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
 import org.sejda.sambox.pdmodel.graphics.color.PDPattern;
 import org.sejda.sambox.pdmodel.graphics.form.PDFormXObject;
+import org.sejda.sambox.pdmodel.graphics.form.PDTransparencyGroup;
 import org.sejda.sambox.pdmodel.graphics.image.PDImage;
 import org.sejda.sambox.pdmodel.graphics.pattern.PDAbstractPattern;
 import org.sejda.sambox.pdmodel.graphics.pattern.PDShadingPattern;
@@ -846,7 +847,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
     }
 
     @Override
-    public void showTransparencyGroup(PDFormXObject form) throws IOException
+    public void showTransparencyGroup(PDTransparencyGroup form) throws IOException
     {
         TransparencyGroup group = new TransparencyGroup(form, false);
 

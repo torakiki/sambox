@@ -34,13 +34,15 @@ public class ShowText extends OperatorProcessor
     @Override
     public void process(Operator operator, List<COSBase> arguments) throws IOException
     {
-        if (arguments.size() < 1)
+        if (!arguments.isEmpty())
         {
-            // ignore ( )Tj
-            return;
+            COSBase base = arguments.get(0);
+            if (base instanceof COSString)
+            {
+                context.showTextString(((COSString) arguments.get(0)).getBytes());
+
+            }
         }
-        COSString string = (COSString)arguments.get( 0 );
-        context.showTextString(string.getBytes());
     }
 
     @Override

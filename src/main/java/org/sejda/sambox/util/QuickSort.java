@@ -22,7 +22,7 @@ import java.util.List;
 /**
  * see http://de.wikipedia.org/wiki/Quicksort.
  * 
- * @author UWe Pachler
+ * @author Uwe Pachler
  */
 public class QuickSort
 {
@@ -31,8 +31,9 @@ public class QuickSort
     {
     }
     
-    private static final Comparator<? extends Comparable> objComp = new Comparator<Comparable>()
+    private static final Comparator<? extends Comparable> OBJCOMP = new Comparator<Comparable>()
     {
+        @Override
         public int compare(Comparable object1, Comparable object2)
         {
             return object1.compareTo(object2);
@@ -62,7 +63,7 @@ public class QuickSort
      */
     public static <T extends Comparable> void sort(List<T> list)
     {
-        sort(list, (Comparator<T>) objComp);
+        sort(list, (Comparator<T>) OBJCOMP);
     }
 
     private static <T> void quicksort(List<T> list, Comparator<T> cmp, int left, int right)

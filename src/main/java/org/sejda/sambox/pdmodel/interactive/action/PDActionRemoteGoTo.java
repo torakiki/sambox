@@ -20,6 +20,7 @@ import java.io.IOException;
 
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.common.filespecification.PDFileSpecification;
 
 /**
@@ -41,7 +42,7 @@ public class PDActionRemoteGoTo extends PDAction
     public PDActionRemoteGoTo()
     {
         action = new COSDictionary();
-        setSubType( SUB_TYPE );
+        setSubType(SUB_TYPE);
     }
 
     /**
@@ -49,31 +50,31 @@ public class PDActionRemoteGoTo extends PDAction
      *
      * @param a The action dictionary.
      */
-    public PDActionRemoteGoTo( COSDictionary a )
+    public PDActionRemoteGoTo(COSDictionary a)
     {
-        super( a );
+        super(a);
     }
 
     /**
-     * This will get the type of action that the actions dictionary describes.
-     * It must be GoToR for a remote go-to action.
+     * This will get the type of action that the actions dictionary describes. It must be GoToR for a remote go-to
+     * action.
      *
      * @return The S entry of the specific remote go-to action dictionary.
      */
     public String getS()
     {
-       return action.getNameAsString( "S" );
+        return action.getNameAsString(COSName.S);
     }
 
     /**
-     * This will set the type of action that the actions dictionary describes.
-     * It must be GoToR for a remote go-to action.
+     * This will set the type of action that the actions dictionary describes. It must be GoToR for a remote go-to
+     * action.
      *
      * @param s The remote go-to action.
      */
-    public void setS( String s )
+    public void setS(String s)
     {
-       action.setName( "S", s );
+        action.setName(COSName.S, s);
     }
 
     /**
@@ -85,7 +86,7 @@ public class PDActionRemoteGoTo extends PDAction
      */
     public PDFileSpecification getFile() throws IOException
     {
-        return PDFileSpecification.createFS( action.getDictionaryObject( "F" ) );
+        return PDFileSpecification.createFS(action.getDictionaryObject(COSName.F));
     }
 
     /**
@@ -93,17 +94,15 @@ public class PDActionRemoteGoTo extends PDAction
      *
      * @param fs The file specification.
      */
-    public void setFile( PDFileSpecification fs )
+    public void setFile(PDFileSpecification fs)
     {
-        action.setItem( "F", fs );
+        action.setItem(COSName.F, fs);
     }
 
     /**
-     * This will get the destination to jump to.
-     * If the value is an array defining an explicit destination,
-     * its first element must be a page number within the remote
-     * document rather than an indirect reference to a page object
-     * in the current document. The first page is numbered 0.
+     * This will get the destination to jump to. If the value is an array defining an explicit destination, its first
+     * element must be a page number within the remote document rather than an indirect reference to a page object in
+     * the current document. The first page is numbered 0.
      *
      * @return The D entry of the specific remote go-to action dictionary.
      */
@@ -111,36 +110,33 @@ public class PDActionRemoteGoTo extends PDAction
     // Array or String.
     public COSBase getD()
     {
-        return action.getDictionaryObject( "D" );
+        return action.getDictionaryObject(COSName.D);
     }
 
     /**
-     * This will set the destination to jump to.
-     * If the value is an array defining an explicit destination,
-     * its first element must be a page number within the remote
-     * document rather than an indirect reference to a page object
-     * in the current document. The first page is numbered 0.
+     * This will set the destination to jump to. If the value is an array defining an explicit destination, its first
+     * element must be a page number within the remote document rather than an indirect reference to a page object in
+     * the current document. The first page is numbered 0.
      *
      * @param d The destination.
      */
 
     // In case the value is an array.
-    public void setD( COSBase d )
+    public void setD(COSBase d)
     {
-        action.setItem( "D", d );
+        action.setItem(COSName.D, d);
     }
 
     /**
-     * This will specify whether to open the destination document in a new window.
-     * If this flag is false, the destination document will replace the current
-     * document in the same window. If this entry is absent, the viewer application
-     * should behave in accordance with the current user preference.
+     * This will specify whether to open the destination document in a new window. If this flag is false, the
+     * destination document will replace the current document in the same window. If this entry is absent, the viewer
+     * application should behave in accordance with the current user preference.
      *
      * @return A flag specifying whether to open the destination document in a new window.
      */
     public boolean shouldOpenInNewWindow()
     {
-        return action.getBoolean( "NewWindow", true );
+        return action.getBoolean("NewWindow", true);
     }
 
     /**
@@ -148,8 +144,8 @@ public class PDActionRemoteGoTo extends PDAction
      *
      * @param value The flag value.
      */
-    public void setOpenInNewWindow( boolean value )
+    public void setOpenInNewWindow(boolean value)
     {
-        action.setBoolean( "NewWindow", value );
+        action.setBoolean("NewWindow", value);
     }
 }

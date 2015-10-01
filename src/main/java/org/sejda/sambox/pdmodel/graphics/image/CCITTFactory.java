@@ -24,7 +24,6 @@ import java.io.IOException;
 import org.sejda.io.SeekableSource;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
 
 /**
@@ -42,48 +41,45 @@ public final class CCITTFactory
     /**
      * Creates a new CCITT Fax compressed Image XObject from the first page of a TIFF file.
      *
-     * @param document the document to create the image as part of.
      * @param file the TIFF file which contains a suitable CCITT compressed image
      * @return a new Image XObject
      * @throws IOException if there is an error reading the TIFF data.
      */
-    public static PDImageXObject createFromFile(PDDocument document, File file) throws IOException
+    public static PDImageXObject createFromFile(File file) throws IOException
     {
-        return createFromRandomAccessImpl(document, seekableSourceFrom(file), 0);
+        return createFromRandomAccessImpl(seekableSourceFrom(file), 0);
     }
 
     /**
      * Creates a new CCITT Fax compressed Image XObject from the first page of a TIFF file.
      *
-     * @param document the document to create the image as part of.
      * @param file the TIFF file which contains a suitable CCITT compressed image
      * @param number TIFF image number, starting from 0
      * @return a new Image XObject
      * @throws IOException if there is an error reading the TIFF data.
      */
-    public static PDImageXObject createFromFile(PDDocument document, File file, int number)
+    public static PDImageXObject createFromFile(File file, int number)
             throws IOException
     {
-        return createFromRandomAccessImpl(document, seekableSourceFrom(file), number);
+        return createFromRandomAccessImpl(seekableSourceFrom(file), number);
     }
 
     /**
      * Creates a new CCITT Fax compressed Image XObject from a TIFF file.
      * 
-     * @param document the document to create the image as part of.
      * @param source the random access TIFF file which contains a suitable CCITT compressed image
      * @param number TIFF image number, starting from 0
      * @return a new Image XObject, or null if no such page
      * @throws IOException if there is an error reading the TIFF data.
      */
-    private static PDImageXObject createFromRandomAccessImpl(PDDocument document,
+    private static PDImageXObject createFromRandomAccessImpl(
             SeekableSource source, int number) throws IOException
     {
         COSDictionary decodeParms = new COSDictionary();
         SeekableSource tiffView = extractFromTiff(source, decodeParms, number);
         if (tiffView != null)
         {
-            PDImageXObject pdImage = new PDImageXObject(document, tiffView.asInputStream(),
+            PDImageXObject pdImage = new PDImageXObject(tiffView.asInputStream(),
                     COSName.CCITTFAX_DECODE, decodeParms.getInt(COSName.COLUMNS),
                     decodeParms.getInt(COSName.ROWS), 1, PDDeviceGray.INSTANCE);
 

@@ -18,6 +18,8 @@ package org.sejda.sambox.pdmodel.graphics.state;
 
 import java.io.IOException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
@@ -26,8 +28,7 @@ import org.sejda.sambox.cos.COSObjectable;
 import org.sejda.sambox.pdmodel.common.function.PDFunction;
 import org.sejda.sambox.pdmodel.graphics.PDXObject;
 import org.sejda.sambox.pdmodel.graphics.form.PDFormXObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.sejda.sambox.pdmodel.graphics.form.PDTransparencyGroup;
 
 /**
  * Soft mask.
@@ -49,11 +50,8 @@ public final class PDSoftMask implements COSObjectable
             {
                 return null;
             }
-            else
-            {
-                LOG.warn("Invalid SMask " + dictionary);
-                return null;
-            }
+            LOG.warn("Invalid SMask " + dictionary);
+            return null;
         }
         else if (dictionary instanceof COSDictionary)
         {
@@ -66,11 +64,11 @@ public final class PDSoftMask implements COSObjectable
         }
     }
 
-    private static final Logger LOG = LoggerFactory.getLogger(PDSoftMask.class);
+    private static final Log LOG = LogFactory.getLog(PDSoftMask.class);
 
     private final COSDictionary dictionary;
     private COSName subType = null;
-    private PDFormXObject group = null;
+    private PDTransparencyGroup group = null;
     private COSArray backdropColor = null;
     private PDFunction transferFunction = null;
 
@@ -114,8 +112,7 @@ public final class PDSoftMask implements COSObjectable
             COSBase cosGroup = getCOSObject().getDictionaryObject(COSName.G);
             if (cosGroup != null)
             {
-                group = (PDFormXObject) PDXObject
-.createXObject(cosGroup, null);
+                group = (PDTransparencyGroup) PDXObject.createXObject(cosGroup, null);
             }
         }
         return group;

@@ -19,12 +19,14 @@ package org.sejda.sambox.contentstream.operator.graphics;
 import java.io.IOException;
 import java.util.List;
 
+import org.sejda.sambox.contentstream.operator.MissingOperandException;
 import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.MissingResourceException;
 import org.sejda.sambox.pdmodel.graphics.PDXObject;
 import org.sejda.sambox.pdmodel.graphics.form.PDFormXObject;
+import org.sejda.sambox.pdmodel.graphics.form.PDTransparencyGroup;
 import org.sejda.sambox.pdmodel.graphics.image.PDImageXObject;
 
 /**
@@ -38,7 +40,16 @@ public final class DrawObject extends GraphicsOperatorProcessor
     @Override
     public void process(Operator operator, List<COSBase> operands) throws IOException
     {
-        COSName objectName = (COSName)operands.get(0);
+        if (operands.size() < 1)
+        {
+            throw new MissingOperandException(operator, operands);
+        }
+        COSBase base0 = operands.get(0);
+        if (!(base0 instanceof COSName))
+        {
+            return;
+        }
+        COSName objectName = (COSName) base0;
         PDXObject xobject = context.getResources().getXObject(objectName);
 
         if (xobject == null)
@@ -47,21 +58,16 @@ public final class DrawObject extends GraphicsOperatorProcessor
         }
         else if (xobject instanceof PDImageXObject)
         {
-            PDImageXObject image = (PDImageXObject)xobject;
+            PDImageXObject image = (PDImageXObject) xobject;
             context.drawImage(image);
+        }
+        else if (xobject instanceof PDTransparencyGroup)
+        {
+            getContext().showTransparencyGroup((PDTransparencyGroup) xobject);
         }
         else if (xobject instanceof PDFormXObject)
         {
-            PDFormXObject form = (PDFormXObject) xobject;
-            if (form.getGroup() != null &&
-                COSName.TRANSPARENCY.equals(form.getGroup().getSubType()))
-            {
-                getContext().showTransparencyGroup(form);
-            }
-            else
-            {
-                getContext().showForm(form);
-            }
+            getContext().showForm((PDFormXObject) xobject);
         }
     }
 

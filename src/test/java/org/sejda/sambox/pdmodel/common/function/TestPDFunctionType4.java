@@ -19,12 +19,11 @@ package org.sejda.sambox.pdmodel.common.function;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import junit.framework.TestCase;
-
 import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.util.IOUtils;
+
+import junit.framework.TestCase;
 
 /**
  * Tests the {@link PDFunctionType4} class.
@@ -35,50 +34,49 @@ public class TestPDFunctionType4 extends TestCase
     private PDFunctionType4 createFunction(String function, float[] domain, float[] range)
             throws IOException
     {
-        COSDictionary dict = new COSDictionary();
-        dict.setInt("FunctionType", 4);
+        COSStream stream = new COSStream();
+        stream.setInt("FunctionType", 4);
         COSArray domainArray = new COSArray();
         domainArray.setFloatArray(domain);
-        dict.setItem("Domain", domainArray);
+        stream.setItem("Domain", domainArray);
         COSArray rangeArray = new COSArray();
         rangeArray.setFloatArray(range);
-        dict.setItem("Range", rangeArray);
+        stream.setItem("Range", rangeArray);
 
-        COSStream functionStream = new COSStream(dict);
-        OutputStream out = functionStream.createUnfilteredStream();
+        OutputStream out = stream.createUnfilteredStream();
         byte[] data = function.getBytes("US-ASCII");
         out.write(data, 0, data.length);
         IOUtils.close(out);
 
-        return new PDFunctionType4(functionStream);
+        return new PDFunctionType4(stream);
     }
 
     /**
      * Checks the {@link PDFunctionType4}.
+     * 
      * @throws Exception if an error occurs
      */
     public void testFunctionSimple() throws Exception
     {
         String functionText = "{ add }";
-        //Simply adds the two arguments and returns the result
+        // Simply adds the two arguments and returns the result
 
         PDFunctionType4 function = createFunction(functionText,
-                new float[] {-1.0f, 1.0f, -1.0f, 1.0f},
-                new float[] {-1.0f, 1.0f});
+                new float[] { -1.0f, 1.0f, -1.0f, 1.0f }, new float[] { -1.0f, 1.0f });
 
-        float[] input = new float[] {0.8f, 0.1f};
+        float[] input = new float[] { 0.8f, 0.1f };
         float[] output = function.eval(input);
 
         assertEquals(1, output.length);
         assertEquals(0.9f, output[0], 0.0001f);
 
-        input = new float[] {0.8f, 0.3f}; //results in 1.1f being outside Range
+        input = new float[] { 0.8f, 0.3f }; // results in 1.1f being outside Range
         output = function.eval(input);
 
         assertEquals(1, output.length);
         assertEquals(1f, output[0]);
 
-        input = new float[] {0.8f, 1.2f}; //input argument outside Dimension
+        input = new float[] { 0.8f, 1.2f }; // input argument outside Dimension
 
         assertEquals(1, output.length);
         assertEquals(1f, output[0]);
@@ -86,6 +84,7 @@ public class TestPDFunctionType4 extends TestCase
 
     /**
      * Checks the handling of the argument order for a {@link PDFunctionType4}.
+     * 
      * @throws Exception if an error occurs
      */
     public void testFunctionArgumentOrder() throws Exception
@@ -94,10 +93,9 @@ public class TestPDFunctionType4 extends TestCase
         // pops an argument (2nd) and returns the next argument (1st)
 
         PDFunctionType4 function = createFunction(functionText,
-                new float[] {-1.0f, 1.0f, -1.0f, 1.0f},
-                new float[] {-1.0f, 1.0f});
+                new float[] { -1.0f, 1.0f, -1.0f, 1.0f }, new float[] { -1.0f, 1.0f });
 
-        float[] input = new float[] {-0.7f, 0.0f };
+        float[] input = new float[] { -0.7f, 0.0f };
         float[] output = function.eval(input);
 
         assertEquals(1, output.length);

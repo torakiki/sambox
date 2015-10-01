@@ -120,7 +120,7 @@ public final class PDPageContentStream implements Closeable
             boolean compress, boolean resetContext) throws IOException
     {
         this.document = document;
-
+        COSName filter = compress ? COSName.FLATE_DECODE : null;
         // If request specifies the need to append to the document
         if (appendContent && sourcePage.hasContents())
         {
@@ -144,30 +144,24 @@ public final class PDPageContentStream implements Closeable
                 array.add(contentsToAppend);
             }
 
-            if (compress)
-            {
-                contentsToAppend.addCompression();
-            }
             // save the initial/unmodified graphics context
             if (resetContext)
             {
                 // create a new stream to encapsulate the existing stream
                 PDStream saveGraphics = new PDStream();
-                this.writer = new ContentStreamWriter(from(saveGraphics.createOutputStream()));
+                this.writer = new ContentStreamWriter(
+                        from(saveGraphics.createOutputStream(filter)));
                 // save the initial/unmodified graphics context
                 saveGraphicsState();
                 close();
-                if (compress)
-                {
-                    saveGraphics.addCompression();
-                }
                 // insert the new stream at the beginning
                 array.add(0, saveGraphics.getStream());
             }
 
             // Sets the compoundStream as page contents
             sourcePage.getCOSObject().setItem(COSName.CONTENTS, array);
-            this.writer = new ContentStreamWriter(from(contentsToAppend.createOutputStream()));
+            this.writer = new ContentStreamWriter(
+                    from(contentsToAppend.createOutputStream(filter)));
             // restore the initial/unmodified graphics context
             if (resetContext)
             {
@@ -181,12 +175,8 @@ public final class PDPageContentStream implements Closeable
                 LOG.warn("You are overwriting an existing content, you should use the append mode");
             }
             PDStream contents = new PDStream();
-            if (compress)
-            {
-                contents.addCompression();
-            }
             sourcePage.setContents(contents);
-            this.writer = new ContentStreamWriter(from(contents.createOutputStream()));
+            this.writer = new ContentStreamWriter(from(contents.createOutputStream(filter)));
         }
         // this has to be done here, as the resources will be set to null when reseting the content stream
         resources = sourcePage.getResources();
@@ -212,7 +202,7 @@ public final class PDPageContentStream implements Closeable
     {
         this.document = doc;
 
-        this.writer = new ContentStreamWriter(from(appearance.getPDStream().createOutputStream()));
+        this.writer = new ContentStreamWriter(from(appearance.getStream().createOutputStream()));
         this.resources = appearance.getResources();
 
         formatDecimal.setMaximumFractionDigits(4);
@@ -520,7 +510,7 @@ public final class PDPageContentStream implements Closeable
 
         // binary data
         writeOperator(Operator.ID_OPERATOR);
-        writeBytes(inlineImage.getStream().getByteArray());
+        writeBytes(inlineImage.getData());
         this.writer.writeEOL();
         writeOperator(Operator.EI_OPERATOR);
 

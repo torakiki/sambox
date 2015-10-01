@@ -24,16 +24,6 @@ package org.sejda.sambox.pdmodel.encryption;
  * the standard security handler (password protection).
  *
  * This is only composed of a password.
- *
- * The following example shows how to decrypt a document protected with
- * the standard security handler:
- *
- *  <pre>
- *  PDDocument doc = PDDocument.load(in);
- *  StandardDecryptionMaterial dm = new StandardDecryptionMaterial("password");
- *  doc.openProtection(dm);
- *  </pre>
- *
  * @author Benoit Guillon
  *
  */

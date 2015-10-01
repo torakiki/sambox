@@ -805,6 +805,21 @@ public final class PDFontDescriptor implements COSObjectable
     }
 
     /**
+     * Get the CIDSet stream.
+     *
+     * @return A stream containing a CIDSet.
+     */
+    public PDStream getCIDSet()
+    {
+        COSObjectable cidSet = dic.getDictionaryObject(COSName.CID_SET);
+        if (cidSet instanceof COSStream)
+        {
+            return new PDStream((COSStream) cidSet);
+        }
+        return null;
+    }
+
+    /**
      * Set a stream containing a CIDSet.
      *
      * @param stream The font program stream.

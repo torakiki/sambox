@@ -33,8 +33,16 @@ public class SetWordSpacing extends OperatorProcessor
     @Override
     public void process(Operator operator, List<COSBase> arguments)
     {
-        COSNumber wordSpacing = (COSNumber)arguments.get( 0 );
-        context.getGraphicsState().getTextState().setWordSpacing( wordSpacing.floatValue() );
+        if (!arguments.isEmpty())
+        {
+            COSBase base = arguments.get(0);
+            if (base instanceof COSNumber)
+            {
+                context.getGraphicsState().getTextState()
+                        .setWordSpacing(((COSNumber) base).floatValue());
+            }
+        }
+
     }
 
     @Override

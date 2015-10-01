@@ -74,7 +74,7 @@ public class ContentStreamParserTest
     public void nextInlineImage() throws IOException
     {
         victim = new ContentStreamParser(inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-                "/input/inline_image_stream.txt")));
+"/sambox/inline_image_stream.txt")));
         Operator operator = (Operator) victim.nextParsedToken();
         assertEquals(5, operator.getImageParameters().size());
         assertEquals(14, operator.getImageData().length);
@@ -84,7 +84,7 @@ public class ContentStreamParserTest
     public void nextInlineImageNoSpace() throws IOException
     {
         victim = new ContentStreamParser(inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-                "/input/inline_image_stream_no_space.txt")));
+"/sambox/inline_image_stream_no_space.txt")));
         Operator operator = (Operator) victim.nextParsedToken();
         assertEquals(5, operator.getImageParameters().size());
         assertEquals(14, operator.getImageData().length);
@@ -94,7 +94,7 @@ public class ContentStreamParserTest
     public void nextInlineImageEndOfStream() throws IOException
     {
         victim = new ContentStreamParser(inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-                "/input/inline_image_end_of_stream.txt")));
+"/sambox/inline_image_end_of_stream.txt")));
         Operator operator = (Operator) victim.nextParsedToken();
         assertEquals(5, operator.getImageParameters().size());
         assertEquals(14, operator.getImageData().length);
@@ -104,7 +104,7 @@ public class ContentStreamParserTest
     public void nextInlineImageIDNoSpace() throws IOException
     {
         victim = new ContentStreamParser(inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-                "/input/inline_image_ID_no_space.txt")));
+"/sambox/inline_image_ID_no_space.txt")));
         Operator operator = (Operator) victim.nextParsedToken();
         assertEquals(5, operator.getImageParameters().size());
         assertEquals(14, operator.getImageData().length);

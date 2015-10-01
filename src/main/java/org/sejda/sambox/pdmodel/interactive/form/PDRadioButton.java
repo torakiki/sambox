@@ -17,14 +17,12 @@
 package org.sejda.sambox.pdmodel.interactive.form;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
-import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.cos.COSObjectable;
-import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
-import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceEntry;
 
 /**
  * Radio button fields contain a set of related buttons that can each be on or off.
@@ -33,6 +31,7 @@ import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceEntry;
  */
 public final class PDRadioButton extends PDButton
 {
+
     /**
      * @see PDField#PDField(PDAcroForm)
      *
@@ -43,7 +42,7 @@ public final class PDRadioButton extends PDButton
         super(acroForm);
         setRadioButton(true);
     }
-    
+
     /**
      * Constructor.
      * 
@@ -79,123 +78,40 @@ public final class PDRadioButton extends PDButton
     }
 
     /**
-     * This will get the export value.
+     * This will get the selected export values.
      * <p>
-     * A RadioButton might have an export value to allow field values
-     * which can not be encoded as PDFDocEncoding or for the same export value 
-     * being assigned to multiple RadioButtons in a group.<br/>
-     * To define an export value the RadioButton must define options {@link #setOptions(List)}
-     * which correspond to the individual items within the RadioButton.</p>
+     * A RadioButton might have an export value to allow field values which can not be encoded as PDFDocEncoding or for
+     * the same export value being assigned to multiple RadioButtons in a group.<br/>
+     * To define an export value the RadioButton must define options {@link #setExportValues(List)} which correspond to
+     * the individual items within the RadioButton.
+     * </p>
      * <p>
-     * The method will either return the value from the options entry or in case there
-     * is no such entry the fields value</p>
+     * The method will either return the corresponding values from the options entry or in case there is no such entry
+     * the fields value
+     * </p>
      * 
      * @return the export value of the field.
      * @throws IOException in case the fields value can not be retrieved
      */
-    public String getExportValue()
+    public List<String> getSelectedExportValues()
     {
-        List<String> options = getOptions();
-        if (options.isEmpty())
+        Set<String> onValues = getOnValues();
+        List<String> exportValues = getExportValues();
+        List<String> selectedExportValues = new ArrayList<>();
+        if (exportValues.isEmpty())
         {
-            return getValue();
+            selectedExportValues.add(getValue());
+            return selectedExportValues;
         }
-        else
+        String fieldValue = getValue();
+        int idx = 0;
+        for (String onValue : onValues)
         {
-            String fieldValue = getValue();
-            List<PDAnnotationWidget> kids = getWidgets();
-            int idx = 0;
-            for (COSObjectable kid : kids)
+            if (onValue.compareTo(fieldValue) == 0)
             {
-                // fixme: this is always false, because it's kids are always widgets, not fields.
-                /*if (kid instanceof PDCheckbox)
-                {
-                    PDCheckbox btn = (PDCheckbox) kid;
-                    if (btn.getOnValue().equals(fieldValue))
-                    {
-                        break;
-                    }
-                    idx++;
-                }*/
-            }
-            if (idx <= options.size())
-            {
-                return options.get(idx);
+                selectedExportValues.add(exportValues.get(idx));
             }
         }
-        return "";
-    }
-
-    /**
-     * Returns the selected value. May be empty if NoToggleToOff is set but there is no value
-     * selected.
-     * 
-     * @return A non-null string.
-     */
-    public String getValue()
-    {
-        COSBase value = getInheritableAttribute(COSName.V);
-        if (value instanceof COSName)
-        {
-            return ((COSName)value).getName();
-        }
-            return "";
-    }
-
-    /**
-     * Returns the default value, if any.
-     *
-     * @return A non-null string.
-     */
-    public String getDefaultValue()
-    {
-        COSBase value = getInheritableAttribute(COSName.DV);
-        if (value instanceof COSName)
-        {
-            return ((COSName)value).getName();
-        }
-            return "";
-    }
-
-    @Override
-    public String getValueAsString()
-    {
-        return getValue();
-    }
-
-    /**
-     * Sets the selected radio button, given its name.
-     * 
-     * @param value Name of radio button to select
-     * @throws IOException if the value could not be set
-     */
-    public void setValue(String value) throws IOException
-    {
-        getCOSObject().setName(COSName.V, value);
-        // update the appearance state (AS)
-        for (PDAnnotationWidget widget : getWidgets())
-        {
-            PDAppearanceEntry appearanceEntry = widget.getAppearance().getNormalAppearance();
-            if (((COSDictionary)appearanceEntry.getCOSObject()).containsKey(value))
-            {
-                widget.getCOSObject().setName(COSName.AS, value);
-            }
-            else
-            {
-                widget.getCOSObject().setItem(COSName.AS, COSName.OFF);
-            }
-        }
-        applyChange();
-    }
-
-    /**
-     * Sets the default value.
-     *
-     * @param value Name of radio button to select
-     * @throws IOException if the value could not be set
-     */
-    public void setDefaultValue(String value)
-    {
-        getCOSObject().setName(COSName.DV, value);
+        return selectedExportValues;
     }
 }

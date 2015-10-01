@@ -46,11 +46,11 @@ public class PDFunctionType4 extends PDFunction
      */
     public PDFunctionType4(COSBase functionStream) throws IOException
     {
-        super( functionStream );
-        this.instructions = InstructionSequenceBuilder.parse(
-                getPDStream().getInputStreamAsString());
+        super(functionStream);
+        byte[] bytes = getPDStream().toByteArray();
+        String string = new String(bytes, "ISO-8859-1");
+        this.instructions = InstructionSequenceBuilder.parse(string);
     }
-
 
     /**
      * {@inheritDoc}
@@ -61,11 +61,11 @@ public class PDFunctionType4 extends PDFunction
     }
 
     /**
-    * {@inheritDoc}
-    */
+     * {@inheritDoc}
+     */
     public float[] eval(float[] input)
     {
-        //Setup the input values
+        // Setup the input values
         ExecutionContext context = new ExecutionContext(OPERATORS);
         for (int i = 0; i < input.length; i++)
         {
@@ -74,17 +74,16 @@ public class PDFunctionType4 extends PDFunction
             context.getStack().push(value);
         }
 
-        //Execute the type 4 function.
+        // Execute the type 4 function.
         instructions.execute(context);
 
-        //Extract the output values
+        // Extract the output values
         int numberOfOutputValues = getNumberOfOutputParameters();
         int numberOfActualOutputValues = context.getStack().size();
         if (numberOfActualOutputValues < numberOfOutputValues)
         {
             throw new IllegalStateException("The type 4 function returned "
-                    + numberOfActualOutputValues
-                    + " values but the Range entry indicates that "
+                    + numberOfActualOutputValues + " values but the Range entry indicates that "
                     + numberOfOutputValues + " values be returned.");
         }
         float[] outputValues = new float[numberOfOutputValues];
@@ -95,7 +94,7 @@ public class PDFunctionType4 extends PDFunction
             outputValues[i] = clipToRange(outputValues[i], range.getMin(), range.getMax());
         }
 
-        //Return the resulting array
+        // Return the resulting array
         return outputValues;
     }
 }

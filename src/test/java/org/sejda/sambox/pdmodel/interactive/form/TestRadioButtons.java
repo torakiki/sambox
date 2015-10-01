@@ -20,20 +20,20 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.PDDocument;
+
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 /**
  * This will test the functionality of Radio Buttons in PDFBox.
  */
 public class TestRadioButtons extends TestCase
 {
-    
+
     /**
      * Constructor.
      *
@@ -82,15 +82,15 @@ public class TestRadioButtons extends TestCase
             // test that there are no nulls returned for an empty field
             // only specific methods are tested here
             assertNotNull(radioButton.getDefaultValue());
-            assertNotNull(radioButton.getExportValue());
-            assertNotNull(radioButton.getOptions());
+            assertNotNull(radioButton.getSelectedExportValues());
+            assertNotNull(radioButton.getExportValues());
             assertNotNull(radioButton.getValue());
             
             // Test setting/getting option values - the dictionaries Opt entry
             List<String> options = new ArrayList<String>();
             options.add("Value01");
             options.add("Value02");
-            radioButton.setOptions(options);
+            radioButton.setExportValues(options);
 
             COSArray optItem = (COSArray) radioButton.getCOSObject().getItem(COSName.OPT);
 
@@ -100,15 +100,15 @@ public class TestRadioButtons extends TestCase
             assertEquals(options.get(0), optItem.getString(0));
             
             // assert that the values can be retrieved correctly
-            List<String> retrievedOptions = radioButton.getOptions();
+            List<String> retrievedOptions = radioButton.getExportValues();
             assertEquals(retrievedOptions.size(),2);
             assertEquals(retrievedOptions, options);
 
             // assert that the Opt entry is removed
-            radioButton.setOptions(null);
+            radioButton.setExportValues(null);
             assertNull(radioButton.getCOSObject().getItem(COSName.OPT));
             // if there is no Opt entry an empty List shall be returned
-            assertEquals(radioButton.getOptions(), new ArrayList<String>());
+            assertEquals(radioButton.getExportValues(), new ArrayList<String>());
         }
         finally
         {

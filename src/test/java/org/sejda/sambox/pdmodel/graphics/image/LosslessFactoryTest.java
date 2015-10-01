@@ -32,8 +32,6 @@ import java.util.Random;
 
 import javax.imageio.ImageIO;
 
-import junit.framework.TestCase;
-
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.PDDocument;
@@ -42,6 +40,9 @@ import org.sejda.sambox.pdmodel.PDPageContentStream;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceRGB;
 import org.sejda.sambox.rendering.PDFRenderer;
+
+import junit.framework.TestCase;
+
 /**
  * Unit tests for LosslessFactory
  *
@@ -70,7 +71,7 @@ public class LosslessFactoryTest extends TestCase
         {
             BufferedImage image = ImageIO.read(this.getClass().getResourceAsStream("png.png"));
 
-            PDImageXObject ximage1 = LosslessFactory.createFromImage(document, image);
+            PDImageXObject ximage1 = LosslessFactory.createFromImage(image);
             validate(ximage1, 8, image.getWidth(), image.getHeight(), "png",
                     PDDeviceRGB.INSTANCE.getName());
             checkIdent(image, ximage1.getImage());
@@ -81,7 +82,7 @@ public class LosslessFactoryTest extends TestCase
             Graphics g = grayImage.getGraphics();
             g.drawImage(image, 0, 0, null);
             g.dispose();
-            PDImageXObject ximage2 = LosslessFactory.createFromImage(document, grayImage);
+            PDImageXObject ximage2 = LosslessFactory.createFromImage(grayImage);
             validate(ximage2, 8, grayImage.getWidth(), grayImage.getHeight(), "png",
                     PDDeviceGray.INSTANCE.getName());
             checkIdent(grayImage, ximage2.getImage());
@@ -96,7 +97,7 @@ public class LosslessFactoryTest extends TestCase
             g = bitonalImage.getGraphics();
             g.drawImage(image, 0, 0, null);
             g.dispose();
-            PDImageXObject ximage3 = LosslessFactory.createFromImage(document, bitonalImage);
+            PDImageXObject ximage3 = LosslessFactory.createFromImage(bitonalImage);
             validate(ximage3, 1, bitonalImage.getWidth(), bitonalImage.getHeight(), "png",
                     PDDeviceGray.INSTANCE.getName());
             checkIdent(bitonalImage, ximage3.getImage());
@@ -106,7 +107,8 @@ public class LosslessFactoryTest extends TestCase
             // if something goes wrong in the future and we want to have a PDF to open.
             PDPage page = new PDPage();
             document.addPage(page);
-            PDPageContentStream contentStream = new PDPageContentStream(document, page, true, false);
+            PDPageContentStream contentStream = new PDPageContentStream(document, page, true,
+                    false);
             contentStream.drawImage(ximage1, 200, 300, ximage1.getWidth() / 2,
                     ximage1.getHeight() / 2);
             contentStream.drawImage(ximage2, 200, 450, ximage2.getWidth() / 2,
@@ -150,7 +152,7 @@ public class LosslessFactoryTest extends TestCase
             }
         }
 
-        PDImageXObject ximage = LosslessFactory.createFromImage(document, argbImage);
+        PDImageXObject ximage = LosslessFactory.createFromImage(argbImage);
         validate(ximage, 8, argbImage.getWidth(), argbImage.getHeight(), "png",
                 PDDeviceRGB.INSTANCE.getName());
         checkIdent(argbImage, ximage.getImage());
@@ -212,7 +214,7 @@ public class LosslessFactoryTest extends TestCase
             }
         }
 
-        PDImageXObject ximage = LosslessFactory.createFromImage(document, argbImage);
+        PDImageXObject ximage = LosslessFactory.createFromImage(argbImage);
 
         validate(ximage, 8, w, h, "png", PDDeviceRGB.INSTANCE.getName());
         checkIdent(argbImage, ximage.getImage());
@@ -237,7 +239,7 @@ public class LosslessFactoryTest extends TestCase
 
         assertEquals(Transparency.BITMASK, image.getColorModel().getTransparency());
 
-        PDImageXObject ximage = LosslessFactory.createFromImage(document, image);
+        PDImageXObject ximage = LosslessFactory.createFromImage(image);
 
         int w = image.getWidth();
         int h = image.getHeight();
@@ -270,7 +272,8 @@ public class LosslessFactoryTest extends TestCase
         {
             for (int x = 0; x < w; ++x)
             {
-                if ((expectedImage.getRGB(x, y) & 0xFFFFFF) != (actualImage.getRGB(x, y) & 0xFFFFFF))
+                if ((expectedImage.getRGB(x, y) & 0xFFFFFF) != (actualImage.getRGB(x, y)
+                        & 0xFFFFFF))
                 {
                     errMsg = String.format("(%d,%d) %06X != %06X", x, y,
                             expectedImage.getRGB(x, y) & 0xFFFFFF,
@@ -337,13 +340,14 @@ public class LosslessFactoryTest extends TestCase
                 }
             }
 
-            PDImageXObject ximage = LosslessFactory.createFromImage(document, argbImage);
+            PDImageXObject ximage = LosslessFactory.createFromImage(argbImage);
             validate(ximage, 8, width, height, "png", PDDeviceRGB.INSTANCE.getName());
             checkIdent(argbImage, ximage.getImage());
             checkIdentRGB(argbImage, ximage.getOpaqueImage());
 
             assertNotNull(ximage.getSoftMask());
-            validate(ximage.getSoftMask(), 1, width, height, "png", PDDeviceGray.INSTANCE.getName());
+            validate(ximage.getSoftMask(), 1, width, height, "png",
+                    PDDeviceGray.INSTANCE.getName());
             assertEquals(2, colorCount(ximage.getSoftMask().getImage()));
 
             // check whether the mask is a b/w cross
@@ -377,11 +381,12 @@ public class LosslessFactoryTest extends TestCase
             g.setColor(Color.blue);
             g.fillRect(0, 0, width, height);
             g.dispose();
-            PDImageXObject ximage2 = LosslessFactory.createFromImage(document, rectImage);
+            PDImageXObject ximage2 = LosslessFactory.createFromImage(rectImage);
 
             PDPage page = new PDPage();
             document.addPage(page);
-            PDPageContentStream contentStream = new PDPageContentStream(document, page, true, false);
+            PDPageContentStream contentStream = new PDPageContentStream(document, page, true,
+                    false);
             contentStream.drawImage(ximage2, 150, 300, ximage2.getWidth(), ximage2.getHeight());
             contentStream.drawImage(ximage, 150, 300, ximage.getWidth(), ximage.getHeight());
             contentStream.close();

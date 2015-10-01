@@ -50,6 +50,7 @@ import org.sejda.sambox.pdmodel.graphics.PDLineDashPattern;
 import org.sejda.sambox.pdmodel.graphics.color.PDColor;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
 import org.sejda.sambox.pdmodel.graphics.form.PDFormXObject;
+import org.sejda.sambox.pdmodel.graphics.form.PDTransparencyGroup;
 import org.sejda.sambox.pdmodel.graphics.pattern.PDTilingPattern;
 import org.sejda.sambox.pdmodel.graphics.state.PDGraphicsState;
 import org.sejda.sambox.pdmodel.graphics.state.PDTextState;
@@ -70,12 +71,12 @@ public abstract class PDFStreamEngine
 {
     private static final Logger LOG = LoggerFactory.getLogger(PDFStreamEngine.class);
 
-    private final Map<String, OperatorProcessor> operators = new HashMap<String, OperatorProcessor>();
+    private final Map<String, OperatorProcessor> operators = new HashMap<>();
 
     private Matrix textMatrix;
     private Matrix textLineMatrix;
 
-    private Stack<PDGraphicsState> graphicsStack = new Stack<PDGraphicsState>();
+    private Stack<PDGraphicsState> graphicsStack = new Stack<>();
 
     private PDResources resources;
     private PDPage currentPage;
@@ -89,19 +90,6 @@ public abstract class PDFStreamEngine
     {
     }
 
-    /**
-     * Register a custom operator processor with the engine.
-     * 
-     * @param operator The operator as a string.
-     * @param op Processor instance.
-     * @deprecated Use {@link #addOperator(OperatorProcessor)} instead
-     */
-    @Deprecated
-    public void registerOperatorProcessor(String operator, OperatorProcessor op)
-    {
-        op.setContext(this);
-        operators.put(operator, op);
-    }
 
     /**
      * Adds an operator processor to the engine.
@@ -155,7 +143,7 @@ public abstract class PDFStreamEngine
      * @param form transparency group (form) XObject
      * @throws IOException if the transparency group cannot be processed
      */
-    public void showTransparencyGroup(PDFormXObject form) throws IOException
+    public void showTransparencyGroup(PDTransparencyGroup form) throws IOException
     {
         processTransparencyGroup(form);
     }

@@ -92,7 +92,7 @@ public class SyncPDFBodyWriterTest
     {
         try (PDDocument document = PDFParser.parse(SeekableSources
                 .inMemorySeekableSourceFrom(getClass()
-                        .getResourceAsStream("/input/simple_test.pdf"))))
+.getResourceAsStream("/sambox/simple_test.pdf"))))
         {
             victim.write(document.getDocument());
         }

@@ -16,8 +16,10 @@
  */
 package org.sejda.sambox.contentstream.operator.text;
 
+import java.io.IOException;
 import java.util.List;
 
+import org.sejda.sambox.contentstream.operator.MissingOperandException;
 import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.contentstream.operator.OperatorProcessor;
 import org.sejda.sambox.cos.COSBase;
@@ -32,11 +34,19 @@ import org.sejda.sambox.pdmodel.graphics.state.RenderingMode;
 public class SetTextRenderingMode extends OperatorProcessor
 {
     @Override
-    public void process(Operator operator, List<COSBase> arguments)
+    public void process(Operator operator, List<COSBase> arguments) throws IOException
     {
-        COSNumber mode = (COSNumber)arguments.get(0);
-        RenderingMode renderingMode = RenderingMode.fromInt(mode.intValue());
-        context.getGraphicsState().getTextState().setRenderingMode(renderingMode);
+        if (arguments.size() < 1)
+        {
+            throw new MissingOperandException(operator, arguments);
+        }
+        COSBase base0 = arguments.get(0);
+        if (base0 instanceof COSNumber)
+        {
+            RenderingMode renderingMode = RenderingMode.fromInt(((COSNumber) base0).intValue());
+            context.getGraphicsState().getTextState().setRenderingMode(renderingMode);
+        }
+
     }
 
     @Override

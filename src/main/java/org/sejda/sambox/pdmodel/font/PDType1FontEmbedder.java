@@ -76,13 +76,12 @@ class PDType1FontEmbedder
         // build font descriptor
         PDFontDescriptor fd = buildFontDescriptor(type1);
 
-        PDStream fontStream = new PDStream(pfbParser.getInputStream(), false);
+        PDStream fontStream = new PDStream(pfbParser.getInputStream(), COSName.FLATE_DECODE);
         fontStream.getStream().setInt("Length", pfbParser.size());
         for (int i = 0; i < pfbParser.getLengths().length; i++)
         {
             fontStream.getStream().setInt("Length" + (i + 1), pfbParser.getLengths()[i]);
         }
-        fontStream.addCompression();
         fd.setFontFile(fontStream);
 
         // set the values
@@ -90,7 +89,7 @@ class PDType1FontEmbedder
         dict.setName(COSName.BASE_FONT, type1.getName());
 
         // widths
-        List<Integer> widths = new ArrayList<Integer>(256);
+        List<Integer> widths = new ArrayList<>(256);
         for (int code = 0; code <= 255; code++)
         {
             String name = fontEncoding.getName(code);

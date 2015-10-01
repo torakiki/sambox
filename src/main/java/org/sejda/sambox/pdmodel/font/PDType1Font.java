@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.pdmodel.font;
 
+import static org.sejda.sambox.pdmodel.font.UniUtil.getUniNameOfCodePoint;
+
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
@@ -43,7 +45,6 @@ import org.sejda.sambox.pdmodel.font.encoding.WinAnsiEncoding;
 import org.sejda.sambox.util.Matrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 /**
  * A PostScript Type 1 Font.
  *
@@ -54,7 +55,8 @@ public class PDType1Font extends PDSimpleFont
     private static final Logger LOG = LoggerFactory.getLogger(PDType1Font.class);
 
     // alternative names for glyphs which are commonly encountered
-    private static final Map<String, String> ALT_NAMES = new HashMap<String, String>();
+    private static final Map<String, String> ALT_NAMES = new HashMap<>();
+
     static
     {
         ALT_NAMES.put("ff", "f_f");
@@ -67,6 +69,7 @@ public class PDType1Font extends PDSimpleFont
         ALT_NAMES.put("ij", "i_j");
         ALT_NAMES.put("ellipsis", "elipsis"); // misspelled in ArialMT
     }
+
     private static final int PFB_START_MARKER = 0x80;
 
     // todo: replace with enum? or getters?
@@ -77,7 +80,8 @@ public class PDType1Font extends PDSimpleFont
     public static final PDType1Font HELVETICA = new PDType1Font("Helvetica");
     public static final PDType1Font HELVETICA_BOLD = new PDType1Font("Helvetica-Bold");
     public static final PDType1Font HELVETICA_OBLIQUE = new PDType1Font("Helvetica-Oblique");
-    public static final PDType1Font HELVETICA_BOLD_OBLIQUE = new PDType1Font("Helvetica-BoldOblique");
+    public static final PDType1Font HELVETICA_BOLD_OBLIQUE = new PDType1Font(
+            "Helvetica-BoldOblique");
     public static final PDType1Font COURIER = new PDType1Font("Courier");
     public static final PDType1Font COURIER_BOLD = new PDType1Font("Courier-Bold");
     public static final PDType1Font COURIER_OBLIQUE = new PDType1Font("Courier-Oblique");
@@ -100,7 +104,7 @@ public class PDType1Font extends PDSimpleFont
     private PDType1Font(String baseFont)
     {
         super(baseFont);
-        
+
         dict.setItem(COSName.SUBTYPE, COSName.TYPE1);
         dict.setName(COSName.BASE_FONT, baseFont);
         encoding = new WinAnsiEncoding();
@@ -108,10 +112,10 @@ public class PDType1Font extends PDSimpleFont
 
         // todo: could load the PFB font here if we wanted to support Standard 14 embedding
         type1font = null;
-        FontMapping<FontBoxFont> mapping = FontMapper.getFontBoxFont(getBaseFont(),
-                                                                     getFontDescriptor());
+        FontMapping<FontBoxFont> mapping = FontMappers.instance().getFontBoxFont(getBaseFont(),
+                getFontDescriptor());
         genericFont = mapping.getFont();
-        
+
         if (mapping.isFallback())
         {
             String fontName;
@@ -200,9 +204,9 @@ public class PDType1Font extends PDSimpleFont
                     int length2 = stream.getInt(COSName.LENGTH2);
 
                     // repair Length1 if necessary
-                    byte[] bytes = fontFile.getByteArray();
+                    byte[] bytes = fontFile.toByteArray();
                     length1 = repairLength1(bytes, length1);
-                    
+
                     if (bytes.length > 0 && (bytes[0] & 0xff) == PFB_START_MARKER)
                     {
                         // some bad files embed the entire PFB, see PDFBOX-2607
@@ -244,9 +248,10 @@ public class PDType1Font extends PDSimpleFont
         }
         else
         {
-            FontMapping<FontBoxFont> mapping = FontMapper.getFontBoxFont(getBaseFont(), fd);
+            FontMapping<FontBoxFont> mapping = FontMappers.instance().getFontBoxFont(getBaseFont(),
+                    fd);
             genericFont = mapping.getFont();
-            
+
             if (mapping.isFallback())
             {
                 LOG.warn("Using fallback font " + genericFont.getName() + " for " + getBaseFont());
@@ -258,8 +263,8 @@ public class PDType1Font extends PDSimpleFont
     }
 
     /**
-     * Some Type 1 fonts have an invalid Length1, which causes the binary segment of the font
-     * to be truncated, see PDFBOX-2350.
+     * Some Type 1 fonts have an invalid Length1, which causes the binary segment of the font to be truncated, see
+     * PDFBOX-2350.
      *
      * @param bytes Type 1 stream bytes
      * @param length1 Length1 from the Type 1 stream
@@ -271,14 +276,13 @@ public class PDType1Font extends PDSimpleFont
         int offset = Math.max(0, length1 - 4);
         while (offset > 0)
         {
-            if (bytes[offset + 0] == 'e' &&
-                bytes[offset + 1] == 'x' &&
-                bytes[offset + 2] == 'e' &&
-                bytes[offset + 3] == 'c')
+            if (bytes[offset + 0] == 'e' && bytes[offset + 1] == 'x' && bytes[offset + 2] == 'e'
+                    && bytes[offset + 3] == 'c')
             {
                 offset += 4;
                 // skip additional CR LF space characters
-                while (offset < length1 && (bytes[offset] == '\r' || bytes[offset] == '\n' || bytes[offset] == ' '))
+                while (offset < length1
+                        && (bytes[offset] == '\r' || bytes[offset] == '\n' || bytes[offset] == ' '))
                 {
                     offset++;
                 }
@@ -325,7 +329,9 @@ public class PDType1Font extends PDSimpleFont
     {
         if (unicode > 0xff)
         {
-            throw new IllegalArgumentException("This font type only supports 8-bit code points");
+            throw new IllegalArgumentException(String.format(
+                    "Can't encode U+%04X in font %s. Type 1 fonts only support 8-bit code points",
+                    unicode, getName()));
         }
 
         String name = getGlyphList().codePointToName(unicode);
@@ -339,7 +345,7 @@ public class PDType1Font extends PDSimpleFont
         }
 
         int code = inverted.get(name);
-        return new byte[] { (byte)code };
+        return new byte[] { (byte) code };
     }
 
     @Override
@@ -356,7 +362,7 @@ public class PDType1Font extends PDSimpleFont
 
         Point2D p = new Point2D.Float(width, 0);
         fontMatrixTransform.transform(p, p);
-        return (float)p.getX();
+        return (float) p.getX();
     }
 
     @Override
@@ -433,7 +439,7 @@ public class PDType1Font extends PDSimpleFont
         return genericFont.getFontBBox();
     }
 
-    //@Override
+    // @Override
     public String codeToName(int code) throws IOException
     {
         String name = getEncoding().getName(code);
@@ -441,8 +447,8 @@ public class PDType1Font extends PDSimpleFont
     }
 
     /**
-     * Maps a PostScript glyph name to the name in the underlying font, for example when
-     * using a TTF font we might map "W" to "uni0057".
+     * Maps a PostScript glyph name to the name in the underlying font, for example when using a TTF font we might map
+     * "W" to "uni0057".
      */
     private String getNameInFont(String name) throws IOException
     {
@@ -450,26 +456,20 @@ public class PDType1Font extends PDSimpleFont
         {
             return name;
         }
-        else
+        // try alternative name
+        String altName = ALT_NAMES.get(name);
+        if (altName != null && !name.equals(".notdef") && genericFont.hasGlyph(altName))
         {
-            // try alternative name
-            String altName = ALT_NAMES.get(name);
-            if (altName != null && !name.equals(".notdef") && genericFont.hasGlyph(altName))
+            return altName;
+        }
+        // try unicode name
+        String unicodes = getGlyphList().toUnicode(name);
+        if (unicodes != null && unicodes.length() == 1)
+        {
+            String uniName = getUniNameOfCodePoint(unicodes.codePointAt(0));
+            if (genericFont.hasGlyph(uniName))
             {
-                return altName;
-            }
-            else
-            {
-                // try unicode name
-                String unicodes = getGlyphList().toUnicode(name);
-                if (unicodes != null && unicodes.length() == 1)
-                {
-                    String uniName = String.format("uni%04X", unicodes.codePointAt(0));
-                    if (genericFont.hasGlyph(uniName))
-                    {
-                        return uniName;
-                    }
-                }
+                return uniName;
             }
         }
         return ".notdef";
@@ -512,11 +512,10 @@ public class PDType1Font extends PDSimpleFont
             {
                 fontMatrix = DEFAULT_FONT_MATRIX;
             }
-            
+
             if (numbers != null && numbers.size() == 6)
             {
-                fontMatrix = new Matrix(
-                        numbers.get(0).floatValue(), numbers.get(1).floatValue(),
+                fontMatrix = new Matrix(numbers.get(0).floatValue(), numbers.get(1).floatValue(),
                         numbers.get(2).floatValue(), numbers.get(3).floatValue(),
                         numbers.get(4).floatValue(), numbers.get(5).floatValue());
             }

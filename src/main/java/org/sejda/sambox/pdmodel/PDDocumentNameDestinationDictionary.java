@@ -24,7 +24,7 @@ import org.sejda.sambox.cos.COSObjectable;
 import org.sejda.sambox.pdmodel.interactive.documentnavigation.destination.PDDestination;
 
 /**
- * This encapsulates the "dictionary of names and corresponding destinations" for the /Dest entry in the document
+ * This encapsulates the "dictionary of names and corresponding destinations" for the /Desta entry in the document
  * catalog.
  *
  * @author Tilman Hausherr
@@ -71,5 +71,4 @@ public class PDDocumentNameDestinationDictionary implements COSObjectable
         }
         return PDDestination.create(item);
     }
-
 }

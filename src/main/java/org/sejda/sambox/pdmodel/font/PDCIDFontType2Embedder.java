@@ -157,8 +157,7 @@ final class PDCIDFontType2Embedder extends TrueTypeEmbedder
         toUniWriter.writeTo(out);
         InputStream cMapStream = new ByteArrayInputStream(out.toByteArray());
 
-        PDStream stream = new PDStream(cMapStream, false);
-        stream.addCompression();
+        PDStream stream = new PDStream(cMapStream, COSName.FLATE_DECODE);
 
         // surrogate code points, requires PDF 1.5
         if (hasSurrogates)
@@ -234,9 +233,8 @@ final class PDCIDFontType2Embedder extends TrueTypeEmbedder
         }
 
         InputStream input = new ByteArrayInputStream(out.toByteArray());
-        PDStream stream = new PDStream(input, false);
-        stream.getStream().setInt(COSName.LENGTH1, stream.getByteArray().length);
-        stream.addCompression();
+        PDStream stream = new PDStream(input, COSName.FLATE_DECODE);
+        stream.getStream().setInt(COSName.LENGTH1, stream.toByteArray().length);
 
         cidFont.setItem(COSName.CID_TO_GID_MAP, stream);
     }
@@ -254,8 +252,7 @@ final class PDCIDFontType2Embedder extends TrueTypeEmbedder
         }
 
         InputStream input = new ByteArrayInputStream(bytes);
-        PDStream stream = new PDStream(input);
-        stream.addCompression();
+        PDStream stream = new PDStream(input, COSName.FLATE_DECODE);
 
         fontDescriptor.setCIDSet(stream);
     }

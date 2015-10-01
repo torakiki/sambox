@@ -27,11 +27,11 @@ import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 
-import junit.framework.TestCase;
-
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceRGB;
+
+import junit.framework.TestCase;
 /**
  * Unit tests for JPEGFactory
  *
@@ -56,7 +56,7 @@ public class JPEGFactoryTest extends TestCase
     {
         PDDocument document = new PDDocument();
         InputStream stream = JPEGFactoryTest.class.getResourceAsStream("jpeg.jpg");
-        PDImageXObject ximage = JPEGFactory.createFromStream(document, stream);
+        PDImageXObject ximage = JPEGFactory.createFromStream(stream);
         validate(ximage, 8, 344, 287, "jpg", PDDeviceRGB.INSTANCE.getName());
 
         doWritePDF(document, ximage, testResultsDir, "jpegrgbstream.pdf");
@@ -70,7 +70,7 @@ public class JPEGFactoryTest extends TestCase
     {
         PDDocument document = new PDDocument();
         InputStream stream = JPEGFactoryTest.class.getResourceAsStream("jpeg256.jpg");
-        PDImageXObject ximage = JPEGFactory.createFromStream(document, stream);
+        PDImageXObject ximage = JPEGFactory.createFromStream(stream);
         validate(ximage, 8, 344, 287, "jpg", PDDeviceGray.INSTANCE.getName());
 
         doWritePDF(document, ximage, testResultsDir, "jpeg256stream.pdf");
@@ -85,7 +85,7 @@ public class JPEGFactoryTest extends TestCase
         PDDocument document = new PDDocument();
         BufferedImage image = ImageIO.read(JPEGFactoryTest.class.getResourceAsStream("jpeg.jpg"));
         assertEquals(3, image.getColorModel().getNumComponents());
-        PDImageXObject ximage = JPEGFactory.createFromImage(document, image);
+        PDImageXObject ximage = JPEGFactory.createFromImage(image);
         validate(ximage, 8, 344, 287, "jpg", PDDeviceRGB.INSTANCE.getName());
 
         doWritePDF(document, ximage, testResultsDir, "jpegrgb.pdf");
@@ -100,7 +100,7 @@ public class JPEGFactoryTest extends TestCase
         PDDocument document = new PDDocument();
         BufferedImage image = ImageIO.read(JPEGFactoryTest.class.getResourceAsStream("jpeg256.jpg"));
         assertEquals(1, image.getColorModel().getNumComponents());
-        PDImageXObject ximage = JPEGFactory.createFromImage(document, image);
+        PDImageXObject ximage = JPEGFactory.createFromImage(image);
         validate(ximage, 8, 344, 287, "jpg", PDDeviceGray.INSTANCE.getName());
 
         doWritePDF(document, ximage, testResultsDir, "jpeg256.pdf");
@@ -141,7 +141,7 @@ public class JPEGFactoryTest extends TestCase
             }
         }
 
-        PDImageXObject ximage = JPEGFactory.createFromImage(document, argbImage);
+        PDImageXObject ximage = JPEGFactory.createFromImage(argbImage);
         validate(ximage, 8, width, height, "jpg", PDDeviceRGB.INSTANCE.getName());
         assertNotNull(ximage.getSoftMask());
         validate(ximage.getSoftMask(), 8, width, height, "jpg", PDDeviceGray.INSTANCE.getName());
@@ -185,7 +185,7 @@ public class JPEGFactoryTest extends TestCase
             }
         }
 
-        PDImageXObject ximage = JPEGFactory.createFromImage(document, argbImage);
+        PDImageXObject ximage = JPEGFactory.createFromImage(argbImage);
         validate(ximage, 8, width, height, "jpg", PDDeviceRGB.INSTANCE.getName());
         assertNotNull(ximage.getSoftMask());
         validate(ximage.getSoftMask(), 8, width, height, "jpg", PDDeviceGray.INSTANCE.getName());

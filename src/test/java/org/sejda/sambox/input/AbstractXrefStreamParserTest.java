@@ -44,7 +44,7 @@ public class AbstractXrefStreamParserTest
         Set<XrefEntry> found = new HashSet<>();
         AbstractXrefStreamParser victim = new AbstractXrefStreamParser(
                 new COSParser(inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-                        "/input/xref_stream.txt"))))
+"/sambox/xref_stream.txt"))))
         {
             @Override
             void onTrailerFound(COSDictionary trailer)
@@ -76,7 +76,7 @@ public class AbstractXrefStreamParserTest
         Set<XrefEntry> found = new HashSet<>();
         AbstractXrefStreamParser victim = new AbstractXrefStreamParser(new COSParser(
                 inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-                        "/input/xref_stream_no_index.txt"))))
+"/sambox/xref_stream_no_index.txt"))))
         {
             @Override
             void onTrailerFound(COSDictionary trailer)
@@ -101,7 +101,7 @@ public class AbstractXrefStreamParserTest
         Set<XrefEntry> found = new HashSet<>();
         AbstractXrefStreamParser victim = new AbstractXrefStreamParser(new COSParser(
                 inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-                        "/input/xref_stream_multiple_ranges.txt"))))
+"/sambox/xref_stream_multiple_ranges.txt"))))
         {
             @Override
             void onTrailerFound(COSDictionary trailer)

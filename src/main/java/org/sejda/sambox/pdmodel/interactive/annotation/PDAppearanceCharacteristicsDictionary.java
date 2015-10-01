@@ -22,7 +22,6 @@ import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSObjectable;
 import org.sejda.sambox.cos.COSStream;
-import org.sejda.sambox.pdmodel.common.PDStream;
 import org.sejda.sambox.pdmodel.graphics.color.PDColor;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceCMYK;
@@ -190,7 +189,7 @@ public class PDAppearanceCharacteristicsDictionary implements COSObjectable
         COSBase i = this.getCOSObject().getDictionaryObject("I");
         if (i instanceof COSStream)
         {
-            return new PDFormXObject(new PDStream((COSStream) i));
+            return new PDFormXObject((COSStream) i);
         }
         return null;
     }
@@ -205,7 +204,7 @@ public class PDAppearanceCharacteristicsDictionary implements COSObjectable
         COSBase i = this.getCOSObject().getDictionaryObject("RI");
         if (i instanceof COSStream)
         {
-            return new PDFormXObject(new PDStream((COSStream) i));
+            return new PDFormXObject((COSStream) i);
         }
         return null;
     }
@@ -220,7 +219,7 @@ public class PDAppearanceCharacteristicsDictionary implements COSObjectable
         COSBase i = this.getCOSObject().getDictionaryObject("IX");
         if (i instanceof COSStream)
         {
-            return new PDFormXObject(new PDStream((COSStream) i));
+            return new PDFormXObject((COSStream) i);
         }
         return null;
     }

@@ -16,12 +16,13 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
+import java.io.IOException;
+
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 
 /**
- * A scrollable list box. Contains several text items, one or more of which shall be selected as the
- * field value.
+ * A scrollable list box. Contains several text items, one or more of which shall be selected as the field value.
  * 
  * @author John Hewson
  */
@@ -36,7 +37,7 @@ public final class PDListBox extends PDChoice
     {
         super(acroForm);
     }
-    
+
     /**
      * Constructor.
      * 
@@ -74,5 +75,13 @@ public final class PDListBox extends PDChoice
         {
             getCOSObject().removeItem(COSName.TI);
         }
+    }
+
+    @Override
+    void constructAppearances() throws IOException
+    {
+        AppearanceGeneratorHelper apHelper;
+        apHelper = new AppearanceGeneratorHelper(this);
+        apHelper.setAppearanceValue("");
     }
 }

@@ -17,10 +17,11 @@
 package org.sejda.sambox.pdmodel.interactive.action;
 
 import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSObjectable;
+
 /**
- * This class represents a page object's dictionary of actions
- * that occur due to events.
+ * This class represents a page object's dictionary of actions that occur due to events.
  *
  * @author Ben Litchfield
  * @author Panagiotis Toumasis
@@ -42,7 +43,7 @@ public class PDPageAdditionalActions implements COSObjectable
      *
      * @param a The action dictionary.
      */
-    public PDPageAdditionalActions( COSDictionary a )
+    public PDPageAdditionalActions(COSDictionary a)
     {
         actions = a;
     }
@@ -59,64 +60,56 @@ public class PDPageAdditionalActions implements COSObjectable
     }
 
     /**
-     * This will get an action to be performed when the page
-     * is opened. This action is independent of any that may be
-     * defined by the OpenAction entry in the document catalog,
-     * and is executed after such an action.
+     * This will get an action to be performed when the page is opened. This action is independent of any that may be
+     * defined by the OpenAction entry in the document catalog, and is executed after such an action.
      *
      * @return The O entry of page object's additional actions dictionary.
      */
     public PDAction getO()
     {
-        COSDictionary o = (COSDictionary)actions.getDictionaryObject( "O" );
-        PDAction retval = null;
-        if( o != null )
+        COSDictionary o = (COSDictionary) actions.getDictionaryObject(COSName.O);
+        if (o != null)
         {
-            retval = PDActionFactory.createAction( o );
+            return PDActionFactory.createAction(o);
         }
-        return retval;
+        return null;
     }
 
     /**
-     * This will set an action to be performed when the page
-     * is opened. This action is independent of any that may be
-     * defined by the OpenAction entry in the document catalog,
-     * and is executed after such an action.
+     * This will set an action to be performed when the page is opened. This action is independent of any that may be
+     * defined by the OpenAction entry in the document catalog, and is executed after such an action.
      *
      * @param o The action to be performed.
      */
-    public void setO( PDAction o )
+    public void setO(PDAction o)
     {
-        actions.setItem( "O", o );
+        actions.setItem(COSName.O, o);
     }
 
     /**
-     * This will get an action to be performed when the page
-     * is closed. This action applies to the page being closed,
+     * This will get an action to be performed when the page is closed. This action applies to the page being closed,
      * and is executed before any other page opened.
      *
      * @return The C entry of page object's additional actions dictionary.
      */
     public PDAction getC()
     {
-        COSDictionary c = (COSDictionary)actions.getDictionaryObject( "C" );
-        PDAction retval = null;
-        if( c != null )
+        COSDictionary c = (COSDictionary) actions.getDictionaryObject(COSName.C);
+        if (c != null)
         {
-            retval = PDActionFactory.createAction( c );
+            return PDActionFactory.createAction(c);
         }
-        return retval;
+        return null;
     }
 
     /**
-     * This will set an action to be performed when the page
-     * is closed. This action applies to the page being closed,
+     * This will set an action to be performed when the page is closed. This action applies to the page being closed,
      * and is executed before any other page opened.
      *
      * @param c The action to be performed.
      */
-    public void setC( PDAction c )
+    public void setC(PDAction c)
     {
-        actions.setItem( "C", c );
+        actions.setItem(COSName.C, c);
     }
 }

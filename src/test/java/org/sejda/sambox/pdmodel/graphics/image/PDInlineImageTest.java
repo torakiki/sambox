@@ -24,8 +24,6 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import junit.framework.TestCase;
-
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
@@ -36,6 +34,8 @@ import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.PDPage;
 import org.sejda.sambox.pdmodel.PDPageContentStream;
 import org.sejda.sambox.rendering.PDFRenderer;
+
+import junit.framework.TestCase;
 
 /**
  * Unit tests for PDInlineImage
@@ -87,7 +87,6 @@ public class PDInlineImageTest extends TestCase
         assertEquals(width, inlineImage1.getWidth());
         assertEquals(height, inlineImage1.getHeight());
         assertEquals(1, inlineImage1.getBitsPerComponent());
-        assertEquals(data.length, inlineImage1.getStream().getLength());
 
         COSDictionary dict2 = new COSDictionary();
         dict2.addAll(dict);

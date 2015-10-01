@@ -29,7 +29,6 @@ import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.filter.Filter;
 import org.sejda.sambox.filter.FilterFactory;
-import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceColorSpace;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
@@ -49,12 +48,11 @@ public final class LosslessFactory
     /**
      * Creates a new lossless encoded Image XObject from a Buffered Image.
      *
-     * @param document the document where the image will be created
      * @param image the buffered image to embed
      * @return a new Image XObject
      * @throws IOException if something goes wrong
      */
-    public static PDImageXObject createFromImage(PDDocument document, BufferedImage image)
+    public static PDImageXObject createFromImage(BufferedImage image)
             throws IOException
     {
         int bpc;
@@ -103,11 +101,11 @@ public final class LosslessFactory
             }
         }
 
-        PDImageXObject pdImage = prepareImageXObject(document, bos.toByteArray(), 
+        PDImageXObject pdImage = prepareImageXObject(bos.toByteArray(), 
                 image.getWidth(), image.getHeight(), bpc, deviceColorSpace);
 
         // alpha -> soft mask
-        PDImage xAlpha = createAlphaFromARGBImage(document, image);
+        PDImage xAlpha = createAlphaFromARGBImage(image);
         if (xAlpha != null)
         {
             pdImage.getCOSStream().setItem(COSName.SMASK, xAlpha);
@@ -120,14 +118,13 @@ public final class LosslessFactory
      * Creates a grayscale Flate encoded PDImageXObject from the alpha channel
      * of an image.
      *
-     * @param document the document where the image will be created.
      * @param image an ARGB image.
      *
      * @return the alpha channel of an image as a grayscale image.
      *
      * @throws IOException if something goes wrong
      */
-    private static PDImageXObject createAlphaFromARGBImage(PDDocument document, BufferedImage image)
+    private static PDImageXObject createAlphaFromARGBImage(BufferedImage image)
             throws IOException
     {
         // this implementation makes the assumption that the raster uses 
@@ -144,7 +141,7 @@ public final class LosslessFactory
         if (alphaRaster == null)
         {
             // happens sometimes (PDFBOX-2654) despite colormodel claiming to have alpha
-            return createAlphaFromARGBImage2(document, image);
+            return createAlphaFromARGBImage2(image);
         }
 
         int[] pixels = alphaRaster.getPixels(0, 0,
@@ -183,14 +180,14 @@ public final class LosslessFactory
             }
         }
 
-        PDImageXObject pdImage = prepareImageXObject(document, bos.toByteArray(), 
+        PDImageXObject pdImage = prepareImageXObject(bos.toByteArray(), 
                 image.getWidth(), image.getHeight(), bpc, PDDeviceGray.INSTANCE);
 
         return pdImage;
     }
 
     // create alpha image the hard way: get the alpha through getRGB()
-    private static PDImageXObject createAlphaFromARGBImage2(PDDocument document, BufferedImage bi)
+    private static PDImageXObject createAlphaFromARGBImage2(BufferedImage bi)
             throws IOException
     {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -227,7 +224,7 @@ public final class LosslessFactory
             }
         }
 
-        PDImageXObject pdImage = prepareImageXObject(document, bos.toByteArray(), 
+        PDImageXObject pdImage = prepareImageXObject(bos.toByteArray(), 
                 bi.getWidth(), bi.getHeight(), bpc, PDDeviceGray.INSTANCE);
 
         return pdImage;
@@ -237,7 +234,6 @@ public final class LosslessFactory
      * Create a PDImageXObject while making a decision whether not to 
      * compress, use Flate filter only, or Flate and LZW filters.
      * 
-     * @param document The document.
      * @param byteArray array with data.
      * @param width the image width
      * @param height the image height
@@ -246,7 +242,7 @@ public final class LosslessFactory
      * @return the newly created PDImageXObject with the data compressed.
      * @throws IOException 
      */
-    private static PDImageXObject prepareImageXObject(PDDocument document, 
+    private static PDImageXObject prepareImageXObject(
             byte [] byteArray, int width, int height, int bitsPerComponent, 
             PDColorSpace initColorSpace) throws IOException
     {
@@ -256,7 +252,7 @@ public final class LosslessFactory
         filter.encode(new ByteArrayInputStream(byteArray), baos, new COSDictionary());
 
         ByteArrayInputStream filteredByteStream = new ByteArrayInputStream(baos.toByteArray());
-        return new PDImageXObject(document, filteredByteStream, COSName.FLATE_DECODE, 
+        return new PDImageXObject(filteredByteStream, COSName.FLATE_DECODE, 
                 width, height, bitsPerComponent, initColorSpace);
     }
 

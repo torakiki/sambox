@@ -33,8 +33,15 @@ public class SetTextRise extends OperatorProcessor
     @Override
     public void process(Operator operator, List<COSBase> arguments)
     {
-        COSNumber rise = (COSNumber)arguments.get(0);
-        context.getGraphicsState().getTextState().setRise( rise.floatValue() );
+        if (!arguments.isEmpty())
+        {
+            COSBase base = arguments.get(0);
+            if (base instanceof COSNumber)
+            {
+                context.getGraphicsState().getTextState().setRise(((COSNumber) base).floatValue());
+            }
+        }
+
     }
 
     @Override

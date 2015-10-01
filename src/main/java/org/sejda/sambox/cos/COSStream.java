@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.cos;
 
+import static java.util.Optional.ofNullable;
 import static org.sejda.io.SeekableSources.inMemorySeekableSourceFrom;
 
 import java.io.ByteArrayInputStream;
@@ -75,8 +76,8 @@ public class COSStream extends COSDictionary implements Closeable
      * @param startingPosition starting position of the stream data in the {@link SeekableSource}
      * @param length the length of the stream data
      */
-    public COSStream(COSDictionary dictionary, SeekableSource seekableSource,
-            long startingPosition, long length)
+    public COSStream(COSDictionary dictionary, SeekableSource seekableSource, long startingPosition,
+            long length)
     {
         super(dictionary);
         this.existing = new LazySeekableSourceViewHolder(seekableSource, startingPosition, length);
@@ -395,6 +396,22 @@ public class COSStream extends COSDictionary implements Closeable
     }
 
     /**
+     * Returns a new OutputStream for writing stream data, using and the given filters.
+     * 
+     * @param filters COSArray or COSName of filters to be used.
+     * @return OutputStream for un-encoded stream data.
+     * @throws IOException If the output stream could not be created.
+     */
+    public OutputStream createFilteredStream(COSBase filters)
+    {
+        if (filters != null)
+        {
+            setItem(COSName.FILTER, filters);
+        }
+        return createUnfilteredStream();
+    }
+
+    /**
      * set the filters to be applied to the stream.
      *
      * @param filters The filters to set on this stream.
@@ -489,6 +506,17 @@ public class COSStream extends COSDictionary implements Closeable
         });
     }
 
+    public boolean isEmpty() throws IOException
+    {
+        if (existing != null)
+        {
+            return existing.get().size() <= 0;
+        }
+        return ofNullable(filtered).map(f -> (f.length <= 0)).orElseGet(() -> {
+            return ofNullable(unfiltered).map(u -> (u.length <= 0)).orElse(true);
+        });
+    }
+
     /**
      * @return the contents of the stream as a text string. Text string as defined in Chap 7.9 of PDF 32000-1:2008.
      */
@@ -572,12 +600,9 @@ public class COSStream extends COSDictionary implements Closeable
         {
             if (view == null)
             {
-                SeekableSource source = Optional
-                        .ofNullable(this.sourceRef.get())
-                        .filter(SeekableSource::isOpen)
-                        .orElseThrow(
-                                () -> new IllegalStateException(
-                                        "The original SeekableSource has been closed"));
+                SeekableSource source = Optional.ofNullable(this.sourceRef.get())
+                        .filter(SeekableSource::isOpen).orElseThrow(() -> new IllegalStateException(
+                                "The original SeekableSource has been closed"));
                 view = source.view(startingPosition, length);
             }
             view.position(0);

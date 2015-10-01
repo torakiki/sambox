@@ -61,7 +61,6 @@ public class DictionaryEncoding extends Encoding
         }
         
         codeToName.putAll( this.baseEncoding.codeToName );
-        names.addAll( this.baseEncoding.names );
         applyDifferences();
     }
 
@@ -119,7 +118,6 @@ public class DictionaryEncoding extends Encoding
         baseEncoding = base;
 
         codeToName.putAll( baseEncoding.codeToName );
-        names.addAll( baseEncoding.names );
         applyDifferences();
     }
 

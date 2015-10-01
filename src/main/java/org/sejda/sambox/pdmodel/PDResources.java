@@ -31,6 +31,7 @@ import org.sejda.sambox.pdmodel.font.PDFont;
 import org.sejda.sambox.pdmodel.font.PDFontFactory;
 import org.sejda.sambox.pdmodel.graphics.PDXObject;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
+import org.sejda.sambox.pdmodel.graphics.color.PDPattern;
 import org.sejda.sambox.pdmodel.graphics.form.PDFormXObject;
 import org.sejda.sambox.pdmodel.graphics.image.PDImageXObject;
 import org.sejda.sambox.pdmodel.graphics.optionalcontent.PDOptionalContentGroup;
@@ -160,7 +161,8 @@ public final class PDResources implements COSObjectable
             colorSpace = PDColorSpace.create(name, this);
         }
 
-        if (cache != null)
+        // we can't cache PDPattern, because it holds page resources, see PDFBOX-2370
+        if (cache != null && !(colorSpace instanceof PDPattern))
         {
             cache.put(key, colorSpace);
         }
@@ -337,7 +339,8 @@ public final class PDResources implements COSObjectable
             xobject = PDXObject.createXObject(value.getCOSObject(), this);
         }
 
-        if (cache != null)
+        // we can't cache PDImageXObject, because it holds page resources, see PDFBOX-2370
+        if (cache != null && !(xobject instanceof PDImageXObject))
         {
             cache.put(key, xobject);
         }

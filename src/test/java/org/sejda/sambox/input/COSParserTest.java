@@ -310,7 +310,7 @@ public class COSParserTest
     public void nextStream() throws IOException
     {
         victim = new COSParser(inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-                "/input/stream.txt")));
+"/sambox/stream.txt")));
         COSDictionary streamDictionary = new COSDictionary();
         streamDictionary.setInt(COSName.LENGTH, 63);
         try (COSStream result = victim.nextStream(streamDictionary))
@@ -323,7 +323,7 @@ public class COSParserTest
     public void nextStreamNoLength() throws IOException
     {
         victim = new COSParser(inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-                "/input/stream.txt")));
+"/sambox/stream.txt")));
         COSDictionary streamDictionary = new COSDictionary();
         try (COSStream result = victim.nextStream(streamDictionary))
         {
@@ -335,7 +335,7 @@ public class COSParserTest
     public void nextStreamIgnoresSpacesAfterStreamKeyword() throws IOException
     {
         victim = new COSParser(inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-                "/input/stream_spaced.txt")));
+"/sambox/stream_spaced.txt")));
         COSDictionary streamDictionary = new COSDictionary();
         streamDictionary.setInt(COSName.LENGTH, 63);
         try (COSStream result = victim.nextStream(streamDictionary))
@@ -348,7 +348,7 @@ public class COSParserTest
     public void nextStreamMissingLineFeed() throws IOException
     {
         victim = new COSParser(inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-                "/input/stream_missing_linefeed.txt")));
+"/sambox/stream_missing_linefeed.txt")));
         COSDictionary streamDictionary = new COSDictionary();
         streamDictionary.setInt(COSName.LENGTH, 63);
         try (COSStream result = victim.nextStream(streamDictionary))
@@ -361,7 +361,7 @@ public class COSParserTest
     public void nextStreamCRLF() throws IOException
     {
         victim = new COSParser(inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-                "/input/stream_cr_lf.txt")));
+"/sambox/stream_cr_lf.txt")));
         COSDictionary streamDictionary = new COSDictionary();
         streamDictionary.setInt(COSName.LENGTH, 63);
         try (COSStream result = victim.nextStream(streamDictionary))
@@ -374,7 +374,7 @@ public class COSParserTest
     public void nextStreamCR() throws IOException
     {
         victim = new COSParser(inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-                "/input/stream_cr_alone.txt")));
+"/sambox/stream_cr_alone.txt")));
         COSDictionary streamDictionary = new COSDictionary();
         streamDictionary.setInt(COSName.LENGTH, 63);
         try (COSStream result = victim.nextStream(streamDictionary))
@@ -387,7 +387,7 @@ public class COSParserTest
     public void nextStreamEndobj() throws IOException
     {
         victim = new COSParser(inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-                "/input/stream_endobj.txt")));
+"/sambox/stream_endobj.txt")));
         COSDictionary streamDictionary = new COSDictionary();
         streamDictionary.setInt(COSName.LENGTH, 63);
         try (COSStream result = victim.nextStream(streamDictionary))
@@ -400,7 +400,7 @@ public class COSParserTest
     public void nextStreamInvalidLength() throws IOException
     {
         victim = new COSParser(inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-                "/input/stream_cr_alone.txt")));
+"/sambox/stream_cr_alone.txt")));
         COSDictionary streamDictionary = new COSDictionary();
         streamDictionary.setBoolean(COSName.LENGTH, false);
         victim.nextStream(streamDictionary);
@@ -410,7 +410,7 @@ public class COSParserTest
     public void nextStreamWrongLength() throws IOException
     {
         victim = new COSParser(inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-                "/input/stream.txt")));
+"/sambox/stream.txt")));
         COSDictionary streamDictionary = new COSDictionary();
         streamDictionary.setInt(COSName.LENGTH, 163);
         try (COSStream result = victim.nextStream(streamDictionary))
@@ -423,7 +423,7 @@ public class COSParserTest
     public void nextStreamNoLengthOnlyCRBeforeEndstream() throws IOException
     {
         victim = new COSParser(inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-                "/input/stream_cr_endstream.txt")));
+"/sambox/stream_cr_endstream.txt")));
         COSDictionary streamDictionary = new COSDictionary();
         try (COSStream result = victim.nextStream(streamDictionary))
         {
@@ -435,7 +435,7 @@ public class COSParserTest
     public void nextStreamNoLengthNoEOLBeforeEndstream() throws IOException
     {
         victim = new COSParser(inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-                "/input/stream_no_eol_before_endstream.txt")));
+"/sambox/stream_no_eol_before_endstream.txt")));
         COSDictionary streamDictionary = new COSDictionary();
         try (COSStream result = victim.nextStream(streamDictionary))
         {
@@ -447,7 +447,7 @@ public class COSParserTest
     public void nextStreamNoLengthCRLFBeforeEndstream() throws IOException
     {
         victim = new COSParser(inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-                "/input/stream_cr_lf_before_endstream.txt")));
+"/sambox/stream_cr_lf_before_endstream.txt")));
         COSDictionary streamDictionary = new COSDictionary();
         try (COSStream result = victim.nextStream(streamDictionary))
         {
@@ -459,7 +459,7 @@ public class COSParserTest
     public void nextStreamEndobjNoLength() throws IOException
     {
         victim = new COSParser(inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-                "/input/stream_endobj.txt")));
+"/sambox/stream_endobj.txt")));
         COSDictionary streamDictionary = new COSDictionary();
         try (COSStream result = victim.nextStream(streamDictionary))
         {
@@ -471,7 +471,7 @@ public class COSParserTest
     public void nextStreamTrunkated() throws IOException
     {
         victim = new COSParser(inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-                "/input/stream_trunkated.txt")));
+"/sambox/stream_trunkated.txt")));
         victim.nextStream(new COSDictionary());
     }
 
@@ -479,7 +479,7 @@ public class COSParserTest
     public void nextStreamEmpty() throws IOException
     {
         victim = new COSParser(inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-                "/input/stream_empty.txt")));
+"/sambox/stream_empty.txt")));
         COSDictionary streamDictionary = new COSDictionary();
         streamDictionary.setInt(COSName.LENGTH, 0);
         try (COSStream result = victim.nextStream(streamDictionary))

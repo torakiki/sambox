@@ -26,8 +26,7 @@ import org.sejda.sambox.pdmodel.PDPage;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 
 /**
- * Renders a PDF document to an AWT BufferedImage.
- * This class may be overridden in order to perform custom rendering.
+ * Renders a PDF document to an AWT BufferedImage. This class may be overridden in order to perform custom rendering.
  *
  * @author John Hewson
  */
@@ -38,6 +37,7 @@ public class PDFRenderer
 
     /**
      * Creates a new PDFRenderer.
+     * 
      * @param document the document to render
      */
     public PDFRenderer(PDDocument document)
@@ -47,6 +47,7 @@ public class PDFRenderer
 
     /**
      * Returns the given page as an RGB image at 72 DPI
+     * 
      * @param pageIndex the zero-based index of the page to be converted.
      * @return the rendered page image
      * @throws IOException if the PDF cannot be read
@@ -57,8 +58,8 @@ public class PDFRenderer
     }
 
     /**
-     * Returns the given page as an RGB image at the given scale.
-     * A scale of 1 will render at 72 DPI.
+     * Returns the given page as an RGB image at the given scale. A scale of 1 will render at 72 DPI.
+     * 
      * @param pageIndex the zero-based index of the page to be converted
      * @param scale the scaling factor, where 1 = 72 DPI
      * @return the rendered page image
@@ -71,6 +72,7 @@ public class PDFRenderer
 
     /**
      * Returns the given page as an RGB image at the given DPI.
+     * 
      * @param pageIndex the zero-based index of the page to be converted
      * @param dpi the DPI (dots per inch) to render at
      * @return the rendered page image
@@ -83,6 +85,7 @@ public class PDFRenderer
 
     /**
      * Returns the given page as an RGB image at the given DPI.
+     * 
      * @param pageIndex the zero-based index of the page to be converted
      * @param dpi the DPI (dots per inch) to render at
      * @param imageType the type of image to return
@@ -97,6 +100,7 @@ public class PDFRenderer
 
     /**
      * Returns the given page as an RGB or ARGB image at the given scale.
+     * 
      * @param pageIndex the zero-based index of the page to be converted
      * @param scale the scaling factor, where 1 = 72 DPI
      * @param imageType the type of image to return
@@ -128,7 +132,11 @@ public class PDFRenderer
 
         // use a transparent background if the imageType supports alpha
         Graphics2D g = image.createGraphics();
-        if (imageType != ImageType.ARGB)
+        if (imageType == ImageType.ARGB)
+        {
+            g.setBackground(new Color(0, 0, 0, 0));
+        }
+        else
         {
             g.setBackground(Color.WHITE);
         }
@@ -141,6 +149,7 @@ public class PDFRenderer
 
     /**
      * Renders a given page to an AWT Graphics2D instance.
+     * 
      * @param pageIndex the zero-based index of the page to be converted
      * @param graphics the Graphics2D on which to draw the page
      * @throws IOException if the PDF cannot be read
@@ -152,6 +161,7 @@ public class PDFRenderer
 
     /**
      * Renders a given page to an AWT Graphics2D instance.
+     * 
      * @param pageIndex the zero-based index of the page to be converted
      * @param graphics the Graphics2D on which to draw the page
      * @param scale the scale to draw the page at
@@ -163,12 +173,13 @@ public class PDFRenderer
         PDPage page = document.getPage(pageIndex);
         // TODO need width/wight calculations? should these be in PageDrawer?
         PDRectangle adjustedCropBox = page.getCropBox();
-        renderPage(page, graphics, (int)adjustedCropBox.getWidth(), (int)adjustedCropBox.getHeight(), scale, scale);
+        renderPage(page, graphics, (int) adjustedCropBox.getWidth(),
+                (int) adjustedCropBox.getHeight(), scale, scale);
     }
 
     // renders a page to the given graphics
     private void renderPage(PDPage page, Graphics2D graphics, int width, int height, float scaleX,
-                            float scaleY) throws IOException
+            float scaleY) throws IOException
     {
         graphics.clearRect(0, 0, width, height);
 
@@ -177,23 +188,23 @@ public class PDFRenderer
 
         PDRectangle cropBox = page.getCropBox();
         int rotationAngle = page.getRotation();
-        
+
         if (rotationAngle != 0)
         {
             float translateX = 0;
             float translateY = 0;
             switch (rotationAngle)
             {
-                case 90:
-                    translateX = cropBox.getHeight();
-                    break;
-                case 270:
-                    translateY = cropBox.getWidth();
-                    break;
-                case 180:
-                    translateX = cropBox.getWidth();
-                    translateY = cropBox.getHeight();
-                    break;
+            case 90:
+                translateX = cropBox.getHeight();
+                break;
+            case 270:
+                translateY = cropBox.getWidth();
+                break;
+            case 180:
+                translateX = cropBox.getWidth();
+                translateY = cropBox.getHeight();
+                break;
             }
             graphics.translate(translateX, translateY);
             graphics.rotate((float) Math.toRadians(rotationAngle));

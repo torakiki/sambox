@@ -17,6 +17,7 @@
 package org.sejda.sambox.pdmodel.interactive.action;
 
 import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSObjectable;
 /**
  * This represents a dictionary of actions that occur due to events.
@@ -63,7 +64,7 @@ public class PDAdditionalActions implements COSObjectable
      */
     public PDAction getF()
     {
-        return PDActionFactory.createAction( (COSDictionary)actions.getDictionaryObject("F" ) );
+        return PDActionFactory.createAction((COSDictionary) actions.getDictionaryObject(COSName.F));
     }
 
     /**
@@ -73,6 +74,6 @@ public class PDAdditionalActions implements COSObjectable
      */
     public void setF( PDAction action )
     {
-        actions.setItem( "F", action );
+        actions.setItem(COSName.F, action);
     }
 }

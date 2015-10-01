@@ -18,7 +18,6 @@
 package org.sejda.sambox.pdmodel.interactive.annotation;
 
 import org.sejda.sambox.cos.COSStream;
-import org.sejda.sambox.pdmodel.common.PDStream;
 import org.sejda.sambox.pdmodel.graphics.form.PDFormXObject;
 
 /**
@@ -42,8 +41,7 @@ public class PDAppearanceStream extends PDFormXObject
      */
     public PDAppearanceStream(COSStream stream)
     {
-        super(new PDStream(stream));
+        super(stream);
     }
-
 
 }

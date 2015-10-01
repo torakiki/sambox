@@ -26,8 +26,6 @@ import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.filter.ccitt.CCITTFaxG31DDecodeInputStream;
 import org.sejda.sambox.filter.ccitt.FillOrderChangeInputStream;
 import org.sejda.sambox.filter.ccitt.TIFFFaxDecoder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Decodes image data that has been encoded using either Group 3 or Group 4
@@ -39,8 +37,6 @@ import org.slf4j.LoggerFactory;
  */
 final class CCITTFaxFilter extends Filter
 {
-    private static final Logger LOG = LoggerFactory.getLogger(CCITTFaxFilter.class);
-
     @Override
     public DecodeResult decode(InputStream encoded, OutputStream decoded,
                                          COSDictionary parameters, int index) throws IOException
@@ -128,6 +124,7 @@ final class CCITTFaxFilter extends Filter
     @Override
     public void encode(InputStream input, OutputStream encoded, COSDictionary parameters)
     {
-        LOG.warn("CCITTFaxDecode.encode is not implemented yet, skipping this stream.");
+        throw new UnsupportedOperationException(
+                "CCITTFaxFilter encoding not implemented, use the CCITTFactory methods instead");
     }
 }
