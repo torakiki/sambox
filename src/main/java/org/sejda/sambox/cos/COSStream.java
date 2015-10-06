@@ -48,8 +48,7 @@ public class COSStream extends COSDictionary implements Closeable
 {
     private static final List<COSName> CAN_COMPRESS = Arrays.asList(COSName.ASCII_HEX_DECODE,
             COSName.ASCII_HEX_DECODE_ABBREVIATION, COSName.ASCII85_DECODE,
-            COSName.ASCII85_DECODE_ABBREVIATION, COSName.RUN_LENGTH_DECODE,
-            COSName.RUN_LENGTH_DECODE_ABBREVIATION);
+            COSName.ASCII85_DECODE_ABBREVIATION);
     private static final Logger LOG = LoggerFactory.getLogger(COSStream.class);
     private LazySeekableSourceViewHolder existing;
     private byte[] filtered;

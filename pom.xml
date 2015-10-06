@@ -5,7 +5,7 @@
 	<artifactId>sambox</artifactId>
 	<packaging>jar</packaging>
 	<name>sambox</name>
-	<version>1.0.0.M5-SNAPSHOT</version>
+	<version>1.0.0.M6-SNAPSHOT</version>
 
 	<description>An Apache PDFBox fork intended to be used as PDF processor for Sejda and PDFsam related projects</description>
 	<url>http://www.sejda.org</url>
@@ -204,7 +204,7 @@
 		<dependency>
 			<groupId>org.sejda</groupId>
 			<artifactId>sejda-io</artifactId>
-			<version>1.0.0.M3</version>
+			<version>1.0.0.M4-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
