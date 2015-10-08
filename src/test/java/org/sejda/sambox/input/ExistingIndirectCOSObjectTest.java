@@ -67,7 +67,7 @@ public class ExistingIndirectCOSObjectTest
         when(provider.get(key)).thenReturn(value);
         assertEquals(value, victim.getCOSObject());
         assertEquals(value, victim.getCOSObject());
-        verify(provider).get(key);
+        verify(provider, times(2)).get(key);
     }
 
     @Test

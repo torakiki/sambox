@@ -35,7 +35,6 @@ import org.sejda.sambox.cos.DisposableCOSObject;
 public class ExistingIndirectCOSObject extends COSBase implements DisposableCOSObject
 {
 
-    private COSBase baseObject;
     private COSObjectKey key;
     private IndirectObjectsProvider provider;
     private String id;
@@ -45,18 +44,13 @@ public class ExistingIndirectCOSObject extends COSBase implements DisposableCOSO
         this.key = key;
         this.provider = provider;
         this.id = String.format("%d %d %s", key.getNumber(), key.getGeneration(), provider.id());
-        ;
     }
 
     @Override
     public COSBase getCOSObject()
     {
-        // TODO multi thread?
-        if (baseObject == null)
-        {
-            baseObject = Optional.ofNullable(provider.get(key)).orElse(COSNull.NULL);
-            baseObject.idIfAbsent(this.id());
-        }
+        COSBase baseObject = Optional.ofNullable(provider.get(key)).orElse(COSNull.NULL);
+        baseObject.idIfAbsent(this.id());
         return baseObject;
     }
 
@@ -64,7 +58,6 @@ public class ExistingIndirectCOSObject extends COSBase implements DisposableCOSO
     public void releaseCOSObject()
     {
         provider.release(key);
-        baseObject = null;
     }
 
     @Override
