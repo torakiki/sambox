@@ -135,7 +135,7 @@ public class COSStream extends COSDictionary implements Closeable
     {
         if (getFilters() != null)
         {
-            if (filtered == null)
+            if (filtered == null && unfiltered != null)
             {
                 doEncode();
             }
@@ -326,7 +326,6 @@ public class COSStream extends COSDictionary implements Closeable
      */
     private void doEncode() throws IOException
     {
-
         COSBase filters = getFilters();
         if (filters instanceof COSName)
         {
