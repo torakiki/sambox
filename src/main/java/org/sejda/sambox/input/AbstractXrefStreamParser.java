@@ -127,7 +127,7 @@ abstract class AbstractXrefStreamParser
                 Long objectId = objectIds.next();
                 byte[] currLine = new byte[lineSize];
                 stream.read(currLine);
-                int type = 0;
+                int type = (w0 == 0) ? 1 : 0;
                 int i = 0;
                 /*
                  * Grabs the number of bytes specified for the first column in the W array and stores it.

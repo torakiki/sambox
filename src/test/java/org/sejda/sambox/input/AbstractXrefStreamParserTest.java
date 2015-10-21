@@ -43,8 +43,8 @@ public class AbstractXrefStreamParserTest
     {
         Set<XrefEntry> found = new HashSet<>();
         AbstractXrefStreamParser victim = new AbstractXrefStreamParser(
-                new COSParser(inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-"/sambox/xref_stream.txt"))))
+                new COSParser(inMemorySeekableSourceFrom(
+                        getClass().getResourceAsStream("/sambox/xref_stream.txt"))))
         {
             @Override
             void onTrailerFound(COSDictionary trailer)
@@ -71,12 +71,38 @@ public class AbstractXrefStreamParserTest
     }
 
     @Test
+    public void parseDefaultW0() throws IOException
+    {
+        Set<XrefEntry> found = new HashSet<>();
+        AbstractXrefStreamParser victim = new AbstractXrefStreamParser(
+                new COSParser(inMemorySeekableSourceFrom(
+                        getClass().getResourceAsStream("/sambox/xref_stream_no_w0.txt"))))
+        {
+            @Override
+            void onTrailerFound(COSDictionary trailer)
+            {
+                assertNotNull(trailer);
+            }
+
+            @Override
+            void onEntryFound(XrefEntry entry)
+            {
+                assertNotNull(entry);
+                assertEquals(XrefType.IN_USE, entry.getType());
+                found.add(entry);
+            }
+        };
+        victim.parse(17);
+        assertEquals(10, found.size());
+    }
+
+    @Test
     public void parseNoIdex() throws IOException
     {
         Set<XrefEntry> found = new HashSet<>();
-        AbstractXrefStreamParser victim = new AbstractXrefStreamParser(new COSParser(
-                inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-"/sambox/xref_stream_no_index.txt"))))
+        AbstractXrefStreamParser victim = new AbstractXrefStreamParser(
+                new COSParser(inMemorySeekableSourceFrom(
+                        getClass().getResourceAsStream("/sambox/xref_stream_no_index.txt"))))
         {
             @Override
             void onTrailerFound(COSDictionary trailer)
@@ -99,9 +125,9 @@ public class AbstractXrefStreamParserTest
     public void parseRanges() throws IOException
     {
         Set<XrefEntry> found = new HashSet<>();
-        AbstractXrefStreamParser victim = new AbstractXrefStreamParser(new COSParser(
-                inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-"/sambox/xref_stream_multiple_ranges.txt"))))
+        AbstractXrefStreamParser victim = new AbstractXrefStreamParser(
+                new COSParser(inMemorySeekableSourceFrom(
+                        getClass().getResourceAsStream("/sambox/xref_stream_multiple_ranges.txt"))))
         {
             @Override
             void onTrailerFound(COSDictionary trailer)

@@ -123,7 +123,7 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
      */
     private List<COSDictionary> getKids(COSDictionary node)
     {
-        List<COSDictionary> result = new ArrayList<COSDictionary>();
+        List<COSDictionary> result = new ArrayList<>();
 
         COSArray kids = (COSArray) node.getDictionaryObject(COSName.KIDS);
         if (kids == null)
@@ -135,7 +135,8 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
         for (int i = 0, size = kids.size(); i < size; i++)
         {
             // TODO investigate this, does it load? Should it load?
-            if(kids.getObject(i) != null) {
+            if (kids.getObject(i) != null)
+            {
                 result.add((COSDictionary) kids.getObject(i).getCOSObject());
             }
         }
@@ -148,7 +149,7 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
      */
     private final class PageIterator implements Iterator<PDPage>
     {
-        private final Queue<COSDictionary> queue = new ArrayDeque<COSDictionary>();
+        private final Queue<COSDictionary> queue = new ArrayDeque<>();
 
         private PageIterator(COSDictionary node)
         {
@@ -250,10 +251,7 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
                             // it's this kid
                             return get(pageNum, kid, encountered);
                         }
-                        else
-                        {
-                            encountered += kidCount;
-                        }
+                        encountered += kidCount;
                     }
                     else
                     {
@@ -269,22 +267,13 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
 
                 throw new IllegalStateException();
             }
-            else
-            {
-                throw new IndexOutOfBoundsException("Index out of bounds: " + pageNum);
-            }
+            throw new IndexOutOfBoundsException("Index out of bounds: " + pageNum);
         }
-        else
+        if (encountered == pageNum)
         {
-            if (encountered == pageNum)
-            {
-                return node;
-            }
-            else
-            {
-                throw new IllegalStateException();
-            }
+            return node;
         }
+        throw new IllegalStateException();
     }
 
     /**

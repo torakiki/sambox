@@ -1,0 +1,13 @@
+something .....
+
+11 0 obj
+<< /Type /XRef
+/Index [2 10] 
+/Size 10
+/W [0 2 1] 
+/Filter /ASCIIHexDecode 
+>>
+stream
+0E8A 00 0002 00 0002 01 0002 02 0002 03 0002 04 0002 05 0002 06 0002 07 1323 00>
+endstream
+endobj
