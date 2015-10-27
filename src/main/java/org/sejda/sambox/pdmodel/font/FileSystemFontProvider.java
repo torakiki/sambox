@@ -54,8 +54,8 @@ import org.slf4j.LoggerFactory;
 final class FileSystemFontProvider extends FontProvider
 {
     private static final Logger LOG = LoggerFactory.getLogger(FileSystemFontProvider.class);
-    
-    private final List<FSFontInfo> fontInfoList = new ArrayList<FSFontInfo>();
+
+    private final List<FSFontInfo> fontInfoList = new ArrayList<>();
     private final FontCache cache;
 
     private static class FSFontInfo extends FontInfo implements Serializable
@@ -73,9 +73,9 @@ final class FileSystemFontProvider extends FontProvider
         private transient FileSystemFontProvider parent;
 
         private FSFontInfo(File file, FontFormat format, String postScriptName,
-                           CIDSystemInfo cidSystemInfo, int usWeightClass, int sFamilyClass,
-                           int ulCodePageRange1, int ulCodePageRange2, int macStyle, byte[] panose,
-                           FileSystemFontProvider parent)
+                CIDSystemInfo cidSystemInfo, int usWeightClass, int sFamilyClass,
+                int ulCodePageRange1, int ulCodePageRange2, int macStyle, byte[] panose,
+                FileSystemFontProvider parent)
         {
             this.file = file;
             this.format = format;
@@ -121,10 +121,17 @@ final class FileSystemFontProvider extends FontProvider
                 FontBoxFont font;
                 switch (format)
                 {
-                    case PFB: font = parent.getType1Font(postScriptName, file); break;
-                    case TTF: font = parent.getTrueTypeFont(postScriptName, file); break;
-                    case OTF: font = parent.getOTFFont(postScriptName, file); break;
-                    default: throw new RuntimeException("can't happen");
+                case PFB:
+                    font = parent.getType1Font(postScriptName, file);
+                    break;
+                case TTF:
+                    font = parent.getTrueTypeFont(postScriptName, file);
+                    break;
+                case OTF:
+                    font = parent.getOTFFont(postScriptName, file);
+                    break;
+                default:
+                    throw new RuntimeException("can't happen");
                 }
                 parent.cache.addFont(this, font);
                 return font;
@@ -210,7 +217,7 @@ final class FileSystemFontProvider extends FontProvider
         {
             LOG.trace("Found " + files.size() + " fonts on the local system");
         }
-        
+
         // load cached FontInfo objects
         List<FSFontInfo> cachedInfos = loadCache(files);
         if (cachedInfos != null && cachedInfos.size() > 0)
@@ -224,20 +231,20 @@ final class FileSystemFontProvider extends FontProvider
             saveCache();
         }
     }
-    
+
     private void scanFonts(List<File> files)
     {
         for (File file : files)
         {
             try
             {
-                if (file.getPath().toLowerCase().endsWith(".ttf") ||
-                        file.getPath().toLowerCase().endsWith(".otf"))
+                if (file.getPath().toLowerCase().endsWith(".ttf")
+                        || file.getPath().toLowerCase().endsWith(".otf"))
                 {
                     addTrueTypeFont(file);
                 }
-                else if (file.getPath().toLowerCase().endsWith(".ttc") ||
-                        file.getPath().toLowerCase().endsWith(".otc"))
+                else if (file.getPath().toLowerCase().endsWith(".ttc")
+                        || file.getPath().toLowerCase().endsWith(".otc"))
                 {
                     addTrueTypeCollection(file);
                 }
@@ -252,7 +259,7 @@ final class FileSystemFontProvider extends FontProvider
             }
         }
     }
-    
+
     private void saveCache()
     {
         // Get the preferences database for this package.
@@ -263,11 +270,19 @@ final class FileSystemFontProvider extends FontProvider
         {
             for (FSFontInfo fontInfo : fontInfoList)
             {
+                String path = fontInfo.file.getAbsolutePath();
+                // PDFBOX-3014: do not cache ttc files because file:font is a 1:N relationship
+                if (path.endsWith(".ttc"))
+                {
+                    // remove .ttc files from older versions
+                    prefs.remove(path);
+                    continue;
+                }
                 ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
                 ObjectOutputStream objectOut = new ObjectOutputStream(byteOut);
                 // write it to the stream
                 objectOut.writeObject(fontInfo);
-                prefs.putByteArray(fontInfo.file.getAbsolutePath(), byteOut.toByteArray());
+                prefs.putByteArray(path, byteOut.toByteArray());
             }
         }
         catch (IOException e)
@@ -276,7 +291,7 @@ final class FileSystemFontProvider extends FontProvider
         }
         LOG.warn("Finished building font cache, found " + fontInfoList.size() + " fonts");
     }
-    
+
     private List<FSFontInfo> loadCache(List<File> files)
     {
         // Get the preferences database for this package.
@@ -295,7 +310,7 @@ final class FileSystemFontProvider extends FontProvider
                     Object object = objectIn.readObject();
                     if (object instanceof FSFontInfo)
                     {
-                        FSFontInfo info = (FSFontInfo)object;
+                        FSFontInfo info = (FSFontInfo) object;
                         info.parent = this;
                         results.add(info);
                     }
@@ -397,14 +412,14 @@ final class FileSystemFontProvider extends FontProvider
                 int ulCodePageRange1 = 0;
                 int ulCodePageRange2 = 0;
                 byte[] panose = null;
-                
+
                 // Apple's AAT fonts don't have an OS/2 table
                 if (ttf.getOS2Windows() != null)
                 {
                     sFamilyClass = ttf.getOS2Windows().getFamilyClass();
                     usWeightClass = ttf.getOS2Windows().getWeightClass();
-                    ulCodePageRange1 = (int)ttf.getOS2Windows().getCodePageRange1();
-                    ulCodePageRange2 = (int)ttf.getOS2Windows().getCodePageRange2();
+                    ulCodePageRange1 = (int) ttf.getOS2Windows().getCodePageRange1();
+                    ulCodePageRange2 = (int) ttf.getOS2Windows().getCodePageRange2();
                     panose = ttf.getOS2Windows().getPanose();
                 }
 
@@ -415,16 +430,16 @@ final class FileSystemFontProvider extends FontProvider
                     return;
                 }
                 int macStyle = ttf.getHeader().getMacStyle();
-                
+
                 String format;
-                if (ttf instanceof OpenTypeFont && ((OpenTypeFont)ttf).isPostScript())
+                if (ttf instanceof OpenTypeFont && ((OpenTypeFont) ttf).isPostScript())
                 {
                     format = "OTF";
-                    CFFFont cff = ((OpenTypeFont)ttf).getCFF().getFont();
+                    CFFFont cff = ((OpenTypeFont) ttf).getCFF().getFont();
                     CIDSystemInfo ros = null;
                     if (cff instanceof CFFCIDFont)
                     {
-                        CFFCIDFont cidFont = (CFFCIDFont)cff;
+                        CFFCIDFont cidFont = (CFFCIDFont) cff;
                         String registry = cidFont.getRegistry();
                         String ordering = cidFont.getOrdering();
                         int supplement = cidFont.getSupplement();
@@ -446,7 +461,7 @@ final class FileSystemFontProvider extends FontProvider
                         int supplementVersion = bytes[140] << 8 & bytes[141];
                         ros = new CIDSystemInfo(registryName, orderName, supplementVersion);
                     }
-                    
+
                     format = "TTF";
                     fontInfoList.add(new FSFontInfo(file, FontFormat.TTF, ttf.getName(), ros,
                             usWeightClass, sFamilyClass, ulCodePageRange1, ulCodePageRange2,
@@ -458,9 +473,8 @@ final class FileSystemFontProvider extends FontProvider
                     NamingTable name = ttf.getNaming();
                     if (name != null)
                     {
-                        LOG.trace(format +": '" + name.getPostScriptName() + "' / '" +
-                                  name.getFontFamily() + "' / '" +
-                                  name.getFontSubFamily() + "'");
+                        LOG.trace(format + ": '" + name.getPostScriptName() + "' / '"
+                                + name.getFontFamily() + "' / '" + name.getFontSubFamily() + "'");
                     }
                 }
             }
@@ -491,13 +505,13 @@ final class FileSystemFontProvider extends FontProvider
         try
         {
             Type1Font type1 = Type1Font.createWithPFB(input);
-            fontInfoList.add(new FSFontInfo(pfbFile, FontFormat.PFB, type1.getName(),
-                                            null, -1, -1, 0, 0, -1, null, this));
+            fontInfoList.add(new FSFontInfo(pfbFile, FontFormat.PFB, type1.getName(), null, -1, -1,
+                    0, 0, -1, null, this));
 
             if (LOG.isTraceEnabled())
             {
-                LOG.trace("PFB: '" + type1.getName() + "' / '" + type1.getFamilyName() + "' / '" +
-                        type1.getWeight() + "'");
+                LOG.trace("PFB: '" + type1.getName() + "' / '" + type1.getFamilyName() + "' / '"
+                        + type1.getWeight() + "'");
             }
         }
         catch (IOException e)
@@ -558,7 +572,7 @@ final class FileSystemFontProvider extends FontProvider
     {
         try
         {
-            // todo JH: we don't yet support loading CFF fonts from OTC collections 
+            // todo JH: we don't yet support loading CFF fonts from OTC collections
             OTFParser parser = new OTFParser(false, true);
             OpenTypeFont otf = parser.parse(file);
 

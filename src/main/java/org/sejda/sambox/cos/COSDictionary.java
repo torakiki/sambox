@@ -1252,7 +1252,8 @@ public class COSDictionary extends COSBase
     @Override
     public String toString()
     {
-        StringBuilder retVal = new StringBuilder("COSDictionary{");
+        StringBuilder retVal = new StringBuilder(getClass().getSimpleName());
+        retVal.append("{");
         for (COSName key : items.keySet())
         {
             retVal.append("(");

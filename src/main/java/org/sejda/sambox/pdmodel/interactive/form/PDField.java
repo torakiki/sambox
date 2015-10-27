@@ -16,12 +16,16 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
+import java.io.IOException;
+import java.util.List;
+
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.common.PDDictionaryWrapper;
 import org.sejda.sambox.pdmodel.interactive.action.PDFormFieldAdditionalActions;
+import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
 
 /**
  * A field in an interactive form.
@@ -109,6 +113,25 @@ public abstract class PDField extends PDDictionaryWrapper
      * @return A non-null string.
      */
     public abstract String getValueAsString();
+
+    /**
+     * Sets the value of the field.
+     *
+     * @param value the new field value.
+     * 
+     * @throws IOException if the value could not be set
+     */
+    public abstract void setValue(String value) throws IOException;
+
+    /**
+     * Returns the widget annotations associated with this field.
+     * 
+     * For {@link PDNonTerminalField} the list will be empty as non terminal fields have no visual representation in the
+     * form.
+     * 
+     * @return A non-null string.
+     */
+    public abstract List<PDAnnotationWidget> getWidgets();
 
     /**
      * sets the field to be read-only.

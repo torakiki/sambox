@@ -52,7 +52,6 @@ import org.sejda.sambox.pdmodel.graphics.blend.SoftMaskPaint;
 import org.sejda.sambox.pdmodel.graphics.color.PDColor;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
 import org.sejda.sambox.pdmodel.graphics.color.PDPattern;
-import org.sejda.sambox.pdmodel.graphics.form.PDFormXObject;
 import org.sejda.sambox.pdmodel.graphics.form.PDTransparencyGroup;
 import org.sejda.sambox.pdmodel.graphics.image.PDImage;
 import org.sejda.sambox.pdmodel.graphics.pattern.PDAbstractPattern;
@@ -898,7 +897,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         /**
          * Creates a buffered image for a transparency group result.
          */
-        private TransparencyGroup(PDFormXObject form, boolean isSoftMask) throws IOException
+        private TransparencyGroup(PDTransparencyGroup form, boolean isSoftMask) throws IOException
         {
             Graphics2D g2dOriginal = graphics;
             Area lastClipOriginal = lastClip;

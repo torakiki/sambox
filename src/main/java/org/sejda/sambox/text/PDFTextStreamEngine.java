@@ -122,7 +122,7 @@ class PDFTextStreamEngine extends PDFStreamEngine
      */
     @Override
     protected void showGlyph(Matrix textRenderingMatrix, PDFont font, int code, String unicode,
-                             Vector displacement) throws IOException
+            Vector displacement) throws IOException
     {
         //
         // legacy calculations which were previously in PDFStreamEngine
@@ -168,8 +168,9 @@ class PDFTextStreamEngine extends PDFStreamEngine
         // saved).
 
         float fontSizeText = getGraphicsState().getTextState().getFontSize();
-        float horizontalScalingText = getGraphicsState().getTextState().getHorizontalScaling()/100f;
-        //Matrix ctm = getGraphicsState().getCurrentTransformationMatrix();
+        float horizontalScalingText = getGraphicsState().getTextState().getHorizontalScaling()
+                / 100f;
+        // Matrix ctm = getGraphicsState().getCurrentTransformationMatrix();
 
         float glyphSpaceToTextSpaceFactor = 1 / 1000f;
         if (font instanceof PDType3Font)
@@ -202,8 +203,8 @@ class PDFTextStreamEngine extends PDFStreamEngine
         }
 
         // the space width has to be transformed into display units
-        float spaceWidthDisplay = spaceWidthText * fontSizeText * horizontalScalingText *
-                textRenderingMatrix.getScalingFactorX()  * ctm.getScalingFactorX();
+        float spaceWidthDisplay = spaceWidthText * fontSizeText * horizontalScalingText
+                * textRenderingMatrix.getScalingFactorX();
 
         // use our additional glyph list for Unicode mapping
         unicode = font.toUnicode(code, glyphList);
@@ -227,15 +228,14 @@ class PDFTextStreamEngine extends PDFStreamEngine
         }
 
         processTextPosition(new TextPosition(pageRotation, pageSize.getWidth(),
-                pageSize.getHeight(), textRenderingMatrix, nextX, nextY,
-                dyDisplay, dxDisplay,
-                spaceWidthDisplay, unicode, new int[] { code } , font, fontSize,
-                (int)(fontSize * textRenderingMatrix.getScalingFactorX())));
+                pageSize.getHeight(), textRenderingMatrix, nextX, nextY, dyDisplay, dxDisplay,
+                spaceWidthDisplay, unicode, new int[] { code }, font, fontSize,
+                (int) (fontSize * textRenderingMatrix.getScalingFactorX())));
     }
 
     /**
-     * A method provided as an event interface to allow a subclass to perform some specific
-     * functionality when text needs to be processed.
+     * A method provided as an event interface to allow a subclass to perform some specific functionality when text
+     * needs to be processed.
      *
      * @param text The text to be processed.
      */

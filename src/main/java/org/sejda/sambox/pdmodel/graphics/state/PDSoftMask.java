@@ -27,7 +27,6 @@ import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSObjectable;
 import org.sejda.sambox.pdmodel.common.function.PDFunction;
 import org.sejda.sambox.pdmodel.graphics.PDXObject;
-import org.sejda.sambox.pdmodel.graphics.form.PDFormXObject;
 import org.sejda.sambox.pdmodel.graphics.form.PDTransparencyGroup;
 
 /**
@@ -105,7 +104,7 @@ public final class PDSoftMask implements COSObjectable
      * @return form containing the transparency group
      * @throws IOException
      */
-    public PDFormXObject getGroup() throws IOException
+    public PDTransparencyGroup getGroup() throws IOException
     {
         if (group == null)
         {
@@ -132,6 +131,8 @@ public final class PDSoftMask implements COSObjectable
 
     /**
      * Returns the transfer function.
+     * 
+     * @throws IOException If we are unable to create the PDFunction object.
      */
     public PDFunction getTransferFunction() throws IOException
     {

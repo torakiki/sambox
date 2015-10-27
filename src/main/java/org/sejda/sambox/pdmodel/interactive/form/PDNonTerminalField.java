@@ -18,7 +18,9 @@ package org.sejda.sambox.pdmodel.interactive.form;
 
 import static java.util.Objects.nonNull;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.sejda.sambox.cos.COSArray;
@@ -28,6 +30,7 @@ import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSNull;
+import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
 
 /**
  * A non terminal field in an interactive form.
@@ -201,6 +204,20 @@ public class PDNonTerminalField extends PDField
     }
 
     /**
+     * Sets the plain text value of this field.
+     * 
+     * @param value Plain text
+     * @throws IOException if the value could not be set
+     */
+    @Override
+    public void setValue(String value)
+    {
+        getCOSObject().setString(COSName.V, value);
+        // todo: propagate change event to children?
+        // todo: construct appearances of children?
+    }
+
+    /**
      * Returns the default value of this field. This may be of any kind which is valid for this field's children.
      *
      * <p>
@@ -222,6 +239,12 @@ public class PDNonTerminalField extends PDField
     public void setDefaultValue(COSBase value)
     {
         getCOSObject().setItem(COSName.V, value);
+    }
+
+    @Override
+    public List<PDAnnotationWidget> getWidgets()
+    {
+        return Collections.emptyList();
     }
 
     @Override

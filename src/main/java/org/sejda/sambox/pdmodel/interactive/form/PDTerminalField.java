@@ -103,6 +103,7 @@ public abstract class PDTerminalField extends PDField
      * 
      * @return The list of widget annotations.
      */
+    @Override
     public List<PDAnnotationWidget> getWidgets()
     {
         List<PDAnnotationWidget> widgets = new ArrayList<>();

@@ -33,8 +33,6 @@ import org.sejda.sambox.pdmodel.font.encoding.Encoding;
 import org.sejda.sambox.pdmodel.font.encoding.GlyphList;
 import org.sejda.sambox.util.Matrix;
 import org.sejda.sambox.util.Vector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * A PostScript Type 3 Font.
@@ -43,7 +41,6 @@ import org.slf4j.LoggerFactory;
  */
 public class PDType3Font extends PDSimpleFont
 {
-    private static final Logger LOG = LoggerFactory.getLogger(PDType3Font.class);
 
     private PDResources resources;
     private COSDictionary charProcs;
@@ -128,8 +125,6 @@ public class PDType3Font extends PDSimpleFont
         {
             return fd.getMissingWidth();
         }
-        LOG.warn(
-                "No width for glyph " + code + " in font " + getName() + ", using width from font");
         return getWidthFromFont(code);
     }
 
@@ -139,7 +134,6 @@ public class PDType3Font extends PDSimpleFont
         PDType3CharProc charProc = getCharProc(code);
         if (charProc == null)
         {
-            LOG.warn("No CharProc for glyph " + code + " found, returning 0");
             return 0;
         }
         return charProc.getWidth();
