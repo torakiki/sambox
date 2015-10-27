@@ -28,14 +28,14 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.Iterator;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.interactive.documentnavigation.destination.PDPageDestination;
 import org.sejda.sambox.pdmodel.interactive.documentnavigation.outline.PDDocumentOutline;
 import org.sejda.sambox.pdmodel.interactive.documentnavigation.outline.PDOutlineItem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -80,10 +80,7 @@ import junit.framework.TestSuite;
 public class TestTextStripper extends TestCase
 {
 
-    /**
-     * Logger instance.
-     */
-    private static final Log log = LogFactory.getLog(TestTextStripper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TestTextStripper.class);
 
     private boolean bFail = false;
     private PDFTextStripper stripper = null;
@@ -143,7 +140,7 @@ public class TestTextStripper extends TestCase
                 if (expectedArray[expectedIndex] != actualArray[actualIndex])
                 {
                     equals = false;
-                    log.warn("Lines differ at index" + " expected:" + expectedIndex + "-"
+                    LOG.warn("Lines differ at index" + " expected:" + expectedIndex + "-"
                             + (int) expectedArray[expectedIndex] + " actual:" + actualIndex + "-"
                             + (int) actualArray[actualIndex]);
                     break;
@@ -158,12 +155,12 @@ public class TestTextStripper extends TestCase
                 if (expectedIndex != expectedArray.length)
                 {
                     equals = false;
-                    log.warn("Expected line is longer at:" + expectedIndex);
+                    LOG.warn("Expected line is longer at:" + expectedIndex);
                 }
                 if (actualIndex != actualArray.length)
                 {
                     equals = false;
-                    log.warn("Actual line is longer at:" + actualIndex);
+                    LOG.warn("Actual line is longer at:" + actualIndex);
                 }
             }
         }
@@ -209,11 +206,11 @@ public class TestTextStripper extends TestCase
 
         if (bSort)
         {
-            log.info("Preparing to parse " + inFile.getName() + " for sorted test");
+            LOG.info("Preparing to parse " + inFile.getName() + " for sorted test");
         }
         else
         {
-            log.info("Preparing to parse " + inFile.getName() + " for standard test");
+            LOG.info("Preparing to parse " + inFile.getName() + " for standard test");
         }
 
         if (!outDir.exists())
@@ -267,8 +264,8 @@ public class TestTextStripper extends TestCase
 
             if (bLogResult)
             {
-                log.info("Text for " + inFile.getName() + ":");
-                log.info(stripper.getText(document));
+                LOG.info("Text for " + inFile.getName() + ":");
+                LOG.info(stripper.getText(document));
             }
 
             if (!expectedFile.exists())
