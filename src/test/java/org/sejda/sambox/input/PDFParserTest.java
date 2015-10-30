@@ -38,15 +38,15 @@ public class PDFParserTest
     @Test(expected = IOException.class)
     public void notAPdf() throws IOException
     {
-        PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-"/sambox/not_a_pdf.pdf")));
+        PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/not_a_pdf.pdf")));
     }
 
     @Test
     public void notEncryted() throws IOException
     {
-        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(getClass()
-.getResourceAsStream("/sambox/simple_test.pdf"))))
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/simple_test.pdf"))))
         {
             assertNotNull(doc);
             assertFalse(doc.isEncrypted());
@@ -59,8 +59,8 @@ public class PDFParserTest
     public void encrypted() throws IOException
     {
         try (PDDocument doc = PDFParser.parse(
-                SeekableSources.inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-"/sambox/encrypted_simple_test.pdf")),
+                SeekableSources.inMemorySeekableSourceFrom(
+                        getClass().getResourceAsStream("/sambox/encrypted_simple_test.pdf")),
                 "test"))
         {
             assertNotNull(doc);
@@ -73,9 +73,8 @@ public class PDFParserTest
     @Test
     public void notEncrytedWithPwd() throws IOException
     {
-        try (PDDocument doc = PDFParser.parse(
-                SeekableSources.inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-"/sambox/simple_test.pdf")), "test"))
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/simple_test.pdf")), "test"))
         {
             assertNotNull(doc);
             assertFalse(doc.isEncrypted());
@@ -87,8 +86,8 @@ public class PDFParserTest
     @Test
     public void badHeader() throws IOException
     {
-        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(getClass()
-.getResourceAsStream("/sambox/bad_header.pdf"))))
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/bad_header.pdf"))))
         {
             assertNotNull(doc);
             assertFalse(doc.isEncrypted());
@@ -100,34 +99,44 @@ public class PDFParserTest
     @Test(expected = IOException.class)
     public void veryBadHeader() throws IOException
     {
-        PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-"/sambox/unparsable_bad_header.pdf")));
+        PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/unparsable_bad_header.pdf")));
     }
 
     @Test(expected = IOException.class)
     public void trunkatedHeader() throws IOException
     {
-        PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-"/sambox/trunkated_header.pdf")));
+        PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/trunkated_header.pdf")));
     }
 
     @Test(expected = IOException.class)
     public void missingHeader() throws IOException
     {
-        PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-"/sambox/missing_header.pdf")));
+        PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/missing_header.pdf")));
     }
 
     @Test
     public void secondLineHeader() throws IOException
     {
-        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(getClass()
-.getResourceAsStream("/sambox/second_line_header.pdf"))))
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/second_line_header.pdf"))))
         {
             assertNotNull(doc);
             assertFalse(doc.isEncrypted());
             assertTrue(doc.isOpen());
             assertEquals(SpecVersionUtils.V1_4, doc.getVersion());
+        }
+    }
+
+    @Test
+    public void missingPageType() throws IOException
+    {
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/missing_page_type.pdf"))))
+        {
+            assertNotNull(doc.getPage(0));
         }
     }
 

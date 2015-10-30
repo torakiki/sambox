@@ -16,6 +16,9 @@
  */
 package org.sejda.sambox.pdmodel;
 
+import static java.util.Objects.isNull;
+import static org.sejda.util.RequireUtils.requireNotNullArg;
+
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -28,6 +31,8 @@ import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSObjectable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The page tree, which defines the ordering of pages in the document in an efficient manner.
@@ -36,6 +41,8 @@ import org.sejda.sambox.cos.COSObjectable;
  */
 public class PDPageTree implements COSObjectable, Iterable<PDPage>
 {
+    private static final Logger LOG = LoggerFactory.getLogger(PDPageTree.class);
+
     private final COSDictionary root;
     private final PDDocument document;
 
@@ -58,11 +65,9 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
      */
     public PDPageTree(COSDictionary root)
     {
-        if (root == null)
-        {
-            throw new IllegalArgumentException("root cannot be null");
-        }
+        requireNotNullArg(root, "Page tree root cannot be null");
         this.root = root;
+        root.setItem(COSName.TYPE, COSName.PAGES);
         document = null;
     }
 
@@ -183,11 +188,7 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
         {
             COSDictionary next = queue.poll();
 
-            // sanity check
-            if (next.getCOSName(COSName.TYPE) != COSName.PAGE)
-            {
-                throw new IllegalStateException("Expected Page but got " + next);
-            }
+            sanitizeType(next);
 
             ResourceCache resourceCache = document != null ? document.getResourceCache() : null;
             return new PDPage(next, resourceCache);
@@ -209,14 +210,24 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
     {
         COSDictionary dict = get(index + 1, root, 0);
 
-        // sanity check
-        if (dict.getCOSName(COSName.TYPE) != COSName.PAGE)
-        {
-            throw new IllegalStateException("Expected Page but got " + dict);
-        }
+        sanitizeType(dict);
 
         ResourceCache resourceCache = document != null ? document.getResourceCache() : null;
         return new PDPage(dict, resourceCache);
+    }
+
+    private static void sanitizeType(COSDictionary dictionary)
+    {
+        if (isNull(dictionary.getCOSName(COSName.TYPE)))
+        {
+            LOG.warn("Missing required 'Page' type for page");
+            dictionary.setName(COSName.TYPE, COSName.PAGE.getName());
+        }
+        COSName type = dictionary.getCOSName(COSName.TYPE);
+        if (!COSName.PAGE.equals(type))
+        {
+            throw new IllegalStateException("Expected 'Page' but found " + type);
+        }
     }
 
     /**
