@@ -19,9 +19,7 @@ package org.sejda.sambox.pdmodel.graphics.color;
 import java.io.IOException;
 import java.util.Arrays;
 
-import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.cos.COSNumber;
+import org.sejda.sambox.cos.*;
 
 /**
  * A color value, consisting of one or more color components, or for pattern color spaces, a name and optional color
@@ -63,7 +61,13 @@ public final class PDColor
             components = new float[array.size()];
             for (int i = 0; i < array.size(); i++)
             {
-                components[i] = ((COSNumber) array.get(i)).floatValue();
+                COSBase component = array.get(i);
+                if(component instanceof COSNumber) {
+                    components[i] = ((COSNumber) array.get(i)).floatValue();
+                } else {
+                    components[i] = 0f;
+                }
+
             }
             patternName = null;
         }
