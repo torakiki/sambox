@@ -16,6 +16,9 @@
  */
 package org.sejda.sambox.pdmodel.common;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -114,7 +117,6 @@ public abstract class PDNameTreeNode<T extends COSObjectable> implements COSObje
      */
     public List<PDNameTreeNode<T>> getKids()
     {
-        List<PDNameTreeNode<T>> retval = null;
         COSArray kids = (COSArray) node.getDictionaryObject(COSName.KIDS);
         if (kids != null)
         {
@@ -123,10 +125,10 @@ public abstract class PDNameTreeNode<T extends COSObjectable> implements COSObje
             {
                 pdObjects.add(createChildNode((COSDictionary) kids.getObject(i)));
             }
-            retval = new COSArrayList<>(pdObjects, kids);
+            return new COSArrayList<>(pdObjects, kids);
         }
 
-        return retval;
+        return null;
     }
 
     /**
@@ -215,36 +217,46 @@ public abstract class PDNameTreeNode<T extends COSObjectable> implements COSObje
     {
         try
         {
-            return Optional
-                    .ofNullable(getNames())
-                    .map(m -> m.get(name))
-                    .orElseGet(
-                            () -> {
-                                List<PDNameTreeNode<T>> kids = getKids();
-                                if (kids != null)
-                                {
-                                    for (int i = 0; i < kids.size(); i++)
-                                    {
-                                        PDNameTreeNode<T> childNode = kids.get(i);
-                                        if (childNode.getLowerLimit().compareTo(name) <= 0
-                                                && childNode.getUpperLimit().compareTo(name) >= 0)
-                                        {
-                                            return childNode.getValue(name);
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    LOG.warn("NameTreeNode does not have \"names\" nor \"kids\" objects.");
-                                }
-                                return null;
-                            });
+            return Optional.ofNullable(getNames()).map(m -> m.get(name)).orElseGet(() -> {
+                List<PDNameTreeNode<T>> kids = getKids();
+                if (nonNull(kids))
+                {
+                    for (int i = 0; i < kids.size(); i++)
+                    {
+                        PDNameTreeNode<T> childNode = kids.get(i);
+                        if (childNode.couldContain(name))
+                        {
+                            return childNode.getValue(name);
+                        }
+                    }
+                }
+                else
+                {
+                    LOG.warn("NameTreeNode does not have \"names\" nor \"kids\" objects.");
+                }
+                return null;
+            });
         }
         catch (IOException e)
         {
             LOG.warn("NameTreeNode couldn't get the names map", e);
         }
         return null;
+    }
+
+    /**
+     * @param name
+     * @return true if the given name can be part of this node/branch
+     */
+    private boolean couldContain(String name)
+    {
+        if (isNull(getLowerLimit()) || isNull(getUpperLimit()))
+        {
+            LOG.warn("Missing requried name tree node Limits array");
+            return false;
+        }
+        return getLowerLimit().compareTo(name) <= 0 && getUpperLimit().compareTo(name) >= 0;
+
     }
 
     /**
@@ -358,13 +370,12 @@ public abstract class PDNameTreeNode<T extends COSObjectable> implements COSObje
      */
     public String getLowerLimit()
     {
-        String retval = null;
         COSArray arr = (COSArray) node.getDictionaryObject(COSName.LIMITS);
-        if (arr != null)
+        if (nonNull(arr))
         {
-            retval = arr.getString(0);
+            return arr.getString(0);
         }
-        return retval;
+        return null;
     }
 
     /**
