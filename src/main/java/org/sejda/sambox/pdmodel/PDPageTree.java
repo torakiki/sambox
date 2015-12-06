@@ -242,7 +242,7 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
     {
         if (pageNum < 0)
         {
-            throw new IndexOutOfBoundsException("Index out of bounds: " + pageNum);
+            throw new PageNotFoundException("Index out of bounds: " + pageNum);
         }
 
         if (isPageTreeNode(node))
@@ -276,15 +276,15 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
                     }
                 }
 
-                throw new IllegalStateException();
+                throw new PageNotFoundException();
             }
-            throw new IndexOutOfBoundsException("Index out of bounds: " + pageNum);
+            throw new PageNotFoundException("Index out of bounds: " + pageNum);
         }
         if (encountered == pageNum)
         {
             return node;
         }
-        throw new IllegalStateException();
+        throw new PageNotFoundException();
     }
 
     /**
