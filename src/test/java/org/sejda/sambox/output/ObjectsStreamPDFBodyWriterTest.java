@@ -86,6 +86,13 @@ public class ObjectsStreamPDFBodyWriterTest
     }
 
     @Test
+    public void closeDelegate() throws IOException
+    {
+        victim.close();
+        verify(writer).close();
+    }
+
+    @Test
     public void fillingStreamWritesItDown() throws IOException
     {
         System.setProperty(SAMBox.OBJECTS_STREAM_SIZE_PROPERTY, "2");

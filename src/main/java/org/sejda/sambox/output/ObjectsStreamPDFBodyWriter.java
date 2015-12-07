@@ -114,6 +114,7 @@ class ObjectsStreamPDFBodyWriter extends AbstractPDFBodyWriter
     @Override
     public void close() throws IOException
     {
+        IOUtils.close(wrapped);
         super.close();
         currentStream = null;
     }
