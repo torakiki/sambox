@@ -42,8 +42,7 @@ public class Xref
      */
     public XrefEntry addIfAbsent(XrefEntry entry)
     {
-        return data.putIfAbsent(
-                new COSObjectKey(entry.getObjectNumber(), entry.getGenerationNumber()), entry);
+        return data.putIfAbsent(entry.key(), entry);
     }
 
     /**
@@ -56,8 +55,7 @@ public class Xref
      */
     public XrefEntry add(XrefEntry entry)
     {
-        return data.put(new COSObjectKey(entry.getObjectNumber(), entry.getGenerationNumber()),
-                entry);
+        return data.put(entry.key(), entry);
     }
 
     /**
