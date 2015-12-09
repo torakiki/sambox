@@ -39,6 +39,7 @@ import org.sejda.sambox.TestUtils;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.COSObjectKey;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.xref.CompressedXrefEntry;
@@ -57,8 +58,8 @@ public class LazyIndirectObjectsProviderTest
     {
 
         victim = new LazyIndirectObjectsProvider();
-        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
-.getResourceAsStream("/sambox/simple_test.pdf")), victim);
+        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/simple_test.pdf")), victim);
         victim.initializeWith(parser);
         XrefParser xrefParser = new XrefParser(parser);
         xrefParser.parse();
@@ -89,8 +90,8 @@ public class LazyIndirectObjectsProviderTest
     public void getCompressed() throws IOException
     {
         victim = new LazyIndirectObjectsProvider();
-        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
-.getResourceAsStream("/sambox/simple_test_objstm.pdf")), victim);
+        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/simple_test_objstm.pdf")), victim);
         victim.initializeWith(parser);
         XrefParser xrefParser = new XrefParser(parser);
         xrefParser.parse();
@@ -101,8 +102,8 @@ public class LazyIndirectObjectsProviderTest
     public void getCompressedWrongOwningStream() throws IOException
     {
         victim = new LazyIndirectObjectsProvider();
-        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
-.getResourceAsStream("/sambox/simple_test_objstm.pdf")), victim);
+        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/simple_test_objstm.pdf")), victim);
         victim.initializeWith(parser);
         XrefParser xrefParser = new XrefParser(parser);
         xrefParser.parse();
@@ -114,8 +115,8 @@ public class LazyIndirectObjectsProviderTest
     public void getCompressedWrongOwningStreamCompressed() throws IOException
     {
         victim = new LazyIndirectObjectsProvider();
-        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
-.getResourceAsStream("/sambox/simple_test_objstm.pdf")), victim);
+        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/simple_test_objstm.pdf")), victim);
         victim.initializeWith(parser);
         XrefParser xrefParser = new XrefParser(parser);
         xrefParser.parse();
@@ -127,8 +128,8 @@ public class LazyIndirectObjectsProviderTest
     public void getCompressedNullContainingStream() throws IOException
     {
         victim = new LazyIndirectObjectsProvider();
-        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
-.getResourceAsStream("/sambox/simple_test_objstm.pdf")), victim);
+        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/simple_test_objstm.pdf")), victim);
         victim.initializeWith(parser);
         XrefParser xrefParser = new XrefParser(parser);
         xrefParser.parse();
@@ -140,8 +141,8 @@ public class LazyIndirectObjectsProviderTest
     public void fallbackDoesntWorkForObjStm() throws IOException
     {
         victim = new LazyIndirectObjectsProvider();
-        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
-.getResourceAsStream("/sambox/bad_objstm.pdf")), victim);
+        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/bad_objstm.pdf")), victim);
         victim.initializeWith(parser);
         XrefParser xrefParser = new XrefParser(parser);
         xrefParser.parse();
@@ -205,5 +206,16 @@ public class LazyIndirectObjectsProviderTest
         TestUtils.setProperty(victim, "store", store);
         victim.close();
         verify(item).close();
+    }
+
+    @Test
+    public void emptyObj() throws IOException
+    {
+        victim = new LazyIndirectObjectsProvider();
+        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/empty_obj.txt")), victim);
+        victim.initializeWith(parser);
+        victim.addEntry(XrefEntry.inUseEntry(10, 3, 0));
+        assertEquals(COSNull.NULL, victim.get(new COSObjectKey(10, 0)));
     }
 }

@@ -17,6 +17,7 @@
 package org.sejda.sambox.input;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.Optional.ofNullable;
 import static org.sejda.sambox.input.BaseCOSParser.ENDOBJ;
 import static org.sejda.sambox.input.BaseCOSParser.ENDSTREAM;
 import static org.sejda.sambox.input.BaseCOSParser.STREAM;
@@ -33,6 +34,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.COSObjectKey;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.pdmodel.encryption.SecurityHandler;
@@ -191,16 +193,17 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
         {
             LOG.warn("Missing 'endobj' token for " + xrefEntry);
         }
-        store.put(xrefEntry.key(), found);
+        store.put(xrefEntry.key(), ofNullable(found).orElse(COSNull.NULL));
     }
 
     private void parseCompressedEntry(XrefEntry xrefEntry) throws IOException
     {
-        XrefEntry containingStreamEntry = xref.get(new COSObjectKey(
-                ((CompressedXrefEntry) xrefEntry).getObjectStreamNumber(), 0));
+        XrefEntry containingStreamEntry = xref.get(
+                new COSObjectKey(((CompressedXrefEntry) xrefEntry).getObjectStreamNumber(), 0));
 
-        requireIOCondition(containingStreamEntry != null
-                && containingStreamEntry.getType() != XrefType.COMPRESSED,
+        requireIOCondition(
+                containingStreamEntry != null
+                        && containingStreamEntry.getType() != XrefType.COMPRESSED,
                 "Expected an uncompressed indirect object reference for the ObjectStream");
 
         parseObject(containingStreamEntry.key());
@@ -208,7 +211,8 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
 
         if (!(stream instanceof COSStream))
         {
-            throw new IOException("Expected an object stream instance for " + containingStreamEntry);
+            throw new IOException(
+                    "Expected an object stream instance for " + containingStreamEntry);
         }
         parseObjectStream(containingStreamEntry, (COSStream) stream);
     }
