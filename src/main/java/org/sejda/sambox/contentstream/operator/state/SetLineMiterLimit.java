@@ -16,8 +16,10 @@
  */
 package org.sejda.sambox.contentstream.operator.state;
 
+import java.io.IOException;
 import java.util.List;
 
+import org.sejda.sambox.contentstream.operator.MissingOperandException;
 import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.contentstream.operator.OperatorProcessor;
 import org.sejda.sambox.cos.COSBase;
@@ -30,10 +32,14 @@ import org.sejda.sambox.cos.COSNumber;
 public class SetLineMiterLimit extends OperatorProcessor
 {
     @Override
-    public void process(Operator operator, List<COSBase> arguments)
+    public void process(Operator operator, List<COSBase> arguments) throws IOException
     {
-        COSNumber miterLimit = (COSNumber)arguments.get( 0 );
-        context.getGraphicsState().setMiterLimit( miterLimit.floatValue() );
+        if (arguments.size() < 1)
+        {
+            throw new MissingOperandException(operator, arguments);
+        }
+        COSNumber miterLimit = (COSNumber) arguments.get(0);
+        context.getGraphicsState().setMiterLimit(miterLimit.floatValue());
     }
 
     @Override

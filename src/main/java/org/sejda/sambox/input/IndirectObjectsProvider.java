@@ -21,6 +21,7 @@ import java.io.Closeable;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSObjectKey;
 import org.sejda.sambox.pdmodel.encryption.SecurityHandler;
+import org.sejda.sambox.xref.Xref;
 import org.sejda.sambox.xref.XrefEntry;
 
 /**
@@ -49,22 +50,22 @@ interface IndirectObjectsProvider extends Closeable
     public void release(COSObjectKey key);
 
     /**
-     * Adds the given xref entry to the {@link org.apache.pdfbox.xref.Xref} if absent
+     * Adds the given xref entry to the {@link Xref} if absent
      * 
      * @param entry
      * @return null if the entry was added. The current entry with the given object number and generation if the entry
      * was already present.
-     * @see org.apache.pdfbox.xref.Xref#addIfAbsent(XrefEntry)
+     * @see Xref#addIfAbsent(XrefEntry)
      */
     public XrefEntry addEntryIfAbsent(XrefEntry entry);
 
     /**
-     * Adds the given xref entry to the {@link org.apache.pdfbox.xref.Xref}
+     * Adds the given xref entry to the {@link Xref}
      * 
      * @param entry
      * @return the previous value or null if no entry was previously associated to the given object number and
      * generation.
-     * @see org.apache.pdfbox.xref.Xref#add(XrefEntry)
+     * @see Xref#add(XrefEntry)
      */
     public XrefEntry addEntry(XrefEntry entry);
 

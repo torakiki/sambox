@@ -19,6 +19,7 @@ package org.sejda.sambox.text;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.apache.fontbox.util.BoundingBox;
 import org.sejda.sambox.contentstream.PDFStreamEngine;
 import org.sejda.sambox.contentstream.operator.DrawObject;
 import org.sejda.sambox.contentstream.operator.state.Concatenate;
@@ -45,6 +46,7 @@ import org.sejda.sambox.contentstream.operator.text.ShowTextLineAndSpace;
 import org.sejda.sambox.pdmodel.PDPage;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.font.PDFont;
+import org.sejda.sambox.pdmodel.font.PDFontDescriptor;
 import org.sejda.sambox.pdmodel.font.PDSimpleFont;
 import org.sejda.sambox.pdmodel.font.PDType3Font;
 import org.sejda.sambox.pdmodel.font.encoding.GlyphList;
@@ -145,8 +147,26 @@ class PDFTextStreamEngine extends PDFStreamEngine
         float horizontalScaling = state.getTextState().getHorizontalScaling() / 100f;
         Matrix textMatrix = getTextMatrix();
 
+        BoundingBox bbox = font.getBoundingBox();
+        if (bbox.getLowerLeftY() < Short.MIN_VALUE)
+        {
+            // PDFBOX-2158 and PDFBOX-3130
+            // files by Salmat eSolutions / ClibPDF Library
+            bbox.setLowerLeftY(-(bbox.getLowerLeftY() + 65536));
+        }
         // 1/2 the bbox is used as the height todo: why?
-        float glyphHeight = font.getBoundingBox().getHeight() / 2;
+        float glyphHeight = bbox.getHeight() / 2;
+
+        // sometimes the bbox has very high values, but CapHeight is OK
+        PDFontDescriptor fontDescriptor = font.getFontDescriptor();
+        if (fontDescriptor != null)
+        {
+            float capHeight = fontDescriptor.getCapHeight();
+            if (capHeight != 0 && capHeight < glyphHeight)
+            {
+                glyphHeight = capHeight;
+            }
+        }
 
         // transformPoint from glyph space -> text space
         float height = font.getFontMatrix().transformPoint(0, glyphHeight).y;
@@ -244,8 +264,7 @@ class PDFTextStreamEngine extends PDFStreamEngine
         }
         processTextPosition(new TextPosition(pageRotation, pageSize.getWidth(),
                 pageSize.getHeight(), translatedTextRenderingMatrix, nextX, nextY, dyDisplay,
-                dxDisplay,
-                spaceWidthDisplay, unicode, new int[] { code }, font, fontSize,
+                dxDisplay, spaceWidthDisplay, unicode, new int[] { code }, font, fontSize,
                 (int) (fontSize * textRenderingMatrix.getScalingFactorX())));
     }
 

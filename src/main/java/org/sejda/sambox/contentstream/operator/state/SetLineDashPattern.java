@@ -18,11 +18,14 @@ package org.sejda.sambox.contentstream.operator.state;
 
 import java.util.List;
 
+import org.sejda.sambox.contentstream.operator.MissingOperandException;
 import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.contentstream.operator.OperatorProcessor;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSNumber;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * d: Set the line dash pattern.
@@ -31,11 +34,52 @@ import org.sejda.sambox.cos.COSNumber;
  */
 public class SetLineDashPattern extends OperatorProcessor
 {
+    private static final Logger LOG = LoggerFactory.getLogger(SetLineDashPattern.class);
+
     @Override
-    public void process(Operator operator, List<COSBase> arguments)
+    public void process(Operator operator, List<COSBase> arguments) throws MissingOperandException
     {
-        COSArray dashArray = (COSArray) arguments.get(0);
-        int dashPhase = ((COSNumber) arguments.get(1)).intValue();
+        if (arguments.size() < 2)
+        {
+            throw new MissingOperandException(operator, arguments);
+        }
+        COSBase base0 = arguments.get(0);
+        if (!(base0 instanceof COSArray))
+        {
+            return;
+        }
+        COSBase base1 = arguments.get(1);
+        if (!(base1 instanceof COSNumber))
+        {
+            return;
+        }
+        COSArray dashArray = (COSArray) base0;
+        int dashPhase = ((COSNumber) base1).intValue();
+
+        boolean allZero = true;
+        for (COSBase base : dashArray)
+        {
+            if (base instanceof COSNumber)
+            {
+                COSNumber num = (COSNumber) base;
+                if (num.floatValue() != 0)
+                {
+                    allZero = false;
+                    break;
+                }
+            }
+            else
+            {
+                LOG.error("dash array has non number element " + base + ", ignored");
+                dashArray = new COSArray();
+                break;
+            }
+        }
+        if (dashArray.size() > 0 && allZero)
+        {
+            LOG.error("dash lengths all zero, ignored");
+            dashArray = new COSArray();
+        }
         context.setLineDashPattern(dashArray, dashPhase);
     }
 

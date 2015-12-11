@@ -479,7 +479,7 @@ public final class PDImageXObject extends PDXObject implements PDImage
     @Override
     public InputStream createInputStream(List<String> stopFilters) throws IOException
     {
-        return createInputStream();
+        return getStream().createInputStream(stopFilters);
     }
 
     @Override

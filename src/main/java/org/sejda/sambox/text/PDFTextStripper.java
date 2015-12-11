@@ -109,21 +109,33 @@ public class PDFTextStripper extends PDFTextStreamEngine
                 // ignore and use default
             }
         }
+    }
 
+    static
+    {
         // check if we need to use the custom quicksort algorithm as a
-        // workaround to the transitivity issue of TextPositionComparator:
-        // https://issues.apache.org/jira/browse/PDFBOX-1512
+        // workaround to the PDFBOX-1512 transitivity issue of TextPositionComparator:
         boolean is16orLess = false;
         try
         {
-            String[] versionComponents = System.getProperty("java.version").split("\\.");
-            int javaMajorVersion = Integer.parseInt(versionComponents[0]);
-            int javaMinorVersion = Integer.parseInt(versionComponents[1]);
-            is16orLess = javaMajorVersion == 1 && javaMinorVersion <= 6;
+            String version = System.getProperty("java.specification.version");
+            StringTokenizer st = new StringTokenizer(version, ".");
+            int majorVersion = Integer.parseInt(st.nextToken());
+            int minorVersion = 0;
+            if (st.hasMoreTokens())
+            {
+                minorVersion = Integer.parseInt(st.nextToken());
+            }
+            is16orLess = majorVersion == 1 && minorVersion <= 6;
         }
         catch (SecurityException x)
         {
             // when run in an applet ignore and use default
+            // assume 1.7 or higher so that quicksort is used
+        }
+        catch (NumberFormatException nfe)
+        {
+            // should never happen, but if it does,
             // assume 1.7 or higher so that quicksort is used
         }
         useCustomQuickSort = !is16orLess;
@@ -262,13 +274,11 @@ public class PDFTextStripper extends PDFTextStreamEngine
      */
     protected void processPages(PDPageTree pages) throws IOException
     {
-        PDPageTree pagesTree = document.getPages();
-
         PDPage startBookmarkPage = startBookmark == null ? null
                 : startBookmark.findDestinationPage(document);
         if (startBookmarkPage != null)
         {
-            startBookmarkPageNumber = pagesTree.indexOf(startBookmarkPage) + 1;
+            startBookmarkPageNumber = pages.indexOf(startBookmarkPage) + 1;
         }
         else
         {
@@ -280,7 +290,7 @@ public class PDFTextStripper extends PDFTextStreamEngine
                 : endBookmark.findDestinationPage(document);
         if (endBookmarkPage != null)
         {
-            endBookmarkPageNumber = pagesTree.indexOf(endBookmarkPage) + 1;
+            endBookmarkPageNumber = pages.indexOf(endBookmarkPage) + 1;
         }
         else
         {
@@ -315,7 +325,7 @@ public class PDFTextStripper extends PDFTextStreamEngine
      * @param document The PDF document that is being processed.
      * @throws IOException If an IO error occurs.
      */
-    protected void startDocument(PDDocument document)
+    protected void startDocument(PDDocument document) throws IOException
     {
         // no default implementation, but available for subclasses
     }
@@ -327,7 +337,7 @@ public class PDFTextStripper extends PDFTextStreamEngine
      * @param document The PDF document that is being processed.
      * @throws IOException If an IO error occurs.
      */
-    protected void endDocument(PDDocument document)
+    protected void endDocument(PDDocument document) throws IOException
     {
         // no default implementation, but available for subclasses
     }
@@ -347,6 +357,7 @@ public class PDFTextStripper extends PDFTextStreamEngine
                 && (endBookmarkPageNumber == -1 || currentPageNo <= endBookmarkPageNumber))
         {
             startPage(page);
+
             int numberOfArticleSections = 1;
             if (shouldSeparateByBeads)
             {
@@ -451,7 +462,7 @@ public class PDFTextStripper extends PDFTextStreamEngine
      *
      * @throws IOException If there is any error writing to the stream.
      */
-    protected void startPage(PDPage page)
+    protected void startPage(PDPage page) throws IOException
     {
         // default is to do nothing
     }
@@ -463,7 +474,7 @@ public class PDFTextStripper extends PDFTextStreamEngine
      *
      * @throws IOException If there is any error writing to the stream.
      */
-    protected void endPage(PDPage page)
+    protected void endPage(PDPage page) throws IOException
     {
         // default is to do nothing
     }
@@ -517,6 +528,7 @@ public class PDFTextStripper extends PDFTextStreamEngine
                     Collections.sort(textList, comparator);
                 }
             }
+
             Iterator<TextPosition> textIter = textList.iterator();
 
             startArticle();
@@ -582,7 +594,7 @@ public class PDFTextStripper extends PDFTextStreamEngine
                 // space character with some margin.
                 float wordSpacing = position.getWidthOfSpace();
                 float deltaSpace;
-                if (wordSpacing == 0 || wordSpacing == Float.NaN)
+                if (wordSpacing == 0 || Float.isNaN(wordSpacing))
                 {
                     deltaSpace = Float.MAX_VALUE;
                 }
@@ -1722,9 +1734,9 @@ public class PDFTextStripper extends PDFTextStreamEngine
      */
     private List<WordWithTextPositions> normalize(List<LineItem> line)
     {
-        List<WordWithTextPositions> normalized = new LinkedList<>();
+        List<WordWithTextPositions> normalized = new LinkedList<WordWithTextPositions>();
         StringBuilder lineBuilder = new StringBuilder();
-        List<TextPosition> wordPositions = new ArrayList<>();
+        List<TextPosition> wordPositions = new ArrayList<TextPosition>();
 
         for (LineItem item : line)
         {
@@ -1814,7 +1826,7 @@ public class PDFTextStripper extends PDFTextStreamEngine
         return result.toString();
     }
 
-    private static HashMap<String, String> MIRRORING_CHAR_MAP = new HashMap<>();
+    private static HashMap<String, String> MIRRORING_CHAR_MAP = new HashMap<String, String>();
 
     static
     {
@@ -1934,8 +1946,11 @@ public class PDFTextStripper extends PDFTextStreamEngine
         {
             return handleDirection(word);
         }
-        builder.append(word.substring(p, q));
-        return handleDirection(builder.toString());
+        else
+        {
+            builder.append(word.substring(p, q));
+            return handleDirection(builder.toString());
+        }
     }
 
     /**
@@ -2045,8 +2060,8 @@ public class PDFTextStripper extends PDFTextStreamEngine
 
         /**
          * Constructs a PositionWrapper around the specified TextPosition object.
-         * 
-         * @param position the text position
+         *
+         * @param position the text position.
          */
         PositionWrapper(TextPosition position)
         {

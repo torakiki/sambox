@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * entries.
  * 
  * @author Andrea Vacondio
- * @see org.apache.pdfbox.input.AbstractXrefStreamParser
+ * @see AbstractXrefStreamParser
  */
 abstract class AbstractXrefTableParser
 {

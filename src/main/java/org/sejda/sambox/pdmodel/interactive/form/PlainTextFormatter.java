@@ -171,13 +171,15 @@ class PlainTextFormatter
     {
         if (textContent != null && !textContent.getParagraphs().isEmpty())
         {
+            boolean isFirstParagraph = true;
             for (Paragraph paragraph : textContent.getParagraphs())
             {
                 if (wrapLines)
                 {
                     List<Line> lines = paragraph.getLines(appearanceStyle.getFont(),
                             appearanceStyle.getFontSize(), width);
-                    processLines(lines);
+                    processLines(lines, isFirstParagraph);
+                    isFirstParagraph = false;
                 }
                 else
                 {
@@ -217,7 +219,7 @@ class PlainTextFormatter
      * @param lines the lines to process.
      * @throws IOException if there is an error writing to the stream.
      */
-    private void processLines(List<Line> lines) throws IOException
+    private void processLines(List<Line> lines, boolean isFirstParagraph) throws IOException
     {
         float wordWidth = 0f;
 
@@ -247,11 +249,10 @@ class PlainTextFormatter
 
             float offset = -lastPos + startOffset + horizontalOffset;
 
-            if (lines.indexOf(line) == 0)
+            if (lines.indexOf(line) == 0 && isFirstParagraph)
             {
                 contents.newLineAtOffset(offset, verticalOffset);
-                // reset the initial verticalOffset
-                verticalOffset = 0f;
+                // reset the initial horizontalOffset
                 horizontalOffset = 0f;
             }
             else
