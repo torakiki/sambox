@@ -37,6 +37,7 @@ import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.pdmodel.PDDocument;
+import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.common.PDStream;
 import org.sejda.sambox.pdmodel.font.encoding.Encoding;
 import org.sejda.sambox.pdmodel.font.encoding.StandardEncoding;
@@ -45,6 +46,7 @@ import org.sejda.sambox.pdmodel.font.encoding.WinAnsiEncoding;
 import org.sejda.sambox.util.Matrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 /**
  * A PostScript Type 1 Font.
  *
@@ -158,6 +160,7 @@ public class PDType1Font extends PDSimpleFont
      *
      * @param doc PDF document to write to
      * @param pfbIn PFB file stream
+     * @param encoding
      * @throws IOException
      */
     public PDType1Font(PDDocument doc, InputStream pfbIn, Encoding encoding) throws IOException
@@ -175,7 +178,9 @@ public class PDType1Font extends PDSimpleFont
     /**
      * Creates a Type 1 font from a Font dictionary in a PDF.
      * 
-     * @param fontDictionary font dictionary
+     * @param fontDictionary font dictionary.
+     * @throws IOException if there was an error initializing the font.
+     * @throws IllegalArgumentException if /FontFile3 was used.
      */
     public PDType1Font(COSDictionary fontDictionary) throws IOException
     {
@@ -274,6 +279,10 @@ public class PDType1Font extends PDSimpleFont
     {
         // scan backwards from the end of the first segment to find 'exec'
         int offset = Math.max(0, length1 - 4);
+        if (offset <= 0 || offset > bytes.length - 4)
+        {
+            offset = bytes.length - 4;
+        }
         while (offset > 0)
         {
             if (bytes[offset + 0] == 'e' && bytes[offset + 1] == 'x' && bytes[offset + 2] == 'e'
@@ -293,7 +302,7 @@ public class PDType1Font extends PDSimpleFont
 
         if (length1 - offset != 0 && offset > 0)
         {
-            LOG.warn("Ignored invalid Length1 for Type 1 font " + getName());
+            LOG.warn("Ignored invalid Length1 {} for Type 1 font {}", length1, getName());
             return offset;
         }
 
@@ -378,10 +387,7 @@ public class PDType1Font extends PDSimpleFont
         {
             return getStandard14AFM().getAverageCharacterWidth();
         }
-        else
-        {
-            return super.getAverageFontWidth();
-        }
+        return super.getAverageFontWidth();
     }
 
     @Override
@@ -398,19 +404,13 @@ public class PDType1Font extends PDSimpleFont
             // read from AFM
             return new Type1Encoding(getStandard14AFM());
         }
-        else
+        // extract from Type1 font/substitute
+        if (genericFont instanceof EncodedFont)
         {
-            // extract from Type1 font/substitute
-            if (genericFont instanceof EncodedFont)
-            {
-                return Type1Encoding.fromFontBox(((EncodedFont) genericFont).getEncoding());
-            }
-            else
-            {
-                // default (only happens with TTFs)
-                return StandardEncoding.INSTANCE;
-            }
+            return Type1Encoding.fromFontBox(((EncodedFont) genericFont).getEncoding());
         }
+        // default (only happens with TTFs)
+        return StandardEncoding.INSTANCE;
     }
 
     /**
@@ -436,6 +436,16 @@ public class PDType1Font extends PDSimpleFont
     @Override
     public BoundingBox getBoundingBox() throws IOException
     {
+        if (getFontDescriptor() != null)
+        {
+            PDRectangle bbox = getFontDescriptor().getFontBoundingBox();
+            if (bbox.getLowerLeftX() != 0 || bbox.getLowerLeftY() != 0 || bbox.getUpperRightX() != 0
+                    || bbox.getUpperRightY() != 0)
+            {
+                return new BoundingBox(bbox.getLowerLeftX(), bbox.getLowerLeftY(),
+                        bbox.getUpperRightX(), bbox.getUpperRightY());
+            }
+        }
         return genericFont.getFontBBox();
     }
 

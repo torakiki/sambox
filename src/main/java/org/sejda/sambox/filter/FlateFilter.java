@@ -31,8 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Decompresses data encoded using the zlib/deflate compression method,
- * reproducing the original text or binary data.
+ * Decompresses data encoded using the zlib/deflate compression method, reproducing the original text or binary data.
  *
  * @author Ben Litchfield
  * @author Marcel Kammer
@@ -43,8 +42,8 @@ final class FlateFilter extends Filter
     private static final int BUFFER_SIZE = 16348;
 
     @Override
-    public DecodeResult decode(InputStream encoded, OutputStream decoded,
-                                         COSDictionary parameters, int index) throws IOException
+    public DecodeResult decode(InputStream encoded, OutputStream decoded, COSDictionary parameters,
+            int index) throws IOException
     {
         int predictor = -1;
 
@@ -58,7 +57,6 @@ final class FlateFilter extends Filter
         {
             if (predictor > 1)
             {
-                @SuppressWarnings("null")
                 int colors = Math.min(decodeParams.getInt(COSName.COLORS, 1), 32);
                 int bitsPerPixel = decodeParams.getInt(COSName.BITS_PER_COMPONENT, 8);
                 int columns = decodeParams.getInt(COSName.COLUMNS, 1);
@@ -74,7 +72,7 @@ final class FlateFilter extends Filter
             {
                 decompress(encoded, decoded);
             }
-        } 
+        }
         catch (DataFormatException e)
         {
             // if the stream is corrupt a DataFormatException may occur
@@ -88,34 +86,53 @@ final class FlateFilter extends Filter
 
     // Use Inflater instead of InflateInputStream to avoid an EOFException due to a probably
     // missing Z_STREAM_END, see PDFBOX-1232 for details
-    private void decompress(InputStream in, OutputStream out) throws IOException, DataFormatException 
-    { 
-        byte[] buf = new byte[2048]; 
-        int read = in.read(buf); 
-        if (read > 0) 
-        { 
-            Inflater inflater = new Inflater(); 
-            inflater.setInput(buf,0,read); 
-            byte[] res = new byte[2048]; 
-            while (true) 
-            { 
-                int resRead = inflater.inflate(res); 
-                if (resRead != 0) 
-                { 
-                    out.write(res,0,resRead); 
-                    continue; 
-                } 
-                if (inflater.finished() || inflater.needsDictionary() || in.available() == 0) 
+    private void decompress(InputStream in, OutputStream out)
+            throws IOException, DataFormatException
+    {
+        byte[] buf = new byte[2048];
+        int read = in.read(buf);
+        if (read > 0)
+        {
+            Inflater inflater = new Inflater();
+            inflater.setInput(buf, 0, read);
+            byte[] res = new byte[32];
+            boolean dataWritten = false;
+            while (true)
+            {
+                int resRead = 0;
+                try
+                {
+                    resRead = inflater.inflate(res);
+                }
+                catch (DataFormatException exception)
+                {
+                    if (dataWritten)
+                    {
+                        // some data could be read -> don't throw an exception
+                        LOG.warn(
+                                "FlateFilter: premature end of stream due to a DataFormatException");
+                        break;
+                    }
+                    // nothing could be read -> re-throw exception
+                    throw exception;
+                }
+                if (resRead != 0)
+                {
+                    out.write(res, 0, resRead);
+                    dataWritten = true;
+                    continue;
+                }
+                if (inflater.finished() || inflater.needsDictionary() || in.available() == 0)
                 {
                     break;
-                } 
-                read = in.read(buf); 
-                inflater.setInput(buf,0,read); 
+                }
+                read = in.read(buf);
+                inflater.setInput(buf, 0, read);
             }
         }
         out.flush();
     }
-    
+
     @Override
     public void encode(InputStream input, OutputStream encoded, COSDictionary parameters)
             throws IOException
@@ -125,8 +142,8 @@ final class FlateFilter extends Filter
         int mayRead = input.available();
         if (mayRead > 0)
         {
-            byte[] buffer = new byte[Math.min(mayRead,BUFFER_SIZE)];
-            while ((amountRead = input.read(buffer, 0, Math.min(mayRead,BUFFER_SIZE))) != -1)
+            byte[] buffer = new byte[Math.min(mayRead, BUFFER_SIZE)];
+            while ((amountRead = input.read(buffer, 0, Math.min(mayRead, BUFFER_SIZE))) != -1)
             {
                 out.write(buffer, 0, amountRead);
             }

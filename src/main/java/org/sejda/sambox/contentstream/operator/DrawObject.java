@@ -24,7 +24,6 @@ import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.graphics.PDXObject;
 import org.sejda.sambox.pdmodel.graphics.form.PDFormXObject;
 import org.sejda.sambox.pdmodel.graphics.form.PDTransparencyGroup;
-import org.sejda.sambox.text.PDFMarkedContentExtractor;
 
 /**
  * Do: Draws an XObject.
@@ -47,12 +46,13 @@ public class DrawObject extends OperatorProcessor
             return;
         }
         COSName name = (COSName) base0;
-        PDXObject xobject = context.getResources().getXObject(name);
-        if (context instanceof PDFMarkedContentExtractor)
+        if (context.getResources().isImageXObject(name))
         {
-            ((PDFMarkedContentExtractor) context).xobject(xobject);
+            // we're done here, don't decode images when doing text extraction
+            return;
         }
 
+        PDXObject xobject = context.getResources().getXObject(name);
         if (xobject instanceof PDTransparencyGroup)
         {
             context.showTransparencyGroup((PDTransparencyGroup) xobject);

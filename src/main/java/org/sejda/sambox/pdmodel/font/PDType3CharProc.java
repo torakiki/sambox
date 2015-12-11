@@ -84,6 +84,44 @@ public final class PDType3CharProc implements COSObjectable, PDContentStream
         return font.getFontBBox();
     }
 
+    /**
+     * Calculate the bounding box of this glyph. This will work only if the first operator in the stream is d1.
+     *
+     * @return the bounding box of this glyph, or null if the first operator is not d1.
+     * @throws IOException If an io error occurs while parsing the stream.
+     */
+    public PDRectangle getGlyphBBox() throws IOException
+    {
+        List<COSBase> arguments = new ArrayList<>();
+        ContentStreamParser parser = new ContentStreamParser(this);
+        Object token = null;
+        while ((token = parser.nextParsedToken()) != null)
+        {
+            if (token instanceof Operator)
+            {
+                if (((Operator) token).getName().equals("d1") && arguments.size() == 6)
+                {
+                    for (int i = 0; i < 6; ++i)
+                    {
+                        if (!(arguments.get(i) instanceof COSNumber))
+                        {
+                            return null;
+                        }
+                    }
+                    return new PDRectangle(((COSNumber) arguments.get(2)).floatValue(),
+                            ((COSNumber) arguments.get(3)).floatValue(),
+                            ((COSNumber) arguments.get(4)).floatValue()
+                                    - ((COSNumber) arguments.get(2)).floatValue(),
+                            ((COSNumber) arguments.get(5)).floatValue()
+                                    - ((COSNumber) arguments.get(3)).floatValue());
+                }
+                return null;
+            }
+            arguments.add((COSBase) token);
+        }
+        return null;
+    }
+
     @Override
     public Matrix getMatrix()
     {

@@ -31,10 +31,11 @@ import org.sejda.sambox.util.Matrix;
 import org.sejda.sambox.util.Vector;
 
 /**
- * A CIDFont. A CIDFont is a PDF object that contains information about a CIDFont program. Although
- * its Type value is Font, a CIDFont is not actually a font.
+ * A CIDFont. A CIDFont is a PDF object that contains information about a CIDFont program. Although its Type value is
+ * Font, a CIDFont is not actually a font.
  *
- * <p>It is not usually necessary to use this class directly, prefer {@link PDType0Font}.
+ * <p>
+ * It is not usually necessary to use this class directly, prefer {@link PDType0Font}.
  *
  * @author Ben Litchfield
  */
@@ -46,7 +47,7 @@ public abstract class PDCIDFont implements COSObjectable, PDFontLike, PDVectorFo
     private float defaultWidth;
 
     private final Map<Integer, Float> verticalDisplacementY = new HashMap<Integer, Float>(); // w1y
-    private final Map<Integer, Vector> positionVectors = new HashMap<Integer, Vector>();     // v
+    private final Map<Integer, Vector> positionVectors = new HashMap<Integer, Vector>(); // v
     private float[] dw2;
 
     protected final COSDictionary dict;
@@ -112,8 +113,8 @@ public abstract class PDCIDFont implements COSObjectable, PDFontLike, PDVectorFo
         if (cosDW2 != null)
         {
             dw2 = new float[2];
-            dw2[0] = ((COSNumber)cosDW2.get(0)).floatValue();
-            dw2[1] = ((COSNumber)cosDW2.get(1)).floatValue();
+            dw2[0] = ((COSNumber) cosDW2.get(0)).floatValue();
+            dw2[1] = ((COSNumber) cosDW2.get(1)).floatValue();
         }
         else
         {
@@ -126,11 +127,11 @@ public abstract class PDCIDFont implements COSObjectable, PDFontLike, PDVectorFo
         {
             for (int i = 0; i < w2.size(); i++)
             {
-                COSNumber c = (COSNumber)w2.get(i);
+                COSNumber c = (COSNumber) w2.get(i);
                 COSBase next = w2.get(++i);
                 if (next instanceof COSArray)
                 {
-                    COSArray array = (COSArray)next;
+                    COSArray array = (COSArray) next;
                     for (int j = 0; j < array.size(); j++)
                     {
                         int cid = c.intValue() + j;
@@ -242,15 +243,7 @@ public abstract class PDCIDFont implements COSObjectable, PDFontLike, PDVectorFo
         float w0;
         if (widths.containsKey(cid))
         {
-            Float w = widths.get(cid);
-            if (w != null)
-            {
-                w0 = w;
-            }
-            else
-            {
-                w0 = getDefaultWidth();
-            }
+            w0 = widths.get(cid);
         }
         else
         {
@@ -269,10 +262,7 @@ public abstract class PDCIDFont implements COSObjectable, PDFontLike, PDVectorFo
         {
             return v;
         }
-        else
-        {
-            return getDefaultPositionVector(cid);
-        }
+        return getDefaultPositionVector(cid);
     }
 
     /**
@@ -289,10 +279,7 @@ public abstract class PDCIDFont implements COSObjectable, PDFontLike, PDVectorFo
         {
             return w1y;
         }
-        else
-        {
-            return dw2[1];
-        }
+        return dw2[1];
     }
 
     @Override
@@ -308,20 +295,9 @@ public abstract class PDCIDFont implements COSObjectable, PDFontLike, PDVectorFo
         int cid = codeToCID(code);
         if (widths.containsKey(cid))
         {
-            Float w = widths.get(cid);
-            if (w != null)
-            {
-                return w;
-            }
-            else
-            {
-                return getDefaultWidth();
-            }
+            return widths.get(cid);
         }
-        else
-        {
-            return getWidthFromFont(code);
-        }
+        return getDefaultWidth();
     }
 
     @Override
@@ -367,7 +343,7 @@ public abstract class PDCIDFont implements COSObjectable, PDFontLike, PDVectorFo
             }
         }
         float average = totalWidths / characterCount;
-        if (average <= 0)
+        if (average <= 0 || Float.isNaN(average))
         {
             average = getDefaultWidth();
         }
@@ -379,8 +355,8 @@ public abstract class PDCIDFont implements COSObjectable, PDFontLike, PDVectorFo
      */
     public PDCIDSystemInfo getCIDSystemInfo()
     {
-        COSDictionary cidSystemInfoDict = (COSDictionary)
-                dict.getDictionaryObject(COSName.CIDSYSTEMINFO);
+        COSDictionary cidSystemInfoDict = (COSDictionary) dict
+                .getDictionaryObject(COSName.CIDSYSTEMINFO);
 
         PDCIDSystemInfo cidSystemInfo = null;
         if (cidSystemInfoDict != null)
@@ -390,7 +366,7 @@ public abstract class PDCIDFont implements COSObjectable, PDFontLike, PDVectorFo
 
         return cidSystemInfo;
     }
-    
+
     /**
      * Returns the CID for the given character code. If not found then CID 0 is returned.
      *
@@ -408,10 +384,11 @@ public abstract class PDCIDFont implements COSObjectable, PDFontLike, PDVectorFo
     public abstract int codeToGID(int code) throws IOException;
 
     /**
-     * Encodes the given Unicode code point for use in a PDF content stream.
-     * Content streams use a multi-byte encoding with 1 to 4 bytes.
+     * Encodes the given Unicode code point for use in a PDF content stream. Content streams use a multi-byte encoding
+     * with 1 to 4 bytes.
      *
-     * <p>This method is called when embedding text in PDFs and when filling in fields.
+     * <p>
+     * This method is called when embedding text in PDFs and when filling in fields.
      *
      * @param unicode Unicode code point.
      * @return Array of 1 to 4 PDF content stream bytes.

@@ -67,6 +67,7 @@ class PDFTextStreamEngine extends PDFStreamEngine
 
     private int pageRotation;
     private PDRectangle pageSize;
+    private Matrix translateMatrix;
     private final GlyphList glyphList;
 
     /**
@@ -114,6 +115,16 @@ class PDFTextStreamEngine extends PDFStreamEngine
     {
         this.pageRotation = page.getRotation();
         this.pageSize = page.getCropBox();
+        if (pageSize.getLowerLeftX() == 0 && pageSize.getLowerLeftY() == 0)
+        {
+            translateMatrix = null;
+        }
+        else
+        {
+            // translation matrix for cropbox
+            translateMatrix = Matrix.getTranslateInstance(-pageSize.getLowerLeftX(),
+                    -pageSize.getLowerLeftY());
+        }
         super.processPage(page);
     }
 
@@ -167,17 +178,10 @@ class PDFTextStreamEngine extends PDFStreamEngine
         // Text or Disp to represent if the values are in text or disp units (no glyph units are
         // saved).
 
-        float fontSizeText = getGraphicsState().getTextState().getFontSize();
-        float horizontalScalingText = getGraphicsState().getTextState().getHorizontalScaling()
-                / 100f;
-        // Matrix ctm = getGraphicsState().getCurrentTransformationMatrix();
-
         float glyphSpaceToTextSpaceFactor = 1 / 1000f;
         if (font instanceof PDType3Font)
         {
-            // This will typically be 1000 but in the case of a type3 font
-            // this might be a different number
-            glyphSpaceToTextSpaceFactor = 1f / font.getFontMatrix().getScaleX();
+            glyphSpaceToTextSpaceFactor = font.getFontMatrix().getScaleX();
         }
 
         float spaceWidthText = 0;
@@ -203,8 +207,7 @@ class PDFTextStreamEngine extends PDFStreamEngine
         }
 
         // the space width has to be transformed into display units
-        float spaceWidthDisplay = spaceWidthText * fontSizeText * horizontalScalingText
-                * textRenderingMatrix.getScalingFactorX();
+        float spaceWidthDisplay = spaceWidthText * textRenderingMatrix.getScalingFactorX();
 
         // use our additional glyph list for Unicode mapping
         unicode = font.toUnicode(code, glyphList);
@@ -226,9 +229,22 @@ class PDFTextStreamEngine extends PDFStreamEngine
                 return;
             }
         }
-
+        // adjust for cropbox if needed
+        Matrix translatedTextRenderingMatrix;
+        if (translateMatrix == null)
+        {
+            translatedTextRenderingMatrix = textRenderingMatrix;
+        }
+        else
+        {
+            translatedTextRenderingMatrix = Matrix.concatenate(translateMatrix,
+                    textRenderingMatrix);
+            nextX -= pageSize.getLowerLeftX();
+            nextY -= pageSize.getLowerLeftY();
+        }
         processTextPosition(new TextPosition(pageRotation, pageSize.getWidth(),
-                pageSize.getHeight(), textRenderingMatrix, nextX, nextY, dyDisplay, dxDisplay,
+                pageSize.getHeight(), translatedTextRenderingMatrix, nextX, nextY, dyDisplay,
+                dxDisplay,
                 spaceWidthDisplay, unicode, new int[] { code }, font, fontSize,
                 (int) (fontSize * textRenderingMatrix.getScalingFactorX())));
     }

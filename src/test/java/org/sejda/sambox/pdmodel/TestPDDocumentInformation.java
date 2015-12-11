@@ -19,10 +19,10 @@ package org.sejda.sambox.pdmodel;
 import java.util.Arrays;
 import java.util.List;
 
-import junit.framework.TestCase;
-
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.input.PDFParser;
+
+import junit.framework.TestCase;
 
 /**
  * This class tests the extraction of document-level metadata.
@@ -35,8 +35,8 @@ public class TestPDDocumentInformation extends TestCase
 
     public void testMetadataExtraction() throws Exception
     {
-        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(getClass()
-                .getResourceAsStream("/input/hello3.pdf"))))
+        try (PDDocument doc = PDFParser.parse(SeekableSources
+                .inMemorySeekableSourceFrom(getClass().getResourceAsStream("/input/hello3.pdf"))))
         {
             // This document has been selected for this test as it contains custom metadata.
             PDDocumentInformation info = doc.getDocumentInformation();
@@ -50,11 +50,11 @@ public class TestPDDocumentInformation extends TestCase
             assertNull("Wrong subject", info.getSubject());
             assertNull("Wrong trapped", info.getTrapped());
 
-            List<String> expectedMetadataKeys = Arrays.asList(new String[] { "CreationDate",
-                    "Author", "Creator", "Producer", "ModDate", "Company", "SourceModified",
-                    "Title" });
-            assertEquals("Wrong metadata key count", expectedMetadataKeys.size(), info
-                    .getMetadataKeys().size());
+            List<String> expectedMetadataKeys = Arrays
+                    .asList(new String[] { "CreationDate", "Author", "Creator", "Producer",
+                            "ModDate", "Company", "SourceModified", "Title" });
+            assertEquals("Wrong metadata key count", expectedMetadataKeys.size(),
+                    info.getMetadataKeys().size());
             for (String key : expectedMetadataKeys)
             {
                 assertTrue("Missing metadata key:" + key, info.getMetadataKeys().contains(key));
@@ -65,6 +65,21 @@ public class TestPDDocumentInformation extends TestCase
                     info.getCustomMetadataValue("Company"));
             assertEquals("Wrong sourceModified", "D:20080819181502",
                     info.getCustomMetadataValue("SourceModified"));
+        }
+    }
+
+    /**
+     * PDFBOX-3068: test that indirect /Title element of /Info entry can be found.
+     * 
+     * @throws Exception
+     */
+    public void testPDFBox3068() throws Exception
+    {
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/org/sejda/sambox/pdmodel/PDFBOX-3068.pdf"))))
+        {
+            PDDocumentInformation documentInformation = doc.getDocumentInformation();
+            assertEquals("Title", documentInformation.getTitle());
         }
     }
 }

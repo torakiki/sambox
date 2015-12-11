@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.fontbox.ttf.TrueTypeFont;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSInteger;
@@ -34,8 +35,7 @@ import org.sejda.sambox.pdmodel.common.PDStream;
 import org.sejda.sambox.util.SpecVersionUtils;
 
 /**
- * Embedded PDCIDFontType2 builder. Helper class to populate a PDCIDFontType2 and its parent
- * PDType0Font from a TTF.
+ * Embedded PDCIDFontType2 builder. Helper class to populate a PDCIDFontType2 and its parent PDType0Font from a TTF.
  *
  * @author Keiji Suzuki
  * @author John Hewson
@@ -53,14 +53,14 @@ final class PDCIDFontType2Embedder extends TrueTypeEmbedder
      *
      * @param document parent document
      * @param dict font dictionary
-     * @param ttfStream TTF stream
+     * @param ttf True Type Font
      * @param parent parent Type 0 font
      * @throws IOException if the TTF could not be read
      */
-    PDCIDFontType2Embedder(PDDocument document, COSDictionary dict, InputStream ttfStream,
-                           boolean embedSubset, PDType0Font parent) throws IOException
+    PDCIDFontType2Embedder(PDDocument document, COSDictionary dict, TrueTypeFont ttf,
+            boolean embedSubset, PDType0Font parent) throws IOException
     {
-        super(dict, ttfStream, embedSubset);
+        super(dict, ttf, embedSubset);
         this.document = document;
         this.dict = dict;
         this.parent = parent;
@@ -131,10 +131,7 @@ final class PDCIDFontType2Embedder extends TrueTypeEmbedder
                 {
                     continue;
                 }
-                else
-                {
-                    cid = newGIDToOldCID.get(gid);
-                }
+                cid = newGIDToOldCID.get(gid);
             }
             else
             {
@@ -149,7 +146,7 @@ final class PDCIDFontType2Embedder extends TrueTypeEmbedder
                 {
                     hasSurrogates = true;
                 }
-                toUniWriter.add(cid, new String(new int[]{ codePoint }, 0, 1));
+                toUniWriter.add(cid, new String(new int[] { codePoint }, 0, 1));
             }
         }
 
@@ -229,7 +226,7 @@ final class PDCIDFontType2Embedder extends TrueTypeEmbedder
             {
                 gid = 0;
             }
-            out.write(new byte[] { (byte)(gid >> 8 & 0xff), (byte)(gid & 0xff) });
+            out.write(new byte[] { (byte) (gid >> 8 & 0xff), (byte) (gid & 0xff) });
         }
 
         InputStream input = new ByteArrayInputStream(out.toByteArray());
@@ -307,7 +304,7 @@ final class PDCIDFontType2Embedder extends TrueTypeEmbedder
 
         cidFont.setItem(COSName.W, getWidths(gidwidths));
     }
-    
+
     enum State
     {
         FIRST, BRACKET, SERIAL
@@ -333,58 +330,58 @@ final class PDCIDFontType2Embedder extends TrueTypeEmbedder
 
         for (int i = 2; i < widths.length; i += 2)
         {
-            long cid   = widths[i];
+            long cid = widths[i];
             long value = Math.round(widths[i + 1] * scaling);
 
             switch (state)
             {
-                case FIRST:
-                    if (cid == lastCid + 1 && value == lastValue)
-                    {
-                        state = State.SERIAL;
-                    }
-                    else if (cid == lastCid + 1)
-                    {
-                        state = State.BRACKET;
-                        inner = new COSArray();
-                        inner.add(COSInteger.get(lastValue));
-                    }
-                    else
-                    {
-                        inner = new COSArray();
-                        inner.add(COSInteger.get(lastValue));
-                        outer.add(inner);
-                        outer.add(COSInteger.get(cid));
-                    }
-                    break;
-                case BRACKET:
-                    if (cid == lastCid + 1 && value == lastValue)
-                    {
-                        state = State.SERIAL;
-                        outer.add(inner);
-                        outer.add(COSInteger.get(lastCid));
-                    }
-                    else if (cid == lastCid + 1)
-                    {
-                        inner.add(COSInteger.get(lastValue));
-                    }
-                    else
-                    {
-                        state = State.FIRST;
-                        inner.add(COSInteger.get(lastValue));
-                        outer.add(inner);
-                        outer.add(COSInteger.get(cid));
-                    }
-                    break;
-                case SERIAL:
-                    if (cid != lastCid + 1 || value != lastValue)
-                    {
-                        outer.add(COSInteger.get(lastCid));
-                        outer.add(COSInteger.get(lastValue));
-                        outer.add(COSInteger.get(cid));
-                        state = State.FIRST;
-                    }
-                    break;
+            case FIRST:
+                if (cid == lastCid + 1 && value == lastValue)
+                {
+                    state = State.SERIAL;
+                }
+                else if (cid == lastCid + 1)
+                {
+                    state = State.BRACKET;
+                    inner = new COSArray();
+                    inner.add(COSInteger.get(lastValue));
+                }
+                else
+                {
+                    inner = new COSArray();
+                    inner.add(COSInteger.get(lastValue));
+                    outer.add(inner);
+                    outer.add(COSInteger.get(cid));
+                }
+                break;
+            case BRACKET:
+                if (cid == lastCid + 1 && value == lastValue)
+                {
+                    state = State.SERIAL;
+                    outer.add(inner);
+                    outer.add(COSInteger.get(lastCid));
+                }
+                else if (cid == lastCid + 1)
+                {
+                    inner.add(COSInteger.get(lastValue));
+                }
+                else
+                {
+                    state = State.FIRST;
+                    inner.add(COSInteger.get(lastValue));
+                    outer.add(inner);
+                    outer.add(COSInteger.get(cid));
+                }
+                break;
+            case SERIAL:
+                if (cid != lastCid + 1 || value != lastValue)
+                {
+                    outer.add(COSInteger.get(lastCid));
+                    outer.add(COSInteger.get(lastValue));
+                    outer.add(COSInteger.get(cid));
+                    state = State.FIRST;
+                }
+                break;
             }
             lastValue = value;
             lastCid = cid;
@@ -392,19 +389,19 @@ final class PDCIDFontType2Embedder extends TrueTypeEmbedder
 
         switch (state)
         {
-            case FIRST:
-                inner = new COSArray();
-                inner.add(COSInteger.get(lastValue));
-                outer.add(inner);
-                break;
-            case BRACKET:
-                inner.add(COSInteger.get(lastValue));
-                outer.add(inner);
-                break;
-            case SERIAL:
-                outer.add(COSInteger.get(lastCid));
-                outer.add(COSInteger.get(lastValue));
-                break;
+        case FIRST:
+            inner = new COSArray();
+            inner.add(COSInteger.get(lastValue));
+            outer.add(inner);
+            break;
+        case BRACKET:
+            inner.add(COSInteger.get(lastValue));
+            outer.add(inner);
+            break;
+        case SERIAL:
+            outer.add(COSInteger.get(lastCid));
+            outer.add(COSInteger.get(lastValue));
+            break;
         }
         return outer;
     }
@@ -414,6 +411,6 @@ final class PDCIDFontType2Embedder extends TrueTypeEmbedder
      */
     public PDCIDFont getCIDFont() throws IOException
     {
-        return PDFontFactory.createDescendantFont(cidFont, parent);
+        return new PDCIDFontType2(cidFont, parent, ttf);
     }
 }

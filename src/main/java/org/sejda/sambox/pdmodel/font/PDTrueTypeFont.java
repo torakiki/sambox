@@ -37,6 +37,7 @@ import org.apache.fontbox.util.BoundingBox;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.PDDocument;
+import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.common.PDStream;
 import org.sejda.sambox.pdmodel.font.encoding.BuiltInEncoding;
 import org.sejda.sambox.pdmodel.font.encoding.Encoding;
@@ -261,6 +262,12 @@ public class PDTrueTypeFont extends PDSimpleFont implements PDVectorFont
     @Override
     public BoundingBox getBoundingBox() throws IOException
     {
+        if (getFontDescriptor() != null)
+        {
+            PDRectangle bbox = getFontDescriptor().getFontBoundingBox();
+            return new BoundingBox(bbox.getLowerLeftX(), bbox.getLowerLeftY(),
+                    bbox.getUpperRightX(), bbox.getUpperRightY());
+        }
         return ttf.getFontBBox();
     }
 

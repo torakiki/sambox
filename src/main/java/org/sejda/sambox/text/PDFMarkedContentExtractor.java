@@ -25,6 +25,7 @@ import java.util.Stack;
 
 import org.sejda.sambox.contentstream.operator.markedcontent.BeginMarkedContentSequence;
 import org.sejda.sambox.contentstream.operator.markedcontent.BeginMarkedContentSequenceWithProperties;
+import org.sejda.sambox.contentstream.operator.markedcontent.DrawObject;
 import org.sejda.sambox.contentstream.operator.markedcontent.EndMarkedContentSequence;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
@@ -61,6 +62,7 @@ public class PDFMarkedContentExtractor extends PDFTextStreamEngine
         addOperator(new BeginMarkedContentSequenceWithProperties());
         addOperator(new BeginMarkedContentSequence());
         addOperator(new EndMarkedContentSequence());
+        addOperator(new DrawObject());
         // todo: DP - Marked Content Point
         // todo: MP - Marked Content Point with Properties
     }

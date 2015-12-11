@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.cos;
 
+import static java.util.Optional.ofNullable;
 import static org.sejda.util.RequireUtils.requireNotBlank;
 import static org.sejda.util.RequireUtils.requireNotNullArg;
 
@@ -55,6 +56,9 @@ public class COSDocument extends COSBase
         requireNotBlank(headerVersion, "Header version cannot be blank");
         this.trailer = trailer;
         this.headerVersion = headerVersion;
+        ofNullable(this.trailer.getDictionaryObject(COSName.ROOT))
+                .filter(c -> c instanceof COSDictionary).map(c -> (COSDictionary) c)
+                .ifPresent(d -> d.setItem(COSName.TYPE, COSName.CATALOG));
     }
 
     /**

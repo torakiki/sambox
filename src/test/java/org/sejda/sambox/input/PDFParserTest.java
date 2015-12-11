@@ -25,6 +25,7 @@ import java.io.IOException;
 
 import org.junit.Test;
 import org.sejda.io.SeekableSources;
+import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.util.SpecVersionUtils;
 
@@ -137,6 +138,22 @@ public class PDFParserTest
                 getClass().getResourceAsStream("/sambox/missing_page_type.pdf"))))
         {
             assertNotNull(doc.getPage(0));
+        }
+    }
+
+    @Test
+    public void missingCatalog() throws IOException
+    {
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/org/sejda/sambox/input/MissingCatalog.pdf"))))
+        {
+            assertNotNull(doc);
+            assertFalse(doc.isEncrypted());
+            assertTrue(doc.isOpen());
+            assertEquals(SpecVersionUtils.V1_4, doc.getVersion());
+            assertNotNull(doc.getDocumentCatalog());
+            assertEquals(COSName.CATALOG,
+                    doc.getDocumentCatalog().getCOSObject().getItem(COSName.TYPE));
         }
     }
 

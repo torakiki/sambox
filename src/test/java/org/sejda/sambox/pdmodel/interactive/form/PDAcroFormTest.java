@@ -21,12 +21,15 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.PDDocument;
 
 /**
@@ -77,6 +80,18 @@ public class PDAcroFormTest
         assertTrue(acroForm.getDefaultAppearance().isEmpty());
         acroForm.setDefaultAppearance("/Helv 0 Tf 0 g");
         assertEquals(acroForm.getDefaultAppearance(), "/Helv 0 Tf 0 g");
+    }
+
+    @Test
+    public void testFlatten() throws IOException
+    {
+        try (PDDocument doc = PDFParser
+                .parse(SeekableSources.inMemorySeekableSourceFrom(getClass().getResourceAsStream(
+                        "/org/sejda/sambox/pdmodel/interactive/form/AlignmentTests.pdf"))))
+        {
+            doc.getDocumentCatalog().getAcroForm().flatten();
+            doc.writeTo(new ByteArrayOutputStream());
+        }
     }
 
     @After

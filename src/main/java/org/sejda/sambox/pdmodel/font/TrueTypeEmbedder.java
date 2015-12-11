@@ -62,12 +62,27 @@ abstract class TrueTypeEmbedder implements Subsetter
     /**
      * Creates a new TrueType font for embedding.
      */
-    TrueTypeEmbedder(COSDictionary dict, InputStream ttfStream,
-                     boolean embedSubset) throws IOException
+    TrueTypeEmbedder(COSDictionary dict, InputStream ttfStream, boolean embedSubset)
+            throws IOException
     {
         this.embedSubset = embedSubset;
 
         buildFontFile2(ttfStream);
+        dict.setName(COSName.BASE_FONT, ttf.getName());
+
+        // choose a Unicode "cmap"
+        cmap = ttf.getUnicodeCmap();
+    }
+
+    /**
+     * Creates a new TrueType font for embedding.
+     */
+    TrueTypeEmbedder(COSDictionary dict, TrueTypeFont ttf, boolean embedSubset) throws IOException
+    {
+        this.embedSubset = embedSubset;
+        this.ttf = ttf;
+        fontDescriptor = createFontDescriptor(ttf);
+
         dict.setName(COSName.BASE_FONT, ttf.getName());
 
         // choose a Unicode "cmap"
@@ -112,14 +127,14 @@ abstract class TrueTypeEmbedder implements Subsetter
             int fsType = ttf.getOS2Windows().getFsType();
             int exclusive = fsType & 0x8; // bits 0-3 are a set of exclusive bits
 
-            if ((exclusive & OS2WindowsMetricsTable.FSTYPE_RESTRICTED) ==
-                             OS2WindowsMetricsTable.FSTYPE_RESTRICTED)
+            if ((exclusive
+                    & OS2WindowsMetricsTable.FSTYPE_RESTRICTED) == OS2WindowsMetricsTable.FSTYPE_RESTRICTED)
             {
                 // restricted License embedding
                 return false;
             }
-            else if ((exclusive & OS2WindowsMetricsTable.FSTYPE_BITMAP_ONLY) ==
-                                 OS2WindowsMetricsTable.FSTYPE_BITMAP_ONLY)
+            else if ((exclusive
+                    & OS2WindowsMetricsTable.FSTYPE_BITMAP_ONLY) == OS2WindowsMetricsTable.FSTYPE_BITMAP_ONLY)
             {
                 // bitmap embedding only
                 return false;
@@ -136,8 +151,8 @@ abstract class TrueTypeEmbedder implements Subsetter
         if (ttf.getOS2Windows() != null)
         {
             int fsType = ttf.getOS2Windows().getFsType();
-            if ((fsType & OS2WindowsMetricsTable.FSTYPE_NO_SUBSETTING) ==
-                          OS2WindowsMetricsTable.FSTYPE_NO_SUBSETTING)
+            if ((fsType
+                    & OS2WindowsMetricsTable.FSTYPE_NO_SUBSETTING) == OS2WindowsMetricsTable.FSTYPE_NO_SUBSETTING)
             {
                 return false;
             }
@@ -157,25 +172,25 @@ abstract class TrueTypeEmbedder implements Subsetter
         PostScriptTable post = ttf.getPostScript();
 
         // Flags
-        fd.setFixedPitch(post.getIsFixedPitch() > 0 ||
-                         ttf.getHorizontalHeader().getNumberOfHMetrics() == 1);
+        fd.setFixedPitch(
+                post.getIsFixedPitch() > 0 || ttf.getHorizontalHeader().getNumberOfHMetrics() == 1);
 
         int fsSelection = os2.getFsSelection();
-        fd.setItalic((fsSelection & ITALIC) == fsSelection ||
-                     (fsSelection & OBLIQUE) == fsSelection);
+        fd.setItalic(
+                (fsSelection & ITALIC) == fsSelection || (fsSelection & OBLIQUE) == fsSelection);
 
         switch (os2.getFamilyClass())
         {
-            case OS2WindowsMetricsTable.FAMILY_CLASS_CLAREDON_SERIFS:
-            case OS2WindowsMetricsTable.FAMILY_CLASS_FREEFORM_SERIFS:
-            case OS2WindowsMetricsTable.FAMILY_CLASS_MODERN_SERIFS:
-            case OS2WindowsMetricsTable.FAMILY_CLASS_OLDSTYLE_SERIFS:
-            case OS2WindowsMetricsTable.FAMILY_CLASS_SLAB_SERIFS:
-                fd.setSerif(true);
-                break;
-            case OS2WindowsMetricsTable.FAMILY_CLASS_SCRIPTS:
-                fd.setScript(true);
-                break;
+        case OS2WindowsMetricsTable.FAMILY_CLASS_CLAREDON_SERIFS:
+        case OS2WindowsMetricsTable.FAMILY_CLASS_FREEFORM_SERIFS:
+        case OS2WindowsMetricsTable.FAMILY_CLASS_MODERN_SERIFS:
+        case OS2WindowsMetricsTable.FAMILY_CLASS_OLDSTYLE_SERIFS:
+        case OS2WindowsMetricsTable.FAMILY_CLASS_SLAB_SERIFS:
+            fd.setSerif(true);
+            break;
+        case OS2WindowsMetricsTable.FAMILY_CLASS_SCRIPTS:
+            fd.setScript(true);
+            break;
         }
 
         fd.setFontWeight(os2.getWeightClass());
@@ -237,13 +252,13 @@ abstract class TrueTypeEmbedder implements Subsetter
     {
         return fontDescriptor;
     }
-    
+
     @Override
     public void addToSubset(int codePoint)
     {
         subsetCodePoints.add(codePoint);
     }
-    
+
     @Override
     public void subset() throws IOException
     {
@@ -251,7 +266,7 @@ abstract class TrueTypeEmbedder implements Subsetter
         {
             throw new IOException("This font does not permit subsetting");
         }
-        
+
         if (!embedSubset)
         {
             throw new IllegalStateException("Subsetting is disabled");
@@ -295,12 +310,12 @@ abstract class TrueTypeEmbedder implements Subsetter
     {
         return embedSubset;
     }
-    
+
     /**
      * Rebuild a font subset.
      */
     protected abstract void buildSubset(InputStream ttfSubset, String tag,
-                                     Map<Integer, Integer> gidToCid) throws IOException;
+            Map<Integer, Integer> gidToCid) throws IOException;
 
     /**
      * Returns an uppercase 6-character unique tag for the given subset.
@@ -315,7 +330,7 @@ abstract class TrueTypeEmbedder implements Subsetter
         do
         {
             long div = num / 25;
-            int mod = (int)(num % 25);
+            int mod = (int) (num % 25);
             sb.append(BASE25.charAt(mod));
             num = div;
         } while (num != 0 && sb.length() < 6);

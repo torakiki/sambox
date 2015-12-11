@@ -35,10 +35,12 @@ import org.apache.fontbox.cff.CFFType1Font;
 import org.apache.fontbox.cff.Type2CharString;
 import org.apache.fontbox.util.BoundingBox;
 import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.common.PDStream;
 import org.sejda.sambox.util.Matrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 /**
  * Type 0 CIDFont (CFF).
  * 
@@ -175,8 +177,8 @@ public class PDCIDFontType0 extends PDCIDFont
             if (numbers != null && numbers.size() == 6)
             {
                 fontMatrix = new Matrix(numbers.get(0).floatValue(), numbers.get(1).floatValue(),
-                        numbers.get(2).floatValue(), numbers.get(3).floatValue(), numbers.get(4)
-                                .floatValue(), numbers.get(5).floatValue());
+                        numbers.get(2).floatValue(), numbers.get(3).floatValue(),
+                        numbers.get(4).floatValue(), numbers.get(5).floatValue());
             }
             else
             {
@@ -189,6 +191,16 @@ public class PDCIDFontType0 extends PDCIDFont
     @Override
     public BoundingBox getBoundingBox()
     {
+        if (getFontDescriptor() != null)
+        {
+            PDRectangle bbox = getFontDescriptor().getFontBoundingBox();
+            if (bbox.getLowerLeftX() != 0 || bbox.getLowerLeftY() != 0 || bbox.getUpperRightX() != 0
+                    || bbox.getUpperRightY() != 0)
+            {
+                return new BoundingBox(bbox.getLowerLeftX(), bbox.getLowerLeftY(),
+                        bbox.getUpperRightX(), bbox.getUpperRightY());
+            }
+        }
         if (cidFont != null)
         {
             return cidFont.getFontBBox();

@@ -33,7 +33,7 @@ public class PDPanoseClassification implements Serializable
     {
         this.bytes = bytes;
     }
-    
+
     public int getFamilyKind()
     {
         return bytes[0];
@@ -68,7 +68,7 @@ public class PDPanoseClassification implements Serializable
     {
         return bytes[6];
     }
-    
+
     public int getLetterform()
     {
         return bytes[7];
@@ -84,18 +84,18 @@ public class PDPanoseClassification implements Serializable
         return bytes[9];
     }
 
+    public byte[] getBytes()
+    {
+        return bytes;
+    }
+
     @Override
     public String toString()
     {
-        return "{ FamilyType = " + getFamilyKind() + ", " +
-                 "SerifStyle = " + getSerifStyle() + ", " +
-                 "Weight = " + getWeight() + ", " +
-                 "Proportion = " + getProportion() + ", " + 
-                 "Contrast = " + getContrast() + ", " +
-                 "StrokeVariation = " + getStrokeVariation() + ", " +
-                 "ArmStyle = " + getArmStyle() + ", " +
-                 "Letterform = " + getLetterform() + ", " +
-                 "Midline = " + getMidline() + ", " +
-                 "XHeight = " + getXHeight() + "}";
+        return "{ FamilyType = " + getFamilyKind() + ", " + "SerifStyle = " + getSerifStyle() + ", "
+                + "Weight = " + getWeight() + ", " + "Proportion = " + getProportion() + ", "
+                + "Contrast = " + getContrast() + ", " + "StrokeVariation = " + getStrokeVariation()
+                + ", " + "ArmStyle = " + getArmStyle() + ", " + "Letterform = " + getLetterform()
+                + ", " + "Midline = " + getMidline() + ", " + "XHeight = " + getXHeight() + "}";
     }
 }

@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.contentstream;
 
+import static java.util.Optional.ofNullable;
+
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -89,7 +91,6 @@ public abstract class PDFStreamEngine
     protected PDFStreamEngine()
     {
     }
-
 
     /**
      * Adds an operator processor to the engine.
@@ -269,15 +270,16 @@ public abstract class PDFStreamEngine
             // compute a matrix which scales and translates the transformed appearance box to align
             // with the edges of the annotation's rectangle
             Matrix a = Matrix.getTranslateInstance(rect.getLowerLeftX(), rect.getLowerLeftY());
-            a.concatenate(Matrix.getScaleInstance(
-                    (float) (rect.getWidth() / transformedBox.getWidth()),
-                    (float) (rect.getHeight() / transformedBox.getHeight())));
+            a.concatenate(
+                    Matrix.getScaleInstance((float) (rect.getWidth() / transformedBox.getWidth()),
+                            (float) (rect.getHeight() / transformedBox.getHeight())));
             a.concatenate(Matrix.getTranslateInstance((float) -transformedBox.getX(),
                     (float) -transformedBox.getY()));
 
-            // Matrix shall be concatenated with A to form a matrix AA that maps from the appearance's
-            // coordinate system to the annotation's rectangle in default user space
-            Matrix aa = Matrix.concatenate(matrix, a);
+            //
+            // HOWEVER only the opposite order works for rotated pages with
+            // filled fields / annotations that have a matrix in the appearance stream, see PDFBOX-3083
+            Matrix aa = Matrix.concatenate(a, matrix);
 
             // make matrix AA the CTM
             getGraphicsState().setCurrentTransformationMatrix(aa);
@@ -386,8 +388,7 @@ public abstract class PDFStreamEngine
      * @param contentStream the child content stream
      * @throws IOException if there is an exception while processing the stream
      */
-    protected void processChildStream(PDContentStream contentStream, PDPage page)
-            throws IOException
+    protected void processChildStream(PDContentStream contentStream, PDPage page) throws IOException
     {
         if (isProcessingPage)
         {
@@ -495,8 +496,8 @@ public abstract class PDFStreamEngine
     {
         if (rectangle != null)
         {
-            GeneralPath clip = rectangle.transform(getGraphicsState()
-                    .getCurrentTransformationMatrix());
+            GeneralPath clip = rectangle
+                    .transform(getGraphicsState().getCurrentTransformationMatrix());
             getGraphicsState().intersectClippingPath(clip);
         }
     }
@@ -545,7 +546,8 @@ public abstract class PDFStreamEngine
         PDTextState textState = getGraphicsState().getTextState();
         float fontSize = textState.getFontSize();
         float horizontalScaling = textState.getHorizontalScaling() / 100f;
-        boolean isVertical = textState.getFont().isVertical();
+        PDFont font = textState.getFont();
+        boolean isVertical = ofNullable(font).map(PDFont::isVertical).orElse(false);
 
         for (COSBase obj : array)
         {
@@ -795,8 +797,7 @@ public abstract class PDFStreamEngine
      * @param operator The unknown operator.
      * @param operands The list of operands.
      */
-    protected void unsupportedOperator(Operator operator, List<COSBase> operands)
-            throws IOException
+    protected void unsupportedOperator(Operator operator, List<COSBase> operands) throws IOException
     {
         // overridden in subclasses
     }

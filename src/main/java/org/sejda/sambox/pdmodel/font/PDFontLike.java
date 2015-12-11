@@ -51,9 +51,9 @@ public interface PDFontLike
     BoundingBox getBoundingBox() throws IOException;
 
     /**
-     * Returns the position vector (v), in text space, for the given character.
-     * This represents the position of vertical origin relative to horizontal origin, for
-     * horizontal writing it will always be (0, 0). For vertical writing both x and y are set.
+     * Returns the position vector (v), in text space, for the given character. This represents the position of vertical
+     * origin relative to horizontal origin, for horizontal writing it will always be (0, 0). For vertical writing both
+     * x and y are set.
      *
      * @param code character code
      * @return position vector
@@ -61,15 +61,28 @@ public interface PDFontLike
     Vector getPositionVector(int code);
 
     /**
-     * Returns the height of the given character, in glyph space. This can be expensive to
-     * calculate. Results are only approximate.
-     *
+     * Returns the height of the given character, in glyph space. This can be expensive to calculate. Results are only
+     * approximate.
+     * </p>
+     * 
+     * Warning: This method is deprecated in PDFBox 2.0 because there is no meaningful value which it can return. The
+     * {@link #getWidth} method returns the advance width of a glyph, but there is no corresponding advance height. The
+     * logical height of a character is the same for every character in a font, so if you want that, retrieve the font
+     * bbox's height. Otherwise if you want the visual bounds of the glyph then call getPath(..) on the appropriate
+     * PDFont subclass to retrieve the glyph outline as a GeneralPath.
+     * 
      * @param code character code
+     * @deprecated Use {@link #getBoundingBox().getHeight()} instead.
      */
+    @Deprecated
     float getHeight(int code) throws IOException;
 
     /**
      * Returns the advance width of the given character, in glyph space.
+     * </p>
+     * 
+     * If you want the visual bounds of the glyph then call getPath(..) on the appropriate PDFont subclass to retrieve
+     * the glyph outline as a GeneralPath instead.
      *
      * @param code character code
      */

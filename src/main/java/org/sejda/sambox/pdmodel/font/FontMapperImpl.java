@@ -51,7 +51,7 @@ final class FontMapperImpl implements FontMapper
     private final TrueTypeFont lastResortFont;
 
     /** Map of PostScript name substitutes, in priority order. */
-    private final Map<String, List<String>> substitutes = new HashMap<String, List<String>>();
+    private final Map<String, List<String>> substitutes = new HashMap<>();
 
     FontMapperImpl()
     {
@@ -307,6 +307,7 @@ final class FontMapperImpl implements FontMapper
      *
      * @param fontDescriptor FontDescriptor
      */
+    @Override
     public FontMapping<TrueTypeFont> getTrueTypeFont(String baseFont,
             PDFontDescriptor fontDescriptor)
     {
@@ -335,6 +336,7 @@ final class FontMapperImpl implements FontMapper
      *
      * @param fontDescriptor the FontDescriptor of the font to find
      */
+    @Override
     public FontMapping<FontBoxFont> getFontBoxFont(String baseFont, PDFontDescriptor fontDescriptor)
     {
         FontBoxFont font = findFontBoxFont(baseFont);
@@ -342,8 +344,6 @@ final class FontMapperImpl implements FontMapper
         {
             return new FontMapping<FontBoxFont>(font, false);
         }
-        else
-        {
             // fallback - todo: i.e. fuzzy match
             String fallbackName = getFallbackFontName(fontDescriptor);
             font = findFontBoxFont(fallbackName);
@@ -353,7 +353,6 @@ final class FontMapperImpl implements FontMapper
                 font = lastResortFont;
             }
             return new FontMapping<FontBoxFont>(font, true);
-        }
     }
 
     /**
@@ -465,6 +464,7 @@ final class FontMapperImpl implements FontMapper
      * @param fontDescriptor FontDescriptor
      * @param cidSystemInfo the CID system info, e.g. "Adobe-Japan1", if any.
      */
+    @Override
     public CIDFontMapping getCIDFont(String baseFont, PDFontDescriptor fontDescriptor,
             PDCIDSystemInfo cidSystemInfo)
     {

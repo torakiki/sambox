@@ -25,6 +25,7 @@ import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSObjectKey;
 import org.sejda.sambox.cos.COSObjectable;
+import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.input.ExistingIndirectCOSObject;
 import org.sejda.sambox.pdmodel.documentinterchange.markedcontent.PDPropertyList;
 import org.sejda.sambox.pdmodel.font.PDFont;
@@ -139,6 +140,20 @@ public final class PDResources implements COSObjectable
      */
     public PDColorSpace getColorSpace(COSName name) throws IOException
     {
+        return getColorSpace(name, false);
+    }
+
+    /**
+     * Returns the color space resource with the given name, or null if none exists. This method is for PDFBox internal
+     * use only, others should use {@link getColorSpace(COSName)}.
+     *
+     * @param name Name of the color space resource.
+     * @param wasDefault if current color space was used by a default color space. This parameter is to
+     * @return a new color space.
+     * @throws IOException if something went wrong.
+     */
+    public PDColorSpace getColorSpace(COSName name, boolean wasDefault) throws IOException
+    {
         COSObjectKey key = getIndirectKey(COSName.COLORSPACE, name);
         if (cache != null && key != null)
         {
@@ -154,11 +169,11 @@ public final class PDResources implements COSObjectable
         COSBase object = get(COSName.COLORSPACE, name);
         if (object != null)
         {
-            colorSpace = PDColorSpace.create(object, this);
+            colorSpace = PDColorSpace.create(object, this, wasDefault);
         }
         else
         {
-            colorSpace = PDColorSpace.create(name, this);
+            colorSpace = PDColorSpace.create(name, this, wasDefault);
         }
 
         // we can't cache PDPattern, because it holds page resources, see PDFBOX-2370
@@ -307,6 +322,20 @@ public final class PDResources implements COSObjectable
             cache.put(key, propertyList);
         }
         return propertyList;
+    }
+
+    /**
+     * Tells whether the XObject resource with the given name is an image.
+     *
+     * @param name Name of the XObject resource.
+     * @return true if it is an image XObject, false if not.
+     */
+    public boolean isImageXObject(COSName name)
+    {
+        // get the instance
+        return Optional.ofNullable(get(COSName.XOBJECT, name)).map(COSBase::getCOSObject)
+                .map(s -> (COSStream) s)
+                .map(s -> COSName.IMAGE.equals(s.getCOSName(COSName.SUBTYPE))).orElse(false);
     }
 
     /**

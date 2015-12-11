@@ -154,9 +154,8 @@ public abstract class PDFont implements COSObjectable, PDFontLike
     }
 
     /**
-
-    /**
-     * Reads a CMap given a COS Stream or Name. May return null if a predefined CMap does not exist.
+     * 
+     * /** Reads a CMap given a COS Stream or Name. May return null if a predefined CMap does not exist.
      *
      * @param base COSName or COSStream
      */
@@ -165,7 +164,7 @@ public abstract class PDFont implements COSObjectable, PDFontLike
         if (base instanceof COSName)
         {
             // predefined CMap
-            String name = ((COSName)base).getName();
+            String name = ((COSName) base).getName();
             return CMapManager.getPredefinedCMap(name);
         }
         else if (base instanceof COSStream)
@@ -174,7 +173,7 @@ public abstract class PDFont implements COSObjectable, PDFontLike
             InputStream input = null;
             try
             {
-                input = ((COSStream)base).getUnfilteredStream();
+                input = ((COSStream) base).getUnfilteredStream();
                 return CMapManager.parseCMap(input);
             }
             finally
@@ -201,8 +200,8 @@ public abstract class PDFont implements COSObjectable, PDFontLike
     }
 
     /**
-     * Returns the displacement vector (w0, w1) in text space, for the given character.
-     * For horizontal text only the x component is used, for vertical text only the y component.
+     * Returns the displacement vector (w0, w1) in text space, for the given character. For horizontal text only the x
+     * component is used, for vertical text only the y component.
      *
      * @param code character code
      * @return displacement vector
@@ -232,9 +231,10 @@ public abstract class PDFont implements COSObjectable, PDFontLike
             }
 
             PDFontDescriptor fd = getFontDescriptor();
-            if (fd != null)
+            if (fd != null && fd.hasMissingWidth())
             {
-                return fd.getMissingWidth(); // default is 0
+                // get entry from /MissingWidth entry
+                return fd.getMissingWidth();
             }
         }
 
@@ -243,7 +243,7 @@ public abstract class PDFont implements COSObjectable, PDFontLike
         {
             return getStandard14Width(code);
         }
-        
+
         // if there's nothing to override with, then obviously we fall back to the font
         return getWidthFromFont(code);
     }
@@ -255,7 +255,7 @@ public abstract class PDFont implements COSObjectable, PDFontLike
      * @return width in 1/1000 text space
      */
     protected abstract float getStandard14Width(int code);
-    
+
     @Override
     public abstract float getWidthFromFont(int code) throws IOException;
 
@@ -275,7 +275,7 @@ public abstract class PDFont implements COSObjectable, PDFontLike
     public final byte[] encode(String text) throws IOException
     {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        for (int offset = 0; offset < text.length(); )
+        for (int offset = 0; offset < text.length();)
         {
             int codePoint = text.codePointAt(offset);
 
@@ -289,10 +289,11 @@ public abstract class PDFont implements COSObjectable, PDFontLike
     }
 
     /**
-     * Encodes the given Unicode code point for use in a PDF content stream.
-     * Content streams use a multi-byte encoding with 1 to 4 bytes.
+     * Encodes the given Unicode code point for use in a PDF content stream. Content streams use a multi-byte encoding
+     * with 1 to 4 bytes.
      *
-     * <p>This method is called when embedding text in PDFs and when filling in fields.
+     * <p>
+     * This method is called when embedding text in PDFs and when filling in fields.
      *
      * @param unicode Unicode code point.
      * @return Array of 1 to 4 PDF content stream bytes.
@@ -311,14 +312,14 @@ public abstract class PDFont implements COSObjectable, PDFontLike
     {
         byte[] bytes = encode(text);
         ByteArrayInputStream in = new ByteArrayInputStream(bytes);
-        
+
         float width = 0;
         while (in.available() > 0)
         {
             int code = readCode(in);
             width += getWidth(code);
         }
-        
+
         return width;
     }
 
@@ -402,7 +403,7 @@ public abstract class PDFont implements COSObjectable, PDFontLike
             if (toUnicodeCMap.getName() != null && toUnicodeCMap.getName().startsWith("Identity-"))
             {
                 // handle the undocumented case of using Identity-H/V as a ToUnicode CMap, this
-                // isn't  actually valid as the Identity-x CMaps are code->CID maps, not
+                // isn't actually valid as the Identity-x CMaps are code->CID maps, not
                 // code->Unicode maps. See sample_fonts_solidconvertor.pdf for an example.
                 return new String(new char[] { (char) code });
             }
@@ -537,7 +538,7 @@ public abstract class PDFont implements COSObjectable, PDFontLike
      * @param codePoint Unicode code point
      */
     public abstract void addToSubset(int codePoint);
-    
+
     /**
      * Replaces this font with a subset containing only the given Unicode characters.
      *
@@ -549,7 +550,7 @@ public abstract class PDFont implements COSObjectable, PDFontLike
      * Returns true if this font will be subset when embedded.
      */
     public abstract boolean willBeSubset();
-    
+
     @Override
     public abstract boolean isDamaged();
 
