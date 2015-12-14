@@ -385,7 +385,7 @@ public final class PDResources implements COSObjectable
                 .map(d -> ((COSDictionary) d).getItem(name)).orElse(null);
         if (found instanceof ExistingIndirectCOSObject)
         {
-            return ((ExistingIndirectCOSObject) found).key();
+            return ((ExistingIndirectCOSObject) found).id().objectIdentifier;
         }
         return null;
     }

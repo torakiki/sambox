@@ -24,6 +24,7 @@ import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.COSObjectKey;
 import org.sejda.sambox.cos.COSVisitor;
 import org.sejda.sambox.cos.DisposableCOSObject;
+import org.sejda.sambox.cos.IndirectCOSObjectIdentifier;
 
 /**
  * An indirect object belonging to an existing pdf document. Indirect objects are defined in Chap 7.3.10 of PDF
@@ -35,29 +36,30 @@ import org.sejda.sambox.cos.DisposableCOSObject;
 public class ExistingIndirectCOSObject extends COSBase implements DisposableCOSObject
 {
 
-    private COSObjectKey key;
+    private IndirectCOSObjectIdentifier id;
     private IndirectObjectsProvider provider;
-    private String id;
 
-    ExistingIndirectCOSObject(COSObjectKey key, IndirectObjectsProvider provider)
+    ExistingIndirectCOSObject(long objectNumber, int generationNumber,
+            IndirectObjectsProvider provider)
     {
-        this.key = key;
+        this.id = new IndirectCOSObjectIdentifier(new COSObjectKey(objectNumber, generationNumber),
+                provider.id());
         this.provider = provider;
-        this.id = String.format("%d %d %s", key.getNumber(), key.getGeneration(), provider.id());
     }
 
     @Override
     public COSBase getCOSObject()
     {
-        COSBase baseObject = Optional.ofNullable(provider.get(key)).orElse(COSNull.NULL);
-        baseObject.idIfAbsent(this.id());
+        COSBase baseObject = Optional.ofNullable(provider.get(id.objectIdentifier))
+                .orElse(COSNull.NULL);
+        baseObject.idIfAbsent(id);
         return baseObject;
     }
 
     @Override
     public void releaseCOSObject()
     {
-        provider.release(key);
+        provider.release(id.objectIdentifier);
     }
 
     @Override
@@ -66,13 +68,8 @@ public class ExistingIndirectCOSObject extends COSBase implements DisposableCOSO
         getCOSObject().accept(visitor);
     }
 
-    public COSObjectKey key()
-    {
-        return key;
-    }
-
     @Override
-    public String id()
+    public IndirectCOSObjectIdentifier id()
     {
         return id;
     }
@@ -80,7 +77,7 @@ public class ExistingIndirectCOSObject extends COSBase implements DisposableCOSO
     @Override
     public String toString()
     {
-        return String.format("%s[%s]", super.toString(), key.toString());
+        return String.format("%s[%s]", super.toString(), id.toString());
     }
 
 }

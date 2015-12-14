@@ -50,7 +50,7 @@ public class ExistingIndirectCOSObjectTest
     {
         provider = mock(IndirectObjectsProvider.class);
         when(provider.id()).thenReturn("sourceId");
-        victim = new ExistingIndirectCOSObject(key, provider);
+        victim = new ExistingIndirectCOSObject(key.objectNumber(), key.generation(), provider);
     }
 
     @Test
@@ -94,7 +94,8 @@ public class ExistingIndirectCOSObjectTest
     @Test
     public void sourceId()
     {
-        assertEquals("10 0 sourceId", victim.id());
+        assertEquals(key, victim.id().objectIdentifier);
+        assertEquals("sourceId", victim.id().ownerIdentifier);
     }
 
     @Test

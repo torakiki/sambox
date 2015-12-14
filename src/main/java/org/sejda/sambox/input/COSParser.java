@@ -23,10 +23,10 @@ import java.io.IOException;
 import org.sejda.io.SeekableSource;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSNumber;
-import org.sejda.sambox.cos.COSObjectKey;
 import org.sejda.sambox.util.Charsets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 /**
  * Parser for COS objects capable of handling indirect references.
  * 
@@ -139,15 +139,14 @@ class COSParser extends BaseCOSParser
             {
                 try
                 {
-                    return new ExistingIndirectCOSObject(new COSObjectKey(Long.parseLong(first),
-                            Integer.parseInt(second)), provider);
+                    return new ExistingIndirectCOSObject(Long.parseLong(first),
+                            Integer.parseInt(second), provider);
                 }
                 catch (NumberFormatException nfe)
                 {
-                    throw new IOException(
-                            String.format(
-                                    "Unable to parse an object indirect reference with object number '%s' and generation number '%s'",
-                                    first, second), nfe);
+                    throw new IOException(String.format(
+                            "Unable to parse an object indirect reference with object number '%s' and generation number '%s'",
+                            first, second), nfe);
                 }
             }
         }

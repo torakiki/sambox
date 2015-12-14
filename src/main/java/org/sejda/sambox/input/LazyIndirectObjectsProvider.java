@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.input;
 
+import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static org.sejda.sambox.input.BaseCOSParser.ENDOBJ;
@@ -202,7 +203,7 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
                 new COSObjectKey(((CompressedXrefEntry) xrefEntry).getObjectStreamNumber(), 0));
 
         requireIOCondition(
-                containingStreamEntry != null
+                nonNull(containingStreamEntry)
                         && containingStreamEntry.getType() != XrefType.COMPRESSED,
                 "Expected an uncompressed indirect object reference for the ObjectStream");
 

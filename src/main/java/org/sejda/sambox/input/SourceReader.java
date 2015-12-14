@@ -186,19 +186,19 @@ class SourceReader implements Closeable
     {
         long objNumOffset = position();
         long number = readObjectNumber();
-        if (number != expected.getNumber())
+        if (number != expected.objectNumber())
         {
             throw new IOException(String.format(
-                    "Expected '%d' object number at offset %d but was '%d'", expected.getNumber(),
+                    "Expected '%d' object number at offset %d but was '%d'", expected.objectNumber(),
                     objNumOffset, number));
         }
         long genNumOffset = position();
         long generation = readGenerationNumber();
-        if (generation != expected.getGeneration())
+        if (generation != expected.generation())
         {
             throw new IOException(String.format(
                     "Expected '%d' generation number at offset %d but was '%d'",
-                    expected.getGeneration(), genNumOffset, number));
+                    expected.generation(), genNumOffset, number));
         }
         skipSpaces();
         skipExpected(OBJ);

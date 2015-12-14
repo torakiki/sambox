@@ -16,6 +16,10 @@
  */
 package org.sejda.sambox.cos;
 
+import static java.util.Comparator.comparing;
+
+import java.util.Objects;
+
 /**
  * Object representing a key to identify a PDF object
  *
@@ -27,19 +31,19 @@ public class COSObjectKey implements Comparable<COSObjectKey>
     private final int generation;
 
     /**
-     * @param num The object number.
-     * @param gen The object generation number.
+     * @param number The object number.
+     * @param generation The object generation number.
      */
-    public COSObjectKey(long num, int gen)
+    public COSObjectKey(long number, int generation)
     {
-        number = num;
-        generation = gen;
+        this.number = number;
+        this.generation = generation;
     }
 
     /**
      * @return The objects generation number.
      */
-    public int getGeneration()
+    public int generation()
     {
         return generation;
     }
@@ -47,7 +51,7 @@ public class COSObjectKey implements Comparable<COSObjectKey>
     /**
      * @return The object number
      */
-    public long getNumber()
+    public long objectNumber()
     {
         return number;
     }
@@ -55,30 +59,31 @@ public class COSObjectKey implements Comparable<COSObjectKey>
     @Override
     public boolean equals(Object obj)
     {
-        return (obj instanceof COSObjectKey) && ((COSObjectKey) obj).getNumber() == getNumber()
-                && ((COSObjectKey) obj).getGeneration() == getGeneration();
+        if (!(obj instanceof COSObjectKey))
+        {
+            return false;
+        }
+        COSObjectKey other = (COSObjectKey) obj;
+
+        return (number == other.number && generation == other.generation);
     }
 
     @Override
     public int hashCode()
     {
-        return Long.valueOf(number + generation).hashCode();
+        return Long.hashCode(number + generation);
     }
 
     @Override
     public String toString()
     {
-        return "on=" + Long.toString(number) + ", gn=" + Integer.toString(generation);
+        return String.format("on=%d, gn=%d", number, generation);
     }
 
     @Override
     public int compareTo(COSObjectKey other)
     {
-        int numCompare = Long.compare(number, other.getNumber());
-        if (numCompare == 0)
-        {
-            return Integer.compare(generation, other.getGeneration());
-        }
-        return numCompare;
+        return Objects.compare(this, other,
+                comparing(COSObjectKey::objectNumber).thenComparingInt(k -> k.generation()));
     }
 }

@@ -62,12 +62,12 @@ public class XrefEntry
 
     public long getObjectNumber()
     {
-        return key.getNumber();
+        return key.objectNumber();
     }
 
     public int getGenerationNumber()
     {
-        return key.getGeneration();
+        return key.generation();
     }
 
     public boolean isUnknownOffset()
@@ -88,7 +88,7 @@ public class XrefEntry
     public boolean owns(XrefEntry entry)
     {
         return entry != null && entry.getType() == XrefType.COMPRESSED
-                && key.getNumber() == ((CompressedXrefEntry) entry).getObjectStreamNumber();
+                && key.objectNumber() == ((CompressedXrefEntry) entry).getObjectStreamNumber();
     }
 
     @Override
@@ -130,13 +130,13 @@ public class XrefEntry
         if (type == XrefType.FREE)
         {
             retVal[0] = 0b00000000;
-            copyBytesTo(key.getNumber(), secondFieldLength, retVal, 1);
-            copyBytesTo(key.getGeneration(), thirdFieldLength, retVal, 1 + secondFieldLength);
+            copyBytesTo(key.objectNumber(), secondFieldLength, retVal, 1);
+            copyBytesTo(key.generation(), thirdFieldLength, retVal, 1 + secondFieldLength);
             return retVal;
         }
         retVal[0] = 0b00000001;
         copyBytesTo(byteOffset, secondFieldLength, retVal, 1);
-        copyBytesTo(key.getGeneration(), thirdFieldLength, retVal, 1 + secondFieldLength);
+        copyBytesTo(key.generation(), thirdFieldLength, retVal, 1 + secondFieldLength);
         return retVal;
     }
 

@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 import org.sejda.sambox.cos.COSBase;
+import org.sejda.sambox.cos.IndirectCOSObjectIdentifier;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
 import org.sejda.sambox.input.ExistingIndirectCOSObject;
 import org.sejda.sambox.xref.XrefEntry;
@@ -45,7 +46,7 @@ class PDFWriteContext
 
     private String contextId = UUID.randomUUID().toString();
     private IndirectReferenceProvider referencesProvider = new IndirectReferenceProvider();
-    private Map<String, IndirectCOSObjectReference> lookupNewRef = new ConcurrentHashMap<>();
+    private Map<IndirectCOSObjectIdentifier, IndirectCOSObjectReference> lookupNewRef = new ConcurrentHashMap<>();
     private List<WriteOption> opts;
     private SortedMap<Long, XrefEntry> written = new ConcurrentSkipListMap<>();
 
@@ -68,7 +69,7 @@ class PDFWriteContext
             ExistingIndirectCOSObject existingItem = (ExistingIndirectCOSObject) item;
             IndirectCOSObjectReference newRef = referencesProvider.nextReferenceFor(existingItem);
             LOG.trace("Created new indirect reference {} replacing the existing one {}", newRef,
-                    existingItem.key());
+                    existingItem.id());
             lookupNewRef.put(existingItem.id(), newRef);
             return newRef;
 
@@ -76,7 +77,7 @@ class PDFWriteContext
         // it's a new COSBase
         IndirectCOSObjectReference newRef = referencesProvider.nextReferenceFor(item);
         LOG.trace("Created new indirect reference '{}' ", newRef);
-        item.idIfAbsent(String.format("%d %s", newRef.xrefEntry().key().getNumber(), contextId));
+        item.idIfAbsent(new IndirectCOSObjectIdentifier(newRef.xrefEntry().key(), contextId));
         lookupNewRef.put(item.id(), newRef);
         return newRef;
     }

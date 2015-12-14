@@ -27,6 +27,8 @@ import static org.mockito.Mockito.when;
 import org.junit.Before;
 import org.junit.Test;
 import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSObjectKey;
+import org.sejda.sambox.cos.IndirectCOSObjectIdentifier;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
 import org.sejda.sambox.input.ExistingIndirectCOSObject;
 import org.sejda.sambox.xref.XrefEntry;
@@ -63,7 +65,8 @@ public class PDFWriteContextTest
         IndirectCOSObjectReference ref2 = context.createIndirectReferenceFor(dic);
         assertNotEquals(ref, ref2);
         ExistingIndirectCOSObject existing = mock(ExistingIndirectCOSObject.class);
-        when(existing.id()).thenReturn("the id");
+        when(existing.id())
+                .thenReturn(new IndirectCOSObjectIdentifier(new COSObjectKey(10, 0), "Source"));
         IndirectCOSObjectReference ref3 = context.createIndirectReferenceFor(existing);
         assertEquals(existing, ref3.getCOSObject());
     }

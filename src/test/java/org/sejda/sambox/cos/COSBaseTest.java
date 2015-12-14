@@ -29,6 +29,8 @@ import org.junit.Test;
 public class COSBaseTest
 {
 
+    private COSObjectKey key = new COSObjectKey(12, 1);
+
     @Test
     public void noId()
     {
@@ -41,16 +43,17 @@ public class COSBaseTest
     public void id()
     {
         COSDictionary victim = new COSDictionary();
-        victim.idIfAbsent("Chuck");
-        assertEquals("Chuck", victim.id());
+        victim.idIfAbsent(new IndirectCOSObjectIdentifier(key, "Source"));
+        assertEquals(key, victim.id().objectIdentifier);
+        assertEquals("Source", victim.id().ownerIdentifier);
     }
 
     @Test
     public void idIfAbsent()
     {
         COSDictionary victim = new COSDictionary();
-        victim.idIfAbsent("Chuck");
-        victim.idIfAbsent("Norris");
-        assertEquals("Chuck", victim.id());
+        victim.idIfAbsent(new IndirectCOSObjectIdentifier(key, "Source"));
+        victim.idIfAbsent(new IndirectCOSObjectIdentifier(key, "Another source"));
+        assertEquals("Source", victim.id().ownerIdentifier);
     }
 }

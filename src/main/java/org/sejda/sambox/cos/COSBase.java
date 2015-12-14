@@ -25,7 +25,7 @@ import java.io.IOException;
  */
 public abstract class COSBase implements COSObjectable
 {
-    private String id;
+    private IndirectCOSObjectIdentifier id;
 
     /**
      * Convert this standard java object to a COS object.
@@ -47,9 +47,9 @@ public abstract class COSBase implements COSObjectable
     public abstract void accept(COSVisitor visitor) throws IOException;
 
     /**
-     * @return an id that can be used to identify this {@link COSBase}.
+     * @return an identifier that can be used to identify this {@link COSBase}.
      */
-    public String id()
+    public IndirectCOSObjectIdentifier id()
     {
         return id;
     }
@@ -59,21 +59,20 @@ public abstract class COSBase implements COSObjectable
      * 
      * @param id
      */
-    public void idIfAbsent(String id)
+    public void idIfAbsent(IndirectCOSObjectIdentifier id)
     {
         if (!hasId() && id != null)
         {
-            this.id = id.trim();
+            this.id = id;
         }
     }
 
     /**
-     * 
      * @return true if the {@link COSBase} has an id assigned to it
      */
     public boolean hasId()
     {
-        return id() != null && id().length() > 0;
+        return id() != null;
     }
 
 }
