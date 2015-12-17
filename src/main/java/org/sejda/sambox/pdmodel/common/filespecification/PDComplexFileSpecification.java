@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.pdmodel.common.filespecification;
 
+import static java.util.Optional.ofNullable;
+
 import java.util.Optional;
 
 import org.sejda.sambox.cos.COSBase;
@@ -53,7 +55,8 @@ public class PDComplexFileSpecification implements PDFileSpecification
     {
         if (embeddedFileDictionary == null && fileSpecificationDictionary != null)
         {
-            embeddedFileDictionary = (COSDictionary) fileSpecificationDictionary.getDictionaryObject(COSName.EF);
+            embeddedFileDictionary = (COSDictionary) fileSpecificationDictionary
+                    .getDictionaryObject(COSName.EF);
         }
         return embeddedFileDictionary;
     }
@@ -220,13 +223,7 @@ public class PDComplexFileSpecification implements PDFileSpecification
      */
     public PDEmbeddedFile getEmbeddedFile()
     {
-        PDEmbeddedFile file = null;
-        COSStream stream = (COSStream) getObjectFromEFDictionary(COSName.F);
-        if (stream != null)
-        {
-            file = new PDEmbeddedFile(stream);
-        }
-        return file;
+        return embeddedFileFor(COSName.F);
     }
 
     /**
@@ -255,13 +252,7 @@ public class PDComplexFileSpecification implements PDFileSpecification
      */
     public PDEmbeddedFile getEmbeddedFileDos()
     {
-        PDEmbeddedFile file = null;
-        COSStream stream = (COSStream) getObjectFromEFDictionary(COSName.DOS);
-        if (stream != null)
-        {
-            file = new PDEmbeddedFile(stream);
-        }
-        return file;
+        return embeddedFileFor(COSName.DOS);
     }
 
     /**
@@ -290,13 +281,7 @@ public class PDComplexFileSpecification implements PDFileSpecification
      */
     public PDEmbeddedFile getEmbeddedFileMac()
     {
-        PDEmbeddedFile file = null;
-        COSStream stream = (COSStream) getObjectFromEFDictionary(COSName.MAC);
-        if (stream != null)
-        {
-            file = new PDEmbeddedFile(stream);
-        }
-        return file;
+        return embeddedFileFor(COSName.MAC);
     }
 
     /**
@@ -325,13 +310,7 @@ public class PDComplexFileSpecification implements PDFileSpecification
      */
     public PDEmbeddedFile getEmbeddedFileUnix()
     {
-        PDEmbeddedFile file = null;
-        COSStream stream = (COSStream) getObjectFromEFDictionary(COSName.UNIX);
-        if (stream != null)
-        {
-            file = new PDEmbeddedFile(stream);
-        }
-        return file;
+        return embeddedFileFor(COSName.UNIX);
     }
 
     /**
@@ -360,13 +339,13 @@ public class PDComplexFileSpecification implements PDFileSpecification
      */
     public PDEmbeddedFile getEmbeddedFileUnicode()
     {
-        PDEmbeddedFile file = null;
-        COSStream stream = (COSStream) getObjectFromEFDictionary(COSName.UF);
-        if (stream != null)
-        {
-            file = new PDEmbeddedFile(stream);
-        }
-        return file;
+        return embeddedFileFor(COSName.UF);
+    }
+
+    private PDEmbeddedFile embeddedFileFor(COSName key)
+    {
+        return ofNullable(getObjectFromEFDictionary(key)).filter(s -> s instanceof COSStream)
+                .map(s -> (COSStream) s).map(PDEmbeddedFile::new).orElse(null);
     }
 
     /**
@@ -386,6 +365,23 @@ public class PDComplexFileSpecification implements PDFileSpecification
         {
             ef.setItem(COSName.UF, file);
         }
+    }
+
+    /**
+     * 
+     * @return the first/best available alternative of the embedded file
+     */
+    public PDEmbeddedFile getBestEmbeddedFile()
+    {
+        return ofNullable(getEmbeddedFileUnicode()).orElseGet(() -> {
+            return ofNullable(getEmbeddedFileDos()).orElseGet(() -> {
+                return ofNullable(getEmbeddedFileMac()).orElseGet(() -> {
+                    return ofNullable(getEmbeddedFileUnix()).orElseGet(() -> {
+                        return getEmbeddedFile();
+                    });
+                });
+            });
+        });
     }
 
     /**
