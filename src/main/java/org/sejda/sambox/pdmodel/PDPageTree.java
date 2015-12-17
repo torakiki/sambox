@@ -24,6 +24,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
@@ -118,6 +122,15 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
     public Iterator<PDPage> iterator()
     {
         return new PageIterator(root);
+    }
+
+    /**
+     * Returns a sequential {@code Stream} over the pages of this page tree.
+     */
+    public Stream<PDPage> stream()
+    {
+        return StreamSupport.stream(Spliterators.spliterator(iterator(), getCount(),
+                Spliterator.ORDERED | Spliterator.NONNULL), false);
     }
 
     /**
