@@ -16,48 +16,19 @@
  */
 package org.sejda.sambox.cos;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Test;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
-import nl.jqno.equalsverifier.Warning;
 
 /**
  * @author Andrea Vacondio
  *
  */
-public class COSIntegerTest
+public class COSObjectKeyTest
 {
-
     @Test
     public void equalsContract()
     {
-        EqualsVerifier.forClass(COSInteger.class).suppress(Warning.NULL_FIELDS).verify();
+        EqualsVerifier.forClass(COSObjectKey.class).verify();
     }
-
-    @Test
-    public void intValue()
-    {
-        assertEquals(20, COSInteger.get(20).intValue());
-    }
-
-    @Test
-    public void longValue()
-    {
-        assertEquals(2l, COSInteger.get(2).longValue());
-    }
-
-    @Test
-    public void doubleValue()
-    {
-        assertEquals(2, COSInteger.get(2).doubleValue(), 0);
-    }
-
-    @Test
-    public void floatValue()
-    {
-        assertEquals(2, COSInteger.get(2).floatValue(), 0);
-    }
-
 }

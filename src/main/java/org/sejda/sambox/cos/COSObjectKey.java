@@ -25,7 +25,7 @@ import java.util.Objects;
  *
  * @author Michael Traut
  */
-public class COSObjectKey implements Comparable<COSObjectKey>
+public final class COSObjectKey implements Comparable<COSObjectKey>
 {
     private final long number;
     private final int generation;
@@ -59,6 +59,10 @@ public class COSObjectKey implements Comparable<COSObjectKey>
     @Override
     public boolean equals(Object obj)
     {
+        if (this == obj)
+        {
+            return true;
+        }
         if (!(obj instanceof COSObjectKey))
         {
             return false;

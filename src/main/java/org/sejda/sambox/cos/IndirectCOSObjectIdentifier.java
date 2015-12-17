@@ -25,7 +25,7 @@ import static org.sejda.util.RequireUtils.requireNotNullArg;
  * 
  * @author Andrea Vacondio
  */
-public class IndirectCOSObjectIdentifier
+public final class IndirectCOSObjectIdentifier
 {
     public final COSObjectKey objectIdentifier;
     public final String ownerIdentifier;
@@ -41,6 +41,10 @@ public class IndirectCOSObjectIdentifier
     @Override
     public boolean equals(Object obj)
     {
+        if (this == obj)
+        {
+            return true;
+        }
         if (!(obj instanceof IndirectCOSObjectIdentifier))
         {
             return false;
