@@ -16,10 +16,9 @@
  */
 package org.sejda.sambox.pdmodel.interactive.annotation;
 
-import java.io.IOException;
-
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.pdmodel.common.filespecification.FileSpecifications;
 import org.sejda.sambox.pdmodel.common.filespecification.PDFileSpecification;
 
 /**
@@ -74,12 +73,10 @@ public class PDAnnotationFileAttachment extends PDAnnotationMarkup
      * Return the attached file.
      *
      * @return The attached file.
-     *
-     * @throws IOException If there is an error creating the file spec.
      */
-    public PDFileSpecification getFile() throws IOException
+    public PDFileSpecification getFile()
     {
-        return PDFileSpecification.createFS(getCOSObject().getDictionaryObject("FS"));
+        return FileSpecifications.fileSpecificationFor(getCOSObject().getDictionaryObject("FS"));
     }
 
     /**

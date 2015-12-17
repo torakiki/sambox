@@ -16,54 +16,28 @@
  */
 package org.sejda.sambox.pdmodel.common.filespecification;
 
-import org.sejda.sambox.cos.COSBase;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
+import org.junit.Test;
+import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSString;
 
 /**
- * A file specification that is just a string.
+ * @author Andrea Vacondio
  *
- * @author Ben Litchfield
  */
-public class PDSimpleFileSpecification implements PDFileSpecification
+public class FileSpecificationsTest
 {
-    private COSString file;
 
-    public PDSimpleFileSpecification()
+    @Test
+    public void fileSpecificationFor()
     {
-        file = COSString.parseLiteral("");
-    }
-
-    /**
-     * Constructor.
-     *
-     * @param fileName The file that this spec represents.
-     */
-    public PDSimpleFileSpecification( COSString fileName )
-    {
-        file = fileName;
-    }
-
-    @Override
-    public String getFile()
-    {
-    return file.getString();
-    }
-
-    @Override
-    public void setFile( String fileName )
-    {
-        file = COSString.parseLiteral(fileName);
-    }
-
-    /**
-     * Convert this standard java object to a COS object.
-     *
-     * @return The cos object that matches this Java object.
-     */
-    @Override
-    public COSBase getCOSObject()
-    {
-        return file;
+        assertNotNull(FileSpecifications.fileSpecificationFor(new COSDictionary()));
+        assertNotNull(FileSpecifications.fileSpecificationFor(COSString.parseLiteral("Chuck")));
+        assertNull(FileSpecifications.fileSpecificationFor(null));
+        assertNull(FileSpecifications.fileSpecificationFor(COSInteger.ONE));
     }
 
 }

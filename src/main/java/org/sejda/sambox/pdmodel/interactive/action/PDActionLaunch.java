@@ -16,10 +16,9 @@
  */
 package org.sejda.sambox.pdmodel.interactive.action;
 
-import java.io.IOException;
-
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.pdmodel.common.filespecification.FileSpecifications;
 import org.sejda.sambox.pdmodel.common.filespecification.PDFileSpecification;
 
 /**
@@ -56,19 +55,16 @@ public class PDActionLaunch extends PDAction
     }
 
     /**
-     * This will get the application to be launched or the document
-     * to be opened or printed. It is required if none of the entries
-     * Win, Mac or Unix is present. If this entry is absent and the
-     * viewer application does not understand any of the alternative
-     * entries it should do nothing.
+     * This will get the application to be launched or the document to be opened or printed. It is required if none of
+     * the entries Win, Mac or Unix is present. If this entry is absent and the viewer application does not understand
+     * any of the alternative entries it should do nothing.
      *
      * @return The F entry of the specific launch action dictionary.
      *
-     * @throws IOException If there is an error creating the file spec.
      */
-    public PDFileSpecification getFile() throws IOException
+    public PDFileSpecification getFile() 
     {
-        return PDFileSpecification.createFS(getCOSObject().getDictionaryObject(COSName.F));
+        return FileSpecifications.fileSpecificationFor(getCOSObject().getDictionaryObject(COSName.F));
     }
 
     /**

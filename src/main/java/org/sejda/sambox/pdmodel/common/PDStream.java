@@ -35,6 +35,7 @@ import org.sejda.sambox.cos.COSObjectable;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.filter.Filter;
 import org.sejda.sambox.filter.FilterFactory;
+import org.sejda.sambox.pdmodel.common.filespecification.FileSpecifications;
 import org.sejda.sambox.pdmodel.common.filespecification.PDFileSpecification;
 import org.sejda.util.IOUtils;
 
@@ -307,13 +308,10 @@ public class PDStream implements COSObjectable
      * This will get the file specification for this stream. This is only required for external files.
      * 
      * @return The file specification.
-     * 
-     * @throws IOException If there is an error creating the file spec.
      */
-    public PDFileSpecification getFile() throws IOException
+    public PDFileSpecification getFile()
     {
-        COSBase f = stream.getDictionaryObject(COSName.F);
-        return PDFileSpecification.createFS(f);
+        return FileSpecifications.fileSpecificationFor(stream.getDictionaryObject(COSName.F));
     }
 
     /**

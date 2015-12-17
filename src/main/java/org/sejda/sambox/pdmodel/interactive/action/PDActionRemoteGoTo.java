@@ -16,11 +16,10 @@
  */
 package org.sejda.sambox.pdmodel.interactive.action;
 
-import java.io.IOException;
-
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.pdmodel.common.filespecification.FileSpecifications;
 import org.sejda.sambox.pdmodel.common.filespecification.PDFileSpecification;
 
 /**
@@ -82,11 +81,10 @@ public class PDActionRemoteGoTo extends PDAction
      *
      * @return The F entry of the specific remote go-to action dictionary.
      *
-     * @throws IOException If there is an error creating the file spec.
      */
-    public PDFileSpecification getFile() throws IOException
+    public PDFileSpecification getFile() 
     {
-        return PDFileSpecification.createFS(action.getDictionaryObject(COSName.F));
+        return FileSpecifications.fileSpecificationFor(action.getDictionaryObject(COSName.F));
     }
 
     /**
