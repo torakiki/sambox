@@ -37,57 +37,6 @@ public class TestPDDocumentCatalog
 {
 
     /**
-     * Test getPageLabels().
-     * 
-     * Test case for <a href="https://issues.apache.org/jira/browse/PDFBOX-90" >PDFBOX-90</a> - Support explicit
-     * retrieval of page labels.
-     * 
-     * @throws IOException in case the document can not be parsed.
-     */
-    @Test
-    public void retrievePageLabels() throws IOException
-    {
-        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(getClass()
-                .getResourceAsStream("test_pagelabels.pdf"))))
-        {
-            PDDocumentCatalog cat = doc.getDocumentCatalog();
-            String[] labels = cat.getPageLabels().getLabelsByPageIndices();
-            assertEquals(12, labels.length);
-            assertEquals("A1", labels[0]);
-            assertEquals("A2", labels[1]);
-            assertEquals("A3", labels[2]);
-            assertEquals("i", labels[3]);
-            assertEquals("ii", labels[4]);
-            assertEquals("iii", labels[5]);
-            assertEquals("iv", labels[6]);
-            assertEquals("v", labels[7]);
-            assertEquals("vi", labels[8]);
-            assertEquals("vii", labels[9]);
-            assertEquals("Appendix I", labels[10]);
-            assertEquals("Appendix II", labels[11]);
-        }
-    }
-
-    /**
-     * Test page labels for malformed PDF.
-     * 
-     * Test case for <a href="https://issues.apache.org/jira/browse/PDFBOX-900" >PDFBOX-900</a> - Handle malformed PDFs
-     * 
-     * @throws IOException in case the document can not be parsed.
-     */
-    @Test
-    public void retrievePageLabelsOnMalformedPdf() throws IOException
-    {
-        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(getClass()
-                .getResourceAsStream("badpagelabels.pdf"))))
-        {
-            PDDocumentCatalog cat = doc.getDocumentCatalog();
-            // getLabelsByPageIndices() should not throw an exception
-            cat.getPageLabels().getLabelsByPageIndices();
-        }
-    }
-
-    /**
      * Test getNumberOfPages().
      * 
      * Test case for <a href="https://issues.apache.org/jira/browse/PDFBOX-911" >PDFBOX-911</a> - Method

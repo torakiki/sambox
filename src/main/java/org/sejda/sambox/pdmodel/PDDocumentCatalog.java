@@ -536,7 +536,7 @@ public class PDDocumentCatalog implements COSObjectable
     public PDPageLabels getPageLabels() throws IOException
     {
         COSDictionary dict = (COSDictionary) root.getDictionaryObject(COSName.PAGE_LABELS);
-        return dict == null ? null : new PDPageLabels(document, dict);
+        return dict == null ? null : new PDPageLabels(dict);
     }
 
     /**
