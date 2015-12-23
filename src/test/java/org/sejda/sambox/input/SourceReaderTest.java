@@ -592,4 +592,30 @@ public class SourceReaderTest
         victim.unreadIfValid(c);
         assertEquals(9, victim.position());
     }
+
+    @Test
+    public void unreadSpaces() throws IOException
+    {
+        victim = new SourceReader(
+                inMemorySeekableSourceFrom("Lets \u0000\t\f\n\r skip spaces".getBytes()));
+        victim.position(11);
+        victim.unreadSpaces();
+        assertEquals(4, victim.position());
+        victim.position(13);
+        victim.unreadSpaces();
+        assertEquals(13, victim.position());
+    }
+
+    @Test
+    public void unreadUntilSpaces() throws IOException
+    {
+        victim = new SourceReader(
+                inMemorySeekableSourceFrom("Lets \u0000\t\f\n\r skip spaces".getBytes()));
+        victim.position(11);
+        victim.unreadUntilSpaces();
+        assertEquals(11, victim.position());
+        victim.position(13);
+        victim.unreadUntilSpaces();
+        assertEquals(11, victim.position());
+    }
 }

@@ -57,6 +57,25 @@ public class COSArrayTest
     }
 
     @Test
+    public void removeLast()
+    {
+        COSArray victim = new COSArray();
+        victim.add(COSInteger.THREE);
+        victim.add(COSNull.NULL);
+        victim.add(COSBoolean.FALSE);
+        assertEquals(3, victim.size());
+        assertEquals(COSBoolean.FALSE, victim.removeLast());
+        assertEquals(2, victim.size());
+    }
+
+    @Test
+    public void removeLastEmptyArray()
+    {
+        COSArray victim = new COSArray();
+        assertEquals(null, victim.removeLast());
+    }
+
+    @Test
     public void setIndexCOSObjectable()
     {
         COSArray victim = new COSArray();

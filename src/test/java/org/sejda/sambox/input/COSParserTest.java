@@ -182,6 +182,18 @@ public class COSParserTest
     }
 
     @Test
+    public void nextArrayWorkaroundObj() throws IOException
+    {
+        victim = new COSParser(inMemorySeekableSourceFrom("[10 (A String) 10 0 obj".getBytes()));
+        COSArray result = victim.nextArray();
+        assertEquals(10, result.getInt(0));
+        assertEquals(COSString.newInstance("A String".getBytes(Charsets.ISO_8859_1)),
+                result.get(1));
+        assertEquals(2, result.size());
+        assertEquals(15, victim.position());
+    }
+
+    @Test
     public void nextArrayWorkaroundEndstream() throws IOException
     {
         victim = new COSParser(inMemorySeekableSourceFrom("[10 (A String) endstream".getBytes()));

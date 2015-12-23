@@ -81,6 +81,10 @@ class XrefFullScanner
         };
     }
 
+    /**
+     * 
+     * @return true if the scan was performed correctly and at least an xref found
+     */
     boolean scan()
     {
         try

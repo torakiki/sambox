@@ -100,7 +100,7 @@ class COSParser extends BaseCOSParser
         {
             String badString = readToken();
             // if it's an endstream/endobj, we want to put it back so the caller will see it
-            if (ENDOBJ.equals(badString) || ENDSTREAM.equals(badString))
+            if (ENDOBJ.equals(badString) || ENDSTREAM.equals(badString) || OBJ.equals(badString))
             {
                 source().back(badString.getBytes(Charsets.ISO_8859_1).length);
             }

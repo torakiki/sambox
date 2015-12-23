@@ -296,6 +296,20 @@ public class COSArray extends COSBase implements List<COSBase>
         return objects.remove(i);
     }
 
+    /**
+     * Removes the last object of the array
+     * 
+     * @return the removed object or null if the array was empty
+     */
+    public COSBase removeLast()
+    {
+        if (!objects.isEmpty())
+        {
+            return objects.remove(objects.size() - 1);
+        }
+        return null;
+    }
+
     @Override
     public boolean remove(Object o)
     {

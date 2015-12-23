@@ -29,6 +29,7 @@ import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSBoolean;
 import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.COSNumber;
@@ -48,6 +49,7 @@ abstract class BaseCOSParser extends SourceReader
     private static final Logger LOG = LoggerFactory.getLogger(BaseCOSParser.class);
 
     public static final String ENDOBJ = "endobj";
+    public static final String OBJ = "obj";
     public static final String STREAM = "stream";
     public static final String ENDSTREAM = "endstream";
 
@@ -119,8 +121,9 @@ abstract class BaseCOSParser extends SourceReader
             // to stop when we find endstream or endobj.
             if (isNextToken(ENDOBJ, ENDSTREAM))
             {
-                LOG.warn("Found unexpected 'endobj or 'endstream' at position " + position()
-                        + ", assuming end of dictionary");
+                LOG.warn(
+                        "Found unexpected 'endobj or 'endstream' at position {}, assuming end of dictionary",
+                        position());
                 return false;
             }
             source().read();
@@ -152,8 +155,27 @@ abstract class BaseCOSParser extends SourceReader
                 // the array has ended.
                 if (isNextToken(ENDOBJ, ENDSTREAM))
                 {
-                    LOG.warn("Found unexpected 'endobj or 'endstream' at position " + position()
-                            + ", assuming end of array");
+                    LOG.warn(
+                            "Found unexpected 'endobj or 'endstream' at position {}, assuming end of array",
+                            position());
+                    return array;
+                }
+                // the next token is "obj" and the latest two are two integer. We assume the array wasn't
+                // correctly terminated and we read the object definition as part of the array.
+                // We have to unread the latest two int and remove them from the array
+                if (isNextToken(OBJ) && array.size() >= 2
+                        && (array.getObject(array.size() - 1) instanceof COSInteger)
+                        && (array.getObject(array.size() - 2) instanceof COSInteger))
+                {
+                    unreadSpaces();
+                    unreadUntilSpaces();
+                    unreadSpaces();
+                    unreadUntilSpaces();
+                    array.removeLast();
+                    array.removeLast();
+                    LOG.warn(
+                            "Found unexpected object definition at position {}, assuming end of array",
+                            position());
                     return array;
                 }
             }
@@ -321,8 +343,9 @@ abstract class BaseCOSParser extends SourceReader
         long length = streamLengthFrom(streamDictionary);
         if (length <= 0)
         {
-            LOG.info("Using fallback strategy reading until 'endstream' or 'endobj' is found. Starting at offset "
-                    + position());
+            LOG.info(
+                    "Using fallback strategy reading until 'endstream' or 'endobj' is found. Starting at offset "
+                            + position());
             length = findStreamLength();
         }
         return length;

@@ -63,6 +63,7 @@ class IndirectReferencesAwareCOSWriter extends DefaultCOSWriter
         }
     }
 
+    @Override
     public void close() throws IOException
     {
         this.context = null;

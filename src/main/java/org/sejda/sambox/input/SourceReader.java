@@ -45,6 +45,7 @@ import org.sejda.sambox.util.Pool;
 import org.sejda.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 /**
  * Component responsible for reading a {@link SeekableSource}. Methods to read expected kind of tokens are available as
  * well as methods to skip them. This implementation uses a pool of {@link StringBuilder}s to minimize garbage
@@ -61,11 +62,11 @@ class SourceReader implements Closeable
     private static final int GENERATION_NUMBER_THRESHOLD = 65535;
     public static final String OBJ = "obj";
 
-    private Pool<StringBuilder> pool = new Pool<>(StringBuilder::new, Integer.getInteger(
-            SAMBox.BUFFERS_POOL_SIZE_PROPERTY, 10)).onGive(b -> {
-        b.setLength(0);
-        b.trimToSize();
-    });
+    private Pool<StringBuilder> pool = new Pool<>(StringBuilder::new,
+            Integer.getInteger(SAMBox.BUFFERS_POOL_SIZE_PROPERTY, 10)).onGive(b -> {
+                b.setLength(0);
+                b.trimToSize();
+            });
     private SeekableSource source;
 
     public SourceReader(SeekableSource source)
@@ -138,8 +139,8 @@ class SourceReader implements Closeable
         char c = (char) source.read();
         if (c != ec)
         {
-            throw new IOException("expected='" + ec + "' actual='" + c + "' at offset "
-                    + (position() - 1));
+            throw new IOException(
+                    "expected='" + ec + "' actual='" + c + "' at offset " + (position() - 1));
         }
     }
 
@@ -188,17 +189,17 @@ class SourceReader implements Closeable
         long number = readObjectNumber();
         if (number != expected.objectNumber())
         {
-            throw new IOException(String.format(
-                    "Expected '%d' object number at offset %d but was '%d'", expected.objectNumber(),
-                    objNumOffset, number));
+            throw new IOException(
+                    String.format("Expected '%d' object number at offset %d but was '%d'",
+                            expected.objectNumber(), objNumOffset, number));
         }
         long genNumOffset = position();
         long generation = readGenerationNumber();
         if (generation != expected.generation())
         {
-            throw new IOException(String.format(
-                    "Expected '%d' generation number at offset %d but was '%d'",
-                    expected.generation(), genNumOffset, number));
+            throw new IOException(
+                    String.format("Expected '%d' generation number at offset %d but was '%d'",
+                            expected.generation(), genNumOffset, number));
         }
         skipSpaces();
         skipExpected(OBJ);
@@ -227,6 +228,34 @@ class SourceReader implements Closeable
         finally
         {
             pool.give(builder);
+        }
+    }
+
+    /**
+     * Unreads white spaces
+     * 
+     * @throws IOException
+     */
+    public void unreadSpaces() throws IOException
+    {
+        int c;
+        while ((c = source.peekBack()) != -1 && isWhitespace(c))
+        {
+            source.back();
+        }
+    }
+
+    /**
+     * Unreads characters until it finds a white space
+     * 
+     * @throws IOException
+     */
+    public void unreadUntilSpaces() throws IOException
+    {
+        int c;
+        while ((c = source.peekBack()) != -1 && !isWhitespace(c))
+        {
+            source.back();
         }
     }
 
@@ -286,8 +315,8 @@ class SourceReader implements Closeable
         long retval = readLong();
         if (retval < 0 || retval >= OBJECT_NUMBER_THRESHOLD)
         {
-            throw new IOException("Object Number '" + retval
-                    + "' has more than 10 digits or is negative");
+            throw new IOException(
+                    "Object Number '" + retval + "' has more than 10 digits or is negative");
         }
         return retval;
     }
@@ -345,8 +374,9 @@ class SourceReader implements Closeable
                     else
                     {
                         source.back(2);
-                        LOG.warn("Found NUMBER SIGN (#) not used as escaping char while reading name at "
-                                + position());
+                        LOG.warn(
+                                "Found NUMBER SIGN (#) not used as escaping char while reading name at "
+                                        + position());
                     }
                 }
                 builder.append(c);
@@ -374,8 +404,10 @@ class SourceReader implements Closeable
         catch (NumberFormatException e)
         {
             source.back(intBuffer.getBytes(Charsets.ISO_8859_1).length);
-            throw new IOException(String.format(
-                    "Expected an integer type at offset %d but was '%s'", position(), intBuffer), e);
+            throw new IOException(
+                    String.format("Expected an integer type at offset %d but was '%s'", position(),
+                            intBuffer),
+                    e);
         }
     }
 
@@ -486,9 +518,9 @@ class SourceReader implements Closeable
                 {
                     // this differs from original PDFBox implementation. It replaces the wrong char with a default value
                     // and goes on.
-                    LOG.warn(String
-                            .format("Expected an hexadecimal char at offset %d but was '%c'. Replaced with default 0.",
-                                    position() - 1, c));
+                    LOG.warn(String.format(
+                            "Expected an hexadecimal char at offset %d but was '%c'. Replaced with default 0.",
+                            position() - 1, c));
                     builder.append('0');
                 }
             }
