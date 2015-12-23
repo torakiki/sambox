@@ -81,7 +81,20 @@ class XrefFullScanner
         };
     }
 
-    boolean scan() throws IOException
+    boolean scan()
+    {
+        try
+        {
+            return doScan();
+        }
+        catch (IOException e)
+        {
+            LOG.warn("An error occurred while performing full scan looking for xrefs", e);
+            return false;
+        }
+    }
+
+    private boolean doScan() throws IOException
     {
         LOG.info("Performing full scan looking for xrefs");
         long savedPos = parser.position();
