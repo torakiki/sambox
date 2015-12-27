@@ -28,15 +28,11 @@ import java.util.Queue;
 
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
-import org.sejda.sambox.cos.COSBoolean;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSDocument;
-import org.sejda.sambox.cos.COSFloat;
-import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.COSStream;
-import org.sejda.sambox.cos.COSString;
 import org.sejda.sambox.cos.COSVisitor;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
 import org.sejda.sambox.input.ExistingIndirectCOSObject;
@@ -180,48 +176,6 @@ abstract class AbstractPDFBodyWriter implements COSVisitor, Closeable
         {
             stack.add(context.getOrCreateIndirectReferenceFor(item));
         }
-    }
-
-    @Override
-    public void visit(COSBoolean value)
-    {
-        // nothing to do
-    }
-
-    @Override
-    public void visit(COSFloat value)
-    {
-        // nothing to do
-    }
-
-    @Override
-    public void visit(COSInteger value)
-    {
-        // nothing to do
-    }
-
-    @Override
-    public void visit(COSName value)
-    {
-        // nothing to do
-    }
-
-    @Override
-    public void visit(COSNull value)
-    {
-        // nothing to do
-    }
-
-    @Override
-    public void visit(COSString value)
-    {
-        // nothing to do
-    }
-
-    @Override
-    public void visit(IndirectCOSObjectReference value)
-    {
-        // nothing to do
     }
 
     @Override

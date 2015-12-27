@@ -31,7 +31,6 @@ import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSBoolean;
 import org.sejda.sambox.cos.COSDictionary;
-import org.sejda.sambox.cos.COSDocument;
 import org.sejda.sambox.cos.COSFloat;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
@@ -228,12 +227,6 @@ class DefaultCOSWriter implements COSWriter
     public void visit(IndirectCOSObjectReference value) throws IOException
     {
         writer.write(value.toString());
-    }
-
-    @Override
-    public void visit(COSDocument value)
-    {
-        // nothing to do
     }
 
     /**

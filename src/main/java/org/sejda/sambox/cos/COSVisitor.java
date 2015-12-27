@@ -26,26 +26,59 @@ import java.io.IOException;
  */
 public interface COSVisitor
 {
-    void visit(COSDocument value) throws IOException;
+    default void visit(COSDocument value) throws IOException
+    {
+        // nothings
+    }
 
-    void visit(COSArray value) throws IOException;
+    default void visit(COSArray value) throws IOException
+    {
+        // nothings
+    }
 
-    void visit(COSBoolean value) throws IOException;
+    default void visit(COSBoolean value) throws IOException
+    {
+        // nothings
+    }
 
-    void visit(COSDictionary value) throws IOException;
+    default void visit(COSDictionary value) throws IOException
+    {
+        // nothings
+    }
 
-    void visit(COSFloat value) throws IOException;
+    default void visit(COSFloat value) throws IOException
+    {
+        // nothings
+    }
 
-    void visit(COSInteger value) throws IOException;
+    default void visit(COSInteger value) throws IOException
+    {
+        // nothings
+    }
 
-    void visit(COSName value) throws IOException;
+    default void visit(COSName value) throws IOException
+    {
+        // nothings
+    }
 
-    void visit(COSNull value) throws IOException;
+    default void visit(COSNull value) throws IOException
+    {
+        // nothings
+    }
 
-    void visit(COSStream value) throws IOException;
+    default void visit(COSStream value) throws IOException
+    {
+        // nothings
+    }
 
-    void visit(COSString value) throws IOException;
+    default void visit(COSString value) throws IOException
+    {
+        // nothings
+    }
 
-    void visit(IndirectCOSObjectReference value) throws IOException;
+    default void visit(IndirectCOSObjectReference value) throws IOException
+    {
+        // nothings
+    }
 
 }

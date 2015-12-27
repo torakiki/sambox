@@ -23,7 +23,6 @@ import org.sejda.io.DevNullWritableByteChannel;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
-import org.sejda.sambox.cos.COSDocument;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSObjectable;
 import org.sejda.sambox.cos.COSStream;
@@ -104,12 +103,6 @@ public class ExistingPagesSizePredictor extends AbstractPDFBodyWriter
             LOG.debug("{} addition simulated, now at {} body bytes and {} xref bytes",
                     value.getCOSObject(), predictedPagesSize(), predictedXrefTableSize());
         }
-    }
-
-    @Override
-    public void visit(COSDocument document)
-    {
-        // nothing
     }
 
     /**

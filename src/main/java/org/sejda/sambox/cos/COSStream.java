@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.cos;
 
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static org.sejda.io.SeekableSources.inMemorySeekableSourceFrom;
 
@@ -30,6 +31,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.sejda.io.SeekableSource;
 import org.sejda.sambox.filter.DecodeResult;
@@ -49,11 +51,15 @@ public class COSStream extends COSDictionary implements Closeable
     private static final List<COSName> CAN_COMPRESS = Arrays.asList(COSName.ASCII_HEX_DECODE,
             COSName.ASCII_HEX_DECODE_ABBREVIATION, COSName.ASCII85_DECODE,
             COSName.ASCII85_DECODE_ABBREVIATION);
+
     private static final Logger LOG = LoggerFactory.getLogger(COSStream.class);
+
     private LazySeekableSourceViewHolder existing;
     private byte[] filtered;
     private byte[] unfiltered;
     private DecodeResult decodeResult;
+    // an encryption function that returns an encrypted view of the filtered stream
+    private Function<InputStream, InputStream> encryptor;
 
     public COSStream()
     {
@@ -88,12 +94,21 @@ public class COSStream extends COSDictionary implements Closeable
      */
     public InputStream getFilteredStream() throws IOException
     {
-        if (existing != null)
+        if (nonNull(encryptor))
+        {
+            return encryptor.apply(doGetFilteredStream());
+        }
+        return doGetFilteredStream();
+    }
+
+    private InputStream doGetFilteredStream() throws IOException
+    {
+        if (nonNull(existing))
         {
             return existing.get().asInputStream();
         }
         encodeIfRequired();
-        if (filtered != null)
+        if (nonNull(filtered))
         {
             return new MyByteArrayInputStream(filtered);
         }
@@ -377,6 +392,16 @@ public class COSStream extends COSDictionary implements Closeable
     }
 
     /**
+     * Sets the function to be used to encrypt this stream.
+     * 
+     * @param encrypted
+     */
+    public void setEncryptor(Function<InputStream, InputStream> encryptor)
+    {
+        this.encryptor = encryptor;
+    }
+
+    /**
      * Creates a new stream for which filtered byte should be written to. You probably don't want this but want to use
      * the createUnfilteredStream, which is used to write raw bytes to.
      *
@@ -506,7 +531,7 @@ public class COSStream extends COSDictionary implements Closeable
 
     public boolean isEmpty() throws IOException
     {
-        if (existing != null)
+        if (nonNull(existing))
         {
             return existing.get().size() <= 0;
         }
