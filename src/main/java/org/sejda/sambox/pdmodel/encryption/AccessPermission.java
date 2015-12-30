@@ -45,7 +45,7 @@ package org.sejda.sambox.pdmodel.encryption;
  * @author Benoit Guillon
  *
  */
-
+// TODO make this immutable
 public class AccessPermission
 {
 

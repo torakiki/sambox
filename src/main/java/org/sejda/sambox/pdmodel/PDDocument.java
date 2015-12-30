@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.pdmodel;
 
+import static java.util.Optional.ofNullable;
 import static org.sejda.io.CountingWritableByteChannel.from;
 import static org.sejda.sambox.cos.DirectCOSObject.asDirectObject;
 import static org.sejda.sambox.util.SpecVersionUtils.V1_4;
@@ -29,7 +30,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.WritableByteChannel;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Optional;
@@ -44,14 +44,13 @@ import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSString;
 import org.sejda.sambox.cos.DirectCOSObject;
+import org.sejda.sambox.encryption.MessageDigests;
+import org.sejda.sambox.encryption.StandardSecurity;
 import org.sejda.sambox.output.PDDocumentWriter;
 import org.sejda.sambox.output.WriteOption;
 import org.sejda.sambox.pdmodel.common.PDStream;
 import org.sejda.sambox.pdmodel.encryption.AccessPermission;
 import org.sejda.sambox.pdmodel.encryption.PDEncryption;
-import org.sejda.sambox.pdmodel.encryption.ProtectionPolicy;
-import org.sejda.sambox.pdmodel.encryption.SecurityHandler;
-import org.sejda.sambox.pdmodel.encryption.SecurityHandlerFactory;
 import org.sejda.sambox.pdmodel.font.PDFont;
 import org.sejda.sambox.util.Charsets;
 import org.sejda.sambox.util.Version;
@@ -70,8 +69,7 @@ public class PDDocument implements Closeable
 
     private final COSDocument document;
     private PDDocumentCatalog documentCatalog;
-    private PDEncryption encryption;
-    private AccessPermission accessPermission;
+    private AccessPermission permission;
     private boolean open = true;
     private OnClose onClose;
     private ResourceCache resourceCache = new DefaultResourceCache();
@@ -94,24 +92,24 @@ public class PDDocument implements Closeable
     /**
      * Constructor that uses an existing document. The COSDocument that is passed in must be valid.
      * 
-     * @param doc The COSDocument that this document wraps.
+     * @param document The COSDocument that this document wraps.
      */
-    public PDDocument(COSDocument doc)
+    public PDDocument(COSDocument document)
     {
-        this(doc, null);
+        this(document, null);
     }
 
     /**
      * Constructor that uses an existing document. The COSDocument that is passed in must be valid.
      * 
-     * @param doc The COSDocument that this document wraps.
+     * @param document The COSDocument that this document wraps.
      * @param permission he access permissions of the pdf
      * 
      */
-    public PDDocument(COSDocument doc, AccessPermission permission)
+    public PDDocument(COSDocument document, AccessPermission permission)
     {
-        document = doc;
-        accessPermission = permission;
+        this.document = document;
+        this.permission = permission;
     }
 
     /**
@@ -196,8 +194,8 @@ public class PDDocument implements Closeable
      */
     public PDDocumentInformation getDocumentInformation()
     {
-        COSDictionary infoDic = (COSDictionary) document.getTrailer().getDictionaryObject(
-                COSName.INFO);
+        COSDictionary infoDic = (COSDictionary) document.getTrailer()
+                .getDictionaryObject(COSName.INFO);
         if (infoDic == null)
         {
             infoDic = new COSDictionary();
@@ -240,38 +238,17 @@ public class PDDocument implements Closeable
     }
 
     /**
-     * This will get the encryption dictionary for this document. This will still return the parameters if the document
-     * was decrypted. As the encryption architecture in PDF documents is plugable this returns an abstract class, but
-     * the only supported subclass at this time is a PDStandardEncryption object.
+     * This will get the encryption dictionary for this document. .
      *
-     * @return The encryption dictionary(most likely a PDStandardEncryption object)
+     * @return The encryption dictionary
      */
     public PDEncryption getEncryption()
     {
-        if (encryption == null && isEncrypted())
+        if (isEncrypted())
         {
-            encryption = new PDEncryption(document.getEncryptionDictionary());
+            return new PDEncryption(document.getEncryptionDictionary());
         }
-        return encryption;
-    }
-
-    /**
-     * @param encryption The encryption
-     */
-    public void setEncryption(PDEncryption encryption)
-    {
-        requireOpen();
-        this.encryption = encryption;
-    }
-
-    /**
-     * @param removes any encryption configuration and encryption dictionary
-     */
-    public void removeEncryption()
-    {
-        requireOpen();
-        this.encryption = null;
-        this.getDocument().getTrailer().removeItem(COSName.ENCRYPT);
+        return new PDEncryption();
     }
 
     /**
@@ -305,35 +282,6 @@ public class PDDocument implements Closeable
     }
 
     /**
-     * Protects the document with the protection policy pp. The document content will be really encrypted when it will
-     * be saved. This method only marks the document for encryption.
-     *
-     * @see org.apache.pdfbox.pdmodel.encryption.StandardProtectionPolicy
-     * @see org.apache.pdfbox.pdmodel.encryption.PublicKeyProtectionPolicy
-     * 
-     * @param policy The protection policy.
-     * 
-     * @throws IOException if there isn't any suitable security handler.
-     */
-    public void protect(ProtectionPolicy policy) throws IOException
-    {
-        requireOpen();
-        if (!isEncrypted())
-        {
-            encryption = new PDEncryption();
-        }
-
-        SecurityHandler securityHandler = SecurityHandlerFactory.INSTANCE
-                .newSecurityHandlerForPolicy(policy);
-        if (securityHandler == null)
-        {
-            throw new IOException("No security handler for policy " + policy);
-        }
-
-        getEncryption().setSecurityHandler(securityHandler);
-    }
-
-    /**
      * Returns the access permissions granted when the document was decrypted. If the document was not decrypted this
      * method returns the access permission for a document owner (ie can do everything). The returned object is in read
      * only mode so that permissions cannot be changed. Methods providing access to content should rely on this object
@@ -343,11 +291,7 @@ public class PDDocument implements Closeable
      */
     public AccessPermission getCurrentAccessPermission()
     {
-        if (accessPermission == null)
-        {
-            accessPermission = AccessPermission.getOwnerAccessPermission();
-        }
-        return accessPermission;
+        return ofNullable(permission).orElseGet(AccessPermission::getOwnerAccessPermission);
     }
 
     /**
@@ -358,7 +302,7 @@ public class PDDocument implements Closeable
         String headerVersion = getDocument().getHeaderVersion();
         if (isAtLeast(headerVersion, V1_4))
         {
-            return Optional.ofNullable(getDocumentCatalog().getVersion())
+            return ofNullable(getDocumentCatalog().getVersion())
                     .filter(catalogVersion -> (catalogVersion.compareTo(headerVersion) > 0))
                     .orElse(headerVersion);
         }
@@ -427,29 +371,28 @@ public class PDDocument implements Closeable
     /**
      * Generates file identifier as defined in the chap 14.4 PDF 32000-1:2008 and sets it as ID value of the document
      * trailer.
+     * 
+     * @param md5Update
+     * @param standardSecurity
      */
-    private void generateFileIdentifier()
+    private void generateFileIdentifier(byte[] md5Update,
+            Optional<StandardSecurity> standardSecurity)
     {
-        try
-        {
-            MessageDigest md5 = MessageDigest.getInstance("MD5");
-            md5.update(Long.toString(System.currentTimeMillis()).getBytes(Charsets.ISO_8859_1));
-            Optional.ofNullable(getDocument().getTrailer().getDictionaryObject(COSName.INFO))
-                    .map(d -> (COSDictionary) d).ifPresent(d -> {
-                        for (COSBase current : d.getValues())
-                        {
-                            md5.update(current.toString().getBytes(Charsets.ISO_8859_1));
-                        }
-                    });
-            COSString retVal = COSString.newInstance(md5.digest());
-            retVal.setForceHexForm(true);
-            DirectCOSObject id = asDirectObject(retVal);
-            getDocument().getTrailer().setItem(COSName.ID, asDirectObject(new COSArray(id, id)));
-        }
-        catch (NoSuchAlgorithmException e)
-        {
-            throw new RuntimeException(e);
-        }
+        MessageDigest md5 = MessageDigests.md5();
+        md5.update(Long.toString(System.currentTimeMillis()).getBytes(Charsets.ISO_8859_1));
+        md5.update(md5Update);
+        ofNullable(getDocument().getTrailer().getDictionaryObject(COSName.INFO))
+                .map(d -> (COSDictionary) d).ifPresent(d -> {
+                    for (COSBase current : d.getValues())
+                    {
+                        md5.update(current.toString().getBytes(Charsets.ISO_8859_1));
+                    }
+                });
+        COSString retVal = COSString.newInstance(md5.digest());
+        standardSecurity.ifPresent(s -> s.documentId(retVal.getBytes()));
+        retVal.setForceHexForm(true);
+        DirectCOSObject id = asDirectObject(retVal);
+        getDocument().getTrailer().setItem(COSName.ID, asDirectObject(new COSArray(id, id)));
     }
 
     /**
@@ -462,7 +405,7 @@ public class PDDocument implements Closeable
      */
     public void writeTo(File file, WriteOption... options) throws IOException
     {
-        writeTo(from(file), options);
+        writeTo(from(file), null, options);
     }
 
     /**
@@ -475,7 +418,7 @@ public class PDDocument implements Closeable
      */
     public void writeTo(String filename, WriteOption... options) throws IOException
     {
-        writeTo(from(filename), options);
+        writeTo(from(filename), null, options);
     }
 
     /**
@@ -488,7 +431,7 @@ public class PDDocument implements Closeable
      */
     public void writeTo(WritableByteChannel channel, WriteOption... options) throws IOException
     {
-        writeTo(from(channel), options);
+        writeTo(from(channel), null, options);
     }
 
     /**
@@ -501,11 +444,75 @@ public class PDDocument implements Closeable
      */
     public void writeTo(OutputStream out, WriteOption... options) throws IOException
     {
-        writeTo(from(out), options);
+        writeTo(from(out), null, options);
     }
 
-    private void writeTo(CountingWritableByteChannel output, WriteOption... options)
+    /**
+     * Writes the document to the given {@link File} encrypting it using the given security. The document is closed once
+     * written.
+     * 
+     * @see PDDocument#close()
+     * @param file
+     * @param security
+     * @param options
+     * @throws IOException
+     */
+    public void writeTo(File file, StandardSecurity security, WriteOption... options)
             throws IOException
+    {
+        writeTo(from(file), security, options);
+    }
+
+    /**
+     * Writes the document to the file corresponding the given file name encrypting it using the given security. The
+     * document is closed once written.
+     * 
+     * @see PDDocument#close()
+     * @param filename
+     * @param security
+     * @param options
+     * @throws IOException
+     */
+    public void writeTo(String filename, StandardSecurity security, WriteOption... options)
+            throws IOException
+    {
+        writeTo(from(filename), security, options);
+    }
+
+    /**
+     * Writes the document to the given {@link WritableByteChannel} encrypting it using the given security. The document
+     * is closed once written.
+     * 
+     * @see PDDocument#close()
+     * @param channel
+     * @param security
+     * @param options
+     * @throws IOException
+     */
+    public void writeTo(WritableByteChannel channel, StandardSecurity security,
+            WriteOption... options) throws IOException
+    {
+        writeTo(from(channel), security, options);
+    }
+
+    /**
+     * Writes the document to the given {@link OutputStream} encrypting it using the given security. The document is
+     * closed once written.
+     * 
+     * @see PDDocument#close()
+     * @param out
+     * @param security
+     * @param options
+     * @throws IOException
+     */
+    public void writeTo(OutputStream out, StandardSecurity security, WriteOption... options)
+            throws IOException
+    {
+        writeTo(from(out), security, options);
+    }
+
+    private void writeTo(CountingWritableByteChannel output, StandardSecurity security,
+            WriteOption... options) throws IOException
     {
         requireOpen();
         getDocumentInformation().setProducer("SAMBox " + Version.getVersion() + " (www.sejda.org)");
@@ -515,10 +522,11 @@ public class PDDocument implements Closeable
             font.subset();
         }
         fontsToSubset.clear();
-        generateFileIdentifier();
+        Optional<StandardSecurity> standardSecurity = ofNullable(security);
+        generateFileIdentifier(output.toString().getBytes(Charsets.ISO_8859_1), standardSecurity);
         try (PDDocumentWriter writer = new PDDocumentWriter(output, options))
         {
-            writer.write(this);
+            writer.write(this, standardSecurity);
         }
         finally
         {

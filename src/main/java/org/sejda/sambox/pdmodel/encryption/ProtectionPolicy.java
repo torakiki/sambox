@@ -23,7 +23,6 @@ package org.sejda.sambox.pdmodel.encryption;
  * Objects implementing this abstract class can be passed to the protect method of PDDocument
  * to protect a document.
  *
- * @see org.apache.pdfbox.pdmodel.PDDocument#protect(ProtectionPolicy)
  *
  * @author Benoit Guillon (benoit.guillon@snv.jussieu.fr)
  */

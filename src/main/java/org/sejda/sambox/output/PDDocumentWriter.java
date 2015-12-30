@@ -21,9 +21,11 @@ import static org.sejda.util.RequireUtils.requireNotNullArg;
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.channels.WritableByteChannel;
+import java.util.Optional;
 
 import org.sejda.io.CountingWritableByteChannel;
 import org.sejda.sambox.cos.COSDocument;
+import org.sejda.sambox.encryption.StandardSecurity;
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.util.SpecVersionUtils;
 import org.sejda.util.IOUtils;
@@ -53,9 +55,11 @@ public class PDDocumentWriter implements Closeable
      * Writes the {@link PDDocument}.
      * 
      * @param document
+     * @param standardSecurity
      * @throws IOException
      */
-    public void write(PDDocument document) throws IOException
+    public void write(PDDocument document, Optional<StandardSecurity> standardSecurity)
+            throws IOException
     {
         requireNotNullArg(document, "PDDocument cannot be null");
         if (context.hasWriteOption(WriteOption.XREF_STREAM)

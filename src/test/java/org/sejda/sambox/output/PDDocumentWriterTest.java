@@ -24,6 +24,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayOutputStream;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -64,7 +65,7 @@ public class PDDocumentWriterTest
     public void writeHaader() throws Exception
     {
         PDDocument document = new PDDocument();
-        victim.write(document);
+        victim.write(document, Optional.empty());
         verify(writer).writeHeader(document.getDocument().getHeaderVersion());
     }
 
@@ -78,7 +79,7 @@ public class PDDocumentWriterTest
                 CountingWritableByteChannel.from(new ByteArrayOutputStream()),
                 WriteOption.SYNC_BODY_WRITE);
         TestUtils.setProperty(victim, "writer", this.writer);
-        victim.write(document);
+        victim.write(document, Optional.empty());
         verify(cosDoc).accept(isA(SyncPDFBodyWriter.class));
     }
 
@@ -92,7 +93,7 @@ public class PDDocumentWriterTest
                 CountingWritableByteChannel.from(new ByteArrayOutputStream()),
                 WriteOption.SYNC_BODY_WRITE, WriteOption.OBJECT_STREAMS);
         TestUtils.setProperty(victim, "writer", this.writer);
-        victim.write(document);
+        victim.write(document, Optional.empty());
         verify(cosDoc).accept(isA(ObjectsStreamPDFBodyWriter.class));
     }
 
@@ -102,7 +103,7 @@ public class PDDocumentWriterTest
         PDDocument document = mock(PDDocument.class);
         COSDocument cosDoc = mock(COSDocument.class);
         when(document.getDocument()).thenReturn(cosDoc);
-        victim.write(document);
+        victim.write(document, Optional.empty());
         verify(cosDoc).accept(isA(AsyncPDFBodyWriter.class));
     }
 
@@ -111,7 +112,7 @@ public class PDDocumentWriterTest
     {
         try (PDDocument document = new PDDocument())
         {
-            victim.write(document);
+            victim.write(document, Optional.empty());
             verify(writer).writeXrefTable();
             verify(writer).writeTrailer(eq(document.getDocument().getTrailer()), anyLong());
         }
@@ -126,7 +127,7 @@ public class PDDocumentWriterTest
                     CountingWritableByteChannel.from(new ByteArrayOutputStream()),
                     WriteOption.XREF_STREAM);
             TestUtils.setProperty(victim, "writer", this.writer);
-            victim.write(document);
+            victim.write(document, Optional.empty());
             verify(writer).writeXrefStream(document.getDocument().getTrailer());
         }
     }
@@ -135,7 +136,7 @@ public class PDDocumentWriterTest
     public void close() throws Exception
     {
         PDDocument document = new PDDocument();
-        victim.write(document);
+        victim.write(document, Optional.empty());
         victim.close();
         verify(writer).close();
     }

@@ -351,7 +351,7 @@ public final class PublicKeySecurityHandler extends SecurityHandler
             this.encryptionKey = new byte[this.keyLength/8];
             System.arraycopy(mdResult, 0, this.encryptionKey, 0, this.keyLength/8);
 
-            doc.setEncryption(dictionary);
+            // doc.setEncryption(dictionary);
             doc.getDocument().setEncryptionDictionary(dictionary.getCOSDictionary());
         }
         catch(GeneralSecurityException e)

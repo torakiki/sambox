@@ -22,7 +22,6 @@ import static org.sejda.util.RequireUtils.requireArg;
 import static org.sejda.util.RequireUtils.requireNotNullArg;
 
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.function.Function;
 
@@ -42,7 +41,7 @@ class Algorithm1 implements GeneralEncryptionAlgorithm
     private static final byte[] AES_SALT = { (byte) 0x73, (byte) 0x41, (byte) 0x6c, (byte) 0x54 };
 
     private EncryptionAlgorithmEngine engine;
-    private MessageDigest digest;
+    private MessageDigest digest = MessageDigests.md5();
     private Function<COSObjectKey, byte[]> keyCalculator;
     private Function<byte[], byte[]> md5ToKey;
     private COSObjectKey currentCOSObjectKey;
@@ -62,14 +61,6 @@ class Algorithm1 implements GeneralEncryptionAlgorithm
             append[4] = (byte) (cosKey.generation() >> 8 & 0xff);
             return concatenate(key, append);
         };
-        try
-        {
-            this.digest = MessageDigest.getInstance("MD5");
-        }
-        catch (NoSuchAlgorithmException e)
-        {
-            throw new EncryptionException(e);
-        }
         md5ToKey = (newKey) -> {
             digest.reset();
             digest.update(newKey);
@@ -112,13 +103,12 @@ class Algorithm1 implements GeneralEncryptionAlgorithm
     /**
      * Factory method for an {@link Algorithm1} with an {@link AESEngine}
      * 
-     * @param engine
      * @param key
      * @return
      */
-    static Algorithm1 withAESEngine(AESEngine engine, byte[] key)
+    static Algorithm1 withAESEngine(byte[] key)
     {
-        Algorithm1 algorithm = new Algorithm1(engine, key);
+        Algorithm1 algorithm = new Algorithm1(new AESEngine(), key);
         algorithm.keyCalculator = algorithm.keyCalculator.andThen(k -> concatenate(k, AES_SALT));
         return algorithm;
     }
@@ -126,13 +116,12 @@ class Algorithm1 implements GeneralEncryptionAlgorithm
     /**
      * Factory method for an {@link Algorithm1} with an {@link ARC4Engine}
      * 
-     * @param engine
      * @param key
      * @return
      */
-    static Algorithm1 withARC4Engine(ARC4Engine engine, byte[] key)
+    static Algorithm1 withARC4Engine(byte[] key)
     {
-        return new Algorithm1(engine, key);
+        return new Algorithm1(new ARC4Engine(), key);
     }
 
 }

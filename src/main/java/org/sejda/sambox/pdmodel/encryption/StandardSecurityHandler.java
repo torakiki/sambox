@@ -382,7 +382,7 @@ public final class StandardSecurityHandler extends SecurityHandler
                     document, revision, length);
         }
 
-        document.setEncryption(encryptionDictionary);
+        // document.setEncryption(encryptionDictionary);
         document.getDocument().setEncryptionDictionary(encryptionDictionary.getCOSDictionary());
     }
 
