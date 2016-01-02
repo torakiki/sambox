@@ -40,9 +40,10 @@ class Algorithm5 implements PasswordAlgorithm
         security.encryption.revision.requireAtLeast(StandardSecurityHandlerRevision.R3,
                 "Algorithm 5 requires a security handler of revision 3 or greater");
         byte[] arc4Key = algo.computeEncryptionKey(security);
+        digest.reset();
         digest.update(ENCRYPT_PADDING);
-        digest.update(security.documentId());
-        byte[] encrypted = engine.encryptBytes(Arrays.copyOf(digest.digest(), 16), arc4Key);
+        byte[] encrypted = engine
+                .encryptBytes(Arrays.copyOf(digest.digest(security.documentId()), 16), arc4Key);
         byte[] iterationKey = new byte[arc4Key.length];
         for (int i = 1; i < 20; i++)
         {

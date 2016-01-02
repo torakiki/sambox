@@ -43,6 +43,7 @@ class Algorithm1 implements GeneralEncryptionAlgorithm
     private EncryptionAlgorithmEngine engine;
     private MessageDigest digest = MessageDigests.md5();
     private Function<COSObjectKey, byte[]> keyCalculator;
+    private Function<byte[], byte[]> md5Initializer;
     private Function<byte[], byte[]> md5ToKey;
     private COSObjectKey currentCOSObjectKey;
 
@@ -61,9 +62,12 @@ class Algorithm1 implements GeneralEncryptionAlgorithm
             append[4] = (byte) (cosKey.generation() >> 8 & 0xff);
             return concatenate(key, append);
         };
-        md5ToKey = (newKey) -> {
+        md5Initializer = (newKey) -> {
             digest.reset();
             digest.update(newKey);
+            return newKey;
+        };
+        md5ToKey = (newKey) -> {
             return Arrays.copyOf(digest.digest(), Math.min(newKey.length, 16));
         };
     }
@@ -72,7 +76,6 @@ class Algorithm1 implements GeneralEncryptionAlgorithm
     public void setCurrentCOSObjectKey(COSObjectKey currentCOSObjectKey)
     {
         this.currentCOSObjectKey = currentCOSObjectKey;
-
     }
 
     @Override
@@ -81,8 +84,8 @@ class Algorithm1 implements GeneralEncryptionAlgorithm
         if (value.encryptable())
         {
             requireObjectKey();
-            value.setValue(engine.encryptBytes(value.getBytes(),
-                    keyCalculator.andThen(md5ToKey).apply(currentCOSObjectKey)));
+            value.setValue(engine.encryptBytes(value.getBytes(), keyCalculator
+                    .andThen(md5Initializer).andThen(md5ToKey).apply(currentCOSObjectKey)));
         }
     }
 
@@ -92,8 +95,8 @@ class Algorithm1 implements GeneralEncryptionAlgorithm
         if (value.encryptable())
         {
             requireObjectKey();
-            value.setEncryptor((i) -> engine.encryptStream(i,
-                    keyCalculator.andThen(md5ToKey).apply(currentCOSObjectKey)));
+            value.setEncryptor((i) -> engine.encryptStream(i, keyCalculator.andThen(md5Initializer)
+                    .andThen(md5ToKey).apply(currentCOSObjectKey)));
         }
     }
 
@@ -115,7 +118,10 @@ class Algorithm1 implements GeneralEncryptionAlgorithm
     static Algorithm1 withAESEngine(byte[] key)
     {
         Algorithm1 algorithm = new Algorithm1(new AESEngine(), key);
-        algorithm.keyCalculator = algorithm.keyCalculator.andThen(k -> concatenate(k, AES_SALT));
+        algorithm.md5Initializer = algorithm.md5Initializer.andThen(k -> {
+            algorithm.digest.update(AES_SALT);
+            return k;
+        });
         return algorithm;
     }
 

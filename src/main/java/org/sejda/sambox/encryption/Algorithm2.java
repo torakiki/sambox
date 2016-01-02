@@ -32,9 +32,9 @@ class Algorithm2
     private MessageDigest digest = MessageDigests.md5();
     private Algorithm3 algo = new Algorithm3();
 
-
     byte[] computeEncryptionKey(StandardSecurity security)
     {
+        digest.reset();
         digest.update(EncryptUtils.padOrTruncate(security.userPassword));
         digest.update(algo.computePassword(security));
 
@@ -51,8 +51,7 @@ class Algorithm2
             digest.update(NO_METADATA);
         }
         byte[] hash = digest.digest();
-        if (StandardSecurityHandlerRevision.R3.compareTo(security.encryption.revision) <= 0
-                && !security.encryptMetadata)
+        if (StandardSecurityHandlerRevision.R3.compareTo(security.encryption.revision) <= 0)
         {
             for (int i = 0; i < 50; i++)
             {
