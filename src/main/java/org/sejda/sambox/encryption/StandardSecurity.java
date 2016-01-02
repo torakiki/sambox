@@ -45,7 +45,9 @@ public class StandardSecurity
         this.ownerPassword = Objects.toString(ownerPassword, "").getBytes(Charsets.ISO_8859_1);
         this.userPassword = Objects.toString(userPassword, "").getBytes(Charsets.ISO_8859_1);
         this.encryption = encryption;
-        this.encryptMetadata = encryptMetadata;
+        // RC4 128 has a version 2 and encryptMetadata is true by default
+        this.encryptMetadata = encryptMetadata
+                || StandardSecurityEncryption.ARC4_128.equals(encryption);
     }
 
     /**
@@ -64,4 +66,8 @@ public class StandardSecurity
         return documentId;
     }
 
+    public GeneralEncryptionAlgorithm encryptionAlgorithm()
+    {
+        return encryption.encryptionAlgorithm(this);
+    }
 }

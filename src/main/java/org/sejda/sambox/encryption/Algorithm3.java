@@ -50,15 +50,17 @@ class Algorithm3 implements PasswordAlgorithm
                 arc4Key = Arrays.copyOf(digest.digest(), security.encryption.revision.length);
             }
             byte[] encrypted = engine.encryptBytes(paddedUser, arc4Key);
-            byte[] iterationKey = Arrays.copyOf(arc4Key, arc4Key.length);
+            byte[] iterationKey = new byte[arc4Key.length];
             for (int i = 1; i < 20; i++)
             {
+                iterationKey = Arrays.copyOf(arc4Key, arc4Key.length);
                 for (int j = 0; j < iterationKey.length; j++)
                 {
                     iterationKey[j] = (byte) (iterationKey[j] ^ (byte) i);
                 }
                 encrypted = engine.encryptBytes(encrypted, iterationKey);
             }
+            return encrypted;
         }
         return engine.encryptBytes(paddedUser, arc4Key);
     }

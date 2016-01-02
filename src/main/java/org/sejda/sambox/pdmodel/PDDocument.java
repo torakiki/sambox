@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.pdmodel;
 
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static org.sejda.io.CountingWritableByteChannel.from;
 import static org.sejda.sambox.cos.DirectCOSObject.asDirectObject;
@@ -32,7 +33,6 @@ import java.nio.channels.WritableByteChannel;
 import java.security.MessageDigest;
 import java.util.Calendar;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 
 import org.sejda.io.CountingWritableByteChannel;
@@ -238,7 +238,7 @@ public class PDDocument implements Closeable
     }
 
     /**
-     * This will get the encryption dictionary for this document. .
+     * This will get the encryption dictionary for this document.
      *
      * @return The encryption dictionary
      */
@@ -375,8 +375,7 @@ public class PDDocument implements Closeable
      * @param md5Update
      * @param standardSecurity
      */
-    private void generateFileIdentifier(byte[] md5Update,
-            Optional<StandardSecurity> standardSecurity)
+    private void generateFileIdentifier(byte[] md5Update, StandardSecurity standardSecurity)
     {
         MessageDigest md5 = MessageDigests.md5();
         md5.update(Long.toString(System.currentTimeMillis()).getBytes(Charsets.ISO_8859_1));
@@ -389,8 +388,12 @@ public class PDDocument implements Closeable
                     }
                 });
         COSString retVal = COSString.newInstance(md5.digest());
-        standardSecurity.ifPresent(s -> s.documentId(retVal.getBytes()));
+        if (nonNull(standardSecurity))
+        {
+            standardSecurity.documentId(retVal.getBytes());
+        }
         retVal.setForceHexForm(true);
+        retVal.encryptable(false);
         DirectCOSObject id = asDirectObject(retVal);
         getDocument().getTrailer().setItem(COSName.ID, asDirectObject(new COSArray(id, id)));
     }
@@ -522,11 +525,10 @@ public class PDDocument implements Closeable
             font.subset();
         }
         fontsToSubset.clear();
-        Optional<StandardSecurity> standardSecurity = ofNullable(security);
-        generateFileIdentifier(output.toString().getBytes(Charsets.ISO_8859_1), standardSecurity);
-        try (PDDocumentWriter writer = new PDDocumentWriter(output, options))
+        generateFileIdentifier(output.toString().getBytes(Charsets.ISO_8859_1), security);
+        try (PDDocumentWriter writer = new PDDocumentWriter(output, security, options))
         {
-            writer.write(this, standardSecurity);
+            writer.write(this);
         }
         finally
         {

@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.output;
 
+import static java.util.Optional.ofNullable;
 import static org.sejda.util.RequireUtils.requireNotNullArg;
 
 import java.io.Closeable;
@@ -25,6 +26,8 @@ import java.util.Optional;
 
 import org.sejda.io.CountingWritableByteChannel;
 import org.sejda.sambox.cos.COSDocument;
+import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.encryption.GeneralEncryptionAlgorithm;
 import org.sejda.sambox.encryption.StandardSecurity;
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.util.SpecVersionUtils;
@@ -43,11 +46,17 @@ public class PDDocumentWriter implements Closeable
     private static final Logger LOG = LoggerFactory.getLogger(PDDocumentWriter.class);
     private DefaultPDFWriter writer;
     private PDFWriteContext context;
+    private Optional<StandardSecurity> standardSecurity;
 
-    public PDDocumentWriter(CountingWritableByteChannel channel, WriteOption... options)
+    public PDDocumentWriter(CountingWritableByteChannel channel, StandardSecurity standardSecurity,
+            WriteOption... options)
     {
         requireNotNullArg(channel, "Cannot write to a null channel");
-        context = new PDFWriteContext(options);
+        this.standardSecurity = Optional.ofNullable(standardSecurity);
+        context = new PDFWriteContext(
+                this.standardSecurity.map(StandardSecurity::encryptionAlgorithm)
+                        .orElse(GeneralEncryptionAlgorithm.IDENTITY),
+                options);
         this.writer = new DefaultPDFWriter(new IndirectObjectsWriter(channel, context));
     }
 
@@ -58,8 +67,7 @@ public class PDDocumentWriter implements Closeable
      * @param standardSecurity
      * @throws IOException
      */
-    public void write(PDDocument document, Optional<StandardSecurity> standardSecurity)
-            throws IOException
+    public void write(PDDocument document) throws IOException
     {
         requireNotNullArg(document, "PDDocument cannot be null");
         if (context.hasWriteOption(WriteOption.XREF_STREAM)
@@ -67,11 +75,17 @@ public class PDDocumentWriter implements Closeable
         {
             document.requireMinVersion(SpecVersionUtils.V1_5);
         }
-        if (document.getEncryption() != null)
-        {
-            // TODO refactor the encrypt/decrypt
-            LOG.warn("Encryption is not supported yet, the document will be written decrypted");
-        }
+        ofNullable(document.getDocument().getTrailer())
+                .ifPresent(t -> t.removeItem(COSName.ENCRYPT));
+
+        standardSecurity.ifPresent(s -> {
+            document.getDocument()
+                    .setEncryptionDictionary(s.encryption.generateEncryptionDictionary(s));
+            LOG.debug("Generated encryption dictionary");
+            ofNullable(document.getDocumentCatalog().getMetadata()).map(m -> m.getCOSObject())
+                    .ifPresent(str -> str.encryptable(s.encryptMetadata));
+        });
+
         writer.writeHeader(document.getDocument().getHeaderVersion());
         writeBody(document.getDocument());
         writeXref(document);

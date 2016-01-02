@@ -16,6 +16,10 @@
  */
 package org.sejda.sambox.encryption;
 
+import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.cos.COSString;
+
 /**
  * Available standard security encryptions
  * 
@@ -24,8 +28,63 @@ package org.sejda.sambox.encryption;
  */
 public enum StandardSecurityEncryption
 {
-    ARC4_128(StandardSecurityHandlerRevision.R3, 2), AES_128(StandardSecurityHandlerRevision.R4,
-            4), AES_256(StandardSecurityHandlerRevision.R6, 5);
+    ARC4_128(StandardSecurityHandlerRevision.R3, 2)
+    {
+        @Override
+        public COSDictionary generateEncryptionDictionary(StandardSecurity security)
+        {
+            COSDictionary encryptionDictionary = super.generateEncryptionDictionary(security);
+            encryptionDictionary.setItem(COSName.O,
+                    pwdString(new Algorithm3().computePassword(security)));
+            encryptionDictionary.setItem(COSName.U,
+                    pwdString(new Algorithm5().computePassword(security)));
+            return encryptionDictionary;
+        }
+
+        @Override
+        public GeneralEncryptionAlgorithm encryptionAlgorithm(StandardSecurity security)
+        {
+            return Algorithm1.withARC4Engine(new Algorithm2().computeEncryptionKey(security));
+        }
+    },
+    AES_128(StandardSecurityHandlerRevision.R4, 4)
+    {
+        @Override
+        public COSDictionary generateEncryptionDictionary(StandardSecurity security)
+        {
+            COSDictionary encryptionDictionary = super.generateEncryptionDictionary(security);
+            encryptionDictionary.setItem(COSName.O,
+                    pwdString(new Algorithm3().computePassword(security)));
+            encryptionDictionary.setItem(COSName.U,
+                    pwdString(new Algorithm5().computePassword(security)));
+            encryptionDictionary.setBoolean(COSName.ENCRYPT_META_DATA, security.encryptMetadata);
+            return encryptionDictionary;
+        }
+
+        @Override
+        public GeneralEncryptionAlgorithm encryptionAlgorithm(StandardSecurity security)
+        {
+            return Algorithm1.withAESEngine(new Algorithm2().computeEncryptionKey(security));
+        }
+    },
+    AES_256(StandardSecurityHandlerRevision.R6, 5)
+    {
+        @Override
+        public COSDictionary generateEncryptionDictionary(StandardSecurity security)
+        {
+            COSDictionary encryptionDictionary = super.generateEncryptionDictionary(security);
+            encryptionDictionary.setInt(COSName.R, this.revision.revisionNumber);
+            // TODO
+            return encryptionDictionary;
+        }
+
+        @Override
+        public GeneralEncryptionAlgorithm encryptionAlgorithm(StandardSecurity security)
+        {
+            // TODO Algo 2A
+            return null;
+        }
+    };
 
     public final int version;
     public final StandardSecurityHandlerRevision revision;
@@ -34,5 +93,32 @@ public enum StandardSecurityEncryption
     {
         this.revision = revision;
         this.version = version;
+    }
+
+    /**
+     * Generates the encryption dictionary for this standard encryption
+     * 
+     * @param security
+     * @return
+     */
+    public COSDictionary generateEncryptionDictionary(StandardSecurity security)
+    {
+        COSDictionary encryptionDictionary = new COSDictionary();
+        encryptionDictionary.setName(COSName.FILTER, "Standard");
+        encryptionDictionary.setInt(COSName.V, this.version);
+        encryptionDictionary.setInt(COSName.LENGTH, this.revision.length * 8);
+        encryptionDictionary.setInt(COSName.R, this.revision.revisionNumber);
+        encryptionDictionary.setInt(COSName.P, security.permissions.getPermissionBytes());
+        return encryptionDictionary;
+    }
+
+    public abstract GeneralEncryptionAlgorithm encryptionAlgorithm(StandardSecurity security);
+
+    private static COSString pwdString(byte[] raw)
+    {
+        COSString string = new COSString(raw);
+        string.encryptable(false);
+        string.setForceHexForm(true);
+        return string;
     }
 }

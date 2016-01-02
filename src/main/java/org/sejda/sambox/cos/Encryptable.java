@@ -14,35 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.sejda.sambox.encryption;
-
-import org.sejda.sambox.cos.COSObjectKey;
-import org.sejda.sambox.cos.COSVisitor;
+package org.sejda.sambox.cos;
 
 /**
- * General encryption algorithm as defined in Chapter 7.6.2 of the PDF 32000-1
+ * An encryptable object
  * 
  * @author Andrea Vacondio
  *
  */
-public interface GeneralEncryptionAlgorithm extends COSVisitor
+public interface Encryptable
 {
     /**
-     * A {@link GeneralEncryptionAlgorithm} that does nothing
+     * @return true if the can be encrypted
      */
-    public GeneralEncryptionAlgorithm IDENTITY = new GeneralEncryptionAlgorithm()
-    {
-        @Override
-        public void setCurrentCOSObjectKey(COSObjectKey key)
-        {
-            // nothing
-        }
-    };
+    boolean encryptable();
 
     /**
-     * Sets the current object and generation numbers
+     * Sets if the object can be encrypted
      * 
-     * @param key
+     * @param encryptable
      */
-    void setCurrentCOSObjectKey(COSObjectKey key);
+    void encryptable(boolean encryptable);
 }

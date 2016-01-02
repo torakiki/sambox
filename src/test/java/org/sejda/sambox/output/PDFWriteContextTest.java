@@ -22,6 +22,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.Before;
@@ -30,6 +31,7 @@ import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSObjectKey;
 import org.sejda.sambox.cos.IndirectCOSObjectIdentifier;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
+import org.sejda.sambox.encryption.GeneralEncryptionAlgorithm;
 import org.sejda.sambox.input.ExistingIndirectCOSObject;
 import org.sejda.sambox.xref.XrefEntry;
 
@@ -46,13 +48,14 @@ public class PDFWriteContextTest
     @Before
     public void setUp()
     {
-        context = new PDFWriteContext();
+        context = new PDFWriteContext(GeneralEncryptionAlgorithm.IDENTITY);
     }
 
     @Test
     public void hasWriteOption()
     {
-        PDFWriteContext context = new PDFWriteContext(WriteOption.OBJECT_STREAMS);
+        PDFWriteContext context = new PDFWriteContext(GeneralEncryptionAlgorithm.IDENTITY,
+                WriteOption.OBJECT_STREAMS);
         assertTrue(context.hasWriteOption(WriteOption.OBJECT_STREAMS));
         assertFalse(context.hasWriteOption(WriteOption.SYNC_BODY_WRITE));
     }
@@ -91,7 +94,8 @@ public class PDFWriteContextTest
     @Test
     public void hasIndirectReferenceFor()
     {
-        PDFWriteContext anotherContext = new PDFWriteContext(WriteOption.OBJECT_STREAMS);
+        PDFWriteContext anotherContext = new PDFWriteContext(GeneralEncryptionAlgorithm.IDENTITY,
+                WriteOption.OBJECT_STREAMS);
         COSDictionary dic = new COSDictionary();
         COSDictionary anotherDic = new COSDictionary();
         anotherContext.createIndirectReferenceFor(anotherDic);
@@ -134,4 +138,19 @@ public class PDFWriteContextTest
         assertEquals(entry2, context.highestWritten());
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void nullEncryptor()
+    {
+        new PDFWriteContext(null);
+    }
+
+    @Test
+    public void writing()
+    {
+        GeneralEncryptionAlgorithm encryptor = mock(GeneralEncryptionAlgorithm.class);
+        PDFWriteContext victim = new PDFWriteContext(encryptor);
+        COSObjectKey key = new COSObjectKey(10, 0);
+        victim.writing(key);
+        verify(encryptor).setCurrentCOSObjectKey(key);
+    }
 }

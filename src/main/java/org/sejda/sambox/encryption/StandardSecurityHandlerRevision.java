@@ -22,13 +22,18 @@ package org.sejda.sambox.encryption;
  */
 public enum StandardSecurityHandlerRevision
 {
-    R2(5), R3(16), R4(16), R6(32);
+    R2(5, 2), R3(16, 3), R4(16, 4), R6(32, 6);
 
+    /**
+     * Length of the encryption key in bytes
+     */
     public final int length;
+    public final int revisionNumber;
 
-    private StandardSecurityHandlerRevision(int length)
+    private StandardSecurityHandlerRevision(int length, int revisionNumber)
     {
         this.length = length;
+        this.revisionNumber = revisionNumber;
     }
 
     /**

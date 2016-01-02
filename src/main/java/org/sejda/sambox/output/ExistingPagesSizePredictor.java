@@ -27,6 +27,7 @@ import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSObjectable;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
+import org.sejda.sambox.encryption.GeneralEncryptionAlgorithm;
 import org.sejda.sambox.pdmodel.PDPage;
 import org.sejda.util.IOUtils;
 import org.slf4j.Logger;
@@ -54,7 +55,7 @@ public class ExistingPagesSizePredictor extends AbstractPDFBodyWriter
 
     public ExistingPagesSizePredictor(WriteOption... opts)
     {
-        super(new PDFWriteContext(opts));
+        super(new PDFWriteContext(GeneralEncryptionAlgorithm.IDENTITY, opts));
         this.writer = new IndirectObjectsWriter(channel, context())
         {
             @Override

@@ -99,8 +99,6 @@ class DefaultPDFWriter implements Closeable
         trailer.removeItem(COSName.F_DECODE_PARMS);
         trailer.removeItem(COSName.F_FILTER);
         trailer.removeItem(COSName.F);
-        // TODO fix this once encryption is implemented
-        trailer.removeItem(COSName.ENCRYPT);
         trailer.setLong(COSName.SIZE, writer.context().highestWritten().getObjectNumber() + 1);
         writer.write("trailer".getBytes(Charsets.US_ASCII));
         writer.writeEOL();

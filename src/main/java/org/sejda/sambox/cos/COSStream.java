@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Ben Litchfield
  */
-public class COSStream extends COSDictionary implements Closeable
+public class COSStream extends COSDictionary implements Closeable, Encryptable
 {
     private static final List<COSName> CAN_COMPRESS = Arrays.asList(COSName.ASCII_HEX_DECODE,
             COSName.ASCII_HEX_DECODE_ABBREVIATION, COSName.ASCII85_DECODE,
@@ -60,6 +60,7 @@ public class COSStream extends COSDictionary implements Closeable
     private DecodeResult decodeResult;
     // an encryption function that returns an encrypted view of the filtered stream
     private Function<InputStream, InputStream> encryptor;
+    private boolean encryptable = true;
 
     public COSStream()
     {
@@ -509,6 +510,18 @@ public class COSStream extends COSDictionary implements Closeable
 
         }
         return true;
+    }
+
+    @Override
+    public boolean encryptable()
+    {
+        return encryptable;
+    }
+
+    @Override
+    public void encryptable(boolean encryptable)
+    {
+        this.encryptable = encryptable;
     }
 
     /**

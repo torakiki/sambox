@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.output;
 
+import static org.sejda.util.RequireUtils.requireNotNullArg;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -25,8 +27,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 import org.sejda.sambox.cos.COSBase;
+import org.sejda.sambox.cos.COSObjectKey;
 import org.sejda.sambox.cos.IndirectCOSObjectIdentifier;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
+import org.sejda.sambox.encryption.GeneralEncryptionAlgorithm;
 import org.sejda.sambox.input.ExistingIndirectCOSObject;
 import org.sejda.sambox.xref.XrefEntry;
 import org.slf4j.Logger;
@@ -49,9 +53,12 @@ class PDFWriteContext
     private Map<IndirectCOSObjectIdentifier, IndirectCOSObjectReference> lookupNewRef = new ConcurrentHashMap<>();
     private List<WriteOption> opts;
     private SortedMap<Long, XrefEntry> written = new ConcurrentSkipListMap<>();
+    public final GeneralEncryptionAlgorithm encryptor;
 
-    PDFWriteContext(WriteOption... options)
+    PDFWriteContext(GeneralEncryptionAlgorithm encryptor, WriteOption... options)
     {
+        requireNotNullArg(encryptor, "Encryptor cannot be null");
+        this.encryptor = encryptor;
         this.opts = Arrays.asList(options);
     }
 
@@ -179,5 +186,15 @@ class PDFWriteContext
     XrefEntry getWritten(Long objectNumber)
     {
         return written.get(objectNumber);
+    }
+
+    /**
+     * Informs the context of the object is about the written
+     * 
+     * @param key
+     */
+    void writing(COSObjectKey key)
+    {
+        encryptor.setCurrentCOSObjectKey(key);
     }
 }

@@ -29,6 +29,7 @@ import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.encryption.GeneralEncryptionAlgorithm;
 import org.sejda.sambox.xref.CompressedXrefEntry;
 import org.sejda.sambox.xref.XrefEntry;
 
@@ -43,7 +44,7 @@ public class XrefStreamTest
     @Before
     public void setUp()
     {
-        context = new PDFWriteContext();
+        context = new PDFWriteContext(GeneralEncryptionAlgorithm.IDENTITY);
         context.putWritten(CompressedXrefEntry.compressedEntry(2, 4, 1));
         context.putWritten(XrefEntry.inUseEntry(4, 256, 0));
     }

@@ -33,6 +33,7 @@ import org.sejda.io.BufferedCountingChannelWriter;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
+import org.sejda.sambox.encryption.GeneralEncryptionAlgorithm;
 import org.sejda.sambox.util.Charsets;
 
 /**
@@ -49,17 +50,30 @@ public class IndirectObjectsWriterTest
     @Before
     public void setUp()
     {
-        context = new PDFWriteContext();
+        context = new PDFWriteContext(GeneralEncryptionAlgorithm.IDENTITY);
         writer = mock(BufferedCountingChannelWriter.class);
         victim = new IndirectObjectsWriter(writer, context);
 
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void nullWriter()
+    {
+        new IndirectObjectsWriter((BufferedCountingChannelWriter) null, context);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void nullContext()
+    {
+        new IndirectObjectsWriter(writer, null);
     }
 
     @Test
     public void writerObject() throws IOException
     {
         when(writer.offset()).thenReturn(12345l);
-        IndirectCOSObjectReference ref = new IndirectCOSObjectReference(123, 0, COSInteger.get(100));
+        IndirectCOSObjectReference ref = new IndirectCOSObjectReference(123, 0,
+                COSInteger.get(100));
         InOrder inOrder = Mockito.inOrder(writer);
         victim.writeObjectIfNotWritten(ref);
         inOrder.verify(writer).write("123");
@@ -79,7 +93,8 @@ public class IndirectObjectsWriterTest
     public void writerObjectOffsetIsSet() throws IOException
     {
         when(writer.offset()).thenReturn(12345l);
-        IndirectCOSObjectReference ref = new IndirectCOSObjectReference(123, 0, COSInteger.get(100));
+        IndirectCOSObjectReference ref = new IndirectCOSObjectReference(123, 0,
+                COSInteger.get(100));
         victim.writeObjectIfNotWritten(ref);
         assertEquals(12345, ref.xrefEntry().getByteOffset());
     }
@@ -87,7 +102,8 @@ public class IndirectObjectsWriterTest
     @Test
     public void writerObjectReleaseIsCalled() throws IOException
     {
-        IndirectCOSObjectReference ref = new IndirectCOSObjectReference(123, 0, COSInteger.get(100));
+        IndirectCOSObjectReference ref = new IndirectCOSObjectReference(123, 0,
+                COSInteger.get(100));
         assertNotEquals(COSNull.NULL, ref.getCOSObject());
         victim.writeObjectIfNotWritten(ref);
         assertEquals(COSNull.NULL, ref.getCOSObject());
@@ -96,7 +112,8 @@ public class IndirectObjectsWriterTest
     @Test
     public void writerObjectMultipleTimesWritesOnce() throws IOException
     {
-        IndirectCOSObjectReference ref = new IndirectCOSObjectReference(123, 0, COSInteger.get(100));
+        IndirectCOSObjectReference ref = new IndirectCOSObjectReference(123, 0,
+                COSInteger.get(100));
         victim.writeObjectIfNotWritten(ref);
         victim.writeObjectIfNotWritten(ref);
         victim.writeObjectIfNotWritten(ref);

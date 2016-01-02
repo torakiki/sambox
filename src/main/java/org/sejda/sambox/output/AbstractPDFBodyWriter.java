@@ -79,9 +79,7 @@ abstract class AbstractPDFBodyWriter implements COSVisitor, Closeable
     @Override
     public void visit(COSDocument document) throws IOException
     {
-        // TODO add Encrypt once implemented
-        // for (COSName k : Arrays.asList(COSName.ROOT, COSName.INFO, COSName.ENCRYPT))
-        for (COSName k : Arrays.asList(COSName.ROOT, COSName.INFO))
+        for (COSName k : Arrays.asList(COSName.ROOT, COSName.INFO, COSName.ENCRYPT))
         {
             COSBase value = document.getTrailer().getItem(k);
             if (value != null)

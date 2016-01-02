@@ -44,10 +44,11 @@ import org.sejda.sambox.util.Hex;
  * @author Ben Litchfield
  * @author John Hewson
  */
-public final class COSString extends COSBase
+public final class COSString extends COSBase implements Encryptable
 {
     private byte[] bytes;
     private boolean forceHexForm;
+    private boolean encryptable = true;
 
     /**
      * Creates a new PDF string from a byte array. This method can be used to read a string from an existing PDF file,
@@ -55,7 +56,7 @@ public final class COSString extends COSBase
      *
      * @param bytes The raw bytes of the PDF text string or byte string.
      */
-    private COSString(byte[] bytes)
+    public COSString(byte[] bytes)
     {
         this.bytes = bytes;
     }
@@ -131,6 +132,18 @@ public final class COSString extends COSBase
             sb.append(Hex.getString(b));
         }
         return sb.toString();
+    }
+
+    @Override
+    public boolean encryptable()
+    {
+        return encryptable;
+    }
+
+    @Override
+    public void encryptable(boolean encryptable)
+    {
+        this.encryptable = encryptable;
     }
 
     @Override

@@ -45,13 +45,19 @@ class Algorithm1A implements GeneralEncryptionAlgorithm
     @Override
     public void visit(COSString value)
     {
-        value.setValue(engine.encryptBytes(value.getBytes(), key));
+        if (value.encryptable())
+        {
+            value.setValue(engine.encryptBytes(value.getBytes(), key));
+        }
     }
 
     @Override
     public void visit(COSStream value)
     {
-        value.setEncryptor((i) -> engine.encryptStream(i, key));
+        if (value.encryptable())
+        {
+            value.setEncryptor((i) -> engine.encryptStream(i, key));
+        }
     }
 
     @Override

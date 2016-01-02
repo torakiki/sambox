@@ -34,6 +34,7 @@ import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
+import org.sejda.sambox.encryption.GeneralEncryptionAlgorithm;
 import org.sejda.sambox.util.Charsets;
 import org.sejda.sambox.util.SpecVersionUtils;
 import org.sejda.sambox.xref.XrefEntry;
@@ -48,7 +49,7 @@ public class DefaultPDFWriterTest
     @Before
     public void setUp()
     {
-        context = new PDFWriteContext();
+        context = new PDFWriteContext(GeneralEncryptionAlgorithm.IDENTITY);
         writer = mock(BufferedCountingChannelWriter.class);
         objectWriter = new IndirectObjectsWriter(writer, context);
         victim = new DefaultPDFWriter(objectWriter);
@@ -109,7 +110,6 @@ public class DefaultPDFWriterTest
         existingTrailer.setName(COSName.F_DECODE_PARMS, "value");
         existingTrailer.setName(COSName.F_FILTER, "value");
         existingTrailer.setName(COSName.F, "value");
-        // TODO remove this test once encryption is implemented
         existingTrailer.setName(COSName.ENCRYPT, "value");
         victim.writeTrailer(existingTrailer, 1);
         assertFalse(existingTrailer.containsKey(COSName.PREV));
@@ -119,7 +119,6 @@ public class DefaultPDFWriterTest
         assertFalse(existingTrailer.containsKey(COSName.F_DECODE_PARMS));
         assertFalse(existingTrailer.containsKey(COSName.F_FILTER));
         assertFalse(existingTrailer.containsKey(COSName.F));
-        assertFalse(existingTrailer.containsKey(COSName.ENCRYPT));
     }
 
     @Test

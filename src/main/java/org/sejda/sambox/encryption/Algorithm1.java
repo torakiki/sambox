@@ -78,17 +78,23 @@ class Algorithm1 implements GeneralEncryptionAlgorithm
     @Override
     public void visit(COSString value)
     {
-        requireObjectKey();
-        value.setValue(engine.encryptBytes(value.getBytes(),
-                keyCalculator.andThen(md5ToKey).apply(currentCOSObjectKey)));
+        if (value.encryptable())
+        {
+            requireObjectKey();
+            value.setValue(engine.encryptBytes(value.getBytes(),
+                    keyCalculator.andThen(md5ToKey).apply(currentCOSObjectKey)));
+        }
     }
 
     @Override
     public void visit(COSStream value)
     {
-        requireObjectKey();
-        value.setEncryptor((i) -> engine.encryptStream(i,
-                keyCalculator.andThen(md5ToKey).apply(currentCOSObjectKey)));
+        if (value.encryptable())
+        {
+            requireObjectKey();
+            value.setEncryptor((i) -> engine.encryptStream(i,
+                    keyCalculator.andThen(md5ToKey).apply(currentCOSObjectKey)));
+        }
     }
 
     private void requireObjectKey()
