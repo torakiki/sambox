@@ -32,7 +32,6 @@ import org.junit.Test;
 import org.sejda.sambox.SAMBox;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.encryption.GeneralEncryptionAlgorithm;
 import org.sejda.sambox.output.ObjectsStreamPDFBodyWriter.ObjectsStream;
 
 /**
@@ -48,7 +47,7 @@ public class ObjectsStreamTest
     @Before
     public void setUp()
     {
-        context = new PDFWriteContext(GeneralEncryptionAlgorithm.IDENTITY);
+        context = new PDFWriteContext(null);
         victim = new ObjectsStream(context);
     }
 

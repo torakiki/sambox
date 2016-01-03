@@ -30,7 +30,6 @@ import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.engines.AESFastEngine;
 import org.bouncycastle.crypto.io.CipherInputStream;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
-import org.bouncycastle.crypto.paddings.PKCS7Padding;
 import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
@@ -49,15 +48,18 @@ class AESEngine implements EncryptionAlgorithmEngine
 
     public AESEngine()
     {
-        cipher = new PaddedBufferedBlockCipher(new CBCBlockCipher(new AESFastEngine()),
-                new PKCS7Padding());
+        cipher = new PaddedBufferedBlockCipher(new CBCBlockCipher(new AESFastEngine()));
         random = new SecureRandom();
     }
 
     @Override
     public InputStream encryptStream(InputStream data, byte[] key)
     {
-        byte[] iv = initializationVector();
+        return encryptStream(data, key, initializationVector());
+    }
+
+    InputStream encryptStream(InputStream data, byte[] key, byte[] iv)
+    {
         init(iv, key);
         return new SequenceInputStream(new ByteArrayInputStream(iv),
                 new CipherInputStream(data, cipher));
@@ -66,7 +68,12 @@ class AESEngine implements EncryptionAlgorithmEngine
     @Override
     public byte[] encryptBytes(byte[] data, byte[] key)
     {
-        byte[] iv = initializationVector();
+        return encryptBytes(data, key, initializationVector());
+    }
+
+    // to test
+    byte[] encryptBytes(byte[] data, byte[] key, byte[] iv)
+    {
         init(iv, key);
         try
         {

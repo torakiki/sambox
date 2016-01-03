@@ -16,11 +16,12 @@
  */
 package org.sejda.sambox.output;
 
-import static org.sejda.util.RequireUtils.requireNotNullArg;
+import static java.util.Optional.ofNullable;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.SortedMap;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -53,12 +54,11 @@ class PDFWriteContext
     private Map<IndirectCOSObjectIdentifier, IndirectCOSObjectReference> lookupNewRef = new ConcurrentHashMap<>();
     private List<WriteOption> opts;
     private SortedMap<Long, XrefEntry> written = new ConcurrentSkipListMap<>();
-    public final GeneralEncryptionAlgorithm encryptor;
+    public final Optional<GeneralEncryptionAlgorithm> encryptor;
 
     PDFWriteContext(GeneralEncryptionAlgorithm encryptor, WriteOption... options)
     {
-        requireNotNullArg(encryptor, "Encryptor cannot be null");
-        this.encryptor = encryptor;
+        this.encryptor = ofNullable(encryptor);
         this.opts = Arrays.asList(options);
     }
 
@@ -195,6 +195,6 @@ class PDFWriteContext
      */
     void writing(COSObjectKey key)
     {
-        encryptor.setCurrentCOSObjectKey(key);
+        encryptor.ifPresent(e -> e.setCurrentCOSObjectKey(key));
     }
 }

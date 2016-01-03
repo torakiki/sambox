@@ -27,17 +27,6 @@ import org.sejda.sambox.cos.COSVisitor;
  */
 public interface GeneralEncryptionAlgorithm extends COSVisitor
 {
-    /**
-     * A {@link GeneralEncryptionAlgorithm} that does nothing
-     */
-    public GeneralEncryptionAlgorithm IDENTITY = new GeneralEncryptionAlgorithm()
-    {
-        @Override
-        public void setCurrentCOSObjectKey(COSObjectKey key)
-        {
-            // nothing
-        }
-    };
 
     /**
      * Sets the current object and generation numbers

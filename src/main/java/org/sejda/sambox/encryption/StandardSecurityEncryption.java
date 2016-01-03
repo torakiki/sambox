@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.encryption;
 
+import static org.sejda.sambox.cos.DirectCOSObject.asDirectObject;
+
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSString;
@@ -58,6 +60,15 @@ public enum StandardSecurityEncryption
             encryptionDictionary.setItem(COSName.U,
                     pwdString(new Algorithm5().computePassword(security)));
             encryptionDictionary.setBoolean(COSName.ENCRYPT_META_DATA, security.encryptMetadata);
+            COSDictionary standardCryptFilterDictionary = new COSDictionary();
+            standardCryptFilterDictionary.setItem(COSName.CFM, COSName.AESV2);
+            standardCryptFilterDictionary.setItem(COSName.AUTEVENT, COSName.DOC_OPEN);
+            COSDictionary cryptFilterDictionary = new COSDictionary();
+            cryptFilterDictionary.setItem(COSName.STD_CF,
+                    asDirectObject(standardCryptFilterDictionary));
+            encryptionDictionary.setItem(COSName.CF, asDirectObject(cryptFilterDictionary));
+            encryptionDictionary.setItem(COSName.STM_F, COSName.STD_CF);
+            encryptionDictionary.setItem(COSName.STR_F, COSName.STD_CF);
             return encryptionDictionary;
         }
 

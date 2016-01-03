@@ -31,7 +31,6 @@ import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSString;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
-import org.sejda.sambox.encryption.GeneralEncryptionAlgorithm;
 
 /**
  * @author Andrea Vacondio
@@ -49,7 +48,7 @@ public class IndirectReferencesAwareCOSWriterTest
     @Before
     public void setUp()
     {
-        context = new PDFWriteContext(GeneralEncryptionAlgorithm.IDENTITY);
+        context = new PDFWriteContext(null);
         writer = mock(BufferedCountingChannelWriter.class);
         victim = new IndirectReferencesAwareCOSWriter(writer, context);
     }

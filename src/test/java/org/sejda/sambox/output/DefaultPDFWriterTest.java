@@ -34,7 +34,6 @@ import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
-import org.sejda.sambox.encryption.GeneralEncryptionAlgorithm;
 import org.sejda.sambox.util.Charsets;
 import org.sejda.sambox.util.SpecVersionUtils;
 import org.sejda.sambox.xref.XrefEntry;
@@ -49,7 +48,7 @@ public class DefaultPDFWriterTest
     @Before
     public void setUp()
     {
-        context = new PDFWriteContext(GeneralEncryptionAlgorithm.IDENTITY);
+        context = new PDFWriteContext(null);
         writer = mock(BufferedCountingChannelWriter.class);
         objectWriter = new IndirectObjectsWriter(writer, context);
         victim = new DefaultPDFWriter(objectWriter);

@@ -27,7 +27,6 @@ import java.util.Optional;
 import org.sejda.io.CountingWritableByteChannel;
 import org.sejda.sambox.cos.COSDocument;
 import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.encryption.GeneralEncryptionAlgorithm;
 import org.sejda.sambox.encryption.StandardSecurity;
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.util.SpecVersionUtils;
@@ -54,8 +53,7 @@ public class PDDocumentWriter implements Closeable
         requireNotNullArg(channel, "Cannot write to a null channel");
         this.standardSecurity = Optional.ofNullable(standardSecurity);
         context = new PDFWriteContext(
-                this.standardSecurity.map(StandardSecurity::encryptionAlgorithm)
-                        .orElse(GeneralEncryptionAlgorithm.IDENTITY),
+                this.standardSecurity.map(StandardSecurity::encryptionAlgorithm).orElse(null),
                 options);
         this.writer = new DefaultPDFWriter(new IndirectObjectsWriter(channel, context));
     }

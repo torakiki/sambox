@@ -33,7 +33,6 @@ import org.junit.Test;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.encryption.GeneralEncryptionAlgorithm;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.PDDocument;
 
@@ -52,7 +51,7 @@ public class AsyncPDFBodyWriterTest
     @Before
     public void setUp()
     {
-        context = new PDFWriteContext(GeneralEncryptionAlgorithm.IDENTITY,
+        context = new PDFWriteContext(null,
                 WriteOption.COMPRESS_STREAMS);
         writer = mock(IndirectObjectsWriter.class);
         victim = new AsyncPDFBodyWriter(writer, context);

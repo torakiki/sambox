@@ -68,15 +68,21 @@ class IndirectReferencesAwareCOSWriter extends DefaultCOSWriter
     @Override
     public void visit(COSStream value) throws IOException
     {
-        context.encryptor.visit(value);
+        if (context.encryptor.isPresent())
+        {
+            context.encryptor.get().visit(value);
+        }
         super.visit(value);
     }
 
     @Override
     public void visit(COSString value) throws IOException
     {
-        context.encryptor.visit(value);
-        value.setForceHexForm(true);
+        if (context.encryptor.isPresent())
+        {
+            context.encryptor.get().visit(value);
+            value.setForceHexForm(true);
+        }
         super.visit(value);
     }
 

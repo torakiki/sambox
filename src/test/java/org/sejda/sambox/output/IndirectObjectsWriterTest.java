@@ -33,7 +33,6 @@ import org.sejda.io.BufferedCountingChannelWriter;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
-import org.sejda.sambox.encryption.GeneralEncryptionAlgorithm;
 import org.sejda.sambox.util.Charsets;
 
 /**
@@ -50,7 +49,7 @@ public class IndirectObjectsWriterTest
     @Before
     public void setUp()
     {
-        context = new PDFWriteContext(GeneralEncryptionAlgorithm.IDENTITY);
+        context = new PDFWriteContext(null);
         writer = mock(BufferedCountingChannelWriter.class);
         victim = new IndirectObjectsWriter(writer, context);
 

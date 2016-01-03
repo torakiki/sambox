@@ -36,7 +36,6 @@ import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSStream;
-import org.sejda.sambox.encryption.GeneralEncryptionAlgorithm;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.PDDocument;
 
@@ -55,7 +54,7 @@ public class SyncPDFBodyWriterTest
     @Before
     public void setUp()
     {
-        context = new PDFWriteContext(GeneralEncryptionAlgorithm.IDENTITY,
+        context = new PDFWriteContext(null,
                 WriteOption.COMPRESS_STREAMS);
         writer = mock(IndirectObjectsWriter.class);
         victim = new SyncPDFBodyWriter(writer, context);
@@ -120,7 +119,7 @@ public class SyncPDFBodyWriterTest
     public void writeUncompressedStream() throws IOException
     {
         victim = new SyncPDFBodyWriter(writer,
-                new PDFWriteContext(GeneralEncryptionAlgorithm.IDENTITY));
+ new PDFWriteContext(null));
         byte[] data = new byte[] { (byte) 0x41, (byte) 0x42, (byte) 0x43 };
         COSStream stream = new COSStream();
         stream.setInt(COSName.B, 2);

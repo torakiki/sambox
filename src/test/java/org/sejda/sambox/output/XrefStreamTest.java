@@ -29,7 +29,6 @@ import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.encryption.GeneralEncryptionAlgorithm;
 import org.sejda.sambox.xref.CompressedXrefEntry;
 import org.sejda.sambox.xref.XrefEntry;
 
@@ -44,7 +43,7 @@ public class XrefStreamTest
     @Before
     public void setUp()
     {
-        context = new PDFWriteContext(GeneralEncryptionAlgorithm.IDENTITY);
+        context = new PDFWriteContext(null);
         context.putWritten(CompressedXrefEntry.compressedEntry(2, 4, 1));
         context.putWritten(XrefEntry.inUseEntry(4, 256, 0));
     }
@@ -61,7 +60,6 @@ public class XrefStreamTest
         existingTrailer.setName(COSName.F_FILTER, "value");
         existingTrailer.setName(COSName.F, "value");
         existingTrailer.setInt(COSName.LENGTH, 10);
-        // TODO remove this test once encryption is implemented
         existingTrailer.setName(COSName.ENCRYPT, "value");
 
         try (XrefStream victim = new XrefStream(existingTrailer, context))
@@ -73,7 +71,6 @@ public class XrefStreamTest
             assertFalse(victim.containsKey(COSName.F_DECODE_PARMS));
             assertFalse(victim.containsKey(COSName.F_FILTER));
             assertFalse(victim.containsKey(COSName.F));
-            assertFalse(victim.containsKey(COSName.ENCRYPT));
             assertFalse(victim.containsKey(COSName.LENGTH));
         }
     }

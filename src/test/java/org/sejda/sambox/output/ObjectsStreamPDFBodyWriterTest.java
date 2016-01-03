@@ -34,7 +34,6 @@ import org.sejda.sambox.SAMBox;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
-import org.sejda.sambox.encryption.GeneralEncryptionAlgorithm;
 import org.sejda.sambox.xref.CompressedXrefEntry;
 
 /**
@@ -51,7 +50,7 @@ public class ObjectsStreamPDFBodyWriterTest
     public void setUp()
     {
         this.writer = mock(AbstractPDFBodyWriter.class);
-        context = new PDFWriteContext(GeneralEncryptionAlgorithm.IDENTITY);
+        context = new PDFWriteContext(null);
         when(writer.context()).thenReturn(context);
         this.victim = new ObjectsStreamPDFBodyWriter(writer);
     }

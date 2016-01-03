@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.output;
 
+import static java.util.Objects.isNull;
 import static org.sejda.sambox.util.CharUtils.isDigit;
 import static org.sejda.sambox.util.CharUtils.isLetter;
 import static org.sejda.util.RequireUtils.requireNotNullArg;
@@ -165,7 +166,7 @@ class DefaultCOSWriter implements COSWriter
         try
         {
             COSBase length = value.getItem(COSName.LENGTH);
-            if (length == null)
+            if (isNull(length))
             {
                 value.setLong(COSName.LENGTH, value.getFilteredLength());
             }

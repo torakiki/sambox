@@ -40,6 +40,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName ADBE_PKCS7_SHA1 = newCommonInstance("adbe.pkcs7.sha1");
     public static final COSName ADBE_X509_RSA_SHA1 = newCommonInstance("adbe.x509.rsa_sha1");
     public static final COSName ADOBE_PPKLITE = newCommonInstance("Adobe.PPKLite");
+    public static final COSName AESV2 = newCommonInstance("AESV2");
     public static final COSName AESV3 = newCommonInstance("AESV3");
     public static final COSName AF = newCommonInstance("AF");
     public static final COSName AFTER = newCommonInstance("After");
@@ -63,6 +64,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName ASCII85_DECODE_ABBREVIATION = newCommonInstance("A85");
     public static final COSName ATTACHED = newCommonInstance("Attached");
     public static final COSName AUTHOR = newCommonInstance("Author");
+    public static final COSName AUTEVENT = newCommonInstance("AuthEvent");
     public static final COSName AVG_WIDTH = newCommonInstance("AvgWidth");
     // B
     public static final COSName B = newCommonInstance("B");
@@ -177,6 +179,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName DM = newCommonInstance("Dm");
     public static final COSName DOC = newCommonInstance("Doc");
     public static final COSName DOC_CHECKSUM = newCommonInstance("DocChecksum");
+    public static final COSName DOC_OPEN = newCommonInstance("DocOpen");
     public static final COSName DOC_TIME_STAMP = newCommonInstance("DocTimeStamp");
     public static final COSName DOMAIN = newCommonInstance("Domain");
     public static final COSName DOS = newCommonInstance("DOS");

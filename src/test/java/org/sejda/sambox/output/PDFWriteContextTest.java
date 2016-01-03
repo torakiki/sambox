@@ -48,14 +48,13 @@ public class PDFWriteContextTest
     @Before
     public void setUp()
     {
-        context = new PDFWriteContext(GeneralEncryptionAlgorithm.IDENTITY);
+        context = new PDFWriteContext(null);
     }
 
     @Test
     public void hasWriteOption()
     {
-        PDFWriteContext context = new PDFWriteContext(GeneralEncryptionAlgorithm.IDENTITY,
-                WriteOption.OBJECT_STREAMS);
+        PDFWriteContext context = new PDFWriteContext(null, WriteOption.OBJECT_STREAMS);
         assertTrue(context.hasWriteOption(WriteOption.OBJECT_STREAMS));
         assertFalse(context.hasWriteOption(WriteOption.SYNC_BODY_WRITE));
     }
@@ -94,8 +93,7 @@ public class PDFWriteContextTest
     @Test
     public void hasIndirectReferenceFor()
     {
-        PDFWriteContext anotherContext = new PDFWriteContext(GeneralEncryptionAlgorithm.IDENTITY,
-                WriteOption.OBJECT_STREAMS);
+        PDFWriteContext anotherContext = new PDFWriteContext(null, WriteOption.OBJECT_STREAMS);
         COSDictionary dic = new COSDictionary();
         COSDictionary anotherDic = new COSDictionary();
         anotherContext.createIndirectReferenceFor(anotherDic);
@@ -136,12 +134,6 @@ public class PDFWriteContextTest
         context.putWritten(entry2);
         assertEquals(entry, context.lowestWritten());
         assertEquals(entry2, context.highestWritten());
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void nullEncryptor()
-    {
-        new PDFWriteContext(null);
     }
 
     @Test
