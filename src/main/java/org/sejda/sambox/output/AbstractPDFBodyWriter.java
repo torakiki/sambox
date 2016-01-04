@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.output;
 
+import static java.util.Optional.ofNullable;
 import static org.sejda.util.RequireUtils.requireNotNullArg;
 import static org.sejda.util.RequireUtils.requireState;
 
@@ -23,7 +24,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedList;
-import java.util.Optional;
 import java.util.Queue;
 
 import org.sejda.sambox.cos.COSArray;
@@ -79,14 +79,13 @@ abstract class AbstractPDFBodyWriter implements COSVisitor, Closeable
     @Override
     public void visit(COSDocument document) throws IOException
     {
-        for (COSName k : Arrays.asList(COSName.ROOT, COSName.INFO, COSName.ENCRYPT))
+        for (COSName k : Arrays.asList(COSName.ROOT, COSName.ENCRYPT))
         {
-            COSBase value = document.getTrailer().getItem(k);
-            if (value != null)
-            {
-                createIndirectReferenceIfNeededFor(value);
-            }
+            ofNullable(document.getTrailer().getItem(k)).ifPresent(
+                    r -> stack.add(context.createNonStorableInObjectStreamIndirectReferenceFor(r)));
         }
+        ofNullable(document.getTrailer().getItem(COSName.INFO))
+                .ifPresent(this::createIndirectReferenceIfNeededFor);
         startWriting();
     }
 
@@ -126,7 +125,7 @@ abstract class AbstractPDFBodyWriter implements COSVisitor, Closeable
     {
         for (int i = 0; i < array.size(); i++)
         {
-            COSBase item = Optional.ofNullable(array.get(i)).orElse(COSNull.NULL);
+            COSBase item = ofNullable(array.get(i)).orElse(COSNull.NULL);
             if (item instanceof ExistingIndirectCOSObject || item instanceof COSDictionary)
             {
                 createIndirectReferenceIfNeededFor(item);
@@ -143,7 +142,7 @@ abstract class AbstractPDFBodyWriter implements COSVisitor, Closeable
     {
         for (COSName key : value.keySet())
         {
-            COSBase item = Optional.ofNullable(value.getItem(key)).orElse(COSNull.NULL);
+            COSBase item = ofNullable(value.getItem(key)).orElse(COSNull.NULL);
             if (item instanceof ExistingIndirectCOSObject || item instanceof COSDictionary
                     || COSName.THREADS.equals(key))
             {
@@ -166,7 +165,9 @@ abstract class AbstractPDFBodyWriter implements COSVisitor, Closeable
         }
         if (context.encryptor.isPresent())
         {
-            IndirectCOSObjectReference length = context.createIndirectReferenceFor(COSNull.NULL);
+            // with encrypted docs we write length as an indirect ref
+            IndirectCOSObjectReference length = context
+                    .createNonStorableInObjectStreamIndirectReferenceFor(COSNull.NULL);
             value.setItem(COSName.LENGTH, length);
             stack.add(length);
         }

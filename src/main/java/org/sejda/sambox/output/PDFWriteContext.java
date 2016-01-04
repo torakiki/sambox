@@ -26,11 +26,13 @@ import java.util.SortedMap;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.function.Function;
 
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSObjectKey;
 import org.sejda.sambox.cos.IndirectCOSObjectIdentifier;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
+import org.sejda.sambox.cos.NonStorableInObjectStreams;
 import org.sejda.sambox.encryption.GeneralEncryptionAlgorithm;
 import org.sejda.sambox.input.ExistingIndirectCOSObject;
 import org.sejda.sambox.xref.XrefEntry;
@@ -70,11 +72,30 @@ class PDFWriteContext
      */
     IndirectCOSObjectReference createIndirectReferenceFor(COSBase item)
     {
+        return createNewReference(item, referencesProvider::nextReferenceFor);
+
+    }
+
+    /**
+     * Creates a new {@link NonStorableInObjectStreams} for the given item
+     * 
+     * @param item
+     * @return the created reference
+     */
+    IndirectCOSObjectReference createNonStorableInObjectStreamIndirectReferenceFor(COSBase item)
+    {
+        return createNewReference(item,
+                referencesProvider::nextNonStorableInObjectStreamsReferenceFor);
+    }
+
+    private IndirectCOSObjectReference createNewReference(COSBase item,
+            Function<COSBase, IndirectCOSObjectReference> supplier)
+    {
         // It's an existing indirect object
         if (item instanceof ExistingIndirectCOSObject)
         {
             ExistingIndirectCOSObject existingItem = (ExistingIndirectCOSObject) item;
-            IndirectCOSObjectReference newRef = referencesProvider.nextReferenceFor(existingItem);
+            IndirectCOSObjectReference newRef = supplier.apply(item);
             LOG.trace("Created new indirect reference {} replacing the existing one {}", newRef,
                     existingItem.id());
             lookupNewRef.put(existingItem.id(), newRef);
@@ -82,7 +103,7 @@ class PDFWriteContext
 
         }
         // it's a new COSBase
-        IndirectCOSObjectReference newRef = referencesProvider.nextReferenceFor(item);
+        IndirectCOSObjectReference newRef = supplier.apply(item);
         LOG.trace("Created new indirect reference '{}' ", newRef);
         item.idIfAbsent(new IndirectCOSObjectIdentifier(newRef.xrefEntry().key(), contextId));
         lookupNewRef.put(item.id(), newRef);

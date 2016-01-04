@@ -93,7 +93,7 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
      * @return the (encoded) stream with all of the filters applied.
      * @throws IOException when encoding/decoding causes an exception
      */
-    public InputStream getFilteredStream() throws IOException
+    public final InputStream getFilteredStream() throws IOException
     {
         if (nonNull(encryptor))
         {
@@ -102,7 +102,7 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
         return doGetFilteredStream();
     }
 
-    private InputStream doGetFilteredStream() throws IOException
+    protected InputStream doGetFilteredStream() throws IOException
     {
         if (nonNull(existing))
         {

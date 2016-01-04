@@ -54,7 +54,7 @@ class IndirectObjectsWriter implements Closeable
     {
         requireNotNullArg(writer, "Writer cannot be null");
         requireNotNullArg(context, "Write context cannot be null");
-        this.writer = new IndirectReferencesAwareCOSWriter(writer, context);
+        this.writer = new EncryptingIndirectReferencesAwareCOSWriter(writer, context);
         this.context = context;
     }
 

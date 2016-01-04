@@ -63,6 +63,7 @@ public enum StandardSecurityEncryption
             COSDictionary standardCryptFilterDictionary = new COSDictionary();
             standardCryptFilterDictionary.setItem(COSName.CFM, COSName.AESV2);
             standardCryptFilterDictionary.setItem(COSName.AUTEVENT, COSName.DOC_OPEN);
+            standardCryptFilterDictionary.setInt(COSName.LENGTH, revision.length);
             COSDictionary cryptFilterDictionary = new COSDictionary();
             cryptFilterDictionary.setItem(COSName.STD_CF,
                     asDirectObject(standardCryptFilterDictionary));

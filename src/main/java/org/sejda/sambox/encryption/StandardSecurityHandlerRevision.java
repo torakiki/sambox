@@ -18,7 +18,6 @@ package org.sejda.sambox.encryption;
 
 /**
  * @author Andrea Vacondio
- *
  */
 public enum StandardSecurityHandlerRevision
 {

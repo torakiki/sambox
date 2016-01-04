@@ -21,8 +21,6 @@ import java.io.IOException;
 import org.sejda.io.BufferedCountingChannelWriter;
 import org.sejda.io.CountingWritableByteChannel;
 import org.sejda.sambox.cos.COSBase;
-import org.sejda.sambox.cos.COSStream;
-import org.sejda.sambox.cos.COSString;
 
 /**
  * {@link COSWriter} implementation that writes dictionary and array values as indirect references if they have been
@@ -34,7 +32,7 @@ import org.sejda.sambox.cos.COSString;
 class IndirectReferencesAwareCOSWriter extends DefaultCOSWriter
 {
 
-    private PDFWriteContext context;
+    final PDFWriteContext context;
 
     IndirectReferencesAwareCOSWriter(CountingWritableByteChannel channel, PDFWriteContext context)
     {
@@ -66,30 +64,8 @@ class IndirectReferencesAwareCOSWriter extends DefaultCOSWriter
     }
 
     @Override
-    public void visit(COSStream value) throws IOException
-    {
-        if (context.encryptor.isPresent())
-        {
-            context.encryptor.get().visit(value);
-        }
-        super.visit(value);
-    }
-
-    @Override
-    public void visit(COSString value) throws IOException
-    {
-        if (context.encryptor.isPresent())
-        {
-            context.encryptor.get().visit(value);
-            value.setForceHexForm(true);
-        }
-        super.visit(value);
-    }
-
-    @Override
     public void close() throws IOException
     {
-        this.context = null;
         super.close();
     }
 

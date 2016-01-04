@@ -34,6 +34,7 @@ import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.cos.DisposableCOSObject;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
+import org.sejda.sambox.cos.NonStorableInObjectStreams;
 import org.sejda.sambox.util.Charsets;
 import org.sejda.sambox.xref.CompressedXrefEntry;
 import org.sejda.util.IOUtils;
@@ -56,8 +57,8 @@ class ObjectsStreamPDFBodyWriter extends AbstractPDFBodyWriter
 
     public ObjectsStreamPDFBodyWriter(AbstractPDFBodyWriter wrapped)
     {
-        super(ofNullable(wrapped).map(AbstractPDFBodyWriter::context).orElseThrow(
-                () -> new IllegalArgumentException("Wrapped writer cannot be null")));
+        super(ofNullable(wrapped).map(AbstractPDFBodyWriter::context)
+                .orElseThrow(() -> new IllegalArgumentException("Wrapped writer cannot be null")));
         requireNotNullArg(wrapped, "Wrapped writer cannot be null");
         this.wrapped = wrapped;
         currentStream = new ObjectsStream(context());
@@ -67,7 +68,8 @@ class ObjectsStreamPDFBodyWriter extends AbstractPDFBodyWriter
     @Override
     void writeObject(IndirectCOSObjectReference ref) throws IOException
     {
-        if (ref.getCOSObject().getCOSObject() instanceof COSStream)
+        if (ref instanceof NonStorableInObjectStreams
+                || ref.getCOSObject().getCOSObject() instanceof COSStream)
         {
             wrapped.writeObject(ref);
         }
@@ -93,7 +95,8 @@ class ObjectsStreamPDFBodyWriter extends AbstractPDFBodyWriter
         IndirectCOSObjectReference ref = context().getIndirectReferenceFor(currentStream);
         LOG.debug("Writing object stream {}", ref);
         currentStream.prepareForWriting();
-        IndirectCOSObjectReference length = context().createIndirectReferenceFor(COSNull.NULL);
+        IndirectCOSObjectReference length = context()
+                .createNonStorableInObjectStreamIndirectReferenceFor(COSNull.NULL);
         currentStream.setItem(COSName.LENGTH, length);
         wrapped.writeObject(ref);
         LOG.trace("Writing object stream length {}", length);
@@ -155,11 +158,11 @@ class ObjectsStreamPDFBodyWriter extends AbstractPDFBodyWriter
         void addItem(IndirectCOSObjectReference ref) throws IOException
         {
             this.counter++;
-            header.write(Long.toUnsignedString(ref.xrefEntry().getObjectNumber()).getBytes(
-                    Charsets.US_ASCII));
+            header.write(Long.toUnsignedString(ref.xrefEntry().getObjectNumber())
+                    .getBytes(Charsets.US_ASCII));
             header.write(ASCII_SPACE);
-            header.write(Long.toUnsignedString(dataWriter.writer().offset()).getBytes(
-                    Charsets.US_ASCII));
+            header.write(Long.toUnsignedString(dataWriter.writer().offset())
+                    .getBytes(Charsets.US_ASCII));
             header.write(ASCII_SPACE);
             ref.getCOSObject().accept(dataWriter);
             dataWriter.writer().write(ASCII_SPACE);
@@ -172,7 +175,7 @@ class ObjectsStreamPDFBodyWriter extends AbstractPDFBodyWriter
         }
 
         @Override
-        public InputStream getFilteredStream()
+        public InputStream doGetFilteredStream()
         {
             return this.filtered;
         }
@@ -183,9 +186,9 @@ class ObjectsStreamPDFBodyWriter extends AbstractPDFBodyWriter
             setInt(COSName.N, counter);
             setInt(COSName.FIRST, header.size());
             setItem(COSName.FILTER, COSName.FLATE_DECODE);
-            this.filtered = new DeflaterInputStream(new SequenceInputStream(
-                    new ByteArrayInputStream(header.toByteArray()), new ByteArrayInputStream(
-                            data.toByteArray())));
+            this.filtered = new DeflaterInputStream(
+                    new SequenceInputStream(new ByteArrayInputStream(header.toByteArray()),
+                            new ByteArrayInputStream(data.toByteArray())));
             this.header = null;
             this.data = null;
         }

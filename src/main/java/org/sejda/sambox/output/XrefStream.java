@@ -19,8 +19,10 @@ package org.sejda.sambox.output;
 import static org.sejda.sambox.xref.XrefEntry.freeEntry;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Optional;
+import java.util.function.Function;
 
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
@@ -59,8 +61,8 @@ class XrefStream extends COSStream
         setName(COSName.TYPE, COSName.XREF.getName());
         setLong(COSName.SIZE, context.highestWritten().getObjectNumber() + 1);
         setItem(COSName.INDEX,
-                new COSArray(COSInteger.get(context.lowestWritten().getObjectNumber()), COSInteger
-                        .get(context.highestWritten().getObjectNumber()
+                new COSArray(COSInteger.get(context.lowestWritten().getObjectNumber()),
+                        COSInteger.get(context.highestWritten().getObjectNumber()
                                 - context.lowestWritten().getObjectNumber() + 1)));
         int secondFieldLength = sizeOf(context.highestWritten().getByteOffset());
         setItem(COSName.W, new COSArray(COSInteger.get(1), COSInteger.get(secondFieldLength),
@@ -76,6 +78,24 @@ class XrefStream extends COSStream
         }
         setLong(COSName.DL, getUnfilteredLength());
         addCompression();
+    }
+
+    @Override
+    public boolean encryptable()
+    {
+        return false;
+    }
+
+    @Override
+    public void encryptable(boolean encryptable)
+    {
+        // do nothing
+    }
+
+    @Override
+    public void setEncryptor(Function<InputStream, InputStream> encryptor)
+    {
+        // do nothing
     }
 
     private static int sizeOf(long number)

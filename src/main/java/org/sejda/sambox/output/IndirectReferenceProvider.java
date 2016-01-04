@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
+import org.sejda.sambox.cos.NonStorableInObjectStreams;
 
 /**
  * Component responsible for creating the {@link IndirectCOSObjectReference}s keeping count of the next available object
@@ -34,6 +35,13 @@ class IndirectReferenceProvider
     IndirectCOSObjectReference nextReferenceFor(COSBase baseObject)
     {
         IndirectCOSObjectReference ref = new IndirectCOSObjectReference(
+                referencesCounter.incrementAndGet(), 0, baseObject);
+        return ref;
+    }
+
+    IndirectCOSObjectReference nextNonStorableInObjectStreamsReferenceFor(COSBase baseObject)
+    {
+        NonStorableInObjectStreams ref = new NonStorableInObjectStreams(
                 referencesCounter.incrementAndGet(), 0, baseObject);
         return ref;
     }
