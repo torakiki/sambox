@@ -18,16 +18,13 @@ package org.sejda.sambox;
 
 import static org.junit.Assert.assertTrue;
 
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
@@ -38,7 +35,6 @@ import org.sejda.sambox.encryption.StandardSecurityEncryption;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.output.WriteOption;
 import org.sejda.sambox.pdmodel.PDDocument;
-import org.sejda.util.IOUtils;
 
 /**
  * @author Andrea Vacondio
@@ -47,9 +43,6 @@ import org.sejda.util.IOUtils;
 @RunWith(Parameterized.class)
 public class ShakeDownTest
 {
-
-    @Rule
-    public TemporaryFolder folder = new TemporaryFolder();
 
     @Parameters
     public static Collection<Object[]> input()
@@ -117,18 +110,14 @@ public class ShakeDownTest
         try (PDDocument current = PDFParser.parse(SeekableSources
                 .inMemorySeekableSourceFrom(getClass().getResourceAsStream(inputFile)), pwd))
         {
-            File outFile = folder.newFile();
-            try (FileOutputStream out = new FileOutputStream(outFile))
+            try (ByteArrayOutputStream out = new ByteArrayOutputStream())
             {
                 current.writeTo(out, options);
-            }
-            finally
-            {
-                IOUtils.close(current);
-            }
-            try (PDDocument outDoc = PDFParser.parse(SeekableSources.seekableSourceFrom(outFile)))
-            {
-                assertTrue(outDoc.getNumberOfPages() > 0);
+                try (PDDocument outDoc = PDFParser
+                        .parse(SeekableSources.inMemorySeekableSourceFrom(out.toByteArray())))
+                {
+                    assertTrue(outDoc.getNumberOfPages() > 0);
+                }
             }
         }
     }
@@ -147,19 +136,16 @@ public class ShakeDownTest
         try (PDDocument current = PDFParser.parse(SeekableSources
                 .inMemorySeekableSourceFrom(getClass().getResourceAsStream(inputFile)), pwd))
         {
-            File outFile = folder.newFile();
-            try (FileOutputStream out = new FileOutputStream(outFile))
+            try (ByteArrayOutputStream out = new ByteArrayOutputStream())
             {
                 current.writeTo(out, security, options);
-            }
-            finally
-            {
-                IOUtils.close(current);
-            }
-            try (PDDocument outDoc = PDFParser.parse(SeekableSources.seekableSourceFrom(outFile),
-                    new String(security.userPassword)))
-            {
-                assertTrue(outDoc.getNumberOfPages() > 0);
+
+                try (PDDocument outDoc = PDFParser.parse(
+                        SeekableSources.inMemorySeekableSourceFrom(out.toByteArray()),
+                        new String(security.userPassword)))
+                {
+                    assertTrue(outDoc.getNumberOfPages() > 0);
+                }
             }
         }
     }
