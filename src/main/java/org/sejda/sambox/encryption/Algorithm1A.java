@@ -64,7 +64,5 @@ class Algorithm1A implements GeneralEncryptionAlgorithm
     public void setCurrentCOSObjectKey(COSObjectKey key)
     {
         // nothing
-
     }
-
 }

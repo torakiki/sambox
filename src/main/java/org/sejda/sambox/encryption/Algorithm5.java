@@ -30,24 +30,22 @@ import org.bouncycastle.util.Arrays;
  */
 class Algorithm5 implements PasswordAlgorithm
 {
-    private Algorithm2 algo = new Algorithm2();
     private MessageDigest digest = MessageDigests.md5();
     private ARC4Engine engine = new ARC4Engine();
 
     @Override
-    public byte[] computePassword(StandardSecurity security)
+    public byte[] computePassword(EncryptionContext context)
     {
-        security.encryption.revision.requireAtLeast(StandardSecurityHandlerRevision.R3,
+        context.security.encryption.revision.requireAtLeast(StandardSecurityHandlerRevision.R3,
                 "Algorithm 5 requires a security handler of revision 3 or greater");
-        byte[] arc4Key = algo.computeEncryptionKey(security);
         digest.reset();
         digest.update(ENCRYPT_PADDING);
-        byte[] encrypted = engine
-                .encryptBytes(Arrays.copyOf(digest.digest(security.documentId()), 16), arc4Key);
-        byte[] iterationKey = new byte[arc4Key.length];
+        byte[] encrypted = engine.encryptBytes(
+                Arrays.copyOf(digest.digest(context.documentId()), 16), context.key());
+        byte[] iterationKey = new byte[context.key().length];
         for (int i = 1; i < 20; i++)
         {
-            iterationKey = Arrays.copyOf(arc4Key, arc4Key.length);
+            iterationKey = Arrays.copyOf(context.key(), context.key().length);
             for (int j = 0; j < iterationKey.length; j++)
             {
                 iterationKey[j] = (byte) (iterationKey[j] ^ (byte) i);

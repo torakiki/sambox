@@ -59,4 +59,49 @@ public final class MessageDigests
             throw new EncryptionException(e);
         }
     }
+
+    /**
+     * @return SHA-256 message digest
+     */
+    public static MessageDigest sha256()
+    {
+        try
+        {
+            return MessageDigest.getInstance("SHA-256");
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            throw new EncryptionException(e);
+        }
+    }
+
+    /**
+     * @return SHA-384 message digest
+     */
+    public static MessageDigest sha384()
+    {
+        try
+        {
+            return MessageDigest.getInstance("SHA-384");
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            throw new EncryptionException(e);
+        }
+    }
+
+    /**
+     * @return SHA-512 message digest
+     */
+    public static MessageDigest sha512()
+    {
+        try
+        {
+            return MessageDigest.getInstance("SHA-512");
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            throw new EncryptionException(e);
+        }
+    }
 }

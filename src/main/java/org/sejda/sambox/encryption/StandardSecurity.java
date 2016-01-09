@@ -17,6 +17,7 @@
 package org.sejda.sambox.encryption;
 
 import static java.util.Objects.requireNonNull;
+import static org.sejda.sambox.encryption.EncryptUtils.truncate127;
 
 import java.util.Objects;
 
@@ -31,19 +32,18 @@ import org.sejda.sambox.util.Charsets;
  */
 public class StandardSecurity
 {
-    public final byte[] ownerPassword;
-    public final byte[] userPassword;
+    public final String ownerPassword;
+    public final String userPassword;
     public final AccessPermission permissions = new AccessPermission();
     public final StandardSecurityEncryption encryption;
-    private byte[] documentId;
     public final boolean encryptMetadata;
 
     public StandardSecurity(String ownerPassword, String userPassword,
             StandardSecurityEncryption encryption, boolean encryptMetadata)
     {
         requireNonNull(encryption, "Encryption algorithm cannot be null");
-        this.ownerPassword = Objects.toString(ownerPassword, "").getBytes(Charsets.ISO_8859_1);
-        this.userPassword = Objects.toString(userPassword, "").getBytes(Charsets.ISO_8859_1);
+        this.ownerPassword = Objects.toString(ownerPassword, "");
+        this.userPassword = Objects.toString(userPassword, "");
         this.encryption = encryption;
         // RC4 128 has a version 2 and encryptMetadata is true by default
         this.encryptMetadata = encryptMetadata
@@ -51,23 +51,29 @@ public class StandardSecurity
     }
 
     /**
-     * Sets the document ID to use in those algorithms requiring it. There is no need to set this since it's going to be
-     * automatically set when the document is written out.
-     * 
-     * @param documentId
+     * @return the UTF-8 user password bytes truncated to a length o 127
      */
-    public void documentId(byte[] documentId)
+    byte[] getUserPasswordUTF()
     {
-        this.documentId = documentId;
+        return truncate127(userPassword.getBytes(Charsets.UTF_8));
     }
 
-    public byte[] documentId()
+    /**
+     * the UTF-8 owner password bytes truncated to a length o 127
+     */
+    byte[] getOwnerPasswordUTF()
     {
-        return documentId;
+        return truncate127(ownerPassword.getBytes(Charsets.UTF_8));
     }
 
-    public GeneralEncryptionAlgorithm encryptionAlgorithm()
+    byte[] getUserPassword()
     {
-        return encryption.encryptionAlgorithm(this);
+        return userPassword.getBytes(Charsets.ISO_8859_1);
     }
+
+    byte[] getOwnerPassword()
+    {
+        return ownerPassword.getBytes(Charsets.ISO_8859_1);
+    }
+
 }

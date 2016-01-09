@@ -18,6 +18,9 @@ package org.sejda.sambox.encryption;
 
 import static org.bouncycastle.util.Arrays.concatenate;
 import static org.bouncycastle.util.Arrays.copyOf;
+import static org.sejda.util.RequireUtils.requireArg;
+
+import java.security.SecureRandom;
 
 /**
  * @author Andrea Vacondio
@@ -36,6 +39,7 @@ public final class EncryptUtils
     {
         // nothing
     }
+
     public static byte[] padOrTruncate(byte[] password)
     {
         byte[] padded = copyOf(password, Math.min(password.length, 32));
@@ -44,6 +48,25 @@ public final class EncryptUtils
             return concatenate(padded, copyOf(ENCRYPT_PADDING, 32 - padded.length));
         }
         return padded;
+    }
 
+    public static byte[] truncate127(byte[] password)
+    {
+        byte[] padded = copyOf(password, Math.min(password.length, 32));
+        if (padded.length < 32)
+        {
+            return concatenate(padded, copyOf(ENCRYPT_PADDING, 32 - padded.length));
+        }
+        return padded;
+
+    }
+
+    public static byte[] rnd(int length)
+    {
+        requireArg(length > 0, "Cannot generate a negative length byte array");
+        SecureRandom random = new SecureRandom();
+        byte[] rnd = new byte[length];
+        random.nextBytes(rnd);
+        return rnd;
     }
 }

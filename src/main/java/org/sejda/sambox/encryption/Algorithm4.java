@@ -24,16 +24,14 @@ package org.sejda.sambox.encryption;
  */
 class Algorithm4 implements PasswordAlgorithm
 {
-    private Algorithm2 algo = new Algorithm2();
     private ARC4Engine engine = new ARC4Engine();
 
     @Override
-    public byte[] computePassword(StandardSecurity security)
+    public byte[] computePassword(EncryptionContext context)
     {
-        security.encryption.revision.require(StandardSecurityHandlerRevision.R2,
+        context.security.encryption.revision.require(StandardSecurityHandlerRevision.R2,
                 "Algorithm 4 requires a security handler of revision 2");
 
-        return engine.encryptBytes(EncryptUtils.ENCRYPT_PADDING,
-                algo.computeEncryptionKey(security));
+        return engine.encryptBytes(EncryptUtils.ENCRYPT_PADDING, context.key());
     }
 }

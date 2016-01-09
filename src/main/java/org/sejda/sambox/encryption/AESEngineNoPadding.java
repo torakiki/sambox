@@ -16,13 +16,10 @@
  */
 package org.sejda.sambox.encryption;
 
-import static org.bouncycastle.util.Arrays.concatenate;
+import static java.util.Objects.nonNull;
 import static org.bouncycastle.util.Arrays.copyOf;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.SequenceInputStream;
-import java.security.SecureRandom;
 
 import org.bouncycastle.crypto.BufferedBlockCipher;
 import org.bouncycastle.crypto.DataLengthException;
@@ -30,59 +27,47 @@ import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.engines.AESFastEngine;
 import org.bouncycastle.crypto.io.CipherInputStream;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
-import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 
 /**
- * AES implementation of a {@link EncryptionAlgorithmEngine}
+ * AES implementation of a {@link EncryptionAlgorithmEngine} with no pudding and zero initialization vector
  * 
  * @author Andrea Vacondio
  *
  */
-class AESEngine implements AESEncryptionAlgorithmEngine
+class AESEngineNoPadding implements AESEncryptionAlgorithmEngine
 {
-
     private BufferedBlockCipher cipher;
-    private SecureRandom random;
 
-    public AESEngine()
+    private AESEngineNoPadding(BufferedBlockCipher cipher)
     {
-        cipher = new PaddedBufferedBlockCipher(new CBCBlockCipher(new AESFastEngine()));
-        random = new SecureRandom();
-    }
-
-    @Override
-    public InputStream encryptStream(InputStream data, byte[] key)
-    {
-        return encryptStream(data, key, initializationVector());
+        this.cipher = cipher;
     }
 
     @Override
     public InputStream encryptStream(InputStream data, byte[] key, byte[] iv)
     {
-        init(iv, key);
-        return new SequenceInputStream(new ByteArrayInputStream(iv),
-                new CipherInputStream(data, cipher));
+        init(key, iv);
+        return new CipherInputStream(data, cipher);
     }
 
     @Override
-    public byte[] encryptBytes(byte[] data, byte[] key)
+    public InputStream encryptStream(InputStream data, byte[] key)
     {
-        return encryptBytes(data, key, initializationVector());
+        return encryptStream(data, key, null);
     }
 
     @Override
     public byte[] encryptBytes(byte[] data, byte[] key, byte[] iv)
     {
-        init(iv, key);
+        init(key, iv);
         try
         {
             byte[] buf = new byte[cipher.getOutputSize(data.length)];
             int len = cipher.processBytes(data, 0, data.length, buf, 0);
             len += cipher.doFinal(buf, len);
-
-            return concatenate(iv, copyOf(buf, len));
+            return copyOf(buf, len);
         }
         catch (DataLengthException | IllegalStateException | InvalidCipherTextException e)
         {
@@ -90,16 +75,39 @@ class AESEngine implements AESEncryptionAlgorithmEngine
         }
     }
 
-    private byte[] initializationVector()
+    @Override
+    public byte[] encryptBytes(byte[] data, byte[] key)
     {
-        byte[] iv = new byte[16];
-        random.nextBytes(iv);
-        return iv;
+        return encryptBytes(data, key, null);
     }
 
-    private void init(byte[] iv, byte[] key)
+    private void init(byte[] key, byte[] iv)
     {
         cipher.reset();
-        cipher.init(true, new ParametersWithIV(new KeyParameter(key), iv));
+        if (nonNull(iv))
+        {
+            cipher.init(true, new ParametersWithIV(new KeyParameter(key), iv));
+        }
+        else
+        {
+            cipher.init(true, new KeyParameter(key));
+        }
+    }
+
+    /**
+     * @return and instance of EncryptionAlgorithmEngine AES/CBC/NoPadding and no initialization vector
+     */
+    static AESEngineNoPadding cbc()
+    {
+        return new AESEngineNoPadding(
+                new BufferedBlockCipher(new CBCBlockCipher(new AESFastEngine())));
+    }
+
+    /**
+     * @return and instance of EncryptionAlgorithmEngine AES/ECB/NoPadding and no initialization vector
+     */
+    static AESEngineNoPadding ecb()
+    {
+        return new AESEngineNoPadding(new BufferedBlockCipher(new AESFastEngine()));
     }
 }

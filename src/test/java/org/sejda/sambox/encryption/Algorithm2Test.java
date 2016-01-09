@@ -31,37 +31,37 @@ public class Algorithm2Test
     @Test
     public void computeEncryptionKeyARC4()
     {
-        StandardSecurity security = new StandardSecurity("test", null,
-                StandardSecurityEncryption.ARC4_128, true);
-        security.documentId(new byte[] { -5, 78, 122, -45, 106, -102, 20, -35, -125, 7, 43, -52,
+        EncryptionContext context = new EncryptionContext(
+                new StandardSecurity("test", null, StandardSecurityEncryption.ARC4_128, true));
+        context.documentId(new byte[] { -5, 78, 122, -45, 106, -102, 20, -35, -125, 7, 43, -52,
                 -104, 23, -68, 113 });
         byte[] expected = new byte[] { -40, -23, -118, -66, -77, -34, 42, 9, 11, 22, 105, 86, -92,
                 23, 57, 4 };
-        assertArrayEquals(expected, victim.computeEncryptionKey(security));
+        assertArrayEquals(expected, victim.computeEncryptionKey(context));
     }
 
     @Test
     public void computeEncryptionKeyAES128()
     {
-        StandardSecurity security = new StandardSecurity("test", null,
-                StandardSecurityEncryption.AES_128, true);
-        security.documentId(new byte[] { -5, 78, 122, -45, 106, -102, 20, -35, -125, 7, 43, -52,
+        EncryptionContext context = new EncryptionContext(
+                new StandardSecurity("test", null, StandardSecurityEncryption.AES_128, true));
+        context.documentId(new byte[] { -5, 78, 122, -45, 106, -102, 20, -35, -125, 7, 43, -52,
                 -104, 23, -68, 113 });
         byte[] expected = new byte[] { -40, -23, -118, -66, -77, -34, 42, 9, 11, 22, 105, 86, -92,
                 23, 57, 4 };
-        assertArrayEquals(expected, victim.computeEncryptionKey(security));
+        assertArrayEquals(expected, victim.computeEncryptionKey(context));
     }
 
     @Test
     public void computeEncryptionKeyAES128NoMeta()
     {
-        StandardSecurity security = new StandardSecurity("test", null,
-                StandardSecurityEncryption.AES_128, false);
-        security.documentId(new byte[] { -5, 78, 122, -45, 106, -102, 20, -35, -125, 7, 43, -52,
+        EncryptionContext context = new EncryptionContext(
+                new StandardSecurity("test", null, StandardSecurityEncryption.AES_128, false));
+        context.documentId(new byte[] { -5, 78, 122, -45, 106, -102, 20, -35, -125, 7, 43, -52,
                 -104, 23, -68, 113 });
         byte[] expected = new byte[] { 16, 21, -116, 88, -24, 99, -16, -74, -35, -46, -31, -21, 87,
                 116, 111, -90 };
-        assertArrayEquals(expected, victim.computeEncryptionKey(security));
+        assertArrayEquals(expected, victim.computeEncryptionKey(context));
     }
 
 }

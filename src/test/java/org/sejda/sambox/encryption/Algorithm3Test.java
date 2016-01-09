@@ -31,12 +31,12 @@ public class Algorithm3Test
         byte[] expected = new byte[] { -26, 0, -20, -62, 2, -120, -83, -117, 13, 100, -87, 41, -58,
                 -88, 62, -30, 81, 118, 121, -86, 2, 24, -66, -50, -22, -117, 121, -122, 114, 106,
                 -116, -37 };
-        assertArrayEquals(expected, victim.computePassword(
-                new StandardSecurity("test", null, StandardSecurityEncryption.ARC4_128, true)));
-        assertArrayEquals(expected, victim.computePassword(
-                new StandardSecurity("test", "", StandardSecurityEncryption.ARC4_128, true)));
-        assertArrayEquals(expected, victim.computePassword(
-                new StandardSecurity("test", "", StandardSecurityEncryption.ARC4_128, false)));
+        assertArrayEquals(expected, victim.computePassword(new EncryptionContext(
+                new StandardSecurity("test", null, StandardSecurityEncryption.ARC4_128, true))));
+        assertArrayEquals(expected, victim.computePassword(new EncryptionContext(
+                new StandardSecurity("test", "", StandardSecurityEncryption.ARC4_128, true))));
+        assertArrayEquals(expected, victim.computePassword(new EncryptionContext(
+                new StandardSecurity("test", "", StandardSecurityEncryption.ARC4_128, false))));
     }
 
     @Test
@@ -45,10 +45,12 @@ public class Algorithm3Test
         byte[] expected = new byte[] { -69, -52, -57, -18, 28, -118, 67, -30, -42, 42, -71, 49, 76,
                 -40, 126, -114, 127, 22, 47, -29, 40, 113, -120, 96, -21, -121, 102, -88, 126, 7,
                 101, -114 };
-        assertArrayEquals(expected, victim.computePassword(new StandardSecurity("test", "userPwd",
-                StandardSecurityEncryption.ARC4_128, true)));
-        assertArrayEquals(expected, victim.computePassword(new StandardSecurity("test", "userPwd",
-                StandardSecurityEncryption.ARC4_128, false)));
+        assertArrayEquals(expected,
+                victim.computePassword(new EncryptionContext(new StandardSecurity("test", "userPwd",
+                        StandardSecurityEncryption.ARC4_128, true))));
+        assertArrayEquals(expected,
+                victim.computePassword(new EncryptionContext(new StandardSecurity("test", "userPwd",
+                        StandardSecurityEncryption.ARC4_128, false))));
     }
 
     @Test
@@ -60,10 +62,12 @@ public class Algorithm3Test
         byte[] expectedNoMeta = new byte[] { -69, -52, -57, -18, 28, -118, 67, -30, -42, 42, -71,
                 49, 76, -40, 126, -114, 127, 22, 47, -29, 40, 113, -120, 96, -21, -121, 102, -88,
                 126, 7, 101, -114 };
-        assertArrayEquals(expected, victim.computePassword(
-                new StandardSecurity("test", "userPwd", StandardSecurityEncryption.AES_128, true)));
-        assertArrayEquals(expectedNoMeta, victim.computePassword(new StandardSecurity("test",
-                "userPwd", StandardSecurityEncryption.AES_128, false)));
+        assertArrayEquals(expected,
+                victim.computePassword(new EncryptionContext(new StandardSecurity("test", "userPwd",
+                        StandardSecurityEncryption.AES_128, true))));
+        assertArrayEquals(expectedNoMeta,
+                victim.computePassword(new EncryptionContext(new StandardSecurity("test", "userPwd",
+                        StandardSecurityEncryption.AES_128, false))));
     }
 
     @Test
@@ -76,14 +80,14 @@ public class Algorithm3Test
                 -58, -88, 62, -30, 81, 118, 121, -86, 2, 24, -66, -50, -22, -117, 121, -122, 114,
                 106, -116, -37 };
 
-        assertArrayEquals(expected, victim.computePassword(
-                new StandardSecurity("test", "", StandardSecurityEncryption.AES_128, true)));
-        assertArrayEquals(expected, victim.computePassword(
-                new StandardSecurity("test", null, StandardSecurityEncryption.AES_128, true)));
+        assertArrayEquals(expected, victim.computePassword(new EncryptionContext(
+                new StandardSecurity("test", "", StandardSecurityEncryption.AES_128, true))));
+        assertArrayEquals(expected, victim.computePassword(new EncryptionContext(
+                new StandardSecurity("test", null, StandardSecurityEncryption.AES_128, true))));
 
-        assertArrayEquals(expectedNoMeta, victim.computePassword(
-                new StandardSecurity("test", "", StandardSecurityEncryption.AES_128, false)));
-        assertArrayEquals(expectedNoMeta, victim.computePassword(
-                new StandardSecurity("test", null, StandardSecurityEncryption.AES_128, false)));
+        assertArrayEquals(expectedNoMeta, victim.computePassword(new EncryptionContext(
+                new StandardSecurity("test", "", StandardSecurityEncryption.AES_128, false))));
+        assertArrayEquals(expectedNoMeta, victim.computePassword(new EncryptionContext(
+                new StandardSecurity("test", null, StandardSecurityEncryption.AES_128, false))));
     }
 }

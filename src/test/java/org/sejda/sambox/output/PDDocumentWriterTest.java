@@ -24,13 +24,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayOutputStream;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.sejda.io.CountingWritableByteChannel;
 import org.sejda.sambox.TestUtils;
 import org.sejda.sambox.cos.COSDocument;
-import org.sejda.sambox.encryption.StandardSecurity;
 import org.sejda.sambox.pdmodel.PDDocument;
 
 /**
@@ -58,7 +58,7 @@ public class PDDocumentWriterTest
     @Test(expected = IllegalArgumentException.class)
     public void nullConstructor()
     {
-        new PDDocumentWriter(null, mock(StandardSecurity.class));
+        new PDDocumentWriter(null, Optional.empty());
     }
 
     @Test

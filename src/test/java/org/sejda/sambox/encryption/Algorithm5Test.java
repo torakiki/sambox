@@ -32,47 +32,51 @@ public class Algorithm5Test
     @Test
     public void computePasswordNoUserARC128()
     {
-        StandardSecurity security = new StandardSecurity("test", null,
-                StandardSecurityEncryption.ARC4_128, true);
-        security.documentId(new byte[] { -5, 78, 122, -45, 106, -102, 20, -35, -125, 7, 43, -52,
+        EncryptionContext context = new EncryptionContext(
+                new StandardSecurity("test", null, StandardSecurityEncryption.ARC4_128, true));
+        context.documentId(new byte[] { -5, 78, 122, -45, 106, -102, 20, -35, -125, 7, 43, -52,
                 -104, 23, -68, 113 });
         byte[] expected = new byte[] { 69, -55, -39, 93, -69, 34, -117, -17, 58, -63, -20, -18, -51,
                 92, 111, 95, 40, -65, 78, 94, 78, 117, -118, 65, 100, 0, 78, 86, -1, -6, 1, 8 };
-        assertArrayEquals(expected, victim.computePassword(security));
-        assertArrayEquals(expected, victim.computePassword(security));
-        assertArrayEquals(expected, victim.computePassword(security));
+        context.key(new Algorithm2().computeEncryptionKey(context));
+        assertArrayEquals(expected, victim.computePassword(context));
+        assertArrayEquals(expected, victim.computePassword(context));
+        assertArrayEquals(expected, victim.computePassword(context));
     }
 
     @Test
     public void computePasswordARC128()
     {
-        StandardSecurity security = new StandardSecurity("test", "userPwd",
-                StandardSecurityEncryption.ARC4_128, true);
-        StandardSecurity securityNoMeta = new StandardSecurity("test", "userPwd",
-                StandardSecurityEncryption.ARC4_128, false);
+        EncryptionContext context = new EncryptionContext(
+                new StandardSecurity("test", "userPwd", StandardSecurityEncryption.ARC4_128, true));
+        EncryptionContext contextNoMeta = new EncryptionContext(new StandardSecurity("test",
+                "userPwd", StandardSecurityEncryption.ARC4_128, false));
 
-        security.documentId(new byte[] { -5, 78, 122, -45, 106, -102, 20, -35, -125, 7, 43, -52,
+        context.documentId(new byte[] { -5, 78, 122, -45, 106, -102, 20, -35, -125, 7, 43, -52,
                 -104, 23, -68, 113 });
-        securityNoMeta.documentId(new byte[] { -5, 78, 122, -45, 106, -102, 20, -35, -125, 7, 43,
+        contextNoMeta.documentId(new byte[] { -5, 78, 122, -45, 106, -102, 20, -35, -125, 7, 43,
                 -52, -104, 23, -68, 113 });
 
         byte[] expected = new byte[] { 47, 113, -64, 46, -100, 75, 92, -84, 63, -77, -29, -90, -78,
                 108, 54, 89, 40, -65, 78, 94, 78, 117, -118, 65, 100, 0, 78, 86, -1, -6, 1, 8 };
-        assertArrayEquals(expected, victim.computePassword(security));
-        assertArrayEquals(expected, victim.computePassword(securityNoMeta));
+        context.key(new Algorithm2().computeEncryptionKey(context));
+        contextNoMeta.key(new Algorithm2().computeEncryptionKey(contextNoMeta));
+        assertArrayEquals(expected, victim.computePassword(context));
+        assertArrayEquals(expected, victim.computePassword(contextNoMeta));
     }
 
     @Test
     public void computePasswordAES128()
     {
-        StandardSecurity security = new StandardSecurity("test", "userPwd",
-                StandardSecurityEncryption.AES_128, true);
-        StandardSecurity securityNoMeta = new StandardSecurity("test", "userPwd",
-                StandardSecurityEncryption.AES_128, false);
+        EncryptionContext context = new EncryptionContext(
+                new StandardSecurity("test", "userPwd", StandardSecurityEncryption.AES_128, true));
 
-        security.documentId(new byte[] { -5, 78, 122, -45, 106, -102, 20, -35, -125, 7, 43, -52,
+        EncryptionContext contextNoMeta = new EncryptionContext(
+                new StandardSecurity("test", "userPwd", StandardSecurityEncryption.AES_128, false));
+
+        context.documentId(new byte[] { -5, 78, 122, -45, 106, -102, 20, -35, -125, 7, 43, -52,
                 -104, 23, -68, 113 });
-        securityNoMeta.documentId(new byte[] { -5, 78, 122, -45, 106, -102, 20, -35, -125, 7, 43,
+        contextNoMeta.documentId(new byte[] { -5, 78, 122, -45, 106, -102, 20, -35, -125, 7, 43,
                 -52, -104, 23, -68, 113 });
 
         byte[] expected = new byte[] { 47, 113, -64, 46, -100, 75, 92, -84, 63, -77, -29, -90, -78,
@@ -80,22 +84,23 @@ public class Algorithm5Test
         byte[] expectedNoMeta = new byte[] { -20, -82, -14, 50, -114, 98, -24, 54, -23, 124, 30, 57,
                 -22, 24, -91, 107, 40, -65, 78, 94, 78, 117, -118, 65, 100, 0, 78, 86, -1, -6, 1,
                 8 };
-
-        assertArrayEquals(expected, victim.computePassword(security));
-        assertArrayEquals(expectedNoMeta, victim.computePassword(securityNoMeta));
+        context.key(new Algorithm2().computeEncryptionKey(context));
+        contextNoMeta.key(new Algorithm2().computeEncryptionKey(contextNoMeta));
+        assertArrayEquals(expected, victim.computePassword(context));
+        assertArrayEquals(expectedNoMeta, victim.computePassword(contextNoMeta));
     }
 
     @Test
     public void computePasswordNoUserAES128()
     {
-        StandardSecurity security = new StandardSecurity("test", null,
-                StandardSecurityEncryption.AES_128, true);
-        StandardSecurity securityNoMeta = new StandardSecurity("test", null,
-                StandardSecurityEncryption.AES_128, false);
+        EncryptionContext context = new EncryptionContext(
+                new StandardSecurity("test", null, StandardSecurityEncryption.AES_128, true));
+        EncryptionContext contextNoMeta = new EncryptionContext(
+                new StandardSecurity("test", null, StandardSecurityEncryption.AES_128, false));
 
-        security.documentId(new byte[] { -5, 78, 122, -45, 106, -102, 20, -35, -125, 7, 43, -52,
+        context.documentId(new byte[] { -5, 78, 122, -45, 106, -102, 20, -35, -125, 7, 43, -52,
                 -104, 23, -68, 113 });
-        securityNoMeta.documentId(new byte[] { -5, 78, 122, -45, 106, -102, 20, -35, -125, 7, 43,
+        contextNoMeta.documentId(new byte[] { -5, 78, 122, -45, 106, -102, 20, -35, -125, 7, 43,
                 -52, -104, 23, -68, 113 });
 
         byte[] expected = new byte[] { 69, -55, -39, 93, -69, 34, -117, -17, 58, -63, -20, -18, -51,
@@ -103,7 +108,10 @@ public class Algorithm5Test
         byte[] expectedNoMeta = new byte[] { -36, -88, -20, 86, 52, 86, 61, 2, -22, -6, -29, -68,
                 52, -3, 4, -23, 40, -65, 78, 94, 78, 117, -118, 65, 100, 0, 78, 86, -1, -6, 1, 8 };
 
-        assertArrayEquals(expected, victim.computePassword(security));
-        assertArrayEquals(expectedNoMeta, victim.computePassword(securityNoMeta));
+        context.key(new Algorithm2().computeEncryptionKey(context));
+        contextNoMeta.key(new Algorithm2().computeEncryptionKey(contextNoMeta));
+
+        assertArrayEquals(expected, victim.computePassword(context));
+        assertArrayEquals(expectedNoMeta, victim.computePassword(contextNoMeta));
     }
 }

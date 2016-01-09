@@ -27,7 +27,7 @@ import java.util.Optional;
 import org.sejda.io.CountingWritableByteChannel;
 import org.sejda.sambox.cos.COSDocument;
 import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.encryption.StandardSecurity;
+import org.sejda.sambox.encryption.EncryptionContext;
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.util.SpecVersionUtils;
 import org.sejda.util.IOUtils;
@@ -45,15 +45,15 @@ public class PDDocumentWriter implements Closeable
     private static final Logger LOG = LoggerFactory.getLogger(PDDocumentWriter.class);
     private DefaultPDFWriter writer;
     private PDFWriteContext context;
-    private Optional<StandardSecurity> standardSecurity;
+    private Optional<EncryptionContext> encryptionContext;
 
-    public PDDocumentWriter(CountingWritableByteChannel channel, StandardSecurity standardSecurity,
-            WriteOption... options)
+    public PDDocumentWriter(CountingWritableByteChannel channel,
+            Optional<EncryptionContext> encryptionContext, WriteOption... options)
     {
         requireNotNullArg(channel, "Cannot write to a null channel");
-        this.standardSecurity = Optional.ofNullable(standardSecurity);
+        this.encryptionContext = encryptionContext;
         context = new PDFWriteContext(
-                this.standardSecurity.map(StandardSecurity::encryptionAlgorithm).orElse(null),
+                this.encryptionContext.map(EncryptionContext::encryptionAlgorithm).orElse(null),
                 options);
         this.writer = new DefaultPDFWriter(new IndirectObjectsWriter(channel, context));
     }
@@ -76,12 +76,12 @@ public class PDDocumentWriter implements Closeable
         ofNullable(document.getDocument().getTrailer())
                 .ifPresent(t -> t.removeItem(COSName.ENCRYPT));
 
-        standardSecurity.ifPresent(s -> {
+        encryptionContext.ifPresent(c -> {
             document.getDocument()
-                    .setEncryptionDictionary(s.encryption.generateEncryptionDictionary(s));
+                    .setEncryptionDictionary(c.security.encryption.generateEncryptionDictionary(c));
             LOG.debug("Generated encryption dictionary");
             ofNullable(document.getDocumentCatalog().getMetadata()).map(m -> m.getCOSObject())
-                    .ifPresent(str -> str.encryptable(s.encryptMetadata));
+                    .ifPresent(str -> str.encryptable(c.security.encryptMetadata));
         });
 
         writer.writeHeader(document.getDocument().getHeaderVersion());

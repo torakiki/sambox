@@ -16,18 +16,15 @@
  */
 package org.sejda.sambox.encryption;
 
+import java.io.InputStream;
+
 /**
- * A password algorithm as defined in PDF spec 32000-1:2008 Chap 7.6.3.4
- * 
  * @author Andrea Vacondio
  *
  */
-interface PasswordAlgorithm
+interface AESEncryptionAlgorithmEngine extends EncryptionAlgorithmEngine
 {
+    InputStream encryptStream(InputStream data, byte[] key, byte[] iv);
 
-    /**
-     * @param context
-     * @return the computed password based on the given input security params
-     */
-    byte[] computePassword(EncryptionContext context);
+    byte[] encryptBytes(byte[] data, byte[] key, byte[] iv);
 }

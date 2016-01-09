@@ -32,33 +32,33 @@ class Algorithm2
     private MessageDigest digest = MessageDigests.md5();
     private Algorithm3 algo = new Algorithm3();
 
-    byte[] computeEncryptionKey(StandardSecurity security)
+    byte[] computeEncryptionKey(EncryptionContext context)
     {
         digest.reset();
-        digest.update(EncryptUtils.padOrTruncate(security.userPassword));
-        digest.update(algo.computePassword(security));
+        digest.update(EncryptUtils.padOrTruncate(context.security.getUserPassword()));
+        digest.update(algo.computePassword(context));
 
-        int permissions = security.permissions.getPermissionBytes();
+        int permissions = context.security.permissions.getPermissionBytes();
         digest.update((byte) permissions);
         digest.update((byte) (permissions >>> 8));
         digest.update((byte) (permissions >>> 16));
         digest.update((byte) (permissions >>> 24));
 
-        digest.update(security.documentId());
-        if (StandardSecurityHandlerRevision.R4.compareTo(security.encryption.revision) <= 0
-                && !security.encryptMetadata)
+        digest.update(context.documentId());
+        if (StandardSecurityHandlerRevision.R4.compareTo(context.security.encryption.revision) <= 0
+                && !context.security.encryptMetadata)
         {
             digest.update(NO_METADATA);
         }
         byte[] hash = digest.digest();
-        if (StandardSecurityHandlerRevision.R3.compareTo(security.encryption.revision) <= 0)
+        if (StandardSecurityHandlerRevision.R3.compareTo(context.security.encryption.revision) <= 0)
         {
             for (int i = 0; i < 50; i++)
             {
-                digest.update(hash, 0, security.encryption.revision.length);
+                digest.update(hash, 0, context.security.encryption.revision.length);
                 hash = digest.digest();
             }
         }
-        return Arrays.copyOf(hash, security.encryption.revision.length);
+        return Arrays.copyOf(hash, context.security.encryption.revision.length);
     }
 }

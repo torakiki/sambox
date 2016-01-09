@@ -16,7 +16,6 @@
  */
 package org.sejda.sambox.pdmodel;
 
-import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static org.sejda.io.CountingWritableByteChannel.from;
 import static org.sejda.sambox.cos.DirectCOSObject.asDirectObject;
@@ -33,6 +32,7 @@ import java.nio.channels.WritableByteChannel;
 import java.security.MessageDigest;
 import java.util.Calendar;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import org.sejda.io.CountingWritableByteChannel;
@@ -44,6 +44,7 @@ import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSString;
 import org.sejda.sambox.cos.DirectCOSObject;
+import org.sejda.sambox.encryption.EncryptionContext;
 import org.sejda.sambox.encryption.MessageDigests;
 import org.sejda.sambox.encryption.StandardSecurity;
 import org.sejda.sambox.output.PDDocumentWriter;
@@ -373,9 +374,9 @@ public class PDDocument implements Closeable
      * trailer.
      * 
      * @param md5Update
-     * @param standardSecurity
+     * @param encContext
      */
-    private void generateFileIdentifier(byte[] md5Update, StandardSecurity standardSecurity)
+    private void generateFileIdentifier(byte[] md5Update, Optional<EncryptionContext> encContext)
     {
         MessageDigest md5 = MessageDigests.md5();
         md5.update(Long.toString(System.currentTimeMillis()).getBytes(Charsets.ISO_8859_1));
@@ -388,10 +389,7 @@ public class PDDocument implements Closeable
                     }
                 });
         COSString retVal = COSString.newInstance(md5.digest());
-        if (nonNull(standardSecurity))
-        {
-            standardSecurity.documentId(retVal.getBytes());
-        }
+        encContext.ifPresent(c -> c.documentId(retVal.getBytes()));
         retVal.setForceHexForm(true);
         retVal.encryptable(false);
         DirectCOSObject id = asDirectObject(retVal);
@@ -525,8 +523,10 @@ public class PDDocument implements Closeable
             font.subset();
         }
         fontsToSubset.clear();
-        generateFileIdentifier(output.toString().getBytes(Charsets.ISO_8859_1), security);
-        try (PDDocumentWriter writer = new PDDocumentWriter(output, security, options))
+        Optional<EncryptionContext> encryptionContext = ofNullable(
+                ofNullable(security).map(EncryptionContext::new).orElse(null));
+        generateFileIdentifier(output.toString().getBytes(Charsets.ISO_8859_1), encryptionContext);
+        try (PDDocumentWriter writer = new PDDocumentWriter(output, encryptionContext, options))
         {
             writer.write(this);
         }

@@ -16,7 +16,7 @@
  */
 package org.sejda.sambox.encryption;
 
-import static java.util.Optional.ofNullable;
+import static java.util.Optional.of;
 import static org.sejda.sambox.encryption.EncryptUtils.padOrTruncate;
 
 import java.security.MessageDigest;
@@ -35,19 +35,22 @@ class Algorithm3 implements PasswordAlgorithm
     private ARC4Engine engine = new ARC4Engine();
 
     @Override
-    public byte[] computePassword(StandardSecurity security)
+    public byte[] computePassword(EncryptionContext context)
     {
-        byte[] padded = padOrTruncate(ofNullable(security.ownerPassword).filter(p -> p.length > 0)
-                .orElse(security.userPassword));
-        byte[] paddedUser = padOrTruncate(security.userPassword);
+        byte[] ownerBytes = context.security.getOwnerPassword();
+        byte[] userBytes = context.security.getUserPassword();
+        byte[] padded = padOrTruncate(
+                of(ownerBytes).filter(p -> p.length > 0).orElseGet(() -> userBytes));
+        byte[] paddedUser = padOrTruncate(userBytes);
         digest.reset();
         byte[] arc4Key = digest.digest(padded);
-        if (StandardSecurityHandlerRevision.R3.compareTo(security.encryption.revision) <= 0)
+        if (StandardSecurityHandlerRevision.R3.compareTo(context.security.encryption.revision) <= 0)
         {
             for (int i = 0; i < 50; ++i)
             {
-                digest.update(arc4Key, 0, security.encryption.revision.length);
-                arc4Key = Arrays.copyOf(digest.digest(), security.encryption.revision.length);
+                digest.update(arc4Key, 0, context.security.encryption.revision.length);
+                arc4Key = Arrays.copyOf(digest.digest(),
+                        context.security.encryption.revision.length);
             }
             byte[] encrypted = engine.encryptBytes(paddedUser, arc4Key);
             byte[] iterationKey = new byte[arc4Key.length];

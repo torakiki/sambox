@@ -17,17 +17,12 @@
 package org.sejda.sambox.encryption;
 
 /**
- * A password algorithm as defined in PDF spec 32000-1:2008 Chap 7.6.3.4
+ * The algorithm used to compute the hash to be used in Algorithm2A
  * 
  * @author Andrea Vacondio
  *
  */
-interface PasswordAlgorithm
+interface Algorithm2AHash
 {
-
-    /**
-     * @param context
-     * @return the computed password based on the given input security params
-     */
-    byte[] computePassword(EncryptionContext context);
+    byte[] computeHash(byte[] input);
 }

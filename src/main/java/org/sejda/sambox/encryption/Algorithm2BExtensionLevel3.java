@@ -16,18 +16,24 @@
  */
 package org.sejda.sambox.encryption;
 
+import java.security.MessageDigest;
+
+import org.bouncycastle.util.Arrays;
+
 /**
- * A password algorithm as defined in PDF spec 32000-1:2008 Chap 7.6.3.4
+ * The algorithm used to compute hash in Algorithm 2.A for extension level 3. This is used with Version 5 and Revision 5
+ * of the security handler.
  * 
  * @author Andrea Vacondio
- *
  */
-interface PasswordAlgorithm
+class Algorithm2BExtensionLevel3 implements Algorithm2AHash
 {
 
-    /**
-     * @param context
-     * @return the computed password based on the given input security params
-     */
-    byte[] computePassword(EncryptionContext context);
+    private MessageDigest digest = MessageDigests.sha256();
+
+    @Override
+    public byte[] computeHash(byte[] input)
+    {
+        return Arrays.copyOf(digest.digest(input), 32);
+    }
 }

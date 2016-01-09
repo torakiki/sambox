@@ -33,33 +33,35 @@ public enum StandardSecurityEncryption
     ARC4_128(StandardSecurityHandlerRevision.R3, 2)
     {
         @Override
-        public COSDictionary generateEncryptionDictionary(StandardSecurity security)
+        public COSDictionary generateEncryptionDictionary(EncryptionContext context)
         {
-            COSDictionary encryptionDictionary = super.generateEncryptionDictionary(security);
+            COSDictionary encryptionDictionary = super.generateEncryptionDictionary(context);
             encryptionDictionary.setItem(COSName.O,
-                    pwdString(new Algorithm3().computePassword(security)));
+                    pwdString(new Algorithm3().computePassword(context)));
             encryptionDictionary.setItem(COSName.U,
-                    pwdString(new Algorithm5().computePassword(security)));
+                    pwdString(new Algorithm5().computePassword(context)));
             return encryptionDictionary;
         }
 
         @Override
-        public GeneralEncryptionAlgorithm encryptionAlgorithm(StandardSecurity security)
+        public GeneralEncryptionAlgorithm encryptionAlgorithm(EncryptionContext context)
         {
-            return Algorithm1.withARC4Engine(new Algorithm2().computeEncryptionKey(security));
+            context.key(new Algorithm2().computeEncryptionKey(context));
+            return Algorithm1.withARC4Engine(context.key());
         }
     },
     AES_128(StandardSecurityHandlerRevision.R4, 4)
     {
         @Override
-        public COSDictionary generateEncryptionDictionary(StandardSecurity security)
+        public COSDictionary generateEncryptionDictionary(EncryptionContext context)
         {
-            COSDictionary encryptionDictionary = super.generateEncryptionDictionary(security);
+            COSDictionary encryptionDictionary = super.generateEncryptionDictionary(context);
             encryptionDictionary.setItem(COSName.O,
-                    pwdString(new Algorithm3().computePassword(security)));
+                    pwdString(new Algorithm3().computePassword(context)));
             encryptionDictionary.setItem(COSName.U,
-                    pwdString(new Algorithm5().computePassword(security)));
-            encryptionDictionary.setBoolean(COSName.ENCRYPT_META_DATA, security.encryptMetadata);
+                    pwdString(new Algorithm5().computePassword(context)));
+            encryptionDictionary.setBoolean(COSName.ENCRYPT_META_DATA,
+                    context.security.encryptMetadata);
             COSDictionary standardCryptFilterDictionary = new COSDictionary();
             standardCryptFilterDictionary.setItem(COSName.CFM, COSName.AESV2);
             standardCryptFilterDictionary.setItem(COSName.AUTEVENT, COSName.DOC_OPEN);
@@ -74,27 +76,49 @@ public enum StandardSecurityEncryption
         }
 
         @Override
-        public GeneralEncryptionAlgorithm encryptionAlgorithm(StandardSecurity security)
+        public GeneralEncryptionAlgorithm encryptionAlgorithm(EncryptionContext context)
         {
-            return Algorithm1.withAESEngine(new Algorithm2().computeEncryptionKey(security));
+            context.key(new Algorithm2().computeEncryptionKey(context));
+            return Algorithm1.withAESEngine(context.key());
         }
     },
     AES_256(StandardSecurityHandlerRevision.R6, 5)
     {
+
         @Override
-        public COSDictionary generateEncryptionDictionary(StandardSecurity security)
+        public COSDictionary generateEncryptionDictionary(EncryptionContext context)
         {
-            COSDictionary encryptionDictionary = super.generateEncryptionDictionary(security);
+            COSDictionary encryptionDictionary = super.generateEncryptionDictionary(context);
             encryptionDictionary.setInt(COSName.R, this.revision.revisionNumber);
-            // TODO
+            Algorithm8 algo8 = new Algorithm8(new Algorithm2B());
+            byte[] u = algo8.computePassword(context);
+            encryptionDictionary.setItem(COSName.U, pwdString(u));
+            encryptionDictionary.setItem(COSName.UE, pwdString(algo8.computeUE(context)));
+            Algorithm9 algo9 = new Algorithm9(new Algorithm2B(u), u);
+            encryptionDictionary.setItem(COSName.O, pwdString(algo9.computePassword(context)));
+            encryptionDictionary.setItem(COSName.OE, pwdString(algo9.computeOE(context)));
+            encryptionDictionary.setBoolean(COSName.ENCRYPT_META_DATA,
+                    context.security.encryptMetadata);
+            encryptionDictionary.setItem(COSName.PERMS,
+                    pwdString(new Algorithm10().computePerms(context)));
+            COSDictionary standardCryptFilterDictionary = new COSDictionary();
+            standardCryptFilterDictionary.setItem(COSName.CFM, COSName.AESV3);
+            standardCryptFilterDictionary.setItem(COSName.AUTEVENT, COSName.DOC_OPEN);
+            standardCryptFilterDictionary.setInt(COSName.LENGTH, revision.length);
+            COSDictionary cryptFilterDictionary = new COSDictionary();
+            cryptFilterDictionary.setItem(COSName.STD_CF,
+                    asDirectObject(standardCryptFilterDictionary));
+            encryptionDictionary.setItem(COSName.CF, asDirectObject(cryptFilterDictionary));
+            encryptionDictionary.setItem(COSName.STM_F, COSName.STD_CF);
+            encryptionDictionary.setItem(COSName.STR_F, COSName.STD_CF);
             return encryptionDictionary;
         }
 
         @Override
-        public GeneralEncryptionAlgorithm encryptionAlgorithm(StandardSecurity security)
+        public GeneralEncryptionAlgorithm encryptionAlgorithm(EncryptionContext context)
         {
-            // TODO Algo 2A
-            return null;
+            context.key(EncryptUtils.rnd(32));
+            return new Algorithm1A(context.key());
         }
     };
 
@@ -110,21 +134,21 @@ public enum StandardSecurityEncryption
     /**
      * Generates the encryption dictionary for this standard encryption
      * 
-     * @param security
+     * @param context
      * @return
      */
-    public COSDictionary generateEncryptionDictionary(StandardSecurity security)
+    public COSDictionary generateEncryptionDictionary(EncryptionContext context)
     {
         COSDictionary encryptionDictionary = new COSDictionary();
         encryptionDictionary.setName(COSName.FILTER, "Standard");
         encryptionDictionary.setInt(COSName.V, this.version);
         encryptionDictionary.setInt(COSName.LENGTH, this.revision.length * 8);
         encryptionDictionary.setInt(COSName.R, this.revision.revisionNumber);
-        encryptionDictionary.setInt(COSName.P, security.permissions.getPermissionBytes());
+        encryptionDictionary.setInt(COSName.P, context.security.permissions.getPermissionBytes());
         return encryptionDictionary;
     }
 
-    public abstract GeneralEncryptionAlgorithm encryptionAlgorithm(StandardSecurity security);
+    public abstract GeneralEncryptionAlgorithm encryptionAlgorithm(EncryptionContext context);
 
     private static COSString pwdString(byte[] raw)
     {
