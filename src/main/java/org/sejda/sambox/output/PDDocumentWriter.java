@@ -51,7 +51,7 @@ public class PDDocumentWriter implements Closeable
             Optional<EncryptionContext> encryptionContext, WriteOption... options)
     {
         requireNotNullArg(channel, "Cannot write to a null channel");
-        this.encryptionContext = encryptionContext;
+        this.encryptionContext = ofNullable(encryptionContext).orElseGet(Optional::empty);
         context = new PDFWriteContext(
                 this.encryptionContext.map(EncryptionContext::encryptionAlgorithm).orElse(null),
                 options);
