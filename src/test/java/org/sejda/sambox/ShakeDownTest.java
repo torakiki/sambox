@@ -57,9 +57,13 @@ public class ShakeDownTest
             new StandardSecurity("owner", "user", StandardSecurityEncryption.ARC4_128, true),
             new StandardSecurity("owner", null, StandardSecurityEncryption.ARC4_128, true),
             new StandardSecurity("owner", "user", StandardSecurityEncryption.AES_128, true),
-            new StandardSecurity("owner", null, StandardSecurityEncryption.ARC4_128, true),
+            new StandardSecurity("owner", null, StandardSecurityEncryption.AES_128, true),
             new StandardSecurity("owner", "user", StandardSecurityEncryption.AES_128, false),
-            new StandardSecurity("owner", null, StandardSecurityEncryption.ARC4_128, false));
+            new StandardSecurity("owner", null, StandardSecurityEncryption.AES_128, false),
+            new StandardSecurity("owner", "user", StandardSecurityEncryption.AES_256, true),
+            new StandardSecurity("owner", null, StandardSecurityEncryption.AES_256, true),
+            new StandardSecurity("owner", "user", StandardSecurityEncryption.AES_256, false),
+            new StandardSecurity("owner", null, StandardSecurityEncryption.AES_256, false));
     @Parameter
     public String inputFile;
     @Parameter(value = 1)
