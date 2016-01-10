@@ -19,6 +19,7 @@ package org.sejda.sambox.encryption;
 import static java.util.Objects.requireNonNull;
 import static org.bouncycastle.util.Arrays.concatenate;
 import static org.bouncycastle.util.Arrays.copyOf;
+import static org.sejda.sambox.encryption.EncryptUtils.rnd;
 import static org.sejda.util.RequireUtils.requireArg;
 
 /**
@@ -28,19 +29,26 @@ import static org.sejda.util.RequireUtils.requireArg;
  */
 public class Algorithm9 implements PasswordAlgorithm
 {
-    private byte[] ownerValidationSalt = EncryptUtils.rnd(8);
-    private byte[] ownerKeySalt = EncryptUtils.rnd(8);
+    private byte[] ownerValidationSalt;
+    private byte[] ownerKeySalt;
     private byte[] u;
     private Algorithm2AHash hashAlgo;
     private AESEngineNoPadding engine = AESEngineNoPadding.cbc();
 
-    Algorithm9(Algorithm2AHash hashAlgo, byte[] u)
+    Algorithm9(Algorithm2AHash hashAlgo, byte[] u, byte[] ownerValidationSalt, byte[] ownerKeySalt)
     {
         requireNonNull(hashAlgo);
         requireNonNull(u);
         requireArg(u.length == 48, "Generated U string must be 48 bytes long");
         this.hashAlgo = hashAlgo;
         this.u = u;
+        this.ownerValidationSalt = ownerValidationSalt;
+        this.ownerKeySalt = ownerKeySalt;
+    }
+
+    Algorithm9(Algorithm2AHash hashAlgo, byte[] u)
+    {
+        this(hashAlgo, u, rnd(8), rnd(8));
     }
 
     @Override
@@ -48,8 +56,9 @@ public class Algorithm9 implements PasswordAlgorithm
     {
         context.security.encryption.revision.requireAtLeast(StandardSecurityHandlerRevision.R5,
                 "Algorithm 9 requires a security handler of revision 5 or greater");
-        return concatenate(hashAlgo.computeHash(
-                concatenate(context.security.getOwnerPasswordUTF(), ownerValidationSalt, u)),
+        byte[] ownerBytes = context.security.getOwnerPasswordUTF();
+        return concatenate(
+                hashAlgo.computeHash(concatenate(ownerBytes, ownerValidationSalt, u), ownerBytes),
                 ownerValidationSalt, ownerKeySalt);
     }
 
@@ -57,8 +66,8 @@ public class Algorithm9 implements PasswordAlgorithm
     {
         context.security.encryption.revision.requireAtLeast(StandardSecurityHandlerRevision.R5,
                 "Algorithm 8 requires a security handler of revision 5 or greater");
-        byte[] key = hashAlgo
-                .computeHash(concatenate(context.security.getOwnerPasswordUTF(), ownerKeySalt, u));
+        byte[] ownerBytes = context.security.getOwnerPasswordUTF();
+        byte[] key = hashAlgo.computeHash(concatenate(ownerBytes, ownerKeySalt, u), ownerBytes);
         return copyOf(engine.encryptBytes(context.key(), key), 32);
     }
 }

@@ -19,6 +19,7 @@ package org.sejda.sambox.encryption;
 import static java.util.Objects.requireNonNull;
 import static org.bouncycastle.util.Arrays.concatenate;
 import static org.bouncycastle.util.Arrays.copyOf;
+import static org.sejda.sambox.encryption.EncryptUtils.rnd;
 
 /**
  * Algorithm 8 as defined in Chap 7.6.3.4.6 of ISO 32000-2
@@ -29,15 +30,22 @@ import static org.bouncycastle.util.Arrays.copyOf;
 class Algorithm8 implements PasswordAlgorithm
 {
 
-    private byte[] userValidationSalt = EncryptUtils.rnd(8);
-    private byte[] userKeySalt = EncryptUtils.rnd(8);
+    private byte[] userValidationSalt;
+    private byte[] userKeySalt;
     private Algorithm2AHash hashAlgo;
     private AESEngineNoPadding engine = AESEngineNoPadding.cbc();
 
     Algorithm8(Algorithm2AHash hashAlgo)
     {
+        this(hashAlgo, rnd(8), rnd(8));
+    }
+
+    Algorithm8(Algorithm2AHash hashAlgo, byte[] userValidationSalt, byte[] userKeySalt)
+    {
         requireNonNull(hashAlgo);
         this.hashAlgo = hashAlgo;
+        this.userValidationSalt = userValidationSalt;
+        this.userKeySalt = userKeySalt;
     }
 
     @Override
@@ -45,9 +53,9 @@ class Algorithm8 implements PasswordAlgorithm
     {
         context.security.encryption.revision.requireAtLeast(StandardSecurityHandlerRevision.R5,
                 "Algorithm 8 requires a security handler of revision 5 or greater");
+        byte[] userPassword = context.security.getUserPasswordUTF();
         return concatenate(
-                hashAlgo.computeHash(
-                        concatenate(context.security.getUserPasswordUTF(), userValidationSalt)),
+                hashAlgo.computeHash(concatenate(userPassword, userValidationSalt), userPassword),
                 userValidationSalt, userKeySalt);
     }
 
@@ -55,8 +63,8 @@ class Algorithm8 implements PasswordAlgorithm
     {
         context.security.encryption.revision.requireAtLeast(StandardSecurityHandlerRevision.R5,
                 "Algorithm 8 requires a security handler of revision 5 or greater");
-        byte[] key = hashAlgo
-                .computeHash(concatenate(context.security.getUserPasswordUTF(), userKeySalt));
+        byte[] userPassword = context.security.getUserPasswordUTF();
+        byte[] key = hashAlgo.computeHash(concatenate(userPassword, userKeySalt), userPassword);
         return copyOf(engine.encryptBytes(context.key(), key), 32);
     }
 }

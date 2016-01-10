@@ -59,20 +59,20 @@ class Algorithm2B implements Algorithm2AHash
     }
 
     @Override
-    public byte[] computeHash(byte[] input)
+    public byte[] computeHash(byte[] input, byte[] password)
     {
         byte[] k = copyOf(HASHES.get(0).digest(input), 32);
         byte[] e = new byte[0];
         for (int round = 0; round < 64 || (e[e.length - 1] & 0xFF) > round - 32; round++)
         {
-            byte[] k1Element = concatenate(input, k, u);
+            byte[] k1Element = concatenate(password, k, u);
             byte[] k1 = new byte[0];
             for (int i = 0; i < 64; i++)
             {
                 k1 = concatenate(k1, k1Element);
             }
-            e = aes128.encryptBytes(k1, copyOf(k1, 16), copyOfRange(k1, 16, 32));
-            k = HASHES.get(new BigInteger(copyOf(e, 16)).mod(THREE).intValue()).digest(e);
+            e = aes128.encryptBytes(k1, copyOf(k, 16), copyOfRange(k, 16, 32));
+            k = HASHES.get(new BigInteger(1, copyOf(e, 16)).mod(THREE).intValue()).digest(e);
         }
         return copyOf(k, 32);
     }

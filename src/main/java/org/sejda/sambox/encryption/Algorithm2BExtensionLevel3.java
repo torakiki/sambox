@@ -32,7 +32,7 @@ class Algorithm2BExtensionLevel3 implements Algorithm2AHash
     private MessageDigest digest = MessageDigests.sha256();
 
     @Override
-    public byte[] computeHash(byte[] input)
+    public byte[] computeHash(byte[] input, byte[] password)
     {
         return Arrays.copyOf(digest.digest(input), 32);
     }

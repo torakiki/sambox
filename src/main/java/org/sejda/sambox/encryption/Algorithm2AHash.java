@@ -24,5 +24,5 @@ package org.sejda.sambox.encryption;
  */
 interface Algorithm2AHash
 {
-    byte[] computeHash(byte[] input);
+    byte[] computeHash(byte[] input, byte[] password);
 }
