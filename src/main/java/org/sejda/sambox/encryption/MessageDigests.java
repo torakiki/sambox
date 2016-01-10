@@ -35,14 +35,8 @@ public final class MessageDigests
      */
     public static MessageDigest md5()
     {
-        try
-        {
-            return MessageDigest.getInstance("MD5");
-        }
-        catch (NoSuchAlgorithmException e)
-        {
-            throw new EncryptionException(e);
-        }
+        return get("MD5");
+
     }
 
     /**
@@ -50,14 +44,7 @@ public final class MessageDigests
      */
     public static MessageDigest sha1()
     {
-        try
-        {
-            return MessageDigest.getInstance("SHA-1");
-        }
-        catch (NoSuchAlgorithmException e)
-        {
-            throw new EncryptionException(e);
-        }
+        return get("SHA-1");
     }
 
     /**
@@ -65,14 +52,7 @@ public final class MessageDigests
      */
     public static MessageDigest sha256()
     {
-        try
-        {
-            return MessageDigest.getInstance("SHA-256");
-        }
-        catch (NoSuchAlgorithmException e)
-        {
-            throw new EncryptionException(e);
-        }
+        return get("SHA-256");
     }
 
     /**
@@ -80,14 +60,7 @@ public final class MessageDigests
      */
     public static MessageDigest sha384()
     {
-        try
-        {
-            return MessageDigest.getInstance("SHA-384");
-        }
-        catch (NoSuchAlgorithmException e)
-        {
-            throw new EncryptionException(e);
-        }
+        return get("SHA-384");
     }
 
     /**
@@ -95,9 +68,14 @@ public final class MessageDigests
      */
     public static MessageDigest sha512()
     {
+        return get("SHA-512");
+    }
+
+    private static MessageDigest get(String name)
+    {
         try
         {
-            return MessageDigest.getInstance("SHA-512");
+            return MessageDigest.getInstance(name);
         }
         catch (NoSuchAlgorithmException e)
         {
