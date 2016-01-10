@@ -20,6 +20,7 @@ import static java.util.Objects.requireNonNull;
 import static org.sejda.sambox.encryption.EncryptUtils.truncate127;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import org.sejda.sambox.pdmodel.encryption.AccessPermission;
 import org.sejda.sambox.util.Charsets;
@@ -34,17 +35,25 @@ public class StandardSecurity
 {
     public final String ownerPassword;
     public final String userPassword;
-    public final AccessPermission permissions = new AccessPermission();
+    public final AccessPermission permissions;
     public final StandardSecurityEncryption encryption;
     public final boolean encryptMetadata;
 
     public StandardSecurity(String ownerPassword, String userPassword,
             StandardSecurityEncryption encryption, boolean encryptMetadata)
     {
+        this(ownerPassword, userPassword, encryption, new AccessPermission(), encryptMetadata);
+    }
+
+    public StandardSecurity(String ownerPassword, String userPassword,
+            StandardSecurityEncryption encryption, AccessPermission permissions,
+            boolean encryptMetadata)
+    {
         requireNonNull(encryption, "Encryption algorithm cannot be null");
         this.ownerPassword = Objects.toString(ownerPassword, "");
         this.userPassword = Objects.toString(userPassword, "");
         this.encryption = encryption;
+        this.permissions = Optional.ofNullable(permissions).orElseGet(AccessPermission::new);
         // RC4 128 has a version 2 and encryptMetadata is true by default
         this.encryptMetadata = encryptMetadata
                 || StandardSecurityEncryption.ARC4_128.equals(encryption);

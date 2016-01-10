@@ -23,10 +23,12 @@ import static org.sejda.util.RequireUtils.requireArg;
 import java.security.SecureRandom;
 
 /**
+ * Utilities for encryption related tasks
+ * 
  * @author Andrea Vacondio
  *
  */
-public final class EncryptUtils
+final class EncryptUtils
 {
     public static final byte[] ENCRYPT_PADDING = { (byte) 0x28, (byte) 0xBF, (byte) 0x4E,
             (byte) 0x5E, (byte) 0x4E, (byte) 0x75, (byte) 0x8A, (byte) 0x41, (byte) 0x64,
@@ -40,9 +42,15 @@ public final class EncryptUtils
         // nothing
     }
 
-    public static byte[] padOrTruncate(byte[] password)
+    /**
+     * Performs pad or truncate to a 32 bytes array as specified in Algo2 and Algo3
+     * 
+     * @param input
+     * @return
+     */
+    public static byte[] padOrTruncate(byte[] input)
     {
-        byte[] padded = copyOf(password, Math.min(password.length, 32));
+        byte[] padded = copyOf(input, Math.min(input.length, 32));
         if (padded.length < 32)
         {
             return concatenate(padded, copyOf(ENCRYPT_PADDING, 32 - padded.length));
@@ -50,17 +58,21 @@ public final class EncryptUtils
         return padded;
     }
 
-    public static byte[] truncate127(byte[] password)
+    /**
+     * @param input
+     * @return the input array truncated to a max length of 127
+     */
+    public static byte[] truncate127(byte[] input)
     {
-        byte[] padded = copyOf(password, Math.min(password.length, 32));
-        if (padded.length < 32)
-        {
-            return concatenate(padded, copyOf(ENCRYPT_PADDING, 32 - padded.length));
-        }
-        return padded;
+        return copyOf(input, Math.min(input.length, 127));
 
     }
 
+    /**
+     * 
+     * @param length
+     * @return an array of the given length with random byte values
+     */
     public static byte[] rnd(int length)
     {
         requireArg(length > 0, "Cannot generate a negative length byte array");

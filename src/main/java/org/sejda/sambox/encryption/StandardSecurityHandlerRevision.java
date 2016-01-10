@@ -17,6 +17,8 @@
 package org.sejda.sambox.encryption;
 
 /**
+ * Possible Standard Security Handler revisions with bytes length of the encryption key associated to that revision
+ * 
  * @author Andrea Vacondio
  */
 public enum StandardSecurityHandlerRevision
