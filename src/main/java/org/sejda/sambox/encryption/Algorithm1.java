@@ -25,6 +25,7 @@ import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.function.Function;
 
+import org.bouncycastle.crypto.engines.AESEngine;
 import org.sejda.sambox.cos.COSObjectKey;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.cos.COSString;
@@ -117,7 +118,7 @@ class Algorithm1 implements GeneralEncryptionAlgorithm
      */
     static Algorithm1 withAESEngine(byte[] key)
     {
-        Algorithm1 algorithm = new Algorithm1(new AESEngine(), key);
+        Algorithm1 algorithm = new Algorithm1(new ConcatenatingAESEngine(), key);
         algorithm.md5Initializer = algorithm.md5Initializer.andThen(k -> {
             algorithm.digest.update(AES_SALT);
             return k;

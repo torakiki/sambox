@@ -30,9 +30,9 @@ import org.junit.Test;
  * @author Andrea Vacondio
  *
  */
-public class AESEngineTest
+public class ConcatenatingAESEngineTest
 {
-    private AESEngine victim = new AESEngine();
+    private ConcatenatingAESEngine victim = new ConcatenatingAESEngine();
 
     @Test
     public void encryptBytes()
@@ -62,5 +62,4 @@ public class AESEngineTest
         assertArrayEquals(Arrays.concatenate(iv, expected), IOUtils.toByteArray(inputStream));
 
     }
-
 }

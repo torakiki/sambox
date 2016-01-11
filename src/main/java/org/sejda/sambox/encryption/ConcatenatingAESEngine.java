@@ -17,38 +17,30 @@
 package org.sejda.sambox.encryption;
 
 import static org.bouncycastle.util.Arrays.concatenate;
-import static org.bouncycastle.util.Arrays.copyOf;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.SequenceInputStream;
 import java.security.SecureRandom;
 
-import org.bouncycastle.crypto.BufferedBlockCipher;
-import org.bouncycastle.crypto.DataLengthException;
-import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.engines.AESFastEngine;
-import org.bouncycastle.crypto.io.CipherInputStream;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
-import org.bouncycastle.crypto.params.KeyParameter;
-import org.bouncycastle.crypto.params.ParametersWithIV;
 
 /**
- * AES implementation of a {@link EncryptionAlgorithmEngine}
+ * AES implementation of a {@link EncryptionAlgorithmEngine} that concatenates the results to the initialization vectors
+ * as required by Algorithm 1 and 1A. A random IV is created for those methods that don't take one as parameter
  * 
  * @author Andrea Vacondio
  *
  */
-class AESEngine implements AESEncryptionAlgorithmEngine
+public class ConcatenatingAESEngine extends AESEngineNoPadding
 {
-
-    private BufferedBlockCipher cipher;
     private SecureRandom random;
 
-    public AESEngine()
+    ConcatenatingAESEngine()
     {
-        cipher = new PaddedBufferedBlockCipher(new CBCBlockCipher(new AESFastEngine()));
+        super(new PaddedBufferedBlockCipher(new CBCBlockCipher(new AESFastEngine())));
         random = new SecureRandom();
     }
 
@@ -61,9 +53,8 @@ class AESEngine implements AESEncryptionAlgorithmEngine
     @Override
     public InputStream encryptStream(InputStream data, byte[] key, byte[] iv)
     {
-        init(iv, key);
         return new SequenceInputStream(new ByteArrayInputStream(iv),
-                new CipherInputStream(data, cipher));
+                super.encryptStream(data, key, iv));
     }
 
     @Override
@@ -75,19 +66,7 @@ class AESEngine implements AESEncryptionAlgorithmEngine
     @Override
     public byte[] encryptBytes(byte[] data, byte[] key, byte[] iv)
     {
-        init(iv, key);
-        try
-        {
-            byte[] buf = new byte[cipher.getOutputSize(data.length)];
-            int len = cipher.processBytes(data, 0, data.length, buf, 0);
-            len += cipher.doFinal(buf, len);
-
-            return concatenate(iv, copyOf(buf, len));
-        }
-        catch (DataLengthException | IllegalStateException | InvalidCipherTextException e)
-        {
-            throw new EncryptionException(e);
-        }
+        return concatenate(iv, super.encryptBytes(data, key, iv));
     }
 
     private byte[] initializationVector()
@@ -95,11 +74,5 @@ class AESEngine implements AESEncryptionAlgorithmEngine
         byte[] iv = new byte[16];
         random.nextBytes(iv);
         return iv;
-    }
-
-    private void init(byte[] iv, byte[] key)
-    {
-        cipher.reset();
-        cipher.init(true, new ParametersWithIV(new KeyParameter(key), iv));
     }
 }

@@ -16,30 +16,27 @@
  */
 package org.sejda.sambox.encryption;
 
-import java.io.InputStream;
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
+import org.sejda.sambox.pdmodel.encryption.AccessPermission;
 
 /**
- * Encryption algorithm with AES engine
- * 
  * @author Andrea Vacondio
  *
  */
-interface AESEncryptionAlgorithmEngine extends EncryptionAlgorithmEngine
+public class Algorithm10Test
 {
-    /**
-     * @param data
-     * @param key
-     * @param iv
-     * @return a stream encrypted with the given key and initialization vector
-     */
-    InputStream encryptStream(InputStream data, byte[] key, byte[] iv);
 
-    /**
-     * 
-     * @param data
-     * @param key
-     * @param iv
-     * @return the byte array encrypted with the given key and initialization vector
-     */
-    byte[] encryptBytes(byte[] data, byte[] key, byte[] iv);
+    @Test
+    public void testComputePermsLength()
+    {
+        EncryptionContext ctx = new EncryptionContext(new StandardSecurity("owner", "user",
+                StandardSecurityEncryption.AES_256, new AccessPermission(), true));
+        ctx.key(new byte[] { -100, -42, 117, -16, -43, -40, 99, 0, 62, 112, 14, 109, -60, -70, -31,
+                -83, 38, -43, -27, 75, -86, -39, -116, -105, -122, -46, -120, -8, -44, -78, -92,
+                -71 });
+        assertEquals(16, new Algorithm10().computePerms(ctx).length);
+    }
+
 }

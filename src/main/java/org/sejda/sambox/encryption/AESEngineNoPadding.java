@@ -31,7 +31,7 @@ import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 
 /**
- * AES implementation of a {@link EncryptionAlgorithmEngine} with no pudding and zero initialization vector
+ * AES implementation of a {@link EncryptionAlgorithmEngine} with no pudding
  * 
  * @author Andrea Vacondio
  *
@@ -40,7 +40,7 @@ class AESEngineNoPadding implements AESEncryptionAlgorithmEngine
 {
     private BufferedBlockCipher cipher;
 
-    private AESEngineNoPadding(BufferedBlockCipher cipher)
+    AESEngineNoPadding(BufferedBlockCipher cipher)
     {
         this.cipher = cipher;
     }

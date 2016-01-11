@@ -32,7 +32,7 @@ import org.sejda.sambox.cos.COSString;
 class Algorithm1A implements GeneralEncryptionAlgorithm
 {
 
-    private AESEngine engine = new AESEngine();
+    private AESEncryptionAlgorithmEngine engine = new ConcatenatingAESEngine();
     private byte[] key;
 
     public Algorithm1A(byte[] key)
