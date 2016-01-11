@@ -16,8 +16,8 @@
  */
 package org.sejda.sambox.encryption;
 
-import static java.util.Objects.requireNonNull;
 import static org.sejda.util.RequireUtils.requireArg;
+import static org.sejda.util.RequireUtils.requireNotNullArg;
 
 import org.sejda.sambox.cos.COSObjectKey;
 import org.sejda.sambox.cos.COSStream;
@@ -35,9 +35,16 @@ class Algorithm1A implements GeneralEncryptionAlgorithm
     private AESEncryptionAlgorithmEngine engine = new ConcatenatingAESEngine();
     private byte[] key;
 
-    public Algorithm1A(byte[] key)
+    Algorithm1A(byte[] key, AESEncryptionAlgorithmEngine engine)
     {
-        requireNonNull(key, "Encryption key cannot be null");
+        this(key);
+        requireNotNullArg(engine, "Enecryption engine cannot be null");
+        this.engine = engine;
+    }
+
+    Algorithm1A(byte[] key)
+    {
+        requireNotNullArg(key, "Encryption key cannot be null");
         requireArg(key.length == 32, "General encryption algorithm 1.A requires a 32 bytes key");
         this.key = key;
     }

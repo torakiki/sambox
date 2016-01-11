@@ -51,7 +51,7 @@ class Algorithm1 implements GeneralEncryptionAlgorithm
     private Algorithm1(EncryptionAlgorithmEngine engine, byte[] key)
     {
         requireNotNullArg(engine, "Encryption engine cannot be null");
-        requireArg(key != null && key.length > 0, "encryption key cannot be blank");
+        requireArg(key != null && key.length > 0, "Encryption key cannot be blank");
         this.engine = engine;
         keyCalculator = (cosKey) -> {
             requireNotNullArg(cosKey, "Cannot encrypt a reference with a null key");
