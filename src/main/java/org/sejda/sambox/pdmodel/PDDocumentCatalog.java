@@ -405,9 +405,12 @@ public class PDDocumentCatalog implements COSObjectable
         String mode = root.getNameAsString(COSName.PAGE_MODE);
         if (mode != null)
         {
-            try {
+            try
+            {
                 return PageMode.fromString(mode);
-            } catch (IllegalArgumentException ex) {
+            }
+            catch (IllegalArgumentException ex)
+            {
                 LOG.debug(String.format("Unrecognized page mode %s", mode));
             }
         }
@@ -432,9 +435,12 @@ public class PDDocumentCatalog implements COSObjectable
         String mode = root.getNameAsString(COSName.PAGE_LAYOUT);
         if (mode != null)
         {
-            try{
-                PageLayout.fromString(mode);
-            } catch (IllegalArgumentException ex){
+            try
+            {
+                return PageLayout.fromString(mode);
+            }
+            catch (IllegalArgumentException ex)
+            {
                 LOG.debug(String.format("Unrecognized page layout %s", mode));
             }
         }
@@ -586,8 +592,7 @@ public class PDDocumentCatalog implements COSObjectable
     public PDPageDestination findNamedDestinationPage(PDNamedDestination namedDest)
             throws IOException
     {
-        PDPageDestination namesDest = ofNullable(getNames())
-                .map(PDDocumentNameDictionary::getDests)
+        PDPageDestination namesDest = ofNullable(getNames()).map(PDDocumentNameDictionary::getDests)
                 .map(tree -> tree.getValue(namedDest.getNamedDestination())).orElse(null);
         if (namesDest == null)
         {
@@ -595,8 +600,8 @@ public class PDDocumentCatalog implements COSObjectable
             PDDocumentNameDestinationDictionary nameDestDict = getDests();
             if (nameDestDict != null)
             {
-                return (PDPageDestination) nameDestDict.getDestination(namedDest
-                        .getNamedDestination());
+                return (PDPageDestination) nameDestDict
+                        .getDestination(namedDest.getNamedDestination());
             }
         }
         return namesDest;
