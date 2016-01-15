@@ -44,7 +44,7 @@ public final class LosslessFactory
     private LosslessFactory()
     {
     }
-    
+
     /**
      * Creates a new lossless encoded Image XObject from a Buffered Image.
      *
@@ -52,8 +52,7 @@ public final class LosslessFactory
      * @return a new Image XObject
      * @throws IOException if something goes wrong
      */
-    public static PDImageXObject createFromImage(BufferedImage image)
-            throws IOException
+    public static PDImageXObject createFromImage(BufferedImage image) throws IOException
     {
         int bpc;
         PDDeviceColorSpace deviceColorSpace;
@@ -62,8 +61,10 @@ public final class LosslessFactory
         int height = image.getHeight();
         int width = image.getWidth();
 
-        if ((image.getType() == BufferedImage.TYPE_BYTE_GRAY && image.getColorModel().getPixelSize() <= 8)
-                || (image.getType() == BufferedImage.TYPE_BYTE_BINARY && image.getColorModel().getPixelSize() == 1))
+        if ((image.getType() == BufferedImage.TYPE_BYTE_GRAY
+                && image.getColorModel().getPixelSize() <= 8)
+                || (image.getType() == BufferedImage.TYPE_BYTE_BINARY
+                        && image.getColorModel().getPixelSize() == 1))
         {
             MemoryCacheImageOutputStream mcios = new MemoryCacheImageOutputStream(bos);
 
@@ -101,8 +102,8 @@ public final class LosslessFactory
             }
         }
 
-        PDImageXObject pdImage = prepareImageXObject(bos.toByteArray(), 
-                image.getWidth(), image.getHeight(), bpc, deviceColorSpace);
+        PDImageXObject pdImage = prepareImageXObject(bos.toByteArray(), image.getWidth(),
+                image.getHeight(), bpc, deviceColorSpace);
 
         // alpha -> soft mask
         PDImage xAlpha = createAlphaFromARGBImage(image);
@@ -115,8 +116,7 @@ public final class LosslessFactory
     }
 
     /**
-     * Creates a grayscale Flate encoded PDImageXObject from the alpha channel
-     * of an image.
+     * Creates a grayscale Flate encoded PDImageXObject from the alpha channel of an image.
      *
      * @param image an ARGB image.
      *
@@ -124,12 +124,11 @@ public final class LosslessFactory
      *
      * @throws IOException if something goes wrong
      */
-    private static PDImageXObject createAlphaFromARGBImage(BufferedImage image)
-            throws IOException
+    private static PDImageXObject createAlphaFromARGBImage(BufferedImage image) throws IOException
     {
-        // this implementation makes the assumption that the raster uses 
+        // this implementation makes the assumption that the raster uses
         // SinglePixelPackedSampleModel, i.e. the values can be used 1:1 for
-        // the stream. 
+        // the stream.
         // Sadly the type of the databuffer is TYPE_INT and not TYPE_BYTE.
         if (!image.getColorModel().hasAlpha())
         {
@@ -144,9 +143,7 @@ public final class LosslessFactory
             return createAlphaFromARGBImage2(image);
         }
 
-        int[] pixels = alphaRaster.getPixels(0, 0,
-                alphaRaster.getSampleModel().getWidth(),
-                alphaRaster.getSampleModel().getHeight(),
+        int[] pixels = alphaRaster.getPixels(0, 0, alphaRaster.getWidth(), alphaRaster.getHeight(),
                 (int[]) null);
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         int bpc;
@@ -154,7 +151,7 @@ public final class LosslessFactory
         {
             bpc = 1;
             MemoryCacheImageOutputStream mcios = new MemoryCacheImageOutputStream(bos);
-            int width = alphaRaster.getSampleModel().getWidth();
+            int width = alphaRaster.getWidth();
             int p = 0;
             for (int pixel : pixels)
             {
@@ -180,15 +177,14 @@ public final class LosslessFactory
             }
         }
 
-        PDImageXObject pdImage = prepareImageXObject(bos.toByteArray(), 
-                image.getWidth(), image.getHeight(), bpc, PDDeviceGray.INSTANCE);
+        PDImageXObject pdImage = prepareImageXObject(bos.toByteArray(), image.getWidth(),
+                image.getHeight(), bpc, PDDeviceGray.INSTANCE);
 
         return pdImage;
     }
 
     // create alpha image the hard way: get the alpha through getRGB()
-    private static PDImageXObject createAlphaFromARGBImage2(BufferedImage bi)
-            throws IOException
+    private static PDImageXObject createAlphaFromARGBImage2(BufferedImage bi) throws IOException
     {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         int bpc;
@@ -224,15 +220,15 @@ public final class LosslessFactory
             }
         }
 
-        PDImageXObject pdImage = prepareImageXObject(bos.toByteArray(), 
-                bi.getWidth(), bi.getHeight(), bpc, PDDeviceGray.INSTANCE);
+        PDImageXObject pdImage = prepareImageXObject(bos.toByteArray(), bi.getWidth(),
+                bi.getHeight(), bpc, PDDeviceGray.INSTANCE);
 
         return pdImage;
-    }            
+    }
 
     /**
-     * Create a PDImageXObject while making a decision whether not to 
-     * compress, use Flate filter only, or Flate and LZW filters.
+     * Create a PDImageXObject while making a decision whether not to compress, use Flate filter only, or Flate and LZW
+     * filters.
      * 
      * @param byteArray array with data.
      * @param width the image width
@@ -240,11 +236,10 @@ public final class LosslessFactory
      * @param bitsPerComponent the bits per component
      * @param initColorSpace the color space
      * @return the newly created PDImageXObject with the data compressed.
-     * @throws IOException 
+     * @throws IOException
      */
-    private static PDImageXObject prepareImageXObject(
-            byte [] byteArray, int width, int height, int bitsPerComponent, 
-            PDColorSpace initColorSpace) throws IOException
+    private static PDImageXObject prepareImageXObject(byte[] byteArray, int width, int height,
+            int bitsPerComponent, PDColorSpace initColorSpace) throws IOException
     {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
@@ -252,8 +247,8 @@ public final class LosslessFactory
         filter.encode(new ByteArrayInputStream(byteArray), baos, new COSDictionary());
 
         ByteArrayInputStream filteredByteStream = new ByteArrayInputStream(baos.toByteArray());
-        return new PDImageXObject(filteredByteStream, COSName.FLATE_DECODE, 
-                width, height, bitsPerComponent, initColorSpace);
+        return new PDImageXObject(filteredByteStream, COSName.FLATE_DECODE, width, height,
+                bitsPerComponent, initColorSpace);
     }
 
 }

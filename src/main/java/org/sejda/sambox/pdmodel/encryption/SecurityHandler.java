@@ -246,6 +246,10 @@ public abstract class SecurityHandler
         byte[] iv = new byte[16];
 
         int ivSize = data.read(iv);
+        if (decrypt && ivSize == -1)
+        {
+            return;
+        }
         if (ivSize != iv.length)
         {
             throw new IOException("AES initialization vector not fully read: only " + ivSize
@@ -319,7 +323,18 @@ public abstract class SecurityHandler
         if (decrypt)
         {
             // read IV from stream
-            data.read(iv);
+            int ivSize = data.read(iv);
+
+            if (ivSize == -1)
+            {
+                return;
+            }
+
+            if (ivSize != iv.length)
+            {
+                throw new IOException("AES initialization vector not fully read: only " + ivSize
+                        + " bytes read instead of " + iv.length);
+            }
         }
         else
         {
@@ -464,19 +479,21 @@ public abstract class SecurityHandler
             // PDFBOX-2936: avoid orphan /CF dictionaries found in US govt "I-" files
             return;
         }
-        // skip dictionary containing the signature
-        if (!COSName.SIG.equals(dictionary.getItem(COSName.TYPE))
-                && !COSName.SIG.equals(dictionary.getItem(COSName.FT)))
+        COSBase type = dictionary.getDictionaryObject(COSName.TYPE);
+        boolean isSignature = COSName.SIG.equals(type) || COSName.DOC_TIME_STAMP.equals(type);
+        for (Map.Entry<COSName, COSBase> entry : dictionary.entrySet())
         {
-            for (Map.Entry<COSName, COSBase> entry : dictionary.entrySet())
+            if (isSignature && COSName.CONTENTS.equals(entry.getKey()))
             {
-                COSBase value = entry.getValue();
-                // within a dictionary only the following kind of COS objects have to be decrypted
-                if (value instanceof COSString || value instanceof COSArray
-                        || value instanceof COSDictionary)
-                {
-                    decrypt(value, objNum, genNum);
-                }
+                // do not decrypt the signature contents string
+                continue;
+            }
+            COSBase value = entry.getValue();
+            // within a dictionary only the following kind of COS objects have to be decrypted
+            if (value instanceof COSString || value instanceof COSArray
+                    || value instanceof COSDictionary)
+            {
+                decrypt(value, objNum, genNum);
             }
         }
     }
@@ -493,9 +510,17 @@ public abstract class SecurityHandler
     private void decryptString(COSString string, long objNum, long genNum) throws IOException
     {
         ByteArrayInputStream data = new ByteArrayInputStream(string.getBytes());
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        encryptData(objNum, genNum, data, buffer, true /* decrypt */);
-        string.setValue(buffer.toByteArray());
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        try
+        {
+            encryptData(objNum, genNum, data, outputStream, true /* decrypt */);
+            string.setValue(outputStream.toByteArray());
+        }
+        catch (IOException ex)
+        {
+            LOG.error("Failed to decrypt COSString of length " + string.getBytes().length
+                    + " in object " + objNum + ": " + ex.getMessage());
+        }
     }
 
     /**

@@ -99,7 +99,7 @@ public class PDType1CFont extends PDSimpleFont
             {
                 // note: this could be an OpenType file, fortunately CFFParser can handle that
                 CFFParser cffParser = new CFFParser();
-                cffEmbedded = (CFFType1Font) cffParser.parse(bytes).get(0);
+                cffEmbedded = (CFFType1Font) cffParser.parse(bytes, new ByteSource()).get(0);
             }
         }
         catch (IOException e)
@@ -130,6 +130,16 @@ public class PDType1CFont extends PDSimpleFont
         readEncoding();
         fontMatrixTransform = getFontMatrix().createAffineTransform();
         fontMatrixTransform.scale(1000, 1000);
+    }
+
+    private class ByteSource implements CFFParser.ByteSource
+    {
+        @Override
+        public byte[] getBytes() throws IOException
+        {
+            PDStream ff3Stream = getFontDescriptor().getFontFile3();
+            return IOUtils.toByteArray(ff3Stream.createInputStream());
+        }
     }
 
     @Override
@@ -283,9 +293,15 @@ public class PDType1CFont extends PDSimpleFont
     protected byte[] encode(int unicode) throws IOException
     {
         String name = getGlyphList().codePointToName(unicode);
+        if (!encoding.contains(name))
+        {
+            throw new IllegalArgumentException(
+                    String.format("U+%04X ('%s') is not available in this font's encoding: %s",
+                            unicode, name, encoding.getEncodingName()));
+        }
         String nameInFont = getNameInFont(name);
 
-        Map<String, Integer> inverted = getInvertedEncoding();
+        Map<String, Integer> inverted = encoding.getNameToCodeMap();
 
         if (nameInFont.equals(".notdef") || !genericFont.hasGlyph(nameInFont))
         {

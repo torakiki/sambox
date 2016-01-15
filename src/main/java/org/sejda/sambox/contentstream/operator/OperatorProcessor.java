@@ -41,6 +41,7 @@ public abstract class OperatorProcessor
 
     /**
      * Returns the processing context.
+     * 
      * @return the processing context
      */
     protected final PDFStreamEngine getContext()
@@ -50,6 +51,7 @@ public abstract class OperatorProcessor
 
     /**
      * Sets the processing context.
+     * 
      * @param context the processing context.
      */
     public void setContext(PDFStreamEngine context)
@@ -59,6 +61,7 @@ public abstract class OperatorProcessor
 
     /**
      * Process the operator.
+     * 
      * @param operator the operator to process
      * @param operands the operands to use when processing
      * @throws IOException if the operator cannot be processed
@@ -69,4 +72,23 @@ public abstract class OperatorProcessor
      * Returns the name of this operator, e.g. "BI".
      */
     public abstract String getName();
+
+    /**
+     * Check whether all operands list elements are an instance of a specific class.
+     *
+     * @param operands The operands list.
+     * @param clazz The expected class.
+     * @return the boolean
+     */
+    public boolean checkArrayTypesClass(List<COSBase> operands, Class<?> clazz)
+    {
+        for (COSBase base : operands)
+        {
+            if (!clazz.isInstance(base))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
 }

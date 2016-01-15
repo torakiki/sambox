@@ -73,7 +73,7 @@ public abstract class PDFStreamEngine
 {
     private static final Logger LOG = LoggerFactory.getLogger(PDFStreamEngine.class);
 
-    private final Map<String, OperatorProcessor> operators = new HashMap<>();
+    private final Map<String, OperatorProcessor> operators = new HashMap<>(80);
 
     private Matrix textMatrix;
     private Matrix textLineMatrix;
@@ -547,7 +547,7 @@ public abstract class PDFStreamEngine
         float fontSize = textState.getFontSize();
         float horizontalScaling = textState.getHorizontalScaling() / 100f;
         PDFont font = textState.getFont();
-        boolean isVertical = ofNullable(font).map(PDFont::isVertical).orElse(false);
+        boolean isVertical = ofNullable(font).map(f -> f.isVertical()).orElse(false);
 
         for (COSBase obj : array)
         {

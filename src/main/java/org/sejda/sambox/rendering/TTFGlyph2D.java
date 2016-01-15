@@ -67,7 +67,7 @@ final class TTFGlyph2D implements Glyph2D
      */
     TTFGlyph2D(PDType0Font type0Font) throws IOException
     {
-        this(((PDCIDFontType2)type0Font.getDescendantFont()).getTrueTypeFont(), type0Font, true);
+        this(((PDCIDFontType2) type0Font.getDescendantFont()).getTrueTypeFont(), type0Font, true);
         vectorFont = type0Font;
     }
 
@@ -99,12 +99,9 @@ final class TTFGlyph2D implements Glyph2D
     {
         if (isCIDFont)
         {
-            return ((PDType0Font)font).codeToGID(code);
+            return ((PDType0Font) font).codeToGID(code);
         }
-        else
-        {
-            return ((PDTrueTypeFont)font).codeToGID(code);
-        }
+        return ((PDTrueTypeFont) font).codeToGID(code);
     }
 
     /**
@@ -117,12 +114,8 @@ final class TTFGlyph2D implements Glyph2D
      */
     public GeneralPath getPathForGID(int gid, int code) throws IOException
     {
-        GeneralPath glyphPath;
-        if (glyphs.containsKey(gid))
-        {
-            glyphPath = glyphs.get(gid);
-        }
-        else
+        GeneralPath glyphPath = glyphs.get(gid);
+        if (glyphPath == null)
         {
             if (gid == 0 || gid >= ttf.getMaximumProfile().getNumGlyphs())
             {
@@ -130,15 +123,15 @@ final class TTFGlyph2D implements Glyph2D
                 {
                     int cid = ((PDType0Font) font).codeToCID(code);
                     String cidHex = String.format("%04x", cid);
-                    LOG.warn("No glyph for " + code + " (CID " + cidHex + ") in font " +
-                            font.getName());
+                    LOG.warn("No glyph for " + code + " (CID " + cidHex + ") in font "
+                            + font.getName());
                 }
                 else
                 {
                     LOG.warn("No glyph for " + code + " in font " + font.getName());
                 }
             }
-            
+
             GeneralPath glyph = vectorFont.getPath(code);
 
             // Acrobat only draws GID 0 for embedded or "Standard 14" fonts, see PDFBOX-2372
@@ -164,7 +157,8 @@ final class TTFGlyph2D implements Glyph2D
                 glyphs.put(gid, glyphPath);
             }
         }
-        return glyphPath != null ? (GeneralPath) glyphPath.clone() : null; // todo: expensive
+        // todo: expensive
+        return (GeneralPath) glyphPath.clone();
     }
 
     @Override

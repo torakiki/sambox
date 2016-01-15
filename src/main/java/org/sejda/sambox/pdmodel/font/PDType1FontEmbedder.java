@@ -16,7 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.font;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -45,7 +44,7 @@ class PDType1FontEmbedder
 {
     private final Encoding fontEncoding;
     private final Type1Font type1;
-    
+
     /**
      * This will load a PFB to be embedded into a document.
      *
@@ -55,15 +54,15 @@ class PDType1FontEmbedder
      * @throws IOException If there is an error loading the data.
      */
     PDType1FontEmbedder(PDDocument doc, COSDictionary dict, InputStream pfbStream,
-                        Encoding encoding) throws IOException
+            Encoding encoding) throws IOException
     {
         dict.setItem(COSName.SUBTYPE, COSName.TYPE1);
 
         // read the pfb
         byte[] pfbBytes = IOUtils.toByteArray(pfbStream);
-        PfbParser pfbParser = new PfbParser(new ByteArrayInputStream(pfbBytes));
-        type1 = Type1Font.createWithPFB(new ByteArrayInputStream(pfbBytes));
-        
+        PfbParser pfbParser = new PfbParser(pfbBytes);
+        type1 = Type1Font.createWithPFB(pfbBytes);
+
         if (encoding == null)
         {
             fontEncoding = Type1Encoding.fromFontBox(type1.getEncoding());
@@ -96,7 +95,7 @@ class PDType1FontEmbedder
             int width = Math.round(type1.getWidth(name));
             widths.add(width);
         }
-        
+
         dict.setInt(COSName.FIRST_CHAR, 0);
         dict.setInt(COSName.LAST_CHAR, 255);
         dict.setItem(COSName.WIDTHS, COSArrayList.converterToCOSArray(widths));
@@ -107,8 +106,8 @@ class PDType1FontEmbedder
      */
     static PDFontDescriptor buildFontDescriptor(Type1Font type1)
     {
-        boolean isSymbolic = type1.getEncoding()
-                instanceof org.apache.fontbox.encoding.BuiltInEncoding;
+        boolean isSymbolic = type1
+                .getEncoding() instanceof org.apache.fontbox.encoding.BuiltInEncoding;
 
         PDFontDescriptor fd = new PDFontDescriptor();
         fd.setFontName(type1.getName());
@@ -123,7 +122,6 @@ class PDType1FontEmbedder
         fd.setStemV(0); // for PDF/A
         return fd;
     }
-
 
     /**
      * Returns a PDFontDescriptor for the given AFM. Used only for Standard 14 fonts.
@@ -150,7 +148,7 @@ class PDType1FontEmbedder
         fd.setStemV(0); // for PDF/A
         return fd;
     }
-    
+
     /**
      * Returns the font's encoding.
      */

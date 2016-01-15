@@ -107,7 +107,6 @@ public class TestTextStripper extends TestCase
     {
         super(name);
         stripper = new PDFTextStripper();
-        stripper.setLineSeparator("\n");
     }
 
     /**
@@ -313,6 +312,7 @@ public class TestTextStripper extends TestCase
                 }
                 if (!stringsEqual(expectedLine, actualLine))
                 {
+
                     this.bFail = true;
                     localFail = true;
                     LOG.error("FAILURE: Line mismatch for file " + inFile.getName() + " (sort = "
@@ -323,6 +323,7 @@ public class TestTextStripper extends TestCase
 
                     // lets report all lines, even though this might produce some verbose logging
                     // break;
+                    throw new RuntimeException();
                 }
 
                 if (expectedLine == null || actualLine == null)
@@ -345,8 +346,8 @@ public class TestTextStripper extends TestCase
                 // Compute diff. Get the Patch object. Patch is the container for computed deltas.
                 Patch patch = DiffUtils.diff(original, revised);
 
-                PrintStream diffPS = new PrintStream(diffFile);
-                for (Object delta : (List<ChangeDelta>) patch.getDeltas())
+                PrintStream diffPS = new PrintStream(diffFile, ENCODING);
+                for (Object delta : patch.getDeltas())
                 {
                     if (delta instanceof ChangeDelta)
                     {
@@ -534,7 +535,7 @@ public class TestTextStripper extends TestCase
      */
     public void testExtract() throws Exception
     {
-        String filename = System.getProperty("org.apache.pdfbox.util.TextStripper.file");
+        String filename = System.getProperty("org.sejda.sambox.util.TextStripper.file");
         File inDir = new File("src/test/resources/input");
         File outDir = new File("target/test-output");
         File inDirExt = new File("target/test-input-ext");

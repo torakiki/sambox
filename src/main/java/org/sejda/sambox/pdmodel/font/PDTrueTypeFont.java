@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.pdmodel.font;
 
+import static java.util.Objects.nonNull;
 import static org.sejda.sambox.pdmodel.font.UniUtil.getUniNameOfCodePoint;
 
 import java.awt.geom.GeneralPath;
@@ -61,7 +62,7 @@ public class PDTrueTypeFont extends PDSimpleFont implements PDVectorFont
     private static final int START_RANGE_F100 = 0xF100;
     private static final int START_RANGE_F200 = 0xF200;
 
-    private static final Map<String, Integer> INVERTED_MACOS_ROMAN = new HashMap<String, Integer>();
+    private static final Map<String, Integer> INVERTED_MACOS_ROMAN = new HashMap<>(250);
 
     static
     {
@@ -313,16 +314,17 @@ public class PDTrueTypeFont extends PDSimpleFont implements PDVectorFont
     @Override
     protected byte[] encode(int unicode) throws IOException
     {
-        if (getEncoding() != null)
+        if (nonNull(encoding))
         {
-            if (!getEncoding().contains(getGlyphList().codePointToName(unicode)))
+            if (!encoding.contains(getGlyphList().codePointToName(unicode)))
             {
                 throw new IllegalArgumentException(
-                        String.format("U+%04X is not available in this font's Encoding", unicode));
+                        String.format("U+%04X is not available in this font's encoding: %s",
+                                unicode, encoding.getEncodingName()));
             }
 
             String name = getGlyphList().codePointToName(unicode);
-            Map<String, Integer> inverted = getInvertedEncoding();
+            Map<String, Integer> inverted = encoding.getNameToCodeMap();
 
             if (!ttf.hasGlyph(name))
             {

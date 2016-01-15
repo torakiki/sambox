@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URI;
+import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -200,39 +201,39 @@ final class FileSystemFontProvider extends FontProvider
     FileSystemFontProvider(FontCache cache)
     {
         this.cache = cache;
-
-        if (LOG.isTraceEnabled())
+        try
         {
             LOG.trace("Will search the local system for fonts");
-        }
 
-        // scan the local system for font files
-        List<File> files = new ArrayList<File>();
-        FontFileFinder fontFileFinder = new FontFileFinder();
-        List<URI> fonts = fontFileFinder.find();
-        for (URI font : fonts)
-        {
-            files.add(new File(font));
-        }
+            // scan the local system for font files
+            List<File> files = new ArrayList<File>();
+            FontFileFinder fontFileFinder = new FontFileFinder();
+            List<URI> fonts = fontFileFinder.find();
+            for (URI font : fonts)
+            {
+                files.add(new File(font));
+            }
 
-        if (LOG.isTraceEnabled())
-        {
             LOG.trace("Found " + files.size() + " fonts on the local system");
-        }
 
-        // load cached FontInfo objects
-        List<FSFontInfo> cachedInfos = loadDiskCache(files);
-        if (cachedInfos != null && cachedInfos.size() > 0)
-        {
-            fontInfoList.addAll(cachedInfos);
+            // load cached FontInfo objects
+            List<FSFontInfo> cachedInfos = loadDiskCache(files);
+            if (cachedInfos != null && cachedInfos.size() > 0)
+            {
+                fontInfoList.addAll(cachedInfos);
+            }
+            else
+            {
+                LOG.warn("Building on-disk font cache, this may take a while");
+                scanFonts(files);
+                saveDiskCache();
+                LOG.warn("Finished building on-disk font cache, found " + fontInfoList.size()
+                        + " fonts");
+            }
         }
-        else
+        catch (AccessControlException e)
         {
-            LOG.warn("Building on-disk font cache, this may take a while");
-            scanFonts(files);
-            saveDiskCache();
-            LOG.warn("Finished building on-disk font cache, found " + fontInfoList.size()
-                    + " fonts");
+            LOG.error("Error accessing the file system", e);
         }
     }
 
@@ -410,7 +411,7 @@ final class FileSystemFontProvider extends FontProvider
                         panose = new byte[10];
                         for (int i = 0; i < 10; i++)
                         {
-                            String str = parts[8].substring(i * 2, i * 2 + 1);
+                            String str = parts[8].substring(i * 2, i * 2 + 2);
                             int b = Integer.parseInt(str, 16);
                             panose[i] = (byte) (b & 0xff);
                         }
@@ -511,6 +512,14 @@ final class FileSystemFontProvider extends FontProvider
             // read PostScript name, if any
             if (ttf.getName() != null)
             {
+                // ignore bitmap fonts
+                if (ttf.getHeader() == null)
+                {
+                    fontInfoList.add(new FSIgnored(file, FontFormat.TTF, ttf.getName()));
+                    return;
+                }
+                int macStyle = ttf.getHeader().getMacStyle();
+
                 int sFamilyClass = -1;
                 int usWeightClass = -1;
                 int ulCodePageRange1 = 0;
@@ -526,14 +535,6 @@ final class FileSystemFontProvider extends FontProvider
                     ulCodePageRange2 = (int) ttf.getOS2Windows().getCodePageRange2();
                     panose = ttf.getOS2Windows().getPanose();
                 }
-
-                // ignore bitmap fonts
-                if (ttf.getHeader() == null)
-                {
-                    fontInfoList.add(new FSIgnored(file, FontFormat.TTF, ttf.getName()));
-                    return;
-                }
-                int macStyle = ttf.getHeader().getMacStyle();
 
                 String format;
                 if (ttf instanceof OpenTypeFont && ((OpenTypeFont) ttf).isPostScript())

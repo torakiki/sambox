@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.pdmodel.graphics.color;
 
+import java.awt.color.ICC_Profile;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -28,10 +30,9 @@ import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.common.PDStream;
 
 /**
- * An Output Intent describes the colour reproduction characteristics of a possible output
- * device or production condition.
- * Output intents provide a means for matching the colour characteristics of a PDF document with
- * those of a target output device or production environment in which the document will be printed.
+ * An Output Intent describes the colour reproduction characteristics of a possible output device or production
+ * condition. Output intents provide a means for matching the colour characteristics of a PDF document with those of a
+ * target output device or production environment in which the document will be printed.
  *
  * @author Guillaume Bailleul
  */
@@ -44,7 +45,7 @@ public final class PDOutputIntent implements COSObjectable
         dictionary = new COSDictionary();
         dictionary.setItem(COSName.TYPE, COSName.OUTPUT_INTENT);
         dictionary.setItem(COSName.S, COSName.GTS_PDFA1);
-        PDStream destOutputIntent = configureOutputProfile(doc, colorProfile);
+        PDStream destOutputIntent = configureOutputProfile(colorProfile);
         dictionary.setItem(COSName.DEST_OUTPUT_PROFILE, destOutputIntent);
     }
 
@@ -104,11 +105,13 @@ public final class PDOutputIntent implements COSObjectable
         dictionary.setString(COSName.REGISTRY_NAME, value);
     }
 
-    private PDStream configureOutputProfile(PDDocument doc, InputStream colorProfile)
+    private PDStream configureOutputProfile(InputStream colorProfile)
             throws IOException
     {
-        PDStream stream = new PDStream(colorProfile, COSName.FLATE_DECODE);
-        stream.getStream().setInt(COSName.N, 3);
+        ICC_Profile icc = ICC_Profile.getInstance(colorProfile);
+        PDStream stream = new PDStream(new ByteArrayInputStream(icc.getData()),
+                COSName.FLATE_DECODE);
+        stream.getStream().setInt(COSName.N, icc.getNumComponents());
         return stream;
     }
-}  
+}

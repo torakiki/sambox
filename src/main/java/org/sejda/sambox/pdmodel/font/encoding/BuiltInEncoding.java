@@ -40,10 +40,16 @@ public class BuiltInEncoding extends Encoding
             add(entry.getKey(), entry.getValue());
         }
     }
-    
+
     @Override
     public COSBase getCOSObject()
     {
         throw new UnsupportedOperationException("Built-in encodings cannot be serialized");
+    }
+
+    @Override
+    public String getEncodingName()
+    {
+        return "built-in (TTF)";
     }
 }

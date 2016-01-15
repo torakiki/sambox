@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.contentstream.operator.text;
 
+import static java.util.Objects.nonNull;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -37,9 +39,9 @@ public class ShowTextAdjusted extends OperatorProcessor
         if (!arguments.isEmpty())
         {
             COSBase base = arguments.get(0);
-            if (base instanceof COSArray)
+            if (base instanceof COSArray && nonNull(context.getTextMatrix()))
             {
-                context.showTextStrings((COSArray) arguments.get(0));
+                context.showTextStrings((COSArray) base);
             }
         }
     }

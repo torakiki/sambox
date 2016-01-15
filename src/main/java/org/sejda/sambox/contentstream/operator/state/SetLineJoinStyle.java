@@ -16,8 +16,10 @@
  */
 package org.sejda.sambox.contentstream.operator.state;
 
+import java.io.IOException;
 import java.util.List;
 
+import org.sejda.sambox.contentstream.operator.MissingOperandException;
 import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.contentstream.operator.OperatorProcessor;
 import org.sejda.sambox.cos.COSBase;
@@ -30,10 +32,14 @@ import org.sejda.sambox.cos.COSNumber;
 public class SetLineJoinStyle extends OperatorProcessor
 {
     @Override
-    public void process(Operator operator, List<COSBase> arguments)
+    public void process(Operator operator, List<COSBase> arguments) throws IOException
     {
-        int lineJoinStyle = ((COSNumber)arguments.get( 0 )).intValue();
-        context.getGraphicsState().setLineJoin( lineJoinStyle );
+        if (arguments.size() < 1)
+        {
+            throw new MissingOperandException(operator, arguments);
+        }
+        int lineJoinStyle = ((COSNumber) arguments.get(0)).intValue();
+        context.getGraphicsState().setLineJoin(lineJoinStyle);
     }
 
     @Override

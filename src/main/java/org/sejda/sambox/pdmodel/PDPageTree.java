@@ -69,10 +69,7 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
      */
     public PDPageTree(COSDictionary root)
     {
-        requireNotNullArg(root, "Page tree root cannot be null");
-        this.root = root;
-        root.setItem(COSName.TYPE, COSName.PAGES);
-        document = null;
+        this(root, null);
     }
 
     /**
@@ -83,11 +80,21 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
      */
     PDPageTree(COSDictionary root, PDDocument document)
     {
-        if (root == null)
+        requireNotNullArg(root, "Page tree root cannot be null");
+        // repair bad PDFs which contain a Page dict instead of a page tree, see PDFBOX-3154
+        if (COSName.PAGE.equals(root.getCOSName(COSName.TYPE)))
         {
-            throw new IllegalArgumentException("root cannot be null");
+            COSArray kids = new COSArray();
+            kids.add(root);
+            this.root = new COSDictionary();
+            this.root.setItem(COSName.KIDS, kids);
+            this.root.setInt(COSName.COUNT, 1);
         }
-        this.root = root;
+        else
+        {
+            this.root = root;
+        }
+        root.setItem(COSName.TYPE, COSName.PAGES);
         this.document = document;
     }
 
@@ -477,14 +484,7 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
         {
             throw new IllegalArgumentException("attempted to insert before orphan page");
         }
-
-        // now increase every parent
-        do
-        {
-            int cnt = parentDict.getInt(COSName.COUNT);
-            parentDict.setInt(COSName.COUNT, cnt + 1);
-            parentDict = (COSDictionary) parentDict.getDictionaryObject(COSName.PARENT);
-        } while (parentDict != null);
+        increaseParents(parentDict);
     }
 
     /**
@@ -515,8 +515,11 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
         {
             throw new IllegalArgumentException("attempted to insert before orphan page");
         }
+        increaseParents(parentDict);
+    }
 
-        // now increase every parent
+    private void increaseParents(COSDictionary parentDict)
+    {
         do
         {
             int cnt = parentDict.getInt(COSName.COUNT);

@@ -30,8 +30,8 @@ import org.apache.fontbox.afm.AFMParser;
 import org.apache.fontbox.afm.FontMetrics;
 
 /**
- * The "Standard 14" PDF fonts, also known as the "base 14" fonts.
- * There are 14 font files, but Acrobat uses additional names for compatibility, e.g. Arial.
+ * The "Standard 14" PDF fonts, also known as the "base 14" fonts. There are 14 font files, but Acrobat uses additional
+ * names for compatibility, e.g. Arial.
  *
  * @author John Hewson
  */
@@ -44,6 +44,7 @@ final class Standard14Fonts
     private static final Set<String> STANDARD_14_NAMES = new HashSet<String>();
     private static final Map<String, String> STANDARD_14_MAPPING = new HashMap<String, String>();
     private static final Map<String, FontMetrics> STANDARD14_AFM_MAP;
+
     static
     {
         try
@@ -113,16 +114,11 @@ final class Standard14Fonts
         URL url = PDType1Font.class.getClassLoader().getResource(resourceName);
         if (url != null)
         {
-            InputStream afmStream = url.openStream();
-            try
+            try (InputStream afmStream = url.openStream())
             {
                 AFMParser parser = new AFMParser(afmStream);
-                FontMetrics metric = parser.parse();
+                FontMetrics metric = parser.parse(true);
                 STANDARD14_AFM_MAP.put(fontName, metric);
-            }
-            finally
-            {
-                afmStream.close();
             }
         }
         else
@@ -133,6 +129,7 @@ final class Standard14Fonts
 
     /**
      * Returns the AFM for the given font.
+     * 
      * @param baseName base name of font
      */
     public static FontMetrics getAFM(String baseName)
@@ -142,6 +139,7 @@ final class Standard14Fonts
 
     /**
      * Returns true if the given font name a Standard 14 font.
+     * 
      * @param baseName base name of font
      */
     public static boolean containsName(String baseName)
@@ -159,6 +157,7 @@ final class Standard14Fonts
 
     /**
      * Returns the name of the actual font which the given font name maps to.
+     * 
      * @param baseName base name of font
      */
     public static String getMappedFontName(String baseName)

@@ -16,7 +16,6 @@
  */
 package org.sejda.sambox;
 
-
 /**
  * Holder for configurable system properties. This is supposed to give developers a single place where they can find out
  * what's configurable in SAMBox.
@@ -26,7 +25,7 @@ package org.sejda.sambox;
 public final class SAMBox
 {
     /**
-     * Pool size used in org.apache.pdfbox.input.SourceReader
+     * Pool size used in org.sejda.sambox.input.SourceReader
      */
     public static final String BUFFERS_POOL_SIZE_PROPERTY = "org.sejda.sambox.buffers.pool.size";
     /**
