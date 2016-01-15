@@ -99,4 +99,10 @@ public class StandardEncoding extends Encoding
     {
         return COSName.STANDARD_ENCODING;
     }
+
+    @Override
+    public String getEncodingName()
+    {
+        return "StandardEncoding";
+    }
 }

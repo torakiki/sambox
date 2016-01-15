@@ -14,42 +14,44 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package org.sejda.sambox.pdmodel.font.encoding;
-
-import java.util.Map;
-
-import org.sejda.sambox.cos.COSBase;
+package org.sejda.sambox.util.filetypedetector;
 
 /**
- * A font's built-in encoding.
+ * @author Drew Noakes
  *
- * @author John Hewson
+ * code taken from https://github.com/drewnoakes/metadata-extractor
+ *
+ * 2016-01-04
+ *
+ * latest commit number 73f1a48
+ *
+ * Enumeration of supported image file formats.
  */
-public class BuiltInEncoding extends Encoding
+public enum FileType
 {
-    /**
-     * Constructor.
-     *
-     * @param codeToName the given code to name mapping
-     */
-    public BuiltInEncoding(Map<Integer, String> codeToName)
-    {
-        for (Map.Entry<Integer, String> entry : codeToName.entrySet())
-        {
-            add(entry.getKey(), entry.getValue());
-        }
-    }
+    UNKNOWN,
+    JPEG,
+    TIFF,
+    PSD,
+    PNG,
+    BMP,
+    GIF,
+    ICO,
+    PCX,
+    RIFF,
 
-    @Override
-    public COSBase getCOSObject()
-    {
-        throw new UnsupportedOperationException("Built-in encodings cannot be serialized");
-    }
-
-    @Override
-    public String getEncodingName()
-    {
-        return "built-in (TTF)";
-    }
+    /** Sony camera raw. */
+    ARW,
+    /** Canon camera raw, version 1. */
+    CRW,
+    /** Canon camera raw, version 2. */
+    CR2,
+    /** Nikon camera raw. */
+    NEF,
+    /** Olympus camera raw. */
+    ORF,
+    /** FujiFilm camera raw. */
+    RAF,
+    /** Panasonic camera raw. */
+    RW2
 }

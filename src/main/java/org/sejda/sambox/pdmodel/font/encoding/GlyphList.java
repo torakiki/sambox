@@ -34,21 +34,21 @@ public final class GlyphList
     private static final Logger LOG = LoggerFactory.getLogger(GlyphList.class);
 
     // Adobe Glyph List (AGL)
-    private static final GlyphList DEFAULT = load("glyphlist.txt");
+    private static final GlyphList DEFAULT = load("glyphlist.txt", 4281);
 
     // Zapf Dingbats has its own glyph list
-    private static final GlyphList ZAPF_DINGBATS = load("zapfdingbats.txt");
+    private static final GlyphList ZAPF_DINGBATS = load("zapfdingbats.txt", 201);
 
     /**
      * Loads a glyph list from disk.
      */
-    private static GlyphList load(String filename)
+    private static GlyphList load(String filename, int numberOfEntries)
     {
         ClassLoader loader = GlyphList.class.getClassLoader();
         String path = "org/sejda/sambox/resources/glyphlist/";
         try
         {
-            return new GlyphList(loader.getResourceAsStream(path + filename));
+            return new GlyphList(loader.getResourceAsStream(path + filename), numberOfEntries);
         }
         catch (IOException e)
         {
@@ -103,10 +103,10 @@ public final class GlyphList
      * @param input glyph list in Adobe format
      * @throws IOException if the glyph list could not be read
      */
-    public GlyphList(InputStream input) throws IOException
+    public GlyphList(InputStream input, int numberOfEntries) throws IOException
     {
-        nameToUnicode = new HashMap<>();
-        unicodeToName = new HashMap<>();
+        nameToUnicode = new HashMap<>(numberOfEntries);
+        unicodeToName = new HashMap<>(numberOfEntries);
         loadList(input);
     }
 

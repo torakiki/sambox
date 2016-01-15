@@ -252,8 +252,6 @@ class PlainTextFormatter
             if (lines.indexOf(line) == 0 && isFirstParagraph)
             {
                 contents.newLineAtOffset(offset, verticalOffset);
-                // reset the initial horizontalOffset
-                horizontalOffset = 0f;
             }
             else
             {
@@ -261,7 +259,7 @@ class PlainTextFormatter
                 verticalOffset = verticalOffset - appearanceStyle.getLeading();
                 contents.newLineAtOffset(offset, -appearanceStyle.getLeading());
             }
-            lastPos = startOffset;
+            lastPos += offset;
 
             List<Word> words = line.getWords();
             for (Word word : words)

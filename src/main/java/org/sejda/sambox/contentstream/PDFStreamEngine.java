@@ -73,7 +73,7 @@ public abstract class PDFStreamEngine
 {
     private static final Logger LOG = LoggerFactory.getLogger(PDFStreamEngine.class);
 
-    private final Map<String, OperatorProcessor> operators = new HashMap<>();
+    private final Map<String, OperatorProcessor> operators = new HashMap<>(80);
 
     private Matrix textMatrix;
     private Matrix textLineMatrix;

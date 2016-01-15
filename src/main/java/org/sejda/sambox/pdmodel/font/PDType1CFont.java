@@ -293,9 +293,15 @@ public class PDType1CFont extends PDSimpleFont
     protected byte[] encode(int unicode) throws IOException
     {
         String name = getGlyphList().codePointToName(unicode);
+        if (!encoding.contains(name))
+        {
+            throw new IllegalArgumentException(
+                    String.format("U+%04X ('%s') is not available in this font's encoding: %s",
+                            unicode, name, encoding.getEncodingName()));
+        }
         String nameInFont = getNameInFont(name);
 
-        Map<String, Integer> inverted = getInvertedEncoding();
+        Map<String, Integer> inverted = encoding.getNameToCodeMap();
 
         if (nameInFont.equals(".notdef") || !genericFont.hasGlyph(nameInFont))
         {

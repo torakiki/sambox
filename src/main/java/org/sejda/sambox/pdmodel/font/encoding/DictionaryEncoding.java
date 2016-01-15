@@ -35,7 +35,7 @@ public class DictionaryEncoding extends Encoding
 {
     private final COSDictionary encoding;
     private final Encoding baseEncoding;
-    private final Map<Integer, String> differences = new HashMap<Integer, String>();
+    private final Map<Integer, String> differences = new HashMap<>();
 
     /**
      * Creates a new DictionaryEncoding for embedding.
@@ -59,8 +59,9 @@ public class DictionaryEncoding extends Encoding
         {
             throw new IllegalArgumentException("Invalid encoding: " + baseEncoding);
         }
-        
-        codeToName.putAll( this.baseEncoding.codeToName );
+
+        codeToName.putAll(this.baseEncoding.codeToName);
+        inverted.putAll(this.baseEncoding.inverted);
         applyDifferences();
     }
 
@@ -75,7 +76,7 @@ public class DictionaryEncoding extends Encoding
         baseEncoding = null;
         applyDifferences();
     }
-    
+
     /**
      * Creates a new DictionaryEncoding from a PDF.
      *
@@ -110,32 +111,33 @@ public class DictionaryEncoding extends Encoding
                 }
                 else
                 {
-                    throw new IllegalArgumentException("Symbolic fonts must have a built-in " + 
-                                                       "encoding");
+                    throw new IllegalArgumentException(
+                            "Symbolic fonts must have a built-in " + "encoding");
                 }
             }
         }
         baseEncoding = base;
 
-        codeToName.putAll( baseEncoding.codeToName );
+        codeToName.putAll(baseEncoding.codeToName);
+        inverted.putAll(baseEncoding.inverted);
         applyDifferences();
     }
 
     private void applyDifferences()
     {
         // now replace with the differences
-        COSArray differences = (COSArray)encoding.getDictionaryObject( COSName.DIFFERENCES );
+        COSArray differences = (COSArray) encoding.getDictionaryObject(COSName.DIFFERENCES);
         int currentIndex = -1;
-        for( int i=0; differences != null && i<differences.size(); i++ )
+        for (int i = 0; differences != null && i < differences.size(); i++)
         {
-            COSBase next = differences.getObject( i );
-            if( next instanceof COSNumber)
+            COSBase next = differences.getObject(i);
+            if (next instanceof COSNumber)
             {
-                currentIndex = ((COSNumber)next).intValue();
+                currentIndex = ((COSNumber) next).intValue();
             }
-            else if( next instanceof COSName )
+            else if (next instanceof COSName)
             {
-                COSName name = (COSName)next;
+                COSName name = (COSName) next;
                 add(currentIndex, name.getName());
                 this.differences.put(currentIndex, name.getName());
                 currentIndex++;
@@ -159,13 +161,15 @@ public class DictionaryEncoding extends Encoding
         return differences;
     }
 
-    /**
-     * Convert this standard java object to a COS object.
-     *
-     * @return The cos object that matches this Java object.
-     */
+    @Override
     public COSBase getCOSObject()
     {
         return encoding;
+    }
+
+    @Override
+    public String getEncodingName()
+    {
+        return baseEncoding.getEncodingName() + " with differences";
     }
 }

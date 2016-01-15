@@ -52,30 +52,30 @@ final class CIDType0Glyph2D implements Glyph2D
     @Override
     public GeneralPath getPathForCharacterCode(int code)
     {
-        if (cache.containsKey(code))
+        GeneralPath path = cache.get(code);
+        if (path == null)
         {
-            return cache.get(code);
-        }
-
-        try
-        {
-            if (!font.hasGlyph(code))
+            try
             {
-                int cid = font.getParent().codeToCID(code);
-                String cidHex = String.format("%04x", cid);
-                LOG.warn("No glyph for " + code + " (CID " + cidHex + ") in font " + fontName);
-            }
+                if (!font.hasGlyph(code))
+                {
+                    int cid = font.getParent().codeToCID(code);
+                    String cidHex = String.format("%04x", cid);
+                    LOG.warn("No glyph for " + code + " (CID " + cidHex + ") in font " + fontName);
+                }
 
-            GeneralPath path = font.getPath(code);
-            cache.put(code, path);
-            return path;
+                path = font.getPath(code);
+                cache.put(code, path);
+                return path;
+            }
+            catch (IOException e)
+            {
+                // todo: escalate this error?
+                LOG.error("Glyph rendering failed", e);
+                path = new GeneralPath();
+            }
         }
-        catch (IOException e)
-        {
-            // todo: escalate this error?
-            LOG.error("Glyph rendering failed", e);
-            return new GeneralPath();
-        }
+        return path;
     }
 
     @Override

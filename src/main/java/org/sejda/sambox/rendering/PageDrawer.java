@@ -400,13 +400,13 @@ public class PageDrawer extends PDFGraphicsStreamEngine
      */
     private Glyph2D createGlyph2D(PDFont font) throws IOException
     {
+        Glyph2D glyph2D = fontGlyph2D.get(font);
         // Is there already a Glyph2D for the given font?
-        if (fontGlyph2D.containsKey(font))
+        if (glyph2D != null)
         {
-            return fontGlyph2D.get(font);
+            return glyph2D;
         }
 
-        Glyph2D glyph2D = null;
         if (font instanceof PDTrueTypeFont)
         {
             PDTrueTypeFont ttfFont = (PDTrueTypeFont) font;
@@ -663,7 +663,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
                 break;
 
             case PathIterator.SEG_CUBICTO:
-                    return false;
+                return false;
 
             case PathIterator.SEG_CLOSE:
                 break;
@@ -913,6 +913,22 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         {
             // spec is unclear, but black seems to be the right thing to do
             ab.color = new PDColor(new float[] { 0 }, PDDeviceGray.INSTANCE);
+        }
+        if (ab.dashArray != null)
+        {
+            boolean allZero = true;
+            for (float f : ab.dashArray)
+            {
+                if (f != 0)
+                {
+                    allZero = false;
+                    break;
+                }
+            }
+            if (allZero)
+            {
+                ab.dashArray = null;
+            }
         }
         return ab;
     }

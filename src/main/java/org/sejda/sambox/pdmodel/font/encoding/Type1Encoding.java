@@ -35,7 +35,7 @@ public class Type1Encoding extends Encoding
     public static Type1Encoding fromFontBox(org.apache.fontbox.encoding.Encoding encoding)
     {
         // todo: could optimise this by looking for specific subclasses
-        Map<Integer,String> codeToName = encoding.getCodeToNameMap();
+        Map<Integer, String> codeToName = encoding.getCodeToNameMap();
         Type1Encoding enc = new Type1Encoding();
 
         for (Map.Entry<Integer, String> entry : codeToName.entrySet())
@@ -70,5 +70,11 @@ public class Type1Encoding extends Encoding
     public COSBase getCOSObject()
     {
         return null;
+    }
+
+    @Override
+    public String getEncodingName()
+    {
+        return "built-in (Type 1)";
     }
 }

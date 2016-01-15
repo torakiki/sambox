@@ -326,26 +326,22 @@ public class PDType1Font extends PDSimpleFont
             String afmName = getEncoding().getName(code);
             return getStandard14AFM().getCharacterHeight(afmName); // todo: isn't this the y-advance, not the height?
         }
-        else
-        {
-            // todo: should be scaled by font matrix
-            return (float) genericFont.getPath(name).getBounds().getHeight();
-        }
+        // todo: should be scaled by font matrix
+        return (float) genericFont.getPath(name).getBounds().getHeight();
     }
 
     @Override
     protected byte[] encode(int unicode) throws IOException
     {
-        if (unicode > 0xff)
-        {
-            throw new IllegalArgumentException(String.format(
-                    "Can't encode U+%04X in font %s. Type 1 fonts only support 8-bit code points",
-                    unicode, getName()));
-        }
-
         String name = getGlyphList().codePointToName(unicode);
+        if (!encoding.contains(name))
+        {
+            throw new IllegalArgumentException(
+                    String.format("U+%04X ('%s') is not available in this font's encoding: %s",
+                            unicode, name, encoding.getEncodingName()));
+        }
         String nameInFont = getNameInFont(name);
-        Map<String, Integer> inverted = getInvertedEncoding();
+        Map<String, Integer> inverted = encoding.getNameToCodeMap();
 
         if (nameInFont.equals(".notdef") || !genericFont.hasGlyph(nameInFont))
         {

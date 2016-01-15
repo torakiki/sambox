@@ -56,6 +56,12 @@ public class PDEmbeddedFile extends PDStream
         getStream().setName(COSName.TYPE, "EmbeddedFile");
     }
 
+    public PDEmbeddedFile(InputStream input, COSName filter) throws IOException
+    {
+        super(input, filter);
+        getStream().setName(COSName.TYPE, "EmbeddedFile");
+    }
+
     /**
      * Set the subtype for this embedded file. This should be a mime type value. Optional.
      *

@@ -35,11 +35,11 @@ public final class TextPosition
     // Adds non-decomposing diacritics to the hash with their related combining character.
     // These are values that the unicode spec claims are equivalent but are not mapped in the form
     // NFKC normalization method. Determined by going through the Combining Diacritical Marks
-    // section of the Unicode spec and identifying which characters are not  mapped to by the
+    // section of the Unicode spec and identifying which characters are not mapped to by the
     // normalization.
     private static Map<Integer, String> createDiacritics()
     {
-        HashMap<Integer, String> map = new HashMap<Integer, String>();
+        Map<Integer, String> map = new HashMap<>(31);
         map.put(0x0060, "\u0300");
         map.put(0x02CB, "\u0300");
         map.put(0x0027, "\u0301");
@@ -99,6 +99,7 @@ public final class TextPosition
     // mutable
     private float[] widths;
     private String unicode;
+    private float direction = -1;
 
     /**
      * Constructor.
@@ -119,9 +120,8 @@ public final class TextPosition
      * @param fontSizeInPt The font size in pt units.
      */
     public TextPosition(int pageRotation, float pageWidth, float pageHeight, Matrix textMatrix,
-                        float endX, float endY, float maxHeight, float individualWidth,
-                        float spaceWidth, String unicode, int[] charCodes, PDFont font,
-                        float fontSize, int fontSizeInPt)
+            float endX, float endY, float maxHeight, float individualWidth, float spaceWidth,
+            String unicode, int[] charCodes, PDFont font, float fontSize, int fontSizeInPt)
     {
         this.textMatrix = textMatrix;
 
@@ -186,47 +186,55 @@ public final class TextPosition
 
     /**
      * Return the direction/orientation of the string in this object based on its text matrix.
+     * 
      * @return The direction of the text (0, 90, 180, or 270)
      */
     public float getDir()
     {
-        float a = textMatrix.getScaleY();
-        float b = textMatrix.getShearY();
-        float c = textMatrix.getShearX();
-        float d = textMatrix.getScaleX();
+        if (direction < 0)
+        {
+            float a = textMatrix.getScaleY();
+            float b = textMatrix.getShearY();
+            float c = textMatrix.getShearX();
+            float d = textMatrix.getScaleX();
 
-        // 12 0   left to right
-        // 0 12
-        if (a > 0 && Math.abs(b) < d && Math.abs(c) < a && d > 0)
-        {
-            return 0;
+            // 12 0 left to right
+            // 0 12
+            if (a > 0 && Math.abs(b) < d && Math.abs(c) < a && d > 0)
+            {
+                direction = 0;
+            }
+            // -12 0 right to left (upside down)
+            // 0 -12
+            else if (a < 0 && Math.abs(b) < Math.abs(d) && Math.abs(c) < Math.abs(a) && d < 0)
+            {
+                direction = 180;
+            }
+            // 0 12 up
+            // -12 0
+            else if (Math.abs(a) < Math.abs(c) && b > 0 && c < 0 && Math.abs(d) < b)
+            {
+                direction = 90;
+            }
+            // 0 -12 down
+            // 12 0
+            else if (Math.abs(a) < c && b < 0 && c > 0 && Math.abs(d) < Math.abs(b))
+            {
+                direction = 270;
+            }
+            else
+            {
+                direction = 0;
+            }
         }
-        // -12 0   right to left (upside down)
-        // 0 -12
-        else if (a < 0 && Math.abs(b) < Math.abs(d) && Math.abs(c) < Math.abs(a) && d < 0)
-        {
-            return 180;
-        }
-        // 0  12    up
-        // -12 0
-        else if (Math.abs(a) < Math.abs(c) && b > 0 && c < 0 && Math.abs(d) < b)
-        {
-            return 90;
-        }
-        // 0  -12   down
-        // 12 0
-        else if (Math.abs(a) < c && b < 0 && c > 0 && Math.abs(d) < Math.abs(b))
-        {
-            return 270;
-        }
-        return 0;
+        return direction;
     }
 
     /**
-     * Return the X starting coordinate of the text, adjusted by the given rotation amount.
-     * The rotation adjusts where the 0,0 location is relative to the text.
+     * Return the X starting coordinate of the text, adjusted by the given rotation amount. The rotation adjusts where
+     * the 0,0 location is relative to the text.
      *
-     * @param rotation Rotation to apply (0, 90, 180, or 270).  0 will perform no adjustments.
+     * @param rotation Rotation to apply (0, 90, 180, or 270). 0 will perform no adjustments.
      * @return X coordinate
      */
     private float getXRot(float rotation)
@@ -251,8 +259,8 @@ public final class TextPosition
     }
 
     /**
-     * This will get the page rotation adjusted x position of the character.
-     * This is adjusted based on page rotation so that the upper left is 0,0.
+     * This will get the page rotation adjusted x position of the character. This is adjusted based on page rotation so
+     * that the upper left is 0,0.
      *
      * @return The x coordinate of the character.
      */
@@ -262,9 +270,8 @@ public final class TextPosition
     }
 
     /**
-     * This will get the text direction adjusted x position of the character.
-     * This is adjusted based on text direction so that the first character
-     * in that direction is in the upper left at 0,0.
+     * This will get the text direction adjusted x position of the character. This is adjusted based on text direction
+     * so that the first character in that direction is in the upper left at 0,0.
      *
      * @return The x coordinate of the text.
      */
@@ -274,8 +281,8 @@ public final class TextPosition
     }
 
     /**
-     * This will get the y position of the character with 0,0 in lower left.
-     * This will be adjusted by the given rotation.
+     * This will get the y position of the character with 0,0 in lower left. This will be adjusted by the given
+     * rotation.
      *
      * @param rotation Rotation to apply to text to adjust the 0,0 location (0,90,180,270)
      * @return The y coordinate of the text
@@ -302,8 +309,8 @@ public final class TextPosition
     }
 
     /**
-     * This will get the y position of the text, adjusted so that 0,0 is upper left and it is
-     * adjusted based on the page rotation.
+     * This will get the y position of the text, adjusted so that 0,0 is upper left and it is adjusted based on the page
+     * rotation.
      *
      * @return The adjusted y coordinate of the character.
      */
@@ -313,8 +320,8 @@ public final class TextPosition
     }
 
     /**
-     * This will get the y position of the text, adjusted so that 0,0 is upper left and it is
-     * adjusted based on the text direction.
+     * This will get the y position of the text, adjusted so that 0,0 is upper left and it is adjusted based on the text
+     * direction.
      *
      * @return The adjusted y coordinate of the character.
      */
@@ -402,8 +409,8 @@ public final class TextPosition
     }
 
     /**
-     * This will get the font size in pt. To get this size we have to multiply the pdf-fontsize
-     * and the scaling from the textmatrix
+     * This will get the font size in pt. To get this size we have to multiply the pdf-fontsize and the scaling from the
+     * textmatrix
      *
      * @return The font size in pt.
      */
@@ -423,8 +430,8 @@ public final class TextPosition
     }
 
     /**
-     * This will get the width of a space character. This is useful for some algorithms such as the
-     * text stripper, that need to know the width of a space character.
+     * This will get the width of a space character. This is useful for some algorithms such as the text stripper, that
+     * need to know the width of a space character.
      *
      * @return The width of a space character.
      */
@@ -460,8 +467,8 @@ public final class TextPosition
     }
 
     /**
-     * Determine if this TextPosition logically contains another (i.e. they overlap and should be
-     * rendered on top of each other).
+     * Determine if this TextPosition logically contains another (i.e. they overlap and should be rendered on top of
+     * each other).
      *
      * @param tp2 The other TestPosition to compare against
      * @return True if tp2 is contained in the bounding box of this text.
@@ -469,10 +476,11 @@ public final class TextPosition
     public boolean contains(TextPosition tp2)
     {
         double thisXstart = getXDirAdj();
-        double thisXend = getXDirAdj() + getWidthDirAdj();
+        double thisWidth = getWidthDirAdj();
+        double thisXend = thisXstart + thisWidth;
 
         double tp2Xstart = tp2.getXDirAdj();
-        double tp2Xend = tp2.getXDirAdj() + tp2.getWidthDirAdj();
+        double tp2Xend = tp2Xstart + tp2.getWidthDirAdj();
 
         // no X overlap at all so return as soon as possible
         if (tp2Xend <= thisXstart || tp2Xstart >= thisXend)
@@ -482,8 +490,9 @@ public final class TextPosition
 
         // no Y overlap at all so return as soon as possible. Note: 0.0 is in the upper left and
         // y-coordinate is top of TextPosition
-        if (tp2.getYDirAdj() + tp2.getHeightDir() < getYDirAdj() ||
-           tp2.getYDirAdj() > getYDirAdj() + getHeightDir())
+        double thisYstart = getYDirAdj();
+        double tp2Ystart = tp2.getYDirAdj();
+        if (tp2Ystart + tp2.getHeightDir() < thisYstart || tp2Ystart > thisYstart + getHeightDir())
         {
             return false;
         }
@@ -493,23 +502,22 @@ public final class TextPosition
         else if (tp2Xstart > thisXstart && tp2Xend > thisXend)
         {
             double overlap = thisXend - tp2Xstart;
-            double overlapPercent = overlap/getWidthDirAdj();
+            double overlapPercent = overlap / thisWidth;
             return overlapPercent > .15;
         }
         else if (tp2Xstart < thisXstart && tp2Xend < thisXend)
         {
             double overlap = tp2Xend - thisXstart;
-            double overlapPercent = overlap/getWidthDirAdj();
+            double overlapPercent = overlap / thisWidth;
             return overlapPercent > .15;
         }
         return true;
     }
 
     /**
-     * Merge a single character TextPosition into the current object. This is to be used only for
-     * cases where we have a diacritic that overlaps an existing TextPosition. In a graphical
-     * display, we could overlay them, but for text extraction we need to merge them. Use the
-     * contains() method to test if two objects overlap.
+     * Merge a single character TextPosition into the current object. This is to be used only for cases where we have a
+     * diacritic that overlaps an existing TextPosition. In a graphical display, we could overlay them, but for text
+     * extraction we need to merge them. Use the contains() method to test if two objects overlap.
      *
      * @param diacritic TextPosition to merge into the current TextPosition.
      */
@@ -532,9 +540,9 @@ public final class TextPosition
         {
             float currCharXEnd = currCharXStart + widths[i];
 
-             // this is the case where there is an overlap of the diacritic character with the
-             // current character and the previous character. If no previous character, just append
-             // the diacritic after the current one
+            // this is the case where there is an overlap of the diacritic character with the
+            // current character and the previous character. If no previous character, just append
+            // the diacritic after the current one
             if (diacXStart < currCharXStart && diacXEnd <= currCharXEnd)
             {
                 if (i == 0)
@@ -544,10 +552,10 @@ public final class TextPosition
                 else
                 {
                     float distanceOverlapping1 = diacXEnd - currCharXStart;
-                    float percentage1 = distanceOverlapping1/widths[i];
+                    float percentage1 = distanceOverlapping1 / widths[i];
 
                     float distanceOverlapping2 = currCharXStart - diacXStart;
-                    float percentage2 = distanceOverlapping2/widths[i - 1];
+                    float percentage2 = distanceOverlapping2 / widths[i - 1];
 
                     if (percentage1 >= percentage2)
                     {
@@ -587,8 +595,8 @@ public final class TextPosition
     }
 
     /**
-     * Inserts the diacritic TextPosition to the str of this TextPosition and updates the widths
-     * array to include the extra character width.
+     * Inserts the diacritic TextPosition to the str of this TextPosition and updates the widths array to include the
+     * extra character width.
      *
      * @param i current character
      * @param diacritic The diacritic TextPosition
@@ -617,8 +625,7 @@ public final class TextPosition
     }
 
     /**
-     * Combine the diacritic, for example, convert non-combining diacritic characters to their
-     * combining counterparts.
+     * Combine the diacritic, for example, convert non-combining diacritic characters to their combining counterparts.
      *
      * @param str String to normalize
      * @return Normalized string
@@ -633,10 +640,7 @@ public final class TextPosition
         {
             return DIACRITICS.get(codePoint);
         }
-        else
-        {
-            return Normalizer.normalize(str, Normalizer.Form.NFKC).trim();
-        }
+        return Normalizer.normalize(str, Normalizer.Form.NFKC).trim();
     }
 
     /**
@@ -650,11 +654,10 @@ public final class TextPosition
             return false;
         }
         int type = Character.getType(text.charAt(0));
-        return type == Character.NON_SPACING_MARK ||
-               type == Character.MODIFIER_SYMBOL ||
-               type == Character.MODIFIER_LETTER;
+        return type == Character.NON_SPACING_MARK || type == Character.MODIFIER_SYMBOL
+                || type == Character.MODIFIER_LETTER;
 
-  }
+    }
 
     /**
      * Show the string data for this text position.
