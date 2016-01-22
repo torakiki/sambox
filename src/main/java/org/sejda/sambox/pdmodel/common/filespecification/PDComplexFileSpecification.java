@@ -404,4 +404,13 @@ public class PDComplexFileSpecification implements PDFileSpecification
         return fileSpecificationDictionary.getString(COSName.DESC);
     }
 
+    /**
+     * Set the collection item dictionary
+     * 
+     * @param the collection item dictionary
+     */
+    public void setCollectionItem(COSDictionary dictionary)
+    {
+        fileSpecificationDictionary.setItem(COSName.CI, dictionary);
+    }
 }

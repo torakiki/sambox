@@ -405,7 +405,7 @@ public class COSDictionary extends COSBase
      * @param key The key to the object,
      * @param value The int value for the name.
      */
-    public void setEmbeddedInt(String embeddedDictionary, String key, int value)
+    public void setEmbeddedInt(String embeddedDictionary, String key, long value)
     {
         setEmbeddedInt(embeddedDictionary, COSName.getPDFName(key), value);
     }
@@ -417,7 +417,7 @@ public class COSDictionary extends COSBase
      * @param key The key to the object,
      * @param value The int value for the name.
      */
-    public void setEmbeddedInt(String embeddedDictionary, COSName key, int value)
+    public void setEmbeddedInt(String embeddedDictionary, COSName key, long value)
     {
         COSDictionary embedded = (COSDictionary) getDictionaryObject(embeddedDictionary);
         if (embedded == null)
@@ -425,7 +425,7 @@ public class COSDictionary extends COSBase
             embedded = new COSDictionary();
             setItem(embeddedDictionary, embedded);
         }
-        embedded.setInt(key, value);
+        embedded.setLong(key, value);
     }
 
     /**

@@ -163,9 +163,10 @@ abstract class AbstractPDFBodyWriter implements COSVisitor, Closeable
         {
             value.addCompression();
         }
-        if (context.encryptor.isPresent())
+        // with encrypted docs we write length as an indirect ref
+        value.indirectLength(context.encryptor.isPresent());
+        if (value.indirectLength())
         {
-            // with encrypted docs we write length as an indirect ref
             IndirectCOSObjectReference length = context
                     .createNonStorableInObjectStreamIndirectReferenceFor(COSNull.NULL);
             value.setItem(COSName.LENGTH, length);

@@ -53,13 +53,13 @@ public class PDEmbeddedFile extends PDStream
     public PDEmbeddedFile(InputStream str) throws IOException
     {
         super(str);
-        getStream().setName(COSName.TYPE, "EmbeddedFile");
+        getStream().setItem(COSName.TYPE, COSName.EMBEDDED_FILE);
     }
 
     public PDEmbeddedFile(InputStream input, COSName filter) throws IOException
     {
         super(input, filter);
-        getStream().setName(COSName.TYPE, "EmbeddedFile");
+        getStream().setItem(COSName.TYPE, COSName.EMBEDDED_FILE);
     }
 
     /**
@@ -97,7 +97,7 @@ public class PDEmbeddedFile extends PDStream
      *
      * @param size The size of the embedded file.
      */
-    public void setSize(int size)
+    public void setSize(long size)
     {
         getStream().setEmbeddedInt("Params", "Size", size);
     }

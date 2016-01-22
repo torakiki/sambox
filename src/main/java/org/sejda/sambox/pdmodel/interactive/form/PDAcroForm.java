@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSArrayList;
@@ -40,7 +41,6 @@ import org.sejda.sambox.pdmodel.PDPage;
 import org.sejda.sambox.pdmodel.PDPageContentStream;
 import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.graphics.form.PDFormXObject;
-import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotation;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
 import org.sejda.sambox.util.Matrix;
 import org.slf4j.Logger;
@@ -202,16 +202,8 @@ public final class PDAcroForm implements COSObjectable
         // preserve all non widget annotations
         for (PDPage page : document.getPages())
         {
-            List<PDAnnotation> annotations = new ArrayList<>();
-
-            for (PDAnnotation annotation : page.getAnnotations())
-            {
-                if (!(annotation instanceof PDAnnotationWidget))
-                {
-                    annotations.add(annotation);
-                }
-            }
-            page.setAnnotations(annotations);
+            page.setAnnotations(page.getAnnotations().stream()
+                    .filter(a -> !(a instanceof PDAnnotationWidget)).collect(Collectors.toList()));
         }
 
         // remove the fields

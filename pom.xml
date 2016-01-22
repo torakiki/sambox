@@ -106,7 +106,6 @@
 						<version>2.5.2</version>
 						<configuration>
 							<tagNameFormat>v@{project.version}</tagNameFormat>
-							<allowTimestampedSnapshots>true</allowTimestampedSnapshots>
 							<preparationGoals>clean install</preparationGoals>
 							<localCheckout>true</localCheckout>
 						</configuration>

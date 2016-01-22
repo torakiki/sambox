@@ -157,13 +157,13 @@ final class UnmodifiableCOSDictionary extends COSDictionary
     }
 
     @Override
-    public void setEmbeddedInt(String embeddedDictionary, String key, int value)
+    public void setEmbeddedInt(String embeddedDictionary, String key, long value)
     {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void setEmbeddedInt(String embeddedDictionary, COSName key, int value)
+    public void setEmbeddedInt(String embeddedDictionary, COSName key, long value)
     {
         throw new UnsupportedOperationException();
     }

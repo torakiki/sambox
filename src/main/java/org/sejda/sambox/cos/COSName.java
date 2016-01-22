@@ -110,6 +110,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName CH = newCommonInstance("Ch");
     public static final COSName CHAR_PROCS = newCommonInstance("CharProcs");
     public static final COSName CHAR_SET = newCommonInstance("CharSet");
+    public static final COSName CI = newCommonInstance("CI");
     public static final COSName CICI_SIGNIT = newCommonInstance("CICI.SignIt");
     public static final COSName CID_FONT_TYPE0 = newCommonInstance("CIDFontType0");
     public static final COSName CID_FONT_TYPE2 = newCommonInstance("CIDFontType2");
@@ -197,6 +198,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName EARLY_CHANGE = newCommonInstance("EarlyChange");
     public static final COSName EF = newCommonInstance("EF");
     public static final COSName EMBEDDED_FDFS = newCommonInstance("EmbeddedFDFs");
+    public static final COSName EMBEDDED_FILE = newCommonInstance("EmbeddedFile");
     public static final COSName EMBEDDED_FILES = newCommonInstance("EmbeddedFiles");
     public static final COSName EMPTY = newCommonInstance("");
     public static final COSName ENCODE = newCommonInstance("Encode");

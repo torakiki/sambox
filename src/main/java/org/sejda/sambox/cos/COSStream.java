@@ -61,6 +61,8 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
     // an encryption function that returns an encrypted view of the filtered stream
     private Function<InputStream, InputStream> encryptor;
     private boolean encryptable = true;
+    // if the writer should write the stream length as indirect object
+    private boolean indirectLength = false;
 
     public COSStream()
     {
@@ -577,6 +579,22 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
         existing = null;
         unfiltered = null;
         filtered = null;
+    }
+
+    /**
+     * @return true if the writer should write this stream length as indirect
+     */
+    public boolean indirectLength()
+    {
+        return indirectLength;
+    }
+
+    /**
+     * @param indirectLength if the writer should write this stream length as indirect
+     */
+    public void indirectLength(boolean indirectLength)
+    {
+        this.indirectLength = indirectLength;
     }
 
     static class MyByteArrayOutputStream extends ByteArrayOutputStream
