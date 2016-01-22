@@ -346,6 +346,7 @@ public class PDDocument implements Closeable
     {
         if (!isAtLeast(getVersion(), version))
         {
+            LOG.info("Minimum spec version required is {}", version);
             setVersion(version);
         }
     }
