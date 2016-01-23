@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.cos;
 
+import static java.util.Objects.nonNull;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -149,6 +151,11 @@ public class COSDictionary extends COSBase
         }
     }
 
+    public void putIfAbsent(COSName key, COSBase value)
+    {
+        items.putIfAbsent(key, value);
+    }
+
     /**
      * Set the wrapped {@link COSBase} as item in the dictionary. If value is null then the result will be the same as
      * removeItem( key ).
@@ -164,6 +171,14 @@ public class COSDictionary extends COSBase
             base = value.getCOSObject();
         }
         setItem(key, base);
+    }
+
+    public void putIfAbsent(COSName key, COSObjectable value)
+    {
+        if (nonNull(value))
+        {
+            items.putIfAbsent(key, value.getCOSObject());
+        }
     }
 
     /**
@@ -198,6 +213,11 @@ public class COSDictionary extends COSBase
     public void setBoolean(COSName key, boolean value)
     {
         setItem(key, COSBoolean.valueOf(value));
+    }
+
+    public void putIfAbsent(COSName key, boolean value)
+    {
+        items.putIfAbsent(key, COSBoolean.valueOf(value));
     }
 
     /**
@@ -319,6 +339,11 @@ public class COSDictionary extends COSBase
         setItem(key, name);
     }
 
+    public void putIfAbsent(COSName key, String value)
+    {
+        items.putIfAbsent(key, COSString.parseLiteral(value));
+    }
+
     /**
      * Convenience method that will convert the value to a COSString object. If it is null then the object will be
      * removed.
@@ -376,6 +401,11 @@ public class COSDictionary extends COSBase
         setItem(key, COSInteger.get(value));
     }
 
+    public void putIfAbsent(COSName key, int value)
+    {
+        items.putIfAbsent(key, COSInteger.get(value));
+    }
+
     /**
      * Convenience method that will convert the value to a COSInteger object.
      *
@@ -396,6 +426,11 @@ public class COSDictionary extends COSBase
     public void setLong(COSName key, long value)
     {
         setItem(key, COSInteger.get(value));
+    }
+
+    public void putIfAbsent(COSName key, long value)
+    {
+        items.putIfAbsent(key, COSInteger.get(value));
     }
 
     /**
