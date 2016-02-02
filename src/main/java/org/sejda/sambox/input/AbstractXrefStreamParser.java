@@ -16,7 +16,6 @@
  */
 package org.sejda.sambox.input;
 
-import static java.util.stream.LongStream.concat;
 import static java.util.stream.LongStream.empty;
 import static java.util.stream.LongStream.rangeClosed;
 
@@ -24,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.PrimitiveIterator.OfLong;
 import java.util.stream.LongStream;
+import java.util.stream.LongStream.Builder;
 
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
@@ -104,13 +104,15 @@ abstract class AbstractXrefStreamParser
         else
         {
             LOG.debug("Index found, now retrieving expected object numbers");
+            Builder builder = LongStream.builder();
             for (int i = 0; i < index.size(); i += 2)
             {
                 long start = ((COSNumber) index.get(i)).longValue();
                 long end = start + Math.max(((COSNumber) index.get(i + 1)).longValue() - 1, 0);
                 LOG.trace(String.format("Adding expected range from %d to %d", start, end));
-                objectNumbers = concat(objectNumbers, rangeClosed(start, end));
+                rangeClosed(start, end).forEach(builder::add);
             }
+            objectNumbers = builder.build();
 
         }
         COSArray xrefFormat = (COSArray) xrefStream.getDictionaryObject(COSName.W);
