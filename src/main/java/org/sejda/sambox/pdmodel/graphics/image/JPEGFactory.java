@@ -16,6 +16,9 @@
  */
 package org.sejda.sambox.pdmodel.graphics.image;
 
+import static java.util.Objects.nonNull;
+import static org.sejda.util.RequireUtils.requireIOCondition;
+
 import java.awt.Transparency;
 import java.awt.color.ColorSpace;
 import java.awt.color.ICC_ColorSpace;
@@ -24,6 +27,7 @@ import java.awt.image.ColorConvertOp;
 import java.awt.image.WritableRaster;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -41,7 +45,6 @@ import javax.imageio.stream.ImageOutputStream;
 
 import org.apache.commons.io.IOUtils;
 import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.filter.MissingImageReaderException;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceCMYK;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
@@ -93,27 +96,31 @@ public final class JPEGFactory
         return pdImage;
     }
 
-    private static BufferedImage readJPEG(InputStream stream) throws IOException
+    public static BufferedImage readJPEG(InputStream stream) throws IOException
     {
-        // find suitable image reader
-        Iterator readers = ImageIO.getImageReadersByFormatName("JPEG");
+        return readJpeg(stream);
+    }
+
+    public static BufferedImage readJpegFile(File file) throws IOException
+    {
+        return readJpeg(file);
+    }
+
+    private static BufferedImage readJpeg(Object fileOrStream) throws IOException
+    {
+        Iterator<ImageReader> readers = ImageIO.getImageReadersByFormatName("JPEG");
         ImageReader reader = null;
         while (readers.hasNext())
         {
-            reader = (ImageReader) readers.next();
+            reader = readers.next();
             if (reader.canReadRaster())
             {
                 break;
             }
         }
+        requireIOCondition(nonNull(reader), "Cannot find an ImageIO reader for JPEG image");
 
-        if (reader == null)
-        {
-            throw new MissingImageReaderException("Cannot read JPEG image: "
-                    + "a suitable JAI I/O image filter is not installed");
-        }
-
-        try (ImageInputStream iis = ImageIO.createImageInputStream(stream))
+        try (ImageInputStream iis = ImageIO.createImageInputStream(fileOrStream))
         {
             reader.setInput(iis);
             ImageIO.setUseCache(false);
@@ -265,7 +272,7 @@ public final class JPEGFactory
     }
 
     // returns a PDColorSpace for a given BufferedImage
-    private static PDColorSpace getColorSpaceFromAWT(BufferedImage awtImage)
+    public static PDColorSpace getColorSpaceFromAWT(BufferedImage awtImage)
     {
         if (awtImage.getColorModel().getNumComponents() == 1)
         {

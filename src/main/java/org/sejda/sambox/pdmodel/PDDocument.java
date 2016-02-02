@@ -85,8 +85,7 @@ public class PDDocument implements Closeable
         COSDictionary pages = new COSDictionary();
         document.getCatalog().setItem(COSName.PAGES, pages);
         pages.setItem(COSName.TYPE, COSName.PAGES);
-        COSArray kidsArray = new COSArray();
-        pages.setItem(COSName.KIDS, kidsArray);
+        pages.setItem(COSName.KIDS, new COSArray());
         pages.setItem(COSName.COUNT, COSInteger.ZERO);
     }
 

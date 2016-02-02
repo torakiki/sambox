@@ -132,11 +132,20 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
     }
 
     /**
-     * Returns a sequential {@code Stream} over the pages of this page tree.
+     * @return a sequential {@code Stream} over the pages of this page tree.
      */
     public Stream<PDPage> stream()
     {
         return StreamSupport.stream(Spliterators.spliterator(iterator(), getCount(),
+                Spliterator.ORDERED | Spliterator.NONNULL), false);
+    }
+
+    /**
+     * @return a sequential {@code Stream} over the nodes of this page tree.
+     */
+    public Stream<COSDictionary> streamNodes()
+    {
+        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(new NodesIterator(root),
                 Spliterator.ORDERED | Spliterator.NONNULL), false);
     }
 
@@ -185,11 +194,7 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
         {
             if (isPageTreeNode(node))
             {
-                List<COSDictionary> kids = getKids(node);
-                for (COSDictionary kid : kids)
-                {
-                    enqueueKids(kid);
-                }
+                getKids(node).forEach(this::enqueueKids);
             }
             else
             {
@@ -212,6 +217,46 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
 
             ResourceCache resourceCache = document != null ? document.getResourceCache() : null;
             return new PDPage(next, resourceCache);
+        }
+
+        @Override
+        public void remove()
+        {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    /**
+     * Iterator which walks all the nodes in the tree.
+     */
+    private final class NodesIterator implements Iterator<COSDictionary>
+    {
+        private final Queue<COSDictionary> queue = new ArrayDeque<>();
+
+        private NodesIterator(COSDictionary node)
+        {
+            enqueueKids(node);
+        }
+
+        private void enqueueKids(COSDictionary node)
+        {
+            queue.add(node);
+            if (isPageTreeNode(node))
+            {
+                getKids(node).forEach(this::enqueueKids);
+            }
+        }
+
+        @Override
+        public boolean hasNext()
+        {
+            return !queue.isEmpty();
+        }
+
+        @Override
+        public COSDictionary next()
+        {
+            return queue.poll();
         }
 
         @Override
