@@ -323,7 +323,7 @@ public class PDDocument implements Closeable
         int compare = getVersion().compareTo(newVersion);
         if (compare > 0)
         {
-            LOG.warn("Spec version downgrade not allowed");
+            LOG.info("Spec version downgrade not allowed");
         }
         else if (compare < 0)
         {
@@ -345,7 +345,7 @@ public class PDDocument implements Closeable
     {
         if (!isAtLeast(getVersion(), version))
         {
-            LOG.info("Minimum spec version required is {}", version);
+            LOG.debug("Minimum spec version required is {}", version);
             setVersion(version);
         }
     }

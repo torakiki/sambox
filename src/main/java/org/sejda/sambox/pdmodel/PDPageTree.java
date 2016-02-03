@@ -353,9 +353,9 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
     }
 
     /**
-     * Returns true if the node is a page tree node (i.e. and intermediate).
+     * @return true if the node is a page tree node (i.e. and intermediate).
      */
-    private boolean isPageTreeNode(COSDictionary node)
+    public static boolean isPageTreeNode(COSDictionary node)
     {
         // some files such as PDFBOX-2250-229205.pdf don't have Pages set as the Type, so we have
         // to check for the presence of Kids too
