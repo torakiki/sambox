@@ -28,7 +28,7 @@ import org.sejda.sambox.util.Matrix;
  *
  * @author Ben Litchfield
  */
-public final class TextPosition
+public class TextPosition
 {
     private static final Map<Integer, String> DIACRITICS = createDiacritics();
 
