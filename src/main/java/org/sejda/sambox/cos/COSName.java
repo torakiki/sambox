@@ -395,6 +395,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName PDF_DOC_ENCODING = newCommonInstance("PDFDocEncoding");
     public static final COSName PERMS = newCommonInstance("Perms");
     public static final COSName PG = newCommonInstance("Pg");
+    public static final COSName PIECE_INFO = newCommonInstance("PieceInfo");
     public static final COSName PMD = newCommonInstance("PMD");
     public static final COSName PRE_RELEASE = newCommonInstance("PreRelease");
     public static final COSName PREDICTOR = newCommonInstance("Predictor");
