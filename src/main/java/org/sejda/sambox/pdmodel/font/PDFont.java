@@ -78,6 +78,7 @@ public abstract class PDFont implements COSObjectable, PDFontLike
     PDFont(String baseFont)
     {
         dict = new COSDictionary();
+        dict.setItem(COSName.TYPE, COSName.FONT);
         toUnicodeCMap = null;
         afmStandard14 = Standard14Fonts.getAFM(baseFont);
         if (afmStandard14 == null)
