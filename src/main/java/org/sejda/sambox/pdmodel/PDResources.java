@@ -339,6 +339,20 @@ public final class PDResources implements COSObjectable
     }
 
     /**
+     * Tells whether the XObject resource with the given name is an form.
+     *
+     * @param name Name of the XObject resource.
+     * @return true if it is an form XObject, false if not.
+     */
+    public boolean isFormXObject(COSName name)
+    {
+        // get the instance
+        return Optional.ofNullable(get(COSName.XOBJECT, name)).map(COSBase::getCOSObject)
+                .map(s -> (COSStream) s)
+                .map(s -> COSName.FORM.equals(s.getCOSName(COSName.SUBTYPE))).orElse(false);
+    }
+
+    /**
      * Returns the XObject resource with the given name, or null if none exists.
      * 
      * @param name Name of the XObject resource.
