@@ -26,6 +26,7 @@ import java.util.List;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.ParallelParameterized;
@@ -38,9 +39,12 @@ import org.sejda.sambox.pdmodel.PDDocument;
  *
  * It does not attempt to detect if rendering is correct, see {@link org.apache.pdfbox.rendering.TestPDFToImage}.
  *
+ * These tests should not run in parallel
+ * http://stackoverflow.com/questions/26535842/multithreaded-jpeg-image-processing-in-java
+ *
  * @author John Hewson
  */
-@RunWith(ParallelParameterized.class)
+@RunWith(Parameterized.class)
 public class TestRendering
 {
     private static final String INPUT_DIR = "src/test/resources/input/rendering";
