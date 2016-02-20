@@ -334,7 +334,7 @@ public final class PDResources implements COSObjectable
     {
         // get the instance
         return Optional.ofNullable(get(COSName.XOBJECT, name)).map(COSBase::getCOSObject)
-                .map(s -> (COSStream) s)
+                .filter(s -> s instanceof COSStream).map(s -> (COSStream) s)
                 .map(s -> COSName.IMAGE.equals(s.getCOSName(COSName.SUBTYPE))).orElse(false);
     }
 
