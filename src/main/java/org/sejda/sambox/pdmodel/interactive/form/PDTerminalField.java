@@ -118,7 +118,7 @@ public abstract class PDTerminalField extends PDField
             // there are multiple widgets
             for (COSBase kid : kids)
             {
-                if (!COSNull.NULL.equals(kid) && nonNull(kid))
+                if (nonNull(kid) && !COSNull.NULL.equals(kid.getCOSObject()))
                 {
                     widgets.add(new PDAnnotationWidget((COSDictionary) kid.getCOSObject()));
                 }
