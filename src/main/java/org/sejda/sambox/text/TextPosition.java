@@ -20,6 +20,8 @@ import java.text.Normalizer;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.sejda.sambox.pdmodel.font.PDFont;
 import org.sejda.sambox.util.Matrix;
 
@@ -30,6 +32,8 @@ import org.sejda.sambox.util.Matrix;
  */
 public class TextPosition
 {
+    private static final Log LOG = LogFactory.getLog(TextPosition.class);
+
     private static final Map<Integer, String> DIACRITICS = createDiacritics();
 
     // Adds non-decomposing diacritics to the hash with their related combining character.
@@ -538,6 +542,13 @@ public class TextPosition
 
         for (int i = 0; i < strLen && !wasAdded; i++)
         {
+            if (i >= widths.length)
+            {
+                LOG.info("diacritic " + diacritic.getUnicode() + " on ligature " + unicode +
+                        " is not supported yet and is ignored (PDFBOX-2831)");
+                break;
+            }
+
             float currCharXEnd = currCharXStart + widths[i];
 
             // this is the case where there is an overlap of the diacritic character with the
