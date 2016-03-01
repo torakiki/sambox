@@ -194,8 +194,8 @@ public class PDDocument implements Closeable
      */
     public PDDocumentInformation getDocumentInformation()
     {
-        COSDictionary infoDic = (COSDictionary) document.getTrailer()
-                .getDictionaryObject(COSName.INFO);
+        COSDictionary infoDic = document.getTrailer().getDictionaryObject(COSName.INFO,
+                COSDictionary.class);
         if (infoDic == null)
         {
             infoDic = new COSDictionary();
@@ -381,13 +381,14 @@ public class PDDocument implements Closeable
         MessageDigest md5 = MessageDigests.md5();
         md5.update(Long.toString(System.currentTimeMillis()).getBytes(Charsets.ISO_8859_1));
         md5.update(md5Update);
-        ofNullable(getDocument().getTrailer().getDictionaryObject(COSName.INFO))
-                .map(d -> (COSDictionary) d).ifPresent(d -> {
-                    for (COSBase current : d.getValues())
-                    {
-                        md5.update(current.toString().getBytes(Charsets.ISO_8859_1));
-                    }
-                });
+        ofNullable(
+                getDocument().getTrailer().getDictionaryObject(COSName.INFO, COSDictionary.class))
+                        .ifPresent(d -> {
+                            for (COSBase current : d.getValues())
+                            {
+                                md5.update(current.toString().getBytes(Charsets.ISO_8859_1));
+                            }
+                        });
         COSString retVal = COSString.newInstance(md5.digest());
         encContext.ifPresent(c -> c.documentId(retVal.getBytes()));
         retVal.setForceHexForm(true);

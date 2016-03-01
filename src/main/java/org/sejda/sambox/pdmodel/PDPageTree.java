@@ -159,7 +159,7 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
     {
         List<COSDictionary> result = new ArrayList<>();
 
-        COSArray kids = (COSArray) node.getDictionaryObject(COSName.KIDS);
+        COSArray kids = node.getDictionaryObject(COSName.KIDS, COSArray.class);
         if (kids == null)
         {
             // probably a malformed PDF
@@ -458,7 +458,7 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
     {
         // remove from parent's kids
         COSDictionary parent = (COSDictionary) node.getDictionaryObject(COSName.PARENT, COSName.P);
-        COSArray kids = (COSArray) parent.getDictionaryObject(COSName.KIDS);
+        COSArray kids = parent.getDictionaryObject(COSName.KIDS, COSArray.class);
         if (kids.removeObject(node))
         {
             // update ancestor counts
@@ -487,7 +487,7 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
         // todo: re-balance tree? (or at least group new pages into tree nodes of e.g. 20)
 
         // add to parent's kids
-        COSArray kids = (COSArray) root.getDictionaryObject(COSName.KIDS);
+        COSArray kids = root.getDictionaryObject(COSName.KIDS, COSArray.class);
         kids.add(node);
 
         // update ancestor counts
@@ -511,8 +511,9 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
     public void insertBefore(PDPage newPage, PDPage nextPage)
     {
         COSDictionary nextPageDict = nextPage.getCOSObject();
-        COSDictionary parentDict = (COSDictionary) nextPageDict.getDictionaryObject(COSName.PARENT);
-        COSArray kids = (COSArray) parentDict.getDictionaryObject(COSName.KIDS);
+        COSDictionary parentDict = nextPageDict.getDictionaryObject(COSName.PARENT,
+                COSDictionary.class);
+        COSArray kids = parentDict.getDictionaryObject(COSName.KIDS, COSArray.class);
         boolean found = false;
         for (int i = 0; i < kids.size(); ++i)
         {
@@ -542,8 +543,9 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
     public void insertAfter(PDPage newPage, PDPage prevPage)
     {
         COSDictionary prevPageDict = prevPage.getCOSObject();
-        COSDictionary parentDict = (COSDictionary) prevPageDict.getDictionaryObject(COSName.PARENT);
-        COSArray kids = (COSArray) parentDict.getDictionaryObject(COSName.KIDS);
+        COSDictionary parentDict = prevPageDict.getDictionaryObject(COSName.PARENT,
+                COSDictionary.class);
+        COSArray kids = parentDict.getDictionaryObject(COSName.KIDS, COSArray.class);
         boolean found = false;
         for (int i = 0; i < kids.size(); ++i)
         {

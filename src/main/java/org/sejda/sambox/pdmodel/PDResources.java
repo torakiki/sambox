@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.pdmodel;
 
+import static java.util.Optional.ofNullable;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Optional;
@@ -409,12 +411,8 @@ public final class PDResources implements COSObjectable
      */
     private COSBase get(COSName kind, COSName name)
     {
-        COSDictionary dict = (COSDictionary) resources.getDictionaryObject(kind);
-        if (dict == null)
-        {
-            return null;
-        }
-        return dict.getDictionaryObject(name);
+        return ofNullable(resources.getDictionaryObject(kind, COSDictionary.class))
+                .map(d -> d.getDictionaryObject(name)).orElse(null);
     }
 
     /**
@@ -478,12 +476,8 @@ public final class PDResources implements COSObjectable
      */
     private Iterable<COSName> getNames(COSName kind)
     {
-        COSDictionary dict = (COSDictionary) resources.getDictionaryObject(kind);
-        if (dict == null)
-        {
-            return Collections.emptySet();
-        }
-        return dict.keySet();
+        return ofNullable(resources.getDictionaryObject(kind, COSDictionary.class))
+                .map(COSDictionary::keySet).orElseGet(Collections::emptySet);
     }
 
     /**
@@ -608,7 +602,7 @@ public final class PDResources implements COSObjectable
     private COSName add(COSName kind, String prefix, COSObjectable object)
     {
         // return the existing key if the item exists already
-        COSDictionary dict = (COSDictionary) resources.getDictionaryObject(kind);
+        COSDictionary dict = resources.getDictionaryObject(kind, COSDictionary.class);
         return Optional.ofNullable(dict).map(d -> d.getKeyForValue(object.getCOSObject()))
                 .orElseGet(() -> {
                     COSName name = createKey(kind, prefix);
@@ -622,7 +616,7 @@ public final class PDResources implements COSObjectable
      */
     private COSName createKey(COSName kind, String prefix)
     {
-        COSDictionary dict = (COSDictionary) resources.getDictionaryObject(kind);
+        COSDictionary dict = resources.getDictionaryObject(kind, COSDictionary.class);
         if (dict == null)
         {
             return COSName.getPDFName(prefix + 1);
@@ -644,7 +638,7 @@ public final class PDResources implements COSObjectable
      */
     private void put(COSName kind, COSName name, COSObjectable object)
     {
-        COSDictionary dict = (COSDictionary) resources.getDictionaryObject(kind);
+        COSDictionary dict = resources.getDictionaryObject(kind, COSDictionary.class);
         if (dict == null)
         {
             dict = new COSDictionary();

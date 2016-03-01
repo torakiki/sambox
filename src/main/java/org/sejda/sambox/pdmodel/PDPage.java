@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.pdmodel;
 
+import static java.util.Optional.ofNullable;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -332,7 +334,7 @@ public class PDPage implements COSObjectable, PDContentStream
     public PDRectangle getBleedBox()
     {
         PDRectangle retval;
-        COSArray array = (COSArray) page.getDictionaryObject(COSName.BLEED_BOX);
+        COSArray array = page.getDictionaryObject(COSName.BLEED_BOX, COSArray.class);
         if (array != null)
         {
             retval = clipToMediaBox(new PDRectangle(array));
@@ -408,7 +410,7 @@ public class PDPage implements COSObjectable, PDContentStream
     public PDRectangle getArtBox()
     {
         PDRectangle retval;
-        COSArray array = (COSArray) page.getDictionaryObject(COSName.ART_BOX);
+        COSArray array = page.getDictionaryObject(COSName.ART_BOX, COSArray.class);
         if (array != null)
         {
             retval = clipToMediaBox(new PDRectangle(array));
@@ -515,7 +517,7 @@ public class PDPage implements COSObjectable, PDContentStream
      */
     public List<PDThreadBead> getThreadBeads()
     {
-        COSArray beads = (COSArray) page.getDictionaryObject(COSName.B);
+        COSArray beads = page.getDictionaryObject(COSName.B, COSArray.class);
         if (beads == null)
         {
             beads = new COSArray();
@@ -554,13 +556,8 @@ public class PDPage implements COSObjectable, PDContentStream
      */
     public PDMetadata getMetadata()
     {
-        PDMetadata retval = null;
-        COSStream stream = (COSStream) page.getDictionaryObject(COSName.METADATA);
-        if (stream != null)
-        {
-            retval = new PDMetadata(stream);
-        }
-        return retval;
+        return ofNullable(page.getDictionaryObject(COSName.METADATA, COSStream.class))
+                .map(PDMetadata::new).orElse(null);
     }
 
     /**
@@ -580,7 +577,7 @@ public class PDPage implements COSObjectable, PDContentStream
      */
     public PDPageAdditionalActions getActions()
     {
-        COSDictionary addAct = (COSDictionary) page.getDictionaryObject(COSName.AA);
+        COSDictionary addAct = page.getDictionaryObject(COSName.AA, COSDictionary.class);
         if (addAct == null)
         {
             addAct = new COSDictionary();
@@ -604,9 +601,8 @@ public class PDPage implements COSObjectable, PDContentStream
      */
     public PDTransition getTransition()
     {
-        COSDictionary transitionDictionary = (COSDictionary) page
-                .getDictionaryObject(COSName.TRANS);
-        return transitionDictionary == null ? null : new PDTransition(transitionDictionary);
+        return ofNullable(page.getDictionaryObject(COSName.TRANS, COSDictionary.class))
+                .map(PDTransition::new).orElse(null);
     }
 
     /**
@@ -638,7 +634,7 @@ public class PDPage implements COSObjectable, PDContentStream
     public List<PDAnnotation> getAnnotations()
     {
         COSArrayList<PDAnnotation> retval;
-        COSArray annots = (COSArray) page.getDictionaryObject(COSName.ANNOTS);
+        COSArray annots = page.getDictionaryObject(COSName.ANNOTS, COSArray.class);
         if (annots == null)
         {
             annots = new COSArray();

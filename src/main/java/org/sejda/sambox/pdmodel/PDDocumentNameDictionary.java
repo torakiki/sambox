@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.pdmodel;
 
+import static java.util.Optional.ofNullable;
+
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
@@ -75,12 +77,8 @@ public class PDDocumentNameDictionary implements COSObjectable
      */
     public PDDestinationNameTreeNode getDests()
     {
-        COSDictionary dic = (COSDictionary) nameDictionary.getDictionaryObject(COSName.DESTS);
-        if (dic != null)
-        {
-            return new PDDestinationNameTreeNode(dic);
-        }
-        return null;
+        return ofNullable(nameDictionary.getDictionaryObject(COSName.DESTS, COSDictionary.class))
+                .map(PDDestinationNameTreeNode::new).orElse(null);
     }
 
     /**
@@ -130,16 +128,9 @@ public class PDDocumentNameDictionary implements COSObjectable
      */
     public PDJavascriptNameTreeNode getJavaScript()
     {
-        PDJavascriptNameTreeNode retval = null;
-
-        COSDictionary dic = (COSDictionary) nameDictionary.getDictionaryObject(COSName.JAVA_SCRIPT);
-
-        if (dic != null)
-        {
-            retval = new PDJavascriptNameTreeNode(dic);
-        }
-
-        return retval;
+        return ofNullable(
+                nameDictionary.getDictionaryObject(COSName.JAVA_SCRIPT, COSDictionary.class))
+                        .map(PDJavascriptNameTreeNode::new).orElse(null);
     }
 
     /**

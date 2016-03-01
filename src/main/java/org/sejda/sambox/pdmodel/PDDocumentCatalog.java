@@ -108,7 +108,7 @@ public class PDDocumentCatalog implements COSObjectable
     {
         if (cachedAcroForm == null)
         {
-            COSDictionary dict = (COSDictionary) root.getDictionaryObject(COSName.ACRO_FORM);
+            COSDictionary dict = root.getDictionaryObject(COSName.ACRO_FORM, COSDictionary.class);
             cachedAcroForm = dict == null ? null : new PDAcroForm(document, dict);
         }
         return cachedAcroForm;
@@ -141,8 +141,8 @@ public class PDDocumentCatalog implements COSObjectable
      */
     public PDViewerPreferences getViewerPreferences()
     {
-        COSBase base = root.getDictionaryObject(COSName.VIEWER_PREFERENCES);
-        return base instanceof COSDictionary ? new PDViewerPreferences((COSDictionary) base) : null;
+        return ofNullable(root.getDictionaryObject(COSName.VIEWER_PREFERENCES, COSDictionary.class))
+                .map(PDViewerPreferences::new).orElse(null);
     }
 
     /**
@@ -162,8 +162,8 @@ public class PDDocumentCatalog implements COSObjectable
      */
     public PDDocumentOutline getDocumentOutline()
     {
-        COSDictionary dict = (COSDictionary) root.getDictionaryObject(COSName.OUTLINES);
-        return dict == null ? null : new PDDocumentOutline(dict);
+        return ofNullable(root.getDictionaryObject(COSName.OUTLINES, COSDictionary.class))
+                .map(PDDocumentOutline::new).orElse(null);
     }
 
     /**
@@ -213,12 +213,8 @@ public class PDDocumentCatalog implements COSObjectable
      */
     public PDMetadata getMetadata()
     {
-        COSBase metaObj = root.getDictionaryObject(COSName.METADATA);
-        if (metaObj instanceof COSStream)
-        {
-            return new PDMetadata((COSStream) metaObj);
-        }
-        return null;
+        return ofNullable(root.getDictionaryObject(COSName.METADATA, COSStream.class))
+                .map(PDMetadata::new).orElse(null);
     }
 
     /**
@@ -273,7 +269,7 @@ public class PDDocumentCatalog implements COSObjectable
      */
     public PDDocumentCatalogAdditionalActions getActions()
     {
-        COSDictionary addAction = (COSDictionary) root.getDictionaryObject(COSName.AA);
+        COSDictionary addAction = root.getDictionaryObject(COSName.AA, COSDictionary.class);
         if (addAction == null)
         {
             addAction = new COSDictionary();
@@ -297,8 +293,8 @@ public class PDDocumentCatalog implements COSObjectable
      */
     public PDDocumentNameDictionary getNames()
     {
-        COSDictionary names = (COSDictionary) root.getDictionaryObject(COSName.NAMES);
-        return names == null ? null : new PDDocumentNameDictionary(names);
+        return ofNullable(root.getDictionaryObject(COSName.NAMES, COSDictionary.class))
+                .map(PDDocumentNameDictionary::new).orElse(null);
     }
 
     /**
@@ -306,13 +302,8 @@ public class PDDocumentCatalog implements COSObjectable
      */
     public PDDocumentNameDestinationDictionary getDests()
     {
-        PDDocumentNameDestinationDictionary nameDic = null;
-        COSDictionary dests = (COSDictionary) root.getDictionaryObject(COSName.DESTS);
-        if (dests != null)
-        {
-            nameDic = new PDDocumentNameDestinationDictionary(dests);
-        }
-        return nameDic;
+        return ofNullable(root.getDictionaryObject(COSName.DESTS, COSDictionary.class))
+                .map(PDDocumentNameDestinationDictionary::new).orElse(null);
     }
 
     /**
@@ -332,8 +323,8 @@ public class PDDocumentCatalog implements COSObjectable
      */
     public PDMarkInfo getMarkInfo()
     {
-        COSDictionary dic = (COSDictionary) root.getDictionaryObject(COSName.MARK_INFO);
-        return dic == null ? null : new PDMarkInfo(dic);
+        return ofNullable(root.getDictionaryObject(COSName.MARK_INFO, COSDictionary.class))
+                .map(PDMarkInfo::new).orElse(null);
     }
 
     /**
@@ -354,7 +345,7 @@ public class PDDocumentCatalog implements COSObjectable
     public List<PDOutputIntent> getOutputIntents()
     {
         List<PDOutputIntent> retval = new ArrayList<>();
-        COSArray array = (COSArray) root.getDictionaryObject(COSName.OUTPUT_INTENTS);
+        COSArray array = root.getDictionaryObject(COSName.OUTPUT_INTENTS, COSArray.class);
         if (array != null)
         {
             for (COSBase cosBase : array)
@@ -373,7 +364,7 @@ public class PDDocumentCatalog implements COSObjectable
      */
     public void addOutputIntent(PDOutputIntent outputIntent)
     {
-        COSArray array = (COSArray) root.getDictionaryObject(COSName.OUTPUT_INTENTS);
+        COSArray array = root.getDictionaryObject(COSName.OUTPUT_INTENTS, COSArray.class);
         if (array == null)
         {
             array = new COSArray();
@@ -462,8 +453,8 @@ public class PDDocumentCatalog implements COSObjectable
      */
     public PDURIDictionary getURI()
     {
-        COSDictionary uri = (COSDictionary) root.getDictionaryObject(COSName.URI);
-        return uri == null ? null : new PDURIDictionary(uri);
+        return ofNullable(root.getDictionaryObject(COSName.URI, COSDictionary.class))
+                .map(PDURIDictionary::new).orElse(null);
     }
 
     /**
@@ -481,8 +472,8 @@ public class PDDocumentCatalog implements COSObjectable
      */
     public PDStructureTreeRoot getStructureTreeRoot()
     {
-        COSDictionary dict = (COSDictionary) root.getDictionaryObject(COSName.STRUCT_TREE_ROOT);
-        return dict == null ? null : new PDStructureTreeRoot(dict);
+        return ofNullable(root.getDictionaryObject(COSName.STRUCT_TREE_ROOT, COSDictionary.class))
+                .map(PDStructureTreeRoot::new).orElse(null);
     }
 
     /**
@@ -562,8 +553,8 @@ public class PDDocumentCatalog implements COSObjectable
      */
     public PDOptionalContentProperties getOCProperties()
     {
-        COSDictionary dict = (COSDictionary) root.getDictionaryObject(COSName.OCPROPERTIES);
-        return dict == null ? null : new PDOptionalContentProperties(dict);
+        return ofNullable(root.getDictionaryObject(COSName.OCPROPERTIES, COSDictionary.class))
+                .map(PDOptionalContentProperties::new).orElse(null);
     }
 
     /**

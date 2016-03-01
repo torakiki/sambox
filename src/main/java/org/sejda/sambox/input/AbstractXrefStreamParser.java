@@ -94,7 +94,7 @@ abstract class AbstractXrefStreamParser
     void parseStream(COSStream xrefStream) throws IOException
     {
         LongStream objectNumbers = empty();
-        COSArray index = (COSArray) xrefStream.getDictionaryObject(COSName.INDEX);
+        COSArray index = xrefStream.getDictionaryObject(COSName.INDEX, COSArray.class);
 
         if (index == null)
         {

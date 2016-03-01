@@ -17,6 +17,7 @@
 package org.sejda.sambox.cos;
 
 import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -101,6 +102,18 @@ public class COSDictionary extends COSBase
     }
 
     /**
+     * Get an object of the expected type from this dictionary. If the type is not compatible, null is returned
+     * 
+     * @param key
+     * @param clazz
+     * @return The object that matches the key and the type or null.
+     */
+    public <T extends COSBase> T getDictionaryObject(String key, Class<T> clazz)
+    {
+        return getDictionaryObject(COSName.getPDFName(key), clazz);
+    }
+
+    /**
      * This is a special case of getDictionaryObject that takes multiple keys, it will handle the situation where
      * multiple keys could get the same value, ie if either CS or ColorSpace is used to get the colorspace. This will
      * get an object from this dictionary. If the object is a reference then it will dereference it and get it from the
@@ -125,12 +138,25 @@ public class COSDictionary extends COSBase
      * COSNull then null will be returned.
      *
      * @param key The key to the object that we are getting.
-     * @return The object that matches the key.
+     * @return The object that matches the key or null.
      */
     public COSBase getDictionaryObject(COSName key)
     {
-        return Optional.ofNullable(items.get(key)).map(COSBase::getCOSObject)
+        return ofNullable(items.get(key)).map(COSBase::getCOSObject)
                 .filter(i -> !COSNull.NULL.equals(i)).orElse(null);
+    }
+
+    /**
+     * Get an object of the expected type from this dictionary. If the type is not compatible, null is returned
+     * 
+     * @param key
+     * @param clazz
+     * @return The object that matches the key and the type or null.
+     */
+    public <T extends COSBase> T getDictionaryObject(COSName key, Class<T> clazz)
+    {
+        return ofNullable(items.get(key)).map(COSBase::getCOSObject)
+                .filter(i -> clazz.isInstance(i)).map(clazz::cast).orElse(null);
     }
 
     /**
@@ -298,7 +324,7 @@ public class COSDictionary extends COSBase
      */
     public void setEmbeddedDate(String embedded, COSName key, Calendar date)
     {
-        COSDictionary dic = (COSDictionary) getDictionaryObject(embedded);
+        COSDictionary dic = getDictionaryObject(embedded, COSDictionary.class);
         if (dic == null && date != null)
         {
             dic = new COSDictionary();
@@ -367,7 +393,7 @@ public class COSDictionary extends COSBase
      */
     public void setEmbeddedString(String embedded, COSName key, String value)
     {
-        COSDictionary dic = (COSDictionary) getDictionaryObject(embedded);
+        COSDictionary dic = getDictionaryObject(embedded, COSDictionary.class);
         if (dic == null && value != null)
         {
             dic = new COSDictionary();
@@ -454,7 +480,7 @@ public class COSDictionary extends COSBase
      */
     public void setEmbeddedInt(String embeddedDictionary, COSName key, long value)
     {
-        COSDictionary embedded = (COSDictionary) getDictionaryObject(embeddedDictionary);
+        COSDictionary embedded = getDictionaryObject(embeddedDictionary, COSDictionary.class);
         if (embedded == null)
         {
             embedded = new COSDictionary();
@@ -528,12 +554,7 @@ public class COSDictionary extends COSBase
      */
     public COSName getCOSName(COSName key, COSName defaultValue)
     {
-        COSBase name = getDictionaryObject(key);
-        if (name instanceof COSName)
-        {
-            return (COSName) name;
-        }
-        return defaultValue;
+        return ofNullable(getDictionaryObject(key, COSName.class)).orElse(defaultValue);
     }
 
     /**
@@ -616,12 +637,8 @@ public class COSDictionary extends COSBase
      */
     public String getString(COSName key)
     {
-        COSBase value = getDictionaryObject(key);
-        if (value instanceof COSString)
-        {
-            return ((COSString) value).getString();
-        }
-        return null;
+        return ofNullable(getDictionaryObject(key, COSString.class)).map(COSString::getString)
+                .orElse(null);
     }
 
     /**
@@ -647,7 +664,7 @@ public class COSDictionary extends COSBase
      */
     public String getString(COSName key, String defaultValue)
     {
-        return Optional.ofNullable(getString(key)).orElse(defaultValue);
+        return ofNullable(getString(key)).orElse(defaultValue);
     }
 
     /**
@@ -701,12 +718,8 @@ public class COSDictionary extends COSBase
      */
     public String getEmbeddedString(String embedded, COSName key, String defaultValue)
     {
-        COSDictionary dic = (COSDictionary) getDictionaryObject(embedded);
-        if (dic != null)
-        {
-            return dic.getString(key, defaultValue);
-        }
-        return defaultValue;
+        return ofNullable(getDictionaryObject(embedded, COSDictionary.class))
+                .map(d -> d.getString(key, defaultValue)).orElse(defaultValue);
     }
 
     /**
@@ -730,7 +743,7 @@ public class COSDictionary extends COSBase
      */
     public Calendar getDate(COSName key)
     {
-        return DateConverter.toCalendar((COSString) getDictionaryObject(key));
+        return DateConverter.toCalendar(getDictionaryObject(key, COSString.class));
     }
 
     /**
@@ -810,12 +823,8 @@ public class COSDictionary extends COSBase
      */
     public Calendar getEmbeddedDate(String embedded, COSName key, Calendar defaultValue)
     {
-        COSDictionary eDic = (COSDictionary) getDictionaryObject(embedded);
-        if (eDic != null)
-        {
-            return eDic.getDate(key, defaultValue);
-        }
-        return defaultValue;
+        return ofNullable(getDictionaryObject(embedded, COSDictionary.class))
+                .map(d -> d.getDate(key, defaultValue)).orElse(defaultValue);
     }
 
     /**
@@ -917,12 +926,8 @@ public class COSDictionary extends COSBase
      */
     public int getEmbeddedInt(String embeddedDictionary, COSName key, int defaultValue)
     {
-        COSDictionary embedded = (COSDictionary) getDictionaryObject(embeddedDictionary);
-        if (embedded != null)
-        {
-            return embedded.getInt(key, defaultValue);
-        }
-        return defaultValue;
+        return ofNullable(getDictionaryObject(embeddedDictionary, COSDictionary.class))
+                .map(d -> d.getInt(key, defaultValue)).orElse(defaultValue);
     }
 
     /**
@@ -1055,12 +1060,8 @@ public class COSDictionary extends COSBase
      */
     public long getLong(COSName key, long defaultValue)
     {
-        COSBase obj = getDictionaryObject(key);
-        if (obj instanceof COSNumber)
-        {
-            return ((COSNumber) obj).longValue();
-        }
-        return defaultValue;
+        return ofNullable(getDictionaryObject(key, COSNumber.class)).map(COSNumber::longValue)
+                .orElse(defaultValue);
     }
 
     /**
@@ -1110,12 +1111,8 @@ public class COSDictionary extends COSBase
      */
     public float getFloat(COSName key, float defaultValue)
     {
-        COSBase obj = getDictionaryObject(key);
-        if (obj instanceof COSNumber)
-        {
-            return ((COSNumber) obj).floatValue();
-        }
-        return defaultValue;
+        return ofNullable(getDictionaryObject(key, COSNumber.class)).map(COSNumber::floatValue)
+                .orElse(defaultValue);
     }
 
     /**

@@ -16,12 +16,13 @@
  */
 package org.sejda.sambox.pdmodel.interactive.documentnavigation.outline;
 
+import static java.util.Optional.ofNullable;
+
 import java.util.Iterator;
 
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.common.PDDictionaryWrapper;
-
 /**
  * Base class for a node in the outline of a PDF document.
  *
@@ -48,7 +49,8 @@ public abstract class PDOutlineNode extends PDDictionaryWrapper
      */
     PDOutlineNode getParent()
     {
-        COSDictionary item = (COSDictionary) getCOSObject().getDictionaryObject(COSName.PARENT);
+        COSDictionary item = getCOSObject().getDictionaryObject(COSName.PARENT,
+                COSDictionary.class);
         if (item != null)
         {
             if (COSName.OUTLINES.equals(item.getCOSName(COSName.TYPE)))
@@ -170,12 +172,8 @@ public abstract class PDOutlineNode extends PDDictionaryWrapper
 
     PDOutlineItem getOutlineItem(COSName name)
     {
-        COSDictionary item = (COSDictionary) getCOSObject().getDictionaryObject(name);
-        if (item != null)
-        {
-            return new PDOutlineItem(item);
-        }
-        return null;
+        return ofNullable(getCOSObject().getDictionaryObject(name, COSDictionary.class))
+                .map(PDOutlineItem::new).orElse(null);
     }
 
     /**
@@ -215,9 +213,8 @@ public abstract class PDOutlineNode extends PDDictionaryWrapper
     }
 
     /**
-     * Get the number of open nodes or a negative number if this node is closed.
-     * See PDF Reference 32000-1:2008 table 152 and 153 for more details. This
-     * value is updated as you append children and siblings.
+     * Get the number of open nodes or a negative number if this node is closed. See PDF Reference 32000-1:2008 table
+     * 152 and 153 for more details. This value is updated as you append children and siblings.
      *
      * @return The Count attribute of the outline dictionary.
      */
@@ -242,8 +239,8 @@ public abstract class PDOutlineNode extends PDDictionaryWrapper
      */
     public void openNode()
     {
-        //if the node is already open then do nothing.
-        if( !isNodeOpen() )
+        // if the node is already open then do nothing.
+        if (!isNodeOpen())
         {
             switchNodeCount();
         }

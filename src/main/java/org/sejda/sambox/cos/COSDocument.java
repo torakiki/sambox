@@ -56,8 +56,7 @@ public class COSDocument extends COSBase
         requireNotBlank(headerVersion, "Header version cannot be blank");
         this.trailer = trailer;
         this.headerVersion = headerVersion;
-        ofNullable(this.trailer.getDictionaryObject(COSName.ROOT))
-                .filter(c -> c instanceof COSDictionary).map(c -> (COSDictionary) c)
+        ofNullable(this.trailer.getDictionaryObject(COSName.ROOT, COSDictionary.class))
                 .ifPresent(d -> d.setItem(COSName.TYPE, COSName.CATALOG));
     }
 
@@ -97,7 +96,7 @@ public class COSDocument extends COSBase
      */
     public COSDictionary getEncryptionDictionary()
     {
-        return (COSDictionary) trailer.getDictionaryObject(COSName.ENCRYPT);
+        return trailer.getDictionaryObject(COSName.ENCRYPT, COSDictionary.class);
     }
 
     /**
@@ -112,7 +111,7 @@ public class COSDocument extends COSBase
 
     public COSArray getDocumentID()
     {
-        return (COSArray) trailer.getDictionaryObject(COSName.ID);
+        return trailer.getDictionaryObject(COSName.ID, COSArray.class);
     }
 
     public void setDocumentID(COSArray id)
@@ -126,7 +125,7 @@ public class COSDocument extends COSBase
      */
     public COSDictionary getCatalog()
     {
-        return (COSDictionary) Optional.ofNullable(trailer.getDictionaryObject(COSName.ROOT))
+        return Optional.ofNullable(trailer.getDictionaryObject(COSName.ROOT, COSDictionary.class))
                 .orElseThrow(() -> new IllegalStateException("Catalog cannot be found"));
     }
 
