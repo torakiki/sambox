@@ -252,7 +252,7 @@ public abstract class PDNameTreeNode<T extends COSObjectable> implements COSObje
     {
         if (isNull(getLowerLimit()) || isNull(getUpperLimit()))
         {
-            LOG.warn("Missing requried name tree node Limits array");
+            LOG.warn("Missing required name tree node Limits array");
             return false;
         }
         return getLowerLimit().compareTo(name) <= 0 && getUpperLimit().compareTo(name) >= 0;
