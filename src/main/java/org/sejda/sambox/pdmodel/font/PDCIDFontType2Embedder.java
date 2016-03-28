@@ -24,6 +24,8 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.fontbox.ttf.TrueTypeFont;
 import org.sejda.sambox.cos.COSArray;
@@ -231,7 +233,7 @@ final class PDCIDFontType2Embedder extends TrueTypeEmbedder
 
         InputStream input = new ByteArrayInputStream(out.toByteArray());
         PDStream stream = new PDStream(input, COSName.FLATE_DECODE);
-        stream.getStream().setInt(COSName.LENGTH1, stream.toByteArray().length);
+        stream.getCOSObject().setInt(COSName.LENGTH1, stream.toByteArray().length);
 
         cidFont.setItem(COSName.CID_TO_GID_MAP, stream);
     }
@@ -263,15 +265,11 @@ final class PDCIDFontType2Embedder extends TrueTypeEmbedder
 
         COSArray widths = new COSArray();
         COSArray ws = new COSArray();
-        int prev = -1;
-
-        for (int cid : cidToGid.keySet())
+        int prev = Integer.MIN_VALUE;
+        // Use a sorted list to get an optimal width array
+        Set<Integer> keys = new TreeSet<>(cidToGid.keySet());
+        for (int cid : keys)
         {
-            if (!cidToGid.containsKey(cid))
-            {
-                continue;
-            }
-
             int gid = cidToGid.get(cid);
             float width = ttf.getHorizontalMetrics().getAdvanceWidth(gid) * scaling;
 

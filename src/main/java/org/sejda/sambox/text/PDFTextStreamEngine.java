@@ -304,7 +304,7 @@ class PDFTextStreamEngine extends PDFStreamEngine
         processTextPosition(new TextPosition(pageRotation, pageSize.getWidth(),
                 pageSize.getHeight(), translatedTextRenderingMatrix, nextX, nextY, dyDisplay,
                 dxDisplay, spaceWidthDisplay, unicode, new int[] { code }, font, fontSize,
-                (int) (fontSize * textRenderingMatrix.getScalingFactorX())));
+                (int) (fontSize * textMatrix.getScalingFactorX())));
     }
 
     /**

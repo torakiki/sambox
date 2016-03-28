@@ -48,6 +48,7 @@ public class COSFloat extends COSNumber
         try
         {
             value = new BigDecimal(aFloat);
+            checkMinMaxValues();
         }
         catch (NumberFormatException e)
         {
@@ -58,6 +59,7 @@ public class COSFloat extends COSNumber
                 try
                 {
                     value = new BigDecimal(aFloat.substring(8));
+                    checkMinMaxValues();
                 }
                 catch (NumberFormatException e2)
                 {
@@ -70,6 +72,37 @@ public class COSFloat extends COSNumber
                 throw new IOException(
                         "Error expected floating point number actual='" + aFloat + "'", e);
             }
+        }
+    }
+
+    private void checkMinMaxValues()
+    {
+        float floatValue = value.floatValue();
+        double doubleValue = value.doubleValue();
+        boolean valueReplaced = false;
+        // check for huge values
+        if (floatValue == Float.NEGATIVE_INFINITY || floatValue == Float.POSITIVE_INFINITY)
+        {
+
+            if (Math.abs(doubleValue) > Float.MAX_VALUE)
+            {
+                floatValue = Float.MAX_VALUE * (floatValue == Float.POSITIVE_INFINITY ? 1 : -1);
+                valueReplaced = true;
+            }
+        }
+        // check for very small values
+        else if (floatValue == 0 && doubleValue != 0)
+        {
+            if (Math.abs(doubleValue) < Float.MIN_NORMAL)
+            {
+                floatValue = Float.MIN_NORMAL;
+                floatValue *= doubleValue >= 0 ? 1 : -1;
+                valueReplaced = true;
+            }
+        }
+        if (valueReplaced)
+        {
+            value = new BigDecimal(floatValue);
         }
     }
 

@@ -35,6 +35,7 @@ import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.PDPage;
 import org.sejda.sambox.pdmodel.PDPageContentStream;
+import org.sejda.sambox.pdmodel.PDPageContentStream.AppendMode;
 import org.sejda.sambox.rendering.PDFRenderer;
 
 /**
@@ -48,11 +49,11 @@ public class ValidateXImage
     {
         // check the dictionary
         assertNotNull(ximage);
-        COSStream cosStream = ximage.getCOSStream();
+        COSStream cosStream = ximage.getCOSObject();
         assertNotNull(cosStream);
         assertEquals(COSName.XOBJECT, cosStream.getItem(COSName.TYPE));
         assertEquals(COSName.IMAGE, cosStream.getItem(COSName.SUBTYPE));
-        assertTrue(ximage.getCOSStream().getFilteredLength() > 0);
+        assertTrue(ximage.getCOSObject().getFilteredLength() > 0);
         assertEquals(bpc, ximage.getBitsPerComponent());
         assertEquals(width, ximage.getWidth());
         assertEquals(height, ximage.getHeight());
@@ -99,7 +100,8 @@ public class ValidateXImage
 
         PDPage page = new PDPage();
         document.addPage(page);
-        PDPageContentStream contentStream = new PDPageContentStream(document, page, true, false);
+        PDPageContentStream contentStream = new PDPageContentStream(document, page,
+                AppendMode.APPEND, false);
         contentStream.drawImage(ximage, 150, 300);
         contentStream.drawImage(ximage, 200, 350);
         contentStream.close();

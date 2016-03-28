@@ -41,9 +41,11 @@ import java.util.Map;
 import org.sejda.sambox.contentstream.PDFGraphicsStreamEngine;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
+import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSNumber;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
+import org.sejda.sambox.pdmodel.common.function.PDFunction;
 import org.sejda.sambox.pdmodel.font.PDCIDFontType0;
 import org.sejda.sambox.pdmodel.font.PDCIDFontType2;
 import org.sejda.sambox.pdmodel.font.PDFont;
@@ -553,7 +555,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
                 float w = transformWidth(dashArray[i]);
                 if (w != 0)
                 {
-                    dashArray[i] = Math.max(w, 0.016f);
+                    dashArray[i] = Math.max(w, 0.035f);
                 }
             }
             phaseStart = (int) transformWidth(phaseStart);
@@ -807,6 +809,11 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         }
         else
         {
+            COSBase transfer = getGraphicsState().getTransfer();
+            if (transfer instanceof COSArray || transfer instanceof COSDictionary)
+            {
+                image = applyTransferFunction(image, transfer);
+            }
             int width = image.getWidth(null);
             int height = image.getHeight(null);
             AffineTransform imageTransform = new AffineTransform(at);
@@ -814,6 +821,92 @@ public class PageDrawer extends PDFGraphicsStreamEngine
             imageTransform.translate(0, -height);
             graphics.drawImage(image, imageTransform, null);
         }
+    }
+
+    private BufferedImage applyTransferFunction(BufferedImage image, COSBase transfer)
+            throws IOException
+    {
+        BufferedImage bim;
+        if (image.getColorModel().hasAlpha())
+        {
+            bim = new BufferedImage(image.getWidth(), image.getHeight(),
+                    BufferedImage.TYPE_INT_ARGB);
+        }
+        else
+        {
+            bim = new BufferedImage(image.getWidth(), image.getHeight(),
+                    BufferedImage.TYPE_INT_RGB);
+        }
+
+        // prepare transfer functions (either one per color or one for all)
+        // and maps (actually arrays[256] to be faster) to avoid calculating values several times
+        Integer rMap[], gMap[], bMap[];
+        PDFunction rf, gf, bf;
+        if (transfer instanceof COSArray)
+        {
+            COSArray ar = (COSArray) transfer;
+            rf = PDFunction.create(ar.getObject(0));
+            gf = PDFunction.create(ar.getObject(1));
+            bf = PDFunction.create(ar.getObject(2));
+            rMap = new Integer[256];
+            gMap = new Integer[256];
+            bMap = new Integer[256];
+        }
+        else
+        {
+            rf = PDFunction.create(transfer);
+            gf = rf;
+            bf = rf;
+            rMap = new Integer[256];
+            gMap = rMap;
+            bMap = rMap;
+        }
+
+        // apply the transfer function to each color, but keep alpha
+        float input[] = new float[1];
+        for (int x = 0; x < image.getWidth(); ++x)
+        {
+            for (int y = 0; y < image.getHeight(); ++y)
+            {
+                int rgb = image.getRGB(x, y);
+                int ri = (rgb >> 16) & 0xFF;
+                int gi = (rgb >> 8) & 0xFF;
+                int bi = rgb & 0xFF;
+                int ro, go, bo;
+                if (rMap[ri] != null)
+                {
+                    ro = rMap[ri];
+                }
+                else
+                {
+                    input[0] = (ri & 0xFF) / 255f;
+                    ro = (int) (rf.eval(input)[0] * 255);
+                    rMap[ri] = ro;
+                }
+                if (gMap[gi] != null)
+                {
+                    go = gMap[gi];
+                }
+                else
+                {
+                    input[0] = (gi & 0xFF) / 255f;
+                    go = (int) (gf.eval(input)[0] * 255);
+                    gMap[gi] = go;
+                }
+                if (bMap[bi] != null)
+                {
+                    bo = bMap[bi];
+                }
+                else
+                {
+                    input[0] = (bi & 0xFF) / 255f;
+                    bo = (int) (bf.eval(input)[0] * 255);
+                    bMap[bi] = bo;
+                }
+                bim.setRGB(x, y, (rgb & 0xFF000000) | (ro << 16) | (go << 8) | bo);
+            }
+        }
+        return bim;
     }
 
     @Override

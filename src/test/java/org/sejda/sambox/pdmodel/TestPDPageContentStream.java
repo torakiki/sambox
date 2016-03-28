@@ -19,11 +19,12 @@ package org.sejda.sambox.pdmodel;
 import java.io.IOException;
 import java.util.List;
 
-import junit.framework.TestCase;
-
 import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.cos.COSFloat;
 import org.sejda.sambox.input.ContentStreamParser;
+import org.sejda.sambox.pdmodel.PDPageContentStream.AppendMode;
+
+import junit.framework.TestCase;
 
 /**
  * @author Yegor Kozlov
@@ -37,7 +38,8 @@ public class TestPDPageContentStream extends TestCase
         PDPage page = new PDPage();
         doc.addPage(page);
 
-        PDPageContentStream contentStream = new PDPageContentStream(doc, page, false, true);
+        PDPageContentStream contentStream = new PDPageContentStream(doc, page, AppendMode.OVERWRITE,
+                true);
         // pass a non-stroking color in CMYK color space
         contentStream.setNonStrokingColor(0.1f, 0.2f, 0.3f, 0.4f);
         contentStream.close();
@@ -62,7 +64,7 @@ public class TestPDPageContentStream extends TestCase
         page = new PDPage();
         doc.addPage(page);
 
-        contentStream = new PDPageContentStream(doc, page, false, false);
+        contentStream = new PDPageContentStream(doc, page, AppendMode.OVERWRITE, false);
         // pass a non-stroking color in CMYK color space
         contentStream.setStrokingColor(0.5f, 0.6f, 0.7f, 0.8f);
         contentStream.close();

@@ -486,6 +486,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName TM = newCommonInstance("TM");
     public static final COSName TO_UNICODE = newCommonInstance("ToUnicode");
     public static final COSName TR = newCommonInstance("TR");
+    public static final COSName TR2 = newCommonInstance("TR2");
     public static final COSName TRAPPED = newCommonInstance("Trapped");
     public static final COSName TRANS = newCommonInstance("Trans");
     public static final COSName TRANSPARENCY = newCommonInstance("Transparency");

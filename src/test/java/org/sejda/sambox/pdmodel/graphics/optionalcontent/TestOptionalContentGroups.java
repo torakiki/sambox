@@ -22,8 +22,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
 
-import junit.framework.TestCase;
-
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.input.PDFParser;
@@ -31,11 +29,14 @@ import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.PDDocumentCatalog;
 import org.sejda.sambox.pdmodel.PDPage;
 import org.sejda.sambox.pdmodel.PDPageContentStream;
+import org.sejda.sambox.pdmodel.PDPageContentStream.AppendMode;
 import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.font.PDFont;
 import org.sejda.sambox.pdmodel.font.PDType1Font;
 import org.sejda.sambox.pdmodel.graphics.optionalcontent.PDOptionalContentProperties.BaseState;
 import org.sejda.sambox.util.SpecVersionUtils;
+
+import junit.framework.TestCase;
 
 /**
  * Tests optional content group functionality (also called layers).
@@ -95,7 +96,8 @@ public class TestOptionalContentGroups extends TestCase
             assertFalse(ocprops.isGroupEnabled("disabled"));
 
             //Setup page content stream and paint background/title
-            PDPageContentStream contentStream = new PDPageContentStream(doc, page, false, false);
+            PDPageContentStream contentStream = new PDPageContentStream(doc, page,
+                    AppendMode.OVERWRITE, false);
             PDFont font = PDType1Font.HELVETICA_BOLD;
             contentStream.beginMarkedContent(COSName.OC, background);
             contentStream.beginText();

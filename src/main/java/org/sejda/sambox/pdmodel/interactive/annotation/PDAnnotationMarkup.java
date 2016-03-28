@@ -214,13 +214,17 @@ public class PDAnnotationMarkup extends PDAnnotation
      * This will retrieve the annotation to which this one is "In Reply To" the actual relationship is specified by the
      * RT entry.
      *
-     * @return the other annotation.
-     * @throws IOException if there is an error with the annotation.
+     * @return the other annotation or null if there is none.
+     * @throws IOException if there is an error creating the other annotation.
      */
     public PDAnnotation getInReplyTo()
     {
-        COSBase irt = getCOSObject().getDictionaryObject("IRT");
-        return PDAnnotation.createAnnotation(irt);
+        COSDictionary base = getCOSObject().getDictionaryObject("IRT", COSDictionary.class);
+        if (base != null)
+        {
+            return PDAnnotation.createAnnotation(base);
+        }
+        return null;
     }
 
     /**
@@ -341,7 +345,7 @@ public class PDAnnotationMarkup extends PDAnnotation
      */
     public PDBorderStyleDictionary getBorderStyle()
     {
-        COSDictionary bs = (COSDictionary) this.getCOSObject().getDictionaryObject(COSName.BS);
+        COSDictionary bs = this.getCOSObject().getDictionaryObject(COSName.BS, COSDictionary.class);
         if (bs != null)
         {
             return new PDBorderStyleDictionary(bs);

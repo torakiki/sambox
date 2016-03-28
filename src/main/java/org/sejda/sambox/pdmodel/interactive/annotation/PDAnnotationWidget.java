@@ -188,7 +188,7 @@ public class PDAnnotationWidget extends PDAnnotation
      */
     public PDBorderStyleDictionary getBorderStyle()
     {
-        COSDictionary bs = (COSDictionary) this.getCOSObject().getDictionaryObject(COSName.BS);
+        COSDictionary bs = this.getCOSObject().getDictionaryObject(COSName.BS, COSDictionary.class);
         if (bs != null)
         {
             return new PDBorderStyleDictionary(bs);

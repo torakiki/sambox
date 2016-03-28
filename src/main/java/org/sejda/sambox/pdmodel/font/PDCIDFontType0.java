@@ -40,6 +40,7 @@ import org.sejda.sambox.pdmodel.common.PDStream;
 import org.sejda.sambox.util.Matrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 /**
  * Type 0 CIDFont (CFF).
  * 
@@ -60,6 +61,7 @@ public class PDCIDFontType0 extends PDCIDFont
     private Float avgWidth = null;
     private Matrix fontMatrix;
     private final AffineTransform fontMatrixTransform;
+    private BoundingBox fontBBox;
 
     /**
      * Constructor.
@@ -199,6 +201,15 @@ public class PDCIDFontType0 extends PDCIDFont
 
     @Override
     public BoundingBox getBoundingBox()
+    {
+        if (fontBBox == null)
+        {
+            fontBBox = generateBoundingBox();
+        }
+        return fontBBox;
+    }
+
+    private BoundingBox generateBoundingBox()
     {
         if (getFontDescriptor() != null)
         {

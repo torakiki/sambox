@@ -356,8 +356,10 @@ class SourceReader implements Closeable
                 char c = (char) i;
                 if (c == '#')
                 {
-                    char ch1 = (char) source.read();
-                    char ch2 = (char) source.read();
+                    int ch1 = source.read();
+                    int ch2 = source.read();
+                    requireIOCondition(ch2 != -1 && ch1 != -1,
+                            "Expected 2-digit hexadecimal code but was end of file");
 
                     // Prior to PDF v1.2, the # was not a special character. Also,
                     // it has been observed that various PDF tools do not follow the
@@ -366,9 +368,9 @@ class SourceReader implements Closeable
                     // interpret the # as an escape only when it is followed by two
                     // valid hex digits.
                     //
-                    if (isHexDigit(ch1) && isHexDigit(ch2))
+                    if (isHexDigit((char) ch1) && isHexDigit((char) ch2))
                     {
-                        String hex = "" + ch1 + ch2;
+                        String hex = "" + (char) ch1 + (char) ch2;
                         c = (char) Integer.parseInt(hex, 16);
                     }
                     else

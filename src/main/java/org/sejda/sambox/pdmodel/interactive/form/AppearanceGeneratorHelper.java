@@ -216,7 +216,7 @@ class AppearanceGeneratorHelper
         // then replace the existing contents of the appearance stream from /Tx BMC
         // to the matching EMC
         try (ContentStreamWriter writer = new ContentStreamWriter(from(appearanceStream
-                .getCOSStream().createUnfilteredStream())))
+                .getCOSObject().createUnfilteredStream())))
         {
 
             List<Object> tokens = tokenize(appearanceStream);

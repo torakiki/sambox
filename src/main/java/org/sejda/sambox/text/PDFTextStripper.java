@@ -708,6 +708,7 @@ public class PDFTextStripper extends PDFTextStreamEngine
                 if (startOfPage)
                 {
                     lastPosition.setParagraphStart();
+                    lastPosition.setLineStart();
                     lastLineStartPosition = lastPosition;
                     startOfPage = false;
                 }
@@ -1434,12 +1435,17 @@ public class PDFTextStripper extends PDFTextStreamEngine
             PositionWrapper lastPosition, PositionWrapper lastLineStartPosition,
             float maxHeightForLine) throws IOException
     {
+        current.setLineStart();
         isParagraphSeparation(current, lastPosition, lastLineStartPosition, maxHeightForLine);
         lastLineStartPosition = current;
         if (current.isParagraphStart())
         {
             if (lastPosition.isArticleStart())
             {
+                if (lastPosition.isLineStart())
+                {
+                    writeLineSeparator();
+                }
                 writeParagraphStart();
             }
             else
@@ -2071,6 +2077,7 @@ public class PDFTextStripper extends PDFTextStreamEngine
      */
     private static final class PositionWrapper
     {
+        private boolean isLineStart = false;
         private boolean isParagraphStart = false;
         private boolean isHangingIndent = false;
         private boolean isArticleStart = false;
@@ -2095,6 +2102,19 @@ public class PDFTextStripper extends PDFTextStreamEngine
         public TextPosition getTextPosition()
         {
             return position;
+        }
+
+        public boolean isLineStart()
+        {
+            return isLineStart;
+        }
+
+        /**
+         * Sets the isLineStart() flag to true.
+         */
+        public void setLineStart()
+        {
+            this.isLineStart = true;
         }
 
         public boolean isParagraphStart()

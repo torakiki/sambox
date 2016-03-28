@@ -398,6 +398,13 @@ public class SourceReaderTest
         assertEquals("The_Key_of_F#_Minor", victim.readName());
     }
 
+    @Test(expected = IOException.class)
+    public void readNameNumberSignUnexpectedEOF() throws IOException
+    {
+        victim = new SourceReader(inMemorySeekableSourceFrom("/The_Key_of_F#2".getBytes()));
+        victim.readName();
+    }
+
     @Test
     public void readNameNumberSignForStandardChar() throws IOException
     {

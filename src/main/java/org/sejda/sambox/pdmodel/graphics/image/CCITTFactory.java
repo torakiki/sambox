@@ -83,7 +83,7 @@ public final class CCITTFactory
                     COSName.CCITTFAX_DECODE, decodeParms.getInt(COSName.COLUMNS),
                     decodeParms.getInt(COSName.ROWS), 1, PDDeviceGray.INSTANCE);
 
-            COSDictionary dict = pdImage.getCOSStream();
+            COSDictionary dict = pdImage.getCOSObject();
             dict.setItem(COSName.DECODE_PARMS, decodeParms);
             return pdImage;
         }

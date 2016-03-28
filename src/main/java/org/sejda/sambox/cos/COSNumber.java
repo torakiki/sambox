@@ -80,14 +80,7 @@ public abstract class COSNumber extends COSBase
             }
             catch (NumberFormatException e)
             {
-                try
-                {
                     return new COSFloat(number);
-                }
-                catch (NumberFormatException e2)
-                {
-                    throw new IOException("Not a number: " + number, e2);
-                }
             }
         }
         return new COSFloat(number);

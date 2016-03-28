@@ -123,10 +123,7 @@ public class PDAnnotationLink extends PDAnnotation
         {
             return new PDBorderStyleDictionary((COSDictionary) bs);
         }
-        else
-        {
             return null;
-        }
     }
 
     /**
@@ -139,10 +136,7 @@ public class PDAnnotationLink extends PDAnnotation
      */
     public PDDestination getDestination() throws IOException
     {
-        COSBase base = getCOSObject().getDictionaryObject(COSName.DEST);
-        PDDestination retval = PDDestination.create(base);
-
-        return retval;
+        return PDDestination.create(getCOSObject().getDictionaryObject(COSName.DEST));
     }
 
     /**

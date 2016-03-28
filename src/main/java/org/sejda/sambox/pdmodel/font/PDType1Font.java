@@ -97,6 +97,7 @@ public class PDType1Font extends PDSimpleFont
     private final boolean isDamaged;
     private Matrix fontMatrix;
     private final AffineTransform fontMatrixTransform;
+    private BoundingBox fontBBox;
 
     /**
      * Creates a Type 1 standard 14 font for embedding.
@@ -204,7 +205,7 @@ public class PDType1Font extends PDSimpleFont
             {
                 try
                 {
-                    COSStream stream = fontFile.getStream();
+                    COSStream stream = fontFile.getCOSObject();
                     int length1 = stream.getInt(COSName.LENGTH1);
                     int length2 = stream.getInt(COSName.LENGTH2);
 
@@ -431,6 +432,15 @@ public class PDType1Font extends PDSimpleFont
 
     @Override
     public BoundingBox getBoundingBox() throws IOException
+    {
+        if (fontBBox == null)
+        {
+            fontBBox = generateBoundingBox();
+        }
+        return fontBBox;
+    }
+
+    private BoundingBox generateBoundingBox() throws IOException
     {
         if (getFontDescriptor() != null)
         {

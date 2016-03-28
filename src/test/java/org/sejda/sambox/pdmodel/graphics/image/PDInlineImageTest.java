@@ -33,6 +33,7 @@ import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.PDPage;
 import org.sejda.sambox.pdmodel.PDPageContentStream;
+import org.sejda.sambox.pdmodel.PDPageContentStream.AppendMode;
 import org.sejda.sambox.rendering.PDFRenderer;
 
 import junit.framework.TestCase;
@@ -116,16 +117,16 @@ public class PDInlineImageTest extends TestCase
         assertEquals(height, image2.getHeight());
 
         // write and read
-        boolean writeOk = ImageIO.write(image1, "png", new FileOutputStream(new File(testResultsDir
-                + "/inline-grid1.png")));
+        boolean writeOk = ImageIO.write(image1, "png",
+                new FileOutputStream(new File(testResultsDir + "/inline-grid1.png")));
         assertTrue(writeOk);
         BufferedImage bim1 = ImageIO.read(new File(testResultsDir + "/inline-grid1.png"));
         assertNotNull(bim1);
         assertEquals(width, bim1.getWidth());
         assertEquals(height, bim1.getHeight());
 
-        writeOk = ImageIO.write(image2, "png", new FileOutputStream(new File(testResultsDir
-                + "/inline-grid2.png")));
+        writeOk = ImageIO.write(image2, "png",
+                new FileOutputStream(new File(testResultsDir + "/inline-grid2.png")));
         assertTrue(writeOk);
         BufferedImage bim2 = ImageIO.read(new File(testResultsDir + "/inline-grid2.png"));
         assertNotNull(bim2);
@@ -168,18 +169,20 @@ public class PDInlineImageTest extends TestCase
         {
             PDPage page = new PDPage();
             document.addPage(page);
-            PDPageContentStream contentStream = new PDPageContentStream(document, page, true, false);
-            contentStream.drawImage(inlineImage1, 150, 400);
-            contentStream.drawImage(inlineImage1, 150, 500, inlineImage1.getWidth() * 2,
-                    inlineImage1.getHeight() * 2);
-            contentStream.drawImage(inlineImage1, 150, 600, inlineImage1.getWidth() * 4,
-                    inlineImage1.getHeight() * 4);
-            contentStream.drawImage(inlineImage2, 350, 400);
-            contentStream.drawImage(inlineImage2, 350, 500, inlineImage2.getWidth() * 2,
-                    inlineImage2.getHeight() * 2);
-            contentStream.drawImage(inlineImage2, 350, 600, inlineImage2.getWidth() * 4,
-                    inlineImage2.getHeight() * 4);
-            contentStream.close();
+            try (PDPageContentStream contentStream = new PDPageContentStream(document, page,
+                    AppendMode.APPEND, false))
+            {
+                contentStream.drawImage(inlineImage1, 150, 400);
+                contentStream.drawImage(inlineImage1, 150, 500, inlineImage1.getWidth() * 2,
+                        inlineImage1.getHeight() * 2);
+                contentStream.drawImage(inlineImage1, 150, 600, inlineImage1.getWidth() * 4,
+                        inlineImage1.getHeight() * 4);
+                contentStream.drawImage(inlineImage2, 350, 400);
+                contentStream.drawImage(inlineImage2, 350, 500, inlineImage2.getWidth() * 2,
+                        inlineImage2.getHeight() * 2);
+                contentStream.drawImage(inlineImage2, 350, 600, inlineImage2.getWidth() * 4,
+                        inlineImage2.getHeight() * 4);
+            }
 
             document.writeTo(pdfFile);
         }

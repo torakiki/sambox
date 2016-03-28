@@ -344,15 +344,15 @@ final class FontMapperImpl implements FontMapper
         {
             return new FontMapping<FontBoxFont>(font, false);
         }
-            // fallback - todo: i.e. fuzzy match
-            String fallbackName = getFallbackFontName(fontDescriptor);
-            font = findFontBoxFont(fallbackName);
-            if (font == null)
-            {
-                // we have to return something here as TTFs aren't strictly required on the system
-                font = lastResortFont;
-            }
-            return new FontMapping<FontBoxFont>(font, true);
+        // fallback - todo: i.e. fuzzy match
+        String fallbackName = getFallbackFontName(fontDescriptor);
+        font = findFontBoxFont(fallbackName);
+        if (font == null)
+        {
+            // we have to return something here as TTFs aren't strictly required on the system
+            font = lastResortFont;
+        }
+        return new FontMapping<FontBoxFont>(font, true);
     }
 
     /**
@@ -618,33 +618,35 @@ final class FontMapperImpl implements FontMapper
             return info.getCIDSystemInfo().getRegistry().equals(cidSystemInfo.getRegistry())
                     && info.getCIDSystemInfo().getOrdering().equals(cidSystemInfo.getOrdering());
         }
-            long codePageRange = info.getCodePageRange();
+        long codePageRange = info.getCodePageRange();
 
-            long JIS_JAPAN = 1 << 17;
-            long CHINESE_SIMPLIFIED = 1 << 18;
-            long KOREAN_WANSUNG = 1 << 19;
-            long CHINESE_TRADITIONAL = 1 << 20;
-            long KOREAN_JOHAB = 1 << 21;
+        long JIS_JAPAN = 1 << 17;
+        long CHINESE_SIMPLIFIED = 1 << 18;
+        long KOREAN_WANSUNG = 1 << 19;
+        long CHINESE_TRADITIONAL = 1 << 20;
+        long KOREAN_JOHAB = 1 << 21;
 
-            if (cidSystemInfo.getOrdering().equals("GB1")
-                    && (codePageRange & CHINESE_SIMPLIFIED) == CHINESE_SIMPLIFIED)
-            {
-                return true;
-            }
-            else if (cidSystemInfo.getOrdering().equals("CNS1")
-                    && (codePageRange & CHINESE_TRADITIONAL) == CHINESE_TRADITIONAL)
-            {
-                return true;
-            }
-            else if (cidSystemInfo.getOrdering().equals("Japan1")
-                    && (codePageRange & JIS_JAPAN) == JIS_JAPAN)
-            {
-                return true;
-            }
-            else
-                return cidSystemInfo.getOrdering().equals("Korea1")
-                        && (codePageRange & KOREAN_WANSUNG) == KOREAN_WANSUNG
-                        || (codePageRange & KOREAN_JOHAB) == KOREAN_JOHAB;
+        if (cidSystemInfo.getOrdering().equals("GB1")
+                && (codePageRange & CHINESE_SIMPLIFIED) == CHINESE_SIMPLIFIED)
+        {
+            return true;
+        }
+        else if (cidSystemInfo.getOrdering().equals("CNS1")
+                && (codePageRange & CHINESE_TRADITIONAL) == CHINESE_TRADITIONAL)
+        {
+            return true;
+        }
+        else if (cidSystemInfo.getOrdering().equals("Japan1")
+                && (codePageRange & JIS_JAPAN) == JIS_JAPAN)
+        {
+            return true;
+        }
+        else
+        {
+            return cidSystemInfo.getOrdering().equals("Korea1")
+                    && (codePageRange & KOREAN_WANSUNG) == KOREAN_WANSUNG
+                    || (codePageRange & KOREAN_JOHAB) == KOREAN_JOHAB;
+        }
     }
 
     /**

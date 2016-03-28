@@ -37,6 +37,7 @@ import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.PDPage;
 import org.sejda.sambox.pdmodel.PDPageContentStream;
+import org.sejda.sambox.pdmodel.PDPageContentStream.AppendMode;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceRGB;
 import org.sejda.sambox.rendering.PDFRenderer;
@@ -107,8 +108,8 @@ public class LosslessFactoryTest extends TestCase
             // if something goes wrong in the future and we want to have a PDF to open.
             PDPage page = new PDPage();
             document.addPage(page);
-            PDPageContentStream contentStream = new PDPageContentStream(document, page, true,
-                    false);
+            PDPageContentStream contentStream = new PDPageContentStream(document, page,
+                    AppendMode.APPEND, false);
             contentStream.drawImage(ximage1, 200, 300, ximage1.getWidth() / 2,
                     ximage1.getHeight() / 2);
             contentStream.drawImage(ximage2, 200, 450, ximage2.getWidth() / 2,
@@ -395,8 +396,8 @@ public class LosslessFactoryTest extends TestCase
 
             PDPage page = new PDPage();
             document.addPage(page);
-            PDPageContentStream contentStream = new PDPageContentStream(document, page, true,
-                    false);
+            PDPageContentStream contentStream = new PDPageContentStream(document, page,
+                    AppendMode.APPEND, false);
             contentStream.drawImage(ximage2, 150, 300, ximage2.getWidth(), ximage2.getHeight());
             contentStream.drawImage(ximage, 150, 300, ximage.getWidth(), ximage.getHeight());
             contentStream.close();

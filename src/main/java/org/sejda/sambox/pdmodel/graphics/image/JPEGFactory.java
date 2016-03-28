@@ -219,7 +219,7 @@ public final class JPEGFactory
         if (awtAlphaImage != null)
         {
             PDImage xAlpha = JPEGFactory.createFromImage(awtAlphaImage, quality);
-            pdImage.getCOSStream().setItem(COSName.SMASK, xAlpha);
+            pdImage.getCOSObject().setItem(COSName.SMASK, xAlpha);
         }
 
         return pdImage;

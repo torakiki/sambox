@@ -39,6 +39,7 @@ import org.sejda.sambox.cos.COSString;
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.PDPage;
 import org.sejda.sambox.pdmodel.PDPageContentStream;
+import org.sejda.sambox.pdmodel.PDPageContentStream.AppendMode;
 import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.graphics.form.PDFormXObject;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
@@ -156,7 +157,7 @@ public final class PDAcroForm implements COSObjectable
         }
         if (refreshAppearances)
         {
-            refreshAppearances();
+            refreshAppearances(fields);
         }
         // indicates if the original content stream
         // has been wrapped in a q...Q pair.
@@ -176,16 +177,18 @@ public final class PDAcroForm implements COSObjectable
                     PDPage page = widget.getPage();
                     if (!isContentStreamWrapped)
                     {
-                        contentStream = new PDPageContentStream(document, page, true, true, true);
+                        contentStream = new PDPageContentStream(document, page, AppendMode.APPEND,
+                                true, true);
                         isContentStreamWrapped = true;
                     }
                     else
                     {
-                        contentStream = new PDPageContentStream(document, page, true, true);
+                        contentStream = new PDPageContentStream(document, page, AppendMode.APPEND,
+                                true);
                     }
 
                     PDFormXObject fieldObject = new PDFormXObject(
-                            widget.getNormalAppearanceStream().getCOSStream());
+                            widget.getNormalAppearanceStream().getCOSObject());
 
                     Matrix translationMatrix = Matrix.getTranslateInstance(
                             widget.getRectangle().getLowerLeftX(),
@@ -475,7 +478,7 @@ public final class PDAcroForm implements COSObjectable
         COSDictionary dr = (COSDictionary) dictionary.getDictionaryObject(COSName.DR);
         if (dr != null)
         {
-            retval = new PDResources(dr);
+            retval = new PDResources(dr, document.getResourceCache());
         }
         return retval;
     }

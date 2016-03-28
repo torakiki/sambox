@@ -28,6 +28,7 @@ import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -48,6 +49,7 @@ import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.cos.COSString;
 import org.sejda.sambox.pdmodel.PDDocument;
+import org.sejda.sambox.util.Charsets;
 import org.sejda.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -424,14 +426,30 @@ public abstract class SecurityHandler
      */
     public void decryptStream(COSStream stream, long objNum, long genNum) throws IOException
     {
-        if (!decryptMetadata && COSName.METADATA.equals(stream.getCOSName(COSName.TYPE)))
+        COSBase type = stream.getCOSName(COSName.TYPE);
+        if (!decryptMetadata && COSName.METADATA.equals(type))
         {
             return;
         }
         // "The cross-reference stream shall not be encrypted"
-        if (COSName.XREF.equals(stream.getCOSName(COSName.TYPE)))
+        if (COSName.XREF.equals(type))
         {
             return;
+        }
+        if (COSName.METADATA.equals(type))
+        {
+            byte buf[] = new byte[10];
+            // PDFBOX-3229 check case where metadata is not encrypted despite /EncryptMetadata missing
+            try (InputStream is = stream.getUnfilteredStream())
+            {
+                is.read(buf);
+            }
+            if (Arrays.equals(buf, "<?xpacket ".getBytes(Charsets.ISO_8859_1)))
+            {
+                LOG.warn("Metadata is not encrypted, but was expected to be");
+                LOG.warn("Read PDF specification about EncryptMetadata (default value: true)");
+                return;
+            }
         }
         decryptDictionary(stream, objNum, genNum);
         byte[] encrypted = org.apache.commons.io.IOUtils.toByteArray(stream.getFilteredStream());

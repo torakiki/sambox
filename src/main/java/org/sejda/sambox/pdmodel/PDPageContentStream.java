@@ -64,6 +64,35 @@ import org.slf4j.LoggerFactory;
  */
 public final class PDPageContentStream implements Closeable
 {
+    /**
+     * This is to choose what to do with the stream: overwrite, append or prepend.
+     */
+    public static enum AppendMode
+    {
+        /**
+         * Overwrite the existing page content streams.
+         */
+        OVERWRITE,
+        /**
+         * Append the content stream after all existing page content streams.
+         */
+        APPEND,
+        /**
+         * Insert before all other page content streams.
+         */
+        PREPEND;
+
+        public boolean isOverwrite()
+        {
+            return this == OVERWRITE;
+        }
+
+        public boolean isPrepend()
+        {
+            return this == PREPEND;
+        }
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(PDPageContentStream.class);
 
     private final PDDocument document;
@@ -88,7 +117,7 @@ public final class PDPageContentStream implements Closeable
      */
     public PDPageContentStream(PDDocument document, PDPage sourcePage) throws IOException
     {
-        this(document, sourcePage, false, true);
+        this(document, sourcePage, AppendMode.OVERWRITE, true, false);
     }
 
     /**
@@ -96,11 +125,11 @@ public final class PDPageContentStream implements Closeable
      *
      * @param document The document the page is part of.
      * @param sourcePage The page to write the contents to.
-     * @param appendContent Indicates whether content will be overwritten. If false all previous content is deleted.
+     * @param appendContent Indicates whether content will be overwritten, appended or prepended.
      * @param compress Tell if the content stream should compress the page contents.
      * @throws IOException If there is an error writing to the page contents.
      */
-    public PDPageContentStream(PDDocument document, PDPage sourcePage, boolean appendContent,
+    public PDPageContentStream(PDDocument document, PDPage sourcePage, AppendMode appendContent,
             boolean compress) throws IOException
     {
         this(document, sourcePage, appendContent, compress, false);
@@ -111,18 +140,20 @@ public final class PDPageContentStream implements Closeable
      *
      * @param document The document the page is part of.
      * @param sourcePage The page to write the contents to.
-     * @param appendContent Indicates whether content will be overwritten. If false all previous content is deleted.
+     * @param appendContent Indicates whether content will be overwritten, appended or prepended.
      * @param compress Tell if the content stream should compress the page contents.
-     * @param resetContext Tell if the graphic context should be reseted.
+     * @param resetContext Tell if the graphic context should be reset. This is only relevant when the appendContent
+     * parameter is set to {@link AppendMode#APPEND}. You should use this when appending to an existing stream, because
+     * the existing stream may have changed graphic properties (e.g. scaling, rotation).
      * @throws IOException If there is an error writing to the page contents.
      */
-    public PDPageContentStream(PDDocument document, PDPage sourcePage, boolean appendContent,
+    public PDPageContentStream(PDDocument document, PDPage sourcePage, AppendMode appendContent,
             boolean compress, boolean resetContext) throws IOException
     {
         this.document = document;
         COSName filter = compress ? COSName.FLATE_DECODE : null;
-        // If request specifies the need to append to the document
-        if (appendContent && sourcePage.hasContents())
+        // If request specifies the need to append/prepend to the document
+        if (!appendContent.isOverwrite() && sourcePage.hasContents())
         {
 
             // Create a pdstream to append new content
@@ -134,13 +165,19 @@ public final class PDPageContentStream implements Closeable
             {
                 // If contents is already an array, a new stream is simply appended to it
                 array = (COSArray) contents;
-                array.add(contentsToAppend);
             }
             else
             {
                 // Creates a new array and adds the current stream plus a new one to it
                 array = new COSArray();
                 array.add(contents);
+            }
+            if (appendContent.isPrepend())
+            {
+                array.add(0, contentsToAppend.getCOSObject());
+            }
+            else
+            {
                 array.add(contentsToAppend);
             }
 
@@ -155,7 +192,7 @@ public final class PDPageContentStream implements Closeable
                 saveGraphicsState();
                 close();
                 // insert the new stream at the beginning
-                array.add(0, saveGraphics.getStream());
+                array.add(0, saveGraphics.getCOSObject());
             }
 
             // Sets the compoundStream as page contents
@@ -200,13 +237,8 @@ public final class PDPageContentStream implements Closeable
      */
     public PDPageContentStream(PDDocument doc, PDAppearanceStream appearance)
     {
-        this.document = doc;
-
-        this.writer = new ContentStreamWriter(from(appearance.getStream().createOutputStream()));
-        this.resources = appearance.getResources();
-
-        formatDecimal.setMaximumFractionDigits(4);
-        formatDecimal.setGroupingUsed(false);
+        this(doc, appearance,
+                new ContentStreamWriter(from(appearance.getStream().createOutputStream())));
     }
 
     /**
@@ -279,7 +311,7 @@ public final class PDPageContentStream implements Closeable
             fontStack.setElementAt(font, fontStack.size() - 1);
         }
 
-        if (font.willBeSubset() && !document.getFontsToSubset().contains(font))
+        if (font.willBeSubset())
         {
             document.getFontsToSubset().add(font);
         }
@@ -363,7 +395,8 @@ public final class PDPageContentStream implements Closeable
     {
         if (!inTextMode)
         {
-            throw new IllegalStateException("Error: must call beginText() before newLineAtOffset()");
+            throw new IllegalStateException(
+                    "Error: must call beginText() before newLineAtOffset()");
         }
         writeOperand(tx);
         writeOperand(ty);
@@ -617,16 +650,7 @@ public final class PDPageContentStream implements Closeable
         {
             writeOperand(getName(color.getColorSpace()));
             writeOperator("CS");
-
-            if (strokingColorSpaceStack.isEmpty())
-            {
-                strokingColorSpaceStack.add(color.getColorSpace());
-            }
-            else
-            {
-                strokingColorSpaceStack.setElementAt(color.getColorSpace(),
-                        nonStrokingColorSpaceStack.size() - 1);
-            }
+            setStrokingColorSpaceStack(color.getColorSpace());
         }
 
         for (float value : color.getComponents())
@@ -686,6 +710,7 @@ public final class PDPageContentStream implements Closeable
         writeOperand(g / 255f);
         writeOperand(b / 255f);
         writeOperator("RG");
+        setStrokingColorSpaceStack(PDDeviceRGB.INSTANCE);
     }
 
     /**
@@ -711,6 +736,7 @@ public final class PDPageContentStream implements Closeable
         writeOperand(y);
         writeOperand(k);
         writeOperator("K");
+        setStrokingColorSpaceStack(PDDeviceCMYK.INSTANCE);
     }
 
     /**
@@ -728,6 +754,7 @@ public final class PDPageContentStream implements Closeable
         }
         writeOperand((float) g);
         writeOperator("G");
+        setStrokingColorSpaceStack(PDDeviceGray.INSTANCE);
     }
 
     /**
@@ -743,16 +770,7 @@ public final class PDPageContentStream implements Closeable
         {
             writeOperand(getName(color.getColorSpace()));
             writeOperator("cs");
-
-            if (nonStrokingColorSpaceStack.isEmpty())
-            {
-                nonStrokingColorSpaceStack.add(color.getColorSpace());
-            }
-            else
-            {
-                nonStrokingColorSpaceStack.setElementAt(color.getColorSpace(),
-                        nonStrokingColorSpaceStack.size() - 1);
-            }
+            setNonStrokingColorSpaceStack(color.getColorSpace());
         }
 
         for (float value : color.getComponents())
@@ -812,6 +830,7 @@ public final class PDPageContentStream implements Closeable
         writeOperand(g / 255f);
         writeOperand(b / 255f);
         writeOperator("rg");
+        setNonStrokingColorSpaceStack(PDDeviceRGB.INSTANCE);
     }
 
     /**
@@ -857,6 +876,7 @@ public final class PDPageContentStream implements Closeable
         writeOperand((float) y);
         writeOperand((float) k);
         writeOperator("k");
+        setNonStrokingColorSpaceStack(PDDeviceCMYK.INSTANCE);
     }
 
     /**
@@ -890,6 +910,7 @@ public final class PDPageContentStream implements Closeable
         }
         writeOperand((float) g);
         writeOperator("g");
+        setNonStrokingColorSpaceStack(PDDeviceGray.INSTANCE);
     }
 
     /**
@@ -1077,7 +1098,7 @@ public final class PDPageContentStream implements Closeable
     }
 
     /**
-     * Fills the path using the even-odd winding rule.
+     * Fills the path using the even-odd winding number rule.
      *
      * @throws IOException If the content stream could not be written
      * @throws IllegalStateException If the method was called within a text block.
@@ -1086,9 +1107,80 @@ public final class PDPageContentStream implements Closeable
     {
         if (inTextMode)
         {
-            throw new IllegalStateException("Error: fill is not allowed within a text block.");
+            throw new IllegalStateException(
+                    "Error: fillEvenOdd is not allowed within a text block.");
         }
         writeOperator("f*");
+    }
+
+    /**
+     * Fill and then stroke the path, using the nonzero winding number rule to determine the region to fill. This shall
+     * produce the same result as constructing two identical path objects, painting the first with {@link #fill() } and
+     * the second with {@link #stroke() }.
+     *
+     * @throws IOException If the content stream could not be written
+     * @throws IllegalStateException If the method was called within a text block.
+     */
+    public void fillAndStroke() throws IOException
+    {
+        if (inTextMode)
+        {
+            throw new IllegalStateException(
+                    "Error: fillAndStroke is not allowed within a text block.");
+        }
+        writeOperator("B");
+    }
+
+    /**
+     * Fill and then stroke the path, using the even-odd rule to determine the region to fill. This shall produce the
+     * same result as constructing two identical path objects, painting the first with {@link #fillEvenOdd() } and the
+     * second with {@link #stroke() }.
+     *
+     * @throws IOException If the content stream could not be written
+     * @throws IllegalStateException If the method was called within a text block.
+     */
+    public void fillAndStrokeEvenOdd() throws IOException
+    {
+        if (inTextMode)
+        {
+            throw new IllegalStateException(
+                    "Error: fillAndStrokeEvenOdd is not allowed within a text block.");
+        }
+        writeOperator("B*");
+    }
+
+    /**
+     * Close, fill, and then stroke the path, using the nonzero winding number rule to determine the region to fill.
+     * This shall have the same effect as the sequence {@link #closePath() } and then {@link #fillAndStroke() }.
+     *
+     * @throws IOException If the content stream could not be written
+     * @throws IllegalStateException If the method was called within a text block.
+     */
+    public void closeAndFillAndStroke() throws IOException
+    {
+        if (inTextMode)
+        {
+            throw new IllegalStateException(
+                    "Error: closeAndFillAndStroke is not allowed within a text block.");
+        }
+        writeOperator("b");
+    }
+
+    /**
+     * Close, fill, and then stroke the path, using the even-odd rule to determine the region to fill. This shall have
+     * the same effect as the sequence {@link #closePath() } and then {@link #fillAndStrokeEvenOdd() }.
+     *
+     * @throws IOException If the content stream could not be written
+     * @throws IllegalStateException If the method was called within a text block.
+     */
+    public void closeAndFillAndStrokeEvenOdd() throws IOException
+    {
+        if (inTextMode)
+        {
+            throw new IllegalStateException(
+                    "Error: closeAndFillAndStrokeEvenOdd is not allowed within a text block.");
+        }
+        writeOperator("b*");
     }
 
     /**
@@ -1383,5 +1475,30 @@ public final class PDPageContentStream implements Closeable
     private boolean isOutsideOneInterval(double val)
     {
         return val < 0 || val > 1;
+    }
+
+    private void setStrokingColorSpaceStack(PDColorSpace colorSpace)
+    {
+        if (strokingColorSpaceStack.isEmpty())
+        {
+            strokingColorSpaceStack.add(colorSpace);
+        }
+        else
+        {
+            strokingColorSpaceStack.setElementAt(colorSpace, strokingColorSpaceStack.size() - 1);
+        }
+    }
+
+    private void setNonStrokingColorSpaceStack(PDColorSpace colorSpace)
+    {
+        if (nonStrokingColorSpaceStack.isEmpty())
+        {
+            nonStrokingColorSpaceStack.add(colorSpace);
+        }
+        else
+        {
+            nonStrokingColorSpaceStack.setElementAt(colorSpace,
+                    nonStrokingColorSpaceStack.size() - 1);
+        }
     }
 }

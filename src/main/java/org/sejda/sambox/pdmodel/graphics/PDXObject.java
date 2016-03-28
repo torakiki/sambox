@@ -110,8 +110,8 @@ public class PDXObject implements COSObjectable
     protected PDXObject(PDStream stream, COSName subtype)
     {
         this.stream = stream;
-        stream.getStream().setName(COSName.TYPE, COSName.XOBJECT.getName());
-        stream.getStream().setName(COSName.SUBTYPE, subtype.getName());
+        stream.getCOSObject().setName(COSName.TYPE, COSName.XOBJECT.getName());
+        stream.getCOSObject().setName(COSName.SUBTYPE, subtype.getName());
     }
 
     /**
@@ -122,38 +122,17 @@ public class PDXObject implements COSObjectable
     protected PDXObject(COSName subtype)
     {
         this.stream = new PDStream();
-        stream.getStream().setName(COSName.TYPE, COSName.XOBJECT.getName());
-        stream.getStream().setName(COSName.SUBTYPE, subtype.getName());
+        stream.getCOSObject().setName(COSName.TYPE, COSName.XOBJECT.getName());
+        stream.getCOSObject().setName(COSName.SUBTYPE, subtype.getName());
     }
 
     /**
      * Returns the stream. {@inheritDoc}
      */
     @Override
-    public final COSBase getCOSObject()
+    public final COSStream getCOSObject()
     {
         return stream.getCOSObject();
-    }
-
-    /**
-     * Returns the stream.
-     * @return The stream for this object.
-     */
-    public final COSStream getCOSStream()
-    {
-        return stream.getStream();
-    }
-
-    /**
-     * Returns the stream.
-     * 
-     * @return The stream for this object.
-     * @deprecated Use {@link #getStream()} instead.
-     */
-    @Deprecated
-    public final PDStream getPDStream()
-    {
-        return stream;
     }
 
     /**
