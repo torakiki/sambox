@@ -581,6 +581,12 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
         filtered = null;
     }
 
+    public void unDecode()
+    {
+        unfiltered = null;
+        filtered = null;
+    }
+
     /**
      * @return true if the writer should write this stream length as indirect
      */
