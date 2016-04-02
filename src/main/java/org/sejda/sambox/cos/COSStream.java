@@ -581,10 +581,20 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
         filtered = null;
     }
 
+    /**
+     * offload decoded/unfiltered data leaving the COSStrem in its filtered state and reducing memory footprint
+     */
     public void unDecode()
     {
-        unfiltered = null;
-        filtered = null;
+        if (nonNull(existing))
+        {
+            unfiltered = null;
+            filtered = null;
+        }
+        if (nonNull(filtered))
+        {
+            unfiltered = null;
+        }
     }
 
     /**
