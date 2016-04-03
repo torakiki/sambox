@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.input;
 
+import static org.sejda.sambox.input.AbstractXrefTableParser.TRAILER;
 import static org.sejda.sambox.input.AbstractXrefTableParser.XREF;
 
 import java.io.IOException;
@@ -102,16 +103,19 @@ class XrefParser
             }
             else
             {
-                LOG.warn("Xref full scan was unable to find an xref table or stream, performing Objects full scan");
+                LOG.warn(
+                        "Xref full scan was unable to find a valid xref table/stream chain, now performing objects full scan");
                 ObjectsFullScanner objectsFullScanner = new ObjectsFullScanner(parser)
                 {
                     @Override
-                    protected void onNonObjectDefinitionLine(String line) throws IOException
+                    protected void onNonObjectDefinitionLine(long offset, String line)
+                            throws IOException
                     {
-                        if (line != null && line.startsWith(AbstractXrefTableParser.TRAILER))
+                        if (line != null && line.startsWith(TRAILER))
                         {
-                            long offset = parser.position();
                             LOG.debug("Parsing trailer at " + offset);
+                            parser.position(offset);
+                            parser.skipExpected(TRAILER);
                             parser.skipSpaces();
                             trailer.mergeWithoutOverwriting(parser.nextDictionary());
                             parser.skipSpaces();
@@ -119,7 +123,7 @@ class XrefParser
                     }
                 };
                 objectsFullScanner.entries().values().stream()
-                        .forEach(e -> parser.provider().addEntry(e));
+                        .forEach(parser.provider()::addEntry);
 
             }
         }
