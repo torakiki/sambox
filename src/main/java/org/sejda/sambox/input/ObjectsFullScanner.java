@@ -80,17 +80,18 @@ class ObjectsFullScanner
         }
         else
         {
-            onNonObjectDefinitionLine(line);
+            onNonObjectDefinitionLine(offset, line);
         }
     }
 
     /**
      * Called when the the scanner has read a line which is not an object definition
      * 
+     * @param originalOffset offset from where the line was read
      * @param line
      * @throws IOException
      */
-    protected void onNonObjectDefinitionLine(String line) throws IOException
+    protected void onNonObjectDefinitionLine(long originalOffset, String line) throws IOException
     {
         // nothing
     }

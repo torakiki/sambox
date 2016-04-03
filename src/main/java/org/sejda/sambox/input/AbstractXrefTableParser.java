@@ -117,8 +117,8 @@ abstract class AbstractXrefTableParser
                 {
                     try
                     {
-                        onEntryFound(inUseEntry(currentObjectNumber,
-                                Long.parseLong(splitString[0]), Integer.parseInt(splitString[1])));
+                        onEntryFound(inUseEntry(currentObjectNumber, Long.parseLong(splitString[0]),
+                                Integer.parseInt(splitString[1])));
                     }
                     catch (NumberFormatException e)
                     {
@@ -127,8 +127,8 @@ abstract class AbstractXrefTableParser
                 }
                 else if (!"f".equals(entryType))
                 {
-                    throw new IOException("Corrupted xref table entry. Expected 'f' but was "
-                            + entryType);
+                    throw new IOException(
+                            "Corrupted xref table entry. Expected 'f' but was " + entryType);
                 }
                 currentObjectNumber++;
                 parser.skipSpaces();

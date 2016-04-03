@@ -17,7 +17,6 @@
 package org.sejda.sambox.input;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
@@ -29,6 +28,7 @@ import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSObjectKey;
+import org.sejda.sambox.input.XrefFullScanner.XrefScanOutcome;
 import org.sejda.util.IOUtils;
 
 /**
@@ -53,7 +53,7 @@ public class XrefFullScannerTest
         parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(
                 getClass().getResourceAsStream("/sambox/test_multiple_xref_tables.pdf")));
         victim = new XrefFullScanner(parser);
-        victim.scan();
+        assertEquals(XrefScanOutcome.FOUND, victim.scan());
         assertEquals(408, victim.trailer().getInt(COSName.PREV));
         assertEquals(8, victim.trailer().getInt(COSName.SIZE));
         assertNotNull(victim.trailer().getDictionaryObject(COSName.ROOT));
@@ -83,7 +83,7 @@ public class XrefFullScannerTest
         parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(
                 getClass().getResourceAsStream("/sambox/test_xref_missing_xref.pdf")));
         victim = new XrefFullScanner(parser);
-        assertFalse(victim.scan());
+        assertEquals(XrefScanOutcome.NOT_FOUND, victim.scan());
     }
 
     @Test
@@ -92,6 +92,6 @@ public class XrefFullScannerTest
         parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(
                 getClass().getResourceAsStream("/sambox/test_trunkated_xref_table.pdf")));
         victim = new XrefFullScanner(parser);
-        assertFalse(victim.scan());
+        assertEquals(XrefScanOutcome.WITH_ERRORS, victim.scan());
     }
 }

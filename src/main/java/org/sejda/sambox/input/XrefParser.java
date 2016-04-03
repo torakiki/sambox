@@ -24,6 +24,7 @@ import java.nio.ByteBuffer;
 
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.input.XrefFullScanner.XrefScanOutcome;
 import org.sejda.sambox.util.Charsets;
 import org.sejda.sambox.xref.XrefEntry;
 import org.slf4j.Logger;
@@ -97,14 +98,17 @@ class XrefParser
         if (xrefOffset <= 0 || !parseXref(xrefOffset))
         {
             XrefFullScanner fallbackFullScanner = new XrefFullScanner(parser);
-            if (fallbackFullScanner.scan())
+            XrefScanOutcome xrefScanStatus = fallbackFullScanner.scan();
+            if (xrefScanStatus != XrefScanOutcome.NOT_FOUND)
             {
+                // something was found so we keep the trailer
                 this.trailer = fallbackFullScanner.trailer();
             }
-            else
+            if (xrefScanStatus != XrefScanOutcome.FOUND)
             {
+                // there were errors in the found xrefs so we perform objects full scan
                 LOG.warn(
-                        "Xref full scan was unable to find a valid xref table/stream chain, now performing objects full scan");
+                        "Xref full scan encountered some errors, now performing objects full scan");
                 ObjectsFullScanner objectsFullScanner = new ObjectsFullScanner(parser)
                 {
                     @Override
@@ -117,11 +121,12 @@ class XrefParser
                             parser.position(offset);
                             parser.skipExpected(TRAILER);
                             parser.skipSpaces();
-                            trailer.mergeWithoutOverwriting(parser.nextDictionary());
+                            trailer.merge(parser.nextDictionary());
                             parser.skipSpaces();
                         }
                     }
                 };
+                // and we consider it scan more reliable compared to what was found in the somehow broken xrefs
                 objectsFullScanner.entries().values().stream()
                         .forEach(parser.provider()::addEntry);
 

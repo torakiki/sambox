@@ -157,4 +157,14 @@ public class PDFParserTest
         }
     }
 
+    @Test
+    public void trunkatedXref() throws IOException
+    {
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/test_trunkated_xref_table.pdf"))))
+        {
+            assertNotNull(doc.getPage(0));
+        }
+    }
+
 }

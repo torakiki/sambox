@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.input;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
@@ -69,8 +70,7 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
     @Override
     public COSBase get(COSObjectKey key)
     {
-        COSBase value = store.get(key);
-        if (value == null)
+        if (isNull(store.get(key)))
         {
             parseObject(key);
         }
@@ -120,14 +120,21 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
     private void parseObject(COSObjectKey key)
     {
         XrefEntry xrefEntry = xref.get(key);
-        try
+        if (nonNull(xrefEntry))
         {
-            requireIOCondition(xrefEntry != null, "Unable to find xref data for " + key);
-            doParse(xrefEntry);
+            try
+            {
+                doParse(xrefEntry);
+            }
+            catch (IOException e)
+            {
+                LOG.warn("An error occurred while parsing " + xrefEntry, e);
+                doParseFallbackObject(key);
+            }
         }
-        catch (IOException e)
+        else
         {
-            LOG.warn("An error occurred while parsing " + xrefEntry, e);
+            LOG.warn("Unable to find xref data for {}", key);
             doParseFallbackObject(key);
         }
     }
@@ -136,7 +143,7 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
     {
         LOG.info("Trying fallback strategy for " + key);
         XrefEntry xrefEntry = scanner.entries().get(key);
-        if (xrefEntry != null)
+        if (nonNull(xrefEntry))
         {
             try
             {

@@ -19,7 +19,6 @@ package org.sejda.sambox.input;
 import static org.sejda.sambox.input.AbstractXrefTableParser.XREF;
 
 import java.io.IOException;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.sejda.sambox.cos.COSBase;
@@ -27,6 +26,7 @@ import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.xref.XrefEntry;
+import org.sejda.sambox.xref.XrefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +45,7 @@ class XrefFullScanner
     private AbstractXrefTableParser xrefTableParser;
     private COSParser parser;
     private Pattern objectDefPatter = Pattern.compile("^(\\d+)[\\s](\\d+)[\\s]obj");
-    private boolean xrefFound = false;
+    private XrefScanOutcome outcome = XrefScanOutcome.NOT_FOUND;
 
     XrefFullScanner(COSParser parser)
     {
@@ -61,7 +61,7 @@ class XrefFullScanner
             @Override
             void onEntryFound(XrefEntry entry)
             {
-                parser.provider().addEntry(entry);
+                addEntryIfValid(entry);
             }
         };
         this.xrefTableParser = new AbstractXrefTableParser(parser)
@@ -76,29 +76,42 @@ class XrefFullScanner
             @Override
             void onEntryFound(XrefEntry entry)
             {
-                parser.provider().addEntry(entry);
+                addEntryIfValid(entry);
             }
         };
     }
 
-    /**
-     * 
-     * @return true if the scan was performed correctly and at least an xref found
-     */
-    boolean scan()
+    private void addEntryIfValid(XrefEntry entry)
     {
-        try
+        if (isValidEntry(entry))
         {
-            return doScan();
+            parser.provider().addEntry(entry);
         }
-        catch (IOException e)
+        else
         {
-            LOG.warn("An error occurred while performing full scan looking for xrefs", e);
-            return false;
+            outcome = outcome.moveTo(XrefScanOutcome.WITH_ERRORS);
         }
     }
 
-    private boolean doScan() throws IOException
+    /**
+     * 
+     * @return the state of the scan
+     */
+    XrefScanOutcome scan()
+    {
+        try
+        {
+            doScan();
+        }
+        catch (IOException e)
+        {
+            outcome = outcome.moveTo(XrefScanOutcome.WITH_ERRORS);
+            LOG.warn("An error occurred while performing full scan looking for xrefs", e);
+        }
+        return outcome;
+    }
+
+    private void doScan() throws IOException
     {
         LOG.info("Performing full scan looking for xrefs");
         long savedPos = parser.position();
@@ -110,18 +123,16 @@ class XrefFullScanner
             String line = parser.readLine();
             if (line.startsWith(XREF))
             {
-                this.xrefFound = true;
+                outcome = outcome.moveTo(XrefScanOutcome.FOUND);
                 parseFoundXrefTable(offset);
             }
-            Matcher matcher = objectDefPatter.matcher(line);
-            if (matcher.find())
+            if (objectDefPatter.matcher(line).find())
             {
                 parseFoundObject(offset);
             }
             parser.skipSpaces();
         }
         parser.position(savedPos);
-        return xrefFound;
     }
 
     private void parseFoundXrefTable(long offset) throws IOException
@@ -151,7 +162,7 @@ class XrefFullScanner
 
     private void parseFoundXrefStream(COSDictionary trailer) throws IOException
     {
-        this.xrefFound = true;
+        outcome = outcome.moveTo(XrefScanOutcome.FOUND);
         try (COSStream xrefStream = parser.nextStream(trailer))
         {
             xrefStreamParser.onTrailerFound(trailer);
@@ -160,4 +171,65 @@ class XrefFullScanner
         LOG.debug("Done parsing xref stream");
     }
 
+    /**
+     * @param entry
+     * @return true if the given xref entry actually points to a valid object definition
+     */
+    private boolean isValidEntry(XrefEntry entry)
+    {
+        if (entry.getType() == XrefType.IN_USE)
+        {
+            try
+            {
+                long origin = parser.position();
+                try
+                {
+                    parser.position(entry.getByteOffset());
+                    parser.skipIndirectObjectDefinition();
+                    return true;
+                }
+                catch (IOException e)
+                {
+                    LOG.warn("Xref entry points to an invalid object definition {}", entry);
+                }
+                finally
+                {
+                    parser.position(origin);
+                }
+            }
+            catch (IOException e)
+            {
+                LOG.error("Unable to change source position", e);
+            }
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * possible outcome of the xref full scan
+     * 
+     * @author Andrea Vacondio
+     *
+     */
+    public static enum XrefScanOutcome
+    {
+        NOT_FOUND, FOUND, WITH_ERRORS
+        {
+            @Override
+            XrefScanOutcome moveTo(XrefScanOutcome newState)
+            {
+                return this;
+            }
+        };
+
+        XrefScanOutcome moveTo(XrefScanOutcome newState)
+        {
+            if (newState != NOT_FOUND)
+            {
+                return newState;
+            }
+            return this;
+        }
+    }
 }
