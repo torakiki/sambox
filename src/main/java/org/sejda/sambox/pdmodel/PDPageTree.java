@@ -341,7 +341,7 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
                     }
                 }
 
-                throw new PageNotFoundException();
+                throw new PageNotFoundException("Unable to find page " + pageNum);
             }
             throw new PageNotFoundException("Index out of bounds: " + pageNum);
         }

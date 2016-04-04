@@ -478,7 +478,7 @@ class SourceReader implements Closeable
             {
                 builder.append((char) c);
                 while ((c = source.read()) != -1
-                        && (isDigit(c) || c == '.' || c == 'E' || c == 'e'))
+                        && (isDigit(c) || c == '.' || c == 'E' || c == 'e' || c == '+' || c == '-'))
                 {
                     builder.append((char) c);
                 }

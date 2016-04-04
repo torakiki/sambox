@@ -332,6 +332,20 @@ public class SourceReaderTest
     }
 
     @Test
+    public void readPostScriptNumberNegativeExponent() throws IOException
+    {
+        victim = new SourceReader(inMemorySeekableSourceFrom("6.10351563e-003".getBytes()));
+        assertEquals("6.10351563e-003", victim.readNumber());
+    }
+
+    @Test
+    public void readPostScriptNumberPositiveExponent() throws IOException
+    {
+        victim = new SourceReader(inMemorySeekableSourceFrom("6.10351563e+003".getBytes()));
+        assertEquals("6.10351563e+003", victim.readNumber());
+    }
+
+    @Test
     public void readNumberEmpty() throws IOException
     {
         victim = new SourceReader(inMemorySeekableSourceFrom(new byte[0]));
