@@ -14,7 +14,7 @@ What's different from PDFBox?
 + PDF streams are read directly from the underlying source through the concept of bounded views.
 + Use and discard of lazy PDF objects. PDF objects can be written (sync/async) and discarded as soon as they have been written, this is particularly useful with existing documents where objects are lazy loaded, written and then discarded, keeping a low memory footprint.
 + All the I/O and parsing logic has been refactored to smaller classes which are nearly 100% unit tested. 
-+ Some of the PDFBox features are currently of no use for Sejda or PDFSam and they have been removed from SAMBox (preflight validator, fdf, digital signature... ).
++ Some of the PDFBox features are currently of no use for Sejda or PDFsam and they have been removed from SAMBox (preflight validator, fdf, digital signature... ).
 + Documents can be saved using objects stream to store PDF objects.
 
 Are PDFBox commits merged to SAMBox?

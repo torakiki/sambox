@@ -17,6 +17,7 @@
 package org.sejda.sambox.cos;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -118,6 +119,26 @@ public class COSStringTest
         COSString other = COSString.parseLiteral("A string");
         other.setValue(bytes);
         assertEquals(COSString.newInstance(bytes), other);
+    }
+
+    @Test
+    public void negativeForceHex()
+    {
+        String value = "A string without Line feed";
+        assertFalse(new COSString(value.getBytes()).isForceHexForm());
+    }
+
+    @Test
+    public void forceHexIfNonASCII()
+    {
+        String value = "A string with \n Line feed";
+        assertTrue(new COSString(value.getBytes()).isForceHexForm());
+    }
+
+    @Test
+    public void forceHexIfNonASCIIAgain()
+    {
+        assertTrue(new COSString(new byte[] { -1, 3, 4, 5 }).isForceHexForm());
     }
 
     private static String createHex(String str)

@@ -86,7 +86,21 @@ public final class COSString extends COSBase implements Encryptable
      */
     public boolean isForceHexForm()
     {
-        return forceHexForm;
+        return forceHexForm || !isAscii();
+    }
+
+    private boolean isAscii()
+    {
+        for (byte b : bytes)
+        {
+            // if the byte is negative then it is an eight bit byte and is outside the ASCII range
+            // PDFBOX-3107 EOL markers within a string are troublesome
+            if (b < 0 || b == 0x0d || b == 0x0a)
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

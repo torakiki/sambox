@@ -252,6 +252,17 @@ public class DefaultCOSWriterTest
     }
 
     @Test
+    public void visitCOSStringWithEscapeSequences() throws Exception
+    {
+        COSString string = COSString.parseLiteral("a\ns\t\r");
+        InOrder inOrder = Mockito.inOrder(writer);
+        victim.visit(string);
+        inOrder.verify(writer).write((byte) 0x3C);
+        inOrder.verify(writer).write("610A73090D");
+        inOrder.verify(writer).write((byte) 0x3E);
+    }
+
+    @Test
     public void visitIndirectCOSObjectReference() throws Exception
     {
         IndirectCOSObjectReference ref = new IndirectCOSObjectReference(123, 0, new COSDictionary());

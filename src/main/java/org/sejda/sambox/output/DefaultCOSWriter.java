@@ -206,11 +206,6 @@ class DefaultCOSWriter implements COSWriter
             {
                 switch (b)
                 {
-                case '\n':
-                case '\r':
-                case '\t':
-                case '\b':
-                case '\f':
                 case '(':
                 case ')':
                 case '\\':
