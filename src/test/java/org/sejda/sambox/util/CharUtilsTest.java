@@ -39,9 +39,12 @@ public class CharUtilsTest
         assertTrue(CharUtils.isEndOfName('<'));
         assertTrue(CharUtils.isEndOfName('>'));
         assertTrue(CharUtils.isEndOfName(']'));
+        assertTrue(CharUtils.isEndOfName('%'));
         assertTrue(CharUtils.isEndOfName(CharUtils.ASCII_HORIZONTAL_TAB));
         assertTrue(CharUtils.isEndOfName(CharUtils.ASCII_CARRIAGE_RETURN));
         assertTrue(CharUtils.isEndOfName(CharUtils.ASCII_LINE_FEED));
+        assertTrue(CharUtils.isEndOfName(CharUtils.ASCII_NULL));
+        assertTrue(CharUtils.isEndOfName(CharUtils.ASCII_FORM_FEED));
         assertTrue(CharUtils.isEndOfName((byte) 32));
     }
 

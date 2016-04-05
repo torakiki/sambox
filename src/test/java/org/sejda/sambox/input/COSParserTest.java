@@ -172,6 +172,19 @@ public class COSParserTest
     }
 
     @Test
+    public void nextArrayNullDelimiter() throws IOException
+    {
+        byte[] bytes = "[/Indexed /DeviceRGB 255 <415A>]".getBytes();
+        bytes[20] = 0x00;
+        victim = new COSParser(inMemorySeekableSourceFrom(bytes));
+        COSArray result = victim.nextArray();
+        assertEquals(COSName.INDEXED.getName(), result.getName(0));
+        assertEquals(COSName.DEVICERGB.getName(), result.getName(1));
+        assertEquals(255, result.getInt(2));
+        assertEquals("AZ", result.getString(3));
+    }
+
+    @Test
     public void nextArrayWorkaroundEndobj() throws IOException
     {
         victim = new COSParser(inMemorySeekableSourceFrom("[10 (A String) endobj".getBytes()));

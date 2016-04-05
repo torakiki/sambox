@@ -53,8 +53,8 @@ public final class CharUtils
      */
     public static boolean isEndOfName(int ch)
     {
-        return isSpace(ch) || isEOL(ch) || ch == ASCII_HORIZONTAL_TAB || ch == '>' || ch == '<'
-                || ch == '[' || ch == ']' || ch == '/' || ch == ')' || ch == '(';
+        return isWhitespace(ch) || ch == '>' || ch == '<' || ch == '[' || ch == ']' || ch == '/'
+                || ch == ')' || ch == '(' || ch == '%';
     }
 
     /**
