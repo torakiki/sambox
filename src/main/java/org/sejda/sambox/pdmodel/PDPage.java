@@ -188,14 +188,17 @@ public class PDPage implements COSObjectable, PDContentStream
     {
         if (pageResources == null)
         {
-            COSDictionary resources = (COSDictionary) PDPageTree.getInheritableAttribute(page,
-                    COSName.RESOURCES);
-
-            // note: it's an error for resources to not be present
-            if (resources != null)
-            {
-                pageResources = new PDResources(resources, resourceCache);
-            }
+            pageResources = new PDResources(ofNullable(
+                    (COSDictionary) PDPageTree.getInheritableAttribute(page, COSName.RESOURCES))
+                            .orElseGet(() -> {
+                                COSDictionary emptyRes = new COSDictionary();
+                                // it's illegal for a page to not have resources, either direct or inherited. According
+                                // to the specs "If the page requires no resources, the value of this entry shall be an
+                                // empty dictionary." so we fix it.
+                                page.setItem(COSName.RESOURCES, emptyRes);
+                                return emptyRes;
+                            }),
+                    resourceCache);
         }
         return pageResources;
     }
@@ -302,10 +305,7 @@ public class PDPage implements COSObjectable, PDContentStream
         {
             return clipToMediaBox(new PDRectangle(array));
         }
-        else
-        {
-            return getMediaBox();
-        }
+        return getMediaBox();
     }
 
     /**
@@ -522,7 +522,7 @@ public class PDPage implements COSObjectable, PDContentStream
         {
             beads = new COSArray();
         }
-        List<PDThreadBead> pdObjects = new ArrayList<PDThreadBead>();
+        List<PDThreadBead> pdObjects = new ArrayList<>();
         for (int i = 0; i < beads.size(); i++)
         {
             COSDictionary beadDic = (COSDictionary) beads.getObject(i);
@@ -534,7 +534,7 @@ public class PDPage implements COSObjectable, PDContentStream
             }
             pdObjects.add(bead);
         }
-        return new COSArrayList<PDThreadBead>(pdObjects, beads);
+        return new COSArrayList<>(pdObjects, beads);
 
     }
 
