@@ -234,7 +234,7 @@ public class PDTilingPattern extends PDAbstractPattern implements PDContentStrea
         }
         else
         {
-            getCOSObject().setItem(COSName.BBOX, bbox.getCOSArray());
+            getCOSObject().setItem(COSName.BBOX, bbox.getCOSObject());
         }
     }
 }

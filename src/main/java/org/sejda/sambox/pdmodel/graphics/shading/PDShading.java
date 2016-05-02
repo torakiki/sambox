@@ -191,7 +191,7 @@ public abstract class PDShading implements COSObjectable
         }
         else
         {
-            dictionary.setItem(COSName.BBOX, bBox.getCOSArray());
+            dictionary.setItem(COSName.BBOX, bBox.getCOSObject());
         }
     }
 

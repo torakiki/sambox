@@ -93,4 +93,12 @@ public class PDRectangleTest
         assertEquals(victim.getHeight(), rotated.getWidth(), 0);
     }
 
+    @Test
+    public void testEquals()
+    {
+        PDRectangle one = new PDRectangle(10, 50, 120, 200);
+        PDRectangle two = new PDRectangle(10, 50, 120, 200);
+        assertEquals(one, two);
+    }
+
 }

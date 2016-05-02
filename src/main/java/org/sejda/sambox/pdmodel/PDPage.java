@@ -321,7 +321,7 @@ public class PDPage implements COSObjectable, PDContentStream
         }
         else
         {
-            page.setItem(COSName.CROP_BOX, cropBox.getCOSArray());
+            page.setItem(COSName.CROP_BOX, cropBox.getCOSObject());
         }
     }
 

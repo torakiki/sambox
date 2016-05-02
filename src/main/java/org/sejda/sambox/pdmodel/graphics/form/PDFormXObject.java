@@ -210,7 +210,7 @@ public class PDFormXObject extends PDXObject implements PDContentStream
         }
         else
         {
-            getCOSObject().setItem(COSName.BBOX, bbox.getCOSArray());
+            getCOSObject().setItem(COSName.BBOX, bbox.getCOSObject());
         }
     }
 

@@ -30,10 +30,10 @@ import org.sejda.sambox.pdmodel.common.PDRange;
  */
 public class PDFunctionType3 extends PDFunction
 {
-
     private COSArray functions = null;
     private COSArray encode = null;
     private COSArray bounds = null;
+    private PDFunction[] functionsArray = null;
     
     /**
      * Constructor.
@@ -69,12 +69,20 @@ public class PDFunctionType3 extends PDFunction
         // clip input value to domain
         x = clipToRange(x, domain.getMin(), domain.getMax());
 
-        COSArray functionsArray = getFunctions();
-        int numberOfFunctions = functionsArray.size();
-        // This doesn't make sense but it may happen ...
-        if (numberOfFunctions == 1) 
+        if (functionsArray == null)
         {
-            function = PDFunction.create(functionsArray.get(0));
+            COSArray ar = getFunctions();
+            functionsArray = new PDFunction[ar.size()];
+            for (int i = 0; i < ar.size(); ++i)
+            {
+                functionsArray[i] = PDFunction.create(ar.getObject(i));
+            }
+        }
+
+        if (functionsArray.length == 1)
+        {
+            // This doesn't make sense but it may happen ...
+            function = functionsArray[0];
             PDRange encRange = getEncodeForParameter(0);
             x = interpolate(x, domain.getMin(), domain.getMax(), encRange.getMin(), encRange.getMax());
         }
@@ -95,7 +103,7 @@ public class PDFunctionType3 extends PDFunction
                 if ( x >= partitionValues[i] && 
                         (x < partitionValues[i+1] || (i == partitionValuesSize - 2 && x == partitionValues[i+1])))
                 {
-                    function = PDFunction.create(functionsArray.get(i));
+                    function = functionsArray[i];
                     PDRange encRange = getEncodeForParameter(i);
                     x = interpolate(x, partitionValues[i], partitionValues[i+1], encRange.getMin(), encRange.getMax());
                     break;
@@ -167,5 +175,4 @@ public class PDFunctionType3 extends PDFunction
         COSArray encodeValues = getEncode();
         return new PDRange( encodeValues, n );
     }
-
 }

@@ -203,7 +203,7 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
      */
     public void setRectangle(PDRectangle rectangle)
     {
-        getCOSObject().setItem(COSName.RECT, rectangle.getCOSArray());
+        getCOSObject().setItem(COSName.RECT, rectangle.getCOSObject());
     }
 
     /**

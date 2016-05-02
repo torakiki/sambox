@@ -443,7 +443,7 @@ public final class PDFontDescriptor implements COSObjectable
         COSArray array = null;
         if (rect != null)
         {
-            array = rect.getCOSArray();
+            array = rect.getCOSObject();
         }
         dic.setItem(COSName.FONT_BBOX, array);
     }

@@ -31,6 +31,7 @@ import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.PDDocument;
+import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
 
 /**
  * Test for the PDButton class.
@@ -91,6 +92,30 @@ public class PDAcroFormTest
         {
             doc.getDocumentCatalog().getAcroForm().flatten();
             doc.writeTo(new ByteArrayOutputStream());
+        }
+    }
+
+    /*
+     * Same as above but remove the page reference from the widget annotation before doing the flatten() to ensure that
+     * the widgets page reference is properly looked up (PDFBOX-3301)
+     */
+    @Test
+    public void testFlattenWidgetNoRef() throws IOException
+    {
+        try (PDDocument doc = PDFParser
+                .parse(SeekableSources.inMemorySeekableSourceFrom(getClass().getResourceAsStream(
+                        "/org/sejda/sambox/pdmodel/interactive/form/AlignmentTests.pdf"))))
+        {
+            PDAcroForm acroForm = doc.getDocumentCatalog().getAcroForm();
+            for (PDField field : acroForm.getFieldTree())
+            {
+                for (PDAnnotationWidget widget : field.getWidgets())
+                {
+                    widget.getCOSObject().removeItem(COSName.P);
+                }
+            }
+            doc.getDocumentCatalog().getAcroForm().flatten();
+            assertTrue(doc.getDocumentCatalog().getAcroForm().getFields().isEmpty());
         }
     }
 

@@ -497,6 +497,26 @@ public class COSArray extends COSBase implements List<COSBase>
     }
 
     @Override
+    public boolean equals(Object o)
+    {
+        if (o == this)
+        {
+            return true;
+        }
+        if (!(o instanceof COSArray))
+        {
+            return false;
+        }
+        return objects.equals(((COSArray) o).objects);
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return objects.hashCode();
+    }
+
+    @Override
     public String toString()
     {
         return "COSArray{" + objects + "}";

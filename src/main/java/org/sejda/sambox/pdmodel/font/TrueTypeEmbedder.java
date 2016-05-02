@@ -17,6 +17,8 @@
 
 package org.sejda.sambox.pdmodel.font;
 
+import static java.util.Objects.nonNull;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -50,7 +52,7 @@ import org.sejda.util.IOUtils;
 abstract class TrueTypeEmbedder implements Subsetter
 {
     private static final int ITALIC = 1;
-    private static final int OBLIQUE = 256;
+    private static final int OBLIQUE = 512;
     private static final String BASE25 = "BCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     protected TrueTypeFont ttf;
@@ -99,6 +101,10 @@ abstract class TrueTypeEmbedder implements Subsetter
         try
         {
             input = stream.createInputStream();
+            if (nonNull(ttf))
+            {
+                ttf.close();
+            }
             ttf = new TTFParser().parseEmbedded(input);
             if (!isEmbeddingPermitted(ttf))
             {
@@ -176,8 +182,7 @@ abstract class TrueTypeEmbedder implements Subsetter
                 post.getIsFixedPitch() > 0 || ttf.getHorizontalHeader().getNumberOfHMetrics() == 1);
 
         int fsSelection = os2.getFsSelection();
-        fd.setItalic(
-                (fsSelection & ITALIC) == fsSelection || (fsSelection & OBLIQUE) == fsSelection);
+        fd.setItalic(((fsSelection & (ITALIC | OBLIQUE)) != 0));
 
         switch (os2.getFamilyClass())
         {

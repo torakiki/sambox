@@ -58,8 +58,7 @@ public final class CCITTFactory
      * @return a new Image XObject
      * @throws IOException if there is an error reading the TIFF data.
      */
-    public static PDImageXObject createFromFile(File file, int number)
-            throws IOException
+    public static PDImageXObject createFromFile(File file, int number) throws IOException
     {
         return createFromRandomAccessImpl(seekableSourceFrom(file), number);
     }
@@ -72,8 +71,8 @@ public final class CCITTFactory
      * @return a new Image XObject, or null if no such page
      * @throws IOException if there is an error reading the TIFF data.
      */
-    private static PDImageXObject createFromRandomAccessImpl(
-            SeekableSource source, int number) throws IOException
+    private static PDImageXObject createFromRandomAccessImpl(SeekableSource source, int number)
+            throws IOException
     {
         COSDictionary decodeParms = new COSDictionary();
         SeekableSource tiffView = extractFromTiff(source, decodeParms, number);
@@ -215,6 +214,14 @@ public final class CCITTFactory
                 if (val == 1)
                 {
                     params.setBoolean(COSName.BLACK_IS_1, true);
+                }
+                break;
+            }
+            case 266:
+            {
+                if (val != 1)
+                {
+                    throw new IOException("FillOrder " + val + " is not supported");
                 }
                 break;
             }
