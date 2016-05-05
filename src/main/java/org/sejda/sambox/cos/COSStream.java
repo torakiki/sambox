@@ -395,6 +395,24 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
     }
 
     /**
+     * @param filter
+     * @return true if the stream has the given filter in the filters list
+     */
+    public boolean hasFilter(COSName filter)
+    {
+        COSBase filters = getFilters();
+        if (filters instanceof COSName)
+        {
+            return filters.equals(filter);
+        }
+        else if (filters instanceof COSArray)
+        {
+            return ((COSArray) filters).contains(filter);
+        }
+        return false;
+    }
+
+    /**
      * Sets the function to be used to encrypt this stream.
      * 
      * @param encrypted
