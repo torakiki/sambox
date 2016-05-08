@@ -22,12 +22,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
@@ -35,13 +33,18 @@ import java.util.Set;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.CipherInputStream;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.bouncycastle.crypto.engines.AESFastEngine;
+import org.bouncycastle.crypto.io.CipherInputStream;
+import org.bouncycastle.crypto.modes.CBCBlockCipher;
+import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
+import org.bouncycastle.crypto.params.KeyParameter;
+import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
@@ -82,7 +85,7 @@ public abstract class SecurityHandler
     /** indicates if the Metadata have to be decrypted of not. */
     private boolean decryptMetadata;
 
-    private final Set<COSBase> objects = new HashSet<COSBase>();
+    private final Set<COSBase> objects = new HashSet<>();
 
     private boolean useAES;
 
@@ -101,15 +104,6 @@ public abstract class SecurityHandler
     {
         this.decryptMetadata = decryptMetadata;
     }
-
-    /**
-     * Prepare the document for encryption.
-     *
-     * @param doc The document that will be encrypted.
-     *
-     * @throws IOException If there is an error with the document.
-     */
-    public abstract void prepareDocumentForEncryption(PDDocument doc) throws IOException;
 
     /**
      * Prepares everything to decrypt the document.
@@ -131,35 +125,28 @@ public abstract class SecurityHandler
      * @param genNumber The data generation number.
      * @param data The data to encrypt.
      * @param output The output to write the encrypted data to.
-     * @param decrypt true to decrypt the data, false to encrypt it.
      *
      * @throws IOException If there is an error reading the data.
      */
-    private void encryptData(long objectNumber, long genNumber, InputStream data,
-            OutputStream output, boolean decrypt) throws IOException
+    private void decryptData(long objectNumber, long genNumber, InputStream data,
+            OutputStream output) throws IOException
     {
         // Determine whether we're using Algorithm 1 (for RC4 and AES-128), or 1.A (for AES-256)
         if (useAES && encryptionKey.length == 32)
         {
-            encryptDataAES256(data, output, decrypt);
+            decryptDataAES256(data, output);
         }
         else
         {
-            if (useAES && !decrypt)
-            {
-                throw new IllegalArgumentException(
-                        "AES encryption with key length other than 256 bits is not yet implemented.");
-            }
-
             byte[] finalKey = calcFinalKey(objectNumber, genNumber);
 
             if (useAES)
             {
-                encryptDataAESother(finalKey, data, output, decrypt);
+                decryptDataAESother(finalKey, data, output);
             }
             else
             {
-                encryptDataRC4(finalKey, data, output);
+                decryptDataRC4(finalKey, data, output);
             }
         }
         IOUtils.close(output);
@@ -209,7 +196,7 @@ public abstract class SecurityHandler
      *
      * @throws IOException If there is an error reading the data.
      */
-    protected void encryptDataRC4(byte[] finalKey, InputStream input, OutputStream output)
+    protected void decryptDataRC4(byte[] finalKey, InputStream input, OutputStream output)
             throws IOException
     {
         rc4.setKey(finalKey);
@@ -225,7 +212,7 @@ public abstract class SecurityHandler
      *
      * @throws IOException If there is an error reading the data.
      */
-    protected void encryptDataRC4(byte[] finalKey, byte[] input, OutputStream output)
+    protected void decryptDataRC4(byte[] finalKey, byte[] input, OutputStream output)
             throws IOException
     {
         rc4.setKey(finalKey);
@@ -238,17 +225,16 @@ public abstract class SecurityHandler
      * @param finalKey The final key obtained with via {@link #calcFinalKey()}.
      * @param data The data to encrypt.
      * @param output The output to write the encrypted data to.
-     * @param decrypt true to decrypt the data, false to encrypt it.
      *
      * @throws IOException If there is an error reading the data.
      */
-    private void encryptDataAESother(byte[] finalKey, InputStream data, OutputStream output,
-            boolean decrypt) throws IOException
+    private void decryptDataAESother(byte[] finalKey, InputStream data, OutputStream output)
+            throws IOException
     {
         byte[] iv = new byte[16];
 
         int ivSize = data.read(iv);
-        if (decrypt && ivSize == -1)
+        if (ivSize == -1)
         {
             return;
         }
@@ -260,20 +246,11 @@ public abstract class SecurityHandler
 
         try
         {
-            Cipher decryptCipher;
-            try
-            {
-                decryptCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            }
-            catch (NoSuchAlgorithmException e)
-            {
-                // should never happen
-                throw new RuntimeException(e);
-            }
+            Cipher decryptCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
 
             SecretKey aesKey = new SecretKeySpec(finalKey, "AES");
             IvParameterSpec ips = new IvParameterSpec(iv);
-            decryptCipher.init(decrypt ? Cipher.DECRYPT_MODE : Cipher.ENCRYPT_MODE, aesKey, ips);
+            decryptCipher.init(Cipher.DECRYPT_MODE, aesKey, ips);
             byte[] buffer = new byte[256];
             int n;
             while ((n = data.read(buffer)) != -1)
@@ -286,23 +263,8 @@ public abstract class SecurityHandler
             }
             output.write(decryptCipher.doFinal());
         }
-        catch (InvalidKeyException e)
-        {
-            throw new IOException(e);
-        }
-        catch (InvalidAlgorithmParameterException e)
-        {
-            throw new IOException(e);
-        }
-        catch (NoSuchPaddingException e)
-        {
-            throw new IOException(e);
-        }
-        catch (IllegalBlockSizeException e)
-        {
-            throw new IOException(e);
-        }
-        catch (BadPaddingException e)
+        catch (InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException
+                | BadPaddingException | NoSuchAlgorithmException | NoSuchPaddingException e)
         {
             throw new IOException(e);
         }
@@ -313,71 +275,31 @@ public abstract class SecurityHandler
      *
      * @param data The data to encrypt.
      * @param output The output to write the encrypted data to.
-     * @param decrypt true to decrypt the data, false to encrypt it.
      *
      * @throws IOException If there is an error reading the data.
      */
-    private void encryptDataAES256(InputStream data, OutputStream output, boolean decrypt)
-            throws IOException
+    private void decryptDataAES256(InputStream data, OutputStream output) throws IOException
     {
         byte[] iv = new byte[16];
 
-        if (decrypt)
+        // read IV from stream
+        int ivSize = data.read(iv);
+        if (ivSize == -1)
         {
-            // read IV from stream
-            int ivSize = data.read(iv);
-
-            if (ivSize == -1)
-            {
-                return;
-            }
-
-            if (ivSize != iv.length)
-            {
-                throw new IOException("AES initialization vector not fully read: only " + ivSize
-                        + " bytes read instead of " + iv.length);
-            }
-        }
-        else
-        {
-            // generate random IV and write to stream
-            SecureRandom rnd = new SecureRandom();
-            rnd.nextBytes(iv);
-            output.write(iv);
+            return;
         }
 
-        Cipher cipher;
-        try
+        if (ivSize != iv.length)
         {
-            cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            SecretKeySpec keySpec = new SecretKeySpec(encryptionKey, "AES");
-            IvParameterSpec ivSpec = new IvParameterSpec(iv);
-            cipher.init(decrypt ? Cipher.DECRYPT_MODE : Cipher.ENCRYPT_MODE, keySpec, ivSpec);
+            throw new IOException("AES initialization vector not fully read: only " + ivSize
+                    + " bytes read instead of " + iv.length);
         }
-        catch (GeneralSecurityException e)
-        {
-            throw new IOException(e);
-        }
-
-        CipherInputStream cis = new CipherInputStream(data, cipher);
-        try
+        PaddedBufferedBlockCipher cipher = new PaddedBufferedBlockCipher(
+                new CBCBlockCipher(new AESFastEngine()));
+        cipher.init(false, new ParametersWithIV(new KeyParameter(encryptionKey), iv));
+        try (CipherInputStream cis = new CipherInputStream(data, cipher))
         {
             org.apache.commons.io.IOUtils.copy(cis, output);
-        }
-        catch (IOException exception)
-        {
-            // starting with java 8 the JVM wraps an IOException around a GeneralSecurityException
-            // it should be safe to swallow a GeneralSecurityException
-            if (!(exception.getCause() instanceof GeneralSecurityException))
-            {
-                throw exception;
-            }
-            LOG.debug("A GeneralSecurityException occured when decrypting some stream data",
-                    exception);
-        }
-        finally
-        {
-            cis.close();
         }
     }
 
@@ -456,27 +378,7 @@ public abstract class SecurityHandler
         ByteArrayInputStream encryptedStream = new ByteArrayInputStream(encrypted);
         try (OutputStream output = stream.createFilteredStream())
         {
-            encryptData(objNum, genNum, encryptedStream, output, true /* decrypt */);
-        }
-    }
-
-    /**
-     * This will encrypt a stream, but not the dictionary as the dictionary is encrypted by visitFromString() in
-     * COSWriter and we don't want to encrypt it twice.
-     *
-     * @param stream The stream to decrypt.
-     * @param objNum The object number.
-     * @param genNum The object generation number.
-     *
-     * @throws IOException If there is an error getting the stream data.
-     */
-    public void encryptStream(COSStream stream, long objNum, int genNum) throws IOException
-    {
-        byte[] rawData = org.apache.commons.io.IOUtils.toByteArray(stream.getFilteredStream());
-        ByteArrayInputStream encryptedStream = new ByteArrayInputStream(rawData);
-        try (OutputStream output = stream.createFilteredStream())
-        {
-            encryptData(objNum, genNum, encryptedStream, output, false /* encrypt */);
+            decryptData(objNum, genNum, encryptedStream, output);
         }
     }
 
@@ -531,7 +433,7 @@ public abstract class SecurityHandler
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         try
         {
-            encryptData(objNum, genNum, data, outputStream, true /* decrypt */);
+            decryptData(objNum, genNum, data, outputStream);
             string.setValue(outputStream.toByteArray());
         }
         catch (IOException ex)
@@ -539,23 +441,6 @@ public abstract class SecurityHandler
             LOG.error("Failed to decrypt COSString of length " + string.getBytes().length
                     + " in object " + objNum + ": " + ex.getMessage());
         }
-    }
-
-    /**
-     * This will encrypt a string.
-     *
-     * @param string the string to encrypt.
-     * @param objNum The object number.
-     * @param genNum The object generation number.
-     *
-     * @throws IOException If an error occurs writing the new string.
-     */
-    public void encryptString(COSString string, long objNum, int genNum) throws IOException
-    {
-        ByteArrayInputStream data = new ByteArrayInputStream(string.getBytes());
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        encryptData(objNum, genNum, data, buffer, false /* decrypt */);
-        string.setValue(buffer.toByteArray());
     }
 
     /**

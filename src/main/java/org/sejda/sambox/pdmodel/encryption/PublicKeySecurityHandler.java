@@ -17,46 +17,15 @@
 
 package org.sejda.sambox.pdmodel.encryption;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.security.AlgorithmParameterGenerator;
-import java.security.AlgorithmParameters;
-import java.security.GeneralSecurityException;
-import java.security.InvalidKeyException;
 import java.security.KeyStoreException;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.security.SecureRandom;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.Iterator;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.KeyGenerator;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.ASN1Primitive;
-import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.DEROutputStream;
-import org.bouncycastle.asn1.DERSet;
-import org.bouncycastle.asn1.cms.ContentInfo;
-import org.bouncycastle.asn1.cms.EncryptedContentInfo;
-import org.bouncycastle.asn1.cms.EnvelopedData;
-import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
-import org.bouncycastle.asn1.cms.KeyTransRecipientInfo;
-import org.bouncycastle.asn1.cms.RecipientIdentifier;
-import org.bouncycastle.asn1.cms.RecipientInfo;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.TBSCertificateStructure;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cms.CMSEnvelopedData;
 import org.bouncycastle.cms.CMSException;
@@ -78,8 +47,6 @@ public final class PublicKeySecurityHandler extends SecurityHandler
 {
     /** The filter name. */
     public static final String FILTER = "Adobe.PubSec";
-
-    private static final String SUBFILTER = "adbe.pkcs7.s4";
 
     private PublicKeyProtectionPolicy policy = null;
     
@@ -267,222 +234,6 @@ public final class PublicKeySecurityHandler extends SecurityHandler
             extraInfo.append(materialCert == null ? "null" : materialCert.getIssuer());
             extraInfo.append("\' ");
         }
-    }
-    
-    /**
-     * Prepare the document for encryption.
-     *
-     * @param doc The document that will be encrypted.
-     *
-     * @throws IOException If there is an error while encrypting.
-     */
-    @Override
-    public void prepareDocumentForEncryption(PDDocument doc) throws IOException
-    {
-        if (keyLength == 256)
-        {
-            throw new IOException("256 bit key length is not supported yet for public key security");
-        }
-        try
-        {
-            PDEncryption dictionary = doc.getEncryption();
-            if (dictionary == null) 
-            {
-                dictionary = new PDEncryption();
-            }
-
-            dictionary.setFilter(FILTER);
-            dictionary.setLength(this.keyLength);
-            dictionary.setVersion(2);
-            
-            // remove CF, StmF, and StrF entries that may be left from a previous encryption
-            dictionary.removeV45filters();
-            
-            dictionary.setSubFilter(SUBFILTER);
-
-            // create the 20 bytes seed
-
-            byte[] seed = new byte[20];
-
-            KeyGenerator key;
-            try
-            {
-                key = KeyGenerator.getInstance("AES");
-            }
-            catch (NoSuchAlgorithmException e)
-            {
-                // should never happen
-                throw new RuntimeException(e);
-            }
-
-            key.init(192, new SecureRandom());
-            SecretKey sk = key.generateKey();
-            System.arraycopy(sk.getEncoded(), 0, seed, 0, 20); // create the 20 bytes seed
-            
-            byte[][] recipientsField = computeRecipientsField(seed);
-            dictionary.setRecipients(recipientsField);
-
-            int sha1InputLength = seed.length;
-
-            for(int j=0; j<dictionary.getRecipientsLength(); j++)
-            {
-                COSString string = dictionary.getRecipientStringAt(j);
-                sha1InputLength += string.getBytes().length;
-            }
-
-            byte[] sha1Input = new byte[sha1InputLength];
-
-            System.arraycopy(seed, 0, sha1Input, 0, 20);
-
-            int sha1InputOffset = 20;
-
-            for(int j=0; j<dictionary.getRecipientsLength(); j++)
-            {
-                COSString string = dictionary.getRecipientStringAt(j);
-                System.arraycopy(
-                    string.getBytes(), 0,
-                    sha1Input, sha1InputOffset, string.getBytes().length);
-                sha1InputOffset += string.getBytes().length;
-            }
-
-            MessageDigest sha1 = MessageDigests.getSHA1();
-            byte[] mdResult = sha1.digest(sha1Input);
-
-            this.encryptionKey = new byte[this.keyLength/8];
-            System.arraycopy(mdResult, 0, this.encryptionKey, 0, this.keyLength/8);
-
-            // doc.setEncryption(dictionary);
-            doc.getDocument().setEncryptionDictionary(dictionary.getCOSDictionary());
-        }
-        catch(GeneralSecurityException e)
-        {
-            throw new IOException(e);
-        }
-    }
-
-    private byte[][] computeRecipientsField(byte[] seed) throws GeneralSecurityException, IOException
-    {
-        byte[][] recipientsField = new byte[policy.getNumberOfRecipients()][];
-        Iterator<PublicKeyRecipient> it = policy.getRecipientsIterator();
-        int i = 0;
-        
-        while(it.hasNext())
-        {
-            PublicKeyRecipient recipient = it.next();
-            X509Certificate certificate = recipient.getX509();
-            int permission = recipient.getPermission().getPermissionBytesForPublicKey();
-            
-            byte[] pkcs7input = new byte[24];
-            byte one = (byte)(permission);
-            byte two = (byte)(permission >>> 8);
-            byte three = (byte)(permission >>> 16);
-            byte four = (byte)(permission >>> 24);
-            
-            System.arraycopy(seed, 0, pkcs7input, 0, 20); // put this seed in the pkcs7 input
-            
-            pkcs7input[20] = four;
-            pkcs7input[21] = three;
-            pkcs7input[22] = two;
-            pkcs7input[23] = one;
-            
-            ASN1Primitive obj = createDERForRecipient(pkcs7input, certificate);
-            
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            
-            DEROutputStream k = new DEROutputStream(baos);
-            
-            k.writeObject(obj);
-            
-            recipientsField[i] = baos.toByteArray();
-            
-            i++;
-        }
-        return recipientsField;
-    }
-
-    private ASN1Primitive createDERForRecipient(byte[] in, X509Certificate cert)
-            throws IOException, GeneralSecurityException
-    {
-        String algorithm = "1.2.840.113549.3.2";
-        AlgorithmParameterGenerator apg;
-        KeyGenerator keygen;
-        Cipher cipher;
-        try
-        {
-            apg = AlgorithmParameterGenerator.getInstance(algorithm);
-            keygen = KeyGenerator.getInstance(algorithm);
-            cipher = Cipher.getInstance(algorithm);
-        }
-        catch (NoSuchAlgorithmException e)
-        {
-            // should never happen, if this happens throw IOException instead
-            throw new RuntimeException("Could not find a suitable javax.crypto provider", e);
-        }
-        catch (NoSuchPaddingException e)
-        {
-            // should never happen, if this happens throw IOException instead
-            throw new RuntimeException("Could not find a suitable javax.crypto provider", e);
-        }
-
-        AlgorithmParameters parameters = apg.generateParameters();
-
-        ASN1InputStream input = new ASN1InputStream(parameters.getEncoded("ASN.1"));
-        ASN1Primitive object = input.readObject();
-        input.close();
-
-        keygen.init(128);
-        SecretKey secretkey = keygen.generateKey();
-
-        cipher.init(1, secretkey, parameters);
-        byte[] bytes = cipher.doFinal(in);
-
-        KeyTransRecipientInfo recipientInfo = computeRecipientInfo(cert, secretkey.getEncoded());
-        DERSet set = new DERSet(new RecipientInfo(recipientInfo));
-
-        AlgorithmIdentifier algorithmId = new AlgorithmIdentifier(new ASN1ObjectIdentifier(algorithm), object);
-        EncryptedContentInfo encryptedInfo = 
-                new EncryptedContentInfo(PKCSObjectIdentifiers.data, algorithmId, new DEROctetString(bytes));
-        EnvelopedData enveloped = new EnvelopedData(null, set, encryptedInfo, (ASN1Set) null);
-
-        ContentInfo contentInfo = new ContentInfo(PKCSObjectIdentifiers.envelopedData, enveloped);
-        return contentInfo.toASN1Primitive();
-    }
-
-    private KeyTransRecipientInfo computeRecipientInfo(X509Certificate x509certificate, byte[] abyte0)
-        throws IOException, CertificateEncodingException, InvalidKeyException,
-            BadPaddingException, IllegalBlockSizeException
-    {
-        ASN1InputStream input = new ASN1InputStream(x509certificate.getTBSCertificate());
-        TBSCertificateStructure certificate = TBSCertificateStructure.getInstance(input.readObject());
-        input.close();
-
-        AlgorithmIdentifier algorithmId = certificate.getSubjectPublicKeyInfo().getAlgorithm();
-
-        IssuerAndSerialNumber serial = new IssuerAndSerialNumber(
-                certificate.getIssuer(),
-                certificate.getSerialNumber().getValue());
-
-        Cipher cipher;
-        try
-        {
-            cipher = Cipher.getInstance(algorithmId.getAlgorithm().getId());
-        }
-        catch (NoSuchAlgorithmException e)
-        {
-            // should never happen, if this happens throw IOException instead
-            throw new RuntimeException("Could not find a suitable javax.crypto provider", e);
-        }
-        catch (NoSuchPaddingException e)
-        {
-            // should never happen, if this happens throw IOException instead
-            throw new RuntimeException("Could not find a suitable javax.crypto provider", e);
-        }
-
-        cipher.init(1, x509certificate.getPublicKey());
-
-        DEROctetString octets = new DEROctetString(cipher.doFinal(abyte0));
-        RecipientIdentifier recipientId = new RecipientIdentifier(serial);
-        return new KeyTransRecipientInfo(recipientId, algorithmId, octets);
     }
     
     /**
