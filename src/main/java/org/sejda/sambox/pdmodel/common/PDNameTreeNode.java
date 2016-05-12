@@ -117,17 +117,19 @@ public abstract class PDNameTreeNode<T extends COSObjectable> implements COSObje
      */
     public List<PDNameTreeNode<T>> getKids()
     {
-        COSArray kids = (COSArray) node.getDictionaryObject(COSName.KIDS);
-        if (kids != null)
+        if (nonNull(node))
         {
-            List<PDNameTreeNode<T>> pdObjects = new ArrayList<>();
-            for (int i = 0; i < kids.size(); i++)
+            COSArray kids = (COSArray) node.getDictionaryObject(COSName.KIDS);
+            if (kids != null)
             {
-                pdObjects.add(createChildNode((COSDictionary) kids.getObject(i)));
+                List<PDNameTreeNode<T>> pdObjects = new ArrayList<>();
+                for (int i = 0; i < kids.size(); i++)
+                {
+                    pdObjects.add(createChildNode((COSDictionary) kids.getObject(i)));
+                }
+                return new COSArrayList<>(pdObjects, kids);
             }
-            return new COSArrayList<>(pdObjects, kids);
         }
-
         return null;
     }
 
@@ -250,7 +252,7 @@ public abstract class PDNameTreeNode<T extends COSObjectable> implements COSObje
      */
     private boolean couldContain(String name)
     {
-        if (isNull(getLowerLimit()) || isNull(getUpperLimit()))
+        if (isNull(node) || isNull(getLowerLimit()) || isNull(getUpperLimit()))
         {
             LOG.warn("Missing required name tree node Limits array");
             return false;
