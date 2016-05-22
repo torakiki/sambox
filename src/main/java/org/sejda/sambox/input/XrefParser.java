@@ -249,7 +249,7 @@ class XrefParser
             parser.skipSpaces();
             COSDictionary xrefStreamDictionary = parser.nextDictionary();
             parser.position(xrefStreamOffset);
-            return xrefStreamDictionary.getCOSName(COSName.TYPE).equals(COSName.XREF);
+            return COSName.XREF.equals(xrefStreamDictionary.getCOSName(COSName.TYPE));
         }
         catch (IOException exception)
         {
