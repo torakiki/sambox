@@ -51,13 +51,20 @@ public class COSFloatTest
     @Test
     public void doubleValue() throws IOException
     {
-        assertEquals(2.04, COSInteger.get("2.04").doubleValue(), 0);
+        assertEquals(2.04, COSFloat.get("2.04").doubleValue(), 0);
     }
 
     @Test
     public void floatValue() throws IOException
     {
-        assertEquals(2.04f, COSInteger.get("2.04").floatValue(), 0);
+        assertEquals(2.04f, COSFloat.get("2.04").floatValue(), 0);
+    }
+
+    @Test
+    public void pdfbox2990() throws IOException
+    {
+        assertEquals(-0.0000033917698f, COSFloat.get("0.00000-33917698").floatValue(), 0);
+        assertEquals(-0.0040f, COSFloat.get("0.00-40").floatValue(), 0);
     }
 
     @Test(expected = IOException.class)

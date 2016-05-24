@@ -16,8 +16,12 @@
  */
 package org.sejda.sambox.cos;
 
+import static org.sejda.util.RequireUtils.requireIOCondition;
+
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This class represents a floating point number in a PDF document.
@@ -52,25 +56,18 @@ public class COSFloat extends COSNumber
         }
         catch (NumberFormatException e)
         {
-            if (aFloat.startsWith("0.00000-"))
+            Matcher matcher = Pattern.compile("(0.[0]+)-([0-9]+)").matcher(aFloat);
+            requireIOCondition(matcher.matches(),
+                    "Expected floating point number but found '" + aFloat + "'");
+            try
             {
-                // PDFBOX-2990 has 0.00000-33917698
-                // Let's wait what other floats will be coming before doing a more general workaround.
-                try
-                {
-                    value = new BigDecimal(aFloat.substring(8));
-                    checkMinMaxValues();
-                }
-                catch (NumberFormatException e2)
-                {
-                    throw new IOException(
-                            "Error expected floating point number actual='" + aFloat + "'", e2);
-                }
+                value = new BigDecimal("-" + matcher.group(1) + matcher.group(2));
+                checkMinMaxValues();
             }
-            else
+            catch (NumberFormatException e2)
             {
                 throw new IOException(
-                        "Error expected floating point number actual='" + aFloat + "'", e);
+                        "Error expected floating point number actual='" + aFloat + "'", e2);
             }
         }
     }
