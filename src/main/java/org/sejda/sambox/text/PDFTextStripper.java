@@ -313,7 +313,14 @@ public class PDFTextStripper extends PDFTextStreamEngine
             currentPageNo++;
             if (page.hasContents())
             {
-                processPage(page);
+                try
+                {
+                    processPage(page);
+                }
+                catch (IOException e)
+                {
+                    LOG.warn("Unable to extract text from page " + currentPageNo, e);
+                }
             }
         }
     }
@@ -393,7 +400,7 @@ public class PDFTextStripper extends PDFTextStreamEngine
 
     private void fillBeadRectangles(PDPage page)
     {
-        beadRectangles = new ArrayList<PDRectangle>();
+        beadRectangles = new ArrayList<>();
         for (PDThreadBead bead : page.getThreadBeads())
         {
             if (bead == null)
