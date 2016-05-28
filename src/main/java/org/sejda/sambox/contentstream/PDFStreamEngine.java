@@ -406,7 +406,7 @@ public abstract class PDFStreamEngine
      * @param contentStream the content stream
      * @throws IOException if there is an exception while processing the stream
      */
-    private void processStream(PDContentStream contentStream) throws IOException
+    protected void processStream(PDContentStream contentStream) throws IOException
     {
         PDResources parent = pushResources(contentStream);
         Stack<PDGraphicsState> savedStack = saveGraphicsStack();

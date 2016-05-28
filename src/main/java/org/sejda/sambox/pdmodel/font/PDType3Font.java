@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.pdmodel.font;
 
+import static java.util.Objects.nonNull;
+
 import java.awt.geom.GeneralPath;
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,11 +49,6 @@ public class PDType3Font extends PDSimpleFont
     private Matrix fontMatrix;
     private BoundingBox fontBBox;
 
-    /**
-     * Constructor.
-     *
-     * @param fontDictionary The font dictionary according to the PDF specification.
-     */
     public PDType3Font(COSDictionary fontDictionary) throws IOException
     {
         super(fontDictionary);
@@ -65,15 +62,15 @@ public class PDType3Font extends PDSimpleFont
     }
 
     @Override
-    protected final void readEncoding() throws IOException
+    protected final void readEncoding()
     {
-        COSDictionary encodingDict = (COSDictionary) dict.getDictionaryObject(COSName.ENCODING);
-        encoding = new DictionaryEncoding(encodingDict);
+        encoding = new DictionaryEncoding(
+                dict.getDictionaryObject(COSName.ENCODING, COSDictionary.class));
         glyphList = GlyphList.getAdobeGlyphList();
     }
 
     @Override
-    protected Encoding readEncodingFromFont() throws IOException
+    protected Encoding readEncodingFromFont()
     {
         // Type 3 fonts do not have a built-in encoding
         throw new UnsupportedOperationException("not supported for Type 3 fonts");
@@ -86,17 +83,17 @@ public class PDType3Font extends PDSimpleFont
     }
 
     @Override
-    public GeneralPath getPath(String name) throws IOException
+    public GeneralPath getPath(String name)
     {
         // Type 3 fonts do not use vector paths
         throw new UnsupportedOperationException("not supported for Type 3 fonts");
     }
 
     @Override
-    public boolean hasGlyph(String name) throws IOException
+    public boolean hasGlyph(String name)
     {
-        COSStream stream = (COSStream) getCharProcs().getDictionaryObject(COSName.getPDFName(name));
-        return stream != null;
+        return nonNull(
+                getCharProcs().getDictionaryObject(COSName.getPDFName(name), COSStream.class));
     }
 
     @Override
@@ -121,29 +118,23 @@ public class PDType3Font extends PDSimpleFont
         {
             return getWidths().get(code - firstChar);
         }
-        else
+        PDFontDescriptor fd = getFontDescriptor();
+        if (nonNull(fd))
         {
-            PDFontDescriptor fd = getFontDescriptor();
-            if (fd != null)
-            {
-                return fd.getMissingWidth();
-            }
-            else
-            {
-                return getWidthFromFont(code);
-            }
+            return fd.getMissingWidth();
         }
+        return getWidthFromFont(code);
     }
 
     @Override
     public float getWidthFromFont(int code) throws IOException
     {
         PDType3CharProc charProc = getCharProc(code);
-        if (charProc == null)
+        if (nonNull(charProc))
         {
-            return 0;
+            return charProc.getWidth();
         }
-        return charProc.getWidth();
+        return 0;
     }
 
     @Override
@@ -153,7 +144,7 @@ public class PDType3Font extends PDSimpleFont
     }
 
     @Override
-    public float getHeight(int code) throws IOException
+    public float getHeight(int code)
     {
         PDFontDescriptor desc = getFontDescriptor();
         if (desc != null)
@@ -189,7 +180,7 @@ public class PDType3Font extends PDSimpleFont
     }
 
     @Override
-    protected byte[] encode(int unicode) throws IOException
+    protected byte[] encode(int unicode)
     {
         throw new UnsupportedOperationException("Not implemented: Type3");
     }
@@ -205,8 +196,8 @@ public class PDType3Font extends PDSimpleFont
     {
         if (fontMatrix == null)
         {
-            COSArray array = (COSArray) dict.getDictionaryObject(COSName.FONT_MATRIX);
-            if (array != null)
+            COSArray array = dict.getDictionaryObject(COSName.FONT_MATRIX, COSArray.class);
+            if (nonNull(array))
             {
                 fontMatrix = new Matrix(array);
             }
@@ -234,7 +225,8 @@ public class PDType3Font extends PDSimpleFont
     {
         if (resources == null)
         {
-            COSDictionary resources = (COSDictionary) dict.getDictionaryObject(COSName.RESOURCES);
+            COSDictionary resources = dict.getDictionaryObject(COSName.RESOURCES,
+                    COSDictionary.class);
             if (resources != null)
             {
                 this.resources = new PDResources(resources);
@@ -251,12 +243,11 @@ public class PDType3Font extends PDSimpleFont
     public PDRectangle getFontBBox()
     {
         COSArray rect = (COSArray) dict.getDictionaryObject(COSName.FONT_BBOX);
-        PDRectangle retval = null;
-        if (rect != null)
+        if (nonNull(rect))
         {
-            retval = new PDRectangle(rect);
+            return new PDRectangle(rect);
         }
-        return retval;
+        return null;
     }
 
     @Override
@@ -302,8 +293,8 @@ public class PDType3Font extends PDSimpleFont
                 }
             }
         }
-        return new BoundingBox(rect.getLowerLeftX(), rect.getLowerLeftY(),
-                rect.getUpperRightX(), rect.getUpperRightY());
+        return new BoundingBox(rect.getLowerLeftX(), rect.getLowerLeftY(), rect.getUpperRightX(),
+                rect.getUpperRightY());
     }
 
     /**
@@ -315,7 +306,7 @@ public class PDType3Font extends PDSimpleFont
     {
         if (charProcs == null)
         {
-            charProcs = (COSDictionary) dict.getDictionaryObject(COSName.CHAR_PROCS);
+            charProcs = dict.getDictionaryObject(COSName.CHAR_PROCS, COSDictionary.class);
         }
         return charProcs;
     }
@@ -329,15 +320,14 @@ public class PDType3Font extends PDSimpleFont
     public PDType3CharProc getCharProc(int code)
     {
         String name = getEncoding().getName(code);
-        if (!name.equals(".notdef"))
+        if (!".notdef".equals(name))
         {
-            COSStream stream;
-            stream = (COSStream) getCharProcs().getDictionaryObject(COSName.getPDFName(name));
-            if (stream == null)
+            COSStream stream = getCharProcs().getDictionaryObject(COSName.getPDFName(name),
+                    COSStream.class);
+            if (nonNull(stream))
             {
-                return null;
+                return new PDType3CharProc(this, stream);
             }
-            return new PDType3CharProc(this, stream);
         }
         return null;
     }
