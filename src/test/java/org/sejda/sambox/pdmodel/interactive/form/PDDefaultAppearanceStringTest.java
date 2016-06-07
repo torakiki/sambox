@@ -64,11 +64,12 @@ public class PDDefaultAppearanceStringTest
         assertEquals(0.627, defaultAppearanceString.getFontColor().getComponents()[2], 0.0001);
     }
 
-    @Test(expected = IOException.class)
+    @Test
     public void testFontResourceUnavailable() throws IOException
     {
         COSString sampleString = COSString.parseLiteral("/Helvetica 12 Tf 0.019 0.305 0.627 rg 0g");
-        new PDDefaultAppearanceString(sampleString, resources);
+        PDDefaultAppearanceString defaultAppearanceString = new PDDefaultAppearanceString(sampleString, resources);
+        assertEquals(PDType1Font.HELVETICA, defaultAppearanceString.getFont());
     }
 
     @Test(expected = IOException.class)

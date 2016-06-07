@@ -33,6 +33,7 @@ import org.sejda.sambox.input.ContentStreamParser;
 import org.sejda.sambox.pdmodel.PDPageContentStream;
 import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.font.PDFont;
+import org.sejda.sambox.pdmodel.font.PDType1Font;
 import org.sejda.sambox.pdmodel.graphics.color.PDColor;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceColorSpace;
@@ -174,7 +175,8 @@ class PDDefaultAppearanceString
         // todo: handle cases where font == null with special mapping logic (see PDFBOX-2661)
         if (font == null)
         {
-            throw new IOException("Could not find font: /" + fontName.getName());
+            LOG.warn("Could not find font: /" + fontName.getName() + ", will use Helvetica instead");
+            font = PDType1Font.HELVETICA;
         }
         setFontName(fontName);
         setFont(font);
