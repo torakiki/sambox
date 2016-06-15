@@ -90,10 +90,7 @@ public enum RenderingMode
      */
     public boolean isFill()
     {
-        return this == FILL ||
-               this == FILL_STROKE ||
-               this == FILL_CLIP ||
-               this == FILL_STROKE_CLIP;
+        return this == FILL || this == FILL_STROKE || this == FILL_CLIP || this == FILL_STROKE_CLIP;
     }
 
     /**
@@ -101,10 +98,8 @@ public enum RenderingMode
      */
     public boolean isStroke()
     {
-        return this == STROKE ||
-               this == FILL_STROKE ||
-               this == STROKE ||
-               this == FILL_STROKE_CLIP;
+        return this == STROKE || this == FILL_STROKE || this == STROKE_CLIP
+                || this == FILL_STROKE_CLIP;
     }
 
     /**
@@ -112,9 +107,7 @@ public enum RenderingMode
      */
     public boolean isClip()
     {
-        return this == FILL_CLIP ||
-               this == STROKE_CLIP ||
-               this == FILL_STROKE_CLIP ||
-               this == NEITHER_CLIP;
+        return this == FILL_CLIP || this == STROKE_CLIP || this == FILL_STROKE_CLIP
+                || this == NEITHER_CLIP;
     }
 }

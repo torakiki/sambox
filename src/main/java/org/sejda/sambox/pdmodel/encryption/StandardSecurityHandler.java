@@ -23,6 +23,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -41,7 +42,6 @@ import org.bouncycastle.crypto.params.KeyParameter;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSString;
-import org.sejda.sambox.util.Charsets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -138,10 +138,10 @@ public final class StandardSecurityHandler extends SecurityHandler
         byte[] ownerKey = encryption.getOwnerKey();
         byte[] ue = null, oe = null;
 
-        Charset passwordCharset = Charsets.ISO_8859_1;
+        Charset passwordCharset = StandardCharsets.ISO_8859_1;
         if (dicRevision == 6 || dicRevision == 5)
         {
-            passwordCharset = Charsets.UTF_8;
+            passwordCharset = StandardCharsets.UTF_8;
             ue = encryption.getUserEncryptionKey();
             oe = encryption.getOwnerEncryptionKey();
         }
@@ -705,12 +705,14 @@ public final class StandardSecurityHandler extends SecurityHandler
     {
         if (encRevision == 6 || encRevision == 5)
         {
-            return isUserPassword(password.getBytes(Charsets.UTF_8), user, owner, permissions, id,
+            return isUserPassword(password.getBytes(StandardCharsets.UTF_8), user, owner,
+                    permissions, id,
                     encRevision, length, encryptMetadata);
         }
         else
         {
-            return isUserPassword(password.getBytes(Charsets.ISO_8859_1), user, owner, permissions,
+            return isUserPassword(password.getBytes(StandardCharsets.ISO_8859_1), user, owner,
+                    permissions,
                     id, encRevision, length, encryptMetadata);
         }
     }
@@ -734,7 +736,8 @@ public final class StandardSecurityHandler extends SecurityHandler
     public boolean isOwnerPassword(String password, byte[] user, byte[] owner, int permissions,
             byte[] id, int encRevision, int length, boolean encryptMetadata) throws IOException
     {
-        return isOwnerPassword(password.getBytes(Charsets.ISO_8859_1), user, owner, permissions, id,
+        return isOwnerPassword(password.getBytes(StandardCharsets.ISO_8859_1), user, owner,
+                permissions, id,
                 encRevision, length, encryptMetadata);
     }
 

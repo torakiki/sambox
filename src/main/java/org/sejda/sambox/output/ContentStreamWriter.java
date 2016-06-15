@@ -21,6 +21,7 @@ import static org.sejda.sambox.contentstream.operator.Operator.EI_OPERATOR;
 import static org.sejda.sambox.contentstream.operator.Operator.ID_OPERATOR;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,7 +33,6 @@ import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
-import org.sejda.sambox.util.Charsets;
 /**
  * Component capable of writing a content stream tokens, {@link Operator}s and {@link COSBase} operands.
  * 
@@ -102,7 +102,7 @@ public class ContentStreamWriter extends DefaultCOSWriter
 
     private void writeOperator(Operator token) throws IOException
     {
-        writer().write(token.getName().getBytes(Charsets.ISO_8859_1));
+        writer().write(token.getName().getBytes(StandardCharsets.ISO_8859_1));
         if (token.getName().equals(BI_OPERATOR))
         {
             writeEOL();
@@ -115,11 +115,11 @@ public class ContentStreamWriter extends DefaultCOSWriter
                 imageParams.getDictionaryObject(key).accept(this);
                 writeEOL();
             }
-            writer().write(ID_OPERATOR.getBytes(Charsets.US_ASCII));
+            writer().write(ID_OPERATOR.getBytes(StandardCharsets.US_ASCII));
             writeEOL();
             writer().write(token.getImageData());
             writeEOL();
-            writer().write(EI_OPERATOR.getBytes(Charsets.US_ASCII));
+            writer().write(EI_OPERATOR.getBytes(StandardCharsets.US_ASCII));
         }
         writeEOL();
     }

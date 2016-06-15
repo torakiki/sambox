@@ -21,6 +21,7 @@ import static org.sejda.sambox.util.CharUtils.isLineFeed;
 import static org.sejda.sambox.util.CharUtils.isSpace;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,7 +36,6 @@ import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.COSNumber;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.cos.COSString;
-import org.sejda.sambox.util.Charsets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -238,7 +238,7 @@ abstract class BaseCOSParser extends SourceReader
      */
     public COSString nextLiteralString() throws IOException
     {
-        return COSString.newInstance(readLiteralString().getBytes(Charsets.ISO_8859_1));
+        return COSString.newInstance(readLiteralString().getBytes(StandardCharsets.ISO_8859_1));
     }
 
     /**

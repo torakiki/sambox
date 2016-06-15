@@ -86,9 +86,7 @@ public class WinAnsiEncoding extends Encoding
             { 0165, "u" }, { 0372, "uacute" }, { 0373, "ucircumflex" }, { 0374, "udieresis" },
             { 0371, "ugrave" }, { 0137, "underscore" }, { 0166, "v" }, { 0167, "w" }, { 0170, "x" },
             { 0171, "y" }, { 0375, "yacute" }, { 0377, "ydieresis" }, { 0245, "yen" },
-            { 0172, "z" }, { 0236, "zcaron" }, { 060, "zero" },
-            // adding some additional mappings as defined in Appendix D of the pdf spec
-            { 0240, "space" }, { 0255, "hyphen" } };
+            { 0172, "z" }, { 0236, "zcaron" }, { 060, "zero" } };
 
     /**
      * Singleton instance of this class.
@@ -106,6 +104,11 @@ public class WinAnsiEncoding extends Encoding
         {
             add((Integer) encodingEntry[CHAR_CODE], encodingEntry[CHAR_NAME].toString());
         }
+
+        // adding some additional mappings as defined in Appendix D of the pdf spec
+        // don't add the reverse mapping as we have to preserve the origin mapping for the given glyph names
+        codeToName.put(0240, "space");
+        codeToName.put(0255, "hyphen");
 
         // From the PDF specification:
         // In WinAnsiEncoding, all unused codes greater than 40 map to the bullet character.

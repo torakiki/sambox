@@ -26,6 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -36,7 +37,6 @@ import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
-import org.sejda.sambox.util.Charsets;
 import org.sejda.sambox.util.SpecVersionUtils;
 import org.sejda.sambox.xref.XrefEntry;
 
@@ -142,13 +142,13 @@ public class DefaultPDFWriterTest
         objectWriter.writeObject(ref);
         COSDictionary existingTrailer = new COSDictionary();
         victim.writeTrailer(existingTrailer, 10);
-        inOrder.verify(writer).write(aryEq("trailer".getBytes(Charsets.US_ASCII)));
+        inOrder.verify(writer).write(aryEq("trailer".getBytes(StandardCharsets.US_ASCII)));
         inOrder.verify(writer).writeEOL();
-        inOrder.verify(writer).write(aryEq("startxref".getBytes(Charsets.US_ASCII)));
+        inOrder.verify(writer).write(aryEq("startxref".getBytes(StandardCharsets.US_ASCII)));
         inOrder.verify(writer).writeEOL();
         inOrder.verify(writer).write("10");
         inOrder.verify(writer).writeEOL();
-        inOrder.verify(writer).write(aryEq("%%EOF".getBytes(Charsets.US_ASCII)));
+        inOrder.verify(writer).write(aryEq("%%EOF".getBytes(StandardCharsets.US_ASCII)));
         inOrder.verify(writer).writeEOL();
     }
 
@@ -165,10 +165,10 @@ public class DefaultPDFWriterTest
         inOrder.verify(writer).write(DefaultCOSWriter.SPACE);
         inOrder.verify(writer).write("0");
         inOrder.verify(writer).write(DefaultCOSWriter.SPACE);
-        inOrder.verify(writer).write(aryEq("obj".getBytes(Charsets.US_ASCII)));
+        inOrder.verify(writer).write(aryEq("obj".getBytes(StandardCharsets.US_ASCII)));
         inOrder.verify(writer).writeEOL();
         // write the stream
-        inOrder.verify(writer).write(aryEq("startxref".getBytes(Charsets.US_ASCII)));
+        inOrder.verify(writer).write(aryEq("startxref".getBytes(StandardCharsets.US_ASCII)));
         inOrder.verify(writer).writeEOL();
         inOrder.verify(writer).write("12345");
         inOrder.verify(writer).writeEOL();

@@ -21,12 +21,11 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-
-import org.sejda.sambox.util.Charsets;
 
 /**
  * Writes ToUnicode Mapping Files.
@@ -85,7 +84,8 @@ final class ToUnicodeWriter
      */
     public void writeTo(OutputStream out) throws IOException
     {
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, Charsets.US_ASCII));
+        BufferedWriter writer = new BufferedWriter(
+                new OutputStreamWriter(out, StandardCharsets.US_ASCII));
 
         writeLine(writer, "/CIDInit /ProcSet findresource begin");
         writeLine(writer, "12 dict begin\n");
@@ -193,7 +193,7 @@ final class ToUnicodeWriter
     {
         // use of non-BMP code points requires PDF 1.5 or later, otherwise we're limited to UCS-2
         StringBuilder sb = new StringBuilder();
-        for (byte b : text.getBytes(Charsets.UTF_16BE))
+        for (byte b : text.getBytes(StandardCharsets.UTF_16BE))
         {
             sb.append(String.format("%02X", b));
         }

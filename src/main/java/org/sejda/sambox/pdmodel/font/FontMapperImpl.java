@@ -31,8 +31,6 @@ import java.util.PriorityQueue;
 import java.util.Set;
 
 import org.apache.fontbox.FontBoxFont;
-import org.apache.fontbox.cff.CFFFont;
-import org.apache.fontbox.cff.CFFType1Font;
 import org.apache.fontbox.ttf.OpenTypeFont;
 import org.apache.fontbox.ttf.TTFParser;
 import org.apache.fontbox.ttf.TrueTypeFont;
@@ -216,10 +214,7 @@ final class FontMapperImpl implements FontMapper
         {
             return subs;
         }
-        else
-        {
-            return Collections.emptyList();
-        }
+        return Collections.emptyList();
     }
 
     /**
@@ -316,18 +311,15 @@ final class FontMapperImpl implements FontMapper
         {
             return new FontMapping<TrueTypeFont>(ttf, false);
         }
-        else
+        // fallback - todo: i.e. fuzzy match
+        String fontName = getFallbackFontName(fontDescriptor);
+        ttf = (TrueTypeFont) findFont(FontFormat.TTF, fontName);
+        if (ttf == null)
         {
-            // fallback - todo: i.e. fuzzy match
-            String fontName = getFallbackFontName(fontDescriptor);
-            ttf = (TrueTypeFont) findFont(FontFormat.TTF, fontName);
-            if (ttf == null)
-            {
-                // we have to return something here as TTFs aren't strictly required on the system
-                ttf = lastResortFont;
-            }
-            return new FontMapping<TrueTypeFont>(ttf, true);
+            // we have to return something here as TTFs aren't strictly required on the system
+            ttf = lastResortFont;
         }
+        return new FontMapping<TrueTypeFont>(ttf, true);
     }
 
     /**
@@ -368,16 +360,16 @@ final class FontMapperImpl implements FontMapper
             return t1;
         }
 
-        CFFFont cff = (CFFFont) findFont(FontFormat.OTF, postScriptName);
-        if (cff instanceof CFFType1Font)
-        {
-            return cff;
-        }
-
         TrueTypeFont ttf = (TrueTypeFont) findFont(FontFormat.TTF, postScriptName);
         if (ttf != null)
         {
             return ttf;
+        }
+
+        OpenTypeFont otf = (OpenTypeFont) findFont(FontFormat.OTF, postScriptName);
+        if (otf != null)
+        {
+            return otf;
         }
 
         return null;

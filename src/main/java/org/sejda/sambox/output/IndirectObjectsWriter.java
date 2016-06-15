@@ -21,11 +21,11 @@ import static org.sejda.util.RequireUtils.requireNotNullArg;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import org.sejda.io.BufferedCountingChannelWriter;
 import org.sejda.io.CountingWritableByteChannel;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
-import org.sejda.sambox.util.Charsets;
 import org.sejda.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,8 +37,8 @@ import org.slf4j.LoggerFactory;
  */
 class IndirectObjectsWriter implements Closeable
 {
-    private static final byte[] OBJ = "obj".getBytes(Charsets.US_ASCII);
-    private static final byte[] ENDOBJ = "endobj".getBytes(Charsets.US_ASCII);
+    private static final byte[] OBJ = "obj".getBytes(StandardCharsets.US_ASCII);
+    private static final byte[] ENDOBJ = "endobj".getBytes(StandardCharsets.US_ASCII);
 
     private static final Logger LOG = LoggerFactory.getLogger(DefaultPDFWriter.class);
 

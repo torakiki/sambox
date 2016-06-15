@@ -19,6 +19,7 @@ package org.sejda.sambox.contentstream.operator.state;
 
 import java.util.List;
 
+import org.sejda.sambox.contentstream.operator.MissingOperandException;
 import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.contentstream.operator.OperatorProcessor;
 import org.sejda.sambox.cos.COSBase;
@@ -32,9 +33,17 @@ import org.sejda.sambox.cos.COSNumber;
 public class SetFlatness extends OperatorProcessor
 {
     @Override
-    public void process(Operator operator, List<COSBase> operands)
+    public void process(Operator operator, List<COSBase> operands) throws MissingOperandException
     {
-        COSNumber value = (COSNumber)operands.get(0);
+        if (operands.size() < 1)
+        {
+            throw new MissingOperandException(operator, operands);
+        }
+        if (!checkArrayTypesClass(operands, COSNumber.class))
+        {
+            return;
+        }
+        COSNumber value = (COSNumber) operands.get(0);
         context.getGraphicsState().setFlatness(value.floatValue());
     }
 

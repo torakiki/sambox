@@ -144,9 +144,9 @@ public abstract class PDFunction implements COSObjectable
     /**
      * This will get the number of output parameters that have a range specified. A range for output parameters is
      * optional so this may return zero for a function that does have output parameters, this will simply return the
-     * number that have the rnage specified.
+     * number that have the range specified.
      *
-     * @return The number of input parameters that have a range specified.
+     * @return The number of output parameters that have a range specified.
      */
     public int getNumberOfOutputParameters()
     {
@@ -226,6 +226,7 @@ public abstract class PDFunction implements COSObjectable
     /**
      * @deprecated Replaced by {@link #eval(float[] input)}
      */
+    @Deprecated
     public COSArray eval(COSArray input) throws IOException
     {
         float[] outputValues = eval(input.toFloatArray());

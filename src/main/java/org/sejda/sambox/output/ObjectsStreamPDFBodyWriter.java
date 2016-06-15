@@ -25,6 +25,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.SequenceInputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.zip.DeflaterInputStream;
 
 import org.sejda.io.CountingWritableByteChannel;
@@ -35,7 +36,6 @@ import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.cos.DisposableCOSObject;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
 import org.sejda.sambox.cos.NonStorableInObjectStreams;
-import org.sejda.sambox.util.Charsets;
 import org.sejda.sambox.xref.CompressedXrefEntry;
 import org.sejda.util.IOUtils;
 import org.slf4j.Logger;
@@ -159,10 +159,10 @@ class ObjectsStreamPDFBodyWriter extends AbstractPDFBodyWriter
         {
             this.counter++;
             header.write(Long.toUnsignedString(ref.xrefEntry().getObjectNumber())
-                    .getBytes(Charsets.US_ASCII));
+                    .getBytes(StandardCharsets.US_ASCII));
             header.write(ASCII_SPACE);
             header.write(Long.toUnsignedString(dataWriter.writer().offset())
-                    .getBytes(Charsets.US_ASCII));
+                    .getBytes(StandardCharsets.US_ASCII));
             header.write(ASCII_SPACE);
             ref.getCOSObject().accept(dataWriter);
             dataWriter.writer().write(ASCII_SPACE);

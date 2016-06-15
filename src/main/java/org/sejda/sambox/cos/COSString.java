@@ -18,10 +18,10 @@ package org.sejda.sambox.cos;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Optional;
 
-import org.sejda.sambox.util.Charsets;
 import org.sejda.sambox.util.Hex;
 
 /**
@@ -114,12 +114,12 @@ public final class COSString extends COSBase implements Encryptable
             if ((bytes[0] & 0xff) == 0xFE && (bytes[1] & 0xff) == 0xFF)
             {
                 // UTF-16BE
-                return new String(bytes, 2, bytes.length - 2, Charsets.UTF_16BE);
+                return new String(bytes, 2, bytes.length - 2, StandardCharsets.UTF_16BE);
             }
             else if ((bytes[0] & 0xff) == 0xFF && (bytes[1] & 0xff) == 0xFE)
             {
                 // UTF-16LE - not in the PDF spec!
-                return new String(bytes, 2, bytes.length - 2, Charsets.UTF_16LE);
+                return new String(bytes, 2, bytes.length - 2, StandardCharsets.UTF_16LE);
             }
         }
 
@@ -212,7 +212,7 @@ public final class COSString extends COSBase implements Encryptable
     {
         return Optional.ofNullable(PDFDocEncoding.getBytes(literal)).map(COSString::new)
                 .orElseGet(() -> {
-                    byte[] data = literal.getBytes(Charsets.UTF_16BE);
+                    byte[] data = literal.getBytes(StandardCharsets.UTF_16BE);
                     byte[] bytes = new byte[data.length + 2];
                     bytes[0] = (byte) 0xFE;
                     bytes[1] = (byte) 0xFF;

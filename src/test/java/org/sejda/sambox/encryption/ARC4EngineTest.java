@@ -19,12 +19,12 @@ package org.sejda.sambox.encryption;
 import static org.junit.Assert.assertArrayEquals;
 
 import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.Security;
 
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.Test;
-import org.sejda.sambox.util.Charsets;
 
 public class ARC4EngineTest
 {
@@ -40,7 +40,8 @@ public class ARC4EngineTest
                 (byte) 0x70, (byte) 0x8b, (byte) 0x59, (byte) 0xde, (byte) 0x4a, (byte) 0x8d,
                 (byte) 0xc1 };
         assertArrayEquals(expected, new ARC4Engine().encryptBytes(
-                "ChuckNorris".getBytes(Charsets.UTF_8), "ABCDE".getBytes(Charsets.UTF_8)));
+                "ChuckNorris".getBytes(StandardCharsets.UTF_8),
+                "ABCDE".getBytes(StandardCharsets.UTF_8)));
     }
 
     @Test
@@ -51,8 +52,8 @@ public class ARC4EngineTest
                 (byte) 0xc1 };
         assertArrayEquals(expected,
                 IOUtils.toByteArray(new ARC4Engine().encryptStream(
-                        new ByteArrayInputStream("ChuckNorris".getBytes(Charsets.UTF_8)),
-                        "ABCDE".getBytes(Charsets.UTF_8))));
+                        new ByteArrayInputStream("ChuckNorris".getBytes(StandardCharsets.UTF_8)),
+                        "ABCDE".getBytes(StandardCharsets.UTF_8))));
     }
 
 }

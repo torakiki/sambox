@@ -27,6 +27,7 @@ import static org.mockito.Mockito.verify;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
@@ -48,7 +49,6 @@ import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.cos.COSString;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
-import org.sejda.sambox.util.Charsets;
 
 /**
  * @author Andrea Vacondio
@@ -162,7 +162,7 @@ public class DefaultCOSWriterTest
     public void visitCOSNull() throws Exception
     {
         victim.visit(COSNull.NULL);
-        verify(writer).write("null".getBytes(Charsets.US_ASCII));
+        verify(writer).write("null".getBytes(StandardCharsets.US_ASCII));
     }
 
     @Test
@@ -198,12 +198,12 @@ public class DefaultCOSWriterTest
         inOrder.verify(writer, times(2)).write((byte) 0x3E);
         inOrder.verify(writer).writeEOL();
         inOrder.verify(writer)
-                .write(AdditionalMatchers.aryEq("stream".getBytes(Charsets.US_ASCII)));
+                .write(AdditionalMatchers.aryEq("stream".getBytes(StandardCharsets.US_ASCII)));
         inOrder.verify(writer).write(AdditionalMatchers.aryEq(new byte[] { '\r', '\n' }));
         inOrder.verify(writer).write(any(InputStream.class));
         inOrder.verify(writer).write(AdditionalMatchers.aryEq(new byte[] { '\r', '\n' }));
         inOrder.verify(writer).write(
-                AdditionalMatchers.aryEq("endstream".getBytes(Charsets.US_ASCII)));
+                AdditionalMatchers.aryEq("endstream".getBytes(StandardCharsets.US_ASCII)));
         inOrder.verify(writer).writeEOL();
     }
 

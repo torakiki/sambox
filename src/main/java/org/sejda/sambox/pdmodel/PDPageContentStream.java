@@ -22,6 +22,7 @@ import java.awt.Color;
 import java.awt.geom.AffineTransform;
 import java.io.Closeable;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.Stack;
@@ -51,7 +52,6 @@ import org.sejda.sambox.pdmodel.graphics.image.PDInlineImage;
 import org.sejda.sambox.pdmodel.graphics.shading.PDShading;
 import org.sejda.sambox.pdmodel.graphics.state.PDExtendedGraphicsState;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceStream;
-import org.sejda.sambox.util.Charsets;
 import org.sejda.sambox.util.Matrix;
 import org.sejda.util.IOUtils;
 import org.slf4j.Logger;
@@ -1424,6 +1424,25 @@ public final class PDPageContentStream implements Closeable
         writeOperator("gs");
     }
 
+    /**
+     * Write a comment line.
+     *
+     * @param comment
+     * @throws IOException If the content stream could not be written.
+     * @throws IllegalArgumentException If the comment contains a newline. This is not allowed, because the next line
+     * could be ordinary PDF content.
+     */
+    public void addComment(String comment) throws IOException
+    {
+        if (comment.indexOf('\n') >= 0 || comment.indexOf('\r') >= 0)
+        {
+            throw new IllegalArgumentException("comment should not include a newline");
+        }
+        writer.writer().write((byte) '%');
+        write(comment);
+        writer.writeEOL();
+    }
+
     private void writeOperand(float real) throws IOException
     {
         write(formatDecimal.format(real));
@@ -1459,7 +1478,7 @@ public final class PDPageContentStream implements Closeable
      */
     private void write(String text) throws IOException
     {
-        writer.writeContent(text.getBytes(Charsets.US_ASCII));
+        writer.writeContent(text.getBytes(StandardCharsets.US_ASCII));
     }
 
     /**

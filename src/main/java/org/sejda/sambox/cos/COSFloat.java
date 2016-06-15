@@ -20,8 +20,6 @@ import static org.sejda.util.RequireUtils.requireIOCondition;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * This class represents a floating point number in a PDF document.
@@ -56,12 +54,13 @@ public class COSFloat extends COSNumber
         }
         catch (NumberFormatException e)
         {
-            Matcher matcher = Pattern.compile("(0.[0]+)-([0-9]+)").matcher(aFloat);
-            requireIOCondition(matcher.matches(),
+            // PDFBOX-2990 has 0.00000-33917698
+            // PDFBOX-3369 has 0.00-35095424
+            requireIOCondition(aFloat.matches("^0\\.0+\\-\\d+"),
                     "Expected floating point number but found '" + aFloat + "'");
             try
             {
-                value = new BigDecimal("-" + matcher.group(1) + matcher.group(2));
+                value = new BigDecimal("-" + aFloat.replaceFirst("\\-", ""));
                 checkMinMaxValues();
             }
             catch (NumberFormatException e2)

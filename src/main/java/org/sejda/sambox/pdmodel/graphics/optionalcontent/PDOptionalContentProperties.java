@@ -35,7 +35,7 @@ public class PDOptionalContentProperties implements COSObjectable
     /**
      * Enumeration for the BaseState dictionary entry on the "D" dictionary.
      */
-    public static enum BaseState
+    public enum BaseState
     {
 
         /** The "ON" value. */

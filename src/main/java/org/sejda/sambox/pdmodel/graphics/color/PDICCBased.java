@@ -26,6 +26,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
@@ -38,7 +39,6 @@ import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.pdmodel.common.PDRange;
 import org.sejda.sambox.pdmodel.common.PDStream;
-import org.sejda.sambox.util.Charsets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,7 +111,11 @@ public final class PDICCBased extends PDCIEBasedColorSpace
 
             // if the embedded profile is sRGB then we can use Java's built-in profile, which
             // results in a large performance gain as it's our native color space, see PDFBOX-2587
-            ICC_Profile profile = ICC_Profile.getInstance(input);
+            ICC_Profile profile;
+            synchronized (LOG)
+            {
+                profile = ICC_Profile.getInstance(input);
+            }
             if (is_sRGB(profile))
             {
                 awtColorSpace = (ICC_ColorSpace)ColorSpace.getInstance(ColorSpace.CS_sRGB);
@@ -165,7 +169,7 @@ public final class PDICCBased extends PDCIEBasedColorSpace
     {
         byte[] bytes = Arrays.copyOfRange(profile.getData(ICC_Profile.icSigHead),
                 ICC_Profile.icHdrModel, ICC_Profile.icHdrModel + 7);
-        String deviceModel = new String(bytes, Charsets.US_ASCII).trim();
+        String deviceModel = new String(bytes, StandardCharsets.US_ASCII).trim();
         return deviceModel.equals("sRGB");
     }
 

@@ -561,9 +561,21 @@ public class PageDrawer extends PDFGraphicsStreamEngine
             phaseStart = (int) transformWidth(phaseStart);
 
             // empty dash array is illegal
-            if (dashArray.length == 0)
+            // avoid also infinite and NaN values (PDFBOX-3360)
+            if (dashArray.length == 0 || Float.isInfinite(phaseStart) || Float.isNaN(phaseStart))
             {
                 dashArray = null;
+            }
+            else
+            {
+                for (int i = 0; i < dashArray.length; ++i)
+                {
+                    if (Float.isInfinite(dashArray[i]) || Float.isNaN(dashArray[i]))
+                    {
+                        dashArray = null;
+                        break;
+                    }
+                }
             }
         }
         return new BasicStroke(lineWidth, state.getLineCap(), state.getLineJoin(),
@@ -1029,7 +1041,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
     private void drawAnnotationLinkBorder(PDAnnotationLink link) throws IOException
     {
         AnnotationBorder ab = getAnnotationBorder(link, link.getBorderStyle());
-        if (ab.width == 0)
+        if (ab.width == 0 || ab.color.getComponents().length == 0)
         {
             return;
         }
@@ -1068,7 +1080,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         }
         // PDF spec does not mention /Border for ink annotations, but it is used if /BS is not available
         AnnotationBorder ab = getAnnotationBorder(inkAnnotation, inkAnnotation.getBorderStyle());
-        if (ab.width == 0)
+        if (ab.width == 0 || ab.color.getComponents().length == 0)
         {
             return;
         }

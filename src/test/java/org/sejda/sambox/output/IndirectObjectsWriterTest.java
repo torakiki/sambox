@@ -24,6 +24,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -33,7 +34,6 @@ import org.sejda.io.BufferedCountingChannelWriter;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
-import org.sejda.sambox.util.Charsets;
 
 /**
  * @author Andrea Vacondio
@@ -79,11 +79,11 @@ public class IndirectObjectsWriterTest
         inOrder.verify(writer).write(DefaultCOSWriter.SPACE);
         inOrder.verify(writer).write("0");
         inOrder.verify(writer).write(DefaultCOSWriter.SPACE);
-        inOrder.verify(writer).write(aryEq("obj".getBytes(Charsets.US_ASCII)));
+        inOrder.verify(writer).write(aryEq("obj".getBytes(StandardCharsets.US_ASCII)));
         inOrder.verify(writer).writeEOL();
         inOrder.verify(writer).write("100");
         inOrder.verify(writer).writeEOL();
-        inOrder.verify(writer).write(aryEq("endobj".getBytes(Charsets.US_ASCII)));
+        inOrder.verify(writer).write(aryEq("endobj".getBytes(StandardCharsets.US_ASCII)));
         inOrder.verify(writer).writeEOL();
         assertEquals(12345, ref.xrefEntry().getByteOffset());
     }

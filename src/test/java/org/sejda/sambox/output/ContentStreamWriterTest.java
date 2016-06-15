@@ -23,6 +23,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,7 +37,6 @@ import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
-import org.sejda.sambox.util.Charsets;
 
 /**
  * @author Andrea Vacondio
@@ -111,7 +111,7 @@ public class ContentStreamWriterTest
     public void writeOperator() throws Exception
     {
         victim.writeTokens(Operator.getOperator("Tj"));
-        verify(writer).write("Tj".getBytes(Charsets.ISO_8859_1));
+        verify(writer).write("Tj".getBytes(StandardCharsets.ISO_8859_1));
         verify(writer).writeEOL();
     }
 
@@ -124,9 +124,9 @@ public class ContentStreamWriterTest
         tokens.add(array);
         victim.writeTokens(tokens);
         verify(array).accept(victim);
-        verify(writer).write(Operator.BI_OPERATOR.getBytes(Charsets.ISO_8859_1));
-        verify(writer).write(Operator.ID_OPERATOR.getBytes(Charsets.US_ASCII));
-        verify(writer).write(Operator.EI_OPERATOR.getBytes(Charsets.US_ASCII));
+        verify(writer).write(Operator.BI_OPERATOR.getBytes(StandardCharsets.ISO_8859_1));
+        verify(writer).write(Operator.ID_OPERATOR.getBytes(StandardCharsets.US_ASCII));
+        verify(writer).write(Operator.EI_OPERATOR.getBytes(StandardCharsets.US_ASCII));
         verify(writer, times(4)).writeEOL();
     }
 
@@ -140,9 +140,9 @@ public class ContentStreamWriterTest
         image.setImageData(imageDataArray);
         image.setImageParameters(imageDictionary);
         victim.writeTokens(image);
-        verify(writer).write(Operator.BI_OPERATOR.getBytes(Charsets.ISO_8859_1));
-        verify(writer).write(Operator.ID_OPERATOR.getBytes(Charsets.US_ASCII));
-        verify(writer).write(Operator.EI_OPERATOR.getBytes(Charsets.US_ASCII));
+        verify(writer).write(Operator.BI_OPERATOR.getBytes(StandardCharsets.ISO_8859_1));
+        verify(writer).write(Operator.ID_OPERATOR.getBytes(StandardCharsets.US_ASCII));
+        verify(writer).write(Operator.EI_OPERATOR.getBytes(StandardCharsets.US_ASCII));
         verify(writer).write(imageDataArray);
         verify(writer, times(5)).writeEOL();
     }

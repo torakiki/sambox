@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.WritableByteChannel;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Calendar;
 import java.util.HashSet;
@@ -53,7 +54,6 @@ import org.sejda.sambox.pdmodel.common.PDStream;
 import org.sejda.sambox.pdmodel.encryption.AccessPermission;
 import org.sejda.sambox.pdmodel.encryption.PDEncryption;
 import org.sejda.sambox.pdmodel.font.PDFont;
-import org.sejda.sambox.util.Charsets;
 import org.sejda.sambox.util.Version;
 import org.sejda.util.IOUtils;
 import org.slf4j.Logger;
@@ -158,6 +158,8 @@ public class PDDocument implements Closeable
      */
     public PDPage importPage(PDPage page)
     {
+        // PDFBox moved to a deep cloning here PDFBOX-3280
+        // given our lazy loading strategy and the bounded views we use for COSStreams I don't think we need the same
         requireOpen();
         PDPage importedPage = new PDPage(page.getCOSObject().duplicate());
         InputStream in = null;
@@ -379,14 +381,15 @@ public class PDDocument implements Closeable
     private void generateFileIdentifier(byte[] md5Update, Optional<EncryptionContext> encContext)
     {
         MessageDigest md5 = MessageDigests.md5();
-        md5.update(Long.toString(System.currentTimeMillis()).getBytes(Charsets.ISO_8859_1));
+        md5.update(Long.toString(System.currentTimeMillis()).getBytes(StandardCharsets.ISO_8859_1));
         md5.update(md5Update);
         ofNullable(
                 getDocument().getTrailer().getDictionaryObject(COSName.INFO, COSDictionary.class))
                         .ifPresent(d -> {
                             for (COSBase current : d.getValues())
                             {
-                                md5.update(current.toString().getBytes(Charsets.ISO_8859_1));
+                                md5.update(
+                                        current.toString().getBytes(StandardCharsets.ISO_8859_1));
                             }
                         });
         COSString retVal = COSString.newInstance(md5.digest());
@@ -526,7 +529,8 @@ public class PDDocument implements Closeable
         fontsToSubset.clear();
         Optional<EncryptionContext> encryptionContext = ofNullable(
                 ofNullable(security).map(EncryptionContext::new).orElse(null));
-        generateFileIdentifier(output.toString().getBytes(Charsets.ISO_8859_1), encryptionContext);
+        generateFileIdentifier(output.toString().getBytes(StandardCharsets.ISO_8859_1),
+                encryptionContext);
         try (PDDocumentWriter writer = new PDDocumentWriter(output, encryptionContext, options))
         {
             writer.write(this);

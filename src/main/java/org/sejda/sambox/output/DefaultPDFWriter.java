@@ -21,12 +21,12 @@ import static org.sejda.util.RequireUtils.requireNotNullArg;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
-import org.sejda.sambox.util.Charsets;
 import org.sejda.sambox.xref.XrefEntry;
 import org.sejda.util.IOUtils;
 import org.slf4j.Logger;
@@ -100,7 +100,7 @@ class DefaultPDFWriter implements Closeable
         trailer.removeItem(COSName.F_FILTER);
         trailer.removeItem(COSName.F);
         trailer.setLong(COSName.SIZE, writer.context().highestWritten().getObjectNumber() + 1);
-        writer.write("trailer".getBytes(Charsets.US_ASCII));
+        writer.write("trailer".getBytes(StandardCharsets.US_ASCII));
         writer.writeEOL();
         trailer.getCOSObject().accept(writer.writer());
         writeXrefFooter(startxref);
@@ -120,11 +120,11 @@ class DefaultPDFWriter implements Closeable
 
     private void writeXrefFooter(long startxref) throws IOException
     {
-        writer.write("startxref".getBytes(Charsets.US_ASCII));
+        writer.write("startxref".getBytes(StandardCharsets.US_ASCII));
         writer.writeEOL();
         writer.write(Long.toString(startxref));
         writer.writeEOL();
-        writer.write("%%EOF".getBytes(Charsets.US_ASCII));
+        writer.write("%%EOF".getBytes(StandardCharsets.US_ASCII));
         writer.writeEOL();
     }
 

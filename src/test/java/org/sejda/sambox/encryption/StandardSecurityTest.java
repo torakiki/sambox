@@ -20,8 +20,9 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.nio.charset.StandardCharsets;
+
 import org.junit.Test;
-import org.sejda.sambox.util.Charsets;
 
 /**
  * @author Andrea Vacondio
@@ -57,8 +58,8 @@ public class StandardSecurityTest
     {
         StandardSecurity victim = new StandardSecurity("Chuck", "Norris",
                 StandardSecurityEncryption.ARC4_128, false);
-        assertArrayEquals("Chuck".getBytes(Charsets.ISO_8859_1), victim.getOwnerPassword());
-        assertArrayEquals("Norris".getBytes(Charsets.ISO_8859_1), victim.getUserPassword());
+        assertArrayEquals("Chuck".getBytes(StandardCharsets.ISO_8859_1), victim.getOwnerPassword());
+        assertArrayEquals("Norris".getBytes(StandardCharsets.ISO_8859_1), victim.getUserPassword());
     }
 
     @Test
@@ -66,7 +67,7 @@ public class StandardSecurityTest
     {
         StandardSecurity victim = new StandardSecurity("Ĉħư¢қ", "Ñọŗґǐŝ",
                 StandardSecurityEncryption.ARC4_128, false);
-        assertArrayEquals("Ĉħư¢қ".getBytes(Charsets.UTF_8), victim.getOwnerPasswordUTF());
-        assertArrayEquals("Ñọŗґǐŝ".getBytes(Charsets.UTF_8), victim.getUserPasswordUTF());
+        assertArrayEquals("Ĉħư¢қ".getBytes(StandardCharsets.UTF_8), victim.getOwnerPasswordUTF());
+        assertArrayEquals("Ñọŗґǐŝ".getBytes(StandardCharsets.UTF_8), victim.getUserPasswordUTF());
     }
 }

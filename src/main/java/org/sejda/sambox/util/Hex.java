@@ -17,6 +17,8 @@
 
 package org.sejda.sambox.util;
 
+import java.nio.charset.StandardCharsets;
+
 /**
  * Utility functions for hex encoding.
  *
@@ -39,6 +41,6 @@ public final class Hex
      */
     public static byte[] getBytes(byte b)
     {
-        return getString(b).getBytes(Charsets.US_ASCII);
+        return getString(b).getBytes(StandardCharsets.US_ASCII);
     }
 }

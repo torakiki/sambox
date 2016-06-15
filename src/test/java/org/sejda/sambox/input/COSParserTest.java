@@ -24,6 +24,7 @@ import static org.junit.Assert.assertThat;
 import static org.sejda.io.SeekableSources.inMemorySeekableSourceFrom;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import org.junit.After;
 import org.junit.Test;
@@ -37,7 +38,6 @@ import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.cos.COSString;
-import org.sejda.sambox.util.Charsets;
 import org.sejda.util.IOUtils;
 
 /**
@@ -121,7 +121,7 @@ public class COSParserTest
     public void nextLiteral() throws IOException
     {
         victim = new COSParser(inMemorySeekableSourceFrom("(Chuck Norris)".getBytes()));
-        assertEquals(COSString.newInstance("Chuck Norris".getBytes(Charsets.ISO_8859_1)),
+        assertEquals(COSString.newInstance("Chuck Norris".getBytes(StandardCharsets.ISO_8859_1)),
                 victim.nextLiteralString());
     }
 
@@ -129,7 +129,8 @@ public class COSParserTest
     public void nextHexString() throws IOException
     {
         victim = new COSParser(inMemorySeekableSourceFrom("<436875636B204E6f72726973>".getBytes()));
-        COSString expected = COSString.newInstance("Chuck Norris".getBytes(Charsets.ISO_8859_1));
+        COSString expected = COSString
+                .newInstance("Chuck Norris".getBytes(StandardCharsets.ISO_8859_1));
         expected.setForceHexForm(true);
         assertEquals(expected, victim.nextHexadecimalString());
     }
@@ -139,10 +140,11 @@ public class COSParserTest
     {
         victim = new COSParser(
                 inMemorySeekableSourceFrom("(Chuck Norris) <436875636B204E6f72726973>".getBytes()));
-        assertEquals(COSString.newInstance("Chuck Norris".getBytes(Charsets.ISO_8859_1)),
+        assertEquals(COSString.newInstance("Chuck Norris".getBytes(StandardCharsets.ISO_8859_1)),
                 victim.nextString());
         victim.skipSpaces();
-        COSString expected = COSString.newInstance("Chuck Norris".getBytes(Charsets.ISO_8859_1));
+        COSString expected = COSString
+                .newInstance("Chuck Norris".getBytes(StandardCharsets.ISO_8859_1));
         expected.setForceHexForm(true);
         assertEquals(expected, victim.nextString());
     }
@@ -167,7 +169,7 @@ public class COSParserTest
         victim = new COSParser(inMemorySeekableSourceFrom("[10 (A String)]".getBytes()));
         COSArray result = victim.nextArray();
         assertEquals(10, result.getInt(0));
-        assertEquals(COSString.newInstance("A String".getBytes(Charsets.ISO_8859_1)),
+        assertEquals(COSString.newInstance("A String".getBytes(StandardCharsets.ISO_8859_1)),
                 result.get(1));
     }
 
@@ -190,7 +192,7 @@ public class COSParserTest
         victim = new COSParser(inMemorySeekableSourceFrom("[10 (A String) endobj".getBytes()));
         COSArray result = victim.nextArray();
         assertEquals(10, result.getInt(0));
-        assertEquals(COSString.newInstance("A String".getBytes(Charsets.ISO_8859_1)),
+        assertEquals(COSString.newInstance("A String".getBytes(StandardCharsets.ISO_8859_1)),
                 result.get(1));
     }
 
@@ -200,7 +202,7 @@ public class COSParserTest
         victim = new COSParser(inMemorySeekableSourceFrom("[10 (A String) 10 0 obj".getBytes()));
         COSArray result = victim.nextArray();
         assertEquals(10, result.getInt(0));
-        assertEquals(COSString.newInstance("A String".getBytes(Charsets.ISO_8859_1)),
+        assertEquals(COSString.newInstance("A String".getBytes(StandardCharsets.ISO_8859_1)),
                 result.get(1));
         assertEquals(2, result.size());
         assertEquals(15, victim.position());
@@ -212,7 +214,7 @@ public class COSParserTest
         victim = new COSParser(inMemorySeekableSourceFrom("[10 (A String) endstream".getBytes()));
         COSArray result = victim.nextArray();
         assertEquals(10, result.getInt(0));
-        assertEquals(COSString.newInstance("A String".getBytes(Charsets.ISO_8859_1)),
+        assertEquals(COSString.newInstance("A String".getBytes(StandardCharsets.ISO_8859_1)),
                 result.get(1));
     }
 
@@ -223,9 +225,10 @@ public class COSParserTest
                 inMemorySeekableSourceFrom("[10 (A String) invalid (valid)]".getBytes()));
         COSArray result = victim.nextArray();
         assertEquals(10, result.getInt(0));
-        assertEquals(COSString.newInstance("A String".getBytes(Charsets.ISO_8859_1)),
+        assertEquals(COSString.newInstance("A String".getBytes(StandardCharsets.ISO_8859_1)),
                 result.get(1));
-        assertEquals(COSString.newInstance("valid".getBytes(Charsets.ISO_8859_1)), result.get(2));
+        assertEquals(COSString.newInstance("valid".getBytes(StandardCharsets.ISO_8859_1)),
+                result.get(2));
     }
 
     @Test(expected = IOException.class)
@@ -282,7 +285,7 @@ public class COSParserTest
                 inMemorySeekableSourceFrom("<< /R 10  invalid /S (A String) >>".getBytes()));
         COSDictionary result = victim.nextDictionary();
         assertEquals(10, result.getInt(COSName.R));
-        assertEquals(COSString.newInstance("A String".getBytes(Charsets.ISO_8859_1)),
+        assertEquals(COSString.newInstance("A String".getBytes(StandardCharsets.ISO_8859_1)),
                 result.getItem(COSName.S));
     }
 
@@ -540,7 +543,8 @@ public class COSParserTest
         assertEquals(COSInteger.THREE, victim.nextParsedToken());
         assertEquals(COSBoolean.TRUE, victim.nextParsedToken());
         assertEquals(COSBoolean.FALSE, victim.nextParsedToken());
-        COSString expected = COSString.newInstance("Chuck Norris".getBytes(Charsets.ISO_8859_1));
+        COSString expected = COSString
+                .newInstance("Chuck Norris".getBytes(StandardCharsets.ISO_8859_1));
         assertEquals(expected, victim.nextParsedToken());
         expected.setForceHexForm(true);
         assertEquals(expected, victim.nextParsedToken());

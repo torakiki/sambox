@@ -22,6 +22,7 @@ import static org.sejda.sambox.util.CharUtils.isLetter;
 import static org.sejda.util.RequireUtils.requireNotNullArg;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
@@ -39,7 +40,6 @@ import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.cos.COSString;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
-import org.sejda.sambox.util.Charsets;
 import org.sejda.util.IOUtils;
 
 /**
@@ -61,8 +61,8 @@ class DefaultCOSWriter implements COSWriter
     private static final byte RIGHT_PARENTHESIS = 0x29;
     private static final byte LEFT_SQUARE_BRACKET = 0x5B;
     private static final byte RIGHT_SQUARE_BRACKET = 0x5D;
-    private static final byte[] STREAM = "stream".getBytes(Charsets.US_ASCII);
-    private static final byte[] ENDSTREAM = "endstream".getBytes(Charsets.US_ASCII);
+    private static final byte[] STREAM = "stream".getBytes(StandardCharsets.US_ASCII);
+    private static final byte[] ENDSTREAM = "endstream".getBytes(StandardCharsets.US_ASCII);
     private BufferedCountingChannelWriter writer;
 
     public DefaultCOSWriter(CountingWritableByteChannel channel)
@@ -138,7 +138,7 @@ class DefaultCOSWriter implements COSWriter
     public void visit(COSName value) throws IOException
     {
         writer.write(SOLIDUS);
-        byte[] bytes = value.getName().getBytes(Charsets.US_ASCII);
+        byte[] bytes = value.getName().getBytes(StandardCharsets.US_ASCII);
         for (int i = 0; i < bytes.length; i++)
         {
             int current = bytes[i] & 0xFF;
@@ -149,7 +149,7 @@ class DefaultCOSWriter implements COSWriter
             else
             {
                 writer.write(NUMBER_SIGN);
-                writer.write(String.format("%02X", current).getBytes(Charsets.US_ASCII));
+                writer.write(String.format("%02X", current).getBytes(StandardCharsets.US_ASCII));
             }
         }
     }
@@ -157,7 +157,7 @@ class DefaultCOSWriter implements COSWriter
     @Override
     public void visit(COSNull value) throws IOException
     {
-        writer.write("null".getBytes(Charsets.US_ASCII));
+        writer.write("null".getBytes(StandardCharsets.US_ASCII));
     }
 
     @Override

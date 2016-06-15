@@ -56,7 +56,7 @@ public class PDViewerPreferences implements COSObjectable
     /**
      * Enumeration containing all valid values for NonFullScreenPageMode.
      */
-    public static enum NON_FULL_SCREEN_PAGE_MODE
+    public enum NON_FULL_SCREEN_PAGE_MODE
     {
         /**
          *  From PDF Reference: "Neither document outline nor thumbnail images visible".
@@ -91,7 +91,7 @@ public class PDViewerPreferences implements COSObjectable
     /**
      * Enumeration containing all valid values for ReadingDirection.
      */
-    public static enum READING_DIRECTION
+    public enum READING_DIRECTION
     {
         /**
          * left to right.
@@ -136,7 +136,7 @@ public class PDViewerPreferences implements COSObjectable
     /**
      * Enumeration containing all valid values for boundaries.
      */
-    public static enum BOUNDARY
+    public enum BOUNDARY
     {
         /**
          * use media box as boundary.
@@ -163,7 +163,7 @@ public class PDViewerPreferences implements COSObjectable
     /**
      * Enumeration containing all valid values for duplex.
      */
-    public static enum DUPLEX
+    public enum DUPLEX
     {
         /**
          * simplex printing.
@@ -182,7 +182,7 @@ public class PDViewerPreferences implements COSObjectable
     /**
      * Enumeration containing all valid values for printscaling.
      */
-    public static enum PRINT_SCALING
+    public enum PRINT_SCALING
     {
         /**
          * no scaling.

@@ -21,11 +21,11 @@ import static org.sejda.sambox.input.AbstractXrefTableParser.XREF;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.input.XrefFullScanner.XrefScanOutcome;
-import org.sejda.sambox.util.Charsets;
 import org.sejda.sambox.xref.XrefEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -148,7 +148,7 @@ class XrefParser
         parser.position(startPosition);
         byte[] buffer = new byte[chunkSize];
         parser.source().read(ByteBuffer.wrap(buffer));
-        int relativeIndex = new String(buffer, Charsets.ISO_8859_1).lastIndexOf(STARTXREF);
+        int relativeIndex = new String(buffer, StandardCharsets.ISO_8859_1).lastIndexOf(STARTXREF);
         if (relativeIndex < 0)
         {
             LOG.warn("Unable to find 'startxref' keyword");

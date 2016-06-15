@@ -19,11 +19,11 @@ package org.sejda.sambox.input;
 import static org.sejda.sambox.util.CharUtils.isDigit;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import org.sejda.io.SeekableSource;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSNumber;
-import org.sejda.sambox.util.Charsets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,7 +102,7 @@ class COSParser extends BaseCOSParser
             // if it's an endstream/endobj, we want to put it back so the caller will see it
             if (ENDOBJ.equals(badString) || ENDSTREAM.equals(badString) || OBJ.equals(badString))
             {
-                source().back(badString.getBytes(Charsets.ISO_8859_1).length);
+                source().back(badString.getBytes(StandardCharsets.ISO_8859_1).length);
             }
             else
             {

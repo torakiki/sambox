@@ -19,11 +19,11 @@ package org.sejda.sambox.encryption;
 import static java.util.Objects.requireNonNull;
 import static org.sejda.sambox.encryption.EncryptUtils.truncate127;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.Optional;
 
 import org.sejda.sambox.pdmodel.encryption.AccessPermission;
-import org.sejda.sambox.util.Charsets;
 
 /**
  * Object holding all the data necessary to specify how to encrypt the document.
@@ -64,7 +64,7 @@ public class StandardSecurity
      */
     byte[] getUserPasswordUTF()
     {
-        return truncate127(userPassword.getBytes(Charsets.UTF_8));
+        return truncate127(userPassword.getBytes(StandardCharsets.UTF_8));
     }
 
     /**
@@ -72,17 +72,17 @@ public class StandardSecurity
      */
     byte[] getOwnerPasswordUTF()
     {
-        return truncate127(ownerPassword.getBytes(Charsets.UTF_8));
+        return truncate127(ownerPassword.getBytes(StandardCharsets.UTF_8));
     }
 
     byte[] getUserPassword()
     {
-        return userPassword.getBytes(Charsets.ISO_8859_1);
+        return userPassword.getBytes(StandardCharsets.ISO_8859_1);
     }
 
     byte[] getOwnerPassword()
     {
-        return ownerPassword.getBytes(Charsets.ISO_8859_1);
+        return ownerPassword.getBytes(StandardCharsets.ISO_8859_1);
     }
 
 }

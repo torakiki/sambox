@@ -24,6 +24,7 @@ import static org.junit.Assert.assertThat;
 import static org.sejda.io.SeekableSources.inMemorySeekableSourceFrom;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import org.junit.After;
 import org.junit.Test;
@@ -35,7 +36,6 @@ import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.COSString;
-import org.sejda.sambox.util.Charsets;
 import org.sejda.util.IOUtils;
 
 /**
@@ -95,7 +95,8 @@ public class ContentStreamCOSParserTest
         assertEquals(COSInteger.THREE, victim.nextParsedToken());
         assertEquals(COSBoolean.TRUE, victim.nextParsedToken());
         assertEquals(COSBoolean.FALSE, victim.nextParsedToken());
-        COSString expected = COSString.newInstance("Chuck Norris".getBytes(Charsets.ISO_8859_1));
+        COSString expected = COSString
+                .newInstance("Chuck Norris".getBytes(StandardCharsets.ISO_8859_1));
         assertEquals(expected, victim.nextParsedToken());
         expected.setForceHexForm(true);
         assertEquals(expected, victim.nextParsedToken());

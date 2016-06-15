@@ -35,12 +35,12 @@ import static org.sejda.util.RequireUtils.requireNotNullArg;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import org.sejda.io.SeekableSource;
 import org.sejda.sambox.SAMBox;
 import org.sejda.sambox.cos.COSObjectKey;
 import org.sejda.sambox.util.CharUtils;
-import org.sejda.sambox.util.Charsets;
 import org.sejda.sambox.util.Pool;
 import org.sejda.util.IOUtils;
 import org.slf4j.Logger;
@@ -405,7 +405,7 @@ class SourceReader implements Closeable
         }
         catch (NumberFormatException e)
         {
-            source.back(intBuffer.getBytes(Charsets.ISO_8859_1).length);
+            source.back(intBuffer.getBytes(StandardCharsets.ISO_8859_1).length);
             throw new IOException(
                     String.format("Expected an integer type at offset %d but was '%s'", position(),
                             intBuffer),
@@ -426,7 +426,7 @@ class SourceReader implements Closeable
         }
         catch (NumberFormatException e)
         {
-            source.back(longBuffer.getBytes(Charsets.ISO_8859_1).length);
+            source.back(longBuffer.getBytes(StandardCharsets.ISO_8859_1).length);
             throw new IOException(String.format("Expected a long type at offset %d but was '%s'",
                     position(), longBuffer), e);
         }
