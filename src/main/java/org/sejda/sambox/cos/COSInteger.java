@@ -59,9 +59,9 @@ public final class COSInteger extends COSNumber
     private final long value;
 
     /**
-     * @param value The integer value of this object.
+     * creates a COSInteger that is not cached
      */
-    private COSInteger(long value)
+    public COSInteger(long value)
     {
         this.value = value;
     }

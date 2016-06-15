@@ -20,6 +20,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.AdditionalMatchers.aryEq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -69,8 +71,8 @@ public class DefaultPDFWriterTest
         inOrder.verify(writer).write(SpecVersionUtils.V1_5);
         inOrder.verify(writer).writeEOL();
         inOrder.verify(writer).write((byte) '%');
-        inOrder.verify(writer).write(
-                aryEq(new byte[] { (byte) 0xA7, (byte) 0xE3, (byte) 0xF1, (byte) 0xF1 }));
+        inOrder.verify(writer)
+                .write(aryEq(new byte[] { (byte) 0xA7, (byte) 0xE3, (byte) 0xF1, (byte) 0xF1 }));
         inOrder.verify(writer).writeEOL();
     }
 
@@ -170,6 +172,16 @@ public class DefaultPDFWriterTest
         inOrder.verify(writer).writeEOL();
         inOrder.verify(writer).write("12345");
         inOrder.verify(writer).writeEOL();
+    }
+
+    @Test
+    public void writeXrefStreamIndexAndWAsDirect() throws IOException
+    {
+        COSDictionary existingTrailer = new COSDictionary();
+        IndirectCOSObjectReference ref = spy(context.createIndirectReferenceFor(COSInteger.get(1)));
+        context.putWritten(ref.xrefEntry());
+        victim.writeXrefStream(existingTrailer);
+        verify(writer, never()).write("1 0 R");
     }
 
     @Test

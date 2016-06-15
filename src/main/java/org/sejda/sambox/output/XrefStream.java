@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.output;
 
+import static org.sejda.sambox.cos.DirectCOSObject.asDirectObject;
 import static org.sejda.sambox.xref.XrefEntry.freeEntry;
 
 import java.io.IOException;
@@ -29,6 +30,7 @@ import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSStream;
+import org.sejda.sambox.cos.DirectCOSObject;
 
 /**
  * A {@link COSStream} that represent and xref stream as defined in Chap 7.5.8 of PDF 32000-1:2008
@@ -59,14 +61,13 @@ class XrefStream extends COSStream
         removeItem(COSName.F);
         removeItem(COSName.LENGTH);
         setName(COSName.TYPE, COSName.XREF.getName());
-        setLong(COSName.SIZE, context.highestWritten().getObjectNumber() + 1);
+        setItem(COSName.SIZE, asDirect(context.highestWritten().getObjectNumber() + 1));
         setItem(COSName.INDEX,
-                new COSArray(COSInteger.get(context.lowestWritten().getObjectNumber()),
-                        COSInteger.get(context.highestWritten().getObjectNumber()
+                new COSArray(asDirect(context.lowestWritten().getObjectNumber()),
+                        asDirect(context.highestWritten().getObjectNumber()
                                 - context.lowestWritten().getObjectNumber() + 1)));
         int secondFieldLength = sizeOf(context.highestWritten().getByteOffset());
-        setItem(COSName.W, new COSArray(COSInteger.get(1), COSInteger.get(secondFieldLength),
-                COSInteger.get(2)));
+        setItem(COSName.W, new COSArray(asDirect(1), asDirect(secondFieldLength), asDirect(2)));
         try (OutputStream out = createUnfilteredStream())
         {
             for (long key = context.lowestWritten().getObjectNumber(); key <= context
@@ -76,8 +77,13 @@ class XrefStream extends COSStream
                         .toXrefStreamEntry(secondFieldLength, 2));
             }
         }
-        setLong(COSName.DL, getUnfilteredLength());
+        setItem(COSName.DL, asDirect(getUnfilteredLength()));
         addCompression();
+    }
+
+    private static DirectCOSObject asDirect(long num)
+    {
+        return asDirectObject(COSInteger.get(num));
     }
 
     @Override

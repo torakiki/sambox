@@ -84,12 +84,12 @@ public class XrefStreamTest
             assertEquals(5, victim.getLong(COSName.SIZE));
             COSArray index = (COSArray) victim.getItem(COSName.INDEX);
             assertNotNull(index);
-            assertEquals(2, ((COSInteger) index.get(0)).intValue());
-            assertEquals(3, ((COSInteger) index.get(1)).intValue());
+            assertEquals(2, ((COSInteger) index.getObject(0)).intValue());
+            assertEquals(3, ((COSInteger) index.getObject(1)).intValue());
             COSArray w = (COSArray) victim.getItem(COSName.W);
-            assertEquals(1, ((COSInteger) w.get(0)).intValue());
-            assertEquals(2, ((COSInteger) w.get(1)).intValue());
-            assertEquals(2, ((COSInteger) w.get(2)).intValue());
+            assertEquals(1, ((COSInteger) w.getObject(0)).intValue());
+            assertEquals(2, ((COSInteger) w.getObject(1)).intValue());
+            assertEquals(2, ((COSInteger) w.getObject(2)).intValue());
             assertEquals(victim.getLong(COSName.DL), victim.getUnfilteredLength());
         }
     }
