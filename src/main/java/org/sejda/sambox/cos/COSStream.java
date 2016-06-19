@@ -34,6 +34,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.sejda.io.SeekableSource;
+import org.sejda.io.ThreadBoundCopiesSupplier;
 import org.sejda.sambox.filter.DecodeResult;
 import org.sejda.sambox.filter.Filter;
 import org.sejda.sambox.filter.FilterFactory;
@@ -54,7 +55,7 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
 
     private static final Logger LOG = LoggerFactory.getLogger(COSStream.class);
 
-    private LazySeekableSourceViewHolder existing;
+    private LocalSeekableSourceViewSupplier existing;
     private byte[] filtered;
     private byte[] unfiltered;
     private DecodeResult decodeResult;
@@ -88,7 +89,8 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
             long length)
     {
         super(dictionary);
-        this.existing = new LazySeekableSourceViewHolder(seekableSource, startingPosition, length);
+        this.existing = new LocalSeekableSourceViewSupplier(new WeakReference<>(seekableSource),
+                startingPosition, length);
     }
 
     /**
@@ -664,44 +666,31 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
     }
 
     /**
-     * Holder for a view of a portion of the given {@link SeekableSource}
+     * Supplier for local views of a {@link SeekableSource}
      * 
      * @author Andrea Vacondio
      */
-    private static class LazySeekableSourceViewHolder implements Closeable
+    private static class LocalSeekableSourceViewSupplier
+            extends ThreadBoundCopiesSupplier<SeekableSource>
     {
-        private WeakReference<SeekableSource> sourceRef;
-        private long startingPosition;
         private long length;
 
-        private SeekableSource view;
-
-        public LazySeekableSourceViewHolder(SeekableSource source, long startingPosition,
-                long length)
+        public LocalSeekableSourceViewSupplier(WeakReference<SeekableSource> sourceRef,
+                long startingPosition, long length)
         {
-            this.sourceRef = new WeakReference<>(source);
-            this.startingPosition = startingPosition;
+            super(() -> {
+                return ofNullable(sourceRef.get()).filter(SeekableSource::isOpen)
+                        .orElseThrow(() -> new IllegalStateException(
+                                "The original SeekableSource has been closed"))
+                        .view(startingPosition, length);
+            });
             this.length = length;
         }
 
-        SeekableSource get() throws IOException
-        {
-            if (view == null)
-            {
-                SeekableSource source = Optional.ofNullable(this.sourceRef.get())
-                        .filter(SeekableSource::isOpen).orElseThrow(() -> new IllegalStateException(
-                                "The original SeekableSource has been closed"));
-                view = source.view(startingPosition, length);
-            }
-            view.position(0);
-            return view;
-        }
-
         @Override
-        public void close() throws IOException
+        public SeekableSource get() throws IOException
         {
-            IOUtils.close(view);
-            view = null;
+            return super.get().position(0);
         }
     }
 }
