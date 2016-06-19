@@ -19,7 +19,6 @@ package org.sejda.sambox.util;
 import static org.sejda.util.RequireUtils.requireNotNullArg;
 
 import java.io.IOException;
-import java.util.regex.Pattern;
 
 /**
  * Utility class with pdf spec versions related methods and constants
@@ -41,7 +40,7 @@ public class SpecVersionUtils
     public static final String V1_7 = "1.7";
     public static final String V2_0 = "2.0";
 
-    private static final Pattern VERSION_PATTERN = Pattern.compile("^(\\d+)\\.(\\d+)$");
+    private static final String VERSION_PATTERN = "^(\\d)\\.(\\d)$";
 
     private SpecVersionUtils()
     {
@@ -58,12 +57,18 @@ public class SpecVersionUtils
      */
     public static String parseHeaderString(String header) throws IOException
     {
-        String version = header.substring(EXPECTED_HEADER_LENGTH - 3, EXPECTED_HEADER_LENGTH);
-        if (!VERSION_PATTERN.matcher(version).matches())
+        String version = sanitizeVersion(
+                header.substring(EXPECTED_HEADER_LENGTH - 3, EXPECTED_HEADER_LENGTH));
+        if (!version.matches(VERSION_PATTERN))
         {
             throw new IOException("Unable to get header version from " + header);
         }
         return version;
+    }
+
+    private static String sanitizeVersion(String version)
+    {
+        return version.replace(',', '.');
     }
 
     /**

@@ -43,6 +43,12 @@ public class SpecVersionUtilsTest
         assertEquals("1.7", SpecVersionUtils.parseHeaderString("%PDF-1.7"));
     }
 
+    @Test
+    public void parseCommaHeaderString() throws IOException
+    {
+        assertEquals("1.7", SpecVersionUtils.parseHeaderString("%PDF-1,7"));
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void failingAtLeastNullVersiont()
     {
