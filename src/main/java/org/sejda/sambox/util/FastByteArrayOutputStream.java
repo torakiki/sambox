@@ -176,6 +176,10 @@ public class FastByteArrayOutputStream extends OutputStream {
         return this.buffers.getFirst();
     }
 
+    public byte[] toByteArray() {
+        return toByteArraySafe();
+    }
+
     /**
      * Creates a newly allocated byte array.
      * <p>Its size is the current
@@ -185,7 +189,7 @@ public class FastByteArrayOutputStream extends OutputStream {
      * @see #size()
      * @see #toByteArrayUnsafe()
      */
-    public byte[] toByteArray() {
+    public byte[] toByteArraySafe() {
         byte[] bytesUnsafe = toByteArrayUnsafe();
         byte[] ret = new byte[bytesUnsafe.length];
         System.arraycopy(bytesUnsafe, 0, ret, 0, bytesUnsafe.length);

@@ -27,6 +27,7 @@ import java.util.zip.Inflater;
 
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.util.FastByteArrayOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,7 +61,7 @@ final class FlateFilter extends Filter
                 int colors = Math.min(decodeParams.getInt(COSName.COLORS, 1), 32);
                 int bitsPerPixel = decodeParams.getInt(COSName.BITS_PER_COMPONENT, 8);
                 int columns = decodeParams.getInt(COSName.COLUMNS, 1);
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                FastByteArrayOutputStream baos = new FastByteArrayOutputStream();
                 decompress(encoded, baos);
                 ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
                 Predictor.decodePredictor(predictor, colors, bitsPerPixel, columns, bais, decoded);
