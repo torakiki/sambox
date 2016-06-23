@@ -177,7 +177,7 @@ public class FastByteArrayOutputStream extends OutputStream {
     }
 
     public byte[] toByteArray() {
-        return toByteArraySafe();
+        return toByteArrayUnsafe();
     }
 
     /**
