@@ -62,6 +62,7 @@ public final class PDImageXObject extends PDXObject implements PDImage
     private static final Logger LOG = LoggerFactory.getLogger(PDImageXObject.class);
 
     private BufferedImage cachedImage;
+    private BufferedImage cachedImageWithoutMasks;
     private PDColorSpace colorSpace;
     private PDResources resources; // current resource dictionary (has color spaces)
 
@@ -326,6 +327,23 @@ public final class PDImageXObject extends PDXObject implements PDImage
         }
 
         cachedImage = image;
+        return image;
+    }
+
+    /**
+     * {@inheritDoc} The returned images are cached for the lifetime of this XObject.
+     */
+    public BufferedImage getImageWithoutMasks() throws IOException
+    {
+        if (cachedImageWithoutMasks != null)
+        {
+            return cachedImageWithoutMasks;
+        }
+
+        // get image as RGB
+        BufferedImage image = SampledImageReader.getRGBImage(this, getColorKeyMask());
+
+        cachedImageWithoutMasks = image;
         return image;
     }
 
