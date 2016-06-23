@@ -38,6 +38,7 @@ import org.sejda.io.ThreadBoundCopiesSupplier;
 import org.sejda.sambox.filter.DecodeResult;
 import org.sejda.sambox.filter.Filter;
 import org.sejda.sambox.filter.FilterFactory;
+import org.sejda.sambox.util.FastByteArrayOutputStream;
 import org.sejda.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -633,7 +634,7 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
         this.indirectLength = indirectLength;
     }
 
-    static class MyByteArrayOutputStream extends ByteArrayOutputStream
+    static class MyByteArrayOutputStream extends FastByteArrayOutputStream
     {
         private Optional<Consumer<byte[]>> onClose;
 
@@ -644,15 +645,14 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
 
         MyByteArrayOutputStream(Consumer<byte[]> onClose)
         {
-            super(0);
+            super();
             this.onClose = Optional.ofNullable(onClose);
         }
 
         @Override
-        public void close() throws IOException
+        public void close()
         {
             super.close();
-            // TODO find a way to avoid copying the array
             onClose.ifPresent(c -> c.accept(toByteArray()));
         }
     }
