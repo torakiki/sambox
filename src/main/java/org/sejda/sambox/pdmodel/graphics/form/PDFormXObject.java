@@ -190,7 +190,7 @@ public class PDFormXObject extends PDXObject implements PDContentStream
     {
         PDRectangle retval = null;
         COSArray array = (COSArray) getCOSObject().getDictionaryObject(COSName.BBOX);
-        if (array != null)
+        if (array != null && array.size() >= 4)
         {
             retval = new PDRectangle(array);
         }
