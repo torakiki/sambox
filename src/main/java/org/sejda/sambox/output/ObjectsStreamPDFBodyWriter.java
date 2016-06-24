@@ -21,7 +21,6 @@ import static org.sejda.sambox.util.CharUtils.ASCII_SPACE;
 import static org.sejda.util.RequireUtils.requireNotNullArg;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.SequenceInputStream;
@@ -36,6 +35,7 @@ import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.cos.DisposableCOSObject;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
 import org.sejda.sambox.cos.NonStorableInObjectStreams;
+import org.sejda.sambox.util.FastByteArrayOutputStream;
 import org.sejda.sambox.xref.CompressedXrefEntry;
 import org.sejda.util.IOUtils;
 import org.slf4j.Logger;
@@ -125,8 +125,8 @@ class ObjectsStreamPDFBodyWriter extends AbstractPDFBodyWriter
     static class ObjectsStream extends COSStream implements DisposableCOSObject
     {
         private int counter;
-        private ByteArrayOutputStream header = new ByteArrayOutputStream();
-        private ByteArrayOutputStream data = new ByteArrayOutputStream();
+        private FastByteArrayOutputStream header = new FastByteArrayOutputStream();
+        private FastByteArrayOutputStream data = new FastByteArrayOutputStream();
         private DefaultCOSWriter dataWriter;
         private InputStream filtered;
 
