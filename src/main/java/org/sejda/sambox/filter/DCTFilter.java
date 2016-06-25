@@ -68,111 +68,97 @@ final class DCTFilter extends Filter
 
             String numChannels = getNumChannels(reader);
 
+            boolean previousUseCacheValue = ImageIO.getUseCache();
+
             // get the raster using horrible JAI workarounds
             ImageIO.setUseCache(false);
-            Raster raster;
 
-            // Strategy: use read() for RGB or "can't get metadata"
-            // use readRaster() for CMYK and gray and as fallback if read() fails
-            // after "can't get metadata" because "no meta" file was CMYK
-            if ("3".equals(numChannels) || numChannels.isEmpty())
-            {
-                try
-                {
-                    // I'd like to use ImageReader#readRaster but it is buggy and can't read RGB correctly
-                    BufferedImage image = reader.read(0);
-                    raster = image.getRaster();
-                }
-                catch (IIOException e)
-                {
+            try {
+                Raster raster;
+
+                // Strategy: use read() for RGB or "can't get metadata"
+                // use readRaster() for CMYK and gray and as fallback if read() fails
+                // after "can't get metadata" because "no meta" file was CMYK
+                if ("3".equals(numChannels) || numChannels.isEmpty()) {
+                    try {
+                        // I'd like to use ImageReader#readRaster but it is buggy and can't read RGB correctly
+                        BufferedImage image = reader.read(0);
+                        raster = image.getRaster();
+                    } catch (IIOException e) {
+                        // JAI can't read CMYK JPEGs using ImageReader#read or ImageIO.read but
+                        // fortunately ImageReader#readRaster isn't buggy when reading 4-channel files
+                        raster = reader.readRaster(0, null);
+                    }
+                } else {
                     // JAI can't read CMYK JPEGs using ImageReader#read or ImageIO.read but
                     // fortunately ImageReader#readRaster isn't buggy when reading 4-channel files
                     raster = reader.readRaster(0, null);
                 }
-            }
-            else
-            {
-                // JAI can't read CMYK JPEGs using ImageReader#read or ImageIO.read but
-                // fortunately ImageReader#readRaster isn't buggy when reading 4-channel files
-                raster = reader.readRaster(0, null);
-            }
 
-            // special handling for 4-component images
-            if (raster.getNumBands() == 4)
-            {
-                // get APP14 marker
-                Integer transform;
-                try
-                {
-                    transform = getAdobeTransform(reader.getImageMetadata(0));
-                }
-                catch (IIOException e)
-                {
-                    // catches the error "Inconsistent metadata read from stream"
-                    // if we're using the Sun decoder then can be caused by either a YCCK
-                    // image or by a CMYK image which the decoder has problems reading
-                    try
-                    {
-                        // if this is Sun's decoder, use reflection to determine if the
-                        // color space is CMYK or YCCK
-                        Field field = reader.getClass().getDeclaredField("colorSpaceCode");
-                        field.setAccessible(true);
-                        int colorSpaceCode = field.getInt(reader);
+                LOG.debug("Raster size is {}x{}", raster.getWidth(), raster.getHeight());
 
-                        if (colorSpaceCode == 7 || colorSpaceCode == 8 || colorSpaceCode == 9
-                                || colorSpaceCode == 11)
-                        {
-                            // YCCK
-                            transform = 2;
-                        }
-                        else if (colorSpaceCode == 4)
-                        {
-                            // CMYK
-                            transform = 0;
-                        }
-                        else
-                        {
-                            throw new IOException("Unexpected color space: " + colorSpaceCode);
+                // special handling for 4-component images
+                if (raster.getNumBands() == 4) {
+                    // get APP14 marker
+                    Integer transform;
+                    try {
+                        transform = getAdobeTransform(reader.getImageMetadata(0));
+                    } catch (IIOException e) {
+                        // catches the error "Inconsistent metadata read from stream"
+                        // if we're using the Sun decoder then can be caused by either a YCCK
+                        // image or by a CMYK image which the decoder has problems reading
+                        try {
+                            // if this is Sun's decoder, use reflection to determine if the
+                            // color space is CMYK or YCCK
+                            Field field = reader.getClass().getDeclaredField("colorSpaceCode");
+                            field.setAccessible(true);
+                            int colorSpaceCode = field.getInt(reader);
+
+                            if (colorSpaceCode == 7 || colorSpaceCode == 8 || colorSpaceCode == 9
+                                    || colorSpaceCode == 11) {
+                                // YCCK
+                                transform = 2;
+                            } else if (colorSpaceCode == 4) {
+                                // CMYK
+                                transform = 0;
+                            } else {
+                                throw new IOException("Unexpected color space: " + colorSpaceCode);
+                            }
+                        } catch (NoSuchFieldException e1) {
+                            // error from non-Sun JPEG decoder
+                            throw e;
+                        } catch (IllegalAccessException e1) {
+                            // error from non-Sun JPEG decoder
+                            throw e;
                         }
                     }
-                    catch (NoSuchFieldException e1)
-                    {
-                        // error from non-Sun JPEG decoder
-                        throw e;
-                    }
-                    catch (IllegalAccessException e1)
-                    {
-                        // error from non-Sun JPEG decoder
-                        throw e;
-                    }
-                }
-                int colorTransform = transform != null ? transform : 0;
+                    int colorTransform = transform != null ? transform : 0;
 
-                // 0 = Unknown (RGB or CMYK), 1 = YCbCr, 2 = YCCK
-                switch (colorTransform)
-                {
-                case 0:
-                    // already CMYK
-                    break;
-                case 1:
-                    // TODO YCbCr
-                    LOG.warn("YCbCr JPEGs not implemented");
-                    break;
-                case 2:
-                    raster = fromYCCKtoCMYK(raster);
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unknown colorTransform");
+                    // 0 = Unknown (RGB or CMYK), 1 = YCbCr, 2 = YCCK
+                    switch (colorTransform) {
+                        case 0:
+                            // already CMYK
+                            break;
+                        case 1:
+                            // TODO YCbCr
+                            LOG.warn("YCbCr JPEGs not implemented");
+                            break;
+                        case 2:
+                            raster = fromYCCKtoCMYK(raster);
+                            break;
+                        default:
+                            throw new IllegalArgumentException("Unknown colorTransform");
+                    }
+                } else if (raster.getNumBands() == 3) {
+                    // BGR to RGB
+                    raster = fromBGRtoRGB(raster);
                 }
-            }
-            else if (raster.getNumBands() == 3)
-            {
-                // BGR to RGB
-                raster = fromBGRtoRGB(raster);
-            }
 
-            DataBufferByte dataBuffer = (DataBufferByte) raster.getDataBuffer();
-            decoded.write(dataBuffer.getData());
+                DataBufferByte dataBuffer = (DataBufferByte) raster.getDataBuffer();
+                decoded.write(dataBuffer.getData());
+            } finally {
+                ImageIO.setUseCache(previousUseCacheValue);
+            }
         }
         finally
         {
