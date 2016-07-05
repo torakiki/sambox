@@ -16,26 +16,7 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
-import static java.util.Objects.nonNull;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSArrayList;
-import org.sejda.sambox.cos.COSBase;
-import org.sejda.sambox.cos.COSDictionary;
-import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.cos.COSNull;
-import org.sejda.sambox.cos.COSObjectable;
-import org.sejda.sambox.cos.COSString;
+import org.sejda.sambox.cos.*;
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.PDPage;
 import org.sejda.sambox.pdmodel.PDPageContentStream;
@@ -47,6 +28,12 @@ import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
 import org.sejda.sambox.util.Matrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.util.Objects.nonNull;
 
 /**
  * An interactive form, also known as an AcroForm.
@@ -289,7 +276,8 @@ public final class PDAcroForm implements COSObjectable
         {
             for (COSBase field : fields)
             {
-                if (!COSNull.NULL.equals(field) && nonNull(field))
+                if (!COSNull.NULL.equals(field) && nonNull(field) && !COSNull.NULL
+                        .equals(field.getCOSObject()))
                 {
                     pdFields.add(PDField.fromDictionary(this, (COSDictionary) field.getCOSObject(),
                             null));
