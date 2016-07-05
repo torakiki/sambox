@@ -21,6 +21,8 @@ import static org.sejda.util.RequireUtils.requireNotNullArg;
 import java.io.IOException;
 
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Synchronous implementation of an {@link AbstractPDFBodyWriter}.
@@ -30,6 +32,8 @@ import org.sejda.sambox.cos.IndirectCOSObjectReference;
  */
 class SyncPDFBodyWriter extends AbstractPDFBodyWriter
 {
+    private static final Logger LOG = LoggerFactory.getLogger(SyncPDFBodyWriter.class);
+
     private IndirectObjectsWriter writer;
 
     SyncPDFBodyWriter(IndirectObjectsWriter writer, PDFWriteContext context)
@@ -48,7 +52,7 @@ class SyncPDFBodyWriter extends AbstractPDFBodyWriter
     @Override
     void onCompletion()
     {
-        // no op
+        LOG.debug("Written document body");
     }
 
 }
