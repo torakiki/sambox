@@ -37,7 +37,7 @@ import org.sejda.sambox.pdmodel.font.PDFont;
 class PlainText
 {
     private static final float FONTSCALE = 1000f;
-    
+
     private final List<Paragraph> paragraphs;
     
     /**
@@ -51,6 +51,8 @@ class PlainText
      */
     PlainText(String textValue)
     {
+        // normalize carriage return cross platform
+        textValue = textValue.replaceAll("(\r\n|\n\r|\r|\n)", "\n");
         List<String> parts = Arrays.asList(textValue.split("\\n"));
         paragraphs = new ArrayList<Paragraph>();
         for (String part : parts)
@@ -153,7 +155,7 @@ class PlainText
         {
             BreakIterator iterator = BreakIterator.getLineInstance();
             iterator.setText(textContent);
-            
+
             final float scale = fontSize/FONTSCALE;
             
             int start = iterator.first();
@@ -170,7 +172,7 @@ class PlainText
                 whitespaceWidth = 0f;
                 String word = textContent.substring(start,end);
                 wordWidth = font.getStringWidth(word) * scale;
-                
+
                 lineWidth = lineWidth + wordWidth;
 
                 // check if the last word would fit without the whitespace ending it
@@ -179,7 +181,7 @@ class PlainText
                     whitespaceWidth = font.getStringWidth(word.substring(word.length()-1)) * scale;
                     lineWidth = lineWidth - whitespaceWidth;
                 }
-                
+
                 if (lineWidth >= width)
                 {
                     textLine.setWidth(textLine.calculateWidth(font, fontSize));
@@ -187,7 +189,7 @@ class PlainText
                     textLine = new Line();
                     lineWidth = font.getStringWidth(word) * scale;
                 }
-                
+
                 AttributedString as = new AttributedString(word);
                 as.addAttribute(TextAttribute.WIDTH, wordWidth);
                 Word wordInstance = new Word(word);
