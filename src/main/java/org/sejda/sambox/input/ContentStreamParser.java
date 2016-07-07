@@ -21,7 +21,6 @@ import static org.sejda.sambox.contentstream.operator.Operator.ID_OPERATOR;
 import static org.sejda.sambox.util.CharUtils.isEOF;
 import static org.sejda.sambox.util.CharUtils.isWhitespace;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,7 +34,9 @@ import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.util.FastByteArrayOutputStream;
 import org.sejda.util.IOUtils;
+
 /**
  * Component responsible for parsing a a content stream to extract operands and such.
  * 
@@ -79,11 +80,13 @@ public class ContentStreamParser extends SourceReader
     public Object nextParsedToken() throws IOException
     {
         skipSpaces();
+        long pos = position();
         COSBase token = cosParser.nextParsedToken();
         if (token != null)
         {
             return token;
         }
+        position(pos);
         return nextOperator();
     }
 
@@ -108,10 +111,13 @@ public class ContentStreamParser extends SourceReader
         COSDictionary imageParams = new COSDictionary();
         operator.setImageParameters(imageParams);
         COSBase nextToken = null;
+        long position = position();
         while ((nextToken = cosParser.nextParsedToken()) instanceof COSName)
         {
             imageParams.setItem((COSName) nextToken, cosParser.nextParsedToken());
+            position = position();
         }
+        position(position);
         operator.setImageData(nextImageData());
     }
 
@@ -129,7 +135,7 @@ public class ContentStreamParser extends SourceReader
         {
             source().back();
         }
-        ByteArrayOutputStream imageData = new ByteArrayOutputStream();
+        FastByteArrayOutputStream imageData = new FastByteArrayOutputStream();
         int current;
 
         while ((current = source().read()) != -1)

@@ -73,8 +73,8 @@ public class ContentStreamParserTest
     @Test
     public void nextInlineImage() throws IOException
     {
-        victim = new ContentStreamParser(inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-"/sambox/inline_image_stream.txt")));
+        victim = new ContentStreamParser(inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/inline_image_stream.txt")));
         Operator operator = (Operator) victim.nextParsedToken();
         assertEquals(5, operator.getImageParameters().size());
         assertEquals(14, operator.getImageData().length);
@@ -83,8 +83,8 @@ public class ContentStreamParserTest
     @Test
     public void nextInlineImageNoSpace() throws IOException
     {
-        victim = new ContentStreamParser(inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-"/sambox/inline_image_stream_no_space.txt")));
+        victim = new ContentStreamParser(inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/inline_image_stream_no_space.txt")));
         Operator operator = (Operator) victim.nextParsedToken();
         assertEquals(5, operator.getImageParameters().size());
         assertEquals(14, operator.getImageData().length);
@@ -93,8 +93,8 @@ public class ContentStreamParserTest
     @Test
     public void nextInlineImageEndOfStream() throws IOException
     {
-        victim = new ContentStreamParser(inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-"/sambox/inline_image_end_of_stream.txt")));
+        victim = new ContentStreamParser(inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/inline_image_end_of_stream.txt")));
         Operator operator = (Operator) victim.nextParsedToken();
         assertEquals(5, operator.getImageParameters().size());
         assertEquals(14, operator.getImageData().length);
@@ -103,8 +103,8 @@ public class ContentStreamParserTest
     @Test
     public void nextInlineImageIDNoSpace() throws IOException
     {
-        victim = new ContentStreamParser(inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-"/sambox/inline_image_ID_no_space.txt")));
+        victim = new ContentStreamParser(inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/inline_image_ID_no_space.txt")));
         Operator operator = (Operator) victim.nextParsedToken();
         assertEquals(5, operator.getImageParameters().size());
         assertEquals(14, operator.getImageData().length);

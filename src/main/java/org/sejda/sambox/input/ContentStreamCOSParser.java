@@ -46,23 +46,6 @@ class ContentStreamCOSParser extends BaseCOSParser
     @Override
     public COSBase nextParsedToken() throws IOException
     {
-        long pos = position();
-        COSBase token = doNextParsedToken();
-        if (token == null)
-        {
-            position(pos);
-        }
-        return token;
-    }
-
-    /**
-     * @return The next parsed basic type object from the stream or null if the next token is not a COSBase. Basic types
-     * are defined in Chap 7.3 of PDF 32000-1:2008 except for Chap 7.3.10. This method doesn't parse indirect objects
-     * definition because they are not permitted in contest stream.
-     * @throws IOException If there is an error during parsing.
-     */
-    private COSBase doNextParsedToken() throws IOException
-    {
         String token;
         skipSpaces();
         char c = (char) source().peek();
@@ -118,7 +101,15 @@ class ContentStreamCOSParser extends BaseCOSParser
         case '8':
         case '9':
             return nextNumber();
+        case (char) -1:
+            return null;
         default:
+            String badString = readToken();
+            if (badString.length() <= 0)
+            {
+                // we are at a zero length end of token, we try to skip it and hopefully recover
+                source().read();
+            }
             return null;
         }
     }

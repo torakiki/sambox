@@ -68,10 +68,19 @@ public class ContentStreamCOSParserTest
     }
 
     @Test
-    public void nextParsedTokenN() throws IOException
+    public void nextDictionaryBadValue() throws IOException
     {
         victim = new ContentStreamCOSParser(
-                inMemorySeekableSourceFrom("q\nq\n27.27 823.89 540.738 -783.57 re\nW\nn\n540.73824 0 0 783.569764 27.268676 40.32 cm\n/a0 gs\n/x5 Do\nQ\nQ"
+                inMemorySeekableSourceFrom("<< /R Chuck >>".getBytes()));
+        COSDictionary result = victim.nextDictionary();
+        assertNull(result.getItem(COSName.R));
+    }
+
+    @Test
+    public void nextParsedTokenN() throws IOException
+    {
+        victim = new ContentStreamCOSParser(inMemorySeekableSourceFrom(
+                "q\nq\n27.27 823.89 540.738 -783.57 re\nW\nn\n540.73824 0 0 783.569764 27.268676 40.32 cm\n/a0 gs\n/x5 Do\nQ\nQ"
                         .getBytes()));
         victim.position(38);
         assertNull(victim.nextParsedToken());
@@ -83,14 +92,14 @@ public class ContentStreamCOSParserTest
         victim = new ContentStreamCOSParser(inMemorySeekableSourceFrom("something t ".getBytes()));
         victim.position(10);
         assertNull(victim.nextParsedToken());
-        assertEquals(10, victim.position());
+        assertEquals(11, victim.position());
     }
 
     @Test
     public void nextParsedToken() throws IOException
     {
-        victim = new ContentStreamCOSParser(
-                inMemorySeekableSourceFrom("   3 true false (Chuck Norris) <436875636B204E6f72726973> [10 (A String)] null <</R 10>> +2 /R"
+        victim = new ContentStreamCOSParser(inMemorySeekableSourceFrom(
+                "   3 true false (Chuck Norris) <436875636B204E6f72726973> [10 (A String)] null <</R 10>> +2 /R"
                         .getBytes()));
         assertEquals(COSInteger.THREE, victim.nextParsedToken());
         assertEquals(COSBoolean.TRUE, victim.nextParsedToken());
@@ -116,5 +125,16 @@ public class ContentStreamCOSParserTest
         assertEquals(COSInteger.TWO, victim.nextParsedToken());
         assertEquals(COSInteger.ZERO, victim.nextParsedToken());
         assertNull(victim.nextParsedToken());
+    }
+
+    @Test
+    public void nextParsedTokenInvalidTokenInArray() throws IOException
+    {
+        victim = new ContentStreamCOSParser(
+                inMemorySeekableSourceFrom(new byte[] { 0x5B, 0x28, 0x54, 0x29, 0x20, 0x30, 0x2E,
+                        0x30, 0x20, 0x54, 0x63, 0x0A, 0x2D, 0x32, 0x2E, 0x30, 0x20, 0x5D }));
+        COSBase array = victim.nextParsedToken();
+        assertThat(array, is(instanceOf(COSArray.class)));
+        assertEquals(3, ((COSArray) array).size());
     }
 }

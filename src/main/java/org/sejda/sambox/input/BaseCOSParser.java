@@ -144,6 +144,7 @@ abstract class BaseCOSParser extends SourceReader
         int c;
         while (((c = source().peek()) != -1) && c != ']')
         {
+            long position = position();
             COSBase item = nextParsedToken();
             if (item != null)
             {
@@ -157,7 +158,7 @@ abstract class BaseCOSParser extends SourceReader
                 {
                     LOG.warn(
                             "Found unexpected 'endobj or 'endstream' at position {}, assuming end of array",
-                            position());
+                            position);
                     return array;
                 }
                 // the next token is "obj" and the latest two are two integer. We assume the array wasn't
@@ -175,9 +176,10 @@ abstract class BaseCOSParser extends SourceReader
                     array.removeLast();
                     LOG.warn(
                             "Found unexpected object definition at position {}, assuming end of array",
-                            position());
+                            position);
                     return array;
                 }
+                LOG.warn("Found invalid token while parsing array at {}", position);
             }
             skipSpaces();
         }
