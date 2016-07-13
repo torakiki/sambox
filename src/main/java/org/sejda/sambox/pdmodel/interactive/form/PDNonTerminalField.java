@@ -29,7 +29,6 @@ import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
 
 /**
@@ -83,12 +82,12 @@ public class PDNonTerminalField extends PDField
     public List<PDField> getChildren()
     {
         List<PDField> children = new ArrayList<>();
-        COSArray kids = (COSArray) getCOSObject().getDictionaryObject(COSName.KIDS);
+        COSArray kids = getCOSObject().getDictionaryObject(COSName.KIDS, COSArray.class);
         if (kids != null)
         {
             for (COSBase kid : kids)
             {
-                if (!COSNull.NULL.equals(kid) && nonNull(kid))
+                if (nonNull(kid) && kid.getCOSObject() instanceof COSDictionary)
                 {
                     children.add(PDField.fromDictionary(getAcroForm(),
                             (COSDictionary) kid.getCOSObject(), this));
