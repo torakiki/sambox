@@ -221,7 +221,7 @@ public final class CCITTFactory
             {
                 if (val != 1)
                 {
-                    throw new IOException("FillOrder " + val + " is not supported");
+                    throw new UnsupportedTiffImageException("FillOrder " + val + " is not supported");
                 }
                 break;
             }
@@ -250,11 +250,11 @@ public final class CCITTFactory
                 // http://www.awaresystems.be/imaging/tiff/tifftags/t4options.html
                 if ((val & 4) != 0)
                 {
-                    throw new IOException("CCITT Group 3 'uncompressed mode' is not supported");
+                    throw new UnsupportedTiffImageException("CCITT Group 3 'uncompressed mode' is not supported");
                 }
                 if ((val & 2) != 0)
                 {
-                    throw new IOException("CCITT Group 3 'fill bits before EOL' is not supported");
+                    throw new UnsupportedTiffImageException("CCITT Group 3 'fill bits before EOL' is not supported");
                 }
                 break;
             }
@@ -283,11 +283,11 @@ public final class CCITTFactory
 
         if (k == -1000)
         {
-            throw new IOException("First image in tiff is not CCITT T4 or T6 compressed");
+            throw new UnsupportedTiffImageException("First image in tiff is not CCITT T4 or T6 compressed");
         }
         if (dataoffset == 0)
         {
-            throw new IOException("First image in tiff is not a single tile/strip");
+            throw new UnsupportedTiffImageException("First image in tiff is not a single tile/strip");
         }
 
         params.setInt(COSName.K, k);
