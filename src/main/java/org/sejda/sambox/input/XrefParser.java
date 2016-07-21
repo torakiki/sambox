@@ -127,8 +127,7 @@ class XrefParser
                     }
                 };
                 // and we consider it scan more reliable compared to what was found in the somehow broken xrefs
-                objectsFullScanner.entries().values().stream()
-                        .forEach(parser.provider()::addEntry);
+                objectsFullScanner.entries().values().stream().forEach(parser.provider()::addEntry);
 
             }
         }
@@ -154,11 +153,19 @@ class XrefParser
             LOG.warn("Unable to find 'startxref' keyword");
             return -1;
         }
-        parser.position(startPosition + relativeIndex + STARTXREF.length());
-        parser.skipSpaces();
-        long xrefOffset = parser.readLong();
-        LOG.debug("Found xref offset at " + xrefOffset);
-        return xrefOffset;
+        try
+        {
+            parser.position(startPosition + relativeIndex + STARTXREF.length());
+            parser.skipSpaces();
+            long xrefOffset = parser.readLong();
+            LOG.debug("Found xref offset at " + xrefOffset);
+            return xrefOffset;
+        }
+        catch (IOException e)
+        {
+            LOG.warn("An error occurred while parsing the xref offset", e);
+            return -1;
+        }
     }
 
     private boolean parseXref(long xrefOffset)
