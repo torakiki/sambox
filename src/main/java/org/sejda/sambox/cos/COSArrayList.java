@@ -361,56 +361,49 @@ public class COSArrayList<E> implements List<E>
      *
      * @param cosObjectableList A list of COSObjectable.
      *
-     * @return A list of COSBase.
+     * @return An array of COSBase or null if the input list is null or empty.
      */
     public static COSArray converterToCOSArray(List<?> cosObjectableList)
     {
-        COSArray array = null;
-        if (cosObjectableList != null)
+        if (cosObjectableList != null && !cosObjectableList.isEmpty())
         {
             if (cosObjectableList instanceof COSArrayList)
             {
                 // if it is already a COSArrayList then we don't want to recreate the array, we want to reuse it.
-                array = ((COSArrayList<?>) cosObjectableList).array;
+                return ((COSArrayList<?>) cosObjectableList).array;
             }
-            else
+            COSArray array = new COSArray();
+            for (Object current : cosObjectableList)
             {
-                array = new COSArray();
-                Iterator<?> iter = cosObjectableList.iterator();
-                while (iter.hasNext())
+                if (current instanceof String)
                 {
-                    Object next = iter.next();
-                    if (next instanceof String)
-                    {
-                        array.add(COSString.parseLiteral((String) next));
-                    }
-                    else if (next instanceof Integer || next instanceof Long)
-                    {
-                        array.add(COSInteger.get(((Number) next).longValue()));
-                    }
-                    else if (next instanceof Float || next instanceof Double)
-                    {
-                        array.add(new COSFloat(((Number) next).floatValue()));
-                    }
-                    else if (next instanceof COSObjectable)
-                    {
-                        COSObjectable object = (COSObjectable) next;
-                        array.add(object.getCOSObject());
-                    }
-                    else if (next == null)
-                    {
-                        array.add(COSNull.NULL);
-                    }
-                    else
-                    {
-                        throw new RuntimeException(
-                                "Error: Don't know how to convert type to COSBase '"
-                                        + next.getClass().getName() + "'");
-                    }
+                    array.add(COSString.parseLiteral((String) current));
+                }
+                else if (current instanceof Integer || current instanceof Long)
+                {
+                    array.add(COSInteger.get(((Number) current).longValue()));
+                }
+                else if (current instanceof Float || current instanceof Double)
+                {
+                    array.add(new COSFloat(((Number) current).floatValue()));
+                }
+                else if (current instanceof COSObjectable)
+                {
+                    array.add(((COSObjectable) current).getCOSObject());
+                }
+                else if (current == null)
+                {
+                    array.add(COSNull.NULL);
+                }
+                else
+                {
+                    throw new RuntimeException(
+                            "Unable to convert '" + current.getClass().getName() + "' to COSBase ");
                 }
             }
+            return array;
         }
-        return array;
+        return null;
     }
 
     private List<COSBase> toCOSObjectList(Collection<?> list)
