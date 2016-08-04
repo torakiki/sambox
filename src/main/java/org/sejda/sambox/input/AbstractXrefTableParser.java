@@ -109,8 +109,8 @@ abstract class AbstractXrefTableParser
                 String[] splitString = currentLine.split("\\s");
                 if (splitString.length < 3)
                 {
-                    LOG.warn("Invalid xref line: " + currentLine);
-                    break;
+                    throw new IOException(
+                            "Corrupted xref table entry. Invalid xref line: " + currentLine);
                 }
                 String entryType = splitString[splitString.length - 1];
                 if ("n".equals(entryType))
@@ -122,7 +122,7 @@ abstract class AbstractXrefTableParser
                     }
                     catch (NumberFormatException e)
                     {
-                        throw new IOException(e);
+                        throw new IOException("Corrupted xref table entry.", e);
                     }
                 }
                 else if (!"f".equals(entryType))

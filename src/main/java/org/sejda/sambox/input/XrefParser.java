@@ -128,7 +128,6 @@ class XrefParser
                 };
                 // and we consider it scan more reliable compared to what was found in the somehow broken xrefs
                 objectsFullScanner.entries().values().stream().forEach(parser.provider()::addEntry);
-
             }
         }
     }

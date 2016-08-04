@@ -40,8 +40,8 @@ public class AbstractXrefTableParserTest
     {
         Set<XrefEntry> found = new HashSet<>();
         AbstractXrefTableParser victim = new AbstractXrefTableParser(
-                new COSParser(inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-"/sambox/xref_table.txt"))))
+                new COSParser(inMemorySeekableSourceFrom(
+                        getClass().getResourceAsStream("/sambox/xref_table.txt"))))
         {
             @Override
             void onTrailerFound(COSDictionary trailer)
@@ -63,9 +63,9 @@ public class AbstractXrefTableParserTest
     @Test(expected = IOException.class)
     public void parseCorrupted() throws IOException
     {
-        AbstractXrefTableParser victim = new AbstractXrefTableParser(new COSParser(
-                inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-"/sambox/xref_table_corrupted.txt"))))
+        AbstractXrefTableParser victim = new AbstractXrefTableParser(
+                new COSParser(inMemorySeekableSourceFrom(
+                        getClass().getResourceAsStream("/sambox/xref_table_corrupted.txt"))))
         {
             @Override
             void onTrailerFound(COSDictionary trailer)
@@ -85,9 +85,9 @@ public class AbstractXrefTableParserTest
     @Test(expected = IOException.class)
     public void parseCorruptedObjectNumber() throws IOException
     {
-        AbstractXrefTableParser victim = new AbstractXrefTableParser(new COSParser(
-                inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-"/sambox/xref_table_corrupted_on.txt"))))
+        AbstractXrefTableParser victim = new AbstractXrefTableParser(
+                new COSParser(inMemorySeekableSourceFrom(
+                        getClass().getResourceAsStream("/sambox/xref_table_corrupted_on.txt"))))
         {
             @Override
             void onTrailerFound(COSDictionary trailer)
@@ -107,9 +107,9 @@ public class AbstractXrefTableParserTest
     @Test(expected = IOException.class)
     public void parseCorruptedGenerationNumber() throws IOException
     {
-        AbstractXrefTableParser victim = new AbstractXrefTableParser(new COSParser(
-                inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-"/sambox/xref_table_corrupted_gn.txt"))))
+        AbstractXrefTableParser victim = new AbstractXrefTableParser(
+                new COSParser(inMemorySeekableSourceFrom(
+                        getClass().getResourceAsStream("/sambox/xref_table_corrupted_gn.txt"))))
         {
             @Override
             void onTrailerFound(COSDictionary trailer)
@@ -129,9 +129,9 @@ public class AbstractXrefTableParserTest
     @Test
     public void parseEmptyTable() throws IOException
     {
-        AbstractXrefTableParser victim = new AbstractXrefTableParser(new COSParser(
-                inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-"/sambox/xref_empty_table.txt"))))
+        AbstractXrefTableParser victim = new AbstractXrefTableParser(
+                new COSParser(inMemorySeekableSourceFrom(
+                        getClass().getResourceAsStream("/sambox/xref_empty_table.txt"))))
         {
             @Override
             void onTrailerFound(COSDictionary trailer)
@@ -148,13 +148,13 @@ public class AbstractXrefTableParserTest
         victim.parse(15);
     }
 
-    @Test
-    public void parseSkipsInvalidRow() throws IOException
+    @Test(expected = IOException.class)
+    public void parseInvalidRow() throws IOException
     {
         Set<XrefEntry> found = new HashSet<>();
-        AbstractXrefTableParser victim = new AbstractXrefTableParser(new COSParser(
-                inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-"/sambox/xref_table_invalid_row.txt"))))
+        AbstractXrefTableParser victim = new AbstractXrefTableParser(
+                new COSParser(inMemorySeekableSourceFrom(
+                        getClass().getResourceAsStream("/sambox/xref_table_invalid_row.txt"))))
         {
             @Override
             void onTrailerFound(COSDictionary trailer)
@@ -170,7 +170,6 @@ public class AbstractXrefTableParserTest
             }
         };
         victim.parse(15);
-        assertEquals(2, found.size());
     }
 
     /**
@@ -182,9 +181,9 @@ public class AbstractXrefTableParserTest
     public void parseSkipsUnexpectedRows() throws IOException
     {
         Set<XrefEntry> found = new HashSet<>();
-        AbstractXrefTableParser victim = new AbstractXrefTableParser(new COSParser(
-                inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-"/sambox/xref_table_wrong_size.txt"))))
+        AbstractXrefTableParser victim = new AbstractXrefTableParser(
+                new COSParser(inMemorySeekableSourceFrom(
+                        getClass().getResourceAsStream("/sambox/xref_table_wrong_size.txt"))))
         {
             @Override
             void onTrailerFound(COSDictionary trailer)
@@ -212,9 +211,9 @@ public class AbstractXrefTableParserTest
     public void parseInvalidTokensNumber() throws IOException
     {
         Set<XrefEntry> found = new HashSet<>();
-        AbstractXrefTableParser victim = new AbstractXrefTableParser(new COSParser(
-                inMemorySeekableSourceFrom(getClass().getResourceAsStream(
-"/sambox/xref_table_invalid_tokens_number.txt"))))
+        AbstractXrefTableParser victim = new AbstractXrefTableParser(
+                new COSParser(inMemorySeekableSourceFrom(getClass()
+                        .getResourceAsStream("/sambox/xref_table_invalid_tokens_number.txt"))))
         {
             @Override
             void onTrailerFound(COSDictionary trailer)
