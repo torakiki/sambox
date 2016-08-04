@@ -18,10 +18,13 @@ package org.sejda.sambox.input;
 
 import static org.sejda.sambox.input.AbstractXrefTableParser.TRAILER;
 import static org.sejda.sambox.input.AbstractXrefTableParser.XREF;
+import static org.sejda.util.RequireUtils.requireIOCondition;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
@@ -182,36 +185,30 @@ class XrefParser
 
     private boolean doParseXref(long xrefOffset) throws IOException
     {
-        if (!isValidXrefOffset(xrefOffset))
-        {
-            LOG.warn("Offset '" + xrefOffset
-                    + "' doesn't point to an xref table or stream, applying fallback strategy");
-            return false;
-        }
+
+        requireIOCondition(isValidXrefOffset(xrefOffset),
+                "Offset '" + xrefOffset + "' doesn't point to an xref table or stream");
+
+        Set<Long> parsedOffsets = new HashSet<>();
         while (xrefOffset > -1)
         {
-            if (!isValidXrefOffset(xrefOffset))
-            {
-                LOG.warn("Offset '" + xrefOffset
-                        + "' doesn't point to an xref table or stream, applying fallback strategy");
-                return false;
-            }
+            requireIOCondition(!parsedOffsets.contains(xrefOffset), "/Prev loop detected");
+            requireIOCondition(isValidXrefOffset(xrefOffset),
+                    "Offset '" + xrefOffset + "' doesn't point to an xref table or stream");
+
             parser.position(xrefOffset);
             parser.skipSpaces();
 
             if (parser.isNextToken(XREF))
             {
                 COSDictionary trailer = xrefTableParser.parse(xrefOffset);
+                parsedOffsets.add(xrefOffset);
                 long streamOffset = trailer.getLong(COSName.XREF_STM);
                 if (streamOffset > 0)
                 {
-                    if (!isValidXrefStreamOffset(streamOffset))
-                    {
-                        LOG.warn("Offset '" + streamOffset
-                                + "' doesn't point to an xref stream, applying fallback strategy");
-                        return false;
+                    requireIOCondition(isValidXrefStreamOffset(xrefOffset),
+                            "Offset '" + streamOffset + "' doesn't point to an xref stream");
 
-                    }
                     trailer.setLong(COSName.XREF_STM, streamOffset);
                     xrefStreamParser.parse(streamOffset);
                 }
@@ -220,6 +217,7 @@ class XrefParser
             else
             {
                 COSDictionary streamDictionary = xrefStreamParser.parse(xrefOffset);
+                parsedOffsets.add(xrefOffset);
                 xrefOffset = streamDictionary.getLong(COSName.PREV);
             }
         }
