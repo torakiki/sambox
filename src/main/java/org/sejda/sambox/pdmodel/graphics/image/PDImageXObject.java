@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Arrays;
 
 import javax.imageio.ImageIO;
 
@@ -165,6 +166,9 @@ public final class PDImageXObject extends PDXObject implements PDImage
      * {@link LosslessFactory#createFromImage}. (The later can also be used to create a PDImageXObject from a
      * BufferedImage).
      *
+     * Image type is also detected based on the first bytes in the file, for PNG and JPEG. Takes precedence over extension.
+     * Eg: Solves issues with JPEG with .png extension
+     *
      * @param file the image file.
      * @param doc the document that shall use this PDImageXObject.
      * @return a PDImageXObject.
@@ -180,6 +184,27 @@ public final class PDImageXObject extends PDXObject implements PDImage
             throw new IllegalArgumentException("Image type not supported: " + name);
         }
         String ext = name.substring(dot + 1).toLowerCase();
+
+        // Do some basic checks to see if the first bytes match the extension
+        // Eg: a JPEG extension on a PNG image file
+
+        byte[] jpegFirstBytes = new byte[] { (byte) 0xFF, (byte) 0xD8 };
+        byte[] pngFirstBytes = new byte[] { (byte) 0x89, (byte) 0x50 };
+
+        FileInputStream fin = new FileInputStream(file);
+        byte[] firstBytes = new byte[2];
+
+        fin.read(firstBytes);
+        fin.close();
+
+        if(Arrays.equals(firstBytes, jpegFirstBytes)) {
+            ext = "jpg";
+        }
+        if(Arrays.equals(firstBytes, pngFirstBytes)) {
+            ext = "png";
+        }
+
+
         if ("jpg".equals(ext) || "jpeg".equals(ext))
         {
             try (FileInputStream fis = new FileInputStream(file))
