@@ -41,18 +41,20 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Reads a sampled image from a PDF file.
+ * 
  * @author John Hewson
  */
 final class SampledImageReader
 {
     private static final Logger LOG = LoggerFactory.getLogger(SampledImageReader.class);
-    
+
     private SampledImageReader()
     {
     }
 
     /**
      * Returns an ARGB image filled with the given paint and using the given image as a mask.
+     * 
      * @param paint the paint to fill the visible portions of the image with
      * @return a masked image filled with the given paint
      * @throws IOException if the image cannot be read
@@ -69,10 +71,10 @@ final class SampledImageReader
         Graphics2D g = masked.createGraphics();
 
         // draw the mask
-        //g.drawImage(mask, 0, 0, null);
+        // g.drawImage(mask, 0, 0, null);
 
         // fill with paint using src-in
-        //g.setComposite(AlphaComposite.SrcIn);
+        // g.setComposite(AlphaComposite.SrcIn);
         g.setPaint(paint);
         g.fillRect(0, 0, mask.getWidth(), mask.getHeight());
         g.dispose();
@@ -101,9 +103,9 @@ final class SampledImageReader
     }
 
     /**
-     * Returns the content of the given image as an AWT buffered image with an RGB color space.
-     * If a color key mask is provided then an ARGB image is returned instead.
-     * This method never returns null.
+     * Returns the content of the given image as an AWT buffered image with an RGB color space. If a color key mask is
+     * provided then an ARGB image is returned instead. This method never returns null.
+     * 
      * @param pdImage the image to read
      * @param colorKey an optional color key mask
      * @return content of this image as an RGB buffered image
@@ -149,9 +151,8 @@ final class SampledImageReader
             return fromAny(pdImage, raster, colorKey);
         }
     }
-    
-    private static BufferedImage from1Bit(PDImage pdImage, WritableRaster raster)
-            throws IOException
+
+    private static BufferedImage from1Bit(PDImage pdImage, WritableRaster raster) throws IOException
     {
         final PDColorSpace colorSpace = pdImage.getColorSpace();
         final int width = pdImage.getWidth();
@@ -159,12 +160,8 @@ final class SampledImageReader
         final float[] decode = getDecodeArray(pdImage);
         byte[] output = ((DataBufferByte) raster.getDataBuffer()).getData();
 
-        // read bit stream
-        InputStream iis = null;
-        try
+        try (InputStream iis = pdImage.createInputStream())
         {
-            // create stream
-            iis = pdImage.createInputStream();
             final boolean isIndexed = colorSpace instanceof PDIndexed;
 
             int rowLen = width / 8;
@@ -215,18 +212,10 @@ final class SampledImageReader
 
             return rgbImage;
         }
-        finally
-        {
-            if (iis != null)
-            {
-                iis.close();
-            }
-        }
     }
 
     // faster, 8-bit non-decoded, non-colormasked image conversion
-    private static BufferedImage from8bit(PDImage pdImage, WritableRaster raster)
-            throws IOException
+    private static BufferedImage from8bit(PDImage pdImage, WritableRaster raster) throws IOException
     {
         InputStream input = pdImage.createInputStream();
         try
@@ -257,8 +246,8 @@ final class SampledImageReader
         {
             IOUtils.closeQuietly(input);
         }
-    }    
-    
+    }
+
     // slower, general-purpose image conversion from any image format
     private static BufferedImage fromAny(PDImage pdImage, WritableRaster raster, COSArray colorKey)
             throws IOException
@@ -270,13 +259,9 @@ final class SampledImageReader
         final int bitsPerComponent = pdImage.getBitsPerComponent();
         final float[] decode = getDecodeArray(pdImage);
 
-        // read bit stream
-        ImageInputStream iis = null;
-        try
+        try (ImageInputStream iis = new MemoryCacheImageInputStream(pdImage.createInputStream()))
         {
-            // create stream
-            iis = new MemoryCacheImageInputStream(pdImage.createInputStream());
-            final float sampleMax = (float)Math.pow(2, bitsPerComponent) - 1f;
+            final float sampleMax = (float) Math.pow(2, bitsPerComponent) - 1f;
             final boolean isIndexed = colorSpace instanceof PDIndexed;
 
             // init color key mask
@@ -305,13 +290,13 @@ final class SampledImageReader
                     boolean isMasked = true;
                     for (int c = 0; c < numComponents; c++)
                     {
-                        int value = (int)iis.readBits(bitsPerComponent);
+                        int value = (int) iis.readBits(bitsPerComponent);
 
                         // color key mask requires values before they are decoded
                         if (colorKeyRanges != null)
                         {
-                            isMasked &= value >= colorKeyRanges[c * 2] &&
-                                        value <= colorKeyRanges[c * 2 + 1];
+                            isMasked &= value >= colorKeyRanges[c * 2]
+                                    && value <= colorKeyRanges[c * 2 + 1];
                         }
 
                         // decode array
@@ -326,15 +311,16 @@ final class SampledImageReader
                             // indexed color spaces get the raw value, because the TYPE_BYTE
                             // below cannot be reversed by the color space without it having
                             // knowledge of the number of bits per component
-                            srcColorValues[c] = (byte)Math.round(output);
+                            srcColorValues[c] = (byte) Math.round(output);
                         }
                         else
                         {
                             // interpolate to TYPE_BYTE
-                            int outputByte = Math.round(((output - Math.min(dMin, dMax)) /
-                                    Math.abs(dMax - dMin)) * 255f);
+                            int outputByte = Math
+                                    .round(((output - Math.min(dMin, dMax)) / Math.abs(dMax - dMin))
+                                            * 255f);
 
-                            srcColorValues[c] = (byte)outputByte;
+                            srcColorValues[c] = (byte) outputByte;
                         }
                     }
                     raster.setDataElements(x, y, srcColorValues);
@@ -342,7 +328,7 @@ final class SampledImageReader
                     // set alpha channel in color key mask, if any
                     if (colorKeyMask != null)
                     {
-                        alpha[0] = (byte)(isMasked ? 255 : 0);
+                        alpha[0] = (byte) (isMasked ? 255 : 0);
                         colorKeyMask.getRaster().setDataElements(x, y, alpha);
                     }
                 }
@@ -362,13 +348,6 @@ final class SampledImageReader
             else
             {
                 return rgbImage;
-            }
-        }
-        finally
-        {
-            if (iis != null)
-            {
-                iis.close();
             }
         }
     }
@@ -430,10 +409,7 @@ final class SampledImageReader
                     {
                         LOG.warn("decode array " + cosDecode
                                 + " not compatible with color space, using the first two entries");
-                        return new float[]
-                        {
-                            decode0, decode1
-                        };
+                        return new float[] { decode0, decode1 };
                     }
                 }
                 LOG.error("decode array " + cosDecode

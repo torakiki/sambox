@@ -52,7 +52,6 @@ public final class PDInlineImage implements PDImage
     private final PDResources resources;
 
     // image data
-    private final byte[] rawData;
     private final byte[] decodedData;
 
     /**
@@ -68,7 +67,6 @@ public final class PDInlineImage implements PDImage
     {
         this.parameters = parameters;
         this.resources = resources;
-        this.rawData = data;
 
         DecodeResult decodeResult = null;
         List<String> filters = getFilters();
@@ -292,27 +290,6 @@ public final class PDInlineImage implements PDImage
     public InputStream createInputStream()
     {
         return new ByteArrayInputStream(decodedData);
-    }
-
-    @Override
-    public InputStream createInputStream(List<String> stopFilters) throws IOException
-    {
-        List<String> filters = getFilters();
-        ByteArrayInputStream in = new ByteArrayInputStream(rawData);
-        ByteArrayOutputStream out = new ByteArrayOutputStream(rawData.length);
-        for (int i = 0; i < filters.size(); i++)
-        {
-            // TODO handling of abbreviated names belongs here, rather than in other classes
-            out.reset();
-            if (stopFilters.contains(filters.get(i)))
-            {
-                break;
-            }
-            Filter filter = FilterFactory.INSTANCE.getFilter(filters.get(i));
-            filter.decode(in, out, parameters, i);
-            in = new ByteArrayInputStream(out.toByteArray());
-        }
-        return new ByteArrayInputStream(out.toByteArray());
     }
 
     @Override

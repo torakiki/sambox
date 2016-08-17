@@ -21,7 +21,6 @@ import static java.util.Optional.ofNullable;
 import static org.sejda.io.SeekableSources.inMemorySeekableSourceFrom;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
@@ -580,7 +579,7 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
      */
     public String asTextString()
     {
-        try (ByteArrayOutputStream out = new ByteArrayOutputStream())
+        try (FastByteArrayOutputStream out = new FastByteArrayOutputStream())
         {
             org.apache.commons.io.IOUtils.copy(getUnfilteredStream(), out);
             return COSString.newInstance(out.toByteArray()).getString();

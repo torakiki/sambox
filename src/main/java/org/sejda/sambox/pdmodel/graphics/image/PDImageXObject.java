@@ -578,12 +578,6 @@ public final class PDImageXObject extends PDXObject implements PDImage
     }
 
     @Override
-    public InputStream createInputStream(List<String> stopFilters) throws IOException
-    {
-        return getStream().createInputStream(stopFilters);
-    }
-
-    @Override
     public boolean isEmpty() throws IOException
     {
         return getStream().getCOSObject().isEmpty();

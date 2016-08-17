@@ -16,7 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.common;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,8 +32,6 @@ import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.COSObjectable;
 import org.sejda.sambox.cos.COSStream;
-import org.sejda.sambox.filter.Filter;
-import org.sejda.sambox.filter.FilterFactory;
 import org.sejda.sambox.pdmodel.common.filespecification.FileSpecifications;
 import org.sejda.sambox.pdmodel.common.filespecification.PDFileSpecification;
 import org.sejda.util.IOUtils;
@@ -170,38 +167,6 @@ public class PDStream implements COSObjectable
     public InputStream createInputStream() throws IOException
     {
         return stream.getUnfilteredStream();
-    }
-
-    /**
-     * This will get a stream with some filters applied but not others. This is useful when doing images, ie filters =
-     * [flate,dct], we want to remove flate but leave dct
-     * 
-     * @param stopFilters A list of filters to stop decoding at.
-     * @return A stream with decoded data.
-     * @throws IOException If there is an error processing the stream.
-     */
-    public InputStream createInputStream(List<String> stopFilters) throws IOException
-    {
-        InputStream is = stream.getFilteredStream();
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        List<COSName> filters = getFilters();
-        if (filters != null)
-        {
-            for (int i = 0; i < filters.size(); i++)
-            {
-                COSName nextFilter = filters.get(i);
-                if ((stopFilters != null) && stopFilters.contains(nextFilter.getName()))
-                {
-                    break;
-                }
-                Filter filter = FilterFactory.INSTANCE.getFilter(nextFilter);
-                filter.decode(is, os, stream, i);
-                IOUtils.closeQuietly(is);
-                is = new ByteArrayInputStream(os.toByteArray());
-                os.reset();
-            }
-        }
-        return is;
     }
 
     /**

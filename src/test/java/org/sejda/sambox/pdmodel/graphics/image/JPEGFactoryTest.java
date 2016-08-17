@@ -26,7 +26,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 
 import javax.imageio.ImageIO;
 
@@ -211,8 +210,7 @@ public class JPEGFactoryTest extends TestCase
         {
             PDImageXObject img = (PDImageXObject) doc.getPage(0).getResources()
                     .getXObject(COSName.getPDFName("Im1"));
-            InputStream dctStream = img
-                    .createInputStream(Arrays.asList(COSName.DCT_DECODE.getName()));
+            InputStream dctStream = img.getCOSObject().getFilteredStream();
             ByteArrayOutputStream baos1 = new ByteArrayOutputStream();
             ByteArrayOutputStream baos2 = new ByteArrayOutputStream();
             IOUtils.copy(resourceStream, baos1);
