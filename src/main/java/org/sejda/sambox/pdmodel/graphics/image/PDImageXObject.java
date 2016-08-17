@@ -27,8 +27,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.List;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 
@@ -166,8 +167,8 @@ public final class PDImageXObject extends PDXObject implements PDImage
      * {@link LosslessFactory#createFromImage}. (The later can also be used to create a PDImageXObject from a
      * BufferedImage).
      *
-     * Image type is also detected based on the first bytes in the file, for PNG and JPEG. Takes precedence over extension.
-     * Eg: Solves issues with JPEG with .png extension
+     * Image type is also detected based on the first bytes in the file, for PNG and JPEG. Takes precedence over
+     * extension. Eg: Solves issues with JPEG with .png extension
      *
      * @param file the image file.
      * @param doc the document that shall use this PDImageXObject.
@@ -197,13 +198,14 @@ public final class PDImageXObject extends PDXObject implements PDImage
         fin.read(firstBytes);
         fin.close();
 
-        if(Arrays.equals(firstBytes, jpegFirstBytes)) {
+        if (Arrays.equals(firstBytes, jpegFirstBytes))
+        {
             ext = "jpg";
         }
-        if(Arrays.equals(firstBytes, pngFirstBytes)) {
+        if (Arrays.equals(firstBytes, pngFirstBytes))
+        {
             ext = "png";
         }
-
 
         if ("jpg".equals(ext) || "jpeg".equals(ext))
         {
@@ -569,6 +571,12 @@ public final class PDImageXObject extends PDXObject implements PDImage
     public InputStream createInputStream() throws IOException
     {
         return getStream().createInputStream();
+    }
+
+    @Override
+    public ByteBuffer asByteBuffer() throws IOException
+    {
+        return getStream().getCOSObject().getUnfilteredByteBuffer();
     }
 
     @Override

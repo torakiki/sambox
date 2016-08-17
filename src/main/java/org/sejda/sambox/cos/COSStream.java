@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.ref.WeakReference;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -191,6 +192,25 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
             return existing.get();
         }
         return inMemorySeekableSourceFrom(filtered);
+    }
+
+    /**
+     * @return the (decoded) stream in the form of a read only {@link ByteBuffer} with all of the filters applied.
+     * @throws IOException when encoding/decoding causes an exception
+     */
+    public ByteBuffer getUnfilteredByteBuffer() throws IOException
+    {
+        decodeIfRequired();
+        if (unfiltered != null)
+        {
+            return ByteBuffer.wrap(unfiltered).asReadOnlyBuffer();
+        }
+        if (existing != null)
+        {
+            return ByteBuffer.wrap(
+                    org.apache.commons.io.IOUtils.toByteArray(existing.get().asInputStream()));
+        }
+        return ByteBuffer.wrap(filtered).asReadOnlyBuffer();
     }
 
     /**

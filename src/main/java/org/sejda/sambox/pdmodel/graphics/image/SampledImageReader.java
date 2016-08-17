@@ -26,12 +26,12 @@ import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.MemoryCacheImageInputStream;
 
-import org.apache.commons.io.IOUtils;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSNumber;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
@@ -217,35 +217,27 @@ final class SampledImageReader
     // faster, 8-bit non-decoded, non-colormasked image conversion
     private static BufferedImage from8bit(PDImage pdImage, WritableRaster raster) throws IOException
     {
-        InputStream input = pdImage.createInputStream();
-        try
+        // get the raster's underlying byte buffer
+        byte[][] banks = ((DataBufferByte) raster.getDataBuffer()).getBankData();
+        ByteBuffer source = pdImage.asByteBuffer();
+
+        final int width = pdImage.getWidth();
+        final int height = pdImage.getHeight();
+        final int numComponents = pdImage.getColorSpace().getNumberOfComponents();
+        int max = width * height;
+
+        for (int c = 0; c < numComponents; c++)
         {
-            // get the raster's underlying byte buffer
-            byte[][] banks = ((DataBufferByte) raster.getDataBuffer()).getBankData();
-            byte[] source = IOUtils.toByteArray(input);
-
-            final int width = pdImage.getWidth();
-            final int height = pdImage.getHeight();
-            final int numComponents = pdImage.getColorSpace().getNumberOfComponents();
-            int max = width * height;
-
-            for (int c = 0; c < numComponents; c++)
+            int sourceOffset = c;
+            for (int i = 0; i < max; i++)
             {
-                int sourceOffset = c;
-                for (int i = 0; i < max; i++)
-                {
-                    banks[c][i] = source[sourceOffset];
-                    sourceOffset += numComponents;
-                }
+                banks[c][i] = source.get(sourceOffset);
+                sourceOffset += numComponents;
             }
+        }
 
-            // use the color space to convert the image to RGB
-            return pdImage.getColorSpace().toRGBImage(raster);
-        }
-        finally
-        {
-            IOUtils.closeQuietly(input);
-        }
+        // use the color space to convert the image to RGB
+        return pdImage.getColorSpace().toRGBImage(raster);
     }
 
     // slower, general-purpose image conversion from any image format
@@ -345,10 +337,7 @@ final class SampledImageReader
             {
                 return applyColorKeyMask(rgbImage, colorKeyMask);
             }
-            else
-            {
-                return rgbImage;
-            }
+            return rgbImage;
         }
     }
 

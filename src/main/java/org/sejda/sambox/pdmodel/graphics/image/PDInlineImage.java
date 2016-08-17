@@ -22,6 +22,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.List;
 
 import org.sejda.sambox.cos.COSArray;
@@ -290,6 +291,12 @@ public final class PDInlineImage implements PDImage
     public InputStream createInputStream()
     {
         return new ByteArrayInputStream(decodedData);
+    }
+
+    @Override
+    public ByteBuffer asByteBuffer()
+    {
+        return ByteBuffer.wrap(decodedData).asReadOnlyBuffer();
     }
 
     @Override

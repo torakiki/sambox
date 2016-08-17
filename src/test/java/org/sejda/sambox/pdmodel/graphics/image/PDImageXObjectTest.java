@@ -1,21 +1,20 @@
 package org.sejda.sambox.pdmodel.graphics.image;
 
-import org.apache.commons.io.IOUtils;
-import org.junit.Test;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static org.junit.Assert.*;
+import org.apache.commons.io.IOUtils;
+import org.junit.Test;
 
 public class PDImageXObjectTest
 {
     @Test
     public void testJpegWithPngExtension() throws IOException
     {
-        InputStream in = getClass().getResourceAsStream("/org/sejda/sambox/resources/images/sample.png");
+        InputStream in = getClass()
+                .getResourceAsStream("/org/sejda/sambox/resources/images/sample.png");
         File outFile = File.createTempFile("sample", ".jpeg");
         FileOutputStream out = new FileOutputStream(outFile);
         IOUtils.copy(in, out);

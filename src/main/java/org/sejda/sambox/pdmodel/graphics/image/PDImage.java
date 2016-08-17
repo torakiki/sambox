@@ -20,6 +20,7 @@ import java.awt.Paint;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSObjectable;
@@ -33,8 +34,9 @@ import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
 public interface PDImage extends COSObjectable
 {
     /**
-     * Returns the content of this image as an AWT buffered image with an (A)RGB color space.
-     * The size of the returned image is the larger of the size of the image itself or its mask. 
+     * Returns the content of this image as an AWT buffered image with an (A)RGB color space. The size of the returned
+     * image is the larger of the size of the image itself or its mask.
+     * 
      * @return content of this image as a buffered image.
      * @throws IOException
      */
@@ -42,6 +44,7 @@ public interface PDImage extends COSObjectable
 
     /**
      * Returns an ARGB image filled with the given paint and using this image as a mask.
+     * 
      * @param paint the paint to fill the visible portions of the image with
      * @return a masked image filled with the given paint
      * @throws IOException if the image cannot be read
@@ -59,6 +62,11 @@ public interface PDImage extends COSObjectable
     InputStream createInputStream() throws IOException;
 
     /**
+     * @return image data in the form of a {@link ByteBuffer}
+     */
+    ByteBuffer asByteBuffer() throws IOException;
+
+    /**
      * Returns true if the image has no data.
      * 
      * @throws IOException
@@ -71,8 +79,9 @@ public interface PDImage extends COSObjectable
     boolean isStencil();
 
     /**
-     * Sets whether or not the image is a stencil.
-     * This corresponds to the {@code ImageMask} entry in the image stream's dictionary.
+     * Sets whether or not the image is a stencil. This corresponds to the {@code ImageMask} entry in the image stream's
+     * dictionary.
+     * 
      * @param isStencil True to make the image a stencil.
      */
     void setStencil(boolean isStencil);
@@ -84,18 +93,21 @@ public interface PDImage extends COSObjectable
 
     /**
      * Set the number of bits per component.
+     * 
      * @param bitsPerComponent The number of bits per component.
      */
     void setBitsPerComponent(int bitsPerComponent);
 
     /**
      * Returns the image's color space.
+     * 
      * @throws IOException If there is an error getting the color space.
      */
     PDColorSpace getColorSpace() throws IOException;
 
     /**
      * Sets the color space for this image.
+     * 
      * @param colorSpace The color space for this image.
      */
     void setColorSpace(PDColorSpace colorSpace);
@@ -107,6 +119,7 @@ public interface PDImage extends COSObjectable
 
     /**
      * Sets the height of the image.
+     * 
      * @param height The height of the image.
      */
     void setHeight(int height);
@@ -118,13 +131,15 @@ public interface PDImage extends COSObjectable
 
     /**
      * Sets the width of the image.
+     * 
      * @param width The width of the image.
      */
     void setWidth(int width);
 
     /**
      * Sets the decode array.
-     * @param decode  the new decode array.
+     * 
+     * @param decode the new decode array.
      */
     void setDecode(COSArray decode);
 
@@ -138,7 +153,6 @@ public interface PDImage extends COSObjectable
      */
     boolean getInterpolate();
 
-
     /**
      * Sets the Interpolate flag, true for high-quality image scaling.
      */
@@ -148,4 +162,5 @@ public interface PDImage extends COSObjectable
      * Returns the suffix for this image type, e.g. "jpg"
      */
     String getSuffix();
+
 }
