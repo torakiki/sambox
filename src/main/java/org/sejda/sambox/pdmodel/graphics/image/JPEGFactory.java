@@ -25,12 +25,13 @@ import java.awt.color.ICC_ColorSpace;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorConvertOp;
 import java.awt.image.WritableRaster;
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.Iterator;
 
 import javax.imageio.IIOImage;
@@ -68,22 +69,20 @@ public final class JPEGFactory
      * The input stream data will be preserved and embedded in the PDF file without modification.
      * 
      * @param document the document where the image will be created
-     * @param stream a stream of JPEG data
+     * @param a JPEG file
      * @return a new Image XObject
      * 
      * @throws IOException if the input stream cannot be read
      */
-    public static PDImageXObject createFromStream(InputStream stream) throws IOException
+    public static PDImageXObject createFromFile(File file) throws IOException
     {
-        // copy stream
-        ByteArrayInputStream byteStream = new ByteArrayInputStream(IOUtils.toByteArray(stream));
 
         // read image
-        BufferedImage awtImage = readJPEG(byteStream);
-        byteStream.reset();
+        BufferedImage awtImage = readJpegFile(file);
 
         // create Image XObject from stream
-        PDImageXObject pdImage = new PDImageXObject(byteStream, COSName.DCT_DECODE,
+        PDImageXObject pdImage = new PDImageXObject(
+                new BufferedInputStream(Files.newInputStream(file.toPath())), COSName.DCT_DECODE,
                 awtImage.getWidth(), awtImage.getHeight(),
                 awtImage.getColorModel().getComponentSize(0), getColorSpaceFromAWT(awtImage));
 
@@ -94,11 +93,6 @@ public final class JPEGFactory
         }
 
         return pdImage;
-    }
-
-    public static BufferedImage readJPEG(InputStream stream) throws IOException
-    {
-        return readJpeg(stream);
     }
 
     public static BufferedImage readJpegFile(File file) throws IOException

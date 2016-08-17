@@ -16,6 +16,9 @@
 package org.sejda.sambox.pdmodel.graphics.image;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.sejda.sambox.pdmodel.graphics.image.ValidateXImage.colorCount;
 import static org.sejda.sambox.pdmodel.graphics.image.ValidateXImage.doWritePDF;
 import static org.sejda.sambox.pdmodel.graphics.image.ValidateXImage.validate;
@@ -26,10 +29,16 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 import javax.imageio.ImageIO;
 
 import org.apache.commons.io.IOUtils;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.input.PDFParser;
@@ -37,57 +46,57 @@ import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceRGB;
 
-import junit.framework.TestCase;
-
 /**
  * Unit tests for JPEGFactory
  *
  * @author Tilman Hausherr
  */
-public class JPEGFactoryTest extends TestCase
+public class JPEGFactoryTest
 {
     private final File testResultsDir = new File("target/test-output/graphics");
 
-    @Override
-    protected void setUp() throws Exception
+    @Rule
+    public TemporaryFolder folder = new TemporaryFolder();
+
+    @Before
+    public void setUp()
     {
-        super.setUp();
         testResultsDir.mkdirs();
     }
 
-    /**
-     * Tests JPEGFactory#createFromStream(PDDocument document, InputStream stream) with color JPEG file
-     */
-    public void testCreateFromStream() throws IOException
+    @Test
+    public void testCreateFromFile() throws IOException
     {
-        PDDocument document = new PDDocument();
-        InputStream stream = JPEGFactoryTest.class.getResourceAsStream("jpeg.jpg");
-        PDImageXObject ximage = JPEGFactory.createFromStream(stream);
-        validate(ximage, 8, 344, 287, "jpg", PDDeviceRGB.INSTANCE.getName());
+        try (InputStream stream = JPEGFactoryTest.class.getResourceAsStream("jpeg.jpg"))
+        {
+            File file = folder.newFile();
+            Files.copy(stream, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            PDImageXObject ximage = JPEGFactory.createFromFile(file);
+            validate(ximage, 8, 344, 287, "jpg", PDDeviceRGB.INSTANCE.getName());
 
-        doWritePDF(document, ximage, testResultsDir, "jpegrgbstream.pdf");
-        checkJpegStream(testResultsDir, "jpegrgbstream.pdf",
-                JPEGFactoryTest.class.getResourceAsStream("jpeg.jpg"));
+            doWritePDF(new PDDocument(), ximage, testResultsDir, "jpegrgbstream.pdf");
+            checkJpegStream(testResultsDir, "jpegrgbstream.pdf",
+                    JPEGFactoryTest.class.getResourceAsStream("jpeg.jpg"));
+        }
     }
 
-    /**
-     * Tests JPEGFactory#createFromStream(PDDocument document, InputStream stream) with gray JPEG file
-     */
-    public void testCreateFromStream256() throws IOException
+    @Test
+    public void testCreateFromFile256() throws IOException
     {
-        PDDocument document = new PDDocument();
-        InputStream stream = JPEGFactoryTest.class.getResourceAsStream("jpeg256.jpg");
-        PDImageXObject ximage = JPEGFactory.createFromStream(stream);
-        validate(ximage, 8, 344, 287, "jpg", PDDeviceGray.INSTANCE.getName());
+        try (InputStream stream = JPEGFactoryTest.class.getResourceAsStream("jpeg256.jpg"))
+        {
+            File file = folder.newFile();
+            Files.copy(stream, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            PDImageXObject ximage = JPEGFactory.createFromFile(file);
+            validate(ximage, 8, 344, 287, "jpg", PDDeviceGray.INSTANCE.getName());
 
-        doWritePDF(document, ximage, testResultsDir, "jpeg256stream.pdf");
-        checkJpegStream(testResultsDir, "jpeg256stream.pdf",
-                JPEGFactoryTest.class.getResourceAsStream("jpeg256.jpg"));
+            doWritePDF(new PDDocument(), ximage, testResultsDir, "jpeg256stream.pdf");
+            checkJpegStream(testResultsDir, "jpeg256stream.pdf",
+                    JPEGFactoryTest.class.getResourceAsStream("jpeg256.jpg"));
+        }
     }
 
-    /**
-     * Tests RGB JPEGFactory#createFromImage(PDDocument document, BufferedImage image) with color JPEG image
-     */
+    @Test
     public void testCreateFromImageRGB() throws IOException
     {
         PDDocument document = new PDDocument();
@@ -99,9 +108,7 @@ public class JPEGFactoryTest extends TestCase
         doWritePDF(document, ximage, testResultsDir, "jpegrgb.pdf");
     }
 
-    /**
-     * Tests RGB JPEGFactory#createFromImage(PDDocument document, BufferedImage image) with gray JPEG image
-     */
+    @Test
     public void testCreateFromImage256() throws IOException
     {
         PDDocument document = new PDDocument();
@@ -114,9 +121,7 @@ public class JPEGFactoryTest extends TestCase
         doWritePDF(document, ximage, testResultsDir, "jpeg256.pdf");
     }
 
-    /**
-     * Tests ARGB JPEGFactory#createFromImage(PDDocument document, BufferedImage image)
-     */
+    @Test
     public void testCreateFromImageINT_ARGB() throws IOException
     {
         // workaround Open JDK bug
@@ -157,9 +162,7 @@ public class JPEGFactoryTest extends TestCase
         doWritePDF(document, ximage, testResultsDir, "jpeg-intargb.pdf");
     }
 
-    /**
-     * Tests ARGB JPEGFactory#createFromImage(PDDocument document, BufferedImage image)
-     */
+    @Test
     public void testCreateFromImage4BYTE_ABGR() throws IOException
     {
         // workaround Open JDK bug

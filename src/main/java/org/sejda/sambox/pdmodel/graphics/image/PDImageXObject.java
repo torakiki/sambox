@@ -207,10 +207,7 @@ public final class PDImageXObject extends PDXObject implements PDImage
 
         if ("jpg".equals(ext) || "jpeg".equals(ext))
         {
-            try (FileInputStream fis = new FileInputStream(file))
-            {
-                return JPEGFactory.createFromStream(fis);
-            }
+            return JPEGFactory.createFromFile(file);
         }
         if ("tif".equals(ext) || "tiff".equals(ext))
         {
@@ -258,10 +255,7 @@ public final class PDImageXObject extends PDXObject implements PDImage
 
         if (fileType.equals(FileType.JPEG))
         {
-            try (FileInputStream fis = new FileInputStream(file))
-            {
-                return JPEGFactory.createFromStream(fis);
-            }
+            return JPEGFactory.createFromFile(file);
         }
         if (fileType.equals(FileType.TIFF))
         {
