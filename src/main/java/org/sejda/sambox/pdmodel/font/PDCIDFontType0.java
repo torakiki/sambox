@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.fontbox.FontBoxFont;
 import org.apache.fontbox.cff.CFFCIDFont;
 import org.apache.fontbox.cff.CFFFont;
@@ -38,6 +37,7 @@ import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.common.PDStream;
 import org.sejda.sambox.util.Matrix;
+import org.sejda.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -28,7 +28,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.fontbox.EncodedFont;
 import org.apache.fontbox.FontBoxFont;
 import org.apache.fontbox.cff.CFFParser;
@@ -42,6 +41,7 @@ import org.sejda.sambox.pdmodel.font.encoding.Encoding;
 import org.sejda.sambox.pdmodel.font.encoding.StandardEncoding;
 import org.sejda.sambox.pdmodel.font.encoding.Type1Encoding;
 import org.sejda.sambox.util.Matrix;
+import org.sejda.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

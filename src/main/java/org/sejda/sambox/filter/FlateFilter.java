@@ -24,9 +24,9 @@ import java.util.zip.DataFormatException;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.Inflater;
 
+import org.sejda.io.FastByteArrayOutputStream;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.util.FastByteArrayOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

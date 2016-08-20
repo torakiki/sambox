@@ -206,7 +206,7 @@
 		<dependency>
 			<groupId>org.sejda</groupId>
 			<artifactId>sejda-io</artifactId>
-			<version>1.1.0.RELEASE</version>
+			<version>1.1.1.RELEASE</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>

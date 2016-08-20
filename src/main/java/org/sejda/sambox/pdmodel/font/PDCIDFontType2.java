@@ -20,7 +20,6 @@ import java.awt.geom.GeneralPath;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.fontbox.cff.Type2CharString;
 import org.apache.fontbox.cmap.CMap;
 import org.apache.fontbox.ttf.CmapSubtable;
@@ -37,6 +36,7 @@ import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.common.PDStream;
 import org.sejda.sambox.util.Matrix;
+import org.sejda.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

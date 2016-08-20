@@ -374,7 +374,7 @@ public abstract class SecurityHandler
             }
         }
         decryptDictionary(stream, objNum, genNum);
-        byte[] encrypted = org.apache.commons.io.IOUtils.toByteArray(stream.getFilteredStream());
+        byte[] encrypted = IOUtils.toByteArray(stream.getFilteredStream());
         ByteArrayInputStream encryptedStream = new ByteArrayInputStream(encrypted);
         try (OutputStream output = stream.createFilteredStream())
         {

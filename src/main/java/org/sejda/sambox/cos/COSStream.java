@@ -33,12 +33,12 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import org.sejda.io.FastByteArrayOutputStream;
 import org.sejda.io.SeekableSource;
 import org.sejda.io.SeekableSourceSupplier;
 import org.sejda.sambox.filter.DecodeResult;
 import org.sejda.sambox.filter.Filter;
 import org.sejda.sambox.filter.FilterFactory;
-import org.sejda.sambox.util.FastByteArrayOutputStream;
 import org.sejda.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -207,8 +207,7 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
         }
         if (existing != null)
         {
-            return ByteBuffer.wrap(
-                    org.apache.commons.io.IOUtils.toByteArray(existing.get().asInputStream()));
+            return ByteBuffer.wrap(IOUtils.toByteArray(existing.get().asInputStream()));
         }
         return ByteBuffer.wrap(filtered).asReadOnlyBuffer();
     }

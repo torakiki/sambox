@@ -25,10 +25,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
 
-import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.sejda.sambox.filter.Filter;
 import org.sejda.sambox.filter.FilterFactory;
+import org.sejda.util.IOUtils;
 
 public class COSStreamTest
 {
