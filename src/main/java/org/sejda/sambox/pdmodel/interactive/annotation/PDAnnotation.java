@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.pdmodel.interactive.annotation;
 
+import static java.util.Optional.ofNullable;
 import static org.sejda.util.RequireUtils.requireArg;
 
 import java.util.Calendar;
@@ -232,12 +233,8 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
      */
     public COSName getAppearanceState()
     {
-        COSName name = (COSName) getCOSObject().getDictionaryObject(COSName.AS);
-        if (name != null)
-        {
-            return name;
-        }
-        return null;
+        return ofNullable(getCOSObject().getDictionaryObject(COSName.AS, COSName.class))
+                .orElse(null);
     }
 
     /**
@@ -264,12 +261,8 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
      */
     public PDAppearanceDictionary getAppearance()
     {
-        COSDictionary apDic = (COSDictionary) getCOSObject().getDictionaryObject(COSName.AP);
-        if (apDic != null)
-        {
-            return new PDAppearanceDictionary(apDic);
-        }
-        return null;
+        return ofNullable(getCOSObject().getDictionaryObject(COSName.AP, COSDictionary.class))
+                .map(PDAppearanceDictionary::new).orElse(null);
     }
 
     /**

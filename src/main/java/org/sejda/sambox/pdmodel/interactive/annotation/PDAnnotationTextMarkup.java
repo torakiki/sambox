@@ -93,10 +93,7 @@ public class PDAnnotationTextMarkup extends PDAnnotationMarkup
         {
             return quadPoints.toFloatArray();
         }
-        else
-        {
-            return null; // Should never happen as this is a required item
-        }
+        return null; // Should never happen as this is a required item
     }
 
     /**
@@ -115,6 +112,7 @@ public class PDAnnotationTextMarkup extends PDAnnotationMarkup
      *
      * @return The subtype of this annotation, see the SUB_TYPE_XXX constants.
      */
+    @Override
     public String getSubtype()
     {
         return getCOSObject().getNameAsString(COSName.SUBTYPE);

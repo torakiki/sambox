@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.pdmodel.interactive.annotation;
 
+import static java.util.Optional.ofNullable;
+
 import java.io.IOException;
 import java.util.Calendar;
 
@@ -119,15 +121,8 @@ public class PDAnnotationMarkup extends PDAnnotation
      */
     public PDAnnotationPopup getPopup()
     {
-        COSDictionary popup = (COSDictionary) getCOSObject().getDictionaryObject("Popup");
-        if (popup != null)
-        {
-            return new PDAnnotationPopup(popup);
-        }
-        else
-        {
-            return null;
-        }
+        return ofNullable(getCOSObject().getDictionaryObject(COSName.POPUP, COSDictionary.class))
+                .map(PDAnnotationPopup::new).orElse(null);
     }
 
     /**
@@ -137,7 +132,7 @@ public class PDAnnotationMarkup extends PDAnnotation
      */
     public void setPopup(PDAnnotationPopup popup)
     {
-        getCOSObject().setItem("Popup", popup);
+        getCOSObject().setItem(COSName.POPUP, popup);
     }
 
     /**
@@ -219,12 +214,8 @@ public class PDAnnotationMarkup extends PDAnnotation
      */
     public PDAnnotation getInReplyTo()
     {
-        COSDictionary base = getCOSObject().getDictionaryObject("IRT", COSDictionary.class);
-        if (base != null)
-        {
-            return PDAnnotation.createAnnotation(base);
-        }
-        return null;
+        return ofNullable(getCOSObject().getDictionaryObject("IRT", COSDictionary.class))
+                .map(PDAnnotation::createAnnotation).orElse(null);
     }
 
     /**

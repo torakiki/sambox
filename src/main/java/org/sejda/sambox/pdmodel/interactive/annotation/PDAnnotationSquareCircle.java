@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.pdmodel.interactive.annotation;
 
+import static java.util.Optional.ofNullable;
+
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
@@ -99,15 +101,8 @@ public class PDAnnotationSquareCircle extends PDAnnotationMarkup
      */
     public PDBorderEffectDictionary getBorderEffect()
     {
-        COSDictionary be = (COSDictionary) getCOSObject().getDictionaryObject(COSName.BE);
-        if (be != null)
-        {
-            return new PDBorderEffectDictionary(be);
-        }
-        else
-        {
-            return null;
-        }
+        return ofNullable(getCOSObject().getDictionaryObject(COSName.BE, COSDictionary.class))
+                .map(PDBorderEffectDictionary::new).orElse(null);
     }
 
     /**
@@ -130,15 +125,8 @@ public class PDAnnotationSquareCircle extends PDAnnotationMarkup
      */
     public PDRectangle getRectDifference()
     {
-        COSArray rd = (COSArray) getCOSObject().getDictionaryObject(COSName.RD);
-        if (rd != null)
-        {
-            return new PDRectangle(rd);
-        }
-        else
-        {
-            return null;
-        }
+        return ofNullable(getCOSObject().getDictionaryObject(COSName.RD, COSArray.class))
+                .map(PDRectangle::new).orElse(null);
     }
 
     /**
@@ -183,12 +171,8 @@ public class PDAnnotationSquareCircle extends PDAnnotationMarkup
     @Override
     public PDBorderStyleDictionary getBorderStyle()
     {
-        COSDictionary bs = this.getCOSObject().getDictionaryObject(COSName.BS, COSDictionary.class);
-        if (bs != null)
-        {
-            return new PDBorderStyleDictionary(bs);
-        }
-        return null;
+        return ofNullable(getCOSObject().getDictionaryObject(COSName.BS, COSDictionary.class))
+                .map(PDBorderStyleDictionary::new).orElse(null);
     }
 
 }
