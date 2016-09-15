@@ -16,6 +16,9 @@
  */
 package org.sejda.sambox.pdmodel.interactive.annotation;
 
+import static java.util.Objects.nonNull;
+
+import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 
@@ -27,9 +30,6 @@ import org.sejda.sambox.cos.COSName;
 public class PDAnnotationPopup extends PDAnnotation
 {
 
-    /**
-     * The type of annotation.
-     */
     public static final String SUB_TYPE = "Popup";
 
     /**
@@ -84,12 +84,16 @@ public class PDAnnotationPopup extends PDAnnotation
     /**
      * This will retrieve the markup annotation which this popup relates to.
      *
-     * @return The parent markup annotation.
+     * @return The parent markup annotation or null.
      */
     public PDAnnotationMarkup getParent()
     {
-        return (PDAnnotationMarkup) PDAnnotation
-                .createAnnotation(getCOSObject().getDictionaryObject(COSName.PARENT, COSName.P));
+        COSBase parent = getCOSObject().getDictionaryObject(COSName.PARENT, COSName.P);
+        if (nonNull(parent))
+        {
+            return (PDAnnotationMarkup) PDAnnotation.createAnnotation(parent);
+        }
+        return null;
     }
 
 }
