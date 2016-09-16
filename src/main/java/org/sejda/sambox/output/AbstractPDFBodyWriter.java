@@ -96,9 +96,9 @@ abstract class AbstractPDFBodyWriter implements COSVisitor, Closeable
      */
     void startWriting() throws IOException
     {
-        IndirectCOSObjectReference item;
-        while ((item = stack.poll()) != null)
+        while (!stack.isEmpty())
         {
+            IndirectCOSObjectReference item = stack.poll();
             item.getCOSObject().accept(this);
             writeObject(item);
         }
