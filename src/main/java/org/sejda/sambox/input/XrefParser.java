@@ -206,10 +206,8 @@ class XrefParser
                 long streamOffset = trailer.getLong(COSName.XREF_STM);
                 if (streamOffset > 0)
                 {
-                    requireIOCondition(isValidXrefStreamOffset(xrefOffset),
+                    requireIOCondition(isValidXrefStreamOffset(streamOffset),
                             "Offset '" + streamOffset + "' doesn't point to an xref stream");
-
-                    trailer.setLong(COSName.XREF_STM, streamOffset);
                     xrefStreamParser.parse(streamOffset);
                 }
                 xrefOffset = trailer.getLong(COSName.PREV);
