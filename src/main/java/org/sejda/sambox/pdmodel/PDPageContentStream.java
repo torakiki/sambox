@@ -28,11 +28,7 @@ import java.util.Locale;
 import java.util.Stack;
 
 import org.sejda.sambox.contentstream.operator.Operator;
-import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSBase;
-import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.cos.COSNumber;
-import org.sejda.sambox.cos.COSString;
+import org.sejda.sambox.cos.*;
 import org.sejda.sambox.output.ContentStreamWriter;
 import org.sejda.sambox.pdmodel.common.PDStream;
 import org.sejda.sambox.pdmodel.documentinterchange.markedcontent.PDPropertyList;
@@ -51,6 +47,7 @@ import org.sejda.sambox.pdmodel.graphics.image.PDImageXObject;
 import org.sejda.sambox.pdmodel.graphics.image.PDInlineImage;
 import org.sejda.sambox.pdmodel.graphics.shading.PDShading;
 import org.sejda.sambox.pdmodel.graphics.state.PDExtendedGraphicsState;
+import org.sejda.sambox.pdmodel.graphics.state.RenderingMode;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceStream;
 import org.sejda.sambox.util.Matrix;
 import org.sejda.util.IOUtils;
@@ -662,6 +659,12 @@ public final class PDPageContentStream implements Closeable
         {
             return resources.add(colorSpace);
         }
+    }
+
+    public void setTextRenderingMode(RenderingMode renderingMode) throws IOException
+    {
+        writeOperand(renderingMode.intValue());
+        writeOperator("Tr");
     }
 
     /**

@@ -38,7 +38,7 @@ import org.sejda.sambox.pdmodel.graphics.image.PDImageXObject;
  */
 public class PDXObject implements COSObjectable
 {
-    private final PDStream stream;
+    private PDStream stream;
 
     /**
      * Creates a new XObject instance of the appropriate type for the COS stream.
@@ -143,5 +143,11 @@ public class PDXObject implements COSObjectable
     public final PDStream getStream()
     {
         return stream;
+    }
+
+    public final void setStream(PDStream stream) {
+        stream.getCOSObject().setName(COSName.TYPE, COSName.XOBJECT.getName());
+        stream.getCOSObject().setName(COSName.SUBTYPE, this.stream.getCOSObject().getCOSName(COSName.SUBTYPE).getName());
+        this.stream = stream;
     }
 }

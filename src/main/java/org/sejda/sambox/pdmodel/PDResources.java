@@ -403,6 +403,11 @@ public final class PDResources implements COSObjectable
         {
             return ((ExistingIndirectCOSObject) found).id().objectIdentifier;
         }
+
+        if(found != null && found.id() != null) {
+            return found.id().objectIdentifier;
+        }
+
         return null;
     }
 

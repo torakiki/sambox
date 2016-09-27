@@ -68,7 +68,7 @@ import org.slf4j.LoggerFactory;
  * @author Ben Litchfield
  * @author John Hewson
  */
-class PDFTextStreamEngine extends PDFStreamEngine
+public class PDFTextStreamEngine extends PDFStreamEngine
 {
     private static final Logger LOG = LoggerFactory.getLogger(PDFTextStreamEngine.class);
 
