@@ -25,6 +25,8 @@ import org.sejda.sambox.contentstream.operator.OperatorProcessor;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.graphics.state.PDExtendedGraphicsState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * gs: Set parameters from graphics state parameter dictionary.
@@ -33,6 +35,9 @@ import org.sejda.sambox.pdmodel.graphics.state.PDExtendedGraphicsState;
  */
 public class SetGraphicsStateParameters extends OperatorProcessor
 {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SetGraphicsStateParameters.class);
+
     @Override
     public void process(Operator operator, List<COSBase> arguments) throws IOException
     {
@@ -51,10 +56,10 @@ public class SetGraphicsStateParameters extends OperatorProcessor
         PDExtendedGraphicsState gs = context.getResources().getExtGState(graphicsName);
         if (gs == null)
         {
-            throw new IOException(
-                    "name for 'gs' operator not found in resources: /" + graphicsName.getName());
+            LOG.warn("name for 'gs' operator not found in resources: /" + graphicsName.getName());
+        } else {
+            gs.copyIntoGraphicsState( context.getGraphicsState() );
         }
-        gs.copyIntoGraphicsState( context.getGraphicsState() );
     }
 
     @Override
