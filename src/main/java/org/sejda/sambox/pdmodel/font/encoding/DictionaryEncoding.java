@@ -125,6 +125,8 @@ public class DictionaryEncoding extends Encoding
 
     private void applyDifferences()
     {
+        if(encoding == null) return;
+
         // now replace with the differences
         COSArray differences = (COSArray) encoding.getDictionaryObject(COSName.DIFFERENCES);
         int currentIndex = -1;
