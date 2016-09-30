@@ -56,6 +56,7 @@ public class PDFormXObject extends PDXObject implements PDContentStream
 {
     private PDTransparencyGroupAttributes group;
     private final ResourceCache cache;
+    private PDResources resources;
 
     /**
      * Creates a Form XObject for reading.
@@ -159,13 +160,16 @@ public class PDFormXObject extends PDXObject implements PDContentStream
     @Override
     public PDResources getResources()
     {
-        COSDictionary resources = (COSDictionary) getCOSObject()
-                .getDictionaryObject(COSName.RESOURCES);
-        if (resources != null)
+        if(resources == null)
         {
-            return new PDResources(resources, cache);
+            COSDictionary resourcesDict = (COSDictionary) getCOSObject()
+                    .getDictionaryObject(COSName.RESOURCES);
+            if (resourcesDict != null)
+            {
+                resources = new PDResources(resourcesDict, cache);
+            }
         }
-        return null;
+        return resources;
     }
 
     /**
@@ -175,6 +179,7 @@ public class PDFormXObject extends PDXObject implements PDContentStream
      */
     public void setResources(PDResources resources)
     {
+        this.resources = resources;
         getCOSObject().setItem(COSName.RESOURCES, resources);
     }
 
