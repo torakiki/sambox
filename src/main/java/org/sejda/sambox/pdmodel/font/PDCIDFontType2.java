@@ -184,8 +184,19 @@ public class PDCIDFontType2 extends PDCIDFont
             }
             ttf = ttfFont;
         }
-        cmap = ttf.getUnicodeCmap(false);
+
+        cmap = getUnicodeCmapFromTTF();
         cid2gid = readCIDToGIDMap();
+    }
+
+    private CmapSubtable getUnicodeCmapFromTTF() {
+        try
+        {
+            return ttf.getUnicodeCmap(false);
+        } catch(NullPointerException | IOException e) {
+            LOG.warn("An error occurred parsing the unicode cmp for font " + this.getName(), e);
+            return null;
+        }
     }
 
     @Override
