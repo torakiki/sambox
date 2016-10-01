@@ -24,6 +24,8 @@ import java.util.Map;
 
 import org.apache.fontbox.cmap.CMap;
 import org.apache.fontbox.cmap.CMapParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * CMap resource loader and cache.
@@ -32,6 +34,8 @@ final class CMapManager
 {
     static Map<String, CMap> cMapCache =
             Collections.synchronizedMap(new HashMap<String, CMap>());
+
+    private static final Logger LOG = LoggerFactory.getLogger(CMapManager.class);
 
     private CMapManager()
     {
@@ -70,7 +74,12 @@ final class CMapManager
         if (cMapStream != null)
         {
             CMapParser parser = new CMapParser();
-            targetCmap = parser.parse(cMapStream);
+            try
+            {
+                targetCmap = parser.parse(cMapStream);
+            } catch(IOException e) {
+                LOG.warn("Failed to parse CMap for font", e);
+            }
         }
         return targetCmap;
     }
