@@ -140,12 +140,7 @@ public final class COSString extends COSBase implements Encryptable
      */
     public String toHexString()
     {
-        StringBuilder sb = new StringBuilder(bytes.length * 2);
-        for (byte b : bytes)
-        {
-            sb.append(Hex.getString(b));
-        }
-        return sb.toString();
+        return Hex.getString(bytes);
     }
 
     @Override

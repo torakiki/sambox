@@ -409,10 +409,7 @@ public class PDTrueTypeFont extends PDSimpleFont implements PDVectorFont
         {
             return new GeneralPath();
         }
-        else
-        {
-            return glyph.getPath();
-        }
+        return glyph.getPath();
     }
 
     @Override
@@ -447,10 +444,7 @@ public class PDTrueTypeFont extends PDSimpleFont implements PDVectorFont
         {
             return glyph.getPath();
         }
-        else
-        {
-            return new GeneralPath();
-        }
+        return new GeneralPath();
     }
 
     @Override

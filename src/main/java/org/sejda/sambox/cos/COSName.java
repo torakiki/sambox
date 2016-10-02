@@ -453,6 +453,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName SM = newCommonInstance("SM");
     public static final COSName SMASK = newCommonInstance("SMask");
     public static final COSName SOFT_LIGHT = newCommonInstance("SoftLight");
+    public static final COSName SOUND = newCommonInstance("Sound");
     public static final COSName SS = newCommonInstance("SS");
     public static final COSName ST = newCommonInstance("St");
     public static final COSName STANDARD_ENCODING = newCommonInstance("StandardEncoding");

@@ -158,8 +158,6 @@ public class PDDocument implements Closeable
      */
     public PDPage importPage(PDPage page)
     {
-        // PDFBox moved to a deep cloning here PDFBOX-3280
-        // given our lazy loading strategy and the bounded views we use for COSStreams I don't think we need the same
         requireOpen();
         PDPage importedPage = new PDPage(page.getCOSObject().duplicate());
         InputStream in = null;

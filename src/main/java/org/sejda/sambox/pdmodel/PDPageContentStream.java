@@ -28,7 +28,11 @@ import java.util.Locale;
 import java.util.Stack;
 
 import org.sejda.sambox.contentstream.operator.Operator;
-import org.sejda.sambox.cos.*;
+import org.sejda.sambox.cos.COSArray;
+import org.sejda.sambox.cos.COSBase;
+import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.cos.COSNumber;
+import org.sejda.sambox.cos.COSString;
 import org.sejda.sambox.output.ContentStreamWriter;
 import org.sejda.sambox.pdmodel.common.PDStream;
 import org.sejda.sambox.pdmodel.documentinterchange.markedcontent.PDPropertyList;
@@ -50,6 +54,7 @@ import org.sejda.sambox.pdmodel.graphics.state.PDExtendedGraphicsState;
 import org.sejda.sambox.pdmodel.graphics.state.RenderingMode;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceStream;
 import org.sejda.sambox.util.Matrix;
+import org.sejda.sambox.util.NumberFormatUtil;
 import org.sejda.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,6 +109,7 @@ public final class PDPageContentStream implements Closeable
 
     // number format
     private final NumberFormat formatDecimal = NumberFormat.getNumberInstance(Locale.US);
+    private final byte[] formatBuffer = new byte[32];
 
     /**
      * Create a new PDPage content stream.
@@ -221,7 +227,7 @@ public final class PDPageContentStream implements Closeable
         }
 
         // configure NumberFormat
-        formatDecimal.setMaximumFractionDigits(10);
+        formatDecimal.setMaximumFractionDigits(5);
         formatDecimal.setGroupingUsed(false);
     }
 
@@ -1446,9 +1452,20 @@ public final class PDPageContentStream implements Closeable
         writer.writeEOL();
     }
 
-    private void writeOperand(float real) throws IOException
+    protected void writeOperand(float real) throws IOException
     {
-        write(formatDecimal.format(real));
+        int byteCount = NumberFormatUtil.formatFloatFast(real,
+                formatDecimal.getMaximumFractionDigits(), formatBuffer);
+
+        if (byteCount == -1)
+        {
+            // Fast formatting failed
+            write(formatDecimal.format(real));
+        }
+        else
+        {
+            writeBytes(formatBuffer);
+        }
         writer.writeSpace();
     }
 
