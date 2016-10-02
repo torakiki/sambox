@@ -22,6 +22,8 @@ import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSObjectable;
+import org.sejda.sambox.cos.COSStream;
+import org.sejda.sambox.pdmodel.common.PDDictionaryWrapper;
 import org.sejda.sambox.pdmodel.graphics.PDXObject;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotation;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationUnknown;
@@ -31,45 +33,27 @@ import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationUnknown;
  * 
  * @author Johannes Koch
  */
-public class PDObjectReference implements COSObjectable
+public class PDObjectReference extends PDDictionaryWrapper
 {
 
     /**
      * TYPE of this object.
      */
     public static final String TYPE = "OBJR";
-
-    private final COSDictionary dictionary;
-
-    /**
-     * Returns the underlying dictionary.
-     * 
-     * @return the dictionary
-     */
-    @Override
-    public COSDictionary getCOSObject()
-    {
-        return this.dictionary;
-    }
-
+    
     /**
      * Default Constructor.
      *
      */
     public PDObjectReference()
     {
-        this.dictionary = new COSDictionary();
-        this.dictionary.setName(COSName.TYPE, TYPE);
+
+        this.getCOSObject().setName(COSName.TYPE, TYPE);
     }
 
-    /**
-     * Constructor for an existing object reference.
-     *
-     * @param theDictionary The existing dictionary.
-     */
-    public PDObjectReference(COSDictionary theDictionary)
+    public PDObjectReference(COSDictionary dictionary)
     {
-        dictionary = theDictionary;
+        super(dictionary);
     }
 
     /**
@@ -88,10 +72,13 @@ public class PDObjectReference implements COSObjectable
         }
         try
         {
-            PDXObject xobject = PDXObject.createXObject(obj, null); // <-- TODO: valid?
-            if (xobject != null)
+            if (obj instanceof COSStream)
             {
-                return xobject;
+                PDXObject xobject = PDXObject.createXObject(obj, null); // <-- TODO: valid?
+                if (xobject != null)
+                {
+                    return xobject;
+                }
             }
             COSDictionary objDictionary  = (COSDictionary)obj;
             PDAnnotation annotation = PDAnnotation.createAnnotation(obj);

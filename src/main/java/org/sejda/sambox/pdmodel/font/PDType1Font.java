@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.fontbox.EncodedFont;
 import org.apache.fontbox.FontBoxFont;
@@ -41,8 +42,10 @@ import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.common.PDStream;
 import org.sejda.sambox.pdmodel.font.encoding.Encoding;
 import org.sejda.sambox.pdmodel.font.encoding.StandardEncoding;
+import org.sejda.sambox.pdmodel.font.encoding.SymbolEncoding;
 import org.sejda.sambox.pdmodel.font.encoding.Type1Encoding;
 import org.sejda.sambox.pdmodel.font.encoding.WinAnsiEncoding;
+import org.sejda.sambox.pdmodel.font.encoding.ZapfDingbatsEncoding;
 import org.sejda.sambox.util.Matrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,6 +101,10 @@ public class PDType1Font extends PDSimpleFont
     private Matrix fontMatrix;
     private final AffineTransform fontMatrixTransform;
     private BoundingBox fontBBox;
+    /**
+     * to improve encoding speed.
+     */
+    private final Map<Integer, byte[]> codeToBytesMap;
 
     /**
      * Creates a Type 1 standard 14 font for embedding.
@@ -110,8 +117,22 @@ public class PDType1Font extends PDSimpleFont
 
         dict.setItem(COSName.SUBTYPE, COSName.TYPE1);
         dict.setName(COSName.BASE_FONT, baseFont);
-        encoding = new WinAnsiEncoding();
-        dict.setItem(COSName.ENCODING, COSName.WIN_ANSI_ENCODING);
+        if ("ZapfDingbats".equals(baseFont))
+        {
+            encoding = ZapfDingbatsEncoding.INSTANCE;
+        }
+        else if ("Symbol".equals(baseFont))
+        {
+            encoding = SymbolEncoding.INSTANCE;
+        }
+        else
+        {
+            encoding = WinAnsiEncoding.INSTANCE;
+            dict.setItem(COSName.ENCODING, COSName.WIN_ANSI_ENCODING);
+        }
+
+        // standard 14 fonts may be accessed concurrently, as they are singletons
+        codeToBytesMap = new ConcurrentHashMap<>();
 
         // todo: could load the PFB font here if we wanted to support Standard 14 embedding
         type1font = null;
@@ -154,6 +175,7 @@ public class PDType1Font extends PDSimpleFont
         isEmbedded = true;
         isDamaged = false;
         fontMatrixTransform = new AffineTransform();
+        codeToBytesMap = new HashMap<>();
     }
 
     /**
@@ -174,6 +196,7 @@ public class PDType1Font extends PDSimpleFont
         isEmbedded = true;
         isDamaged = false;
         fontMatrixTransform = new AffineTransform();
+        codeToBytesMap = new HashMap<>();
     }
 
     /**
@@ -186,6 +209,7 @@ public class PDType1Font extends PDSimpleFont
     public PDType1Font(COSDictionary fontDictionary) throws IOException
     {
         super(fontDictionary);
+        codeToBytesMap = new HashMap<>();
 
         PDFontDescriptor fd = getFontDescriptor();
         Type1Font t1 = null;
@@ -209,9 +233,10 @@ public class PDType1Font extends PDSimpleFont
                     int length1 = stream.getInt(COSName.LENGTH1);
                     int length2 = stream.getInt(COSName.LENGTH2);
 
-                    // repair Length1 if necessary
+                    // repair Length1 and Length2 if necessary
                     byte[] bytes = fontFile.toByteArray();
                     length1 = repairLength1(bytes, length1);
+                    length2 = repairLength2(bytes, length1, length2);
 
                     if (bytes.length > 0 && (bytes[0] & 0xff) == PFB_START_MARKER)
                     {
@@ -311,6 +336,26 @@ public class PDType1Font extends PDSimpleFont
     }
 
     /**
+     * Some Type 1 fonts have an invalid Length2, see PDFBOX-3475. A negative /Length2 brings an
+     * IllegalArgumentException in Arrays.copyOfRange(), a huge value eats up memory because of padding.
+     *
+     * @param bytes Type 1 stream bytes
+     * @param length1 Length1 from the Type 1 stream
+     * @param length2 Length2 from the Type 1 stream
+     * @return repaired Length2 value
+     */
+    private int repairLength2(byte[] bytes, int length1, int length2)
+    {
+        // repair Length2 if necessary
+        if (length2 < 0 || length2 > bytes.length - length1)
+        {
+            LOG.warn("Ignored invalid Length2 " + length2 + " for Type 1 font " + getName());
+            return bytes.length - length1;
+        }
+        return length2;
+    }
+
+    /**
      * Returns the PostScript name of the font.
      */
     public final String getBaseFont()
@@ -334,24 +379,34 @@ public class PDType1Font extends PDSimpleFont
     @Override
     protected byte[] encode(int unicode) throws IOException
     {
+        byte[] bytes = codeToBytesMap.get(unicode);
+        if (bytes != null)
+        {
+            return bytes;
+        }
+
         String name = getGlyphList().codePointToName(unicode);
         if (!encoding.contains(name))
         {
-            throw new IllegalArgumentException(
-                    String.format("U+%04X ('%s') is not available in this font's encoding: %s",
-                            unicode, name, encoding.getEncodingName()));
+            throw new IllegalArgumentException(String.format(
+                    "U+%04X ('%s') is not available in this font %s (generic: %s) encoding: %s",
+                    unicode, name, getName(), genericFont.getName(), encoding.getEncodingName()));
         }
+
         String nameInFont = getNameInFont(name);
         Map<String, Integer> inverted = encoding.getNameToCodeMap();
 
         if (nameInFont.equals(".notdef") || !genericFont.hasGlyph(nameInFont))
         {
             throw new IllegalArgumentException(
-                    String.format("No glyph for U+%04X in font %s", unicode, getName()));
+                    String.format("No glyph for U+%04X in font %s (generic: %s)", unicode,
+                            getName(), genericFont.getName()));
         }
 
         int code = inverted.get(name);
-        return new byte[] { (byte) code };
+        bytes = new byte[] { (byte) code };
+        codeToBytesMap.put(code, bytes);
+        return bytes;
     }
 
     @Override

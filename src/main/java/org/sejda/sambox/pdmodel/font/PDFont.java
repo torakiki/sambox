@@ -21,7 +21,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.fontbox.afm.FontMetrics;
@@ -59,10 +62,8 @@ public abstract class PDFont implements COSObjectable, PDFontLike
     private List<Float> widths;
     private float avgFontWidth;
     private float fontWidthOfSpace = -1f;
+    private final Map<Integer, Float> codeToWidthMap;
 
-    /**
-     * Constructor for embedding.
-     */
     PDFont()
     {
         dict = new COSDictionary();
@@ -70,6 +71,7 @@ public abstract class PDFont implements COSObjectable, PDFontLike
         toUnicodeCMap = null;
         fontDescriptor = null;
         afmStandard14 = null;
+        codeToWidthMap = new HashMap<>();
     }
 
     /**
@@ -86,6 +88,8 @@ public abstract class PDFont implements COSObjectable, PDFontLike
             throw new IllegalArgumentException("No AFM for font " + baseFont);
         }
         fontDescriptor = PDType1FontEmbedder.buildFontDescriptor(afmStandard14);
+        // standard 14 fonts may be accessed concurrently, as they are singletons
+        codeToWidthMap = new ConcurrentHashMap<>();
     }
 
     /**
@@ -96,6 +100,7 @@ public abstract class PDFont implements COSObjectable, PDFontLike
     protected PDFont(COSDictionary fontDictionary) throws IOException
     {
         dict = fontDictionary;
+        codeToWidthMap = new HashMap<>();
 
         // standard 14 fonts use an AFM
         afmStandard14 = Standard14Fonts.getAFM(getName()); // may be null (it usually is)
@@ -215,6 +220,12 @@ public abstract class PDFont implements COSObjectable, PDFontLike
     @Override
     public float getWidth(int code) throws IOException
     {
+        Float width = codeToWidthMap.get(code);
+        if (width != null)
+        {
+            return width;
+        }
+
         // Acrobat overrides the widths in the font program on the conforming reader's system with
         // the widths specified in the font dictionary." (Adobe Supplement to the ISO 32000)
         //
@@ -230,25 +241,37 @@ public abstract class PDFont implements COSObjectable, PDFontLike
             int idx = code - firstChar;
             if (siz > 0 && code >= firstChar && code <= lastChar && idx < siz)
             {
-                return getWidths().get(idx);
+                width = getWidths().get(idx);
+                if (width == null)
+                {
+                    width = 0f;
+                }
+                codeToWidthMap.put(code, width);
+                return width;
             }
 
             PDFontDescriptor fd = getFontDescriptor();
             if (fd != null && fd.hasMissingWidth())
             {
                 // get entry from /MissingWidth entry
-                return fd.getMissingWidth();
+                width = fd.getMissingWidth();
+                codeToWidthMap.put(code, width);
+                return width;
             }
         }
 
         // standard 14 font widths are specified by an AFM
         if (isStandard14())
         {
-            return getStandard14Width(code);
+            width = getStandard14Width(code);
+            codeToWidthMap.put(code, width);
+            return width;
         }
 
         // if there's nothing to override with, then obviously we fall back to the font
-        return getWidthFromFont(code);
+        width = getWidthFromFont(code);
+        codeToWidthMap.put(code, width);
+        return width;
     }
 
     /**

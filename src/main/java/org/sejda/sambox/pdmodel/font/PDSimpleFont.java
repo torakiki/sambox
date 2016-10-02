@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.pdmodel.font;
 
+import static java.util.Objects.isNull;
+
 import java.awt.geom.GeneralPath;
 import java.io.IOException;
 import java.util.HashSet;
@@ -48,7 +50,7 @@ public abstract class PDSimpleFont extends PDFont
     protected GlyphList glyphList;
     private Boolean isSymbolic;
     private final Set<Integer> noUnicode = new HashSet<>(); // for logging
-    
+
     /**
      * Constructor for embedding.
      */
@@ -63,8 +65,6 @@ public abstract class PDSimpleFont extends PDFont
     PDSimpleFont(String baseFont)
     {
         super(baseFont);
-
-        this.encoding = WinAnsiEncoding.INSTANCE;
 
         // assign the glyph list based on the font
         if ("ZapfDingbats".equals(baseFont))
@@ -88,8 +88,8 @@ public abstract class PDSimpleFont extends PDFont
     }
 
     /**
-     * Reads the Encoding from the Font dictionary or the embedded or substituted font file.
-     * Must be called at the end of any subclass constructors.
+     * Reads the Encoding from the Font dictionary or the embedded or substituted font file. Must be called at the end
+     * of any subclass constructors.
      *
      * @throws IOException if the font file could not be read
      */
@@ -100,7 +100,7 @@ public abstract class PDSimpleFont extends PDFont
         {
             if (encoding instanceof COSName)
             {
-                COSName encodingName = (COSName)encoding;
+                COSName encodingName = (COSName) encoding;
                 this.encoding = Encoding.getInstance(encodingName);
                 if (this.encoding == null)
                 {
@@ -110,7 +110,7 @@ public abstract class PDSimpleFont extends PDFont
             }
             else if (encoding instanceof COSDictionary)
             {
-                COSDictionary encodingDict = (COSDictionary)encoding;
+                COSDictionary encodingDict = (COSDictionary) encoding;
                 Encoding builtIn = null;
                 Boolean symbolic = getSymbolicFlag();
                 boolean isFlaggedAsSymbolic = symbolic != null && symbolic;
@@ -168,10 +168,9 @@ public abstract class PDSimpleFont extends PDFont
     {
         return glyphList;
     }
-    
+
     /**
-     * Returns true the font is a symbolic (that is, it does not use the Adobe Standard Roman
-     * character set).
+     * Returns true the font is a symbolic (that is, it does not use the Adobe Standard Roman character set).
      */
     public final boolean isSymbolic()
     {
@@ -192,8 +191,7 @@ public abstract class PDSimpleFont extends PDFont
     }
 
     /**
-     * Internal implementation of isSymbolic, allowing for the fact that the result may be
-     * indeterminate.
+     * Internal implementation of isSymbolic, allowing for the fact that the result may be indeterminate.
      */
     protected Boolean isFontSymbolic()
     {
@@ -220,24 +218,23 @@ public abstract class PDSimpleFont extends PDFont
                 // TTF without its non-symbolic flag set must be symbolic
                 return true;
             }
-            else if (encoding instanceof WinAnsiEncoding ||
-                     encoding instanceof MacRomanEncoding ||
-                     encoding instanceof StandardEncoding)
+            else if (encoding instanceof WinAnsiEncoding || encoding instanceof MacRomanEncoding
+                    || encoding instanceof StandardEncoding)
             {
                 return false;
             }
             else if (encoding instanceof DictionaryEncoding)
             {
                 // each name in Differences array must also be in the latin character set
-                for (String name : ((DictionaryEncoding)encoding).getDifferences().values())
+                for (String name : ((DictionaryEncoding) encoding).getDifferences().values())
                 {
                     if (name.equals(".notdef"))
                     {
                         // skip
                     }
-                    else if (!(WinAnsiEncoding.INSTANCE.contains(name) &&
-                               MacRomanEncoding.INSTANCE.contains(name) &&
-                               StandardEncoding.INSTANCE.contains(name)))
+                    else if (!(WinAnsiEncoding.INSTANCE.contains(name)
+                            && MacRomanEncoding.INSTANCE.contains(name)
+                            && StandardEncoding.INSTANCE.contains(name)))
                     {
                         return true;
                     }
@@ -254,8 +251,7 @@ public abstract class PDSimpleFont extends PDFont
     }
 
     /**
-     * Returns the value of the symbolic flag,  allowing for the fact that the result may be
-     * indeterminate.
+     * Returns the value of the symbolic flag, allowing for the fact that the result may be indeterminate.
      */
     protected final Boolean getSymbolicFlag()
     {
@@ -298,8 +294,8 @@ public abstract class PDSimpleFont extends PDFont
         // if the font is a "simple font" and uses MacRoman/MacExpert/WinAnsi[Encoding]
         // or has Differences with names from only Adobe Standard and/or Symbol, then:
         //
-        //    a) Map the character codes to names
-        //    b) Look up the name in the Adobe Glyph List to obtain the Unicode value
+        // a) Map the character codes to names
+        // b) Look up the name in the Adobe Glyph List to obtain the Unicode value
 
         String name = null;
         if (encoding != null)
@@ -319,13 +315,11 @@ public abstract class PDSimpleFont extends PDFont
             noUnicode.add(code);
             if (name != null)
             {
-                LOG.warn("No Unicode mapping for " + name + " (" + code + ") in font " +
-                        getName());
+                LOG.warn("No Unicode mapping for " + name + " (" + code + ") in font " + getName());
             }
             else
             {
-                LOG.warn("No Unicode mapping for character code " + code + " in font " +
-                        getName());
+                LOG.warn("No Unicode mapping for character code " + code + " in font " + getName());
             }
         }
 
@@ -363,12 +357,16 @@ public abstract class PDSimpleFont extends PDFont
         // the Encoding entry cannot have Differences if we want "standard 14" font handling
         if (getEncoding() instanceof DictionaryEncoding)
         {
-            DictionaryEncoding dictionary = (DictionaryEncoding)getEncoding();
+            DictionaryEncoding dictionary = (DictionaryEncoding) getEncoding();
             if (dictionary.getDifferences().size() > 0)
             {
                 // we also require that the differences are actually different, see PDFBOX-1900 with
                 // the file from PDFBOX-2192 on Windows
                 Encoding baseEncoding = dictionary.getBaseEncoding();
+                if (isNull(baseEncoding))
+                {
+                    return false;
+                }
                 for (Map.Entry<Integer, String> entry : dictionary.getDifferences().entrySet())
                 {
                     if (!entry.getValue().equals(baseEncoding.getName(entry.getKey())))
@@ -382,8 +380,8 @@ public abstract class PDSimpleFont extends PDFont
     }
 
     /**
-     * Returns the path for the character with the given name. For some fonts, GIDs may be used
-     * instead of names when calling this method.
+     * Returns the path for the character with the given name. For some fonts, GIDs may be used instead of names when
+     * calling this method.
      *
      * @return glyph path
      * @throws IOException if the path could not be read

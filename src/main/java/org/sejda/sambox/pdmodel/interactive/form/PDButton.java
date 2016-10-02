@@ -145,20 +145,20 @@ public abstract class PDButton extends PDTerminalField
     public void setValue(String value) throws IOException
     {
         checkValue(value);
-        getCOSObject().setName(COSName.V, value);
-        // update the appearance state (AS)
-        for (PDAnnotationWidget widget : getWidgets())
+
+        // if there are export values/an Opt entry there is a different
+        // approach to setting the value
+        boolean hasExportValues = getExportValues().size() > 0;
+
+        if (hasExportValues)
         {
-            PDAppearanceEntry appearanceEntry = widget.getAppearance().getNormalAppearance();
-            if (((COSDictionary) appearanceEntry.getCOSObject()).containsKey(value))
-            {
-                widget.getCOSObject().setName(COSName.AS, value);
-            }
-            else
-            {
-                widget.getCOSObject().setItem(COSName.AS, COSName.Off);
-            }
+            updateByOption(value);
         }
+        else
+        {
+            updateByValue(value);
+        }
+
         applyChange();
     }
 
@@ -253,25 +253,28 @@ public abstract class PDButton extends PDTerminalField
     @Override
     void constructAppearances() throws IOException
     {
-        for (PDAnnotationWidget widget : getWidgets())
+        List<String> exportValues = getExportValues();
+        if (exportValues.size() > 0)
         {
-            PDAppearanceDictionary appearance = widget.getAppearance();
-            if (appearance == null || appearance.getNormalAppearance() == null)
+            // the value is the index value of the option. So we need to get that
+            // and use it to set the value
+            try
             {
-                // TODO: implement appearance generation for radio buttons
-                throw new UnsupportedOperationException(
-                        "Appearance generation is not implemented yet, see PDFBOX-2849");
+                int optionsIndex = Integer.parseInt(getValue());
+                if (optionsIndex < exportValues.size())
+                {
+                    updateByOption(exportValues.get(optionsIndex));
+                }
             }
-            PDAppearanceEntry appearanceEntry = widget.getAppearance().getNormalAppearance();
-            String value = getValue();
-            if (((COSDictionary) appearanceEntry.getCOSObject()).containsKey(value))
+            catch (NumberFormatException e)
             {
-                widget.getCOSObject().setName(COSName.AS, value);
+                // silently ignore that
+                // and don't update the appearance
             }
-            else
-            {
-                widget.getCOSObject().setItem(COSName.AS, COSName.Off);
-            }
+        }
+        else
+        {
+            updateByValue(getValue());
         }
     }
 
@@ -290,6 +293,12 @@ public abstract class PDButton extends PDTerminalField
     {
         // we need a set as the field can appear multiple times
         Set<String> onValues = new HashSet<>();
+
+        if (getExportValues().size() > 0)
+        {
+            onValues.addAll(getExportValues());
+            return onValues;
+        }
 
         List<PDAnnotationWidget> widgets = this.getWidgets();
         for (PDAnnotationWidget widget : widgets)
@@ -328,6 +337,54 @@ public abstract class PDButton extends PDTerminalField
             throw new IllegalArgumentException("value '" + value
                     + "' is not a valid option for the field " + getFullyQualifiedName()
                     + ", valid values are: " + onValues + " and " + COSName.Off.getName());
+        }
+    }
+
+    private void updateByValue(String value)
+    {
+        getCOSObject().setName(COSName.V, value);
+        // update the appearance state (AS)
+        for (PDAnnotationWidget widget : getWidgets())
+        {
+            PDAppearanceEntry appearanceEntry = widget.getAppearance().getNormalAppearance();
+            if (((COSDictionary) appearanceEntry.getCOSObject()).containsKey(value))
+            {
+                widget.getCOSObject().setName(COSName.AS, value);
+            }
+            else
+            {
+                widget.getCOSObject().setItem(COSName.AS, COSName.Off);
+            }
+        }
+    }
+
+    private void updateByOption(String value)
+    {
+        List<PDAnnotationWidget> widgets = getWidgets();
+        List<String> options = getExportValues();
+
+        if (widgets.size() != options.size())
+        {
+            throw new IllegalArgumentException(
+                    "The number of options doesn't match the number of widgets");
+        }
+
+        // the value is the index of the matching option
+        int optionsIndex = options.indexOf(value);
+        getCOSObject().setName(COSName.V, String.valueOf(optionsIndex));
+
+        // update the appearance state (AS)
+        for (int i = 0; i < widgets.size(); i++)
+        {
+            PDAnnotationWidget widget = widgets.get(i);
+            if (value.compareTo(options.get(i)) == 0)
+            {
+                widget.getCOSObject().setName(COSName.AS, String.valueOf(i));
+            }
+            else
+            {
+                widget.getCOSObject().setItem(COSName.AS, COSName.Off);
+            }
         }
     }
 }

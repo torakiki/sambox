@@ -19,12 +19,21 @@
 
 package org.sejda.sambox.pdmodel.font;
 
-import junit.framework.TestCase;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
+import org.apache.fontbox.ttf.TTFParser;
+import org.apache.fontbox.ttf.TrueTypeFont;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.PDDocument;
+import org.sejda.sambox.pdmodel.PDPage;
+import org.sejda.sambox.pdmodel.PDPageContentStream;
+import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.rendering.PDFRenderer;
+
+import junit.framework.TestCase;
 
 /**
  * 
@@ -38,12 +47,42 @@ public class PDFontTest extends TestCase
      */
     public void testPDFBox988() throws Exception
     {
-        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(getClass()
-                .getResourceAsStream("F001u_3_7j.pdf"))))
+        try (PDDocument doc = PDFParser.parse(SeekableSources
+                .inMemorySeekableSourceFrom(getClass().getResourceAsStream("F001u_3_7j.pdf"))))
         {
             PDFRenderer renderer = new PDFRenderer(doc);
             renderer.renderImage(0);
             // the allegation is that renderImage() will crash the JVM or hang
+        }
+    }
+
+    /**
+     * PDFBOX-3337: Test ability to reuse a TrueTypeFont for several PDFs to avoid parsing it over and over again.
+     *
+     * @throws java.io.IOException
+     */
+    public void testPDFBox3337() throws IOException
+    {
+        InputStream ttfStream = PDFontTest.class.getClassLoader()
+                .getResourceAsStream("org/sejda/sambox/ttf/LiberationSans-Regular.ttf");
+        final TrueTypeFont ttf = new TTFParser().parse(ttfStream);
+
+        for (int i = 0; i < 2; ++i)
+        {
+            PDDocument doc = new PDDocument();
+
+            final PDPage page = new PDPage(PDRectangle.A4);
+            doc.addPage(page);
+
+            PDPageContentStream cs = new PDPageContentStream(doc, page);
+            PDFont font = PDType0Font.load(doc, ttf, true);
+            cs.setFont(font, 10);
+            cs.beginText();
+            cs.showText("PDFBOX");
+            cs.endText();
+            cs.close();
+            doc.writeTo(new ByteArrayOutputStream());
+            doc.close();
         }
     }
 }

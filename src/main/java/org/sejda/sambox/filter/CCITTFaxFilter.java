@@ -20,12 +20,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import org.apache.commons.io.IOUtils;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 
 /**
- * Decodes image data that has been encoded using either Group 3 or Group 4
- * CCITT facsimile (fax) encoding.
+ * Decodes image data that has been encoded using either Group 3 or Group 4 CCITT facsimile (fax) encoding, and encodes
+ * image data to Group 4.
  *
  * @author Ben Litchfield
  * @author Marcel Kammer
@@ -34,8 +35,8 @@ import org.sejda.sambox.cos.COSName;
 final class CCITTFaxFilter extends Filter
 {
     @Override
-    public DecodeResult decode(InputStream encoded, OutputStream decoded,
-                                         COSDictionary parameters, int index) throws IOException
+    public DecodeResult decode(InputStream encoded, OutputStream decoded, COSDictionary parameters,
+            int index) throws IOException
     {
         DecodeResult result = new DecodeResult(new COSDictionary());
         result.getParameters().addAll(parameters);
@@ -112,7 +113,7 @@ final class CCITTFaxFilter extends Filter
         return new DecodeResult(parameters);
     }
 
-    public static void readFromDecoderStream(CCITTFaxDecoderStream decoderStream, byte[] result)
+    static void readFromDecoderStream(CCITTFaxDecoderStream decoderStream, byte[] result)
             throws IOException
     {
         int pos = 0;
@@ -138,8 +139,12 @@ final class CCITTFaxFilter extends Filter
 
     @Override
     public void encode(InputStream input, OutputStream encoded, COSDictionary parameters)
+            throws IOException
     {
-        throw new UnsupportedOperationException(
-                "CCITTFaxFilter encoding not implemented, use the CCITTFactory methods instead");
+        int cols = parameters.getInt(COSName.COLUMNS);
+        int rows = parameters.getInt(COSName.ROWS);
+        IOUtils.copy(input, new CCITTFaxEncoderStream(encoded, cols, rows,
+                TIFFExtension.FILL_LEFT_TO_RIGHT));
+        input.close();
     }
 }

@@ -17,6 +17,9 @@
  */
 package org.sejda.sambox.pdmodel.font.encoding;
 
+import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -89,10 +92,11 @@ public class DictionaryEncoding extends Encoding
         encoding = fontEncoding;
 
         Encoding base = null;
-        if (encoding.containsKey(COSName.BASE_ENCODING))
+        boolean hasBaseEncoding = encoding.containsKey(COSName.BASE_ENCODING);
+        if (hasBaseEncoding)
         {
             COSName name = encoding.getCOSName(COSName.BASE_ENCODING);
-            base = Encoding.getInstance(name); // may be null
+            base = Encoding.getInstance(name); // null when the name is invalid
         }
 
         if (base == null)
@@ -111,6 +115,8 @@ public class DictionaryEncoding extends Encoding
                 }
                 else
                 {
+                    // triggering this error indicates a bug in PDFBox. Every font should always have
+                    // a built-in encoding, if not, we parsed it incorrectly.
                     throw new IllegalArgumentException(
                             "Symbolic fonts must have a built-in " + "encoding");
                 }
@@ -125,24 +131,25 @@ public class DictionaryEncoding extends Encoding
 
     private void applyDifferences()
     {
-        if(encoding == null) return;
-
-        // now replace with the differences
-        COSArray differences = (COSArray) encoding.getDictionaryObject(COSName.DIFFERENCES);
-        int currentIndex = -1;
-        for (int i = 0; differences != null && i < differences.size(); i++)
+        COSArray differences = ofNullable(encoding)
+                .map(e -> e.getDictionaryObject(COSName.DIFFERENCES, COSArray.class)).orElse(null);
+        if (nonNull(differences))
         {
-            COSBase next = differences.getObject(i);
-            if (next instanceof COSNumber)
+            int currentIndex = -1;
+            for (int i = 0; i < differences.size(); i++)
             {
-                currentIndex = ((COSNumber) next).intValue();
-            }
-            else if (next instanceof COSName)
-            {
-                COSName name = (COSName) next;
-                add(currentIndex, name.getName());
-                this.differences.put(currentIndex, name.getName());
-                currentIndex++;
+                COSBase next = differences.getObject(i);
+                if (next instanceof COSNumber)
+                {
+                    currentIndex = ((COSNumber) next).intValue();
+                }
+                else if (next instanceof COSName)
+                {
+                    COSName name = (COSName) next;
+                    add(currentIndex, name.getName());
+                    this.differences.put(currentIndex, name.getName());
+                    currentIndex++;
+                }
             }
         }
     }

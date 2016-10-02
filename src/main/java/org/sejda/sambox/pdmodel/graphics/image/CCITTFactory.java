@@ -18,12 +18,22 @@ package org.sejda.sambox.pdmodel.graphics.image;
 
 import static org.sejda.io.SeekableSources.seekableSourceFrom;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 
+import javax.imageio.stream.MemoryCacheImageOutputStream;
+
+import org.sejda.io.FastByteArrayOutputStream;
 import org.sejda.io.SeekableSource;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.filter.Filter;
+import org.sejda.sambox.filter.FilterFactory;
+import org.sejda.sambox.pdmodel.PDDocument;
+import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
 
 /**
@@ -36,6 +46,68 @@ public final class CCITTFactory
 {
     private CCITTFactory()
     {
+    }
+
+    /**
+     * Creates a new CCITT group 4 (T6) compressed image XObject from a b/w BufferedImage. This compression technique
+     * usually results in smaller images than those produced by
+     * {@link LosslessFactory#createFromImage(PDDocument, BufferedImage) }.
+     *
+     * @param image the image.
+     * @return a new image XObject.
+     * @throws IOException if there is an error creating the image.
+     * @throws IllegalArgumentException if the BufferedImage is not a b/w image.
+     */
+    public static PDImageXObject createFromImage(BufferedImage image) throws IOException
+    {
+        if (image.getType() != BufferedImage.TYPE_BYTE_BINARY
+                && image.getColorModel().getPixelSize() != 1)
+        {
+            throw new IllegalArgumentException("Only 1-bit b/w images supported");
+        }
+
+        int height = image.getHeight();
+        int width = image.getWidth();
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        try (MemoryCacheImageOutputStream mcios = new MemoryCacheImageOutputStream(bos))
+        {
+
+            for (int y = 0; y < height; ++y)
+            {
+                for (int x = 0; x < width; ++x)
+                {
+                    // flip bit to avoid having to set /BlackIs1
+                    mcios.writeBits(~(image.getRGB(x, y) & 1), 1);
+                }
+                while (mcios.getBitOffset() != 0)
+                {
+                    mcios.writeBit(0);
+                }
+            }
+            mcios.flush();
+        }
+
+        return prepareImageXObject(bos.toByteArray(), width, height, PDDeviceGray.INSTANCE);
+    }
+
+    private static PDImageXObject prepareImageXObject(byte[] byteArray, int width, int height,
+            PDColorSpace initColorSpace) throws IOException
+    {
+        FastByteArrayOutputStream baos = new FastByteArrayOutputStream();
+
+        Filter filter = FilterFactory.INSTANCE.getFilter(COSName.CCITTFAX_DECODE);
+        COSDictionary dict = new COSDictionary();
+        dict.setInt(COSName.COLUMNS, width);
+        dict.setInt(COSName.ROWS, height);
+        filter.encode(new ByteArrayInputStream(byteArray), baos, dict);
+
+        ByteArrayInputStream encodedByteStream = new ByteArrayInputStream(baos.toByteArray());
+        PDImageXObject image = new PDImageXObject(encodedByteStream, COSName.CCITTFAX_DECODE, width,
+                height, 1, initColorSpace);
+        dict.setInt(COSName.K, -1);
+        image.getCOSObject().setItem(COSName.DECODE_PARMS, dict);
+        return image;
     }
 
     /**
@@ -221,7 +293,8 @@ public final class CCITTFactory
             {
                 if (val != 1)
                 {
-                    throw new UnsupportedTiffImageException("FillOrder " + val + " is not supported");
+                    throw new UnsupportedTiffImageException(
+                            "FillOrder " + val + " is not supported");
                 }
                 break;
             }
@@ -230,6 +303,16 @@ public final class CCITTFactory
                 if (count == 1)
                 {
                     dataoffset = val;
+                }
+                break;
+            }
+            case 274:
+            {
+                // http://www.awaresystems.be/imaging/tiff/tifftags/orientation.html
+                if (val != 1)
+                {
+                    throw new UnsupportedTiffImageException(
+                            "Orientation " + val + " is not supported");
                 }
                 break;
             }
@@ -250,11 +333,13 @@ public final class CCITTFactory
                 // http://www.awaresystems.be/imaging/tiff/tifftags/t4options.html
                 if ((val & 4) != 0)
                 {
-                    throw new UnsupportedTiffImageException("CCITT Group 3 'uncompressed mode' is not supported");
+                    throw new UnsupportedTiffImageException(
+                            "CCITT Group 3 'uncompressed mode' is not supported");
                 }
                 if ((val & 2) != 0)
                 {
-                    throw new UnsupportedTiffImageException("CCITT Group 3 'fill bits before EOL' is not supported");
+                    throw new UnsupportedTiffImageException(
+                            "CCITT Group 3 'fill bits before EOL' is not supported");
                 }
                 break;
             }
@@ -283,11 +368,13 @@ public final class CCITTFactory
 
         if (k == -1000)
         {
-            throw new UnsupportedTiffImageException("First image in tiff is not CCITT T4 or T6 compressed");
+            throw new UnsupportedTiffImageException(
+                    "First image in tiff is not CCITT T4 or T6 compressed");
         }
         if (dataoffset == 0)
         {
-            throw new UnsupportedTiffImageException("First image in tiff is not a single tile/strip");
+            throw new UnsupportedTiffImageException(
+                    "First image in tiff is not a single tile/strip");
         }
 
         params.setInt(COSName.K, k);

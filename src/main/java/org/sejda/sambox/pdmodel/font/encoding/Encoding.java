@@ -18,9 +18,9 @@ package org.sejda.sambox.pdmodel.font.encoding;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSObjectable;
@@ -52,10 +52,11 @@ public abstract class Encoding implements COSObjectable
         {
             return MacRomanEncoding.INSTANCE;
         }
-        else
+        else if (COSName.MAC_EXPERT_ENCODING.equals(name))
         {
-            return null;
+            return MacExpertEncoding.INSTANCE;
         }
+        return null;
     }
 
     protected final Map<Integer, String> codeToName = new HashMap<>(250);
@@ -105,7 +106,7 @@ public abstract class Encoding implements COSObjectable
         // otherwise /Differences won't be accounted for
         if (names == null)
         {
-            names = new HashSet<>(codeToName.size());
+            names = Collections.newSetFromMap(new ConcurrentHashMap<>());
             names.addAll(codeToName.values());
         }
         return names.contains(name);

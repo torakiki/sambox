@@ -322,6 +322,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     // M
     public static final COSName M = newCommonInstance("M");
     public static final COSName MAC = newCommonInstance("Mac");
+    public static final COSName MAC_EXPERT_ENCODING = newCommonInstance("MacExpertEncoding");
     public static final COSName MAC_ROMAN_ENCODING = newCommonInstance("MacRomanEncoding");
     public static final COSName MARK_INFO = newCommonInstance("MarkInfo");
     public static final COSName MASK = newCommonInstance("Mask");
