@@ -1454,18 +1454,9 @@ public final class PDPageContentStream implements Closeable
 
     protected void writeOperand(float real) throws IOException
     {
-        int byteCount = NumberFormatUtil.formatFloatFast(real,
-                formatDecimal.getMaximumFractionDigits(), formatBuffer);
-
-        if (byteCount == -1)
-        {
-            // Fast formatting failed
-            write(formatDecimal.format(real));
-        }
-        else
-        {
-            writeBytes(formatBuffer);
-        }
+        // PDFbox up to 1st Aug has a new fast or fallback way to write things here, which breaks things
+        // temporary reverted to old way of doing things, see if new commits fix this
+        write(formatDecimal.format(real));
         writer.writeSpace();
     }
 
