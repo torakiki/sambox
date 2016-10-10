@@ -19,7 +19,10 @@ package org.sejda.sambox.pdmodel;
 import static java.util.Optional.ofNullable;
 
 import java.io.IOException;
+import java.lang.ref.SoftReference;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import org.sejda.sambox.cos.COSBase;
@@ -52,6 +55,10 @@ public final class PDResources implements COSObjectable
 {
     private final COSDictionary resources;
     private final ResourceCache cache;
+
+    // PDFBOX-3442 cache fonts that are not indirect objects, as these aren't cached in ResourceCache
+    // and this would result in huge memory footprint in text extraction
+    private final Map<COSName, SoftReference<PDFont>> directFontCache = new HashMap<>();
 
     /**
      * Constructor for embedding.
@@ -119,6 +126,18 @@ public final class PDResources implements COSObjectable
                 return cached;
             }
         }
+        else if (key == null)
+        {
+            SoftReference<PDFont> ref = directFontCache.get(name);
+            if (ref != null)
+            {
+                PDFont cached = ref.get();
+                if (cached != null)
+                {
+                    return cached;
+                }
+            }
+        }
 
         PDFont font = null;
         COSDictionary dict = (COSDictionary) get(COSName.FONT, name);
@@ -127,10 +146,15 @@ public final class PDResources implements COSObjectable
             font = PDFontFactory.createFont(dict);
         }
 
-        if (cache != null)
+        if (cache != null && key != null)
         {
             cache.put(key, font);
         }
+        else if (key == null)
+        {
+            directFontCache.put(name, new SoftReference<>(font));
+        }
+
         return font;
     }
 
@@ -404,7 +428,8 @@ public final class PDResources implements COSObjectable
             return ((ExistingIndirectCOSObject) found).id().objectIdentifier;
         }
 
-        if(found != null && found.id() != null) {
+        if (found != null && found.id() != null)
+        {
             return found.id().objectIdentifier;
         }
 

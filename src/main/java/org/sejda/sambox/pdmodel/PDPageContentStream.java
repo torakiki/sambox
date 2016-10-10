@@ -54,7 +54,6 @@ import org.sejda.sambox.pdmodel.graphics.state.PDExtendedGraphicsState;
 import org.sejda.sambox.pdmodel.graphics.state.RenderingMode;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceStream;
 import org.sejda.sambox.util.Matrix;
-import org.sejda.sambox.util.NumberFormatUtil;
 import org.sejda.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,7 +108,6 @@ public final class PDPageContentStream implements Closeable
 
     // number format
     private final NumberFormat formatDecimal = NumberFormat.getNumberInstance(Locale.US);
-    private final byte[] formatBuffer = new byte[32];
 
     /**
      * Create a new PDPage content stream.
@@ -1558,4 +1556,44 @@ public final class PDPageContentStream implements Closeable
                     nonStrokingColorSpaceStack.size() - 1);
         }
     }
+
+    /**
+     * Set the text rendering mode. This determines whether showing text shall cause glyph outlines to be stroked,
+     * filled, used as a clipping boundary, or some combination of the three.
+     *
+     * @param rm The text rendering mode.
+     * @throws IOException If the content stream could not be written.
+     */
+    public void setRenderingMode(RenderingMode rm) throws IOException
+    {
+        writeOperand(rm.intValue());
+        writeOperator("Tr");
+    }
+
+    /**
+     * Set the character spacing. The value shall be added to the horizontal or vertical component of the glyph's
+     * displacement, depending on the writing mode.
+     *
+     * @param spacing character spacing
+     * @throws IOException If the content stream could not be written.
+     */
+    public void setCharacterSpacing(float spacing) throws IOException
+    {
+        writeOperand(spacing);
+        writeOperator("Tc");
+    }
+
+    /**
+     * Set the word spacing. The value shall be added to the horizontal or vertical component of the ASCII SPACE
+     * character, depending on the writing mode.
+     *
+     * @param spacing word spacing
+     * @throws IOException If the content stream could not be written.
+     */
+    public void setWordSpacing(float spacing) throws IOException
+    {
+        writeOperand(spacing);
+        writeOperator("Tw");
+    }
+
 }

@@ -17,6 +17,7 @@
 package org.sejda.sambox.pdmodel.font;
 
 import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
 
 import java.awt.geom.GeneralPath;
 import java.io.IOException;
@@ -116,7 +117,7 @@ public class PDType3Font extends PDSimpleFont
         int lastChar = dict.getInt(COSName.LAST_CHAR, -1);
         if (getWidths().size() > 0 && code >= firstChar && code <= lastChar)
         {
-            return getWidths().get(code - firstChar);
+            return ofNullable(getWidths().get(code - firstChar)).orElse(0f);
         }
         PDFontDescriptor fd = getFontDescriptor();
         if (nonNull(fd))

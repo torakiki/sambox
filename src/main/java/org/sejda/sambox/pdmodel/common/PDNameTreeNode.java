@@ -48,7 +48,7 @@ public abstract class PDNameTreeNode<T extends COSObjectable> implements COSObje
     private static final Logger LOG = LoggerFactory.getLogger(PDNameTreeNode.class);
 
     private final COSDictionary node;
-    private PDNameTreeNode parent;
+    private PDNameTreeNode<T> parent;
 
     /**
      * Constructor.
@@ -84,7 +84,7 @@ public abstract class PDNameTreeNode<T extends COSObjectable> implements COSObje
      * 
      * @return parent node
      */
-    public PDNameTreeNode getParent()
+    public PDNameTreeNode<T> getParent()
     {
         return parent;
     }
@@ -94,7 +94,7 @@ public abstract class PDNameTreeNode<T extends COSObjectable> implements COSObje
      * 
      * @param parentNode the node to be set as parent
      */
-    public void setParent(PDNameTreeNode parentNode)
+    public void setParent(PDNameTreeNode<T> parentNode)
     {
         parent = parentNode;
         calculateLimits();
@@ -142,7 +142,7 @@ public abstract class PDNameTreeNode<T extends COSObjectable> implements COSObje
     {
         if (kids != null && kids.size() > 0)
         {
-            for (PDNameTreeNode kidsNode : kids)
+            for (PDNameTreeNode<T> kidsNode : kids)
             {
                 kidsNode.setParent(this);
             }
@@ -172,8 +172,8 @@ public abstract class PDNameTreeNode<T extends COSObjectable> implements COSObje
             List<PDNameTreeNode<T>> kids = getKids();
             if (kids != null && kids.size() > 0)
             {
-                PDNameTreeNode firstKid = kids.get(0);
-                PDNameTreeNode lastKid = kids.get(kids.size() - 1);
+                PDNameTreeNode<T> firstKid = kids.get(0);
+                PDNameTreeNode<T> lastKid = kids.get(kids.size() - 1);
                 String lowerLimit = firstKid.getLowerLimit();
                 setLowerLimit(lowerLimit);
                 String upperLimit = lastKid.getUpperLimit();

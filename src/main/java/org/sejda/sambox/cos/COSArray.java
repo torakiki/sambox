@@ -447,7 +447,7 @@ public class COSArray extends COSBase implements List<COSBase>
     /**
      * @return the COSArray as List
      */
-    public List<?> toList()
+    public List<? extends COSBase> toList()
     {
         ArrayList<COSBase> retList = new ArrayList<>(size());
         Collections.copy(retList, objects);

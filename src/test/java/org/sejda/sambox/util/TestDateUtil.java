@@ -24,11 +24,11 @@ import java.util.Locale;
 import java.util.SimpleTimeZone;
 import java.util.TimeZone;
 
+import org.sejda.sambox.cos.COSString;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
-import org.sejda.sambox.cos.COSString;
 
 /**
  * Test the date conversion utility.
@@ -50,7 +50,7 @@ public class TestDateUtil extends TestCase
      *
      * @throws IOException If there is an error creating the test.
      */
-    public TestDateUtil(String name)
+    public TestDateUtil(String name) throws IOException
     {
         super( name );
     }
@@ -65,7 +65,7 @@ public class TestDateUtil extends TestCase
      *
      * @throws Exception when there is an exception
      */
-    public void testExtract()
+    public void testExtract() throws Exception
     {
         TimeZone timezone = TimeZone.getDefault();
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
@@ -99,7 +99,7 @@ public class TestDateUtil extends TestCase
      * 
      * @throws IOException if something went wrong.
      */
-    public void testDateConversion()
+    public void testDateConversion() throws IOException
     { 
         Calendar c = DateConverter.toCalendar("D:20050526205258+01'00'"); 
         assertEquals(2005, c.get(Calendar.YEAR)); 
@@ -127,11 +127,11 @@ public class TestDateUtil extends TestCase
      */
     private static void checkParse(int yr, int mon, int day, 
                 int hr, int min, int sec, int offsetHours, int offsetMinutes,
- String orig)
+            String orig) throws Exception
     {
-        String pdfDate = String.format("D:%04d%02d%02d%02d%02d%02d%+03d'%02d'", 
+        String pdfDate = String.format(Locale.US, "D:%04d%02d%02d%02d%02d%02d%+03d'%02d'",
                 yr,mon,day,hr,min,sec,offsetHours,offsetMinutes);
-        String iso8601Date = String.format("%04d-%02d-%02d"
+        String iso8601Date = String.format(Locale.US, "%04d-%02d-%02d"
                 + "T%02d:%02d:%02d%+03d:%02d", 
                 yr,mon,day,hr,min,sec,offsetHours,offsetMinutes);
         Calendar cal = DateConverter.toCalendar(orig);
@@ -157,7 +157,7 @@ public class TestDateUtil extends TestCase
      * Years differ to make it easier to find failures.
      * @throws Exception none expected
      */
-    public void testDateConverter()
+    public void testDateConverter() throws Exception
     {
             int year = Calendar.getInstance().get(Calendar.YEAR);
             checkParse(2010, 4,23, 0, 0, 0, 0, 0, "D:20100423");
@@ -295,19 +295,21 @@ public class TestDateUtil extends TestCase
             // ambiguous big-endian date
             checkParse(2073,12,25, 0, 8, 0, 0, 0, "2073 12 25:08"); 
             
+        // PDFBOX-3315 GMT+12
+        checkParse(2016, 4, 11, 16, 01, 15, 12, 0, "D:20160411160115+12'00'");
     }
 
     private static void checkToString(int yr, int mon, int day, 
                 int hr, int min, int sec, 
-            TimeZone tz, int offsetHours, int offsetMinutes)
+            TimeZone tz, int offsetHours, int offsetMinutes) throws Exception
     {
         // construct a GregoreanCalendar from args
         GregorianCalendar cal = new GregorianCalendar(tz, Locale.ENGLISH);
         cal.set(yr, mon-1, day, hr, min, sec);
         // create expected strings
-        String pdfDate = String.format("D:%04d%02d%02d%02d%02d%02d%+03d'%02d'", 
+        String pdfDate = String.format(Locale.US, "D:%04d%02d%02d%02d%02d%02d%+03d'%02d'",
                 yr,mon,day,hr,min,sec,offsetHours, offsetMinutes);
-        String iso8601Date = String.format("%04d-%02d-%02d"
+        String iso8601Date = String.format(Locale.US, "%04d-%02d-%02d"
                 + "T%02d:%02d:%02d%+03d:%02d", 
                 yr,mon,day,hr,min,sec,offsetHours, offsetMinutes);
         // compare outputs from toString and toISO8601 with expected values
@@ -320,7 +322,7 @@ public class TestDateUtil extends TestCase
      * 
      * @throws Exception if something went wrong.
      */
-    public void testToString()
+    public void testToString() throws Exception
     {                                                              // std DST
         TimeZone tzPgh = TimeZone.getTimeZone("America/New_York");   // -5 -4
         TimeZone tzBerlin = TimeZone.getTimeZone("Europe/Berlin");   // +1 +2
@@ -370,14 +372,15 @@ public class TestDateUtil extends TestCase
      */
     public void testParseTZ() 
     {
+        // 1st parameter is what to expect
         checkParseTZ(0*HRS+0*MINS, "+00:00");
         checkParseTZ(0*HRS+0*MINS, "-0000");
         checkParseTZ(1*HRS+0*MINS, "+1:00");
         checkParseTZ(-(1*HRS+0*MINS), "-1:00");
         checkParseTZ(-(1*HRS+30*MINS), "-0130");
         checkParseTZ(11*HRS+59*MINS, "1159");
-        checkParseTZ(-(11*HRS+30*MINS), "1230");
-        checkParseTZ(11*HRS+30*MINS, "-12:30");
+        checkParseTZ(12 * HRS + 30 * MINS, "1230");
+        checkParseTZ(-(12 * HRS + 30 * MINS), "-12:30");
         checkParseTZ(0*HRS+0*MINS, "Z");
         checkParseTZ(-(8*HRS+0*MINS), "PST");
         checkParseTZ(0*HRS+0*MINS, "EDT");  // EDT does not parse
@@ -391,6 +394,11 @@ public class TestDateUtil extends TestCase
         checkParseTZ((5*HRS+0*MINS), "+0500");
         checkParseTZ((11*HRS+0*MINS), "+11'00'");
         checkParseTZ(0, "Z");
+        // PDFBOX-3315, PDFBOX-2420
+        checkParseTZ(12 * HRS + 0 * MINS, "+12:00");
+        checkParseTZ(-(12 * HRS + 0 * MINS), "-12:00");
+        checkParseTZ(14 * HRS + 0 * MINS, "1400");
+        checkParseTZ(-(14 * HRS + 0 * MINS), "-1400");
     }
     
     private static void checkFormatOffset(double off, String expect) 
@@ -405,16 +413,17 @@ public class TestDateUtil extends TestCase
      */
     public void testFormatTZoffset()
     {
-        checkFormatOffset(-12.1, "+11:54");
-        checkFormatOffset(12.1, "-11:54");
+        // 2nd parameter is what to expect
+        checkFormatOffset(-12.1, "-12:06");
+        checkFormatOffset(12.1, "+12:06");
         checkFormatOffset(0, "+00:00");
         checkFormatOffset(-1, "-01:00");
         checkFormatOffset(.5, "+00:30");
         checkFormatOffset(-0.5, "-00:30");
         checkFormatOffset(.1, "+00:06");
         checkFormatOffset(-0.1, "-00:06");
-        checkFormatOffset(-12, "+00:00");
-        checkFormatOffset(12, "+00:00");
+        checkFormatOffset(-12, "-12:00");
+        checkFormatOffset(12, "+12:00");
         checkFormatOffset(-11.5, "-11:30");
         checkFormatOffset(11.5, "+11:30");
         checkFormatOffset(11.9, "+11:54");

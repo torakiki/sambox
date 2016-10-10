@@ -16,6 +16,9 @@
  */
 package org.sejda.sambox.cos;
 
+import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -76,6 +79,21 @@ public class COSArrayList<E> implements List<E>
         actual = new ArrayList<E>();
         actual.add(actualObject);
 
+        parentDict = dictionary;
+        dictKey = dictionaryKey;
+    }
+
+    /**
+     * This constructor is to be used if the array doesn't exist, but is to be created and added to the parent
+     * dictionary as soon as the first element is added to the array.
+     *
+     * @param dictionary The dictionary that holds the item, and will hold the array if an item is added.
+     * @param dictionaryKey The key into the dictionary to set the item.
+     */
+    public COSArrayList(COSDictionary dictionary, COSName dictionaryKey)
+    {
+        array = new COSArray();
+        actual = new ArrayList<>();
         parentDict = dictionary;
         dictKey = dictionaryKey;
     }
@@ -265,17 +283,17 @@ public class COSArrayList<E> implements List<E>
      */
     public static List<Float> convertFloatCOSArrayToList(COSArray floatArray)
     {
-        List<Float> retval = null;
-        if (floatArray != null)
+        if (nonNull(floatArray))
         {
-            List<Float> numbers = new ArrayList<>();
+            List<Float> numbers = new ArrayList<>(floatArray.size());
             for (int i = 0; i < floatArray.size(); i++)
             {
-                numbers.add(((COSNumber) floatArray.getObject(i)).floatValue());
+                numbers.add(ofNullable(floatArray.getObject(i)).filter(v -> v instanceof COSNumber)
+                        .map(v -> ((COSNumber) v).floatValue()).orElse(null));
             }
-            retval = new COSArrayList<>(numbers, floatArray);
+            return new COSArrayList<>(numbers, floatArray);
         }
-        return retval;
+        return null;
     }
 
     /**
@@ -408,7 +426,7 @@ public class COSArrayList<E> implements List<E>
 
     private List<COSBase> toCOSObjectList(Collection<?> list)
     {
-        List<COSBase> cosObjects = new ArrayList<COSBase>();
+        List<COSBase> cosObjects = new ArrayList<>();
         Iterator<?> iter = list.iterator();
         while (iter.hasNext())
         {

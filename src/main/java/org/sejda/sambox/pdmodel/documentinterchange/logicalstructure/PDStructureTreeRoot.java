@@ -119,7 +119,7 @@ public class PDStructureTreeRoot extends PDStructureNode
      * 
      * @return the ID tree
      */
-    public PDNameTreeNode getIDTree()
+    public PDNameTreeNode<PDStructureElement> getIDTree()
     {
         COSDictionary idTreeDic = (COSDictionary) this.getCOSObject().getDictionaryObject(COSName.ID_TREE);
         if (idTreeDic != null)
@@ -134,7 +134,7 @@ public class PDStructureTreeRoot extends PDStructureNode
      * 
      * @param idTree the ID tree
      */
-    public void setIDTree(PDNameTreeNode idTree)
+    public void setIDTree(PDNameTreeNode<PDStructureElement> idTree)
     {
         this.getCOSObject().setItem(COSName.ID_TREE, idTree);
     }
@@ -203,7 +203,7 @@ public class PDStructureTreeRoot extends PDStructureNode
                 LOG.error(e.getMessage(), e);
             }
         }
-        return new Hashtable<String, Object>();
+        return new Hashtable<>();
     }
 
     /**

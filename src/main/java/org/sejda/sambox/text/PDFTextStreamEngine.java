@@ -167,7 +167,7 @@ public class PDFTextStreamEngine extends PDFStreamEngine
         if (fontDescriptor != null)
         {
             float capHeight = fontDescriptor.getCapHeight();
-            if (capHeight != 0 && capHeight < glyphHeight)
+            if (capHeight != 0 && (capHeight < glyphHeight || glyphHeight == 0))
             {
                 glyphHeight = capHeight;
             }
