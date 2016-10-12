@@ -32,26 +32,25 @@ import org.sejda.sambox.cos.COSString;
  */
 public final class FieldUtils
 {
-    
+
     /**
      * An implementation of a basic key value pair.
      * 
-     * This implementation is used to help sorting the content of
-     * field option entries with an array of two-element arrays as
-     * used by choice fields.
+     * This implementation is used to help sorting the content of field option entries with an array of two-element
+     * arrays as used by choice fields.
      * 
      */
     static class KeyValue
     {
         private final String key;
         private final String value;
-        
+
         public KeyValue(final String theKey, final String theValue)
         {
             this.key = theKey;
             this.value = theValue;
         }
-        
+
         public String getKey()
         {
             return this.key;
@@ -61,14 +60,14 @@ public final class FieldUtils
         {
             return this.value;
         }
-        
+
         @Override
         public String toString()
         {
             return "(" + this.key + ", " + this.value + ")";
         }
     }
-    
+
     /**
      * Comparator to sort KeyValue by key.
      */
@@ -105,7 +104,7 @@ public final class FieldUtils
     private FieldUtils()
     {
     }
-    
+
     /**
      * Return two related lists as a single list with key value pairs.
      * 
@@ -115,14 +114,14 @@ public final class FieldUtils
      */
     static List<KeyValue> toKeyValueList(List<String> key, List<String> value)
     {
-        List<KeyValue> list = new ArrayList<KeyValue>();
-        for(int i =0; i<key.size(); i++)
+        List<KeyValue> list = new ArrayList<>();
+        for (int i = 0; i < key.size(); i++)
         {
-            list.add(new FieldUtils.KeyValue(key.get(i),value.get(i)));
+            list.add(new FieldUtils.KeyValue(key.get(i), value.get(i)));
         }
         return list;
-    }    
-    
+    }
+
     /**
      * Sort two related lists simultaneously by the elements in the key parameter.
      * 
@@ -142,18 +141,17 @@ public final class FieldUtils
     {
         Collections.sort(pairs, new FieldUtils.KeyValueKeyComparator());
     }
-    
+
     /**
      * Return either one of a list which can have two-element arrays entries.
      * <p>
-     * Some entries in a dictionary can either be an array of elements
-     * or an array of two-element arrays. This method will either return
-     * the elements in the array or in case of two-element arrays, the element
-     * designated by the pair index
+     * Some entries in a dictionary can either be an array of elements or an array of two-element arrays. This method
+     * will either return the elements in the array or in case of two-element arrays, the element designated by the pair
+     * index
      * </p>
      * <p>
-     * An {@link IllegalArgumentException} will be thrown if the items contain
-     * two-element arrays and the index is not 0 or 1.
+     * An {@link IllegalArgumentException} will be thrown if the items contain two-element arrays and the index is not 0
+     * or 1.
      * </p>
      * 
      * @param items the array of elements or two-element arrays
@@ -162,32 +160,30 @@ public final class FieldUtils
      */
     static List<String> getPairableItems(COSBase items, int pairIdx)
     {
-        if (pairIdx < 0 || pairIdx > 1) 
+        if (pairIdx < 0 || pairIdx > 1)
         {
-            throw new IllegalArgumentException("Only 0 and 1 are allowed as an index into two-element arrays");
+            throw new IllegalArgumentException(
+                    "Only 0 and 1 are allowed as an index into two-element arrays");
         }
-        
+
         if (items instanceof COSString)
         {
-            List<String> array = new ArrayList<String>();
+            List<String> array = new ArrayList<>();
             array.add(((COSString) items).getString());
             return array;
         }
         else if (items instanceof COSArray)
         {
-            // test if there is a single text or a two-element array 
+            // test if there is a single text or a two-element array
             COSBase entry = ((COSArray) items).get(0);
             if (entry instanceof COSString)
             {
-                return COSArrayList.convertCOSStringCOSArrayToList((COSArray)items);
-            } 
-            else
-            {
-                return getItemsFromPair(items, pairIdx);
-            }            
+                return COSArrayList.convertCOSStringCOSArrayToList((COSArray) items);
+            }
+            return getItemsFromPair(items, pairIdx);
         }
-        return Collections.<String>emptyList();
-    }    
+        return Collections.emptyList();
+    }
 
     /**
      * Return either one of a list of two-element arrays entries.
@@ -198,14 +194,14 @@ public final class FieldUtils
      */
     private static List<String> getItemsFromPair(COSBase items, int pairIdx)
     {
-        List<String> exportValues = new ArrayList<String>();
+        List<String> exportValues = new ArrayList<>();
         int numItems = ((COSArray) items).size();
-        for (int i=0;i<numItems;i++)
+        for (int i = 0; i < numItems; i++)
         {
             COSArray pair = (COSArray) ((COSArray) items).get(i);
             COSString displayValue = (COSString) pair.get(pairIdx);
             exportValues.add(displayValue.getString());
         }
-        return exportValues;        
+        return exportValues;
     }
 }

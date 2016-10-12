@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.pdmodel.documentinterchange.taggedpdf;
 
+import static java.util.Objects.nonNull;
+
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
@@ -98,10 +100,9 @@ public abstract class PDStandardAttributeObject extends PDAttributeObject
      */
     protected String[] getArrayOfString(String name)
     {
-        COSBase v = this.getCOSObject().getDictionaryObject(name);
-        if (v instanceof COSArray)
+        COSArray array = this.getCOSObject().getDictionaryObject(name, COSArray.class);
+        if (nonNull(array))
         {
-            COSArray array = (COSArray) v;
             String[] strings = new String[array.size()];
             for (int i = 0; i < array.size(); i++)
             {
@@ -365,9 +366,9 @@ public abstract class PDStandardAttributeObject extends PDAttributeObject
     protected void setArrayOfNumber(String name, float[] values)
     {
         COSArray array = new COSArray();
-        for (int i = 0; i < values.length; i++)
+        for (float value : values)
         {
-            array.add(new COSFloat(values[i]));
+            array.add(new COSFloat(value));
         }
         COSBase oldBase = this.getCOSObject().getDictionaryObject(name);
         this.getCOSObject().setItem(name, array);

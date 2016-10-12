@@ -40,6 +40,7 @@ import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.cos.COSString;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
+import org.sejda.sambox.util.Hex;
 import org.sejda.util.IOUtils;
 
 /**
@@ -149,7 +150,7 @@ class DefaultCOSWriter implements COSWriter
             else
             {
                 writer.write(NUMBER_SIGN);
-                writer.write(String.format("%02X", current).getBytes(StandardCharsets.US_ASCII));
+                writer.write(Hex.getBytes(bytes[i]));
             }
         }
     }

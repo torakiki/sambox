@@ -22,14 +22,15 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
-
-import junit.framework.TestCase;
+import java.util.Locale;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.util.SpecVersionUtils;
+
+import junit.framework.TestCase;
 
 /**
  * Testcase introduced with PDFBOX-1581.
@@ -65,8 +66,8 @@ public class TestPDDocument extends TestCase
         byte[] pdf = baos.toByteArray();
         assertTrue(pdf.length > 200);
         assertEquals("%PDF-1.4", new String(Arrays.copyOfRange(pdf, 0, 8), "UTF-8"));
-        assertEquals("%%EOF\n", new String(Arrays.copyOfRange(pdf, pdf.length - 6, pdf.length),
-                "UTF-8"));
+        assertEquals("%%EOF\n",
+                new String(Arrays.copyOfRange(pdf, pdf.length - 6, pdf.length), "UTF-8"));
 
         // Load
         try (PDDocument loadDoc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(pdf)))
@@ -97,13 +98,46 @@ public class TestPDDocument extends TestCase
         in.close();
         assertTrue(pdf.length > 200);
         assertEquals("%PDF-1.4", new String(Arrays.copyOfRange(pdf, 0, 8), "UTF-8"));
-        assertEquals("%%EOF\n", new String(Arrays.copyOfRange(pdf, pdf.length - 6, pdf.length),
-                "UTF-8"));
+        assertEquals("%%EOF\n",
+                new String(Arrays.copyOfRange(pdf, pdf.length - 6, pdf.length), "UTF-8"));
 
         // Load
         try (PDDocument loadDoc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(pdf)))
         {
             assertEquals(1, loadDoc.getNumberOfPages());
+        }
+    }
+
+    /**
+     * PDFBOX-3481: Test whether XRef generation results in unusable PDFs if Arab numbering is default.
+     */
+    public void testSaveArabicLocale() throws IOException
+    {
+        Locale defaultLocale = Locale.getDefault();
+        try
+        {
+            Locale arabicLocale = new Locale.Builder().setLanguageTag("ar-EG-u-nu-arab").build();
+            Locale.setDefault(arabicLocale);
+
+            File targetFile = new File(testResultsDir, "pddocument-savearabicfile.pdf");
+
+            // Create PDF with one blank page
+            try (PDDocument document = new PDDocument())
+            {
+                document.addPage(new PDPage());
+                document.writeTo(targetFile);
+            }
+
+            // Load
+            try (PDDocument loadDoc = PDFParser
+                    .parse(SeekableSources.seekableSourceFrom(targetFile)))
+            {
+                assertEquals(1, loadDoc.getNumberOfPages());
+            }
+        }
+        finally
+        {
+            Locale.setDefault(defaultLocale);
         }
     }
 

@@ -18,6 +18,8 @@ package org.sejda.sambox.xref;
 
 import static org.sejda.util.RequireUtils.requireArg;
 
+import java.util.Locale;
+
 import org.sejda.sambox.cos.COSObjectKey;
 
 /**
@@ -106,10 +108,12 @@ public class XrefEntry
         switch (type)
         {
         case IN_USE:
-            return String.format(XREFTABLE_ENTRY_FORMAT, getByteOffset(), getGenerationNumber(),
+            return String.format(Locale.US, XREFTABLE_ENTRY_FORMAT, getByteOffset(),
+                    getGenerationNumber(),
                     'n');
         case FREE:
-            return String.format(XREFTABLE_ENTRY_FORMAT, getObjectNumber(), getGenerationNumber(),
+            return String.format(Locale.US, XREFTABLE_ENTRY_FORMAT, getObjectNumber(),
+                    getGenerationNumber(),
                     'f');
         default:
             throw new IllegalArgumentException(

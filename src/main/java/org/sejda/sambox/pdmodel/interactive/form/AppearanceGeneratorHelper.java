@@ -40,6 +40,8 @@ import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceEntry;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceStream;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDBorderStyleDictionary;
 import org.sejda.sambox.util.Matrix;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Create the AcroForms field appearance helper.
@@ -49,6 +51,8 @@ import org.sejda.sambox.util.Matrix;
  */
 class AppearanceGeneratorHelper
 {
+    private static final Logger LOG = LoggerFactory.getLogger(AppearanceGeneratorHelper.class);
+
     private static final Operator BMC = Operator.getOperator("BMC");
     private static final Operator EMC = Operator.getOperator("EMC");
 
@@ -104,6 +108,15 @@ class AppearanceGeneratorHelper
 
         for (PDAnnotationWidget widget : field.getWidgets())
         {
+            PDRectangle rect = widget.getRectangle();
+            if (rect == null)
+            {
+                widget.getCOSObject().removeItem(COSName.AP);
+                LOG.warn("widget of field {} has no rectangle, no appearance stream created",
+                        field.getFullyQualifiedName());
+                continue;
+            }
+
             PDFormFieldAdditionalActions actions = field.getActions();
 
             // in case all tests fail the field will be formatted by acrobat
@@ -129,8 +142,6 @@ class AppearanceGeneratorHelper
                 else
                 {
                     appearanceStream = new PDAppearanceStream();
-
-                    PDRectangle rect = widget.getRectangle();
 
                     // Calculate the entries for the bounding box and the transformation matrix
                     // settings for the appearance stream

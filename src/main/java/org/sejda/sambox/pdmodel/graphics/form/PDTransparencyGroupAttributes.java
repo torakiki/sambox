@@ -20,7 +20,7 @@ import java.io.IOException;
 
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.cos.COSObjectable;
+import org.sejda.sambox.pdmodel.common.PDDictionaryWrapper;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
 
 /**
@@ -28,28 +28,26 @@ import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
  * 
  * @author Kühn & Weyh Software, GmbH
  */
-public final class PDTransparencyGroupAttributes implements COSObjectable
+public final class PDTransparencyGroupAttributes extends PDDictionaryWrapper
 {
-    private final COSDictionary dictionary;
     private PDColorSpace colorSpace;
 
     /**
-     * Creates a group object from a given dictionary
-     * @param dic {@link COSDictionary} object
+     * Creates a group object with /Transparency subtype entry.
      */
-    public PDTransparencyGroupAttributes(COSDictionary dic)
+    public PDTransparencyGroupAttributes()
     {
-        dictionary = dic;
+        getCOSObject().setItem(COSName.S, COSName.TRANSPARENCY);
     }
 
-    @Override
-    public COSDictionary getCOSObject()
+    public PDTransparencyGroupAttributes(COSDictionary dictionary)
     {
-        return dictionary;
+        super(dictionary);
     }
 
     /**
      * Returns the blending color space
+     * 
      * @return color space
      * @throws IOException
      */
@@ -63,8 +61,8 @@ public final class PDTransparencyGroupAttributes implements COSObjectable
     }
 
     /**
-     * Returns true if this group is isolated. Isolated groups begin with the fully transparent
-     * image, non-isolated begin with the current backdrop.
+     * Returns true if this group is isolated. Isolated groups begin with the fully transparent image, non-isolated
+     * begin with the current backdrop.
      */
     public boolean isIsolated()
     {
@@ -72,8 +70,8 @@ public final class PDTransparencyGroupAttributes implements COSObjectable
     }
 
     /**
-     * Returns true if this group is a knockout. A knockout group blends with original backdrop,
-     * a non-knockout group blends with the current backdrop.
+     * Returns true if this group is a knockout. A knockout group blends with original backdrop, a non-knockout group
+     * blends with the current backdrop.
      */
     public boolean isKnockout()
     {

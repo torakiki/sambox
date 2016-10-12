@@ -84,7 +84,9 @@ public class MacRomanEncoding extends Encoding
             { 0367, "tilde" }, { 0252, "trademark" }, { 062, "two" }, { 0165, "u" },
             { 0234, "uacute" }, { 0236, "ucircumflex" }, { 0237, "udieresis" }, { 0235, "ugrave" },
             { 0137, "underscore" }, { 0166, "v" }, { 0167, "w" }, { 0170, "x" }, { 0171, "y" },
-            { 0330, "ydieresis" }, { 0264, "yen" }, { 0172, "z" }, { 060, "zero" } };
+            { 0330, "ydieresis" }, { 0264, "yen" }, { 0172, "z" }, { 060, "zero" },
+            // adding an additional mapping as defined in Appendix D of the pdf spec
+            { 0312, "space" } };
 
     /**
      * Singleton instance of this class.
@@ -102,9 +104,6 @@ public class MacRomanEncoding extends Encoding
         {
             add((Integer) encodingEntry[CHAR_CODE], encodingEntry[CHAR_NAME].toString());
         }
-        // adding an additional mapping as defined in Appendix D of the pdf spec
-        // don't add the reverse mapping as we have to preserve the origin mapping for the given glyph name
-        codeToName.put(0312, "space");
     }
 
     /**

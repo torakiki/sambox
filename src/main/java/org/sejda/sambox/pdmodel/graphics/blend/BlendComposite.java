@@ -44,29 +44,25 @@ public final class BlendComposite implements Composite
      * Creates a blend composite
      *
      * @param blendMode Desired blend mode
-     * @param constantAlpha Constant alpha, must be in the inclusive range
-     * [0.0...1.0] or it will be clipped.
+     * @param constantAlpha Constant alpha, must be in the inclusive range [0.0...1.0] or it will be clipped.
      */
     public static Composite getInstance(BlendMode blendMode, float constantAlpha)
     {
+        if (constantAlpha < 0)
+        {
+            LOG.warn("using 0 instead of incorrect Alpha " + constantAlpha);
+            constantAlpha = 0;
+        }
+        else if (constantAlpha > 1)
+        {
+            LOG.warn("using 1 instead of incorrect Alpha " + constantAlpha);
+            constantAlpha = 1;
+        }
         if (blendMode == BlendMode.NORMAL)
         {
-            if (constantAlpha < 0)
-            {
-                LOG.warn("using 0 instead of incorrect Alpha " + constantAlpha);
-                constantAlpha = 0;
-            }
-            else if (constantAlpha > 1)
-            {
-                LOG.warn("using 1 instead of incorrect Alpha " + constantAlpha);
-                constantAlpha = 1;
-            }
             return AlphaComposite.getInstance(AlphaComposite.SRC_OVER, constantAlpha);
         }
-        else
-        {
-            return new BlendComposite(blendMode, constantAlpha);
-        }
+        return new BlendComposite(blendMode, constantAlpha);
     }
 
     // TODO - non-separable blending modes
@@ -136,8 +132,8 @@ public final class BlendComposite implements Composite
                     && (colorSpaceType != ColorSpace.TYPE_GRAY);
 
             boolean blendModeIsSeparable = blendMode instanceof SeparableBlendMode;
-            SeparableBlendMode separableBlendMode = blendModeIsSeparable ?
-                    (SeparableBlendMode) blendMode : null;
+            SeparableBlendMode separableBlendMode = blendModeIsSeparable
+                    ? (SeparableBlendMode) blendMode : null;
 
             boolean needsColorConversion = !srcColorSpace.equals(dstColorSpace);
 

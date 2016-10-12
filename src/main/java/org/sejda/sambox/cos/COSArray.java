@@ -438,9 +438,9 @@ public class COSArray extends COSBase implements List<COSBase>
     public void setFloatArray(float[] value)
     {
         this.clear();
-        for (int i = 0; i < value.length; i++)
+        for (float aValue : value)
         {
-            add(new COSFloat(value[i]));
+            add(new COSFloat(aValue));
         }
     }
 

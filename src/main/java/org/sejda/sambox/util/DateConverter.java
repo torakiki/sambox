@@ -149,7 +149,7 @@ public final class DateConverter
         }
         String offset = formatTZoffset(cal.get(Calendar.ZONE_OFFSET) + cal.get(Calendar.DST_OFFSET),
                 "'");
-        return String.format(
+        return String.format(Locale.US,
                 "D:" + "%1$4tY%1$2tm%1$2td" // yyyyMMdd
                         + "%1$2tH%1$2tM%1$2tS" // HHmmss
                         + "%2$s" // time zone
@@ -168,7 +168,7 @@ public final class DateConverter
     {
         String offset = formatTZoffset(cal.get(Calendar.ZONE_OFFSET) + cal.get(Calendar.DST_OFFSET),
                 ":");
-        return String.format(
+        return String.format(Locale.US,
                 "%1$4tY" // yyyy
                         + "-%1$2tm" // -mm (%tm adds one to cal month value)
                         + "-%1$2td" // -dd (%tm adds one to cal month value)
@@ -404,8 +404,11 @@ public final class DateConverter
                 // no timezone in text, cal amd initialWhere are unchanged
                 return false;
             }
-            // we got a tz by name; use it
-            where.setIndex(text.length());
+            else
+            {
+                // we got a tz by name; use it
+                where.setIndex(text.length());
+            }
         }
         adjustTimeZoneNicely(cal, tz);
         initialWhere.setIndex(where.getIndex());
@@ -436,11 +439,11 @@ public final class DateConverter
         }
         else if (pm == '+' && hh <= 12)
         {
-            tz.setID(String.format("GMT+%02d:%02d", hh, mm));
+            tz.setID(String.format(Locale.US, "GMT+%02d:%02d", hh, mm));
         }
         else if (pm == '-' && hh <= 14)
         {
-            tz.setID(String.format("GMT-%02d:%02d", hh, mm));
+            tz.setID(String.format(Locale.US, "GMT-%02d:%02d", hh, mm));
         }
         else
         {

@@ -302,8 +302,9 @@ public class PDFTextStreamEngine extends PDFStreamEngine
             nextY -= pageSize.getLowerLeftY();
         }
         processTextPosition(new TextPosition(pageRotation, pageSize.getWidth(),
-                pageSize.getHeight(), translatedTextRenderingMatrix, nextX, nextY, dyDisplay,
-                dxDisplay, spaceWidthDisplay, unicode, new int[] { code }, font, fontSize,
+                pageSize.getHeight(), translatedTextRenderingMatrix, nextX, nextY,
+                Math.abs(dyDisplay), dxDisplay, Math.abs(spaceWidthDisplay), unicode,
+                new int[] { code }, font, fontSize,
                 (int) (fontSize * textMatrix.getScalingFactorX())));
     }
 

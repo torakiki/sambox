@@ -16,8 +16,9 @@
  */
 package org.sejda.sambox.pdmodel.documentinterchange.logicalstructure;
 
+import static java.util.Objects.nonNull;
+
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.sejda.sambox.cos.COSArray;
@@ -103,14 +104,12 @@ public abstract class PDStructureNode implements COSObjectable
      */
     public List<Object> getKids()
     {
-        List<Object> kidObjects = new ArrayList<Object>();
-        COSBase k = this.getCOSObject().getDictionaryObject(COSName.K);
-        if (k instanceof COSArray)
+        List<Object> kidObjects = new ArrayList<>();
+        COSArray k = this.getCOSObject().getDictionaryObject(COSName.K, COSArray.class);
+        if (nonNull(k))
         {
-            Iterator<COSBase> kids = ((COSArray) k).iterator();
-            while (kids.hasNext())
+            for (COSBase kid : k)
             {
-                COSBase kid = kids.next();
                 Object kidObject = this.createObject(kid);
                 if (kidObject != null)
                 {

@@ -236,7 +236,7 @@ public final class PDAcroForm extends PDDictionaryWrapper
         }
 
         // remove the fields
-        setFields(Collections.<PDField> emptyList());
+        setFields(Collections.emptyList());
 
         // remove XFA for hybrid forms
         getCOSObject().removeItem(COSName.XFA);

@@ -17,6 +17,7 @@
 
 package org.sejda.sambox.pdmodel.font;
 
+import static java.util.Objects.nonNull;
 import static org.sejda.sambox.pdmodel.font.UniUtil.getUniNameOfCodePoint;
 
 import java.awt.geom.AffineTransform;
@@ -195,8 +196,8 @@ public class PDType1CFont extends PDSimpleFont
         if (getFontDescriptor() != null)
         {
             PDRectangle bbox = getFontDescriptor().getFontBoundingBox();
-            if (bbox.getLowerLeftX() != 0 || bbox.getLowerLeftY() != 0 || bbox.getUpperRightX() != 0
-                    || bbox.getUpperRightY() != 0)
+            if (nonNull(bbox) && bbox.getLowerLeftX() != 0 || bbox.getLowerLeftY() != 0
+                    || bbox.getUpperRightX() != 0 || bbox.getUpperRightY() != 0)
             {
                 return new BoundingBox(bbox.getLowerLeftX(), bbox.getLowerLeftY(),
                         bbox.getUpperRightX(), bbox.getUpperRightY());

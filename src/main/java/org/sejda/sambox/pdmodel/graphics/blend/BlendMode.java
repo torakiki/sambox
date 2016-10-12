@@ -30,6 +30,9 @@ import org.sejda.sambox.cos.COSName;
  */
 public abstract class BlendMode
 {
+    BlendMode()
+    {
+    }
     /**
      * Determines the blend mode from the BM entry in the COS ExtGState.
      *
@@ -41,7 +44,7 @@ public abstract class BlendMode
         BlendMode result = null;
         if (cosBlendMode instanceof COSName)
         {
-            result = BLEND_MODES.get((COSName)cosBlendMode);
+            result = BLEND_MODES.get(cosBlendMode);
         }
         else if (cosBlendMode instanceof COSArray)
         {
@@ -97,8 +100,8 @@ public abstract class BlendMode
         @Override
         public float blendChannel(float srcValue, float dstValue)
         {
-            return (dstValue <= 0.5) ? 2 * dstValue * srcValue : 2 * (srcValue + dstValue - srcValue
-                    * dstValue) - 1;
+            return (dstValue <= 0.5) ? 2 * dstValue * srcValue
+                    : 2 * (srcValue + dstValue - srcValue * dstValue) - 1;
         }
     };
 
@@ -143,8 +146,8 @@ public abstract class BlendMode
         @Override
         public float blendChannel(float srcValue, float dstValue)
         {
-            return (srcValue <= 0.5) ? 2 * dstValue * srcValue :
-                    2 * (srcValue + dstValue - srcValue * dstValue) - 1;
+            return (srcValue <= 0.5) ? 2 * dstValue * srcValue
+                    : 2 * (srcValue + dstValue - srcValue * dstValue) - 1;
         }
     };
 
@@ -157,12 +160,9 @@ public abstract class BlendMode
             {
                 return dstValue - (1 - 2 * srcValue) * dstValue * (1 - dstValue);
             }
-            else
-            {
-                float d = (dstValue <= 0.25) ? ((16 * dstValue - 12) * dstValue + 4) * dstValue
-                        : (float) Math .sqrt(dstValue);
-                return dstValue + (2 * srcValue - 1) * (d - dstValue);
-            }
+            float d = (dstValue <= 0.25) ? ((16 * dstValue - 12) * dstValue + 4) * dstValue
+                    : (float) Math.sqrt(dstValue);
+            return dstValue + (2 * srcValue - 1) * (d - dstValue);
         }
     };
 
@@ -189,7 +189,7 @@ public abstract class BlendMode
 
     private static Map<COSName, BlendMode> createBlendModeMap()
     {
-        Map<COSName, BlendMode> map = new HashMap<COSName, BlendMode>();
+        Map<COSName, BlendMode> map = new HashMap<>(13);
         map.put(COSName.NORMAL, BlendMode.NORMAL);
         map.put(COSName.COMPATIBLE, BlendMode.COMPATIBLE);
         map.put(COSName.MULTIPLY, BlendMode.MULTIPLY);
@@ -205,9 +205,5 @@ public abstract class BlendMode
         map.put(COSName.EXCLUSION, BlendMode.EXCLUSION);
         // TODO - non-separable blending modes
         return map;
-    }
-
-    BlendMode()
-    {
     }
 }

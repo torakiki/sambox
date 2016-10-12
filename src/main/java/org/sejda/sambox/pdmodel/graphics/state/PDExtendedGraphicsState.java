@@ -497,7 +497,8 @@ public class PDExtendedGraphicsState implements COSObjectable
     }
 
     /**
-     * This will get the alpha source flag.
+     * This will get the alpha source flag (“alpha is shape”), that specifies whether the current soft mask and alpha
+     * constant shall be interpreted as shape values (true) or opacity values (false).
      *
      * @return The alpha source flag.
      */
@@ -507,7 +508,8 @@ public class PDExtendedGraphicsState implements COSObjectable
     }
 
     /**
-     * This will get the alpha source flag.
+     * This will get the alpha source flag (“alpha is shape”), that specifies whether the current soft mask and alpha
+     * constant shall be interpreted as shape values (true) or opacity values (false).
      *
      * @param alpha The alpha source flag.
      */
@@ -527,7 +529,7 @@ public class PDExtendedGraphicsState implements COSObjectable
     }
 
     /**
-     * Returns the soft mask stored in the COS dictionary
+     * Returns the soft mask stored in the COS dictionaryO
      *
      * @return the soft mask
      */
