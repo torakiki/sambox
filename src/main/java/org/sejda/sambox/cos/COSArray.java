@@ -496,6 +496,16 @@ public class COSArray extends COSBase implements List<COSBase>
         visitor.visit(this);
     }
 
+    /**
+     * @return a new {@link COSArray} that is a duplicate of this
+     */
+    public COSArray duplicate()
+    {
+        COSArray ret = new COSArray();
+        ret.addAll(this);
+        return ret;
+    }
+
     @Override
     public boolean equals(Object o)
     {
