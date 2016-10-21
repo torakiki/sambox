@@ -58,9 +58,6 @@ import org.slf4j.LoggerFactory;
  */
 public final class PDImageXObject extends PDXObject implements PDImage
 {
-    /**
-     * Log instance.
-     */
     private static final Logger LOG = LoggerFactory.getLogger(PDImageXObject.class);
 
     private BufferedImage cachedImage;
@@ -191,12 +188,12 @@ public final class PDImageXObject extends PDXObject implements PDImage
 
         byte[] jpegFirstBytes = new byte[] { (byte) 0xFF, (byte) 0xD8 };
         byte[] pngFirstBytes = new byte[] { (byte) 0x89, (byte) 0x50 };
-
-        FileInputStream fin = new FileInputStream(file);
         byte[] firstBytes = new byte[2];
 
-        fin.read(firstBytes);
-        fin.close();
+        try (FileInputStream fin = new FileInputStream(file))
+        {
+            fin.read(firstBytes);
+        }
 
         if (Arrays.equals(firstBytes, jpegFirstBytes))
         {
@@ -236,8 +233,7 @@ public final class PDImageXObject extends PDXObject implements PDImage
      * @throws IOException if there is an error when reading the file or creating the PDImageXObject.
      * @throws IllegalArgumentException if the image type is not supported.
      */
-    public static PDImageXObject createFromFileByContent(File file, PDDocument doc)
-            throws IOException
+    public static PDImageXObject createFromFileByContent(File file) throws IOException
     {
         FileType fileType = null;
         try (BufferedInputStream bufferedInputStream = new BufferedInputStream(
@@ -279,7 +275,7 @@ public final class PDImageXObject extends PDXObject implements PDImage
      */
     public PDMetadata getMetadata()
     {
-        COSStream cosStream = (COSStream) getCOSObject().getDictionaryObject(COSName.METADATA);
+        COSStream cosStream = getCOSObject().getDictionaryObject(COSName.METADATA, COSStream.class);
         if (cosStream != null)
         {
             return new PDMetadata(cosStream);
@@ -475,22 +471,13 @@ public final class PDImageXObject extends PDXObject implements PDImage
      */
     public PDImageXObject getMask() throws IOException
     {
-        COSBase mask = getCOSObject().getDictionaryObject(COSName.MASK);
-        if (mask instanceof COSArray)
+        COSStream cosStream = getCOSObject().getDictionaryObject(COSName.MASK, COSStream.class);
+        if (cosStream != null)
         {
-            // color key mask, no explicit mask to return
-            return null;
+            // always DeviceGray
+            return new PDImageXObject(new PDStream(cosStream), null);
         }
-        else
-        {
-            COSStream cosStream = (COSStream) getCOSObject().getDictionaryObject(COSName.MASK);
-            if (cosStream != null)
-            {
-                // always DeviceGray
-                return new PDImageXObject(new PDStream(cosStream), null);
-            }
-            return null;
-        }
+        return null;
     }
 
     /**
@@ -515,7 +502,7 @@ public final class PDImageXObject extends PDXObject implements PDImage
      */
     public PDImageXObject getSoftMask() throws IOException
     {
-        COSStream cosStream = (COSStream) getCOSObject().getDictionaryObject(COSName.SMASK);
+        COSStream cosStream = getCOSObject().getDictionaryObject(COSName.SMASK, COSStream.class);
         if (cosStream != null)
         {
             // always DeviceGray
@@ -531,10 +518,7 @@ public final class PDImageXObject extends PDXObject implements PDImage
         {
             return 1;
         }
-        else
-        {
-            return getCOSObject().getInt(COSName.BITS_PER_COMPONENT, COSName.BPC);
-        }
+        return getCOSObject().getInt(COSName.BITS_PER_COMPONENT, COSName.BPC);
     }
 
     @Override

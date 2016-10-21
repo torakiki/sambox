@@ -37,6 +37,7 @@ public final class PDTransparencyGroupAttributes extends PDDictionaryWrapper
      */
     public PDTransparencyGroupAttributes()
     {
+        getCOSObject().setItem(COSName.TYPE, COSName.GROUP);
         getCOSObject().setItem(COSName.S, COSName.TRANSPARENCY);
     }
 
@@ -61,7 +62,7 @@ public final class PDTransparencyGroupAttributes extends PDDictionaryWrapper
     }
 
     /**
-     * Returns true if this group is isolated. Isolated groups begin with the fully transparent image, non-isolated
+     * @return true if this group is isolated. Isolated groups begin with the fully transparent image, non-isolated
      * begin with the current backdrop.
      */
     public boolean isIsolated()
@@ -69,12 +70,22 @@ public final class PDTransparencyGroupAttributes extends PDDictionaryWrapper
         return getCOSObject().getBoolean(COSName.I, false);
     }
 
+    public void setIsolated()
+    {
+        getCOSObject().setBoolean(COSName.I, true);
+    }
+
     /**
-     * Returns true if this group is a knockout. A knockout group blends with original backdrop, a non-knockout group
+     * @return true if this group is a knockout. A knockout group blends with original backdrop, a non-knockout group
      * blends with the current backdrop.
      */
     public boolean isKnockout()
     {
         return getCOSObject().getBoolean(COSName.K, false);
+    }
+
+    public void setKnockout()
+    {
+        getCOSObject().setBoolean(COSName.K, true);
     }
 }

@@ -292,10 +292,7 @@ public class PDExtendedGraphicsState implements COSObjectable
         {
             return RenderingIntent.fromString(ri);
         }
-        else
-        {
-            return null;
-        }
+        return null;
     }
 
     /**

@@ -16,7 +16,9 @@
  */
 package org.sejda.sambox.pdmodel;
 
+import static java.util.Objects.nonNull;
 import static org.sejda.io.CountingWritableByteChannel.from;
+import static org.sejda.util.RequireUtils.requireState;
 
 import java.awt.Color;
 import java.awt.geom.AffineTransform;
@@ -37,6 +39,7 @@ import org.sejda.sambox.output.ContentStreamWriter;
 import org.sejda.sambox.pdmodel.common.PDStream;
 import org.sejda.sambox.pdmodel.documentinterchange.markedcontent.PDPropertyList;
 import org.sejda.sambox.pdmodel.font.PDFont;
+import org.sejda.sambox.pdmodel.graphics.PDXObject;
 import org.sejda.sambox.pdmodel.graphics.color.PDColor;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceCMYK;
@@ -52,7 +55,6 @@ import org.sejda.sambox.pdmodel.graphics.image.PDInlineImage;
 import org.sejda.sambox.pdmodel.graphics.shading.PDShading;
 import org.sejda.sambox.pdmodel.graphics.state.PDExtendedGraphicsState;
 import org.sejda.sambox.pdmodel.graphics.state.RenderingMode;
-import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceStream;
 import org.sejda.sambox.util.Matrix;
 import org.sejda.util.IOUtils;
 import org.slf4j.Logger;
@@ -236,7 +238,7 @@ public final class PDPageContentStream implements Closeable
      * @param appearance The appearance stream to write to.
      * @throws IOException If there is an error writing to the page contents.
      */
-    public PDPageContentStream(PDDocument doc, PDAppearanceStream appearance)
+    public PDPageContentStream(PDDocument doc, PDFormXObject appearance)
     {
         this(doc, appearance,
                 new ContentStreamWriter(from(appearance.getStream().createOutputStream())));
@@ -250,8 +252,7 @@ public final class PDPageContentStream implements Closeable
      * @param writer The writer to write the apperances
      * @throws IOException If there is an error writing to the page contents.
      */
-    public PDPageContentStream(PDDocument doc, PDAppearanceStream appearance,
-            ContentStreamWriter writer)
+    public PDPageContentStream(PDDocument doc, PDFormXObject appearance, ContentStreamWriter writer)
     {
         this.document = doc;
         this.writer = writer;
@@ -436,6 +437,11 @@ public final class PDPageContentStream implements Closeable
         drawImage(image, x, y, image.getWidth(), image.getHeight());
     }
 
+    public void drawImage(PDFormXObject image, float x, float y) throws IOException
+    {
+        drawImage(image, x, y, image.getBBox().getWidth(), image.getBBox().getHeight());
+    }
+
     /**
      * Draw an image at the x,y coordinates, with the given size.
      *
@@ -451,20 +457,13 @@ public final class PDPageContentStream implements Closeable
     public void drawImage(PDImageXObject image, float x, float y, float width, float height)
             throws IOException
     {
-        if (inTextMode)
-        {
-            throw new IllegalStateException("Error: drawImage is not allowed within a text block.");
-        }
+        draw(image, new Matrix(new AffineTransform(width, 0, 0, height, x, y)), null);
+    }
 
-        saveGraphicsState();
-
-        AffineTransform transform = new AffineTransform(width, 0, 0, height, x, y);
-        transform(new Matrix(transform));
-
-        writeOperand(resources.add(image));
-        writeOperator("Do");
-
-        restoreGraphicsState();
+    public void drawImage(PDFormXObject image, float x, float y, float width, float height)
+            throws IOException
+    {
+        draw(image, new Matrix(new AffineTransform(width, 0, 0, height, x, y)), null);
     }
 
     /**
@@ -472,23 +471,47 @@ public final class PDPageContentStream implements Closeable
      *
      * @param image The image to draw.
      * @param matrix The transformation matrix to apply to the image.
+     * @param state the graphic state to use
      *
      * @throws IOException If there is an error writing to the stream.
      * @throws IllegalStateException If the method was called within a text block.
      */
-    public void drawImage(PDImageXObject image, Matrix matrix) throws IOException
+    public void drawImage(PDImageXObject image, Matrix matrix, PDExtendedGraphicsState state)
+            throws IOException
     {
-        if (inTextMode)
-        {
-            throw new IllegalStateException("Error: drawImage is not allowed within a text block.");
-        }
+        draw(image, matrix, state);
+    }
 
+    public void drawImage(PDFormXObject image, Matrix matrix, PDExtendedGraphicsState state)
+            throws IOException
+    {
+        draw(image, matrix, state);
+    }
+
+    private void draw(PDXObject image, Matrix matrix, PDExtendedGraphicsState state)
+            throws IOException
+    {
+        requireState(!inTextMode, "Cannot draw image within a text block.");
         saveGraphicsState();
 
-        AffineTransform transform = matrix.createAffineTransform();
-        transform(new Matrix(transform));
+        transform(matrix);
+        if (nonNull(state))
+        {
+            setGraphicsStateParameters(state);
+        }
+        if (image instanceof PDImageXObject)
+        {
+            writeOperand(resources.add((PDImageXObject) image));
+        }
+        else if (image instanceof PDFormXObject)
+        {
+            writeOperand(resources.add((PDFormXObject) image));
+        }
+        else
+        {
+            throw new IllegalArgumentException("Unsupported xobject type");
+        }
 
-        writeOperand(resources.add(image));
         writeOperator("Do");
 
         restoreGraphicsState();

@@ -617,10 +617,7 @@ public final class PDResources implements COSObjectable
         {
             return add(COSName.PROPERTIES, "oc", properties);
         }
-        else
-        {
-            return add(COSName.PROPERTIES, "Prop", properties);
-        }
+        return add(COSName.PROPERTIES, "Prop", properties);
     }
 
     /**

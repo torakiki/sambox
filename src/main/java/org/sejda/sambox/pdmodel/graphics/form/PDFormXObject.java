@@ -16,6 +16,9 @@
  */
 package org.sejda.sambox.pdmodel.graphics.form;
 
+import static java.util.Objects.isNull;
+import static java.util.Optional.ofNullable;
+
 import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,20 +35,6 @@ import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.common.PDStream;
 import org.sejda.sambox.pdmodel.graphics.PDXObject;
 import org.sejda.sambox.util.Matrix;
-
-/*
- TODO There are further Form XObjects to implement:
-
- + PDFormXObject
- |- PDReferenceXObject
- |- PDGroupXObject
- |- PDTransparencyXObject
-
- See PDF 32000 p111
-
- When doing this all methods on PDFormXObject should probably be made
- final and all fields private.
- */
 
 /**
  * A Form XObject.
@@ -129,15 +118,27 @@ public class PDFormXObject extends PDXObject implements PDContentStream
      */
     public PDTransparencyGroupAttributes getGroup()
     {
-        if (group == null)
+        if (isNull(group))
         {
-            COSDictionary dic = (COSDictionary) getCOSObject().getDictionaryObject(COSName.GROUP);
-            if (dic != null)
-            {
-                group = new PDTransparencyGroupAttributes(dic);
-            }
+            group = ofNullable(
+                    getCOSObject().getDictionaryObject(COSName.GROUP, COSDictionary.class))
+                            .map(PDTransparencyGroupAttributes::new).orElse(null);
         }
         return group;
+    }
+
+    public void setGroup(PDTransparencyGroupAttributes group)
+    {
+        if (isNull(group))
+        {
+            getCOSObject().removeItem(COSName.GROUP);
+            this.group = null;
+        }
+        else
+        {
+            getCOSObject().setItem(COSName.GROUP, group.getCOSObject());
+            this.group = group;
+        }
     }
 
     public PDStream getContentStream()
@@ -160,10 +161,10 @@ public class PDFormXObject extends PDXObject implements PDContentStream
     @Override
     public PDResources getResources()
     {
-        if(resources == null)
+        if (resources == null)
         {
-            COSDictionary resourcesDict = (COSDictionary) getCOSObject()
-                    .getDictionaryObject(COSName.RESOURCES);
+            COSDictionary resourcesDict = getCOSObject().getDictionaryObject(COSName.RESOURCES,
+                    COSDictionary.class);
             if (resourcesDict != null)
             {
                 resources = new PDResources(resourcesDict, cache);
