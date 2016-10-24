@@ -25,7 +25,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import org.sejda.sambox.cos.COSArray;
@@ -219,16 +218,21 @@ public abstract class PDNameTreeNode<T extends COSObjectable> implements COSObje
     {
         try
         {
-            return Optional.ofNullable(getNames()).map(m -> m.get(name)).orElseGet(() -> {
+            Map<String, T> names = getNames();
+            if (isNull(names))
+            {
                 List<PDNameTreeNode<T>> kids = getKids();
-                if (nonNull(kids))
+                if (kids != null)
                 {
-                    for (int i = 0; i < kids.size(); i++)
+                    for (PDNameTreeNode<T> childNode : kids)
                     {
-                        PDNameTreeNode<T> childNode = kids.get(i);
                         if (childNode.couldContain(name))
                         {
-                            return childNode.getValue(name);
+                            T value = childNode.getValue(name);
+                            if (nonNull(value))
+                            {
+                                return value;
+                            }
                         }
                     }
                 }
@@ -236,8 +240,11 @@ public abstract class PDNameTreeNode<T extends COSObjectable> implements COSObje
                 {
                     LOG.warn("NameTreeNode does not have \"names\" nor \"kids\" objects.");
                 }
-                return null;
-            });
+            }
+            else
+            {
+                return names.get(name);
+            }
         }
         catch (IOException e)
         {
