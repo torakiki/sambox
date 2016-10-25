@@ -23,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.junit.After;
 import org.junit.Before;
@@ -41,14 +42,14 @@ public class PDAcroFormTest
 {
 
     private PDDocument document;
-    private PDAcroForm acroForm;
+    private PDAcroForm form;
 
     @Before
     public void setUp()
     {
         document = new PDDocument();
-        acroForm = new PDAcroForm(document);
-        document.getDocumentCatalog().setAcroForm(acroForm);
+        form = new PDAcroForm(document);
+        document.getDocumentCatalog().setAcroForm(form);
     }
 
     @Test
@@ -56,31 +57,31 @@ public class PDAcroFormTest
     {
         // the /Fields entry has been created with the AcroForm
         // as this is a required entry
-        assertNotNull(acroForm.getFields());
-        assertEquals(acroForm.getFields().size(), 0);
+        assertNotNull(form.getFields());
+        assertEquals(form.getFields().size(), 0);
 
         // there shouldn't be an exception if there is no such field
-        assertNull(acroForm.getField("foo"));
+        assertNull(form.getField("foo"));
 
         // remove the required entry which is the case for some
         // PDFs (see PDFBOX-2965)
-        acroForm.getCOSObject().removeItem(COSName.FIELDS);
+        form.getCOSObject().removeItem(COSName.FIELDS);
 
         // ensure there is always an empty collection returned
-        assertNotNull(acroForm.getFields());
-        assertEquals(acroForm.getFields().size(), 0);
+        assertNotNull(form.getFields());
+        assertEquals(form.getFields().size(), 0);
 
         // there shouldn't be an exception if there is no such field
-        assertNull(acroForm.getField("foo"));
-        assertEquals("", acroForm.getDefaultAppearance());
+        assertNull(form.getField("foo"));
+        assertEquals("", form.getDefaultAppearance());
     }
 
     @Test
     public void testAcroFormProperties()
     {
-        assertTrue(acroForm.getDefaultAppearance().isEmpty());
-        acroForm.setDefaultAppearance("/Helv 0 Tf 0 g");
-        assertEquals(acroForm.getDefaultAppearance(), "/Helv 0 Tf 0 g");
+        assertTrue(form.getDefaultAppearance().isEmpty());
+        form.setDefaultAppearance("/Helv 0 Tf 0 g");
+        assertEquals(form.getDefaultAppearance(), "/Helv 0 Tf 0 g");
     }
 
     @Test
@@ -117,6 +118,41 @@ public class PDAcroFormTest
             doc.getDocumentCatalog().getAcroForm().flatten();
             assertTrue(doc.getDocumentCatalog().getAcroForm().getFields().isEmpty());
         }
+    }
+
+    @Test
+    public void remove()
+    {
+        PDNonTerminalField b = new PDNonTerminalField(form);
+        b.setPartialName("B");
+        PDNonTerminalField d = new PDNonTerminalField(form);
+        d.setPartialName("D");
+        PDNonTerminalField g = new PDNonTerminalField(form);
+        g.setPartialName("G");
+        PDNonTerminalField i = new PDNonTerminalField(form);
+        i.setPartialName("I");
+        PDTextField a = new PDTextField(form);
+        a.setPartialName("A");
+        PDTextField c = new PDTextField(form);
+        c.setPartialName("C");
+        PDTextField h = new PDTextField(form);
+        h.setPartialName("H");
+        PDTextField e = new PDTextField(form);
+        e.setPartialName("E");
+        b.addChild(a);
+        b.addChild(d);
+        d.addChild(c);
+        d.addChild(e);
+        g.addChild(i);
+        i.addChild(h);
+        form.addFields(Arrays.asList(b, g));
+        assertNotNull(form.getField("B"));
+        assertNotNull(form.getField("B.D.C"));
+        // removes only from root
+        assertNull(form.removeField(e));
+        assertNotNull(form.removeField(PDFieldFactory.createField(form, b.getCOSObject(), null)));
+        assertNull(form.getField("B"));
+        assertNull(form.getField("B.D.C"));
     }
 
     @After

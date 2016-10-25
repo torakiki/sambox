@@ -16,32 +16,29 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
 import java.util.Arrays;
 
-import org.junit.Before;
 import org.junit.Test;
+import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.pdmodel.PDDocument;
 
 /**
  * @author Andrea Vacondio
  *
  */
-public class PDFieldTreeTest
+public class PDNonTerminalFieldTest
 {
-
-    private PDAcroForm form = null;
-
-    @Before
-    public void setUp() throws IOException
+    @Test
+    public void remove() throws IOException
     {
-        try (PDDocument doc = new PDDocument())
+        try (PDDocument document = new PDDocument())
         {
-            form = new PDAcroForm(doc);
-            PDNonTerminalField f = new PDNonTerminalField(form);
-            f.setPartialName("F");
+            PDAcroForm form = new PDAcroForm(document);
+            document.getDocumentCatalog().setAcroForm(form);
             PDNonTerminalField b = new PDNonTerminalField(form);
             b.setPartialName("B");
             PDNonTerminalField d = new PDNonTerminalField(form);
@@ -58,34 +55,23 @@ public class PDFieldTreeTest
             h.setPartialName("H");
             PDTextField e = new PDTextField(form);
             e.setPartialName("E");
+            PDNonTerminalField f = new PDNonTerminalField(form);
+            f.setPartialName("F");
             b.addChild(a);
             b.addChild(d);
             d.addChild(c);
             d.addChild(e);
-            f.addChild(b);
             g.addChild(i);
             i.addChild(h);
+            f.addChild(b);
             f.addChild(g);
             form.addFields(Arrays.asList(f));
+            assertNotNull(form.getField("F.G.I.H"));
+            assertNull(i.removeChild(PDFieldFactory.createField(form, new COSDictionary(), null)));
+            assertNotNull(
+                    i.removeChild(PDFieldFactory.createField(form, h.getCOSObject(), null)));
+            assertNull(form.getField("F.G.I.H"));
         }
     }
 
-    @Test
-    public void iteratorIsPostOrder()
-    {
-        StringBuilder builder = new StringBuilder();
-        for (PDField current : form.getFieldTree())
-        {
-            builder.append(current.getPartialName());
-        }
-        assertEquals("ACEDBHIGF", builder.toString());
-    }
-
-    @Test
-    public void streamIsPreOrder()
-    {
-        StringBuilder builder = new StringBuilder();
-        form.getFieldTree().stream().map(PDField::getPartialName).forEach(builder::append);
-        assertEquals("FBADCEGIH", builder.toString());
-    }
 }

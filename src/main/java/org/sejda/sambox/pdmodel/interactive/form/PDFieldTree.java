@@ -16,11 +16,17 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
+import static org.sejda.util.RequireUtils.requireNotNullArg;
+
 import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Queue;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * The field tree allowing a post-order iteration of the nodes.
@@ -30,21 +36,16 @@ public class PDFieldTree implements Iterable<PDField>
     private final PDAcroForm acroForm;
 
     /**
-     * Constructor for reading.
-     *
      * @param acroForm the AcroForm containing the fields.
      */
     public PDFieldTree(PDAcroForm acroForm)
     {
-        if (acroForm == null)
-        {
-            throw new IllegalArgumentException("root cannot be null");
-        }
+        requireNotNullArg(acroForm, "root cannot be null");
         this.acroForm = acroForm;
     }
 
     /**
-     * Returns an iterator which walks all fields in the tree, post-order.
+     * @return an iterator which walks all fields in the tree, post-order.
      */
     @Override
     public Iterator<PDField> iterator()
@@ -61,8 +62,7 @@ public class PDFieldTree implements Iterable<PDField>
 
         private FieldIterator(PDAcroForm form)
         {
-            List<PDField> fields = form.getFields();
-            for (PDField field : fields)
+            for (PDField field : form.getFields())
             {
                 enqueueKids(field);
             }
@@ -77,11 +77,7 @@ public class PDFieldTree implements Iterable<PDField>
         @Override
         public PDField next()
         {
-            if (!hasNext())
-            {
-                throw new NoSuchElementException();
-            }
-            return queue.poll();
+            return queue.remove();
         }
 
         @Override
@@ -101,6 +97,62 @@ public class PDFieldTree implements Iterable<PDField>
                 }
             }
             queue.add(node);
+        }
+    }
+
+    /**
+     * @return a pre order sequential {@code Stream} over the fields of this form.
+     */
+    public Stream<PDField> stream()
+    {
+        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(
+                new PreOrderIterator(acroForm), Spliterator.ORDERED | Spliterator.NONNULL), false);
+    }
+
+    /**
+     * Iterator which walks all the fields pre order
+     */
+    private final class PreOrderIterator implements Iterator<PDField>
+    {
+        private final Deque<PDField> queue = new ArrayDeque<>();
+
+        private PreOrderIterator(PDAcroForm form)
+        {
+            for (PDField field : form.getFields())
+            {
+                enqueueKids(field);
+            }
+        }
+
+        private void enqueueKids(PDField node)
+        {
+            queue.add(node);
+            if (node instanceof PDNonTerminalField)
+            {
+                List<PDField> kids = ((PDNonTerminalField) node).getChildren();
+                for (PDField kid : kids)
+                {
+                    enqueueKids(kid);
+                }
+            }
+        }
+
+        @Override
+        public boolean hasNext()
+        {
+            return !queue.isEmpty();
+        }
+
+        @Override
+        public PDField next()
+        {
+            return queue.remove();
+        }
+
+        @Override
+        public void remove()
+        {
+            throw new UnsupportedOperationException();
         }
     }
 }

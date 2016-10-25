@@ -324,14 +324,21 @@ public final class PDAcroForm extends PDDictionaryWrapper
 
     /**
      * removes the given field from the root fields of the form
+     * 
+     * @return the removed element or null
      */
-    public void removeField(PDField remove)
+    public COSBase removeField(PDField remove)
     {
         COSArray fields = getCOSObject().getDictionaryObject(COSName.FIELDS, COSArray.class);
-        if (nonNull(fields) && fields.contains(remove))
+        if (nonNull(fields))
         {
-            fields.remove(remove);
+            int removeIdx = fields.indexOfObject(remove.getCOSObject());
+            if (removeIdx >= 0)
+            {
+                return fields.remove(removeIdx);
+            }
         }
+        return null;
     }
 
     /**
@@ -345,7 +352,7 @@ public final class PDAcroForm extends PDDictionaryWrapper
     }
 
     /**
-     * Returns an iterator which walks all fields in the field tree, in order.
+     * Returns an iterator which walks all fields in the field tree, post-order.
      */
     public Iterator<PDField> getFieldIterator()
     {
@@ -368,36 +375,9 @@ public final class PDAcroForm extends PDDictionaryWrapper
      */
     public PDField getField(String fullyQualifiedName)
     {
-        String[] nameSubSection = fullyQualifiedName.split("\\.");
-        COSArray fields = getCOSObject().getDictionaryObject(COSName.FIELDS, COSArray.class);
-
-        if (nonNull(fields))
-        {
-            for (int i = 0; i < fields.size(); i++)
-            {
-                COSDictionary element = (COSDictionary) fields.getObject(i);
-                if (nonNull(element))
-                {
-                    String fieldName = ofNullable(
-                            element.getDictionaryObject(COSName.T, COSString.class))
-                                    .map(COSString::getString).orElse("");
-                    if (fieldName.equals(fullyQualifiedName) || fieldName.equals(nameSubSection[0]))
-                    {
-                        PDField root = PDField.fromDictionary(this, element, null);
-                        if (nonNull(root))
-                        {
-                            if (nameSubSection.length > 1)
-                            {
-                                return ofNullable(root.findKid(nameSubSection, 1)).orElse(root);
-
-                            }
-                            return root;
-                        }
-                    }
-                }
-            }
-        }
-        return null;
+        return getFieldTree().stream()
+                .filter(f -> f.getFullyQualifiedName().equals(fullyQualifiedName)).findFirst()
+                .orElse(null);
     }
 
     /**

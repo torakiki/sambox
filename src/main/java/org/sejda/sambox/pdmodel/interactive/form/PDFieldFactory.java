@@ -44,7 +44,7 @@ public final class PDFieldFactory
      * @param parent
      * @return
      */
-    public static PDField createFielAddingChildToParent(PDAcroForm form, COSDictionary field,
+    public static PDField createFieldAddingChildToParent(PDAcroForm form, COSDictionary field,
             PDNonTerminalField parent)
     {
         PDField retField = createField(form, field, parent);

@@ -140,14 +140,20 @@ public class PDNonTerminalField extends PDField
      * Removes the given node from the children list
      * 
      * @param field
+     * @return the removed COSBase or null
      */
-    public void removeChild(PDField field)
+    public COSBase removeChild(PDField field)
     {
-        COSArray kids = (COSArray) getCOSObject().getDictionaryObject(COSName.KIDS);
-        if (kids != null && kids.contains(field))
+        COSArray kids = getCOSObject().getDictionaryObject(COSName.KIDS, COSArray.class);
+        if (nonNull(kids))
         {
-            kids.remove(field);
+            int removeIdx = kids.indexOfObject(field.getCOSObject());
+            if (removeIdx >= 0)
+            {
+                return kids.remove(removeIdx);
+            }
         }
+        return null;
     }
 
     /**

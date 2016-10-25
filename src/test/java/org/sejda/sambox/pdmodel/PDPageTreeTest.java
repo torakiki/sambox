@@ -30,14 +30,14 @@ import org.sejda.sambox.pdmodel.interactive.documentnavigation.outline.PDOutline
  * @author Andrea Vacondio
  *
  */
-public class TestPDPageTree
+public class PDPageTreeTest
 {
 
     @Test
     public void indexOfPageFromOutlineDestination() throws IOException
     {
         try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
-                TestPDPageTree.class.getResourceAsStream("with_outline.pdf"))))
+                PDPageTreeTest.class.getResourceAsStream("with_outline.pdf"))))
         {
             PDDocumentOutline outline = doc.getDocumentCatalog().getDocumentOutline();
             for (PDOutlineItem current : outline.children())
@@ -55,7 +55,7 @@ public class TestPDPageTree
     public void positiveSingleLevel() throws IOException
     {
         try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
-                TestPDPageTree.class.getResourceAsStream("with_outline.pdf"))))
+                PDPageTreeTest.class.getResourceAsStream("with_outline.pdf"))))
         {
             for (int i = 0; i < doc.getNumberOfPages(); i++)
             {
@@ -68,7 +68,7 @@ public class TestPDPageTree
     public void positiveMultipleLevel() throws IOException
     {
         try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
-                TestPDPageTree.class.getResourceAsStream("page_tree_multiple_levels.pdf"))))
+                PDPageTreeTest.class.getResourceAsStream("page_tree_multiple_levels.pdf"))))
         {
             for (int i = 0; i < doc.getNumberOfPages(); i++)
             {
@@ -81,7 +81,7 @@ public class TestPDPageTree
     public void negative() throws IOException
     {
         try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
-                TestPDPageTree.class.getResourceAsStream("with_outline.pdf"))))
+                PDPageTreeTest.class.getResourceAsStream("with_outline.pdf"))))
         {
             assertEquals(-1, doc.getPages().indexOf(new PDPage()));
         }
@@ -91,7 +91,7 @@ public class TestPDPageTree
     public void pagesAsStream() throws IOException
     {
         try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
-                TestPDPageTree.class.getResourceAsStream("with_outline.pdf"))))
+                PDPageTreeTest.class.getResourceAsStream("with_outline.pdf"))))
         {
             assertEquals(6, doc.getPages().stream().count());
         }
@@ -101,7 +101,7 @@ public class TestPDPageTree
     public void pagesAsStreamOrder() throws IOException
     {
         try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
-                TestPDPageTree.class.getResourceAsStream("with_outline.pdf"))))
+                PDPageTreeTest.class.getResourceAsStream("with_outline.pdf"))))
         {
             assertEquals(doc.getPage(0), doc.getPages().stream().findFirst().get());
             assertEquals(doc.getPage(1), doc.getPages().stream().skip(1).findFirst().get());
