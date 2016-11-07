@@ -350,8 +350,12 @@ public class PDTrueTypeFont extends PDSimpleFont implements PDVectorFont
                 }
             }
 
-            int code = inverted.get(name);
-            return new byte[] { (byte) code };
+            Integer code = inverted.get(name);
+            if(code == null) {
+                throw new IllegalArgumentException(
+                        String.format("No glyph for U+%04X in font %s", unicode, getName()));
+            }
+            return new byte[] { (byte) code.intValue() };
         }
         // use TTF font's built-in encoding
         String name = getGlyphList().codePointToName(unicode);
