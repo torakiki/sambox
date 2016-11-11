@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.pdmodel.interactive.annotation;
 
+import static java.util.Objects.nonNull;
+import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static org.sejda.util.RequireUtils.requireArg;
 
@@ -86,6 +88,27 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
      * An annotation flag.
      */
     public static final int FLAG_TOGGLE_NO_VIEW = 1 << 8;
+
+    /**
+     * Create the annotation of the expected type from the given dictionary.
+     * 
+     * @return The correctly typed annotation object.
+     */
+    public static <T extends PDAnnotation> T createAnnotation(COSDictionary dictionary,
+            Class<T> expectedType)
+    {
+        PDAnnotation annotation = createAnnotation(dictionary);
+        if (nonNull(annotation))
+        {
+            of(annotation).filter(i -> expectedType.isInstance(i)).map(expectedType::cast)
+                    .orElseGet(() -> {
+                        LOG.warn("Expected annotation type {} but got {}", expectedType,
+                                annotation.getClass());
+                        return null;
+                    });
+        }
+        return null;
+    }
 
     /**
      * Create the correct annotation from the base COS object.
