@@ -692,10 +692,10 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
      */
     public PDPage getPage()
     {
-        COSDictionary p = (COSDictionary) this.getCOSObject().getDictionaryObject(COSName.P);
-        if (p != null)
+        COSBase p = this.getCOSObject().getDictionaryObject(COSName.P);
+        if (p != null && p instanceof COSDictionary)
         {
-            return new PDPage(p);
+            return new PDPage((COSDictionary) p);
         }
         return null;
     }
