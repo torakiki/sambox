@@ -18,6 +18,7 @@ package org.sejda.sambox.pdmodel.common;
 
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 
 import org.apache.fontbox.util.BoundingBox;
 import org.sejda.sambox.cos.COSArray;
@@ -69,8 +70,6 @@ public class PDRectangle implements COSObjectable
     private final COSArray rectArray = new COSArray();
 
     /**
-     * Constructor.
-     *
      * Initializes to 0,0,0,0
      */
     public PDRectangle()
@@ -79,8 +78,6 @@ public class PDRectangle implements COSObjectable
     }
 
     /**
-     * Constructor.
-     *
      * @param width The width of the rectangle.
      * @param height The height of the rectangle.
      */
@@ -90,8 +87,6 @@ public class PDRectangle implements COSObjectable
     }
 
     /**
-     * Constructor.
-     *
      * @param x the x coordinate of the rectangle
      * @param y the y coordinate of the rectangle
      * @param width The width of the rectangle.
@@ -105,9 +100,13 @@ public class PDRectangle implements COSObjectable
         rectArray.add(new COSFloat(y + height));
     }
 
+    public PDRectangle(Rectangle2D rectange)
+    {
+        this((float) rectange.getX(), (float) rectange.getY(), (float) rectange.getWidth(),
+                (float) rectange.getHeight());
+    }
+
     /**
-     * Constructor.
-     *
      * @param box the bounding box to be used for the rectangle
      */
     public PDRectangle(BoundingBox box)
@@ -119,8 +118,6 @@ public class PDRectangle implements COSObjectable
     }
 
     /**
-     * Constructor.
-     *
      * @param array An array of numbers as specified in the PDF Reference for a rectangle type.
      */
     public PDRectangle(COSArray array)
