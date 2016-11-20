@@ -17,6 +17,7 @@
 package org.sejda.sambox.pdmodel.interactive.annotation;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 import org.sejda.sambox.cos.COSName;
@@ -43,8 +44,7 @@ public class PDAnnotationTest
     @Test
     public void createWidgetAnnotationFromField()
     {
-        PDDocument document = new PDDocument();
-        PDAcroForm acroForm = new PDAcroForm(document);
+        PDAcroForm acroForm = new PDAcroForm(new PDDocument());
         PDTextField textField = new PDTextField(acroForm);
         PDAnnotation annotation = textField.getWidgets().get(0);
         assertEquals(COSName.ANNOT, annotation.getCOSObject().getItem(COSName.TYPE));
@@ -52,4 +52,13 @@ public class PDAnnotationTest
                 annotation.getCOSObject().getNameAsString(COSName.SUBTYPE));
     }
 
+    @Test
+    public void createAnnotation()
+    {
+        PDAnnotation annotation = new PDAnnotationWidget();
+        assertEquals(annotation,
+                PDAnnotation.createAnnotation(annotation.getCOSObject(), PDAnnotationWidget.class));
+        assertNull(
+                PDAnnotation.createAnnotation(annotation.getCOSObject(), PDAnnotationLink.class));
+    }
 }

@@ -100,7 +100,7 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
         PDAnnotation annotation = createAnnotation(dictionary);
         if (nonNull(annotation))
         {
-            of(annotation).filter(i -> expectedType.isInstance(i)).map(expectedType::cast)
+            return of(annotation).filter(i -> expectedType.isInstance(i)).map(expectedType::cast)
                     .orElseGet(() -> {
                         LOG.warn("Expected annotation type {} but got {}", expectedType,
                                 annotation.getClass());
