@@ -325,6 +325,15 @@ public class SourceReaderTest
     }
 
     @Test
+    public void readDoubleNegativeNumber() throws IOException
+    {
+        victim = new SourceReader(inMemorySeekableSourceFrom("--1.002".getBytes()));
+        assertEquals("-1.002", victim.readNumber());
+        victim = new SourceReader(inMemorySeekableSourceFrom("--.002".getBytes()));
+        assertEquals("-.002", victim.readNumber());
+    }
+
+    @Test
     public void readPostScriptNumber() throws IOException
     {
         victim = new SourceReader(inMemorySeekableSourceFrom("6.02E23".getBytes()));
