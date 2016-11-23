@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.pdmodel;
 
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 
 import java.io.ByteArrayInputStream;
@@ -520,22 +521,24 @@ public class PDPage implements COSObjectable, PDContentStream
         COSArray beads = page.getDictionaryObject(COSName.B, COSArray.class);
         if (beads == null)
         {
-            beads = new COSArray();
+            return new COSArrayList<>(page, COSName.B);
         }
-        List<PDThreadBead> pdObjects = new ArrayList<>();
+        List<PDThreadBead> actuals = new ArrayList<>();
         for (int i = 0; i < beads.size(); i++)
         {
-            COSDictionary beadDic = (COSDictionary) beads.getObject(i);
-            PDThreadBead bead = null;
-            // in some cases the bead is null
-            if (beadDic != null)
+            COSBase item = beads.getObject(i);
+            PDThreadBead bead = ofNullable(item).filter(d -> d instanceof COSDictionary)
+                    .map(COSDictionary.class::cast).map(PDThreadBead::new).orElseGet(() -> {
+                        LOG.warn("Ignored thread bead expected to be a dictionary but was {}",
+                                item);
+                        return null;
+                    });
+            if (nonNull(bead))
             {
-                bead = new PDThreadBead(beadDic);
+                actuals.add(bead);
             }
-            pdObjects.add(bead);
         }
-        return new COSArrayList<>(pdObjects, beads);
-
+        return new COSArrayList<>(actuals, beads);
     }
 
     /**
@@ -633,19 +636,24 @@ public class PDPage implements COSObjectable, PDContentStream
      */
     public List<PDAnnotation> getAnnotations()
     {
-        COSArrayList<PDAnnotation> retval;
         COSArray annots = page.getDictionaryObject(COSName.ANNOTS, COSArray.class);
         if (annots == null)
         {
-            return new COSArrayList<PDAnnotation>(page, COSName.ANNOTS);
+            return new COSArrayList<>(page, COSName.ANNOTS);
         }
         List<PDAnnotation> actuals = new ArrayList<>();
         for (int i = 0; i < annots.size(); i++)
         {
             COSBase item = annots.getObject(i);
-            if (item != null)
+            PDAnnotation annotation = ofNullable(item).filter(d -> d instanceof COSDictionary)
+                    .map(COSDictionary.class::cast).map(PDAnnotation::createAnnotation)
+                    .orElseGet(() -> {
+                        LOG.warn("Ignored annotation expected to be a dictionary but was {}", item);
+                        return null;
+                    });
+            if (nonNull(annotation))
             {
-                actuals.add(PDAnnotation.createAnnotation(item));
+                actuals.add(annotation);
             }
         }
         return new COSArrayList<>(actuals, annots);
