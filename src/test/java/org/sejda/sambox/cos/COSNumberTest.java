@@ -64,13 +64,13 @@ public class COSNumberTest
         COSNumber.get("  ");
     }
 
-    @Test(expected = IOException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void invalidString() throws IOException
     {
         COSNumber.get("ChuckNorris");
     }
 
-    @Test(expected = IOException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void invalidChar() throws IOException
     {
         COSNumber.get("A");
@@ -80,11 +80,19 @@ public class COSNumberTest
     public void pdfbox592() throws IOException
     {
         assertEquals(COSInteger.ZERO, COSNumber.get("-"));
+        assertEquals(COSInteger.ZERO, COSNumber.get("."));
     }
 
     @Test
-    public void pdfbox592_2() throws IOException
+    public void pdfbox3589() throws IOException
     {
-        assertEquals(COSInteger.ZERO, COSNumber.get("."));
+        assertEquals(COSInteger.ZERO, COSNumber.get("--242"));
+        assertEquals(COSInteger.ZERO, COSNumber.get("-+242"));
+        assertEquals(COSInteger.ZERO, COSNumber.get("+-242"));
+        assertEquals(COSInteger.ZERO, COSNumber.get("++242"));
+
+        assertEquals(new COSFloat(-242f), COSNumber.get("--242.0"));
+        assertEquals(new COSFloat(-242f), COSNumber.get("-+242.0"));
+        assertEquals(new COSFloat(-242f), COSNumber.get("---242.0"));
     }
 }

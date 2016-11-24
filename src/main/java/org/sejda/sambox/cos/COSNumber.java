@@ -16,7 +16,8 @@
  */
 package org.sejda.sambox.cos;
 
-import static org.sejda.util.RequireUtils.requireNotBlank;
+import static org.sejda.util.RequireUtils.requireArg;
+import static org.sejda.util.RequireUtils.requireNotNullArg;
 
 import java.io.IOException;
 
@@ -57,7 +58,8 @@ public abstract class COSNumber extends COSBase
      */
     public static COSNumber get(String number) throws IOException
     {
-        requireNotBlank(number, "Cannot get a number from a blank string");
+        requireNotNullArg(number, "Number cannot be null");
+        requireArg(number.matches("(E|e|\\+|\\-|\\.|\\d)+"), "Invalid number " + number);
         if (number.length() == 1)
         {
             char digit = number.charAt(0);
@@ -65,12 +67,8 @@ public abstract class COSNumber extends COSBase
             {
                 return COSInteger.get(digit - '0');
             }
-            else if (digit == '-' || digit == '.')
-            {
-                // See https://issues.apache.org/jira/browse/PDFBOX-592
-                return COSInteger.ZERO;
-            }
-            throw new IOException("Expected a number but was " + number);
+            // PDFBOX-592
+            return COSInteger.ZERO;
         }
         else if (number.indexOf('.') == -1 && (number.toLowerCase().indexOf('e') == -1))
         {
@@ -80,9 +78,11 @@ public abstract class COSNumber extends COSBase
             }
             catch (NumberFormatException e)
             {
-                    return new COSFloat(number);
+                // PDFBOX-3589 --242
+                return COSInteger.ZERO;
             }
         }
+
         return new COSFloat(number);
     }
 }

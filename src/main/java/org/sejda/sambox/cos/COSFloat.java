@@ -54,13 +54,21 @@ public class COSFloat extends COSNumber
         }
         catch (NumberFormatException e)
         {
-            // PDFBOX-2990 has 0.00000-33917698
-            // PDFBOX-3369 has 0.00-35095424
-            requireIOCondition(aFloat.matches("^0\\.0+\\-\\d+"),
-                    "Expected floating point number but found '" + aFloat + "'");
             try
             {
-                value = new BigDecimal("-" + aFloat.replaceFirst("\\-", ""));
+                if (aFloat.matches("^(-)([-|+]+)\\d+\\.\\d+"))
+                {
+                    // PDFBOX-3589 --242.0
+                    value = new BigDecimal(aFloat.replaceFirst("^(-)([\\-|\\+]+)", "-"));
+                }
+                else
+                {
+                    // PDFBOX-2990 has 0.00000-33917698
+                    // PDFBOX-3369 has 0.00-35095424
+                    requireIOCondition(aFloat.matches("^0\\.0+\\-\\d+"),
+                            "Expected floating point number but found '" + aFloat + "'");
+                    value = new BigDecimal("-" + aFloat.replaceFirst("\\-", ""));
+                }
                 checkMinMaxValues();
             }
             catch (NumberFormatException e2)

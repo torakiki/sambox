@@ -16,12 +16,12 @@
  */
 package org.sejda.sambox.cos;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Optional;
 
+import org.sejda.io.FastByteArrayOutputStream;
 import org.sejda.sambox.util.Hex;
 
 /**
@@ -225,7 +225,7 @@ public final class COSString extends COSBase implements Encryptable
      */
     public static COSString parseHex(String hex) throws IOException
     {
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+
         StringBuilder hexBuffer = new StringBuilder(hex.trim());
 
         // if odd number then the last hex digit is assumed to be 0
@@ -234,22 +234,23 @@ public final class COSString extends COSBase implements Encryptable
             hexBuffer.append('0');
         }
 
-        int length = hexBuffer.length();
-        for (int i = 0; i < length; i += 2)
+        try (FastByteArrayOutputStream bytes = new FastByteArrayOutputStream())
         {
-            try
+            for (int i = 0; i < hexBuffer.length(); i += 2)
             {
-                bytes.write(Integer.parseInt(hexBuffer.substring(i, i + 2), 16));
+                try
+                {
+                    bytes.write(Integer.parseInt(hexBuffer.substring(i, i + 2), 16));
+                }
+                catch (NumberFormatException e)
+                {
+                    throw new IOException("Invalid hex string: " + hex, e);
+                }
             }
-            catch (NumberFormatException e)
-            {
-                throw new IOException("Invalid hex string: " + hex, e);
-            }
+            COSString retVal = new COSString(bytes.toByteArray());
+            retVal.setForceHexForm(true);
+            return retVal;
         }
-
-        COSString retVal = new COSString(bytes.toByteArray());
-        retVal.setForceHexForm(true);
-        return retVal;
     }
 
 }

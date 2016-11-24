@@ -477,11 +477,6 @@ class SourceReader implements Closeable
             if (c != -1 && (isDigit(c) || c == '+' || c == '-' || c == '.'))
             {
                 builder.append((char) c);
-                if (c == '-' && source.peek() == '-')
-                {
-                    // skip double negative, consistent with pdf.js
-                    source.read();
-                }
                 while ((c = source.read()) != -1
                         && (isDigit(c) || c == '.' || c == 'E' || c == 'e' || c == '+' || c == '-'))
                 {

@@ -43,6 +43,12 @@ public class COSIntegerTest
     }
 
     @Test
+    public void negativeIntValue()
+    {
+        assertEquals(-20, COSInteger.get(-20).intValue());
+    }
+
+    @Test
     public void longValue()
     {
         assertEquals(2l, COSInteger.get(2).longValue());

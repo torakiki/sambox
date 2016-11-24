@@ -61,6 +61,12 @@ public class COSFloatTest
     }
 
     @Test
+    public void negativeFloatValue() throws IOException
+    {
+        assertEquals(-2.04f, COSFloat.get("-2.04").floatValue(), 0);
+    }
+
+    @Test
     public void pdfbox2990() throws IOException
     {
         assertEquals(-0.0000033917698f, COSFloat.get("0.00000-33917698").floatValue(), 0);
@@ -71,5 +77,15 @@ public class COSFloatTest
     public void invalidValue() throws IOException
     {
         new COSFloat("Chuck");
+    }
+
+    @Test
+    public void pdfbox3589() throws IOException
+    {
+        assertEquals(-242.3f, COSFloat.get("---242.3").floatValue(), 0);
+        assertEquals(-242.3f, COSFloat.get("-+-242.3").floatValue(), 0);
+        assertEquals(-242.3f, COSFloat.get("--+242.3").floatValue(), 0);
+        assertEquals(-242.3f, COSFloat.get("--242.3").floatValue(), 0);
+        assertEquals(-242.3f, COSFloat.get("-+242.3").floatValue(), 0);
     }
 }
