@@ -311,6 +311,7 @@ public class PDFTextStripper extends PDFTextStreamEngine
         for (PDPage page : pages)
         {
             currentPageNo++;
+            LOG.trace("Processing page {}", currentPageNo);
             if (page.hasContents())
             {
                 try
