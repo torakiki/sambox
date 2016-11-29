@@ -88,4 +88,11 @@ public class COSFloatTest
         assertEquals(-242.3f, COSFloat.get("--242.3").floatValue(), 0);
         assertEquals(-242.3f, COSFloat.get("-+242.3").floatValue(), 0);
     }
+
+    @Test
+    public void multipleDots() throws IOException
+    {
+        assertEquals(415.750795f, COSFloat.get("415.75.795").floatValue(), 0);
+        assertEquals(-415.750795f, COSFloat.get("-415.75.795").floatValue(), 0);
+    }
 }

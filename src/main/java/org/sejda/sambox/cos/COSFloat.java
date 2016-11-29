@@ -49,6 +49,14 @@ public class COSFloat extends COSNumber
     {
         try
         {
+            int dot = aFloat.indexOf('.');
+            if (dot != aFloat.lastIndexOf('.'))
+            {
+                // 415.75.795 we replace additional dots with 0
+                aFloat = aFloat.substring(0, dot + 1)
+                        + aFloat.substring(dot + 1).replaceAll("\\.", "0");
+
+            }
             value = new BigDecimal(aFloat);
             checkMinMaxValues();
         }
