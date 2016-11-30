@@ -118,26 +118,23 @@ final class FileSystemFontProvider extends FontProvider
             {
                 return cached;
             }
-            else
+            FontBoxFont font;
+            switch (format)
             {
-                FontBoxFont font;
-                switch (format)
-                {
-                case PFB:
-                    font = parent.getType1Font(postScriptName, file);
-                    break;
-                case TTF:
-                    font = parent.getTrueTypeFont(postScriptName, file);
-                    break;
-                case OTF:
-                    font = parent.getOTFFont(postScriptName, file);
-                    break;
-                default:
-                    throw new RuntimeException("can't happen");
-                }
-                parent.cache.addFont(this, font);
-                return font;
+            case PFB:
+                font = parent.getType1Font(postScriptName, file);
+                break;
+            case TTF:
+                font = parent.getTrueTypeFont(postScriptName, file);
+                break;
+            case OTF:
+                font = parent.getOTFFont(postScriptName, file);
+                break;
+            default:
+                throw new RuntimeException("can't happen");
             }
+            parent.cache.addFont(this, font);
+            return font;
         }
 
         @Override
@@ -205,7 +202,7 @@ final class FileSystemFontProvider extends FontProvider
             LOG.trace("Will search the local system for fonts");
 
             // scan the local system for font files
-            List<File> files = new ArrayList<File>();
+            List<File> files = new ArrayList<>();
             FontFileFinder fontFileFinder = new FontFileFinder();
             List<URI> fonts = fontFileFinder.find();
             for (URI font : fonts)
@@ -354,20 +351,18 @@ final class FileSystemFontProvider extends FontProvider
      */
     private List<FSFontInfo> loadDiskCache(List<File> files)
     {
-        Set<String> pending = new HashSet<String>();
+        Set<String> pending = new HashSet<>();
         for (File file : files)
         {
             pending.add(file.getAbsolutePath());
         }
 
-        List<FSFontInfo> results = new ArrayList<FSFontInfo>();
+        List<FSFontInfo> results = new ArrayList<>();
         File file = getDiskCacheFile();
         if (file.exists())
         {
-            BufferedReader reader = null;
-            try
+            try (BufferedReader reader = new BufferedReader(new FileReader(file)))
             {
-                reader = new BufferedReader(new FileReader(file));
                 String line;
                 while ((line = reader.readLine()) != null)
                 {
@@ -434,10 +429,6 @@ final class FileSystemFontProvider extends FontProvider
                 LOG.error("Error loading font cache, will be re-built", e);
                 return null;
             }
-            finally
-            {
-                IOUtils.closeQuietly(reader);
-            }
         }
 
         if (pending.size() > 0)
@@ -453,7 +444,7 @@ final class FileSystemFontProvider extends FontProvider
     /**
      * Adds a TTC or OTC to the file cache. To reduce memory, the parsed font is not cached.
      */
-    private void addTrueTypeCollection(final File ttcFile) throws IOException
+    private void addTrueTypeCollection(final File ttcFile)
     {
         try (TrueTypeCollection ttc = new TrueTypeCollection(ttcFile))
         {
@@ -479,7 +470,7 @@ final class FileSystemFontProvider extends FontProvider
     /**
      * Adds an OTF or TTF font to the file cache. To reduce memory, the parsed font is not cached.
      */
-    private void addTrueTypeFont(File ttfFile) throws IOException
+    private void addTrueTypeFont(File ttfFile)
     {
         try
         {
@@ -614,8 +605,7 @@ final class FileSystemFontProvider extends FontProvider
      */
     private void addType1Font(File pfbFile) throws IOException
     {
-        InputStream input = new FileInputStream(pfbFile);
-        try
+        try (InputStream input = new FileInputStream(pfbFile))
         {
             Type1Font type1 = Type1Font.createWithPFB(input);
             fontInfoList.add(new FSFontInfo(pfbFile, FontFormat.PFB, type1.getName(), null, -1, -1,
@@ -630,10 +620,6 @@ final class FileSystemFontProvider extends FontProvider
         catch (IOException e)
         {
             LOG.error("Could not load font file: " + pfbFile, e);
-        }
-        finally
-        {
-            input.close();
         }
     }
 
@@ -673,11 +659,7 @@ final class FileSystemFontProvider extends FontProvider
             }
             return ttf;
         }
-        else
-        {
-            TTFParser ttfParser = new TTFParser(false, true);
-            return ttfParser.parse(file);
-        }
+        return new TTFParser(false, true).parse(file);
     }
 
     private OpenTypeFont getOTFFont(String postScriptName, File file)
