@@ -197,7 +197,7 @@ public class LazyIndirectObjectsProviderTest
     }
 
     @Test
-    public void close()
+    public void close() throws IOException
     {
         Map<COSObjectKey, COSBase> store = new ConcurrentHashMap<>();
         COSStream item = mock(COSStream.class);

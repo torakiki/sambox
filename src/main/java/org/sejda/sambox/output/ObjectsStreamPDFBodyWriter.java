@@ -194,7 +194,7 @@ class ObjectsStreamPDFBodyWriter extends AbstractPDFBodyWriter
         }
 
         @Override
-        public void close()
+        public void close() throws IOException
         {
             IOUtils.closeQuietly(filtered);
             super.close();

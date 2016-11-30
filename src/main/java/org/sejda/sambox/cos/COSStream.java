@@ -611,7 +611,7 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
     }
 
     @Override
-    public void close()
+    public void close() throws IOException
     {
         IOUtils.closeQuietly(existing);
         existing = null;
