@@ -73,7 +73,7 @@ public class PDFTextStreamEngine extends PDFStreamEngine
     private static final Logger LOG = LoggerFactory.getLogger(PDFTextStreamEngine.class);
 
     private int pageRotation;
-    private PDRectangle pageSize;
+    private PDRectangle cropBox;
     private Matrix translateMatrix;
     private final GlyphList glyphList;
 
@@ -121,16 +121,16 @@ public class PDFTextStreamEngine extends PDFStreamEngine
     public void processPage(PDPage page) throws IOException
     {
         this.pageRotation = page.getRotation();
-        this.pageSize = page.getCropBox();
-        if (pageSize.getLowerLeftX() == 0 && pageSize.getLowerLeftY() == 0)
+        this.cropBox = page.getCropBox();
+        if (cropBox.getLowerLeftX() == 0 && cropBox.getLowerLeftY() == 0)
         {
             translateMatrix = null;
         }
         else
         {
             // translation matrix for cropbox
-            translateMatrix = Matrix.getTranslateInstance(-pageSize.getLowerLeftX(),
-                    -pageSize.getLowerLeftY());
+            translateMatrix = Matrix.getTranslateInstance(-cropBox.getLowerLeftX(),
+                    -cropBox.getLowerLeftY());
         }
         super.processPage(page);
     }
@@ -298,11 +298,11 @@ public class PDFTextStreamEngine extends PDFStreamEngine
         {
             translatedTextRenderingMatrix = Matrix.concatenate(translateMatrix,
                     textRenderingMatrix);
-            nextX -= pageSize.getLowerLeftX();
-            nextY -= pageSize.getLowerLeftY();
+            nextX -= cropBox.getLowerLeftX();
+            nextY -= cropBox.getLowerLeftY();
         }
-        processTextPosition(new TextPosition(pageRotation, pageSize.getWidth(),
-                pageSize.getHeight(), translatedTextRenderingMatrix, nextX, nextY,
+        processTextPosition(new TextPosition(pageRotation, cropBox.getWidth(),
+                cropBox.getHeight(), translatedTextRenderingMatrix, nextX, nextY,
                 Math.abs(dyDisplay), dxDisplay, Math.abs(spaceWidthDisplay), unicode,
                 new int[] { code }, font, fontSize,
                 (int) (fontSize * textMatrix.getScalingFactorX())));

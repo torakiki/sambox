@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.text;
 
+import java.awt.geom.Rectangle2D;
 import java.text.Normalizer;
 import java.util.HashMap;
 import java.util.Map;
@@ -337,10 +338,7 @@ public class TextPosition
         {
             return pageHeight - getYLowerLeftRot(dir);
         }
-        else
-        {
-            return pageWidth - getYLowerLeftRot(dir);
-        }
+        return pageWidth - getYLowerLeftRot(dir);
     }
 
     /**
@@ -355,10 +353,7 @@ public class TextPosition
         {
             return Math.abs(endY - textMatrix.getTranslateY());
         }
-        else
-        {
-            return Math.abs(endX - textMatrix.getTranslateX());
-        }
+        return Math.abs(endX - textMatrix.getTranslateX());
     }
 
     /**
@@ -544,8 +539,8 @@ public class TextPosition
         {
             if (i >= widths.length)
             {
-                LOG.info("diacritic " + diacritic.getUnicode() + " on ligature " + unicode +
-                        " is not supported yet and is ignored (PDFBOX-2831)");
+                LOG.info("diacritic " + diacritic.getUnicode() + " on ligature " + unicode
+                        + " is not supported yet and is ignored (PDFBOX-2831)");
                 break;
             }
 
@@ -668,6 +663,14 @@ public class TextPosition
         return type == Character.NON_SPACING_MARK || type == Character.MODIFIER_SYMBOL
                 || type == Character.MODIFIER_LETTER;
 
+    }
+
+    /**
+     * @return true if the text is visible in the page cropbox and not outside its boundaries s
+     */
+    public boolean isVisible()
+    {
+        return new Rectangle2D.Float(0, 0, pageWidth, pageHeight).contains(getX(), getY());
     }
 
     /**
