@@ -22,6 +22,7 @@ import java.io.IOException;
 
 import org.junit.Test;
 import org.sejda.io.SeekableSources;
+import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.interactive.documentnavigation.outline.PDDocumentOutline;
 import org.sejda.sambox.pdmodel.interactive.documentnavigation.outline.PDOutlineItem;
@@ -109,6 +110,21 @@ public class PDPageTreeTest
             assertEquals(doc.getPage(3), doc.getPages().stream().skip(3).findFirst().get());
             assertEquals(doc.getPage(4), doc.getPages().stream().skip(4).findFirst().get());
             assertEquals(doc.getPage(5), doc.getPages().stream().skip(5).findFirst().get());
+        }
+    }
+
+    @Test
+    public void pageTypeIsSanitized() throws IOException
+    {
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                PDPageTreeTest.class.getResourceAsStream("with_outline.pdf"))))
+        {
+            PDPage page = doc.getPage(0);
+            page.getCOSObject().setItem(COSName.TYPE, null);
+            assertEquals(COSName.PAGE, doc.getPage(0).getCOSObject().getItem(COSName.TYPE));
+            // found localized cosname in the wild o_O
+            page.getCOSObject().setName(COSName.TYPE, "Pagina");
+            assertEquals(COSName.PAGE, doc.getPage(0).getCOSObject().getItem(COSName.TYPE));
         }
     }
 }

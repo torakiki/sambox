@@ -291,7 +291,8 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
         COSName type = dictionary.getCOSName(COSName.TYPE);
         if (!COSName.PAGE.equals(type))
         {
-            throw new IllegalStateException("Expected 'Page' but found " + type);
+            LOG.error("Expected 'Page' but found '{}'", type.getName());
+            dictionary.setName(COSName.TYPE, COSName.PAGE.getName());
         }
     }
 
