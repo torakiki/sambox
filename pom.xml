@@ -78,7 +78,7 @@
 		</snapshotRepository>
 		<repository>
 			<id>bintray</id>
-			<url>https://api.bintray.com/maven/sejdapdf/maven/sejda</url>
+			<url>https://api.bintray.com/maven/sejdapdf/maven/sejda/;publish=1</url>
 		</repository>
 	</distributionManagement>
 
