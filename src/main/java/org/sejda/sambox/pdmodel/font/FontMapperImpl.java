@@ -154,7 +154,7 @@ final class FontMapperImpl implements FontMapper
 
     private Map<String, FontInfo> createFontInfoByName(List<? extends FontInfo> fontInfoList)
     {
-        Map<String, FontInfo> map = new LinkedHashMap<String, FontInfo>();
+        Map<String, FontInfo> map = new LinkedHashMap<>();
         for (FontInfo info : fontInfoList)
         {
             for (String name : getPostScriptNames(info.getPostScriptName()))
