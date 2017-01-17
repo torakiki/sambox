@@ -115,30 +115,21 @@ public abstract class PDFunction implements COSObjectable
             return new PDFunctionTypeIdentity(null);
         }
 
-        PDFunction retval = null;
         COSDictionary functionDictionary = (COSDictionary) function.getCOSObject();
         int functionType = functionDictionary.getInt(COSName.FUNCTION_TYPE);
-        if (functionType == 0)
+        switch (functionType)
         {
-            retval = new PDFunctionType0(functionDictionary);
-        }
-        else if (functionType == 2)
-        {
-            retval = new PDFunctionType2(functionDictionary);
-        }
-        else if (functionType == 3)
-        {
-            retval = new PDFunctionType3(functionDictionary);
-        }
-        else if (functionType == 4)
-        {
-            retval = new PDFunctionType4(functionDictionary);
-        }
-        else
-        {
+        case 0:
+            return new PDFunctionType0(functionDictionary);
+        case 2:
+            return new PDFunctionType2(functionDictionary);
+        case 3:
+            return new PDFunctionType3(functionDictionary);
+        case 4:
+            return new PDFunctionType4(functionDictionary);
+        default:
             throw new IOException("Error: Unknown function type " + functionType);
         }
-        return retval;
     }
 
     /**

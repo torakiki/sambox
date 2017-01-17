@@ -19,10 +19,7 @@ package org.sejda.sambox.pdmodel.graphics.image;
 import static org.sejda.io.SeekableSources.seekableSourceFrom;
 
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 
@@ -227,35 +224,30 @@ public final class CCITTFactory
             int tag = readshort(endianess, source);
             int type = readshort(endianess, source);
             int count = readlong(endianess, source);
-            int val = readlong(endianess, source); // See note
+            int val;
 
-            // Note, we treated that value as a long. The value always occupies 4 bytes
-            // But it might only use the first byte or two. Depending on endianess we might
-            // need to correct.
-            // Note we ignore all other types, they are of little interest for PDFs/CCITT Fax
-            if (endianess == 'M')
+            // Note that when the type is shorter than 4 bytes, the rest can be garbage
+            // and must be ignored. E.g. short (2 bytes) from "01 00 38 32" (little endian)
+            // is 1, not 842530817 (seen in a real-life TIFF image).
+
+            switch (type)
             {
-                switch (type)
-                {
-                case 1:
-                {
-                    val = val >> 24;
-                    break; // byte value
-                }
-                case 3:
-                {
-                    val = val >> 16;
-                    break; // short value
-                }
-                case 4:
-                {
-                    break; // long value
-                }
-                default:
-                {
-                    // do nothing
-                }
-                }
+                case 1: // byte value
+                    val = source.read();
+                    source.read();
+                    source.read();
+                    source.read();
+                    break;
+
+                case 3: // short value
+                    val = readshort(endianess, source);
+                    source.read();
+                    source.read();
+                    break;
+
+                default: // long and other types
+                    val = readlong(endianess, source);
+                    break;
             }
             switch (tag)
             {

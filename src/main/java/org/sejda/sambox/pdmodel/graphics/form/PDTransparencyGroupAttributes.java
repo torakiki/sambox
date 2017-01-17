@@ -47,14 +47,14 @@ public final class PDTransparencyGroupAttributes extends PDDictionaryWrapper
     }
 
     /**
-     * Returns the blending color space
+     * Returns the group color space or null if it isn't defined.
      * 
-     * @return color space
+     * @return the group color space.
      * @throws IOException
      */
     public PDColorSpace getColorSpace() throws IOException
     {
-        if (colorSpace == null)
+        if (colorSpace == null && getCOSObject().containsKey(COSName.CS))
         {
             colorSpace = PDColorSpace.create(getCOSObject().getDictionaryObject(COSName.CS));
         }

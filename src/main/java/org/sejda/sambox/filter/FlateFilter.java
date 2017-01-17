@@ -132,6 +132,7 @@ final class FlateFilter extends Filter
                 read = in.read(buf);
                 inflater.setInput(buf, 0, read);
             }
+            inflater.end();
         }
         out.flush();
     }

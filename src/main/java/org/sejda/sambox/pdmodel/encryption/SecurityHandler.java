@@ -116,7 +116,7 @@ public abstract class SecurityHandler
      * @throws IOException If there is an error accessing data.
      */
     public abstract void prepareForDecryption(PDEncryption encryption, COSArray documentIDArray,
-            DecryptionMaterial decryptionMaterial) throws IOException;
+            DecryptionMaterial decryptionMaterial) throws InvalidPasswordException, IOException;
 
     /**
      * Encrypt or decrypt a set of data.
@@ -190,7 +190,7 @@ public abstract class SecurityHandler
     /**
      * Encrypt or decrypt data with RC4.
      *
-     * @param finalKey The final key obtained with via {@link #calcFinalKey()}.
+     * @param finalKey The final key obtained with via {@link #calcFinalKey(long, long)}.
      * @param input The data to encrypt.
      * @param output The output to write the encrypted data to.
      *
@@ -206,7 +206,7 @@ public abstract class SecurityHandler
     /**
      * Encrypt or decrypt data with RC4.
      *
-     * @param finalKey The final key obtained with via {@link #calcFinalKey()}.
+     * @param finalKey The final key obtained with via {@link #calcFinalKey(long, long)}.
      * @param input The data to encrypt.
      * @param output The output to write the encrypted data to.
      *
