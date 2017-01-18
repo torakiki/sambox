@@ -328,7 +328,7 @@ final class FileSystemFontProvider extends FontProvider
                 writer.newLine();
             }
         }
-        catch (IOException e)
+        catch (IOException | SecurityException e)
         {
             LOG.error("Could not write to font cache", e);
         }
@@ -347,7 +347,17 @@ final class FileSystemFontProvider extends FontProvider
 
         List<FSFontInfo> results = new ArrayList<>();
         File file = getDiskCacheFile();
-        if (file.exists())
+        boolean fileExists = false;
+
+        try
+        {
+            fileExists = file.exists();
+        }
+        catch (SecurityException e)
+        {
+        }
+
+        if (fileExists)
         {
             try (BufferedReader reader = new BufferedReader(new FileReader(file)))
             {

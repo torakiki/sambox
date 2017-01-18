@@ -62,6 +62,7 @@ import org.sejda.sambox.util.Matrix;
 import org.sejda.sambox.util.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.sejda.sambox.pdmodel.graphics.blend.BlendMode;
 
 /**
  * Processes a PDF content stream and executes certain operations. Provides a callback interface for clients that want
@@ -167,18 +168,20 @@ public abstract class PDFStreamEngine
 
     /**
      * Processes a soft mask transparency group stream.
+     * @param group
+     * @throws IOException
      */
     protected void processSoftMask(PDTransparencyGroup group) throws IOException
     {
-        // clear the current soft mask (this mask) to avoid recursion
         saveGraphicsState();
-        getGraphicsState().setSoftMask(null);
         processTransparencyGroup(group);
         restoreGraphicsState();
     }
 
     /**
      * Processes a transparency group stream.
+     * @param group
+     * @throws IOException
      */
     protected void processTransparencyGroup(PDTransparencyGroup group) throws IOException
     {
@@ -193,6 +196,14 @@ public abstract class PDFStreamEngine
 
         // transform the CTM using the stream's matrix
         getGraphicsState().getCurrentTransformationMatrix().concatenate(group.getMatrix());
+
+        // Before execution of the transparency group XObject’s content stream,
+        // the current blend mode in the graphics state shall be initialized to Normal,
+        // the current stroking and nonstroking alpha constants to 1.0, and the current soft mask to None.
+        getGraphicsState().setBlendMode(BlendMode.NORMAL);
+        getGraphicsState().setAlphaConstant(1);
+        getGraphicsState().setNonStrokeAlphaConstants(1);
+        getGraphicsState().setSoftMask(null);
 
         // clip to bounding box
         clipToRect(group.getBBox());
@@ -286,6 +297,9 @@ public abstract class PDFStreamEngine
 
             // clip to bounding box
             clipToRect(bbox);
+
+            // needed for patterns in appearance streams, e.g. PDFBOX-2182
+            initialMatrix = aa.clone();
 
             processStreamOperators(appearance);
         }

@@ -20,6 +20,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
 
+import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.graphics.pattern.PDAbstractPattern;
@@ -45,6 +46,8 @@ public final class PDPattern extends PDSpecialColorSpace
     public PDPattern(PDResources resources)
     {
         this.resources = resources;
+        this.array = new COSArray();
+        this.array.add(COSName.PATTERN);
     }
 
     /**
@@ -57,6 +60,9 @@ public final class PDPattern extends PDSpecialColorSpace
     {
         this.resources = resources;
         this.underlyingColorSpace = colorSpace;
+        this.array = new COSArray();
+        this.array.add(COSName.PATTERN);
+        this.array.add(colorSpace);
     }
 
     @Override

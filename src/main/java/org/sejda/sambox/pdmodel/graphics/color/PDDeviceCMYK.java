@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.pdmodel.graphics.color;
 
+import java.util.Arrays;
+import java.awt.color.ColorSpace;
 import java.awt.color.ICC_ColorSpace;
 import java.awt.color.ICC_Profile;
 import java.awt.image.BufferedImage;
@@ -51,6 +53,7 @@ public class PDDeviceCMYK extends PDDeviceColorSpace
 
     private final PDColor initialColor = new PDColor(new float[] { 0, 0, 0, 1 }, this);
     private final ICC_ColorSpace awtColorSpace;
+    private boolean usePureJavaCMYKConversion = false;
 
     protected PDDeviceCMYK() throws IOException
     {
@@ -66,6 +69,9 @@ public class PDDeviceCMYK extends PDDeviceColorSpace
         // condition caused by lazy initialization of the color transform, so we perform
         // an initial color conversion while we're still in a static context, see PDFBOX-2184
         awtColorSpace.toRGB(new float[] { 0, 0, 0, 0 });
+
+        usePureJavaCMYKConversion = System
+                .getProperty("org.sejda.sambox.rendering.UsePureJavaCMYKConversion") != null;
     }
 
     protected ICC_Profile getICCProfile() throws IOException
@@ -124,5 +130,52 @@ public class PDDeviceCMYK extends PDDeviceColorSpace
     public BufferedImage toRGBImage(WritableRaster raster)
     {
         return toRGBImageAWT(raster, awtColorSpace);
+    }
+
+    @Override
+    protected BufferedImage toRGBImageAWT(WritableRaster raster, ColorSpace colorSpace)
+    {
+        if (usePureJavaCMYKConversion)
+        {
+            BufferedImage dest = new BufferedImage(raster.getWidth(), raster.getHeight(),
+                    BufferedImage.TYPE_INT_RGB);
+            ColorSpace destCS = dest.getColorModel().getColorSpace();
+            WritableRaster destRaster = dest.getRaster();
+            float[] srcValues = new float[4];
+            float[] lastValues = new float[] { -1.0f, -1.0f, -1.0f, -1.0f };
+            float[] destValues = new float[3];
+            int width = raster.getWidth();
+            int startX = raster.getMinX();
+            int height = raster.getHeight();
+            int startY = raster.getMinY();
+            for (int x = startX; x < width + startX; x++)
+            {
+                for (int y = startY; y < height + startY; y++)
+                {
+                    raster.getPixel(x, y, srcValues);
+                    // check if the last value can be reused
+                    if (!Arrays.equals(lastValues, srcValues))
+                    {
+                        for (int k = 0; k < 4; k++)
+                        {
+                            lastValues[k] = srcValues[k];
+                            srcValues[k] = srcValues[k] / 255f;
+                        }
+                        // use CIEXYZ as intermediate format to optimize the color conversion
+                        destValues = destCS.fromCIEXYZ(colorSpace.toCIEXYZ(srcValues));
+                        for (int k = 0; k < destValues.length; k++)
+                        {
+                            destValues[k] = destValues[k] * 255f;
+                        }
+                    }
+                    destRaster.setPixel(x, y, destValues);
+                }
+            }
+            return dest;
+        }
+        else
+        {
+            return super.toRGBImageAWT(raster, colorSpace);
+        }
     }
 }

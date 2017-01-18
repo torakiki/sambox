@@ -54,6 +54,7 @@ import org.sejda.sambox.pdmodel.common.PDStream;
 import org.sejda.sambox.pdmodel.encryption.AccessPermission;
 import org.sejda.sambox.pdmodel.encryption.PDEncryption;
 import org.sejda.sambox.pdmodel.font.PDFont;
+import org.sejda.sambox.pdmodel.graphics.color.PDDeviceRGB;
 import org.sejda.sambox.util.Version;
 import org.sejda.util.IOUtils;
 import org.slf4j.Logger;
@@ -67,6 +68,14 @@ import org.slf4j.LoggerFactory;
 public class PDDocument implements Closeable
 {
     private static final Logger LOG = LoggerFactory.getLogger(PDDocument.class);
+
+    /**
+     * avoid concurrency issues with PDDeviceRGB
+     */
+    static
+    {
+        PDDeviceRGB.INSTANCE.toRGB(new float[]{1,1,1,1});
+    }
 
     private final COSDocument document;
     private PDDocumentCatalog documentCatalog;

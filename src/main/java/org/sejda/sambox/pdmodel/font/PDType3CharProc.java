@@ -129,11 +129,12 @@ public final class PDType3CharProc implements COSObjectable, PDContentStream
     }
 
     /**
-     * todo.
-     * 
-     * @return
-     * @throws IOException
-     */
+    * Get the width from a type3 charproc stream.
+    *
+    * @return the glyph width.
+    * @throws IOException if the stream could not be read, or did not have d0 or d1 as first
+    * operator, or if their first argument was not a number.
+    */
     public float getWidth() throws IOException
     {
         List<COSBase> arguments = new ArrayList<>();

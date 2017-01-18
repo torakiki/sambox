@@ -73,7 +73,8 @@ public class COSFloat extends COSNumber
                 {
                     // PDFBOX-2990 has 0.00000-33917698
                     // PDFBOX-3369 has 0.00-35095424
-                    requireIOCondition(aFloat.matches("^0\\.0+\\-\\d+"),
+                    // PDFBOX-3500 has 0.-262
+                    requireIOCondition(aFloat.matches("^0\\.0*\\-\\d+"),
                             "Expected floating point number but found '" + aFloat + "'");
                     value = new BigDecimal("-" + aFloat.replaceFirst("\\-", ""));
                 }
