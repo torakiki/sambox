@@ -71,7 +71,7 @@ public class PDDeviceCMYK extends PDDeviceColorSpace
         awtColorSpace.toRGB(new float[] { 0, 0, 0, 0 });
 
         usePureJavaCMYKConversion = System
-                .getProperty("org.apache.pdfbox.rendering.UsePureJavaCMYKConversion") != null;
+                .getProperty("org.sejda.sambox.rendering.UsePureJavaCMYKConversion") != null;
     }
 
     protected ICC_Profile getICCProfile() throws IOException
