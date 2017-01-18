@@ -90,6 +90,12 @@ public class COSFloatTest
     }
 
     @Test
+    public void pdfbox3500() throws IOException
+    {
+        assertEquals(-0.262f, COSFloat.get("0.-262").floatValue(), 0);
+    }
+
+    @Test
     public void multipleDots() throws IOException
     {
         assertEquals(415.750795f, COSFloat.get("415.75.795").floatValue(), 0);

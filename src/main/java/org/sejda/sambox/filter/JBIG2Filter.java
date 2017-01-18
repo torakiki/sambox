@@ -30,7 +30,6 @@ import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 
 import org.sejda.sambox.cos.COSDictionary;
-import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSStream;
 import org.slf4j.Logger;
