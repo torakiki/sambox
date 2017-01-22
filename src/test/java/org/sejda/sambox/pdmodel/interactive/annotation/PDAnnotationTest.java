@@ -20,6 +20,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
+import org.sejda.sambox.cos.COSArray;
+import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.interactive.form.PDAcroForm;
@@ -60,5 +62,32 @@ public class PDAnnotationTest
                 PDAnnotation.createAnnotation(annotation.getCOSObject(), PDAnnotationWidget.class));
         assertNull(
                 PDAnnotation.createAnnotation(annotation.getCOSObject(), PDAnnotationLink.class));
+    }
+
+    @Test
+    public void nullBorder()
+    {
+        PDAnnotation victim = new PDAnnotationWidget();
+        victim.setBorder(null);
+        assertEquals(new COSArray(COSInteger.ZERO, COSInteger.ZERO, COSInteger.ONE),
+                victim.getBorder());
+    }
+
+    @Test
+    public void wrongSizeBorder()
+    {
+        PDAnnotation victim = new PDAnnotationWidget();
+        victim.setBorder(new COSArray(COSInteger.ZERO));
+        assertEquals(new COSArray(COSInteger.ZERO, COSInteger.ZERO, COSInteger.ONE),
+                victim.getBorder());
+    }
+
+    @Test
+    public void border()
+    {
+        PDAnnotation victim = new PDAnnotationWidget();
+        COSArray border = new COSArray(COSInteger.ZERO, COSInteger.THREE, COSInteger.TWO);
+        victim.setBorder(border);
+        assertEquals(border, victim.getBorder());
     }
 }

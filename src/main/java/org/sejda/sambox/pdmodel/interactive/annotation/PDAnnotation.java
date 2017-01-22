@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.pdmodel.interactive.annotation;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
@@ -607,18 +608,10 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
      */
     public COSArray getBorder()
     {
-        COSBase base = getCOSObject().getDictionaryObject(COSName.BORDER);
-        COSArray border;
-        if (!(base instanceof COSArray))
+        COSArray border = getCOSObject().getDictionaryObject(COSName.BORDER, COSArray.class);
+        if (isNull(border) || border.size() < 3)
         {
-            border = new COSArray();
-            border.add(COSInteger.ZERO);
-            border.add(COSInteger.ZERO);
-            border.add(COSInteger.ONE);
-        }
-        else
-        {
-            border = (COSArray) base;
+            return new COSArray(COSInteger.ZERO, COSInteger.ZERO, COSInteger.ONE);
         }
         return border;
     }
