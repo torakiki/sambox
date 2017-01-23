@@ -97,6 +97,19 @@ public class PDFParserTest
         }
     }
 
+    @Test
+    public void headerWithSpaces() throws IOException
+    {
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/spaces_in_header.pdf"))))
+        {
+            assertNotNull(doc);
+            assertFalse(doc.isEncrypted());
+            assertTrue(doc.isOpen());
+            assertEquals(SpecVersionUtils.V1_4, doc.getVersion());
+        }
+    }
+
     @Test(expected = IOException.class)
     public void veryBadHeader() throws IOException
     {

@@ -17,7 +17,9 @@
 package org.sejda.sambox.input;
 
 import static java.util.Objects.requireNonNull;
+import static org.sejda.sambox.util.SpecVersionUtils.EXPECTED_HEADER_LENGTH;
 import static org.sejda.sambox.util.SpecVersionUtils.PDF_HEADER;
+import static org.sejda.sambox.util.SpecVersionUtils.parseHeaderString;
 import static org.sejda.util.RequireUtils.requireIOCondition;
 
 import java.io.IOException;
@@ -30,7 +32,6 @@ import org.sejda.sambox.pdmodel.encryption.DecryptionMaterial;
 import org.sejda.sambox.pdmodel.encryption.PDEncryption;
 import org.sejda.sambox.pdmodel.encryption.SecurityHandler;
 import org.sejda.sambox.pdmodel.encryption.StandardDecryptionMaterial;
-import org.sejda.sambox.util.SpecVersionUtils;
 import org.sejda.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,8 +68,8 @@ public class PDFParser
      */
     public static PDDocument parse(SeekableSource source, String password) throws IOException
     {
-        return parse(source, Optional.ofNullable(password).map(StandardDecryptionMaterial::new)
-                .orElse(null));
+        return parse(source,
+                Optional.ofNullable(password).map(StandardDecryptionMaterial::new).orElse(null));
     }
 
     /**
@@ -131,10 +132,11 @@ public class PDFParser
             header = parser.readLine();
         }
 
-        final String trimmedLeftHeader = header.substring(headerIndex, header.length());
-        requireIOCondition(trimmedLeftHeader.length() >= SpecVersionUtils.EXPECTED_HEADER_LENGTH,
+        final String trimmedLeftHeader = header.substring(headerIndex, header.length())
+                .replaceAll("\\s", "");
+        requireIOCondition(trimmedLeftHeader.length() >= EXPECTED_HEADER_LENGTH,
                 "Unable to find expected header '%PDF-n.n'");
         LOG.debug("Found header " + trimmedLeftHeader);
-        return SpecVersionUtils.parseHeaderString(trimmedLeftHeader);
+        return parseHeaderString(trimmedLeftHeader);
     }
 }
