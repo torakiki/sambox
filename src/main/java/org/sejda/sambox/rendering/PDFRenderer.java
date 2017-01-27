@@ -84,12 +84,10 @@ public class PDFRenderer
     }
 
     /**
-     * Returns the given page as an RGB image at the given DPI.
-     * 
-     * @param pageIndex the zero-based index of the page to be converted
+     * @param page the zero-based index of the page to be converted
      * @param dpi the DPI (dots per inch) to render at
      * @param imageType the type of image to return
-     * @return the rendered page image
+     * @return the page rendered as a {@link BufferedImage}
      * @throws IOException if the PDF cannot be read
      */
     public BufferedImage renderImageWithDPI(int pageIndex, float dpi, ImageType imageType)
@@ -99,15 +97,39 @@ public class PDFRenderer
     }
 
     /**
-     * Returns the given page as an RGB or ARGB image at the given scale.
-     * 
+     * @param page the zero-based index of the page to be converted
+     * @param dpi the DPI (dots per inch) to render at
+     * @param bufferedImageType the type of image to return
+     * @return the page rendered as a {@link BufferedImage}
+     * @throws IOException if the PDF cannot be read
+     */
+    public BufferedImage renderImageWithDPI(int page, float dpi, int bufferedImageType)
+            throws IOException
+    {
+        return renderImage(page, dpi / 72f, bufferedImageType);
+    }
+
+    /**
      * @param pageIndex the zero-based index of the page to be converted
      * @param scale the scaling factor, where 1 = 72 DPI
-     * @param imageType the type of image to return
-     * @return the rendered page image
+     * @param bufferedImageType the type of image to return
+     * @return the page rendered as a {@link BufferedImage}
      * @throws IOException if the PDF cannot be read
      */
     public BufferedImage renderImage(int pageIndex, float scale, ImageType imageType)
+            throws IOException
+    {
+        return renderImage(pageIndex, scale, imageType.toBufferedImageType());
+    }
+
+    /**
+     * @param pageIndex the zero-based index of the page to be converted
+     * @param scale the scaling factor, where 1 = 72 DPI
+     * @param bufferedImageType the type of image to return
+     * @return the page rendered as a {@link BufferedImage}
+     * @throws IOException if the PDF cannot be read
+     */
+    public BufferedImage renderImage(int pageIndex, float scale, int bufferedImageType)
             throws IOException
     {
         PDPage page = document.getPage(pageIndex);
@@ -123,16 +145,16 @@ public class PDFRenderer
         BufferedImage image;
         if (rotationAngle == 90 || rotationAngle == 270)
         {
-            image = new BufferedImage(heightPx, widthPx, imageType.toBufferedImageType());
+            image = new BufferedImage(heightPx, widthPx, bufferedImageType);
         }
         else
         {
-            image = new BufferedImage(widthPx, heightPx, imageType.toBufferedImageType());
+            image = new BufferedImage(widthPx, heightPx, bufferedImageType);
         }
 
         // use a transparent background if the imageType supports alpha
         Graphics2D g = image.createGraphics();
-        if (imageType == ImageType.ARGB)
+        if (bufferedImageType == BufferedImage.TYPE_INT_ARGB)
         {
             g.setBackground(new Color(0, 0, 0, 0));
         }
