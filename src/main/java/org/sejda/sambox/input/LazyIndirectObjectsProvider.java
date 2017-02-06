@@ -89,7 +89,7 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
         XrefEntry retVal = xref.addIfAbsent(entry);
         if (retVal == null)
         {
-            LOG.trace("Added xref entry " + entry);
+            LOG.trace("Added xref entry {}", entry);
         }
         return retVal;
     }
@@ -97,7 +97,7 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
     @Override
     public XrefEntry addEntry(XrefEntry entry)
     {
-        LOG.trace("Added xref entry " + entry);
+        LOG.trace("Added xref entry {}", entry);
         return xref.add(entry);
     }
 
@@ -162,7 +162,7 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
 
     private void doParse(XrefEntry xrefEntry) throws IOException
     {
-        LOG.trace("Parsing indirect object " + xrefEntry);
+        LOG.trace("Parsing indirect object {}", xrefEntry);
         if (xrefEntry.getType() == XrefType.IN_USE)
         {
             parseInUseEntry(xrefEntry);
@@ -188,7 +188,7 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
             found = parser.nextStream((COSDictionary) found);
             if (parser.skipTokenIfValue(ENDSTREAM))
             {
-                LOG.warn("Found double 'endstream' token for " + xrefEntry);
+                LOG.warn("Found double 'endstream' token for {}", xrefEntry);
             }
         }
         if (securityHandler != null)
@@ -199,7 +199,7 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
         }
         if (!parser.skipTokenIfValue(ENDOBJ))
         {
-            LOG.warn("Missing 'endobj' token for " + xrefEntry);
+            LOG.warn("Missing 'endobj' token for {}", xrefEntry);
         }
         store.put(xrefEntry.key(), ofNullable(found).orElse(COSNull.NULL));
     }
@@ -215,7 +215,9 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
                 "Expected an uncompressed indirect object reference for the ObjectStream");
 
         parseObject(containingStreamEntry.key());
-        COSBase stream = store.get(containingStreamEntry.key()).getCOSObject();
+        COSBase stream = ofNullable(store.get(containingStreamEntry.key()))
+                .map(COSBase::getCOSObject).orElseThrow(() -> new IOException(
+                        "Unable to find ObjectStream " + containingStreamEntry));
 
         if (!(stream instanceof COSStream))
         {
@@ -243,12 +245,12 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
                 long offset = firstOffset + streamParser.readLong();
                 entries.put(offset, number);
             }
-            LOG.trace("Found " + entries.size() + " entries in object stream of size "
-                    + streamParser.source().size());
+            LOG.trace("Found {} entries in object stream of size {}", entries.size(),
+                    streamParser.source().size());
             for (Entry<Long, Long> entry : entries.entrySet())
             {
-                LOG.trace("Parsing compressed object " + entry.getValue() + " at offset "
-                        + entry.getKey());
+                LOG.trace("Parsing compressed object {} at offset {}", entry.getValue(),
+                        entry.getKey());
                 streamParser.position(entry.getKey());
                 if (streamParser.skipTokenIfValue(OBJ))
                 {
@@ -261,7 +263,7 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
                     // make sure the xref points to this copy of the object and not one in another more recent stream
                     if (containingStreamEntry.owns(xref.get(key)))
                     {
-                        LOG.trace("Parsed compressed object " + key + " " + object.getClass());
+                        LOG.trace("Parsed compressed object {} {}", key, object.getClass());
                         store.put(key, object);
                     }
                 }
