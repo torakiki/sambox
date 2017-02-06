@@ -144,11 +144,11 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
             return existing.length;
         }
         encodeIfRequired();
-        if (filtered != null)
+        if (nonNull(filtered))
         {
-            return Optional.ofNullable(filtered).map(f -> f.length).orElse(0);
+            return filtered.length;
         }
-        return Optional.ofNullable(unfiltered).map(f -> f.length).orElse(0);
+        return ofNullable(unfiltered).map(f -> f.length).orElse(0);
     }
 
     private void encodeIfRequired() throws IOException
@@ -219,15 +219,15 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
     public long getUnfilteredLength() throws IOException
     {
         decodeIfRequired();
-        if (unfiltered != null)
+        if (nonNull(unfiltered))
         {
-            return Optional.ofNullable(unfiltered).map(f -> f.length).orElse(0);
+            return unfiltered.length;
         }
-        if (existing != null)
+        if (nonNull(existing))
         {
             return existing.length;
         }
-        return Optional.ofNullable(filtered).map(f -> f.length).orElse(0);
+        return ofNullable(filtered).map(f -> f.length).orElse(0);
     }
 
     private void decodeIfRequired() throws IOException
