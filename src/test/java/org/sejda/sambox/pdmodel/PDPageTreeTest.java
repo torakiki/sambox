@@ -17,6 +17,7 @@
 package org.sejda.sambox.pdmodel;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
 
@@ -74,6 +75,20 @@ public class PDPageTreeTest
             for (int i = 0; i < doc.getNumberOfPages(); i++)
             {
                 assertEquals(i, doc.getPages().indexOf(doc.getPage(i)));
+            }
+        }
+    }
+
+    @Test
+    public void wrongMultipleLevel() throws IOException
+    {
+        try (PDDocument doc = PDFParser
+                .parse(SeekableSources.inMemorySeekableSourceFrom(PDPageTreeTest.class
+                        .getResourceAsStream("page_tree_multiple_levels_wrong_kid_type.pdf"))))
+        {
+            for (PDPage page : doc.getPages())
+            {
+                assertNotNull(page);
             }
         }
     }

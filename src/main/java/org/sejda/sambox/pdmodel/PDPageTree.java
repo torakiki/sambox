@@ -17,12 +17,15 @@
 package org.sejda.sambox.pdmodel;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static java.util.stream.Collectors.toList;
 import static org.sejda.util.RequireUtils.requireNotNullArg;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.Spliterator;
 import java.util.Spliterators;
@@ -34,6 +37,7 @@ import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.COSObjectable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -157,25 +161,15 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
      */
     private List<COSDictionary> getKids(COSDictionary node)
     {
-        List<COSDictionary> result = new ArrayList<>();
-
         COSArray kids = node.getDictionaryObject(COSName.KIDS, COSArray.class);
-        if (kids == null)
+        if (nonNull(kids))
         {
-            // probably a malformed PDF
-            return result;
+            // we collect only non null, non COSNull COSDictionary kids
+            return kids.stream().map(COSBase::getCOSObject).filter(i -> i != COSNull.NULL)
+                    .filter(Objects::nonNull).filter(n -> n instanceof COSDictionary)
+                    .map(n -> (COSDictionary) n).collect(toList());
         }
-
-        for (int i = 0, size = kids.size(); i < size; i++)
-        {
-            // TODO investigate this, does it load? Should it load?
-            if (kids.getObject(i) != null)
-            {
-                result.add((COSDictionary) kids.getObject(i).getCOSObject());
-            }
-        }
-
-        return result;
+        return new ArrayList<>();
     }
 
     /**
