@@ -77,6 +77,7 @@ class ObjectsFullScanner
         {
             xref.add(XrefEntry.inUseEntry(Long.parseUnsignedLong(matcher.group(1)), offset,
                     Integer.parseUnsignedInt(matcher.group(2))));
+            onObjectDefinitionLine(offset, line);
         }
         else
         {
@@ -92,6 +93,18 @@ class ObjectsFullScanner
      * @throws IOException
      */
     protected void onNonObjectDefinitionLine(long originalOffset, String line) throws IOException
+    {
+        // nothing
+    }
+
+    /**
+     * Called when the the scanner has read a line which is an object definition
+     * 
+     * @param originalOffset offset from where the line was read
+     * @param line
+     * @throws IOException
+     */
+    protected void onObjectDefinitionLine(long originalOffset, String line) throws IOException
     {
         // nothing
     }

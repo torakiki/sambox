@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.input;
 
+import static java.util.Objects.nonNull;
 import static org.sejda.sambox.input.AbstractXrefTableParser.TRAILER;
 import static org.sejda.sambox.input.AbstractXrefTableParser.XREF;
 import static org.sejda.util.RequireUtils.requireIOCondition;
@@ -114,19 +115,54 @@ class XrefParser
                         "Xref full scan encountered some errors, now performing objects full scan");
                 ObjectsFullScanner objectsFullScanner = new ObjectsFullScanner(parser)
                 {
+                    private long lastObjectOffset = 0;
+
                     @Override
                     protected void onNonObjectDefinitionLine(long offset, String line)
                             throws IOException
                     {
-                        if (line != null && line.startsWith(TRAILER))
+                        if (nonNull(line))
                         {
-                            LOG.debug("Parsing trailer at " + offset);
-                            parser.position(offset);
-                            parser.skipExpected(TRAILER);
-                            parser.skipSpaces();
-                            trailer.merge(parser.nextDictionary());
-                            parser.skipSpaces();
+                            if (line.startsWith(TRAILER))
+                            {
+                                LOG.debug("Parsing trailer at " + offset);
+                                parser.position(offset);
+                                parser.skipExpected(TRAILER);
+                                parser.skipSpaces();
+                                trailer.merge(parser.nextDictionary());
+                                parser.skipSpaces();
+                            }
+                            else if (line.contains(COSName.CATALOG.getName()))
+                            {
+                                long position = parser.position();
+                                try
+                                {
+                                    // we do our best to make sure we have a catalog even in corrupted docs
+                                    LOG.debug("Parsing potential Catalog at " + lastObjectOffset);
+                                    parser.position(lastObjectOffset);
+                                    parser.skipIndirectObjectDefinition();
+                                    parser.skipSpaces();
+                                    COSDictionary possibleCatalog = parser.nextDictionary();
+                                    if (COSName.CATALOG
+                                            .equals(possibleCatalog.getCOSName(COSName.TYPE)))
+                                    {
+                                        trailer.putIfAbsent(COSName.ROOT, possibleCatalog);
+                                    }
+                                    parser.skipSpaces();
+                                }
+                                catch (IOException e)
+                                {
+                                    LOG.warn("Unable to parse potential Catalog", e);
+                                    parser.position(position);
+                                }
+                            }
                         }
+                    }
+
+                    @Override
+                    protected void onObjectDefinitionLine(long offset, String line)
+                    {
+                        lastObjectOffset = offset;
                     }
                 };
                 // and we consider it scan more reliable compared to what was found in the somehow broken xrefs

@@ -216,4 +216,14 @@ public class XrefParserTest
         assertEquals(10, victim.trailer().getInt(COSName.SIZE));
         assertNotNull(victim.trailer().getDictionaryObject(COSName.ROOT));
     }
+
+    @Test
+    public void scanMissingTrailer() throws IOException
+    {
+        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/test_xref_missing_trailer.pdf")));
+        victim = new XrefParser(parser);
+        victim.parse();
+        assertNotNull(victim.trailer().getDictionaryObject(COSName.ROOT));
+    }
 }

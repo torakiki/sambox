@@ -87,6 +87,15 @@ public class XrefFullScannerTest
     }
 
     @Test
+    public void missingTrailer() throws IOException
+    {
+        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/test_xref_missing_trailer.pdf")));
+        victim = new XrefFullScanner(parser);
+        assertEquals(XrefScanOutcome.NOT_FOUND, victim.scan());
+    }
+
+    @Test
     public void trunkatedXref() throws IOException
     {
         parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(

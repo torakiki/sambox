@@ -41,8 +41,8 @@ public class ObjectsFullScannerTest
     @Before
     public void setUp() throws Exception
     {
-        reader = new SourceReader(SeekableSources.inMemorySeekableSourceFrom(getClass()
-.getResourceAsStream("/sambox/test_multiple_xref_tables.pdf")));
+        reader = new SourceReader(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/test_multiple_xref_tables.pdf")));
         victim = new ObjectsFullScanner(reader);
     }
 
