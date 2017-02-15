@@ -188,6 +188,8 @@ public final class PDImageXObject extends PDXObject implements PDImage
 
         byte[] jpegFirstBytes = new byte[] { (byte) 0xFF, (byte) 0xD8 };
         byte[] pngFirstBytes = new byte[] { (byte) 0x89, (byte) 0x50 };
+        byte[] tiffLittleEndianFirstBytes = new byte[] { (byte) 0x49, (byte) 0x49 };
+        byte[] tiffBigEndianFirstBytes = new byte[] { (byte) 0x4D, (byte) 0x4D };
         byte[] firstBytes = new byte[2];
 
         try (FileInputStream fin = new FileInputStream(file))
@@ -202,6 +204,10 @@ public final class PDImageXObject extends PDXObject implements PDImage
         if (Arrays.equals(firstBytes, pngFirstBytes))
         {
             ext = "png";
+        }
+        if (Arrays.equals(firstBytes, tiffLittleEndianFirstBytes) || Arrays.equals(firstBytes, tiffBigEndianFirstBytes))
+        {
+            ext = "tiff";
         }
 
         if ("jpg".equals(ext) || "jpeg".equals(ext))
