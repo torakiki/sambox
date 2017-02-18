@@ -19,6 +19,9 @@ package org.sejda.sambox.pdmodel.common;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
+import org.sejda.sambox.cos.COSArray;
+import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSInteger;
 
 /**
  * @author Andrea Vacondio
@@ -91,6 +94,18 @@ public class PDRectangleTest
         assertEquals(victim.getLowerLeftY(), rotated.getLowerLeftY(), 0);
         assertEquals(victim.getWidth(), rotated.getHeight(), 0);
         assertEquals(victim.getHeight(), rotated.getWidth(), 0);
+    }
+
+    @Test
+    public void trimCosArray()
+    {
+        COSArray array = new COSArray(COSInteger.ONE, COSInteger.ONE, COSInteger.THREE,
+                COSInteger.THREE, new COSDictionary());
+        PDRectangle victim = new PDRectangle(array);
+        assertEquals(1, victim.getLowerLeftX(), 0);
+        assertEquals(1, victim.getLowerLeftY(), 0);
+        assertEquals(2, victim.getHeight(), 0);
+        assertEquals(2, victim.getWidth(), 0);
     }
 
     @Test

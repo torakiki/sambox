@@ -337,17 +337,12 @@ public class PDPage implements COSObjectable, PDContentStream
      */
     public PDRectangle getBleedBox()
     {
-        PDRectangle retval;
         COSArray array = page.getDictionaryObject(COSName.BLEED_BOX, COSArray.class);
-        if (array != null)
+        if (nonNull(array))
         {
-            retval = clipToMediaBox(new PDRectangle(array));
+            return clipToMediaBox(new PDRectangle(array));
         }
-        else
-        {
-            retval = getCropBox();
-        }
-        return retval;
+        return getCropBox();
     }
 
     /**
@@ -375,17 +370,12 @@ public class PDPage implements COSObjectable, PDContentStream
      */
     public PDRectangle getTrimBox()
     {
-        PDRectangle retval;
         COSArray array = (COSArray) page.getDictionaryObject(COSName.TRIM_BOX);
-        if (array != null)
+        if (nonNull(array))
         {
-            retval = clipToMediaBox(new PDRectangle(array));
+            return clipToMediaBox(new PDRectangle(array));
         }
-        else
-        {
-            retval = getCropBox();
-        }
-        return retval;
+        return getCropBox();
     }
 
     /**
@@ -413,17 +403,12 @@ public class PDPage implements COSObjectable, PDContentStream
      */
     public PDRectangle getArtBox()
     {
-        PDRectangle retval;
         COSArray array = page.getDictionaryObject(COSName.ART_BOX, COSArray.class);
-        if (array != null)
+        if (nonNull(array))
         {
-            retval = clipToMediaBox(new PDRectangle(array));
+            return clipToMediaBox(new PDRectangle(array));
         }
-        else
-        {
-            retval = getCropBox();
-        }
-        return retval;
+        return getCropBox();
     }
 
     /**

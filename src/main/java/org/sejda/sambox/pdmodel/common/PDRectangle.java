@@ -122,7 +122,7 @@ public class PDRectangle implements COSObjectable
      */
     public PDRectangle(COSArray array)
     {
-        float[] values = array.toFloatArray();
+        float[] values = array.trimToSize(4).toFloatArray();
         // we have to start with the lower left corner
         rectArray.add(new COSFloat(Math.min(values[0], values[2])));
         rectArray.add(new COSFloat(Math.min(values[1], values[3])));

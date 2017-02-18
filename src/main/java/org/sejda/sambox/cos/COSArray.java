@@ -395,9 +395,9 @@ public class COSArray extends COSBase implements List<COSBase>
      *
      * @param size The desired size of the array.
      */
-    public void growToSize(int size)
+    public COSArray growToSize(int size)
     {
-        growToSize(size, null);
+        return growToSize(size, null);
     }
 
     /**
@@ -407,12 +407,27 @@ public class COSArray extends COSBase implements List<COSBase>
      * @param size The desired size of the array.
      * @param object The object to fill the array with.
      */
-    public void growToSize(int size, COSBase object)
+    public COSArray growToSize(int size, COSBase object)
     {
         while (size() < size)
         {
             add(object);
         }
+        return this;
+    }
+
+    /**
+     * trims the array to the given size
+     * 
+     * @param size
+     */
+    public COSArray trimToSize(int size)
+    {
+        if (size() > size)
+        {
+            objects.subList(size, size()).clear();
+        }
+        return this;
     }
 
     /**
