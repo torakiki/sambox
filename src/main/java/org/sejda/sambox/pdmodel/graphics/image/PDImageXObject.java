@@ -177,11 +177,13 @@ public final class PDImageXObject extends PDXObject implements PDImage
     {
         String name = file.getName();
         int dot = file.getName().lastIndexOf('.');
-        if (dot == -1)
+        String ext = "jpg";
+        if (dot != -1)
         {
-            throw new IllegalArgumentException("Image type not supported: " + name);
+            ext = name.substring(dot + 1).toLowerCase();
+        } else {
+            LOG.warn("Unknown extension for image file {}, assuming .jpg", file.getName());
         }
-        String ext = name.substring(dot + 1).toLowerCase();
 
         // Do some basic checks to see if the first bytes match the extension
         // Eg: a JPEG extension on a PNG image file
