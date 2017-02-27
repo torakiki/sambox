@@ -305,9 +305,9 @@ public class PDPage implements COSObjectable, PDContentStream
     public PDRectangle getCropBox()
     {
         COSArray array = (COSArray) PDPageTree.getInheritableAttribute(page, COSName.CROP_BOX);
-        if (array != null)
+        if (array != null && inMediaBoxBounds(new PDRectangle(array)))
         {
-            return clipToMediaBox(new PDRectangle(array));
+            return new PDRectangle(array);
         }
         return getMediaBox();
     }
@@ -338,9 +338,9 @@ public class PDPage implements COSObjectable, PDContentStream
     public PDRectangle getBleedBox()
     {
         COSArray array = page.getDictionaryObject(COSName.BLEED_BOX, COSArray.class);
-        if (nonNull(array))
+        if (nonNull(array) && inMediaBoxBounds(new PDRectangle(array)))
         {
-            return clipToMediaBox(new PDRectangle(array));
+            return new PDRectangle(array);
         }
         return getCropBox();
     }
@@ -371,9 +371,9 @@ public class PDPage implements COSObjectable, PDContentStream
     public PDRectangle getTrimBox()
     {
         COSArray array = (COSArray) page.getDictionaryObject(COSName.TRIM_BOX);
-        if (nonNull(array))
+        if (nonNull(array) && inMediaBoxBounds(new PDRectangle(array)))
         {
-            return clipToMediaBox(new PDRectangle(array));
+            return new PDRectangle(array);
         }
         return getCropBox();
     }
@@ -404,9 +404,9 @@ public class PDPage implements COSObjectable, PDContentStream
     public PDRectangle getArtBox()
     {
         COSArray array = page.getDictionaryObject(COSName.ART_BOX, COSArray.class);
-        if (nonNull(array))
+        if (nonNull(array) && inMediaBoxBounds(new PDRectangle(array)))
         {
-            return clipToMediaBox(new PDRectangle(array));
+            return new PDRectangle(array);
         }
         return getCropBox();
     }
@@ -440,6 +440,17 @@ public class PDPage implements COSObjectable, PDContentStream
         result.setUpperRightX(Math.min(mediaBox.getUpperRightX(), box.getUpperRightX()));
         result.setUpperRightY(Math.min(mediaBox.getUpperRightY(), box.getUpperRightY()));
         return result;
+    }
+
+    /**
+     * @return true if the given box fits into the media box
+     */
+    private boolean inMediaBoxBounds(PDRectangle box) {
+        PDRectangle mediaBox = getMediaBox();
+        return mediaBox.getLowerLeftX() <= box.getLowerLeftX() &&
+                mediaBox.getLowerLeftY() <= box.getLowerLeftY() &&
+                mediaBox.getUpperRightX() >= box.getUpperRightX() &&
+                mediaBox.getUpperRightY() >= box.getUpperRightY();
     }
 
     /**
