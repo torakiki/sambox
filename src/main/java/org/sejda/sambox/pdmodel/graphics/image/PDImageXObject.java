@@ -61,7 +61,6 @@ public final class PDImageXObject extends PDXObject implements PDImage
     private static final Logger LOG = LoggerFactory.getLogger(PDImageXObject.class);
 
     private BufferedImage cachedImage;
-    private BufferedImage cachedImageWithoutMasks;
     private PDColorSpace colorSpace;
     private PDResources resources; // current resource dictionary (has color spaces)
 
@@ -181,7 +180,9 @@ public final class PDImageXObject extends PDXObject implements PDImage
         if (dot != -1)
         {
             ext = name.substring(dot + 1).toLowerCase();
-        } else {
+        }
+        else
+        {
             LOG.warn("Unknown extension for image file {}, assuming .jpg", file.getName());
         }
 
@@ -207,7 +208,8 @@ public final class PDImageXObject extends PDXObject implements PDImage
         {
             ext = "png";
         }
-        if (Arrays.equals(firstBytes, tiffLittleEndianFirstBytes) || Arrays.equals(firstBytes, tiffBigEndianFirstBytes))
+        if (Arrays.equals(firstBytes, tiffLittleEndianFirstBytes)
+                || Arrays.equals(firstBytes, tiffBigEndianFirstBytes))
         {
             ext = "tiff";
         }
@@ -356,20 +358,13 @@ public final class PDImageXObject extends PDXObject implements PDImage
     }
 
     /**
-     * {@inheritDoc} The returned images are cached for the lifetime of this XObject.
+     * 
+     * @return the image without mask applied. The image is not cached
+     * @throws IOException
      */
     public BufferedImage getImageWithoutMasks() throws IOException
     {
-        if (cachedImageWithoutMasks != null)
-        {
-            return cachedImageWithoutMasks;
-        }
-
-        // get image as RGB
-        BufferedImage image = SampledImageReader.getRGBImage(this, getColorKeyMask());
-
-        cachedImageWithoutMasks = image;
-        return image;
+        return SampledImageReader.getRGBImage(this, getColorKeyMask());
     }
 
     /**
