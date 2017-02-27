@@ -490,12 +490,7 @@ public final class PDImageXObject extends PDXObject implements PDImage
      */
     public COSArray getColorKeyMask()
     {
-        COSBase mask = getCOSObject().getDictionaryObject(COSName.MASK);
-        if (mask instanceof COSArray)
-        {
-            return (COSArray) mask;
-        }
-        return null;
+        return getCOSObject().getDictionaryObject(COSName.MASK, COSArray.class);
     }
 
     /**

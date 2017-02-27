@@ -429,20 +429,6 @@ public class PDPage implements COSObjectable, PDContentStream
     }
 
     /**
-     * Clips the given box to the bounds of the media box.
-     */
-    private PDRectangle clipToMediaBox(PDRectangle box)
-    {
-        PDRectangle mediaBox = getMediaBox();
-        PDRectangle result = new PDRectangle();
-        result.setLowerLeftX(Math.max(mediaBox.getLowerLeftX(), box.getLowerLeftX()));
-        result.setLowerLeftY(Math.max(mediaBox.getLowerLeftY(), box.getLowerLeftY()));
-        result.setUpperRightX(Math.min(mediaBox.getUpperRightX(), box.getUpperRightX()));
-        result.setUpperRightY(Math.min(mediaBox.getUpperRightY(), box.getUpperRightY()));
-        return result;
-    }
-
-    /**
      * @return true if the given box fits into the media box
      */
     private boolean inMediaBoxBounds(PDRectangle box) {
