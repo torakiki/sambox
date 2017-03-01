@@ -4,4 +4,4 @@ jdk:
   - oraclejdk8
 notifications:
   email:
-    - hi@sejda.com
+    - info@sejda.org
