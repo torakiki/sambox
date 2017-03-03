@@ -251,8 +251,7 @@ public final class LosslessFactory
     private static PDImageXObject prepareImageXObject(byte[] byteArray, int width, int height,
             int bitsPerComponent, PDColorSpace initColorSpace) throws IOException
     {
-        // pre-size the output stream to half of the input
-        FastByteArrayOutputStream baos = new FastByteArrayOutputStream(byteArray.length / 2);
+        FastByteArrayOutputStream baos = new FastByteArrayOutputStream();
 
         Filter filter = FilterFactory.INSTANCE.getFilter(COSName.FLATE_DECODE);
         filter.encode(new ByteArrayInputStream(byteArray), baos, new COSDictionary());
