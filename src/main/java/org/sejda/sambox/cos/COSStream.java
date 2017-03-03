@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.cos;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static org.sejda.io.SeekableSources.inMemorySeekableSourceFrom;
@@ -232,12 +233,9 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
 
     private void decodeIfRequired() throws IOException
     {
-        if (getFilters() != null)
+        if (nonNull(getFilters()) && isNull(unfiltered))
         {
-            if (unfiltered == null)
-            {
-                doDecode();
-            }
+            doDecode();
         }
     }
 
@@ -247,39 +245,9 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
      */
     public DecodeResult getDecodeResult() throws IOException
     {
-        if (unfiltered == null)
-        {
-            doDecode();
-        }
+        decodeIfRequired();
 
-        if (unfiltered == null || decodeResult == null)
-        {
-            StringBuilder filterInfo = new StringBuilder();
-            COSBase filters = getFilters();
-            if (filters != null)
-            {
-                filterInfo.append(" - filter: ");
-                if (filters instanceof COSName)
-                {
-                    filterInfo.append(((COSName) filters).getName());
-                }
-                else if (filters instanceof COSArray)
-                {
-                    COSArray filterArray = (COSArray) filters;
-                    for (int i = 0; i < filterArray.size(); i++)
-                    {
-                        if (filterArray.size() > 1)
-                        {
-                            filterInfo.append(", ");
-                        }
-                        filterInfo.append(((COSName) filterArray.get(i)).getName());
-                    }
-                }
-            }
-            String subtype = getNameAsString(COSName.SUBTYPE);
-            throw new IOException(subtype + " stream was not read" + filterInfo);
-        }
-        return decodeResult;
+        return Optional.ofNullable(decodeResult).orElse(DecodeResult.DEFAULT);
     }
 
     @Override
@@ -296,21 +264,20 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
     private void doDecode() throws IOException
     {
         COSBase filters = getFilters();
-        if (filters == null)
+        if (nonNull(filters))
         {
-            decodeResult = DecodeResult.DEFAULT;
-        }
-        else if (filters instanceof COSName)
-        {
-            unfiltered = decode((COSName) filters, 0, getStreamToDecode());
-        }
-        else if (filters instanceof COSArray)
-        {
-            unfiltered = decodeChain((COSArray) filters, getStreamToDecode());
-        }
-        else
-        {
-            throw new IOException("Unknown filter type:" + filters);
+            if (filters instanceof COSName)
+            {
+                unfiltered = decode((COSName) filters, 0, getStreamToDecode());
+            }
+            else if (filters instanceof COSArray)
+            {
+                unfiltered = decodeChain((COSArray) filters, getStreamToDecode());
+            }
+            else
+            {
+                throw new IOException("Unknown filter type:" + filters);
+            }
         }
     }
 
@@ -337,7 +304,6 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
             }
             return tmpResult;
         }
-        decodeResult = DecodeResult.DEFAULT;
         return null;
     }
 
