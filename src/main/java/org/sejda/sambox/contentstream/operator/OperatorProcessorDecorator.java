@@ -32,7 +32,7 @@ import org.sejda.sambox.cos.COSBase;
  */
 public class OperatorProcessorDecorator extends OperatorProcessor
 {
-    protected final OperatorProcessor delegate;
+    private OperatorProcessor delegate;
     private OperatorConsumer consumer;
 
     /**
