@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.contentstream.operator;
 
+import static org.sejda.sambox.contentstream.operator.OperatorConsumer.NO_OP;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +35,12 @@ public class OperatorProcessorDecorator extends OperatorProcessor
     protected final OperatorProcessor delegate;
     private OperatorConsumer consumer;
 
+    /**
+     * Decorates the given {@link OperatorProcessor} with the given {@link OperatorConsumer} function
+     * 
+     * @param delegate
+     * @param consumer
+     */
     public OperatorProcessorDecorator(OperatorProcessor delegate, OperatorConsumer consumer)
     {
         this.delegate = delegate;
@@ -43,7 +51,7 @@ public class OperatorProcessorDecorator extends OperatorProcessor
     public void process(Operator operator, List<COSBase> operands) throws IOException
     {
         delegate.process(operator, operands);
-        consumer.process(operator, operands);
+        consumer.apply(operator, operands);
     }
 
     @Override

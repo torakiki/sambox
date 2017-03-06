@@ -27,7 +27,7 @@ import org.sejda.sambox.cos.COSBase;
  *
  * @author Laurent Huault
  */
-public abstract class OperatorProcessor implements OperatorConsumer
+public abstract class OperatorProcessor
 {
     private PDFStreamEngine context;
 
@@ -39,8 +39,6 @@ public abstract class OperatorProcessor implements OperatorConsumer
     }
 
     /**
-     * Returns the processing context.
-     * 
      * @return the processing context
      */
     public PDFStreamEngine getContext()

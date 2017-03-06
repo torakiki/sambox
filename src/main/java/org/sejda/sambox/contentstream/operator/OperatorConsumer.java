@@ -22,6 +22,8 @@ import java.util.List;
 import org.sejda.sambox.cos.COSBase;
 
 /**
+ * Consumes an operator
+ * 
  * @author Andrea Vacondio
  *
  */
@@ -32,5 +34,5 @@ public interface OperatorConsumer
         // no op
     };
 
-    void process(Operator operator, List<COSBase> operands) throws IOException;
+    void apply(Operator operator, List<COSBase> operands) throws IOException;
 }
