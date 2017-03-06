@@ -39,7 +39,7 @@ public class SetLineJoinStyle extends OperatorProcessor
             throw new MissingOperandException(operator, arguments);
         }
         int lineJoinStyle = ((COSNumber) arguments.get(0)).intValue();
-        context.getGraphicsState().setLineJoin(lineJoinStyle);
+        getContext().getGraphicsState().setLineJoin(lineJoinStyle);
     }
 
     @Override

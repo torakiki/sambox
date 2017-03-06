@@ -42,9 +42,9 @@ public class BeginMarkedContentSequence extends OperatorProcessor
                 tag = (COSName) argument;
             }
         }
-        if (this.context instanceof PDFMarkedContentExtractor)
+        if (this.getContext() instanceof PDFMarkedContentExtractor)
         {
-            ((PDFMarkedContentExtractor) this.context).beginMarkedContentSequence(tag, null);
+            ((PDFMarkedContentExtractor) this.getContext()).beginMarkedContentSequence(tag, null);
         }
     }
 

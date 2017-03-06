@@ -33,6 +33,7 @@ import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
+
 /**
  * Component capable of writing a content stream tokens, {@link Operator}s and {@link COSBase} operands.
  * 
@@ -79,6 +80,16 @@ public class ContentStreamWriter extends DefaultCOSWriter
         }
     }
 
+    public void writeOperator(List<COSBase> operands, Operator operator) throws IOException
+    {
+        for (COSBase operand : operands)
+        {
+            operand.accept(this);
+            writeSpace();
+        }
+        this.writeOperator(operator);
+    }
+
     /**
      * Writes the byte array as is as content of the stream.
      * 
@@ -106,8 +117,8 @@ public class ContentStreamWriter extends DefaultCOSWriter
         if (token.getName().equals(BI_OPERATOR))
         {
             writeEOL();
-            COSDictionary imageParams = Optional.ofNullable(token.getImageParameters()).orElseGet(
-                    COSDictionary::new);
+            COSDictionary imageParams = Optional.ofNullable(token.getImageParameters())
+                    .orElseGet(COSDictionary::new);
             for (COSName key : imageParams.keySet())
             {
                 key.accept(this);

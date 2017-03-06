@@ -39,9 +39,9 @@ public class ShowText extends OperatorProcessor
         if (!arguments.isEmpty())
         {
             COSBase base = arguments.get(0);
-            if (base instanceof COSString && nonNull(context.getTextMatrix()))
+            if (base instanceof COSString && nonNull(getContext().getTextMatrix()))
             {
-                context.showTextString(((COSString) base).getBytes());
+                getContext().showTextString(((COSString) base).getBytes());
 
             }
         }

@@ -43,7 +43,7 @@ public class MoveText extends OperatorProcessor
         {
             throw new MissingOperandException(operator, arguments);
         }
-        Matrix textLineMatrix = context.getTextLineMatrix();
+        Matrix textLineMatrix = getContext().getTextLineMatrix();
         if (textLineMatrix == null)
         {
             LOG.warn("TextLineMatrix is null, " + getName() + " operator will be ignored");
@@ -65,7 +65,7 @@ public class MoveText extends OperatorProcessor
 
         Matrix matrix = new Matrix(1, 0, 0, 1, x.floatValue(), y.floatValue());
         textLineMatrix.concatenate(matrix);
-        context.setTextMatrix(textLineMatrix.clone());
+        getContext().setTextMatrix(textLineMatrix.clone());
     }
 
     @Override

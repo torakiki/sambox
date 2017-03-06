@@ -14,41 +14,53 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package org.sejda.sambox.contentstream.operator.state;
+package org.sejda.sambox.contentstream.operator;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
-import org.sejda.sambox.contentstream.operator.MissingOperandException;
-import org.sejda.sambox.contentstream.operator.Operator;
-import org.sejda.sambox.contentstream.operator.OperatorProcessor;
+import org.sejda.sambox.contentstream.PDFStreamEngine;
 import org.sejda.sambox.cos.COSBase;
-import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.pdmodel.graphics.state.RenderingIntent;
 
 /**
- * ri: Set the rendering intent.
- *
- * @author John Hewson
+ * decorator for an {@link OperatorProcessor}
+ * 
+ * @author Andrea Vacondio
  */
-public class SetRenderingIntent extends OperatorProcessor
+public class OperatorProcessorDecorator extends OperatorProcessor
 {
+    protected final OperatorProcessor delegate;
+    private OperatorConsumer consumer;
+
+    public OperatorProcessorDecorator(OperatorProcessor delegate, OperatorConsumer consumer)
+    {
+        this.delegate = delegate;
+        this.consumer = Optional.ofNullable(consumer).orElse(NO_OP);
+    }
+
     @Override
     public void process(Operator operator, List<COSBase> operands) throws IOException
     {
-        if (operands.size() < 1)
-        {
-            throw new MissingOperandException(operator, operands);
-        }
-        COSName value = (COSName) operands.get(0);
-        getContext().getGraphicsState()
-                .setRenderingIntent(RenderingIntent.fromString(value.getName()));
+        delegate.process(operator, operands);
+        consumer.process(operator, operands);
     }
 
     @Override
     public String getName()
     {
-        return "ri";
+        return delegate.getName();
+    }
+
+    @Override
+    public PDFStreamEngine getContext()
+    {
+        return delegate.getContext();
+    }
+
+    @Override
+    public void setContext(PDFStreamEngine context)
+    {
+        delegate.setContext(context);
     }
 }

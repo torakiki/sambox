@@ -50,8 +50,8 @@ public class SetMatrix extends OperatorProcessor
         Matrix matrix = new Matrix(a.floatValue(), b.floatValue(), c.floatValue(),
                                    d.floatValue(), e.floatValue(), f.floatValue());
 
-        context.setTextMatrix(matrix);
-        context.setTextLineMatrix(matrix.clone());
+        getContext().setTextMatrix(matrix);
+        getContext().setTextLineMatrix(matrix.clone());
     }
 
     @Override

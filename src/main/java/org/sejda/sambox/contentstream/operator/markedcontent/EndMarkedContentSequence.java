@@ -33,9 +33,9 @@ public class EndMarkedContentSequence extends OperatorProcessor
     @Override
     public void process(Operator operator, List<COSBase> arguments)
     {
-        if (this.context instanceof PDFMarkedContentExtractor)
+        if (this.getContext() instanceof PDFMarkedContentExtractor)
         {
-            ((PDFMarkedContentExtractor) this.context).endMarkedContentSequence();
+            ((PDFMarkedContentExtractor) this.getContext()).endMarkedContentSequence();
         }
     }
 

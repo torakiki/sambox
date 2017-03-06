@@ -184,10 +184,7 @@ public abstract class PDColorSpace implements COSObjectable
                 {
                     return new PDPattern(resources);
                 }
-                else
-                {
-                    return new PDPattern(resources, PDColorSpace.create(array.get(1)));
-                }
+                return new PDPattern(resources, PDColorSpace.create(array.get(1)));
             }
             else if (name == COSName.DEVICECMYK || name == COSName.DEVICERGB
                     || name == COSName.DEVICEGRAY)

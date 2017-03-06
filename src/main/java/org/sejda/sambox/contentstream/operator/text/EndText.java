@@ -33,9 +33,9 @@ public class EndText extends OperatorProcessor
     @Override
     public void process(Operator operator, List<COSBase> arguments) throws IOException
     {
-        context.setTextMatrix(null);
-        context.setTextLineMatrix(null);
-        context.endText();
+        getContext().setTextMatrix(null);
+        getContext().setTextLineMatrix(null);
+        getContext().endText();
     }
 
     @Override

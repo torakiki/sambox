@@ -41,8 +41,8 @@ public class SetStrokingDeviceRGBColor extends SetStrokingColor
      */
     public void process(Operator operator, List<COSBase> arguments) throws IOException
     {
-        PDColorSpace cs = context.getResources().getColorSpace(COSName.DEVICERGB);
-        context.getGraphicsState().setStrokingColorSpace(cs);
+        PDColorSpace cs = getContext().getResources().getColorSpace(COSName.DEVICERGB);
+        getContext().getGraphicsState().setStrokingColorSpace(cs);
         super.process(operator, arguments);
     }
 

@@ -39,8 +39,8 @@ public abstract class SetColor extends OperatorProcessor
     public void process(Operator operator, List<COSBase> arguments) throws IOException
     {
         PDColorSpace colorSpace = getColorSpace();
-        if (colorSpace instanceof PDDeviceColorSpace &&
-            arguments.size() < colorSpace.getNumberOfComponents())
+        if (colorSpace instanceof PDDeviceColorSpace
+                && arguments.size() < colorSpace.getNumberOfComponents())
         {
             throw new MissingOperandException(operator, arguments);
         }
@@ -50,20 +50,19 @@ public abstract class SetColor extends OperatorProcessor
     }
 
     /**
-     * Returns either the stroking or non-stroking color value.
      * @return The stroking or non-stroking color value.
      */
-    protected abstract PDColor getColor();
+    public abstract PDColor getColor();
 
     /**
      * Sets either the stroking or non-stroking color value.
+     * 
      * @param color The stroking or non-stroking color value.
      */
     protected abstract void setColor(PDColor color);
 
     /**
-     * Returns either the stroking or non-stroking color space.
      * @return The stroking or non-stroking color space.
      */
-    protected abstract PDColorSpace getColorSpace();
+    public abstract PDColorSpace getColorSpace();
 }

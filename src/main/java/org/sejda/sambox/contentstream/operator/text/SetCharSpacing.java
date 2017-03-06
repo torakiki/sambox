@@ -47,7 +47,8 @@ public class SetCharSpacing extends OperatorProcessor
         if (charSpacing instanceof COSNumber)
         {
             COSNumber characterSpacing = (COSNumber)charSpacing;
-            context.getGraphicsState().getTextState().setCharacterSpacing(characterSpacing.floatValue());
+            getContext().getGraphicsState().getTextState()
+                    .setCharacterSpacing(characterSpacing.floatValue());
         }
     }
 

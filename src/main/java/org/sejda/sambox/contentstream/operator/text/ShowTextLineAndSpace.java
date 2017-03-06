@@ -38,9 +38,9 @@ public class ShowTextLineAndSpace extends OperatorProcessor
         {
             throw new MissingOperandException(operator, arguments);
         }
-        context.processOperator("Tw", arguments.subList(0, 1));
-        context.processOperator("Tc", arguments.subList(1, 2));
-        context.processOperator("'", arguments.subList(2, 3));
+        getContext().processOperator("Tw", arguments.subList(0, 1));
+        getContext().processOperator("Tc", arguments.subList(1, 2));
+        getContext().processOperator("'", arguments.subList(2, 3));
     }
 
     @Override

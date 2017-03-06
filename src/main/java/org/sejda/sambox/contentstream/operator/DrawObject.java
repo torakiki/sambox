@@ -46,21 +46,21 @@ public class DrawObject extends OperatorProcessor
             return;
         }
         COSName name = (COSName) base0;
-        if (context.getResources().isImageXObject(name))
+        if (getContext().getResources().isImageXObject(name))
         {
             // we're done here, don't decode images when doing text extraction
             return;
         }
 
-        PDXObject xobject = context.getResources().getXObject(name);
+        PDXObject xobject = getContext().getResources().getXObject(name);
         if (xobject instanceof PDTransparencyGroup)
         {
-            context.showTransparencyGroup((PDTransparencyGroup) xobject);
+            getContext().showTransparencyGroup((PDTransparencyGroup) xobject);
         }
         else if (xobject instanceof PDFormXObject)
         {
             PDFormXObject form = (PDFormXObject) xobject;
-            context.showForm(form);
+            getContext().showForm(form);
         }
     }
 

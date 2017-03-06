@@ -25,6 +25,7 @@ import static org.mockito.Mockito.verify;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Before;
@@ -34,6 +35,7 @@ import org.sejda.io.CountingWritableByteChannel;
 import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
@@ -113,6 +115,18 @@ public class ContentStreamWriterTest
         victim.writeTokens(Operator.getOperator("Tj"));
         verify(writer).write("Tj".getBytes(StandardCharsets.ISO_8859_1));
         verify(writer).writeEOL();
+    }
+
+    @Test
+    public void writeOperatorWithOperands() throws Exception
+    {
+        victim.writeOperator(Arrays.asList(COSInteger.ONE, new COSInteger(50)),
+                Operator.getOperator("Td"));
+        verify(writer).write("1");
+        verify(writer).write("50");
+        verify(writer).write("Td".getBytes(StandardCharsets.ISO_8859_1));
+        verify(writer).writeEOL();
+        verify(writer, times(2)).write((byte) 0x20);
     }
 
     @Test

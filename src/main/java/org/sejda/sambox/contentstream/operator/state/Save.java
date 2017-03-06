@@ -32,7 +32,7 @@ public class Save extends OperatorProcessor
     @Override
     public void process(Operator operator, List<COSBase> arguments)
     {
-        context.saveGraphicsState();
+        getContext().saveGraphicsState();
     }
 
     @Override

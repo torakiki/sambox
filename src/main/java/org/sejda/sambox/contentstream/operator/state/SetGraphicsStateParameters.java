@@ -53,12 +53,12 @@ public class SetGraphicsStateParameters extends OperatorProcessor
 
         // set parameters from graphics state parameter dictionary
         COSName graphicsName = (COSName) base0;
-        PDExtendedGraphicsState gs = context.getResources().getExtGState(graphicsName);
+        PDExtendedGraphicsState gs = getContext().getResources().getExtGState(graphicsName);
         if (gs == null)
         {
             LOG.warn("name for 'gs' operator not found in resources: /" + graphicsName.getName());
         } else {
-            gs.copyIntoGraphicsState( context.getGraphicsState() );
+            gs.copyIntoGraphicsState(getContext().getGraphicsState());
         }
     }
 

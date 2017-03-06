@@ -38,9 +38,9 @@ public class SetStrokingColorSpace extends OperatorProcessor
     {
         COSName name = (COSName)arguments.get(0);
 
-        PDColorSpace cs = context.getResources().getColorSpace(name);
-        context.getGraphicsState().setStrokingColorSpace(cs);
-        context.getGraphicsState().setStrokingColor(cs.getInitialColor());
+        PDColorSpace cs = getContext().getResources().getColorSpace(name);
+        getContext().getGraphicsState().setStrokingColorSpace(cs);
+        getContext().getGraphicsState().setStrokingColor(cs.getInitialColor());
     }
 
     @Override

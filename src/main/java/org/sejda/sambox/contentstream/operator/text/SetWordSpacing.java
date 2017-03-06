@@ -38,7 +38,7 @@ public class SetWordSpacing extends OperatorProcessor
             COSBase base = arguments.get(0);
             if (base instanceof COSNumber)
             {
-                context.getGraphicsState().getTextState()
+                getContext().getGraphicsState().getTextState()
                         .setWordSpacing(((COSNumber) base).floatValue());
             }
         }

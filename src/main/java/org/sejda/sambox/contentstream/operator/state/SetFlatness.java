@@ -44,7 +44,7 @@ public class SetFlatness extends OperatorProcessor
             return;
         }
         COSNumber value = (COSNumber) operands.get(0);
-        context.getGraphicsState().setFlatness(value.floatValue());
+        getContext().getGraphicsState().setFlatness(value.floatValue());
     }
 
     @Override

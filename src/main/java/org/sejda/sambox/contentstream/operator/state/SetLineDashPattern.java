@@ -80,7 +80,7 @@ public class SetLineDashPattern extends OperatorProcessor
             LOG.warn("dash lengths all zero, ignored");
             dashArray = new COSArray();
         }
-        context.setLineDashPattern(dashArray, dashPhase);
+        getContext().setLineDashPattern(dashArray, dashPhase);
     }
 
     @Override

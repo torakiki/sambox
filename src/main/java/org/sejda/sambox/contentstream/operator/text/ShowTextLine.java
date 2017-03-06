@@ -33,8 +33,8 @@ public class ShowTextLine extends OperatorProcessor
     @Override
     public void process(Operator operator, List<COSBase> arguments) throws IOException
     {
-        context.processOperator("T*", null);
-        context.processOperator("Tj", arguments);
+        getContext().processOperator("T*", null);
+        getContext().processOperator("Tj", arguments);
     }
 
     @Override

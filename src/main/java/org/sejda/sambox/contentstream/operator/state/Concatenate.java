@@ -55,7 +55,7 @@ public class Concatenate extends OperatorProcessor
         Matrix matrix = new Matrix(a.floatValue(), b.floatValue(), c.floatValue(),
                                    d.floatValue(), e.floatValue(), f.floatValue());
 
-        context.getGraphicsState().getCurrentTransformationMatrix().concatenate(matrix);
+        getContext().getGraphicsState().getCurrentTransformationMatrix().concatenate(matrix);
     }
 
     @Override

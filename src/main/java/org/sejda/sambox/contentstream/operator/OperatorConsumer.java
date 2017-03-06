@@ -14,37 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.sejda.sambox.contentstream.operator.state;
+package org.sejda.sambox.contentstream.operator;
 
 import java.io.IOException;
 import java.util.List;
 
-import org.sejda.sambox.contentstream.operator.MissingOperandException;
-import org.sejda.sambox.contentstream.operator.Operator;
-import org.sejda.sambox.contentstream.operator.OperatorProcessor;
 import org.sejda.sambox.cos.COSBase;
-import org.sejda.sambox.cos.COSNumber;
 
 /**
- * M: Set miter limit.
+ * @author Andrea Vacondio
  *
  */
-public class SetLineMiterLimit extends OperatorProcessor
+@FunctionalInterface
+public interface OperatorConsumer
 {
-    @Override
-    public void process(Operator operator, List<COSBase> arguments) throws IOException
-    {
-        if (arguments.size() < 1)
-        {
-            throw new MissingOperandException(operator, arguments);
-        }
-        COSNumber miterLimit = (COSNumber) arguments.get(0);
-        getContext().getGraphicsState().setMiterLimit(miterLimit.floatValue());
-    }
+    public static final OperatorConsumer NO_OP = (operator, operands) -> {
+        // no op
+    };
 
-    @Override
-    public String getName()
-    {
-        return "M";
-    }
+    void process(Operator operator, List<COSBase> operands) throws IOException;
 }

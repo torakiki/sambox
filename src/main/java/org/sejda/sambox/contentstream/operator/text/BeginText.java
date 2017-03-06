@@ -35,9 +35,9 @@ public class BeginText extends OperatorProcessor
     @Override
     public void process(Operator operator, List<COSBase> arguments) throws IOException
     {
-        context.setTextMatrix( new Matrix());
-        context.setTextLineMatrix( new Matrix() );
-        context.beginText();
+        getContext().setTextMatrix(new Matrix());
+        getContext().setTextLineMatrix(new Matrix());
+        getContext().beginText();
     }
 
     @Override

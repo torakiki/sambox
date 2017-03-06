@@ -33,9 +33,9 @@ public class Restore extends OperatorProcessor
     @Override
     public void process(Operator operator, List<COSBase> arguments) throws IOException
     {
-        if (context.getGraphicsStackSize() > 1)
+        if (getContext().getGraphicsStackSize() > 1)
         {
-            context.restoreGraphicsState();
+            getContext().restoreGraphicsState();
         }
         else
         {

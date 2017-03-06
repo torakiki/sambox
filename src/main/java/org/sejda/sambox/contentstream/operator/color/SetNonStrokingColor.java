@@ -31,9 +31,9 @@ public class SetNonStrokingColor extends SetColor
      * @return The non-stroking color.
      */
     @Override
-    protected PDColor getColor()
+    public PDColor getColor()
     {
-        return context.getGraphicsState().getNonStrokingColor();
+        return getContext().getGraphicsState().getNonStrokingColor();
     }
 
     /**
@@ -43,7 +43,7 @@ public class SetNonStrokingColor extends SetColor
     @Override
     protected void setColor(PDColor color)
     {
-        context.getGraphicsState().setNonStrokingColor(color);
+        getContext().getGraphicsState().setNonStrokingColor(color);
     }
 
     /**
@@ -51,9 +51,9 @@ public class SetNonStrokingColor extends SetColor
      * @return The non-stroking color space.
      */
     @Override
-    protected PDColorSpace getColorSpace()
+    public PDColorSpace getColorSpace()
     {
-        return context.getGraphicsState().getNonStrokingColorSpace();
+        return getContext().getGraphicsState().getNonStrokingColorSpace();
     }
 
     @Override

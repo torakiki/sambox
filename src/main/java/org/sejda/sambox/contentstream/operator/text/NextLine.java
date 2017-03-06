@@ -36,13 +36,13 @@ public class NextLine extends OperatorProcessor
     public void process(Operator operator, List<COSBase> arguments) throws IOException
     {
         //move to start of next text line
-        ArrayList<COSBase> args = new ArrayList<COSBase>();
+        ArrayList<COSBase> args = new ArrayList<>();
         args.add(new COSFloat(0f));
         // this must be -leading instead of just leading as written in the
         // specification (p.369) the acrobat reader seems to implement it the same way
-        args.add(new COSFloat(-1 * context.getGraphicsState().getTextState().getLeading()));
+        args.add(new COSFloat(-1 * getContext().getGraphicsState().getTextState().getLeading()));
         // use Td instead of repeating code
-        context.processOperator("Td", args);
+        getContext().processOperator("Td", args);
     }
 
     @Override

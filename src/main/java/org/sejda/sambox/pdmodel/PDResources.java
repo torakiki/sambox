@@ -455,8 +455,9 @@ public final class PDResources implements COSObjectable
      */
     private COSObjectKey getIndirectKey(COSName kind, COSName name)
     {
-        COSBase found = Optional.ofNullable(resources.getDictionaryObject(kind))
-                .map(d -> ((COSDictionary) d).getItem(name)).orElse(null);
+        COSBase found = Optional
+                .ofNullable(resources.getDictionaryObject(kind, COSDictionary.class))
+                .map(d -> d.getItem(name)).orElse(null);
         if (found instanceof ExistingIndirectCOSObject)
         {
             return ((ExistingIndirectCOSObject) found).id().objectIdentifier;

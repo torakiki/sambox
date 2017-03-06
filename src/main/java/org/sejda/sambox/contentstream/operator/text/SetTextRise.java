@@ -38,7 +38,8 @@ public class SetTextRise extends OperatorProcessor
             COSBase base = arguments.get(0);
             if (base instanceof COSNumber)
             {
-                context.getGraphicsState().getTextState().setRise(((COSNumber) base).floatValue());
+                getContext().getGraphicsState().getTextState()
+                        .setRise(((COSNumber) base).floatValue());
             }
         }
 
