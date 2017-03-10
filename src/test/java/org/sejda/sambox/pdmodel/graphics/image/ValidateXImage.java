@@ -24,6 +24,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.imageio.ImageIO;
@@ -45,7 +46,8 @@ import org.sejda.sambox.rendering.PDFRenderer;
  */
 public class ValidateXImage
 {
-    public static void validate(PDImageXObject ximage, int bpc, int width, int height, String format, String colorSpaceName) throws IOException
+    public static void validate(PDImageXObject ximage, int bpc, int width, int height,
+            String format, String colorSpaceName) throws IOException
     {
         // check the dictionary
         assertNotNull(ximage);
@@ -57,7 +59,7 @@ public class ValidateXImage
         assertEquals(bpc, ximage.getBitsPerComponent());
         assertEquals(width, ximage.getWidth());
         assertEquals(height, ximage.getHeight());
-        assertEquals(format, ximage.getSuffix());
+        assertEquals(format, getSuffix(ximage));
         assertEquals(colorSpaceName, ximage.getColorSpace().getName());
 
         // check the image
@@ -65,11 +67,9 @@ public class ValidateXImage
         assertEquals(ximage.getWidth(), ximage.getImage().getWidth());
         assertEquals(ximage.getHeight(), ximage.getImage().getHeight());
 
-        boolean writeOk = ImageIO.write(ximage.getImage(),
-                format, new ByteArrayOutputStream());
+        boolean writeOk = ImageIO.write(ximage.getImage(), format, new ByteArrayOutputStream());
         assertTrue(writeOk);
-        writeOk = ImageIO.write(ximage.getOpaqueImage(),
-                format, new ByteArrayOutputStream());
+        writeOk = ImageIO.write(ximage.getOpaqueImage(), format, new ByteArrayOutputStream());
         assertTrue(writeOk);
     }
 
@@ -89,8 +89,8 @@ public class ValidateXImage
     }
 
     // write image twice (overlapped) in document, close document and re-read PDF
-    static void doWritePDF(PDDocument document, PDImageXObject ximage, File testResultsDir, String filename)
-            throws IOException
+    static void doWritePDF(PDDocument document, PDImageXObject ximage, File testResultsDir,
+            String filename) throws IOException
     {
         File pdfFile = new File(testResultsDir, filename);
 
@@ -105,7 +105,7 @@ public class ValidateXImage
         contentStream.drawImage(ximage, 150, 300);
         contentStream.drawImage(ximage, 200, 350);
         contentStream.close();
-        
+
         // check that the resource map is up-to-date
         assertEquals(1, count(document.getPage(0).getResources().getXObjectNames()));
 
@@ -117,7 +117,7 @@ public class ValidateXImage
             assertEquals(1, count(doc.getPage(0).getResources().getXObjectNames()));
             new PDFRenderer(doc).renderImage(0);
         }
-        
+
     }
 
     private static int count(Iterable<COSName> iterable)
@@ -150,13 +150,45 @@ public class ValidateXImage
             {
                 if (expectedImage.getRGB(x, y) != actualImage.getRGB(x, y))
                 {
-                    errMsg = String.format("(%d,%d) %08X != %08X", x, y, expectedImage.getRGB(x, y), actualImage.getRGB(x, y));
+                    errMsg = String.format("(%d,%d) %08X != %08X", x, y, expectedImage.getRGB(x, y),
+                            actualImage.getRGB(x, y));
                 }
                 assertEquals(errMsg, expectedImage.getRGB(x, y), actualImage.getRGB(x, y));
             }
         }
     }
 
-    
+    /**
+     * This will get the suffix for this image type, e.g. jpg/png.
+     * 
+     * @return The image suffix or null if not available.
+     */
+    public static String getSuffix(PDImageXObject ximage)
+    {
+        List<COSName> filters = ximage.getStream().getFilters();
+
+        if (filters == null)
+        {
+            return "png";
+        }
+        else if (filters.contains(COSName.DCT_DECODE))
+        {
+            return "jpg";
+        }
+        else if (filters.contains(COSName.JPX_DECODE))
+        {
+            return "jpx";
+        }
+        else if (filters.contains(COSName.CCITTFAX_DECODE))
+        {
+            return "tiff";
+        }
+        else if (filters.contains(COSName.FLATE_DECODE) || filters.contains(COSName.LZW_DECODE)
+                || filters.contains(COSName.RUN_LENGTH_DECODE))
+        {
+            return "png";
+        }
+        return null;
+    }
 
 }

@@ -16,29 +16,27 @@
  */
 package org.sejda.sambox.pdmodel.graphics.image;
 
+import static org.sejda.util.RequireUtils.requireNotNullArg;
+
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.List;
 
 import javax.imageio.ImageIO;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSStream;
-import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.common.PDMetadata;
 import org.sejda.sambox.pdmodel.common.PDStream;
@@ -47,8 +45,6 @@ import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
 import org.sejda.sambox.util.filetypedetector.FileType;
 import org.sejda.sambox.util.filetypedetector.FileTypeDetector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * An Image XObject.
@@ -58,8 +54,6 @@ import org.slf4j.LoggerFactory;
  */
 public final class PDImageXObject extends PDXObject implements PDImage
 {
-    private static final Logger LOG = LoggerFactory.getLogger(PDImageXObject.class);
-
     private BufferedImage cachedImage;
     private PDColorSpace colorSpace;
     private PDResources resources; // current resource dictionary (has color spaces)
@@ -92,8 +86,7 @@ public final class PDImageXObject extends PDXObject implements PDImage
     /**
      * Creates an Image XObject in the given document using the given filtered stream.
      * 
-     * @param document the current document
-     * @param filteredStream a filtered stream of image data
+     * @param encodedStream a filtered stream of image data
      * @param cosFilter the filter or a COSArray of filters
      * @param width the image width
      * @param height the image height
@@ -142,124 +135,16 @@ public final class PDImageXObject extends PDXObject implements PDImage
         this.colorSpace = stream.getCOSObject().getDecodeResult().getJPXColorSpace();
     }
 
-    /**
-     * Create a PDImageXObject from an image file, see {@link #createFromFile(File, PDDocument)} for more details.
-     *
-     * @param imagePath the image file path.
-     * @param doc the document that shall use this PDImageXObject.
-     * @return a PDImageXObject.
-     * @throws IOException if there is an error when reading the file or creating the PDImageXObject, or if the image
-     * type is not supported.
-     */
     public static PDImageXObject createFromFile(String imagePath) throws IOException
     {
-        return createFromFileByExtension(new File(imagePath));
+        return createFromFile(new File(imagePath));
     }
 
-    /**
-     * Create a PDImageXObject from an image file. The file format is determined by the file name suffix. The following
-     * suffixes are supported: jpg, jpeg, tif, tiff, gif, bmp and png. This is a convenience method that calls
-     * {@link JPEGFactory#createFromStream}, {@link CCITTFactory#createFromFile} or {@link ImageIO#read} combined with
-     * {@link LosslessFactory#createFromImage}. (The later can also be used to create a PDImageXObject from a
-     * BufferedImage).
-     *
-     * Image type is also detected based on the first bytes in the file, for PNG and JPEG. Takes precedence over
-     * extension. Eg: Solves issues with JPEG with .png extension
-     *
-     * @param file the image file.
-     * @param doc the document that shall use this PDImageXObject.
-     * @return a PDImageXObject.
-     * @throws IOException if there is an error when reading the file or creating the PDImageXObject.
-     * @throws IllegalArgumentException if the image type is not supported.
-     */
-    public static PDImageXObject createFromFileByExtension(File file) throws IOException
+    public static PDImageXObject createFromFile(File file) throws IOException
     {
-        String name = file.getName();
-        int dot = file.getName().lastIndexOf('.');
-        String ext = "jpg";
-        if (dot != -1)
-        {
-            ext = name.substring(dot + 1).toLowerCase();
-        }
-        else
-        {
-            LOG.warn("Unknown extension for image file {}, assuming .jpg", file.getName());
-        }
-
-        // Do some basic checks to see if the first bytes match the extension
-        // Eg: a JPEG extension on a PNG image file
-
-        byte[] jpegFirstBytes = new byte[] { (byte) 0xFF, (byte) 0xD8 };
-        byte[] pngFirstBytes = new byte[] { (byte) 0x89, (byte) 0x50 };
-        byte[] tiffLittleEndianFirstBytes = new byte[] { (byte) 0x49, (byte) 0x49 };
-        byte[] tiffBigEndianFirstBytes = new byte[] { (byte) 0x4D, (byte) 0x4D };
-        byte[] firstBytes = new byte[2];
-
-        try (FileInputStream fin = new FileInputStream(file))
-        {
-            fin.read(firstBytes);
-        }
-
-        if (Arrays.equals(firstBytes, jpegFirstBytes))
-        {
-            ext = "jpg";
-        }
-        if (Arrays.equals(firstBytes, pngFirstBytes))
-        {
-            ext = "png";
-        }
-        if (Arrays.equals(firstBytes, tiffLittleEndianFirstBytes)
-                || Arrays.equals(firstBytes, tiffBigEndianFirstBytes))
-        {
-            ext = "tiff";
-        }
-
-        if ("jpg".equals(ext) || "jpeg".equals(ext))
-        {
-            return JPEGFactory.createFromFile(file);
-        }
-        if ("tif".equals(ext) || "tiff".equals(ext))
-        {
-            return CCITTFactory.createFromFile(file);
-        }
-        if ("gif".equals(ext) || "bmp".equals(ext) || "png".equals(ext))
-        {
-            BufferedImage bim = ImageIO.read(file);
-            return LosslessFactory.createFromImage(bim);
-        }
-        throw new IllegalArgumentException("Image type not supported: " + name);
-    }
-
-    /**
-     * Create a PDImageXObject from an image file. The file format is determined by the file content. The following file
-     * types are supported: jpg, jpeg, tif, tiff, gif, bmp and png. This is a convenience method that calls
-     * {@link JPEGFactory#createFromStream}, {@link CCITTFactory#createFromFile} or {@link ImageIO#read} combined with
-     * {@link LosslessFactory#createFromImage}. (The later can also be used to create a PDImageXObject from a
-     * BufferedImage).
-     *
-     * @param file the image file.
-     * @param doc the document that shall use this PDImageXObject.
-     * @return a PDImageXObject.
-     * @throws IOException if there is an error when reading the file or creating the PDImageXObject.
-     * @throws IllegalArgumentException if the image type is not supported.
-     */
-    public static PDImageXObject createFromFileByContent(File file) throws IOException
-    {
-        FileType fileType = null;
-        try (BufferedInputStream bufferedInputStream = new BufferedInputStream(
-                new FileInputStream(file)))
-        {
-            fileType = FileTypeDetector.detectFileType(bufferedInputStream);
-        }
-        catch (IOException e)
-        {
-            throw new IOException("Could not determine file type: " + file.getName(), e);
-        }
-
-        if (fileType == null)
-        {
-            throw new IllegalArgumentException("Image type not supported: " + file.getName());
-        }
+        requireNotNullArg(file, "Cannot create image from a null file");
+        // we first try to match the first bytes to some known pattern, so we don't rely on the extension first
+        FileType fileType = FileTypeDetector.detectFileType(file);
 
         if (fileType.equals(FileType.JPEG))
         {
@@ -269,13 +154,20 @@ public final class PDImageXObject extends PDXObject implements PDImage
         {
             return CCITTFactory.createFromFile(file);
         }
-        if (fileType.equals(FileType.BMP) || fileType.equals(FileType.GIF)
-                || fileType.equals(FileType.PNG))
+        // we then look at the extension
+        String ext = FilenameUtils.getExtension(file.getName());
+        if ("jpg".equals(ext) || "jpeg".equals(ext))
         {
-            BufferedImage bim = ImageIO.read(file);
-            return LosslessFactory.createFromImage(bim);
+            return JPEGFactory.createFromFile(file);
         }
-        throw new IllegalArgumentException("Image type not supported: " + file.getName());
+        if ("tif".equals(ext) || "tiff".equals(ext))
+        {
+            return CCITTFactory.createFromFile(file);
+        }
+        // last resort, let's see if ImageIO can read it
+        BufferedImage image = ImageIO.read(file);
+        requireNotNullArg(image, "Image type not supported " + file.getName());
+        return LosslessFactory.createFromImage(image);
     }
 
     /**
@@ -638,42 +530,4 @@ public final class PDImageXObject extends PDXObject implements PDImage
         getCOSObject().setBoolean(COSName.IMAGE_MASK, isStencil);
     }
 
-    /**
-     * This will get the suffix for this image type, e.g. jpg/png.
-     * 
-     * @return The image suffix or null if not available.
-     */
-    @Override
-    public String getSuffix()
-    {
-        List<COSName> filters = getStream().getFilters();
-
-        if (filters == null)
-        {
-            return "png";
-        }
-        else if (filters.contains(COSName.DCT_DECODE))
-        {
-            return "jpg";
-        }
-        else if (filters.contains(COSName.JPX_DECODE))
-        {
-            return "jpx";
-        }
-        else if (filters.contains(COSName.CCITTFAX_DECODE))
-        {
-            return "tiff";
-        }
-        else if (filters.contains(COSName.FLATE_DECODE) || filters.contains(COSName.LZW_DECODE)
-                || filters.contains(COSName.RUN_LENGTH_DECODE))
-        {
-            return "png";
-        }
-        else
-        {
-            LOG.warn("getSuffix() returns null, filters: " + filters);
-            // TODO more...
-            return null;
-        }
-    }
 }
