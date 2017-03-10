@@ -31,7 +31,6 @@ import java.nio.ByteBuffer;
 
 import javax.imageio.ImageIO;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
@@ -151,16 +150,6 @@ public final class PDImageXObject extends PDXObject implements PDImage
             return JPEGFactory.createFromFile(file);
         }
         if (fileType.equals(FileType.TIFF))
-        {
-            return CCITTFactory.createFromFile(file);
-        }
-        // we then look at the extension
-        String ext = FilenameUtils.getExtension(file.getName());
-        if ("jpg".equals(ext) || "jpeg".equals(ext))
-        {
-            return JPEGFactory.createFromFile(file);
-        }
-        if ("tif".equals(ext) || "tiff".equals(ext))
         {
             return CCITTFactory.createFromFile(file);
         }
