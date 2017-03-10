@@ -327,6 +327,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName MARK_INFO = newCommonInstance("MarkInfo");
     public static final COSName MASK = newCommonInstance("Mask");
     public static final COSName MATRIX = newCommonInstance("Matrix");
+    public static final COSName MATTE = newCommonInstance("Matte");
     public static final COSName MAX_LEN = newCommonInstance("MaxLen");
     public static final COSName MAX_WIDTH = newCommonInstance("MaxWidth");
     public static final COSName MCID = newCommonInstance("MCID");
