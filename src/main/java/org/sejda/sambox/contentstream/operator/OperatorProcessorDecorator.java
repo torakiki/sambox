@@ -33,7 +33,7 @@ import org.sejda.sambox.cos.COSBase;
 public class OperatorProcessorDecorator extends OperatorProcessor
 {
     private OperatorProcessor delegate;
-    private OperatorConsumer consumer;
+    private Optional<OperatorConsumer> consumer;
 
     /**
      * Decorates the given {@link OperatorProcessor} with the given {@link OperatorConsumer} function
@@ -44,14 +44,20 @@ public class OperatorProcessorDecorator extends OperatorProcessor
     public OperatorProcessorDecorator(OperatorProcessor delegate, OperatorConsumer consumer)
     {
         this.delegate = delegate;
-        this.consumer = Optional.ofNullable(consumer).orElse(NO_OP);
+        this.consumer = Optional.ofNullable(consumer);
+    }
+
+    public OperatorProcessorDecorator(OperatorProcessor delegate)
+    {
+        this.delegate = delegate;
+        this.consumer = Optional.empty();
     }
 
     @Override
     public void process(Operator operator, List<COSBase> operands) throws IOException
     {
         delegate.process(operator, operands);
-        consumer.apply(operator, operands);
+        consumer.orElse(NO_OP).apply(operator, operands);
     }
 
     @Override
@@ -70,5 +76,15 @@ public class OperatorProcessorDecorator extends OperatorProcessor
     public void setContext(PDFStreamEngine context)
     {
         delegate.setContext(context);
+    }
+
+    /**
+     * Set the consumer that decorates this OperatorProcessor
+     * 
+     * @param consumer
+     */
+    public void setConsumer(OperatorConsumer consumer)
+    {
+        this.consumer = Optional.ofNullable(consumer);
     }
 }
