@@ -34,7 +34,6 @@ import org.sejda.sambox.pdmodel.PDPage;
 import org.sejda.sambox.pdmodel.common.PDDictionaryWrapper;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.graphics.color.PDColor;
-import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceCMYK;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceRGB;
@@ -656,27 +655,20 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
         return getColor(COSName.C);
     }
 
-    protected PDColor getColor(COSName itemName)
+    public PDColor getColor(COSName itemName)
     {
-        COSBase c = this.getCOSObject().getItem(itemName);
-        if (c instanceof COSArray)
+        COSArray color = getCOSObject().getDictionaryObject(itemName, COSArray.class);
+        if (nonNull(color) && color.size() > 0)
         {
-            PDColorSpace colorSpace = null;
-            switch (((COSArray) c).size())
+            switch (color.size())
             {
             case 1:
-                colorSpace = PDDeviceGray.INSTANCE;
-                break;
+                return new PDColor(color, PDDeviceGray.INSTANCE);
             case 3:
-                colorSpace = PDDeviceRGB.INSTANCE;
-                break;
+                return new PDColor(color, PDDeviceRGB.INSTANCE);
             case 4:
-                colorSpace = PDDeviceCMYK.INSTANCE;
-                break;
-            default:
-                break;
+                return new PDColor(color, PDDeviceCMYK.INSTANCE);
             }
-            return new PDColor((COSArray) c, colorSpace);
         }
         return null;
     }

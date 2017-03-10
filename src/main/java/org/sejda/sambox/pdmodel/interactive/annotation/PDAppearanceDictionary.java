@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.pdmodel.interactive.annotation;
 
+import static java.util.Objects.nonNull;
+
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
@@ -65,14 +67,13 @@ public class PDAppearanceDictionary implements COSObjectable
     public PDAppearanceEntry getNormalAppearance()
     {
         COSBase entry = dictionary.getDictionaryObject(COSName.N);
-        if (entry == null)
-        {
-            return null;
-        }
-        else
+        if (nonNull(entry))
         {
             return new PDAppearanceEntry(entry);
+
         }
+        return null;
+
     }
 
     /**
@@ -106,14 +107,12 @@ public class PDAppearanceDictionary implements COSObjectable
     public PDAppearanceEntry getRolloverAppearance()
     {
         COSBase entry = dictionary.getDictionaryObject(COSName.R);
-        if (entry == null)
-        {
-            return getNormalAppearance();
-        }
-        else
+        if (nonNull(entry))
         {
             return new PDAppearanceEntry(entry);
+
         }
+        return getNormalAppearance();
     }
 
     /**
@@ -139,7 +138,7 @@ public class PDAppearanceDictionary implements COSObjectable
 
     /**
      * This will return a list of appearances. In the case where there is only one appearance the map will contain one
-     * entry whose key is the string "default". If there is no rollover appearance then the normal appearance will be
+     * entry whose key is the string "default". If there is no down appearance then the normal appearance will be
      * returned. Which means that this method will never return null.
      *
      * @return A list of key(java.lang.String) value(PDAppearanceStream) pairs
@@ -147,14 +146,12 @@ public class PDAppearanceDictionary implements COSObjectable
     public PDAppearanceEntry getDownAppearance()
     {
         COSBase entry = dictionary.getDictionaryObject(COSName.D);
-        if (entry == null)
-        {
-            return getNormalAppearance();
-        }
-        else
+        if (nonNull(entry))
         {
             return new PDAppearanceEntry(entry);
+
         }
+        return getNormalAppearance();
     }
 
     /**
