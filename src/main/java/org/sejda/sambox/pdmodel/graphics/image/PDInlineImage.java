@@ -19,12 +19,12 @@ package org.sejda.sambox.pdmodel.graphics.image;
 import java.awt.Paint;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.List;
 
+import org.sejda.io.FastByteArrayOutputStream;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSArrayList;
 import org.sejda.sambox.cos.COSBase;
@@ -78,7 +78,7 @@ public final class PDInlineImage implements PDImage
         else
         {
             ByteArrayInputStream in = new ByteArrayInputStream(data);
-            ByteArrayOutputStream out = new ByteArrayOutputStream(data.length);
+            FastByteArrayOutputStream out = new FastByteArrayOutputStream(data.length);
             for (int i = 0; i < filters.size(); i++)
             {
                 // TODO handling of abbreviated names belongs here, rather than in other classes
@@ -316,7 +316,7 @@ public final class PDInlineImage implements PDImage
     @Override
     public BufferedImage getImage() throws IOException
     {
-        return SampledImageReader.getRGBImage(this, getColorKeyMask());
+        return SampledImageReader.getRGBImage(this, null);
     }
 
     @Override
@@ -329,30 +329,4 @@ public final class PDInlineImage implements PDImage
         return SampledImageReader.getStencilImage(this, paint);
     }
 
-    /**
-     * Returns the color key mask array associated with this image, or null if there is none.
-     *
-     * @return Mask Image XObject
-     */
-    public COSArray getColorKeyMask()
-    {
-        COSBase mask = parameters.getDictionaryObject(COSName.IM, COSName.MASK);
-        if (mask instanceof COSArray)
-        {
-            return (COSArray) mask;
-        }
-        return null;
-    }
-
-    /**
-     * Returns the suffix for this image type, e.g. jpg/png.
-     *
-     * @return The image suffix.
-     */
-    @Override
-    public String getSuffix()
-    {
-        // TODO implement me
-        return null;
-    }
 }
