@@ -107,6 +107,21 @@ public class XrefParserTest
     }
 
     @Test
+    public void scanMultipleTablesFallsbackOnFullScannerOnNegativeOffset() throws IOException
+    {
+        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
+                .getResourceAsStream("/sambox/test_multiple_xref_tables_negative_offset.pdf")));
+        victim = new XrefParser(parser);
+        victim.parse();
+        assertEquals(408, victim.trailer().getInt(COSName.PREV));
+        assertEquals(8, victim.trailer().getInt(COSName.SIZE));
+        assertNotNull(victim.trailer().getDictionaryObject(COSName.ROOT));
+        COSDictionary overriddenObj = (COSDictionary) parser.provider().get(new COSObjectKey(3, 0))
+                .getCOSObject();
+        assertNotNull(overriddenObj.getDictionaryObject(COSName.ANNOTS));
+    }
+
+    @Test
     public void scanMultipleTablesFallsbackOnFullScannerOnWrongOffset() throws IOException
     {
         parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()

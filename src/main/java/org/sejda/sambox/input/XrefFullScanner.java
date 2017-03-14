@@ -179,6 +179,10 @@ class XrefFullScanner
     {
         if (entry.getType() == XrefType.IN_USE)
         {
+            if (entry.getByteOffset() < 0)
+            {
+                return false;
+            }
             try
             {
                 long origin = parser.position();

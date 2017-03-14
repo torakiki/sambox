@@ -103,4 +103,14 @@ public class XrefFullScannerTest
         victim = new XrefFullScanner(parser);
         assertEquals(XrefScanOutcome.WITH_ERRORS, victim.scan());
     }
+
+    @Test
+    public void negativeOffset() throws IOException
+    {
+        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
+                .getResourceAsStream("/sambox/test_multiple_xref_tables_negative_offset.pdf")));
+        victim = new XrefFullScanner(parser);
+        assertEquals(XrefScanOutcome.WITH_ERRORS, victim.scan());
+    }
+
 }
