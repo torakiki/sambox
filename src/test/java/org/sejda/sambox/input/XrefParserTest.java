@@ -77,6 +77,21 @@ public class XrefParserTest
     }
 
     @Test
+    public void scanCorruptedStreamAndTable() throws IOException
+    {
+        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
+                .getResourceAsStream("/sambox/test_xref_corrupted_stream_and_table.pdf")));
+        victim = new XrefParser(parser);
+        victim.parse();
+        assertEquals(562, victim.trailer().getInt(COSName.PREV));
+        assertEquals(9, victim.trailer().getInt(COSName.SIZE));
+        assertNotNull(victim.trailer().getDictionaryObject(COSName.ROOT));
+        COSDictionary overriddenObj = (COSDictionary) parser.provider().get(new COSObjectKey(3, 0))
+                .getCOSObject();
+        assertNull(overriddenObj.getDictionaryObject(COSName.ANNOTS));
+    }
+
+    @Test
     public void scanOnTableLoop() throws IOException
     {
         parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(

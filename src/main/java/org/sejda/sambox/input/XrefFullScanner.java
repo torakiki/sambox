@@ -103,7 +103,7 @@ class XrefFullScanner
         {
             doScan();
         }
-        catch (IOException e)
+        catch (Exception e)
         {
             outcome = outcome.moveTo(XrefScanOutcome.WITH_ERRORS);
             LOG.warn("An error occurred while performing full scan looking for xrefs", e);

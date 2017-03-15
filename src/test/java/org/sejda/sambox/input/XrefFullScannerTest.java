@@ -78,6 +78,17 @@ public class XrefFullScannerTest
     }
 
     @Test
+    public void scanCorruptedStreamAndTable() throws IOException
+    {
+        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
+                .getResourceAsStream("/sambox/test_xref_corrupted_stream_and_table.pdf")));
+        victim = new XrefFullScanner(parser);
+        victim.scan();
+        assertEquals(XrefScanOutcome.WITH_ERRORS, victim.scan());
+        assertNotNull(victim.trailer().getDictionaryObject(COSName.ROOT));
+    }
+
+    @Test
     public void missingXref() throws IOException
     {
         parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(
