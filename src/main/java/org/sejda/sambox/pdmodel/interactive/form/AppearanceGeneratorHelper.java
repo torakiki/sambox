@@ -334,7 +334,7 @@ class AppearanceGeneratorHelper
         contents.clip();
 
         // get the font
-        PDFont font = field.getDefaultAppearanceString().getFont();
+        PDFont font = field.getAppearanceFont();
 
         // calculate the fontSize (because 0 = autosize)
         float fontSize = calculateFontSize(font, contentRect);

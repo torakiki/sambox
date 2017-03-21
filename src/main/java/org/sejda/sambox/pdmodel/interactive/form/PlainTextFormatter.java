@@ -171,6 +171,9 @@ class PlainTextFormatter
     {
         if (textContent != null && !textContent.getParagraphs().isEmpty())
         {
+            contents.saveGraphicsState();
+            contents.setFont(appearanceStyle.getFont(), appearanceStyle.getFontSize());
+
             boolean isFirstParagraph = true;
             for (Paragraph paragraph : textContent.getParagraphs())
             {
@@ -208,6 +211,8 @@ class PlainTextFormatter
                     contents.showText(paragraph.getText());
                 }
             }
+
+            contents.restoreGraphicsState();
         }
     }
 

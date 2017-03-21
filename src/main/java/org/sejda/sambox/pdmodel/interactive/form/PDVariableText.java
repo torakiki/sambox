@@ -25,6 +25,7 @@ import org.sejda.sambox.cos.COSNumber;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.cos.COSString;
 import org.sejda.sambox.pdmodel.PDResources;
+import org.sejda.sambox.pdmodel.font.PDFont;
 
 /**
  * Base class for fields which use "Variable Text". These fields construct an appearance stream dynamically at viewing
@@ -37,6 +38,8 @@ public abstract class PDVariableText extends PDTerminalField
     static final int QUADDING_LEFT = 0;
     static final int QUADDING_CENTERED = 1;
     static final int QUADDING_RIGHT = 2;
+
+    private PDFont appearanceOverrideFont = null;
 
     /**
      * @see PDTerminalField#PDTerminalField(PDAcroForm)
@@ -229,5 +232,29 @@ public abstract class PDVariableText extends PDTerminalField
             return ((COSStream) base).asTextString();
         }
         return "";
+    }
+
+    public PDFont getAppearanceFont()
+    {
+        try
+        {
+            if(appearanceOverrideFont != null) {
+                return appearanceOverrideFont;
+            }
+
+            return getDefaultAppearanceString().getFont();
+        } catch (IOException ioe) {
+            return null;
+        }
+    }
+
+    public PDFont getAppearanceOverrideFont()
+    {
+        return appearanceOverrideFont;
+    }
+
+    public void setAppearanceOverrideFont(PDFont appearanceOverrideFont)
+    {
+        this.appearanceOverrideFont = appearanceOverrideFont;
     }
 }
