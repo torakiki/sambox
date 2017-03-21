@@ -232,9 +232,15 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
     {
         try (COSParser streamParser = new COSParser(stream.getUnfilteredSource(), this))
         {
+            requireIOCondition(
+                    !isIndirectContainedIn(stream.getItem(COSName.N), containingStreamEntry),
+                    "Objects stream size cannot be store as indirect reference in the ObjStm itself");
             int numberOfObjects = stream.getInt(COSName.N);
             requireIOCondition(numberOfObjects >= 0,
                     "Missing or negative required objects stream size");
+            requireIOCondition(
+                    !isIndirectContainedIn(stream.getItem(COSName.FIRST), containingStreamEntry),
+                    "Objects stream first offset cannot be store as indirect reference in the ObjStm itself");
             long firstOffset = stream.getLong(COSName.FIRST);
             requireIOCondition(firstOffset >= 0,
                     "Missing or negative required bytes offset of the fist object in the objects stream");
@@ -274,6 +280,19 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
             }
         }
         IOUtils.close(stream);
+    }
+
+    private boolean isIndirectContainedIn(COSBase item, XrefEntry containingStreamEntry)
+    {
+        if (item instanceof ExistingIndirectCOSObject)
+        {
+            return ofNullable(item.id()).map(i -> i.objectIdentifier).map(xref::get)
+                    .filter(e -> e instanceof CompressedXrefEntry).map(e -> (CompressedXrefEntry) e)
+                    .map(e -> containingStreamEntry.key().objectNumber() == e
+                            .getObjectStreamNumber())
+                    .orElse(Boolean.FALSE);
+        }
+        return false;
     }
 
     @Override
