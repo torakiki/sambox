@@ -261,7 +261,7 @@ public abstract class PDButton extends PDTerminalField
             try
             {
                 int optionsIndex = Integer.parseInt(getValue());
-                if (optionsIndex < exportValues.size())
+                if (optionsIndex >= 0 && optionsIndex < exportValues.size())
                 {
                     updateByOption(exportValues.get(optionsIndex));
                 }

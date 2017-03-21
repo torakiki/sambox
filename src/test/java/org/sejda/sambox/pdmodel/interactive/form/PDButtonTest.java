@@ -22,6 +22,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.util.Collections;
 
 import org.junit.After;
 import org.junit.Before;
@@ -127,6 +128,28 @@ public class PDButtonTest
 
         checkbox.setDefaultValue("Off");
         assertEquals(checkbox.getDefaultValue(), COSName.Off.getName());
+    }
+
+    @Test
+    public void testUncheck() throws IOException
+    {
+        PDCheckBox checkbox = (PDCheckBox) acrobatAcroForm.getField("Checkbox");
+
+        checkbox.unCheck();
+        assertEquals(checkbox.getValue(), COSName.Off.getName());
+        assertEquals(checkbox.isChecked(), false);
+    }
+
+    @Test
+    public void testUncheckCheckboxWithExportValues() throws IOException
+    {
+        PDCheckBox checkbox = (PDCheckBox) acrobatAcroForm.getField("Checkbox");
+        checkbox.setExportValues(Collections.singletonList("exportValue1"));
+        assertTrue(checkbox.getExportValues().size() > 0);
+
+        checkbox.unCheck();
+        assertEquals(checkbox.getValue(), "-1");
+        assertEquals(checkbox.isChecked(), false);
     }
 
     @Test
