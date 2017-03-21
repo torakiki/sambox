@@ -278,6 +278,10 @@ public abstract class PDButton extends PDTerminalField
         }
     }
 
+    public Set<String> getOnValues() {
+        return new HashSet<>(getOnValuesList());
+    }
+
     /**
      * Get the values to set individual buttons within a group to the on state.
      * 
@@ -289,7 +293,7 @@ public abstract class PDButton extends PDTerminalField
      * @return the potential values setting the check box to the On state. If an empty Set is returned there is no
      * appearance definition.
      */
-    public List<String> getOnValues()
+    public List<String> getOnValuesList()
     {
         // we need a set as the field can appear multiple times
         List<String> onValues = new ArrayList<>();
@@ -331,7 +335,7 @@ public abstract class PDButton extends PDTerminalField
      */
     void checkValue(String value) throws IllegalArgumentException
     {
-        List<String> onValues = getOnValues();
+        Set<String> onValues = getOnValues();
         if (COSName.Off.getName().compareTo(value) != 0 && !onValues.contains(value))
         {
             throw new IllegalArgumentException("value '" + value
