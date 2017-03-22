@@ -336,6 +336,11 @@ public abstract class PDButton extends PDTerminalField
     void checkValue(String value) throws IllegalArgumentException
     {
         Set<String> onValues = getOnValues();
+
+        if(onValues.isEmpty()) {
+            return;
+        }
+
         if (COSName.Off.getName().compareTo(value) != 0 && !onValues.contains(value))
         {
             throw new IllegalArgumentException("value '" + value

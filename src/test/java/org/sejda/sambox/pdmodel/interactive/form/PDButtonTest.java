@@ -22,16 +22,20 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.sejda.io.SeekableSources;
+import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
+import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceDictionary;
+import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceEntry;
 
 /**
  * Test for the PDButton class.
@@ -67,6 +71,21 @@ public class PDButtonTest
         assertEquals(buttonField.getFieldType(), "Btn");
         assertFalse(buttonField.isPushButton());
         assertFalse(buttonField.isRadioButton());
+    }
+
+    @Test
+    public void createCheckBoxWithoutOnValues() throws IOException
+    {
+        PDCheckBox checkbox = new PDCheckBox(acroForm);
+        PDAnnotationWidget widget = new PDAnnotationWidget();
+        PDAppearanceDictionary appearance = new PDAppearanceDictionary();
+        appearance.setNormalAppearance(new PDAppearanceEntry(new COSDictionary()));
+        widget.setAppearance(appearance);
+
+        checkbox.setWidgets(Arrays.asList(widget));
+
+        checkbox.check();
+        checkbox.unCheck();
     }
 
     @Test
