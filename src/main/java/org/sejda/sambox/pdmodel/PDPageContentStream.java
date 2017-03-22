@@ -703,7 +703,8 @@ public final class PDPageContentStream implements Closeable
     public void setStrokingColor(PDColor color) throws IOException
     {
         if (strokingColorSpaceStack.isEmpty()
-                || strokingColorSpaceStack.peek() != color.getColorSpace())
+                || strokingColorSpaceStack.peek() != color.getColorSpace()
+                && color.getColorSpace() != null)
         {
             writeOperand(getName(color.getColorSpace()));
             writeOperator("CS");
