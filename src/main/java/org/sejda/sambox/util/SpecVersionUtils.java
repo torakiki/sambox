@@ -20,6 +20,9 @@ import static org.sejda.util.RequireUtils.requireNotNullArg;
 
 import java.io.IOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Utility class with pdf spec versions related methods and constants
  * 
@@ -27,6 +30,8 @@ import java.io.IOException;
  */
 public class SpecVersionUtils
 {
+    private static final Logger LOG = LoggerFactory.getLogger(SpecVersionUtils.class);
+
     public static final int EXPECTED_HEADER_LENGTH = 8;
     public static final String PDF_HEADER = "%PDF-";
 
@@ -55,13 +60,15 @@ public class SpecVersionUtils
      * @return the parsed version (ex. "1.4")
      * @throws IOException if the string is not a valid header
      */
-    public static String parseHeaderString(String header) throws IOException
+    public static String parseHeaderString(String header)
     {
         String version = sanitizeVersion(
                 header.substring(EXPECTED_HEADER_LENGTH - 3, EXPECTED_HEADER_LENGTH));
         if (!version.matches(VERSION_PATTERN))
         {
-            throw new IOException("Unable to get header version from " + header);
+            // it seems Acrobat doesn't choke on invalid version but it does sometime warn the user
+            LOG.warn("Invalid header version {}, falling back to {}", version, V1_6);
+            return V1_6;
         }
         return version;
     }

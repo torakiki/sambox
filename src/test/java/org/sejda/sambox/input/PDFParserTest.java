@@ -110,11 +110,17 @@ public class PDFParserTest
         }
     }
 
-    @Test(expected = IOException.class)
-    public void veryBadHeader() throws IOException
+    @Test
+    public void invalidButRightLengthHeader() throws IOException
     {
-        PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
-                getClass().getResourceAsStream("/sambox/unparsable_bad_header.pdf")));
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/invalid_header_right_length.pdf"))))
+        {
+            assertNotNull(doc);
+            assertFalse(doc.isEncrypted());
+            assertTrue(doc.isOpen());
+            assertEquals(SpecVersionUtils.V1_6, doc.getVersion());
+        }
     }
 
     @Test(expected = IOException.class)
