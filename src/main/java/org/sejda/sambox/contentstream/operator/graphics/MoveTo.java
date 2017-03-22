@@ -51,8 +51,8 @@ public final class MoveTo extends GraphicsOperatorProcessor
         }
         COSNumber x = (COSNumber) base0;
         COSNumber y = (COSNumber) base1;
-        Point2D.Float pos = context.transformedPoint(x.floatValue(), y.floatValue());
-        context.moveTo(pos.x, pos.y);
+        Point2D.Float pos = getContext().transformedPoint(x.floatValue(), y.floatValue());
+        getContext().moveTo(pos.x, pos.y);
     }
 
     @Override

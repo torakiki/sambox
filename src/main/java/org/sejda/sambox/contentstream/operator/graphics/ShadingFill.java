@@ -38,7 +38,7 @@ public final class ShadingFill extends GraphicsOperatorProcessor
         {
             throw new MissingOperandException(operator, operands);
         }
-        context.shadingFill((COSName) operands.get(0));
+        getContext().shadingFill((COSName) operands.get(0));
     }
 
     @Override

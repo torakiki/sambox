@@ -32,7 +32,7 @@ public final class EndPath extends GraphicsOperatorProcessor
     @Override
     public void process(Operator operator, List<COSBase> operands) throws IOException
     {
-        context.endPath();
+        getContext().endPath();
     }
 
     @Override

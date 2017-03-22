@@ -32,7 +32,7 @@ public final class FillEvenOddAndStrokePath extends GraphicsOperatorProcessor
     @Override
     public void process(Operator operator, List<COSBase> operands) throws IOException
     {
-        context.fillAndStrokePath(GeneralPath.WIND_EVEN_ODD);
+        getContext().fillAndStrokePath(GeneralPath.WIND_EVEN_ODD);
     }
 
     @Override

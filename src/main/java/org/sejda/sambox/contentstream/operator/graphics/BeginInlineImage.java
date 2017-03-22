@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.contentstream.operator.graphics;
 
+import static java.util.Objects.nonNull;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -34,10 +36,12 @@ public final class BeginInlineImage extends GraphicsOperatorProcessor
     @Override
     public void process(Operator operator, List<COSBase> operands) throws IOException
     {
-        PDImage image = new PDInlineImage(operator.getImageParameters(),
-                                          operator.getImageData(),
-                                          context.getResources());
-        context.drawImage(image);
+        if (nonNull(operator.getImageData()) && operator.getImageData().length > 0)
+        {
+            PDImage image = new PDInlineImage(operator.getImageParameters(),
+                    operator.getImageData(), getContext().getResources());
+            getContext().drawImage(image);
+        }
     }
 
     @Override

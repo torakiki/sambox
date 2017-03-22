@@ -201,8 +201,7 @@ public class COSDictionaryMap<K, V> implements Map<K, V>
     }
 
     /**
-     * This will take a map&lt;java.lang.String,org.apache.pdfbox.pdmodel.COSObjectable&gt; and convert it into a
-     * COSDictionary.
+     * This will take a map&lt;String,COSObjectable&gt; and convert it into a COSDictionary.
      *
      * @param someMap A map containing COSObjectables
      *

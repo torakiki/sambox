@@ -19,7 +19,10 @@ package org.sejda.sambox.pdmodel.graphics.image;
 import static org.sejda.io.SeekableSources.seekableSourceFrom;
 
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 
@@ -77,9 +80,9 @@ public final class CCITTFactory
                     // flip bit to avoid having to set /BlackIs1
                     mcios.writeBits(~(image.getRGB(x, y) & 1), 1);
                 }
-                while (mcios.getBitOffset() != 0)
+                if (mcios.getBitOffset() != 0)
                 {
-                    mcios.writeBit(0);
+                    mcios.writeBits(0, 8 - mcios.getBitOffset());
                 }
             }
             mcios.flush();

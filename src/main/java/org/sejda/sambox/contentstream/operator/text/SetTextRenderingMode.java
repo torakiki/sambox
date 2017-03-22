@@ -43,8 +43,13 @@ public class SetTextRenderingMode extends OperatorProcessor
         COSBase base0 = arguments.get(0);
         if (base0 instanceof COSNumber)
         {
-            RenderingMode renderingMode = RenderingMode.fromInt(((COSNumber) base0).intValue());
-            getContext().getGraphicsState().getTextState().setRenderingMode(renderingMode);
+            COSNumber mode = (COSNumber) base0;
+            int val = mode.intValue();
+            if (val >= 0 && val < RenderingMode.values().length)
+            {
+                getContext().getGraphicsState().getTextState()
+                        .setRenderingMode(RenderingMode.fromInt(val));
+            }
         }
 
     }

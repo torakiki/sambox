@@ -57,16 +57,16 @@ public class LineTo extends GraphicsOperatorProcessor
         COSNumber x = (COSNumber) base0;
         COSNumber y = (COSNumber) base1;
 
-        Point2D.Float pos = context.transformedPoint(x.floatValue(), y.floatValue());
+        Point2D.Float pos = getContext().transformedPoint(x.floatValue(), y.floatValue());
 
-        if (context.getCurrentPoint() == null)
+        if (getContext().getCurrentPoint() == null)
         {
             LOG.warn("LineTo (" + pos.x + "," + pos.y + ") without initial MoveTo");
-            context.moveTo(pos.x, pos.y);
+            getContext().moveTo(pos.x, pos.y);
         }
         else
         {
-            context.lineTo(pos.x, pos.y);
+            getContext().lineTo(pos.x, pos.y);
         }
     }
 

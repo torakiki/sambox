@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.pdmodel.font;
 
+import static java.util.Objects.nonNull;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -508,7 +510,7 @@ public abstract class PDFont implements COSObjectable, PDFontLike
             COSBase toUnicode = dict.getDictionaryObject(COSName.TO_UNICODE);
             try
             {
-                if (toUnicode != null)
+                if (nonNull(toUnicode) && nonNull(toUnicodeCMap))
                 {
                     int spaceMapping = toUnicodeCMap.getSpaceMapping();
                     if (spaceMapping > -1)

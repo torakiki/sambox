@@ -74,12 +74,8 @@ public class PDAnnotationMarkup extends PDAnnotation
      */
     public static final String RT_GROUP = "Group";
 
-    /**
-     * Constructor.
-     */
     public PDAnnotationMarkup()
     {
-        super();
     }
 
     /**

@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.pdmodel.common;
 
+import static java.util.Objects.nonNull;
+
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
@@ -35,8 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class represents a PDF Number tree. See the PDF Reference 1.7 section
- * 7.9.7 for more details.
+ * This class represents a PDF Number tree. See the PDF Reference 1.7 section 7.9.7 for more details.
  *
  * @author Ben Litchfield,
  * @author Igor Podolskiy
@@ -53,7 +54,7 @@ public class PDNumberTreeNode implements COSObjectable
      *
      * @param valueClass The PD Model type of object that is the value.
      */
-    public PDNumberTreeNode( Class<? extends COSObjectable> valueClass )
+    public PDNumberTreeNode(Class<? extends COSObjectable> valueClass)
     {
         node = new COSDictionary();
         valueType = valueClass;
@@ -65,7 +66,7 @@ public class PDNumberTreeNode implements COSObjectable
      * @param dict The dictionary that holds the name information.
      * @param valueClass The PD Model type of object that is the value.
      */
-    public PDNumberTreeNode( COSDictionary dict, Class<? extends COSObjectable> valueClass )
+    public PDNumberTreeNode(COSDictionary dict, Class<? extends COSObjectable> valueClass)
     {
         node = dict;
         valueType = valueClass;
@@ -83,25 +84,24 @@ public class PDNumberTreeNode implements COSObjectable
     }
 
     /**
-     * Return the children of this node.  This list will contain PDNumberTreeNode objects.
+     * Return the children of this node. This list will contain PDNumberTreeNode objects.
      *
      * @return The list of children or null if there are no children.
      */
     public List<PDNumberTreeNode> getKids()
     {
-        List<PDNumberTreeNode> retval = null;
-        COSArray kids = (COSArray)node.getDictionaryObject( COSName.KIDS );
-        if( kids != null )
+        COSArray kids = node.getDictionaryObject(COSName.KIDS, COSArray.class);
+        if (nonNull(kids))
         {
-            List<PDNumberTreeNode> pdObjects = new ArrayList<PDNumberTreeNode>();
-            for( int i=0; i<kids.size(); i++ )
+            List<PDNumberTreeNode> pdObjects = new ArrayList<>();
+            for (int i = 0; i < kids.size(); i++)
             {
-                pdObjects.add( createChildNode( (COSDictionary)kids.getObject(i) ) );
+                pdObjects.add(createChildNode((COSDictionary) kids.getObject(i)));
             }
-            retval = new COSArrayList<PDNumberTreeNode>(pdObjects,kids);
+            return new COSArrayList<>(pdObjects, kids);
         }
 
-        return retval;
+        return null;
     }
 
     /**
@@ -109,9 +109,9 @@ public class PDNumberTreeNode implements COSObjectable
      *
      * @param kids The children of this number tree.
      */
-    public void setKids( List<? extends PDNumberTreeNode> kids )
+    public void setKids(List<? extends PDNumberTreeNode> kids)
     {
-        if (kids != null && kids.size() > 0)
+        if (kids != null && !kids.isEmpty())
         {
             PDNumberTreeNode firstKid = kids.get(0);
             PDNumberTreeNode lastKid = kids.get(kids.size() - 1);
@@ -120,12 +120,12 @@ public class PDNumberTreeNode implements COSObjectable
             Integer upperLimit = lastKid.getUpperLimit();
             this.setUpperLimit(upperLimit);
         }
-        else if ( node.getDictionaryObject( COSName.NUMS ) == null )
+        else if (node.getDictionaryObject(COSName.NUMS) == null)
         {
             // Remove limits if there are no kids and no numbers set.
             node.removeItem(COSName.LIMITS);
         }
-        node.setItem( COSName.KIDS, COSArrayList.converterToCOSArray( kids ) );
+        node.setItem(COSName.KIDS, COSArrayList.converterToCOSArray(kids));
     }
 
     /**
@@ -137,59 +137,55 @@ public class PDNumberTreeNode implements COSObjectable
      *
      * @throws IOException If there is a problem creating the values.
      */
-    public Object getValue( Integer index ) throws IOException
+    public Object getValue(Integer index) throws IOException
     {
-        Object retval = null;
-        Map<Integer,COSObjectable> names = getNumbers();
-        if( names != null )
+        Map<Integer, COSObjectable> names = getNumbers();
+        if (nonNull(names))
         {
-            retval = names.get( index );
+            return names.get(index);
+        }
+        Object retval = null;
+        List<PDNumberTreeNode> kids = getKids();
+        if (nonNull(kids))
+        {
+            for (int i = 0; i < kids.size() && retval == null; i++)
+            {
+                PDNumberTreeNode childNode = kids.get(i);
+                if (childNode.getLowerLimit().compareTo(index) <= 0
+                        && childNode.getUpperLimit().compareTo(index) >= 0)
+                {
+                    retval = childNode.getValue(index);
+                }
+            }
         }
         else
         {
-            List<PDNumberTreeNode> kids = getKids();
-            if ( kids != null )
-            {
-                for( int i=0; i<kids.size() && retval == null; i++ )
-                {
-                    PDNumberTreeNode childNode = kids.get( i );
-                    if( childNode.getLowerLimit().compareTo( index ) <= 0 &&
-                        childNode.getUpperLimit().compareTo( index ) >= 0 )
-                    {
-                        retval = childNode.getValue( index );
-                    }
-                }
-            }
-            else
-            {
-                LOG.warn("NumberTreeNode does not have \"nums\" nor \"kids\" objects.");
-            }
+            LOG.warn("NumberTreeNode does not have \"nums\" nor \"kids\" objects.");
         }
         return retval;
     }
 
-
     /**
-     * This will return a map of numbers.  The key will be a java.lang.Integer, the value will
-     * depend on where this class is being used.
+     * This will return a map of numbers. The key will be a java.lang.Integer, the value will depend on where this class
+     * is being used.
      *
      * @return A map of COS objects.
      *
      * @throws IOException If there is a problem creating the values.
      */
-    public Map<Integer,COSObjectable> getNumbers()  throws IOException
+    public Map<Integer, COSObjectable> getNumbers() throws IOException
     {
         Map<Integer, COSObjectable> indices = null;
-        COSArray namesArray = (COSArray)node.getDictionaryObject( COSName.NUMS );
-        if( namesArray != null )
+        COSArray namesArray = (COSArray) node.getDictionaryObject(COSName.NUMS);
+        if (namesArray != null)
         {
-            indices = new HashMap<Integer,COSObjectable>();
-            for( int i=0; i<namesArray.size(); i+=2 )
+            indices = new HashMap<Integer, COSObjectable>();
+            for (int i = 0; i < namesArray.size(); i += 2)
             {
-                COSInteger key = (COSInteger)namesArray.getObject(i);
-                COSBase cosValue = namesArray.getObject( i+1 );
-                COSObjectable pdValue = convertCOSToPD( cosValue );
-                indices.put( key.intValue(), pdValue );
+                COSInteger key = (COSInteger) namesArray.getObject(i);
+                COSBase cosValue = namesArray.getObject(i + 1);
+                COSObjectable pdValue = convertCOSToPD(cosValue);
+                indices.put(key.intValue(), pdValue);
             }
             indices = Collections.unmodifiableMap(indices);
         }
@@ -197,15 +193,14 @@ public class PDNumberTreeNode implements COSObjectable
     }
 
     /**
-     * Method to convert the COS value in the name tree to the PD Model object.  The
-     * default implementation will simply use reflection to create the correct object
-     * type.  Subclasses can do whatever they want.
+     * Method to convert the COS value in the name tree to the PD Model object. The default implementation will simply
+     * use reflection to create the correct object type. Subclasses can do whatever they want.
      *
      * @param base The COS object to convert.
      * @return The converted PD Model object.
      * @throws IOException If there is an error during creation.
      */
-    protected COSObjectable convertCOSToPD( COSBase base ) throws IOException
+    protected COSObjectable convertCOSToPD(COSBase base) throws IOException
     {
         COSObjectable retval = null;
         try
@@ -213,9 +208,10 @@ public class PDNumberTreeNode implements COSObjectable
             Constructor<? extends COSObjectable> ctor = valueType.getConstructor(base.getClass());
             retval = ctor.newInstance(base);
         }
-        catch( Throwable t )
+        catch (Throwable t)
         {
-            throw new IOException( "Error while trying to create value in number tree:" + t.getMessage(), t);
+            throw new IOException(
+                    "Error while trying to create value in number tree:" + t.getMessage(), t);
         }
         return retval;
     }
@@ -226,46 +222,45 @@ public class PDNumberTreeNode implements COSObjectable
      * @param dic The dictionary for the child node object to refer to.
      * @return The new child node object.
      */
-    protected PDNumberTreeNode createChildNode( COSDictionary dic )
+    protected PDNumberTreeNode createChildNode(COSDictionary dic)
     {
-        return new PDNumberTreeNode(dic,valueType);
+        return new PDNumberTreeNode(dic, valueType);
     }
 
     /**
-     * Set the names of for this node.  The keys should be java.lang.String and the
-     * values must be a COSObjectable.  This method will set the appropriate upper and lower
-     * limits based on the keys in the map.
+     * Set the names of for this node. The keys should be java.lang.String and the values must be a COSObjectable. This
+     * method will set the appropriate upper and lower limits based on the keys in the map.
      *
      * @param numbers The map of names to objects.
      */
-    public void setNumbers( Map<Integer, ? extends COSObjectable> numbers )
+    public void setNumbers(Map<Integer, ? extends COSObjectable> numbers)
     {
-        if( numbers == null )
+        if (numbers == null)
         {
-            node.setItem( COSName.NUMS, (COSObjectable)null );
-            node.setItem( COSName.LIMITS, (COSObjectable)null);
+            node.setItem(COSName.NUMS, (COSObjectable) null);
+            node.setItem(COSName.LIMITS, (COSObjectable) null);
         }
         else
         {
-            List<Integer> keys = new ArrayList<Integer>( numbers.keySet() );
-            Collections.sort( keys );
+            List<Integer> keys = new ArrayList<>(numbers.keySet());
+            Collections.sort(keys);
             COSArray array = new COSArray();
             for (Integer key : keys)
             {
-                array.add( COSInteger.get( key ) );
-                COSObjectable obj = numbers.get( key );
-                array.add( obj );
+                array.add(COSInteger.get(key));
+                COSObjectable obj = numbers.get(key);
+                array.add(obj);
             }
             Integer lower = null;
             Integer upper = null;
-            if( keys.size() > 0 )
+            if (!keys.isEmpty())
             {
-                lower = keys.get( 0 );
-                upper = keys.get( keys.size()-1 );
+                lower = keys.get(0);
+                upper = keys.get(keys.size() - 1);
             }
-            setUpperLimit( upper );
-            setLowerLimit( lower );
-            node.setItem( COSName.NUMS, array );
+            setUpperLimit(upper);
+            setLowerLimit(lower);
+            node.setItem(COSName.NUMS, array);
         }
     }
 
@@ -277,10 +272,10 @@ public class PDNumberTreeNode implements COSObjectable
     public Integer getUpperLimit()
     {
         Integer retval = null;
-        COSArray arr = (COSArray)node.getDictionaryObject( COSName.LIMITS );
-        if( arr != null && arr.get(0) != null )
+        COSArray arr = (COSArray) node.getDictionaryObject(COSName.LIMITS);
+        if (arr != null && arr.get(0) != null)
         {
-            retval = arr.getInt( 1 );
+            retval = arr.getInt(1);
         }
         return retval;
     }
@@ -290,23 +285,23 @@ public class PDNumberTreeNode implements COSObjectable
      *
      * @param upper The new highest value for a key in the map.
      */
-    private void setUpperLimit( Integer upper )
+    private void setUpperLimit(Integer upper)
     {
-        COSArray arr = (COSArray)node.getDictionaryObject( COSName.LIMITS );
-        if( arr == null )
+        COSArray arr = (COSArray) node.getDictionaryObject(COSName.LIMITS);
+        if (arr == null)
         {
             arr = new COSArray();
-            arr.add( null );
-            arr.add( null );
-            node.setItem( COSName.LIMITS, arr );
+            arr.add(null);
+            arr.add(null);
+            node.setItem(COSName.LIMITS, arr);
         }
-        if ( upper != null)
+        if (upper != null)
         {
             arr.set(1, COSInteger.get(upper));
         }
         else
         {
-            arr.set( 1, null );
+            arr.set(1, null);
         }
     }
 
@@ -318,10 +313,10 @@ public class PDNumberTreeNode implements COSObjectable
     public Integer getLowerLimit()
     {
         Integer retval = null;
-        COSArray arr = (COSArray)node.getDictionaryObject( COSName.LIMITS );
-        if( arr != null && arr.get(0) != null )
+        COSArray arr = (COSArray) node.getDictionaryObject(COSName.LIMITS);
+        if (arr != null && arr.get(0) != null)
         {
-            retval = arr.getInt( 0 );
+            retval = arr.getInt(0);
         }
         return retval;
     }
@@ -331,23 +326,23 @@ public class PDNumberTreeNode implements COSObjectable
      *
      * @param lower The new lowest value for a key in the map.
      */
-    private void setLowerLimit( Integer lower )
+    private void setLowerLimit(Integer lower)
     {
-        COSArray arr = (COSArray)node.getDictionaryObject( COSName.LIMITS );
-        if( arr == null )
+        COSArray arr = (COSArray) node.getDictionaryObject(COSName.LIMITS);
+        if (arr == null)
         {
             arr = new COSArray();
-            arr.add( null );
-            arr.add( null );
-            node.setItem( COSName.LIMITS, arr );
+            arr.add(null);
+            arr.add(null);
+            node.setItem(COSName.LIMITS, arr);
         }
-        if ( lower != null )
+        if (lower != null)
         {
             arr.set(0, COSInteger.get(lower));
         }
         else
         {
-            arr.set( 0, null );
+            arr.set(0, null);
         }
     }
 }

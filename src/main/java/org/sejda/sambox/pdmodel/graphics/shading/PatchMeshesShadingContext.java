@@ -116,7 +116,8 @@ abstract class PatchMeshesShadingContext extends TriangleBasedShadingContext
                 LOG.error(ex.getMessage());
             }
 
-            while (true)
+            boolean eof = false;
+            while (!eof)
             {
                 try
                 {
@@ -152,7 +153,7 @@ abstract class PatchMeshesShadingContext extends TriangleBasedShadingContext
                 }
                 catch (EOFException ex)
                 {
-                    break;
+                    eof = true;
                 }
             }
         }

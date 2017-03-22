@@ -34,7 +34,7 @@ public class FillNonZeroAndStrokePath extends GraphicsOperatorProcessor
     @Override
     public void process(Operator operator, List<COSBase> operands) throws IOException
     {
-        context.fillAndStrokePath(GeneralPath.WIND_NON_ZERO);
+        getContext().fillAndStrokePath(GeneralPath.WIND_NON_ZERO);
     }
 
     @Override

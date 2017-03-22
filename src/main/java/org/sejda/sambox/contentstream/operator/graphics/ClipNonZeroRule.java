@@ -33,7 +33,7 @@ public class ClipNonZeroRule extends GraphicsOperatorProcessor
     @Override
     public void process(Operator operator, List<COSBase> operands) throws IOException
     {
-        context.clip(GeneralPath.WIND_NON_ZERO);
+        getContext().clip(GeneralPath.WIND_NON_ZERO);
     }
 
     @Override

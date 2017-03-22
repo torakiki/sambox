@@ -20,8 +20,13 @@ package org.sejda.sambox.util;
  *
  * @author Michael Doswald
  */
-public class NumberFormatUtil
+public final class NumberFormatUtil
 {
+
+    private NumberFormatUtil()
+    {
+        //
+    }
 
     /**
      * Maximum number of fraction digits supported by the format methods
@@ -54,14 +59,12 @@ public class NumberFormatUtil
     }
 
     /**
-     * Fast variant to format a floating point value to a ASCII-string. The format will fail if the
-     * value is greater than {@link Long#MAX_VALUE}, smaller or equal to {@link Long#MIN_VALUE}, is
-     * {@link Float#NaN}, infinite or the number of requested fraction digits is greater than
-     * {@link #MAX_FRACTION_DIGITS}.
+     * Fast variant to format a floating point value to a ASCII-string. The format will fail if the value is greater
+     * than {@link Long#MAX_VALUE}, smaller or equal to {@link Long#MIN_VALUE}, is {@link Float#NaN}, infinite or the
+     * number of requested fraction digits is greater than {@link #MAX_FRACTION_DIGITS}.
      * 
-     * When the number contains more fractional digits than {@code maxFractionDigits} the value will
-     * be rounded. Rounding is done to the nearest possible value, with the tie breaking rule of 
-     * rounding away from zero.
+     * When the number contains more fractional digits than {@code maxFractionDigits} the value will be rounded.
+     * Rounding is done to the nearest possible value, with the tie breaking rule of rounding away from zero.
      * 
      * @param value The float value to format
      * @param maxFractionDigits The maximum number of fraction digits used
@@ -71,11 +74,8 @@ public class NumberFormatUtil
      */
     public static int formatFloatFast(float value, int maxFractionDigits, byte[] asciiBuffer)
     {
-        if (Float.isNaN(value) ||
-                Float.isInfinite(value) ||
-                value > Long.MAX_VALUE ||
-                value <= Long.MIN_VALUE ||
-                maxFractionDigits > MAX_FRACTION_DIGITS)
+        if (Float.isNaN(value) || Float.isInfinite(value) || value > Long.MAX_VALUE
+                || value <= Long.MIN_VALUE || maxFractionDigits > MAX_FRACTION_DIGITS)
         {
             return -1;
         }
@@ -83,29 +83,33 @@ public class NumberFormatUtil
         int offset = 0;
         long integerPart = (long) value;
 
-        //handle sign
+        // handle sign
         if (value < 0)
         {
             asciiBuffer[offset++] = '-';
             integerPart = -integerPart;
         }
-        
-        //extract fraction part 
-        long fractionPart = (long) ((Math.abs((double)value) - integerPart) * POWER_OF_TENS[maxFractionDigits] + 0.5d);
-        
-        //Check for rounding to next integer
-        if (fractionPart >= POWER_OF_TENS[maxFractionDigits]) {
+
+        // extract fraction part
+        long fractionPart = (long) ((Math.abs((double) value) - integerPart)
+                * POWER_OF_TENS[maxFractionDigits] + 0.5d);
+
+        // Check for rounding to next integer
+        if (fractionPart >= POWER_OF_TENS[maxFractionDigits])
+        {
             integerPart++;
             fractionPart -= POWER_OF_TENS[maxFractionDigits];
         }
 
-        //format integer part
-        offset = formatPositiveNumber(integerPart, getExponent(integerPart), false, asciiBuffer, offset);
-        
+        // format integer part
+        offset = formatPositiveNumber(integerPart, getExponent(integerPart), false, asciiBuffer,
+                offset);
+
         if (fractionPart > 0 && maxFractionDigits > 0)
         {
             asciiBuffer[offset++] = '.';
-            offset = formatPositiveNumber(fractionPart, maxFractionDigits - 1, true, asciiBuffer, offset);
+            offset = formatPositiveNumber(fractionPart, maxFractionDigits - 1, true, asciiBuffer,
+                    offset);
         }
 
         return offset;
@@ -116,15 +120,15 @@ public class NumberFormatUtil
      *
      * @param number The number to format
      * @param exp The start digit
-     * @param omitTrailingZeros Whether the formatting should stop if only trailing zeros are left.
-     * This is needed e.g. when formatting fractions of a number.
+     * @param omitTrailingZeros Whether the formatting should stop if only trailing zeros are left. This is needed e.g.
+     * when formatting fractions of a number.
      * @param asciiBuffer The buffer to write the ASCII digits to
      * @param startOffset The start offset into the buffer to start writing
      *
-     * @return The offset into the buffer which contains the first byte that was not filled by the
-     * method
+     * @return The offset into the buffer which contains the first byte that was not filled by the method
      */
-    private static int formatPositiveNumber(long number, int exp, boolean omitTrailingZeros, byte[] asciiBuffer, int startOffset)
+    private static int formatPositiveNumber(long number, int exp, boolean omitTrailingZeros,
+            byte[] asciiBuffer, int startOffset)
     {
         int offset = startOffset;
         long remaining = number;
@@ -138,7 +142,7 @@ public class NumberFormatUtil
             exp--;
         }
 
-        //If the remaining fits into an integer, use int arithmetic as it is faster
+        // If the remaining fits into an integer, use int arithmetic as it is faster
         int remainingInt = (int) remaining;
         while (exp >= 0 && (!omitTrailingZeros || remainingInt > 0))
         {

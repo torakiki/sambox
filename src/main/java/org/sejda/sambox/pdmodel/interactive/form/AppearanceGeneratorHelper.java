@@ -29,6 +29,7 @@ import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.input.ContentStreamParser;
 import org.sejda.sambox.output.ContentStreamWriter;
 import org.sejda.sambox.pdmodel.PDPageContentStream;
+import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.font.PDFont;
 import org.sejda.sambox.pdmodel.graphics.color.PDColor;
@@ -157,6 +158,8 @@ class AppearanceGeneratorHelper
                     appearanceStream.setMatrix(calculateMatrix(bbox, rotation));
                     appearanceStream.setFormType(1);
 
+                    appearanceStream.setResources(new PDResources());
+
                     appearanceDict.setNormalAppearance(appearanceStream);
                     // TODO support appearances other than "normal"
                 }
@@ -232,7 +235,7 @@ class AppearanceGeneratorHelper
                     lineWidth = borderStyle.getWidth();
                 }
 
-                if (lineWidth > 0)
+                if (lineWidth > 0 && borderColour != null)
                 {
                     if (lineWidth != 1)
                     {
@@ -430,23 +433,24 @@ class AppearanceGeneratorHelper
             return new AffineTransform();
         }
         float tx = 0, ty = 0;
-
-        if (rotation == 90)
+        switch (rotation)
         {
+        case 90:
             tx = bbox.getUpperRightY();
-        }
-        else if (rotation == 180)
-        {
+            break;
+        case 180:
             tx = bbox.getUpperRightY();
             ty = bbox.getUpperRightX();
-        }
-        else if (rotation == 270)
-        {
+            break;
+        case 270:
             ty = bbox.getUpperRightX();
+            break;
+        default:
+            break;
         }
-
         Matrix matrix = Matrix.getRotateInstance(Math.toRadians(rotation), tx, ty);
         return matrix.createAffineTransform();
+
     }
 
     private boolean isMultiLine()

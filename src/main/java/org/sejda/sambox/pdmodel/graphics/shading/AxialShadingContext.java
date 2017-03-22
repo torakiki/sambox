@@ -69,7 +69,7 @@ public class AxialShadingContext extends ShadingContext implements PaintContext
      * @throws IOException if there is an error getting the color space or doing color conversion.
      */
     public AxialShadingContext(PDShadingType2 shading, ColorModel colorModel, AffineTransform xform,
- Matrix matrix, Rectangle deviceBounds) throws IOException
+            Matrix matrix, Rectangle deviceBounds) throws IOException
     {
         super(shading, colorModel, xform, matrix);
         this.axialShadingType = shading;
@@ -106,13 +106,14 @@ public class AxialShadingContext extends ShadingContext implements PaintContext
 
         try
         {
-            // get inverse transform to be independent of current user / device space 
+            // get inverse transform to be independent of current user / device space
             // when handling actual pixels in getRaster()
             rat = matrix.createAffineTransform().createInverse();
             rat.concatenate(xform.createInverse());
         }
         catch (NoninvertibleTransformException ex)
         {
+            LOG.error(ex.getMessage() + ", matrix: " + matrix, ex);
             LOG.error(ex.getMessage(), ex);
         }
 
@@ -132,8 +133,7 @@ public class AxialShadingContext extends ShadingContext implements PaintContext
     /**
      * Calculate the color on the axial line and store them in an array.
      *
-     * @return an array, index denotes the relative position, the corresponding
-     * value is the color on the axial line
+     * @return an array, index denotes the relative position, the corresponding value is the color on the axial line
      * @throws IOException if the color conversion fails.
      */
     private int[] calcColorTable() throws IOException
@@ -178,24 +178,12 @@ public class AxialShadingContext extends ShadingContext implements PaintContext
         int[] data = new int[w * h * 4];
         for (int j = 0; j < h; j++)
         {
-            double currentY = y + j;
-            if (bboxRect != null && (currentY < minBBoxY || currentY > maxBBoxY))
-            {
-                continue;
-            }
             for (int i = 0; i < w; i++)
             {
-                double currentX = x + i;
-                if (bboxRect != null && (currentX < minBBoxX || currentX > maxBBoxX))
-                {
-                    continue;
-                }
                 useBackground = false;
                 float[] values = new float[] { x + i, y + j };
                 rat.transform(values, 0, values, 0, 1);
-                currentX = values[0];
-                currentY = values[1];
-                double inputValue = x1x0 * (currentX - coords[0]) + y1y0 * (currentY - coords[1]);
+                double inputValue = x1x0 * (values[0] - coords[0]) + y1y0 * (values[1] - coords[1]);
                 // TODO this happens if start == end, see PDFBOX-1442
                 if (denom == 0)
                 {

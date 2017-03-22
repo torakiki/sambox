@@ -31,6 +31,7 @@ import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.PDDocument;
+import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
 
 /**
  * Test for the PDButton class.
@@ -92,8 +93,73 @@ public class PDButtonTest
         assertFalse(buttonField.isPushButton());
     }
 
+    /**
+     * PDFBOX-3656
+     * 
+     * Test a radio button with options. This was causing an ArrayIndexOutOfBoundsException when trying to set to "Off",
+     * as this wasn't treated to be a valid option.
+     * 
+     * @throws IOException
+     */
     @Test
-    public void retrieveAcrobatCheckBoxProperties() throws IOException
+    public void testRadioButtonWithOptions() throws IOException
+    {
+        try (PDDocument document = PDFParser.parse(
+                SeekableSources.inMemorySeekableSourceFrom(this.getClass().getResourceAsStream(
+                        "/org/sejda/sambox/pdmodel/interactive/form/radio_with_options.pdf"))))
+        {
+
+            PDRadioButton radioButton = (PDRadioButton) document.getDocumentCatalog().getAcroForm()
+                    .getField("Checking/Savings");
+            radioButton.setValue("Off");
+            for (PDAnnotationWidget widget : radioButton.getWidgets())
+            {
+                assertEquals("The widget should be set to Off", COSName.Off,
+                        widget.getCOSObject().getItem(COSName.AS));
+            }
+
+        }
+
+    }
+
+    /**
+     * PDFBOX-3682
+     * 
+     * Test a radio button with options. Special handling for a radio button with /Opt and the On state not being named
+     * after the index.
+     * 
+     * @throws IOException
+     */
+    @Test
+    public void testOptionsAndNamesNotNumbers() throws IOException
+    {
+
+        try (PDDocument document = PDFParser.parse(
+                SeekableSources.inMemorySeekableSourceFrom(this.getClass().getResourceAsStream(
+                        "/org/sejda/sambox/pdmodel/interactive/form/options_names_not_numbers.pdf"))))
+        {
+
+            document.getDocumentCatalog().getAcroForm().getField("RadioButton").setValue("c");
+            PDRadioButton radioButton = (PDRadioButton) document.getDocumentCatalog().getAcroForm()
+                    .getField("RadioButton");
+            radioButton.setValue("c");
+
+            // test that the old behavior is now invalid
+            assertFalse("This shall no longer be 2", "2".equals(radioButton.getValueAsString()));
+            assertFalse("This shall no longer be 2", "2".equals(
+                    radioButton.getWidgets().get(2).getCOSObject().getNameAsString(COSName.AS)));
+
+            // test for the correct behavior
+            assertTrue("This shall be c", "c".equals(radioButton.getValueAsString()));
+            assertTrue("This shall be c", "c".equals(
+                    radioButton.getWidgets().get(2).getCOSObject().getNameAsString(COSName.AS)));
+
+        }
+
+    }
+
+    @Test
+    public void retrieveAcrobatCheckBoxProperties()
     {
         PDCheckBox checkbox = (PDCheckBox) acrobatAcroForm.getField("Checkbox");
         assertNotNull(checkbox);

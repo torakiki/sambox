@@ -55,7 +55,6 @@ public class PDAnnotationFileAttachment extends PDAnnotationMarkup
      */
     public PDAnnotationFileAttachment()
     {
-        super();
         getCOSObject().setItem(COSName.SUBTYPE, COSName.getPDFName(SUB_TYPE));
     }
 

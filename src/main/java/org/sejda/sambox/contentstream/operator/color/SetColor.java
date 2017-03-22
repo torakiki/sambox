@@ -26,7 +26,7 @@ import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.pdmodel.graphics.color.PDColor;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
-import org.sejda.sambox.pdmodel.graphics.color.PDDeviceColorSpace;
+import org.sejda.sambox.pdmodel.graphics.color.PDPattern;
 
 /**
  * sc,scn,SC,SCN: Sets the color to use for stroking or non-stroking operations.
@@ -39,7 +39,7 @@ public abstract class SetColor extends OperatorProcessor
     public void process(Operator operator, List<COSBase> arguments) throws IOException
     {
         PDColorSpace colorSpace = getColorSpace();
-        if (colorSpace instanceof PDDeviceColorSpace
+        if (!(colorSpace instanceof PDPattern)
                 && arguments.size() < colorSpace.getNumberOfComponents())
         {
             throw new MissingOperandException(operator, arguments);

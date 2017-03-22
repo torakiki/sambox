@@ -31,8 +31,8 @@ public final class CloseFillEvenOddAndStrokePath extends GraphicsOperatorProcess
     @Override
     public void process(Operator operator, List<COSBase> operands) throws IOException
     {
-        context.processOperator("h", operands);  // ClosePath
-        context.processOperator("B*", operands); // FillEvenOddAndStroke
+        getContext().processOperator("h", operands); // ClosePath
+        getContext().processOperator("B*", operands); // FillEvenOddAndStroke
     }
 
     @Override

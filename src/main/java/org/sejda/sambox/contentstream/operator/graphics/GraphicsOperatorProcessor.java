@@ -17,7 +17,6 @@
 package org.sejda.sambox.contentstream.operator.graphics;
 
 import org.sejda.sambox.contentstream.PDFGraphicsStreamEngine;
-import org.sejda.sambox.contentstream.PDFStreamEngine;
 import org.sejda.sambox.contentstream.operator.OperatorProcessor;
 
 /**
@@ -27,13 +26,9 @@ import org.sejda.sambox.contentstream.operator.OperatorProcessor;
  */
 public abstract class GraphicsOperatorProcessor extends OperatorProcessor
 {
-    /** The processing context. */
-    protected PDFGraphicsStreamEngine context;
-
     @Override
-    public void setContext(PDFStreamEngine context)
+    public PDFGraphicsStreamEngine getContext()
     {
-        super.setContext(context);
-        this.context = (PDFGraphicsStreamEngine)context;
+        return (PDFGraphicsStreamEngine)super.getContext();
     }
 }

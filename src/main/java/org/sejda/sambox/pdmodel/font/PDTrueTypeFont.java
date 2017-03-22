@@ -351,7 +351,8 @@ public class PDTrueTypeFont extends PDSimpleFont implements PDVectorFont
             }
 
             Integer code = inverted.get(name);
-            if(code == null) {
+            if (code == null)
+            {
                 throw new IllegalArgumentException(
                         String.format("No glyph for U+%04X in font %s", unicode, getName()));
             }
@@ -487,38 +488,35 @@ public class PDTrueTypeFont extends PDSimpleFont implements PDVectorFont
         if (!isSymbolic()) // non-symbolic
         {
             String name = encoding.getName(code);
-            if (name.equals(".notdef"))
+            if (".notdef".equals(name))
             {
                 return 0;
             }
-            else
+            // (3, 1) - (Windows, Unicode)
+            if (cmapWinUnicode != null)
             {
-                // (3, 1) - (Windows, Unicode)
-                if (cmapWinUnicode != null)
+                String unicode = GlyphList.getAdobeGlyphList().toUnicode(name);
+                if (unicode != null)
                 {
-                    String unicode = GlyphList.getAdobeGlyphList().toUnicode(name);
-                    if (unicode != null)
-                    {
-                        int uni = unicode.codePointAt(0);
-                        gid = cmapWinUnicode.getGlyphId(uni);
-                    }
+                    int uni = unicode.codePointAt(0);
+                    gid = cmapWinUnicode.getGlyphId(uni);
                 }
+            }
 
-                // (1, 0) - (Macintosh, Roman)
-                if (gid == 0 && cmapMacRoman != null)
+            // (1, 0) - (Macintosh, Roman)
+            if (gid == 0 && cmapMacRoman != null)
+            {
+                Integer macCode = INVERTED_MACOS_ROMAN.get(name);
+                if (macCode != null)
                 {
-                    Integer macCode = INVERTED_MACOS_ROMAN.get(name);
-                    if (macCode != null)
-                    {
-                        gid = cmapMacRoman.getGlyphId(macCode);
-                    }
+                    gid = cmapMacRoman.getGlyphId(macCode);
                 }
+            }
 
-                // 'post' table
-                if (gid == 0)
-                {
-                    gid = ttf.nameToGID(name);
-                }
+            // 'post' table
+            if (gid == 0)
+            {
+                gid = ttf.nameToGID(name);
             }
         }
         else // symbolic

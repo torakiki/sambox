@@ -41,7 +41,7 @@ import org.sejda.sambox.pdmodel.PDResources;
 public abstract class PDColorSpace implements COSObjectable
 {
     /**
-     * Creates a color space space given a name or array.
+     * Creates a color space given a name or array.
      * 
      * @param colorSpace the color space COS object
      * @return a new color space

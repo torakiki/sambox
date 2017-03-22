@@ -24,11 +24,8 @@ import java.awt.image.DataBuffer;
 import java.io.IOException;
 
 import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
 import org.sejda.sambox.util.Matrix;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * A base class to handle what is common to all shading types.
@@ -38,11 +35,6 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class ShadingContext
 {
-    private static final Logger LOG = LoggerFactory.getLogger(ShadingContext.class);
-
-    protected PDRectangle bboxRect;
-    protected float minBBoxX, minBBoxY, maxBBoxX, maxBBoxY;
-
     private float[] background;
     private int rgbBackground;
     private final PDShading shading;
@@ -70,12 +62,6 @@ public abstract class ShadingContext
         outputColorModel = new ComponentColorModel(outputCS, true, false, Transparency.TRANSLUCENT,
                 DataBuffer.TYPE_BYTE);
 
-        bboxRect = shading.getBBox();
-        if (bboxRect != null)
-        {
-            transformBBox(matrix, xform);
-        }
-        
         // get background values if available
         COSArray bg = shading.getBackground();
         if (bg != null)
@@ -105,29 +91,6 @@ public abstract class ShadingContext
         return rgbBackground;
     }
     
-    private void transformBBox(Matrix matrix, AffineTransform xform)
-    {
-        float[] bboxTab = new float[4];
-        bboxTab[0] = bboxRect.getLowerLeftX();
-        bboxTab[1] = bboxRect.getLowerLeftY();
-        bboxTab[2] = bboxRect.getUpperRightX();
-        bboxTab[3] = bboxRect.getUpperRightY();
-
-        // transform the coords using the given matrix
-        matrix.createAffineTransform().transform(bboxTab, 0, bboxTab, 0, 2);
-
-        xform.transform(bboxTab, 0, bboxTab, 0, 2);
-        minBBoxX = Math.min(bboxTab[0], bboxTab[2]);
-        minBBoxY = Math.min(bboxTab[1], bboxTab[3]);
-        maxBBoxX = Math.max(bboxTab[0], bboxTab[2]);
-        maxBBoxY = Math.max(bboxTab[1], bboxTab[3]);
-        if (minBBoxX >= maxBBoxX || minBBoxY >= maxBBoxY)
-        {
-            LOG.warn("empty BBox is ignored");
-            bboxRect = null;
-        }
-    }
-
     /**
      * Convert color values from shading colorspace to RGB color values encoded
      * into an integer.

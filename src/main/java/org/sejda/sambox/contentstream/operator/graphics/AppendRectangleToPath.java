@@ -55,12 +55,12 @@ public final class AppendRectangleToPath extends GraphicsOperatorProcessor
         float x2 = w.floatValue() + x1;
         float y2 = h.floatValue() + y1;
 
-        Point2D p0 = context.transformedPoint(x1, y1);
-        Point2D p1 = context.transformedPoint(x2, y1);
-        Point2D p2 = context.transformedPoint(x2, y2);
-        Point2D p3 = context.transformedPoint(x1, y2);
+        Point2D p0 = getContext().transformedPoint(x1, y1);
+        Point2D p1 = getContext().transformedPoint(x2, y1);
+        Point2D p2 = getContext().transformedPoint(x2, y2);
+        Point2D p3 = getContext().transformedPoint(x1, y2);
 
-        context.appendRectangle(p0, p1, p2, p3);
+        getContext().appendRectangle(p0, p1, p2, p3);
     }
 
     @Override

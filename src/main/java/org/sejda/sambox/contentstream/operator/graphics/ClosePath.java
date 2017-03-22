@@ -36,12 +36,12 @@ public final class ClosePath extends GraphicsOperatorProcessor
     @Override
     public void process(Operator operator, List<COSBase> operands) throws IOException
     {
-        if (context.getCurrentPoint() == null)
+        if (getContext().getCurrentPoint() == null)
         {
             LOG.warn("ClosePath without initial MoveTo");
             return;
         }
-        context.closePath();
+        getContext().closePath();
     }
 
     @Override

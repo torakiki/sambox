@@ -22,10 +22,8 @@ import static java.util.Optional.ofNullable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSArrayList;
@@ -39,6 +37,8 @@ import org.sejda.sambox.pdmodel.PDPageContentStream;
 import org.sejda.sambox.pdmodel.PDPageContentStream.AppendMode;
 import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.common.PDDictionaryWrapper;
+import org.sejda.sambox.pdmodel.common.PDRectangle;
+import org.sejda.sambox.pdmodel.graphics.PDXObject;
 import org.sejda.sambox.pdmodel.graphics.form.PDFormXObject;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotation;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
@@ -150,44 +150,31 @@ public final class PDAcroForm extends PDDictionaryWrapper
 
         // indicates if the original content stream
         // has been wrapped in a q...Q pair.
-        boolean isContentStreamWrapped = false;
+        boolean isContentStreamWrapped;
 
         // the content stream to write to
         PDPageContentStream contentStream;
 
-        // Hold a reference between the annotations and the page they are on.
-        // This will only be used in case a PDAnnotationWidget doesn't contain
-        // a /P entry specifying the page it's on as the /P entry is optional
-        Map<COSDictionary, Integer> annotationToPageRef = null;
-
-        // Iterate over all form fields and their widgets and create a
-        // FormXObject at the page content level from that
-        for (PDField field : fields)
+        // preserve all non widget annotations
+        for (PDPage page : document.getPages())
         {
-            for (PDAnnotationWidget widget : field.getWidgets())
+            isContentStreamWrapped = false;
+
+            List<PDAnnotation> annotations = new ArrayList<PDAnnotation>();
+
+            for (PDAnnotation annotation : page.getAnnotations())
             {
-                if (widget.getNormalAppearanceStream() != null)
+                if (!(annotation instanceof PDAnnotationWidget))
                 {
-                    PDPage page = widget.getPage();
-
-                    // resolve the page from looking at the annotations
-                    if (widget.getPage() == null)
-                    {
-                        if (annotationToPageRef == null)
-                        {
-                            annotationToPageRef = buildAnnotationToPageRef();
-                        }
-                        Integer pageRef = annotationToPageRef.get(widget.getCOSObject());
-                        if (pageRef != null)
-                        {
-                            page = document.getPage(pageRef);
-                        }
-                    }
-
+                    annotations.add(annotation);
+                }
+                else if (!annotation.isInvisible() && !annotation.isHidden()
+                        && annotation.getNormalAppearanceStream() != null)
+                {
                     if (!isContentStreamWrapped)
                     {
                         contentStream = new PDPageContentStream(document, page, AppendMode.APPEND,
-                                true);
+                                true, true);
                         isContentStreamWrapped = true;
                     }
                     else
@@ -196,7 +183,7 @@ public final class PDAcroForm extends PDDictionaryWrapper
                                 true);
                     }
 
-                    PDAppearanceStream appearanceStream = widget.getNormalAppearanceStream();
+                    PDAppearanceStream appearanceStream = annotation.getNormalAppearanceStream();
 
                     PDFormXObject fieldObject = new PDFormXObject(appearanceStream.getCOSObject());
 
@@ -204,13 +191,41 @@ public final class PDAcroForm extends PDDictionaryWrapper
 
                     // translate the appearance stream to the widget location if there is
                     // not already a transformation in place
-                    boolean needsTransformation = isNeedsTransformation(appearanceStream);
-                    if (needsTransformation)
+                    boolean needsTranslation = resolveNeedsTranslation(appearanceStream);
+
+                    // scale the appearance stream - mainly needed for images
+                    // in buttons and signatures
+                    boolean needsScaling = resolveNeedsScaling(appearanceStream);
+
+                    Matrix transformationMatrix = new Matrix();
+                    boolean transformed = false;
+
+                    if (needsTranslation)
                     {
-                        Matrix translationMatrix = Matrix.getTranslateInstance(
-                                widget.getRectangle().getLowerLeftX(),
-                                widget.getRectangle().getLowerLeftY());
-                        contentStream.transform(translationMatrix);
+                        transformationMatrix.translate(annotation.getRectangle().getLowerLeftX(),
+                                annotation.getRectangle().getLowerLeftY());
+                        transformed = true;
+                    }
+
+                    if (needsScaling)
+                    {
+                        PDRectangle bbox = appearanceStream.getBBox();
+                        PDRectangle fieldRect = annotation.getRectangle();
+
+                        if (bbox.getWidth() - fieldRect.getWidth() != 0
+                                && bbox.getHeight() - fieldRect.getHeight() != 0)
+                        {
+                            float xScale = fieldRect.getWidth() / bbox.getWidth();
+                            float yScale = fieldRect.getHeight() / bbox.getHeight();
+                            Matrix scalingMatrix = Matrix.getScaleInstance(xScale, yScale);
+                            transformationMatrix.concatenate(scalingMatrix);
+                            transformed = true;
+                        }
+                    }
+
+                    if (transformed)
+                    {
+                        contentStream.transform(transformationMatrix);
                     }
 
                     contentStream.drawForm(fieldObject);
@@ -218,28 +233,15 @@ public final class PDAcroForm extends PDDictionaryWrapper
                     contentStream.close();
                 }
             }
-        }
-
-        // preserve all non widget annotations
-        for (PDPage page : document.getPages())
-        {
-            List<PDAnnotation> annotations = new ArrayList<>();
-
-            for (PDAnnotation annotation : page.getAnnotations())
-            {
-                if (!(annotation instanceof PDAnnotationWidget))
-                {
-                    annotations.add(annotation);
-                }
-            }
             page.setAnnotations(annotations);
         }
 
         // remove the fields
-        setFields(Collections.emptyList());
+        setFields(Collections.<PDField> emptyList());
 
         // remove XFA for hybrid forms
         getCOSObject().removeItem(COSName.XFA);
+
     }
 
     /**
@@ -284,7 +286,8 @@ public final class PDAcroForm extends PDDictionaryWrapper
      * terminal fields, non-terminal fields or a mixture of both. Non-terminal fields mark branches which contents can
      * be retrieved using {@link PDNonTerminalField#getChildren()}.
      * 
-     * @return A list of the documents root fields.
+     * @return A list of the documents root fields, never null. If there are no fields then this method returns an empty
+     * list.
      * 
      */
     public List<PDField> getFields()
@@ -376,8 +379,8 @@ public final class PDAcroForm extends PDDictionaryWrapper
     public PDField getField(String fullyQualifiedName)
     {
         return getFieldTree().stream()
-                .filter(f -> f != null && fullyQualifiedName.equals(f.getFullyQualifiedName())).findFirst()
-                .orElse(null);
+                .filter(f -> f != null && fullyQualifiedName.equals(f.getFullyQualifiedName()))
+                .findFirst().orElse(null);
     }
 
     /**
@@ -545,48 +548,62 @@ public final class PDAcroForm extends PDDictionaryWrapper
         getCOSObject().setFlag(COSName.SIG_FLAGS, FLAG_APPEND_ONLY, appendOnly);
     }
 
-    private Map<COSDictionary, Integer> buildAnnotationToPageRef()
+    /**
+     * Check if there is a translation needed to place the annotations content.
+     * 
+     * @param appearanceStream
+     * @return the need for a translation transformation.
+     */
+    private boolean resolveNeedsTranslation(PDAppearanceStream appearanceStream)
     {
-        Map<COSDictionary, Integer> annotationToPageRef = new HashMap<>();
+        boolean needsTranslation = false;
 
-        int idx = 0;
-        for (PDPage page : document.getPages())
+        PDResources resources = appearanceStream.getResources();
+        if (resources != null && resources.getXObjectNames().iterator().hasNext())
         {
-            try
+
+            Iterator<COSName> xObjectNames = resources.getXObjectNames().iterator();
+
+            while (xObjectNames.hasNext())
             {
-                for (PDAnnotation annotation : page.getAnnotations())
+                try
                 {
-                    if (annotation instanceof PDAnnotationWidget)
+                    // if the BBox of the PDFormXObject does not start at 0,0
+                    // there is no need do translate as this is done by the BBox definition.
+                    PDXObject xObject = resources.getXObject(xObjectNames.next());
+                    if (xObject instanceof PDFormXObject)
                     {
-                        annotationToPageRef.put(annotation.getCOSObject(), idx);
+                        PDRectangle bbox = ((PDFormXObject) xObject).getBBox();
+                        float llX = bbox.getLowerLeftX();
+                        float llY = bbox.getLowerLeftY();
+                        if (llX == 0 && llY == 0)
+                        {
+                            needsTranslation = true;
+                        }
                     }
                 }
+                catch (IOException e)
+                {
+                    // we can safely ignore the exception here
+                    // as this might only cause a misplacement
+                }
             }
-            catch (IllegalArgumentException e)
-            {
-                LOG.warn("Can't retrieve annotations for page {}", idx);
-            }
-            idx++;
+            return needsTranslation;
         }
-        return annotationToPageRef;
+
+        return true;
     }
 
     /**
-     * Check if there is a transformation needed to place the annotations content.
+     * Check if there needs to be a scaling transformation applied.
      * 
      * @param appearanceStream
-     * @return the need for a transformation.
+     * @return the need for a scaling transformation.
      */
-    private boolean isNeedsTransformation(PDAppearanceStream appearanceStream)
+    private boolean resolveNeedsScaling(PDAppearanceStream appearanceStream)
     {
-        // Check if there is a XObject defined as this is an indication that there should already be a transformation
-        // in place.
-        // TODO: A more reliable approach might be to parse the content stream
-        if (nonNull(appearanceStream.getResources())
-                && appearanceStream.getResources().getXObjectNames().iterator().hasNext())
-        {
-            return false;
-        }
-        return true;
+        // Check if there is a transformation within the XObjects content
+        PDResources resources = appearanceStream.getResources();
+        return resources != null && resources.getXObjectNames().iterator().hasNext();
     }
 }

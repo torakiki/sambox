@@ -49,6 +49,7 @@ import org.sejda.sambox.pdmodel.font.PDFontFactory;
 import org.sejda.sambox.pdmodel.font.PDType3CharProc;
 import org.sejda.sambox.pdmodel.font.PDType3Font;
 import org.sejda.sambox.pdmodel.graphics.PDLineDashPattern;
+import org.sejda.sambox.pdmodel.graphics.blend.BlendMode;
 import org.sejda.sambox.pdmodel.graphics.color.PDColor;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
 import org.sejda.sambox.pdmodel.graphics.form.PDFormXObject;
@@ -62,7 +63,6 @@ import org.sejda.sambox.util.Matrix;
 import org.sejda.sambox.util.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.sejda.sambox.pdmodel.graphics.blend.BlendMode;
 
 /**
  * Processes a PDF content stream and executes certain operations. Provides a callback interface for clients that want
@@ -168,18 +168,22 @@ public abstract class PDFStreamEngine
 
     /**
      * Processes a soft mask transparency group stream.
+     * 
      * @param group
      * @throws IOException
      */
     protected void processSoftMask(PDTransparencyGroup group) throws IOException
     {
         saveGraphicsState();
+        Matrix softMaskCTM = getGraphicsState().getSoftMask().getInitialTransformationMatrix();
+        getGraphicsState().setCurrentTransformationMatrix(softMaskCTM);
         processTransparencyGroup(group);
         restoreGraphicsState();
     }
 
     /**
      * Processes a transparency group stream.
+     * 
      * @param group
      * @throws IOException
      */
@@ -193,6 +197,11 @@ public abstract class PDFStreamEngine
 
         PDResources parent = pushResources(group);
         Stack<PDGraphicsState> savedStack = saveGraphicsStack();
+
+        Matrix parentMatrix = initialMatrix;
+
+        // the stream's initial matrix includes the parent CTM, e.g. this allows a scaled form
+        initialMatrix = getGraphicsState().getCurrentTransformationMatrix().clone();
 
         // transform the CTM using the stream's matrix
         getGraphicsState().getCurrentTransformationMatrix().concatenate(group.getMatrix());
@@ -209,6 +218,8 @@ public abstract class PDFStreamEngine
         clipToRect(group.getBBox());
 
         processStreamOperators(group);
+
+        initialMatrix = parentMatrix;
 
         restoreGraphicsStack(savedStack);
         popResources(parent);

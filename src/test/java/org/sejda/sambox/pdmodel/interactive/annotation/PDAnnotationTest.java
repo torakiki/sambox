@@ -78,7 +78,7 @@ public class PDAnnotationTest
     {
         PDAnnotation victim = new PDAnnotationWidget();
         victim.setBorder(new COSArray(COSInteger.ZERO));
-        assertEquals(new COSArray(COSInteger.ZERO, COSInteger.ZERO, COSInteger.ONE),
+        assertEquals(new COSArray(COSInteger.ZERO, COSInteger.ZERO, COSInteger.ZERO),
                 victim.getBorder());
     }
 

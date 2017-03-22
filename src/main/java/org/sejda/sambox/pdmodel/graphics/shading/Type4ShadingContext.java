@@ -96,7 +96,8 @@ class Type4ShadingContext extends GouraudShadingContext
                 LOG.error(ex.getMessage());
             }
 
-            while (true)
+            boolean eof = false;
+            while (!eof)
             {
                 Vertex p0, p1, p2;
                 Point2D[] ps;
@@ -155,7 +156,7 @@ class Type4ShadingContext extends GouraudShadingContext
                 }
                 catch (EOFException ex)
                 {
-                    break;
+                    eof = true;
                 }
             }
         }

@@ -43,6 +43,7 @@ import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSDocument;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.cos.COSNumber;
 import org.sejda.sambox.cos.COSString;
 import org.sejda.sambox.cos.DirectCOSObject;
 import org.sejda.sambox.encryption.EncryptionContext;
@@ -70,11 +71,21 @@ public class PDDocument implements Closeable
     private static final Logger LOG = LoggerFactory.getLogger(PDDocument.class);
 
     /**
-     * avoid concurrency issues with PDDeviceRGB
+     * avoid concurrency issues with PDDeviceRGB and deadlock in COSNumber/COSInteger
      */
     static
     {
         PDDeviceRGB.INSTANCE.toRGB(new float[]{1,1,1,1});
+        try
+        {
+            // TODO remove this and deprecated COSNumber statics in 3.0
+            COSNumber.get("0");
+            COSNumber.get("1");
+        }
+        catch (IOException ex)
+        {
+            //
+        }
     }
 
     private final COSDocument document;

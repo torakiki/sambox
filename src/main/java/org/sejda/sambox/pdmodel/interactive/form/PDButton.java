@@ -362,7 +362,7 @@ public abstract class PDButton extends PDTerminalField
         }
     }
 
-    private void updateByOption(String value)
+    private void updateByOption(String value) throws IOException
     {
         List<PDAnnotationWidget> widgets = getWidgets();
         List<String> options = getExportValues();
@@ -373,21 +373,22 @@ public abstract class PDButton extends PDTerminalField
                     "The number of options doesn't match the number of widgets");
         }
 
-        // the value is the index of the matching option
-        int optionsIndex = options.indexOf(value);
-        getCOSObject().setName(COSName.V, String.valueOf(optionsIndex));
-
-        // update the appearance state (AS)
-        for (int i = 0; i < widgets.size(); i++)
+        if (value.equals(COSName.Off.getName()))
         {
-            PDAnnotationWidget widget = widgets.get(i);
-            if (value.compareTo(options.get(i)) == 0)
+            updateByValue(value);
+        }
+        else
+        {
+            // the value is the index of the matching option
+            int optionsIndex = options.indexOf(value);
+
+            // get the values the options are pointing to as
+            // this might not be numerical
+            // see PDFBOX-3682
+            if (optionsIndex != -1)
             {
-                widget.getCOSObject().setName(COSName.AS, String.valueOf(i));
-            }
-            else
-            {
-                widget.getCOSObject().setItem(COSName.AS, COSName.Off);
+                String[] onValues = getOnValues().toArray(new String[getOnValues().size()]);
+                updateByValue(onValues[optionsIndex]);
             }
         }
     }

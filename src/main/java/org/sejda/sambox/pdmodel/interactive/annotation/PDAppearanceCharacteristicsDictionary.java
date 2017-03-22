@@ -16,14 +16,14 @@
  */
 package org.sejda.sambox.pdmodel.interactive.annotation;
 
+import static java.util.Objects.nonNull;
+
 import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.cos.COSObjectable;
 import org.sejda.sambox.cos.COSStream;
+import org.sejda.sambox.pdmodel.common.PDDictionaryWrapper;
 import org.sejda.sambox.pdmodel.graphics.color.PDColor;
-import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceCMYK;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceRGB;
@@ -33,30 +33,12 @@ import org.sejda.sambox.pdmodel.graphics.form.PDFormXObject;
  * This class represents an appearance characteristics dictionary.
  *
  */
-public class PDAppearanceCharacteristicsDictionary implements COSObjectable
+public class PDAppearanceCharacteristicsDictionary extends PDDictionaryWrapper
 {
 
-    private final COSDictionary dictionary;
-
-    /**
-     * Constructor.
-     * 
-     * @param dict dictionary
-     */
     public PDAppearanceCharacteristicsDictionary(COSDictionary dict)
     {
-        this.dictionary = dict;
-    }
-
-    /**
-     * returns the dictionary.
-     * 
-     * @return the dictionary
-     */
-    @Override
-    public COSDictionary getCOSObject()
-    {
-        return this.dictionary;
+        super(dict);
     }
 
     /**
@@ -186,10 +168,10 @@ public class PDAppearanceCharacteristicsDictionary implements COSObjectable
      */
     public PDFormXObject getNormalIcon()
     {
-        COSBase i = this.getCOSObject().getDictionaryObject("I");
-        if (i instanceof COSStream)
+        COSStream i = this.getCOSObject().getDictionaryObject("I", COSStream.class);
+        if (nonNull(i))
         {
-            return new PDFormXObject((COSStream) i);
+            return new PDFormXObject(i);
         }
         return null;
     }
@@ -201,10 +183,10 @@ public class PDAppearanceCharacteristicsDictionary implements COSObjectable
      */
     public PDFormXObject getRolloverIcon()
     {
-        COSBase i = this.getCOSObject().getDictionaryObject("RI");
-        if (i instanceof COSStream)
+        COSStream i = this.getCOSObject().getDictionaryObject("RI", COSStream.class);
+        if (nonNull(i))
         {
-            return new PDFormXObject((COSStream) i);
+            return new PDFormXObject(i);
         }
         return null;
     }
@@ -216,35 +198,30 @@ public class PDAppearanceCharacteristicsDictionary implements COSObjectable
      */
     public PDFormXObject getAlternateIcon()
     {
-        COSBase i = this.getCOSObject().getDictionaryObject("IX");
-        if (i instanceof COSStream)
+        COSStream i = this.getCOSObject().getDictionaryObject("IX", COSStream.class);
+        if (nonNull(i))
         {
-            return new PDFormXObject((COSStream) i);
+            return new PDFormXObject(i);
         }
         return null;
     }
 
     private PDColor getColor(COSName itemName)
     {
-        COSBase c = this.getCOSObject().getItem(itemName);
-        if (c instanceof COSArray)
+        COSArray c = this.getCOSObject().getDictionaryObject(itemName, COSArray.class);
+        if (nonNull(c))
         {
-            PDColorSpace colorSpace = null;
-            switch (((COSArray) c).size())
+            switch (c.size())
             {
             case 1:
-                colorSpace = PDDeviceGray.INSTANCE;
-                break;
+                return new PDColor(c, PDDeviceGray.INSTANCE);
             case 3:
-                colorSpace = PDDeviceRGB.INSTANCE;
-                break;
+                return new PDColor(c, PDDeviceRGB.INSTANCE);
             case 4:
-                colorSpace = PDDeviceCMYK.INSTANCE;
-                break;
+                return new PDColor(c, PDDeviceCMYK.INSTANCE);
             default:
                 break;
             }
-            return new PDColor((COSArray) c, colorSpace);
         }
         return null;
     }

@@ -54,8 +54,8 @@ class Type5ShadingContext extends GouraudShadingContext
      * @param matrix the pattern matrix concatenated with that of the parent content stream
      * @throws IOException if something went wrong
      */
-    Type5ShadingContext(PDShadingType5 shading, ColorModel cm, AffineTransform xform,
-                               Matrix matrix, Rectangle deviceBounds) throws IOException
+    Type5ShadingContext(PDShadingType5 shading, ColorModel cm, AffineTransform xform, Matrix matrix,
+            Rectangle deviceBounds) throws IOException
     {
         super(shading, cm, xform, matrix);
 
@@ -82,26 +82,24 @@ class Type5ShadingContext extends GouraudShadingContext
         long maxSrcColor = (long) Math.pow(2, bitsPerColorComponent) - 1;
         COSStream cosStream = (COSStream) cosDictionary;
 
-        ImageInputStream mciis = new MemoryCacheImageInputStream(cosStream.getUnfilteredStream());
-        try
+        try (ImageInputStream mciis = new MemoryCacheImageInputStream(
+                cosStream.getUnfilteredStream()))
         {
-            while (true)
+            boolean eof = false;
+            while (!eof)
             {
                 Vertex p;
                 try
                 {
-                    p = readVertex(mciis, maxSrcCoord, maxSrcColor, rangeX, rangeY, colRange, matrix, xform);
+                    p = readVertex(mciis, maxSrcCoord, maxSrcColor, rangeX, rangeY, colRange,
+                            matrix, xform);
                     vlist.add(p);
                 }
                 catch (EOFException ex)
                 {
-                    break;
+                    eof = true;
                 }
             }
-        }
-        finally
-        {
-            mciis.close();
         }
         int sz = vlist.size(), rowNum = sz / numPerRow;
         Vertex[][] latticeArray = new Vertex[rowNum][numPerRow];
@@ -123,27 +121,19 @@ class Type5ShadingContext extends GouraudShadingContext
         {
             for (int j = 0; j < numPerRow - 1; j++)
             {
-                Point2D[] ps = new Point2D[] {
-                    latticeArray[i][j].point,
-                    latticeArray[i][j + 1].point,
-                    latticeArray[i + 1][j].point  };
+                Point2D[] ps = new Point2D[] { latticeArray[i][j].point,
+                        latticeArray[i][j + 1].point, latticeArray[i + 1][j].point };
 
-                float[][] cs = new float[][] {
-                    latticeArray[i][j].color,
-                    latticeArray[i][j + 1].color,
-                    latticeArray[i + 1][j].color };
+                float[][] cs = new float[][] { latticeArray[i][j].color,
+                        latticeArray[i][j + 1].color, latticeArray[i + 1][j].color };
 
                 list.add(new ShadedTriangle(ps, cs));
 
-                ps = new Point2D[] {
-                    latticeArray[i][j + 1].point,
-                    latticeArray[i + 1][j].point,
-                    latticeArray[i + 1][j + 1].point };
+                ps = new Point2D[] { latticeArray[i][j + 1].point, latticeArray[i + 1][j].point,
+                        latticeArray[i + 1][j + 1].point };
 
-                cs = new float[][]{
-                    latticeArray[i][j + 1].color,
-                    latticeArray[i + 1][j].color,
-                    latticeArray[i + 1][j + 1].color };
+                cs = new float[][] { latticeArray[i][j + 1].color, latticeArray[i + 1][j].color,
+                        latticeArray[i + 1][j + 1].color };
 
                 list.add(new ShadedTriangle(ps, cs));
             }

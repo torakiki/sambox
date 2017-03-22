@@ -16,7 +16,8 @@
  */
 package org.sejda.sambox.pdmodel.interactive.annotation;
 
-import org.sejda.sambox.cos.COSBase;
+import static java.util.Objects.nonNull;
+
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.interactive.action.PDAction;
@@ -104,10 +105,10 @@ public class PDAnnotationWidget extends PDAnnotation
      */
     public PDAppearanceCharacteristicsDictionary getAppearanceCharacteristics()
     {
-        COSBase mk = this.getCOSObject().getDictionaryObject(COSName.MK);
-        if (mk instanceof COSDictionary)
+        COSDictionary mk = this.getCOSObject().getDictionaryObject(COSName.MK, COSDictionary.class);
+        if (nonNull(mk))
         {
-            return new PDAppearanceCharacteristicsDictionary((COSDictionary) mk);
+            return new PDAppearanceCharacteristicsDictionary(mk);
         }
         return null;
     }

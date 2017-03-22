@@ -33,7 +33,7 @@ public final class FillEvenOddRule extends GraphicsOperatorProcessor
     @Override
     public void process(Operator operator, List<COSBase> operands) throws IOException
     {
-        context.fillPath(GeneralPath.WIND_EVEN_ODD);
+        getContext().fillPath(GeneralPath.WIND_EVEN_ODD);
     }
 
     @Override

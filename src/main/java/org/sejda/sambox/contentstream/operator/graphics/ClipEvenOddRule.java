@@ -33,7 +33,7 @@ public final class ClipEvenOddRule extends GraphicsOperatorProcessor
     @Override
     public void process(Operator operator, List<COSBase> operands) throws IOException
     {
-        context.clip(GeneralPath.WIND_EVEN_ODD);
+        getContext().clip(GeneralPath.WIND_EVEN_ODD);
     }
 
     @Override

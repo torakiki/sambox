@@ -50,7 +50,7 @@ public final class DrawObject extends GraphicsOperatorProcessor
             return;
         }
         COSName objectName = (COSName) base0;
-        PDXObject xobject = context.getResources().getXObject(objectName);
+        PDXObject xobject = getContext().getResources().getXObject(objectName);
 
         if (xobject == null)
         {
@@ -59,7 +59,7 @@ public final class DrawObject extends GraphicsOperatorProcessor
         else if (xobject instanceof PDImageXObject)
         {
             PDImageXObject image = (PDImageXObject) xobject;
-            context.drawImage(image);
+            getContext().drawImage(image);
         }
         else if (xobject instanceof PDTransparencyGroup)
         {

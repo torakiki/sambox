@@ -32,7 +32,7 @@ public final class StrokePath extends GraphicsOperatorProcessor
     @Override
     public void process(Operator operator, List<COSBase> operands) throws IOException
     {
-        context.strokePath();
+        getContext().strokePath();
     }
 
     @Override

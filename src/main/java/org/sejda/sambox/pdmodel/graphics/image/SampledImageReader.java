@@ -85,8 +85,8 @@ final class SampledImageReader
         WritableRaster raster = masked.getRaster();
         WritableRaster alpha = mask.getRaster();
 
-        final float[] transparent = new float[4];
-        float[] alphaPixel = null;
+        final int[] transparent = new int[4];
+        int[] alphaPixel = null;
         for (int y = 0; y < height; y++)
         {
             for (int x = 0; x < width; x++)
@@ -147,7 +147,7 @@ final class SampledImageReader
         {
             return from8bit(pdImage, raster);
         }
-        else if (bitsPerComponent == 1 && colorKey == null)
+        else if (bitsPerComponent == 1 && colorKey == null && numComponents == 1)
         {
             return from1Bit(pdImage, raster);
         }

@@ -135,20 +135,22 @@ public class ContentStreamParser extends SourceReader
         {
             source().back();
         }
-        FastByteArrayOutputStream imageData = new FastByteArrayOutputStream();
-        int current;
-
-        while ((current = source().read()) != -1)
+        try (FastByteArrayOutputStream imageData = new FastByteArrayOutputStream())
         {
-            long position = source().position();
-            if ((current == 'E' && isEndOfImageFrom(position - 1))
-                    || (isWhitespace(current) && isEndOfImageFrom(position)))
+            int current;
+
+            while ((current = source().read()) != -1)
             {
-                break;
+                long position = source().position();
+                if ((current == 'E' && isEndOfImageFrom(position - 1))
+                        || (isWhitespace(current) && isEndOfImageFrom(position)))
+                {
+                    break;
+                }
+                imageData.write(current);
             }
-            imageData.write(current);
+            return imageData.toByteArray();
         }
-        return imageData.toByteArray();
     }
 
     private boolean isEndOfImageFrom(long position) throws IOException

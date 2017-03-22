@@ -183,6 +183,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName DOC_CHECKSUM = newCommonInstance("DocChecksum");
     public static final COSName DOC_OPEN = newCommonInstance("DocOpen");
     public static final COSName DOC_TIME_STAMP = newCommonInstance("DocTimeStamp");
+    public static final COSName DOCMDP = newCommonInstance("DocMDP");
     public static final COSName DOMAIN = newCommonInstance("Domain");
     public static final COSName DOS = newCommonInstance("DOS");
     public static final COSName DP = newCommonInstance("DP");
@@ -348,7 +349,8 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName NEXT = newCommonInstance("Next");
     public static final COSName NM = newCommonInstance("NM");
     public static final COSName NON_EFONT_NO_WARN = newCommonInstance("NonEFontNoWarn");
-    public static final COSName NON_FULL_SCREEN_PAGE_MODE = newCommonInstance("NonFullScreenPageMode");
+    public static final COSName NON_FULL_SCREEN_PAGE_MODE = newCommonInstance(
+            "NonFullScreenPageMode");
     public static final COSName NONE = newCommonInstance("None");
     public static final COSName NORMAL = newCommonInstance("Normal");
     public static final COSName NUMS = newCommonInstance("Nums");
@@ -375,7 +377,8 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName OS = newCommonInstance("OS");
     public static final COSName OUTLINES = newCommonInstance("Outlines");
     public static final COSName OUTPUT_CONDITION = newCommonInstance("OutputCondition");
-    public static final COSName OUTPUT_CONDITION_IDENTIFIER = newCommonInstance("OutputConditionIdentifier");
+    public static final COSName OUTPUT_CONDITION_IDENTIFIER = newCommonInstance(
+            "OutputConditionIdentifier");
     public static final COSName OUTPUT_INTENT = newCommonInstance("OutputIntent");
     public static final COSName OUTPUT_INTENTS = newCommonInstance("OutputIntents");
     public static final COSName OVERLAY = newCommonInstance("Overlay");

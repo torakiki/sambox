@@ -41,9 +41,12 @@ public class SetRenderingIntent extends OperatorProcessor
         {
             throw new MissingOperandException(operator, operands);
         }
-        COSName value = (COSName) operands.get(0);
-        getContext().getGraphicsState()
-                .setRenderingIntent(RenderingIntent.fromString(value.getName()));
+        COSBase base = operands.get(0);
+        if (base instanceof COSName)
+        {
+            getContext().getGraphicsState()
+                    .setRenderingIntent(RenderingIntent.fromString(((COSName) base).getName()));
+        }
     }
 
     @Override

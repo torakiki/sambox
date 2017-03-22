@@ -32,8 +32,8 @@ public class CloseAndStrokePath extends GraphicsOperatorProcessor
     @Override
     public void process(Operator operator, List<COSBase> arguments) throws IOException
     {
-        context.processOperator( "h", arguments );
-        context.processOperator( "S", arguments );
+        getContext().processOperator("h", arguments);
+        getContext().processOperator("S", arguments);
     }
 
     @Override

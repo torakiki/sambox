@@ -18,6 +18,7 @@ package org.sejda.sambox.util;
 
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
+import java.util.Arrays;
 
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSFloat;
@@ -675,5 +676,29 @@ public final class Matrix implements Cloneable
         sb.append(single[6] + ",");
         sb.append(single[7] + "]");
         return sb.toString();
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return Arrays.hashCode(single);
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (this == obj)
+        {
+            return true;
+        }
+        if (obj == null)
+        {
+            return false;
+        }
+        if (getClass() != obj.getClass())
+        {
+            return false;
+        }
+        return Arrays.equals(this.single, ((Matrix) obj).single);
     }
 }

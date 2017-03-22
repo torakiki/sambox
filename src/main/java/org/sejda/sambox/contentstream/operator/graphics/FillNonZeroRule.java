@@ -33,7 +33,7 @@ public class FillNonZeroRule extends GraphicsOperatorProcessor
     @Override
     public final void process(Operator operator, List<COSBase> operands) throws IOException
     {
-        context.fillPath(GeneralPath.WIND_NON_ZERO);
+        getContext().fillPath(GeneralPath.WIND_NON_ZERO);
     }
 
     @Override

@@ -26,6 +26,7 @@ import org.sejda.sambox.cos.COSObjectable;
 import org.sejda.sambox.pdmodel.common.function.PDFunction;
 import org.sejda.sambox.pdmodel.graphics.PDXObject;
 import org.sejda.sambox.pdmodel.graphics.form.PDTransparencyGroup;
+import org.sejda.sambox.util.Matrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,6 +72,10 @@ public final class PDSoftMask implements COSObjectable
     private PDTransparencyGroup group = null;
     private COSArray backdropColor = null;
     private PDFunction transferFunction = null;
+    /**
+     * To allow a soft mask to know the CTM at the time of activation of the ExtGState.
+     */
+    private Matrix ctm;
 
     /**
      * Creates a new soft mask.
@@ -125,7 +130,7 @@ public final class PDSoftMask implements COSObjectable
     {
         if (backdropColor == null)
         {
-            backdropColor = (COSArray) getCOSObject().getDictionaryObject(COSName.BC);
+            backdropColor = getCOSObject().getDictionaryObject(COSName.BC, COSArray.class);
         }
         return backdropColor;
     }
@@ -146,5 +151,25 @@ public final class PDSoftMask implements COSObjectable
             }
         }
         return transferFunction;
+    }
+
+    /**
+     * Set the CTM that is valid at the time the ExtGState was activated.
+     *
+     * @param ctm
+     */
+    void setInitialTransformationMatrix(Matrix ctm)
+    {
+        this.ctm = ctm;
+    }
+
+    /**
+     * Returns the CTM at the time the ExtGState was activated.
+     *
+     * @return
+     */
+    public Matrix getInitialTransformationMatrix()
+    {
+        return ctm;
     }
 }
