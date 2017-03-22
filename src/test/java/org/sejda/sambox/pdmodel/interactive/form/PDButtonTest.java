@@ -214,7 +214,7 @@ public class PDButtonTest
         assertTrue(checkbox.getExportValues().size() > 0);
 
         checkbox.unCheck();
-        assertEquals(checkbox.getValue(), "-1");
+        assertEquals(checkbox.getValue(), COSName.Off.getName());
         assertEquals(checkbox.isChecked(), false);
     }
 
