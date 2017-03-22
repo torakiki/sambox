@@ -20,8 +20,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.io.IOException;
-
 import org.junit.Test;
 
 /**
@@ -31,20 +29,20 @@ import org.junit.Test;
 public class SpecVersionUtilsTest
 {
 
-    @Test(expected = IOException.class)
-    public void failingParseHeaderString() throws IOException
+    @Test
+    public void failingParseHeaderString()
     {
-        SpecVersionUtils.parseHeaderString("ChuckNorris");
+        assertEquals("1.6", SpecVersionUtils.parseHeaderString("ChuckNorris"));
     }
 
     @Test
-    public void parseHeaderString() throws IOException
+    public void parseHeaderString()
     {
         assertEquals("1.7", SpecVersionUtils.parseHeaderString("%PDF-1.7"));
     }
 
     @Test
-    public void parseCommaHeaderString() throws IOException
+    public void parseCommaHeaderString()
     {
         assertEquals("1.7", SpecVersionUtils.parseHeaderString("%PDF-1,7"));
     }
