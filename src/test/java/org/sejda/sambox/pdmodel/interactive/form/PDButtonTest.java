@@ -226,7 +226,7 @@ public class PDButtonTest
     }
 
     @Test
-    public void testUncheckCheckboxWithExportValues() throws IOException
+    public void testCheckboxWithExportValues() throws IOException
     {
         PDCheckBox checkbox = (PDCheckBox) acrobatAcroForm.getField("Checkbox");
         checkbox.setExportValues(Collections.singletonList("exportValue1"));
@@ -235,6 +235,10 @@ public class PDButtonTest
         checkbox.unCheck();
         assertEquals(checkbox.getValue(), COSName.Off.getName());
         assertEquals(checkbox.isChecked(), false);
+
+        checkbox.check();
+        assertEquals(checkbox.getValue(), "exportValue1");
+        assertEquals(checkbox.isChecked(), true);
     }
 
     @Test

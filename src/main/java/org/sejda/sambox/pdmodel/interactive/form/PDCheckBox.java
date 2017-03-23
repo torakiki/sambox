@@ -17,6 +17,7 @@
 package org.sejda.sambox.pdmodel.interactive.form;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 
 import org.sejda.sambox.cos.COSDictionary;
@@ -99,6 +100,11 @@ public final class PDCheckBox extends PDButton
      */
     public String getOnValue()
     {
+        List<String> exportValues = getExportValues();
+        if(exportValues.size() > 0) {
+            return exportValues.get(0);
+        }
+
         PDAnnotationWidget widget = this.getWidgets().get(0);
         PDAppearanceDictionary apDictionary = widget.getAppearance();
 
