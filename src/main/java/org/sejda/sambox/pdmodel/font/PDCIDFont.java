@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.pdmodel.font;
 
+import static java.util.Objects.nonNull;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -69,7 +71,7 @@ public abstract class PDCIDFont implements COSObjectable, PDFontLike, PDVectorFo
 
     private void readWidths()
     {
-        widths = new HashMap<Integer, Float>();
+        widths = new HashMap<>();
         COSArray widths = (COSArray) dict.getDictionaryObject(COSName.W);
         if (widths != null)
         {
@@ -187,7 +189,7 @@ public abstract class PDCIDFont implements COSObjectable, PDFontLike, PDVectorFo
     {
         if (fontDescriptor == null)
         {
-            COSDictionary fd = (COSDictionary) dict.getDictionaryObject(COSName.FONT_DESC);
+            COSDictionary fd = dict.getDictionaryObject(COSName.FONT_DESC, COSDictionary.class);
             if (fd != null)
             {
                 fontDescriptor = new PDFontDescriptor(fd);
@@ -221,8 +223,8 @@ public abstract class PDCIDFont implements COSObjectable, PDFontLike, PDVectorFo
     {
         if (defaultWidth == 0)
         {
-            COSNumber number = (COSNumber) dict.getDictionaryObject(COSName.DW);
-            if (number != null)
+            COSNumber number = dict.getDictionaryObject(COSName.DW, COSNumber.class);
+            if (nonNull(number))
             {
                 defaultWidth = number.floatValue();
             }
