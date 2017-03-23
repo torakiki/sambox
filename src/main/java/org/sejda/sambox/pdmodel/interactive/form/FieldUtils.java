@@ -174,34 +174,24 @@ public final class FieldUtils
         }
         else if (items instanceof COSArray)
         {
-            // test if there is a single text or a two-element array
-            COSBase entry = ((COSArray) items).get(0);
-            if (entry instanceof COSString)
+            COSArray array = (COSArray) items;
+
+            List<String> result = new ArrayList<>();
+            int numItems = ((COSArray) items).size();
+            for (int i = 0; i < numItems; i++)
             {
-                return COSArrayList.convertCOSStringCOSArrayToList((COSArray) items);
+                COSBase item = array.get(i);
+                if(item instanceof COSArray)
+                {
+                    COSArray pair = (COSArray) array.get(i);
+                    COSString displayValue = (COSString) pair.get(pairIdx);
+                    result.add(displayValue.getString());
+                } else if(item instanceof COSString) {
+                    result.add(((COSString) item).getString());
+                }
             }
-            return getItemsFromPair(items, pairIdx);
+            return result;
         }
         return Collections.emptyList();
-    }
-
-    /**
-     * Return either one of a list of two-element arrays entries.
-     *
-     * @param items the array of elements or two-element arrays
-     * @param pairIdx the index into the two-element array
-     * @return a List of single elements
-     */
-    private static List<String> getItemsFromPair(COSBase items, int pairIdx)
-    {
-        List<String> exportValues = new ArrayList<>();
-        int numItems = ((COSArray) items).size();
-        for (int i = 0; i < numItems; i++)
-        {
-            COSArray pair = (COSArray) ((COSArray) items).get(i);
-            COSString displayValue = (COSString) pair.get(pairIdx);
-            exportValues.add(displayValue.getString());
-        }
-        return exportValues;
     }
 }
