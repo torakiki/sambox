@@ -84,7 +84,7 @@ class PDDefaultAppearanceString
 
         if (defaultResources == null)
         {
-            throw new IllegalArgumentException("/DR is a required entry");
+            defaultResources = new PDResources();
         }
 
         this.defaultResources = defaultResources;
