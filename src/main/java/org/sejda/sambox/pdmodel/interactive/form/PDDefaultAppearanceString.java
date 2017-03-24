@@ -79,7 +79,7 @@ class PDDefaultAppearanceString
     {
         if (defaultAppearance == null)
         {
-            throw new IllegalArgumentException("/DA is a required entry");
+            defaultAppearance = new COSString("/Helvetica 0 Tf 0 g".getBytes());
         }
 
         if (defaultResources == null)
