@@ -509,6 +509,9 @@ class AppearanceGeneratorHelper
 
         String combString = "";
 
+        contents.saveGraphicsState();
+        contents.setFont(font, fontSize);
+
         for (int i = 0; i < numChars; i++)
         {
             combString = value.substring(i, i + 1);
@@ -523,6 +526,8 @@ class AppearanceGeneratorHelper
             prevCharWidth = currCharWidth;
             xOffset = combWidth;
         }
+
+        contents.restoreGraphicsState();
     }
 
     private void insertGeneratedSelectionHighlight(PDPageContentStream contents,
