@@ -16,11 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -36,6 +31,8 @@ import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceDictionary;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceEntry;
+
+import static org.junit.Assert.*;
 
 /**
  * Test for the PDButton class.
@@ -432,6 +429,26 @@ public class PDButtonTest
         PDField radioButton = acrobatAcroForm.getField("RadioButtonGroup");
         // Set a value which doesn't match the radio button list
         radioButton.setValue("InvalidValue");
+    }
+
+    @Test
+    public void checkBoxWithoutAppearances() throws IOException
+    {
+        PDCheckBox checkBox = new PDCheckBox(acroForm);
+        assertNull(checkBox.getWidgets().get(0).getAppearance());
+        assertEquals(checkBox.getWidgets().size(), 1);
+        assertEquals(checkBox.getOnValue(), "Yes");
+
+        checkBox.check();
+
+        assertTrue(checkBox.isChecked());
+        assertEquals(checkBox.getWidgets().get(0).getCOSObject().getCOSName(COSName.AS), COSName.YES);
+
+        checkBox.unCheck();
+
+        assertFalse(checkBox.isChecked());
+
+        assertEquals(checkBox.getWidgets().get(0).getCOSObject().getCOSName(COSName.AS), COSName.Off);
     }
 
     @After

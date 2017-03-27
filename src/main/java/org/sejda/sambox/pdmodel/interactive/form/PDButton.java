@@ -355,8 +355,21 @@ public abstract class PDButton extends PDTerminalField
         // update the appearance state (AS)
         for (PDAnnotationWidget widget : getWidgets())
         {
-            PDAppearanceEntry appearanceEntry = widget.getAppearance().getNormalAppearance();
-            if (((COSDictionary) appearanceEntry.getCOSObject()).containsKey(value))
+            boolean matchesAppearance = false;
+            // don't crash when there's no appearances (eg: checkboxes)
+            if(widget.getAppearance() != null && widget.getAppearance().getNormalAppearance() != null)
+            {
+                matchesAppearance =((COSDictionary) widget.getAppearance().getNormalAppearance().getCOSObject())
+                        .containsKey(value);
+            }
+
+            // checkbox with no appearances scenario
+            if(!COSName.OFF.getName().equals(value) && widget.getAppearance() == null && getWidgets().size() == 1)
+            {
+                matchesAppearance = true;
+            }
+
+            if (matchesAppearance)
             {
                 widget.getCOSObject().setName(COSName.AS, value);
             }
@@ -365,6 +378,8 @@ public abstract class PDButton extends PDTerminalField
                 widget.getCOSObject().setItem(COSName.AS, COSName.Off);
             }
         }
+
+
     }
 
     private void updateByOption(String value) throws IOException

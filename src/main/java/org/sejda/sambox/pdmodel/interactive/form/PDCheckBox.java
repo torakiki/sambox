@@ -95,7 +95,7 @@ public final class PDCheckBox extends PDButton
      * value shall always be 'Off'. If not set or not part of the normal appearance keys 'Off' is the default
      * </p>
      *
-     * @return the value setting the check box to the On state. If an empty string is returned there is no appearance
+     * @return the value setting the check box to the On state
      * definition.
      */
     public String getOnValue()
@@ -108,7 +108,7 @@ public final class PDCheckBox extends PDButton
         PDAnnotationWidget widget = this.getWidgets().get(0);
         PDAppearanceDictionary apDictionary = widget.getAppearance();
 
-        String onValue = "";
+        String onValue = "Yes";
         if (apDictionary != null)
         {
             PDAppearanceEntry normalAppearance = apDictionary.getNormalAppearance();
