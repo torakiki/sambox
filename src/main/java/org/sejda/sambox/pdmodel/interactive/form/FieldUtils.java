@@ -23,7 +23,6 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSArrayList;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSString;
 
