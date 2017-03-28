@@ -19,6 +19,8 @@ package org.sejda.sambox.pdmodel.interactive.form;
 
 import java.util.Optional;
 
+import org.sejda.sambox.cos.COSArray;
+import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 
@@ -101,7 +103,24 @@ public final class PDFieldFactory
         // BJL: I have found that the radio flag bit is not always set
         // and that sometimes there is just a kids dictionary.
         // so, if there is a kids dictionary then it must be a radio button group.
-        if ((flags & PDButton.FLAG_RADIO) != 0)
+        boolean hasKids = false;
+        COSArray kids = field.getDictionaryObject(COSName.KIDS, COSArray.class);
+        if (kids == null)
+        {
+            COSBase parentDict = field.getDictionaryObject(COSName.PARENT);
+            if (parentDict instanceof COSDictionary)
+            {
+                kids = ((COSDictionary) parentDict)
+                        .getDictionaryObject(COSName.KIDS, COSArray.class);
+
+            }
+        }
+        if (kids != null && kids.size() > 1)
+        {
+            hasKids = true;
+        }
+
+        if ((flags & PDButton.FLAG_RADIO) != 0 || hasKids)
         {
             return new PDRadioButton(form, field, parent);
         }
