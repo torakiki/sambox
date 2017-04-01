@@ -61,6 +61,36 @@ public class COSFloatTest
     }
 
     @Test
+    public void emptyExponentialValue() throws IOException
+    {
+        assertEquals(4.72856f, COSFloat.get("4.72856e").floatValue(), 0);
+    }
+
+    @Test
+    public void emptyExponentialCapitalEValue() throws IOException
+    {
+        assertEquals(4.72856f, COSFloat.get("4.72856E").floatValue(), 0);
+    }
+
+    @Test(expected = IOException.class)
+    public void invalidExponential() throws IOException
+    {
+        new COSFloat("4.72856f");
+    }
+
+    @Test
+    public void exponentialValue() throws IOException
+    {
+        assertEquals(0.0000204f, COSFloat.get("2.04e-5").floatValue(), 0);
+    }
+
+    @Test
+    public void exponentialCapitalEValue() throws IOException
+    {
+        assertEquals(0.0000204f, COSFloat.get("2.04E-5").floatValue(), 0);
+    }
+
+    @Test
     public void negativeFloatValue() throws IOException
     {
         assertEquals(-2.04f, COSFloat.get("-2.04").floatValue(), 0);

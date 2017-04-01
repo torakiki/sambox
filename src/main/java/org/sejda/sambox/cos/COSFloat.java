@@ -57,6 +57,7 @@ public class COSFloat extends COSNumber
                         + aFloat.substring(dot + 1).replaceAll("\\.", "0");
 
             }
+            aFloat = aFloat.replaceAll("[e|E]$", "");
             value = new BigDecimal(aFloat);
             checkMinMaxValues();
         }
