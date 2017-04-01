@@ -111,10 +111,10 @@ public class PDButtonTest
 
     /**
      * PDFBOX-3656
-     * 
+     *
      * Test a radio button with options. This was causing an ArrayIndexOutOfBoundsException when trying to set to "Off",
      * as this wasn't treated to be a valid option.
-     * 
+     *
      * @throws IOException
      */
     @Test
@@ -140,10 +140,10 @@ public class PDButtonTest
 
     /**
      * PDFBOX-3682
-     * 
+     *
      * Test a radio button with options. Special handling for a radio button with /Opt and the On state not being named
      * after the index.
-     * 
+     *
      * @throws IOException
      */
     @Test
@@ -257,38 +257,43 @@ public class PDButtonTest
     @Test
     public void testAcrobatCheckBoxGroupProperties() throws IOException
     {
-        PDRadioButton radio = (PDRadioButton) acrobatAcroForm.getField("CheckboxGroup");
-        assertEquals(radio.getValue(), "");
+        PDCheckBox checkbox = (PDCheckBox) acrobatAcroForm.getField("CheckboxGroup");
+        assertEquals(checkbox.getValue(), "");
+        assertEquals(checkbox.isChecked(), false);
 
-        assertEquals(radio.getOnValues().size(), 3);
-        assertTrue(radio.getOnValues().contains("Option1"));
-        assertTrue(radio.getOnValues().contains("Option2"));
-        assertTrue(radio.getOnValues().contains("Option3"));
+        checkbox.check();
+        assertEquals(checkbox.getValue(), checkbox.getOnValue());
+        assertEquals(checkbox.isChecked(), true);
+
+        assertEquals(checkbox.getOnValues().size(), 3);
+        assertTrue(checkbox.getOnValues().contains("Option1"));
+        assertTrue(checkbox.getOnValues().contains("Option2"));
+        assertTrue(checkbox.getOnValues().contains("Option3"));
 
         // test a value which sets one of the individual checkboxes within the group
-        radio.setValue("Option1");
-        assertEquals("Option1", radio.getValue());
-        assertEquals("Option1", radio.getValueAsString());
+        checkbox.setValue("Option1");
+        assertEquals("Option1", checkbox.getValue());
+        assertEquals("Option1", checkbox.getValueAsString());
 
         // ensure that for the widgets representing the individual checkboxes
         // the AS entry has been set
-        assertEquals("Option1", radio.getWidgets().get(0).getAppearanceState().getName());
-        assertEquals("Off", radio.getWidgets().get(1).getAppearanceState().getName());
-        assertEquals("Off", radio.getWidgets().get(2).getAppearanceState().getName());
-        assertEquals("Off", radio.getWidgets().get(3).getAppearanceState().getName());
+        assertEquals("Option1", checkbox.getWidgets().get(0).getAppearanceState().getName());
+        assertEquals("Off", checkbox.getWidgets().get(1).getAppearanceState().getName());
+        assertEquals("Off", checkbox.getWidgets().get(2).getAppearanceState().getName());
+        assertEquals("Off", checkbox.getWidgets().get(3).getAppearanceState().getName());
 
         // test a value which sets two of the individual chekboxes within the group
         // as the have the same name entry for being checked
-        radio.setValue("Option3");
-        assertEquals("Option3", radio.getValue());
-        assertEquals("Option3", radio.getValueAsString());
+        checkbox.setValue("Option3");
+        assertEquals("Option3", checkbox.getValue());
+        assertEquals("Option3", checkbox.getValueAsString());
 
         // ensure that for both widgets representing the individual checkboxes
         // the AS entry has been set
-        assertEquals("Off", radio.getWidgets().get(0).getAppearanceState().getName());
-        assertEquals("Off", radio.getWidgets().get(1).getAppearanceState().getName());
-        assertEquals("Option3", radio.getWidgets().get(2).getAppearanceState().getName());
-        assertEquals("Option3", radio.getWidgets().get(3).getAppearanceState().getName());
+        assertEquals("Off", checkbox.getWidgets().get(0).getAppearanceState().getName());
+        assertEquals("Off", checkbox.getWidgets().get(1).getAppearanceState().getName());
+        assertEquals("Option3", checkbox.getWidgets().get(2).getAppearanceState().getName());
+        assertEquals("Option3", checkbox.getWidgets().get(3).getAppearanceState().getName());
     }
 
     @Test
@@ -331,9 +336,9 @@ public class PDButtonTest
     @Test(expected = IllegalArgumentException.class)
     public void setCheckboxGroupInvalidValue() throws IOException
     {
-        PDRadioButton radioButton = (PDRadioButton) acrobatAcroForm.getField("CheckboxGroup");
+        PDCheckBox checkbox = (PDCheckBox) acrobatAcroForm.getField("CheckboxGroup");
         // Set a value which doesn't match the radio button list
-        radioButton.setValue("InvalidValue");
+        checkbox.setValue("InvalidValue");
     }
 
     @Test(expected = IllegalArgumentException.class)
