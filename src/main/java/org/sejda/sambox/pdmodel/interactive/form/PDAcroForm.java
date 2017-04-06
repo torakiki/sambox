@@ -85,7 +85,7 @@ public final class PDAcroForm extends PDDictionaryWrapper
      *
      * @return The PDF document.
      */
-    PDDocument getDocument()
+    public PDDocument getDocument()
     {
         return document;
     }
