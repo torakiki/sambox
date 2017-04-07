@@ -19,8 +19,6 @@ package org.sejda.sambox.pdmodel.interactive.form;
 
 import java.util.Optional;
 
-import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 

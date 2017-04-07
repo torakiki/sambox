@@ -40,7 +40,7 @@ class IndirectObjectsWriter implements Closeable
     private static final byte[] OBJ = "obj".getBytes(StandardCharsets.US_ASCII);
     private static final byte[] ENDOBJ = "endobj".getBytes(StandardCharsets.US_ASCII);
 
-    private static final Logger LOG = LoggerFactory.getLogger(DefaultPDFWriter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(IndirectObjectsWriter.class);
 
     private COSWriter writer;
     private PDFWriteContext context;
