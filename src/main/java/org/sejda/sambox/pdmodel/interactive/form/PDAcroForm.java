@@ -378,6 +378,11 @@ public final class PDAcroForm extends PDDictionaryWrapper
      */
     public PDField getField(String fullyQualifiedName)
     {
+        if(fullyQualifiedName == null)
+        {
+            return null;
+        }
+
         return getFieldTree().stream()
                 .filter(f -> f != null && fullyQualifiedName.equals(f.getFullyQualifiedName()))
                 .findFirst().orElse(null);
