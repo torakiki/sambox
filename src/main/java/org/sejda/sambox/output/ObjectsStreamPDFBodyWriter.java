@@ -31,7 +31,6 @@ import org.sejda.io.CountingWritableByteChannel;
 import org.sejda.io.FastByteArrayOutputStream;
 import org.sejda.sambox.SAMBox;
 import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.cos.DisposableCOSObject;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
@@ -96,7 +95,7 @@ class ObjectsStreamPDFBodyWriter extends AbstractPDFBodyWriter
         LOG.debug("Writing object stream {}", ref);
         currentStream.prepareForWriting();
         IndirectCOSObjectReference length = context()
-                .createNonStorableInObjectStreamIndirectReferenceFor(COSNull.NULL);
+                .createNonStorableInObjectStreamIndirectReference();
         currentStream.setItem(COSName.LENGTH, length);
         wrapped.writeObject(ref);
         LOG.trace("Writing object stream length {}", length);

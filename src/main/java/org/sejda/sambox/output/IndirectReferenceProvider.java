@@ -34,15 +34,16 @@ class IndirectReferenceProvider
 
     IndirectCOSObjectReference nextReferenceFor(COSBase baseObject)
     {
-        IndirectCOSObjectReference ref = new IndirectCOSObjectReference(
-                referencesCounter.incrementAndGet(), 0, baseObject);
-        return ref;
+        return new IndirectCOSObjectReference(referencesCounter.incrementAndGet(), 0, baseObject);
     }
 
     IndirectCOSObjectReference nextNonStorableInObjectStreamsReferenceFor(COSBase baseObject)
     {
-        NonStorableInObjectStreams ref = new NonStorableInObjectStreams(
-                referencesCounter.incrementAndGet(), 0, baseObject);
-        return ref;
+        return new NonStorableInObjectStreams(referencesCounter.incrementAndGet(), 0, baseObject);
+    }
+
+    IndirectCOSObjectReference nextNonStorableInObjectStreamsReference()
+    {
+        return new NonStorableInObjectStreams(referencesCounter.incrementAndGet(), 0, null);
     }
 }

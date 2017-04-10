@@ -29,6 +29,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.function.Function;
 
 import org.sejda.sambox.cos.COSBase;
+import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.COSObjectKey;
 import org.sejda.sambox.cos.IndirectCOSObjectIdentifier;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
@@ -65,7 +66,9 @@ class PDFWriteContext
     }
 
     /**
-     * Creates a new {@link IndirectCOSObjectReference} for the given item
+     * Creates a new {@link IndirectCOSObjectReference} for the given item. We store the association between the item id
+     * and the reference so that if we meet the same id later, we can retrieve the reference that was previously
+     * written.
      * 
      * @param item
      * @return the created reference
@@ -77,7 +80,9 @@ class PDFWriteContext
     }
 
     /**
-     * Creates a new {@link NonStorableInObjectStreams} for the given item
+     * Creates a new {@link NonStorableInObjectStreams} for the given item. We store the association between the item id
+     * and the reference so that if we meet the same id later, we can retrieve the reference that was previously
+     * written.
      * 
      * @param item
      * @return the created reference
@@ -86,6 +91,16 @@ class PDFWriteContext
     {
         return createNewReference(item,
                 referencesProvider::nextNonStorableInObjectStreamsReferenceFor);
+    }
+
+    /**
+     * Creates an empty {@link NonStorableInObjectStreams}
+     * 
+     * @return the created reference
+     */
+    IndirectCOSObjectReference createNonStorableInObjectStreamIndirectReference()
+    {
+        return referencesProvider.nextNonStorableInObjectStreamsReference();
     }
 
     private IndirectCOSObjectReference createNewReference(COSBase item,
@@ -101,6 +116,11 @@ class PDFWriteContext
             lookupNewRef.put(existingItem.id(), newRef);
             return newRef;
 
+        }
+        if (item instanceof COSNull)
+        {
+            // we don't associate any id or store any lookup for COSNull
+            return supplier.apply(item);
         }
         // it's a new COSBase
         IndirectCOSObjectReference newRef = supplier.apply(item);

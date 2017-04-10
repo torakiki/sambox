@@ -168,7 +168,7 @@ abstract class AbstractPDFBodyWriter implements COSVisitor, Closeable
         if (value.indirectLength())
         {
             IndirectCOSObjectReference length = context
-                    .createNonStorableInObjectStreamIndirectReferenceFor(COSNull.NULL);
+                    .createNonStorableInObjectStreamIndirectReference();
             value.setItem(COSName.LENGTH, length);
             stack.add(length);
         }

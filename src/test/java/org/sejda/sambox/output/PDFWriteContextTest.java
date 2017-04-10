@@ -19,6 +19,7 @@ package org.sejda.sambox.output;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -28,6 +29,7 @@ import static org.mockito.Mockito.when;
 import org.junit.Before;
 import org.junit.Test;
 import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.COSObjectKey;
 import org.sejda.sambox.cos.IndirectCOSObjectIdentifier;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
@@ -86,8 +88,24 @@ public class PDFWriteContextTest
     public void getIndirectReferenceFor()
     {
         COSDictionary dic = new COSDictionary();
+        assertNull(dic.id());
         IndirectCOSObjectReference ref = context.getOrCreateIndirectReferenceFor(dic);
         assertEquals(ref, context.getIndirectReferenceFor(dic));
+        assertNotNull(dic.id());
+    }
+
+    @Test
+    public void getIndirectReferenceForNull()
+    {
+        assertNull(COSNull.NULL.id());
+        context.getOrCreateIndirectReferenceFor(COSNull.NULL);
+        assertNull(COSNull.NULL.id());
+    }
+
+    @Test
+    public void createNonStorableInObjectStreamIndirectReference()
+    {
+        assertNotNull(context.createNonStorableInObjectStreamIndirectReference());
     }
 
     @Test
