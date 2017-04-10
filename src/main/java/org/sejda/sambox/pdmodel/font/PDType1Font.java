@@ -409,41 +409,33 @@ public class PDType1Font extends PDSimpleFont
             // this is important on systems with no installed fonts
             if (!encoding.contains(name))
             {
-                throw new UnsupportedCharacterException(
+                throw new IllegalArgumentException(
                         String.format("U+%04X ('%s') is not available in this font %s encoding: %s",
-                                unicode, name, getName(), encoding.getEncodingName()),
-                        unicode
-                );
+                                unicode, name, getName(), encoding.getEncodingName()));
             }
             if (".notdef".equals(name))
             {
-                throw new UnsupportedCharacterException(
-                        String.format("No glyph for U+%04X in font %s", unicode, getName()),
-                        unicode
-                );
+                throw new IllegalArgumentException(
+                        String.format("No glyph for U+%04X in font %s", unicode, getName()));
             }
         }
         else
         {
             if (!encoding.contains(name))
             {
-                throw new UnsupportedCharacterException(String.format(
+                throw new IllegalArgumentException(String.format(
                         "U+%04X ('%s') is not available in this font %s (generic: %s) encoding: %s",
                         unicode, name, getName(), genericFont.getName(),
-                        encoding.getEncodingName()),
-                        unicode
-                );
+                        encoding.getEncodingName()));
             }
 
             String nameInFont = getNameInFont(name);
 
             if (nameInFont.equals(".notdef") || !genericFont.hasGlyph(nameInFont))
             {
-                throw new UnsupportedCharacterException(
+                throw new IllegalArgumentException(
                         String.format("No glyph for U+%04X in font %s (generic: %s)", unicode,
-                                getName(), genericFont.getName()),
-                        unicode
-                );
+                                getName(), genericFont.getName()));
             }
         }
 
