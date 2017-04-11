@@ -37,7 +37,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Provides public entry point to parse a {@link SeekableSource} and obtain a {@link PDDocument}.
+ * Provides public entry point to parse a {@link SeekableSource} and obtain a {@link PDDocument} or
+ * {@link IncrementablePDDocument}.
  * 
  * @author Andrea Vacondio
  */
@@ -58,6 +59,18 @@ public class PDFParser
     }
 
     /**
+     * Parses the given {@link SeekableSource} returning the corresponding {@link IncrementablePDDocument}.
+     * 
+     * @param source
+     * @return the incrementable document
+     * @throws IOException
+     */
+    public static IncrementablePDDocument parseToIncrement(SeekableSource source) throws IOException
+    {
+        return parseToIncrement(source, (String) null);
+    }
+
+    /**
      * Parses the given {@link SeekableSource} using the given password, returning the corresponding decrypted
      * {@link PDDocument}.
      * 
@@ -73,8 +86,24 @@ public class PDFParser
     }
 
     /**
-     * Parses the given {@link SeekableSource} using the given {@link DecryptionMaterial} and returning the
-     * corresponding decrypted {@link PDDocument}.
+     * Parses the given {@link SeekableSource} using the given password, , returning the corresponding decrypted
+     * {@link IncrementablePDDocument} to be used for an incremental update.
+     * 
+     * @param source {@link SeekableSource} to parse
+     * @param password to be used for decryption. Optional.
+     * @return the incrementable document
+     * @throws IOException
+     */
+    public static IncrementablePDDocument parseToIncrement(SeekableSource source, String password)
+            throws IOException
+    {
+        return parseToIncrement(source,
+                Optional.ofNullable(password).map(StandardDecryptionMaterial::new).orElse(null));
+    }
+
+    /**
+     * Parses the given {@link SeekableSource} using the given {@link DecryptionMaterial}, returning the corresponding
+     * decrypted {@link PDDocument}.
      * 
      * @param source {@link SeekableSource} to parse
      * @param decryptionMaterial to be used for decryption. Optional.
@@ -92,6 +121,23 @@ public class PDFParser
             IOUtils.close(parser);
         });
         return document;
+    }
+
+    /**
+     * Parses the given {@link SeekableSource} using the given {@link DecryptionMaterial}, returning the corresponding
+     * decrypted {@link IncrementablePDDocument} to be used for an incremental update.
+     * 
+     * @param source {@link SeekableSource} to parse
+     * @param decryptionMaterial to be used for decryption. Optional.
+     * @return the incrementable document
+     * @throws IOException
+     */
+    public static IncrementablePDDocument parseToIncrement(SeekableSource source,
+            DecryptionMaterial decryptionMaterial) throws IOException
+    {
+        requireNonNull(source);
+        COSParser parser = new COSParser(source);
+        return new IncrementablePDDocument(doParse(decryptionMaterial, parser), parser);
     }
 
     private static PDDocument doParse(DecryptionMaterial decryptionMaterial, COSParser parser)

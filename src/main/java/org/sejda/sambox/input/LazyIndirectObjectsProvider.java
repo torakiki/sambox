@@ -102,6 +102,12 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
     }
 
     @Override
+    public COSObjectKey highestKey()
+    {
+        return xref.highestKey();
+    }
+
+    @Override
     public LazyIndirectObjectsProvider initializeWith(COSParser parser)
     {
         requireNonNull(parser);
@@ -308,4 +314,5 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
     {
         return parser.source().id();
     }
+
 }

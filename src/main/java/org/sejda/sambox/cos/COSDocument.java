@@ -54,7 +54,7 @@ public class COSDocument extends COSBase
         this.headerVersion = headerVersion;
         ofNullable(
                 this.trailer.getCOSObject().getDictionaryObject(COSName.ROOT, COSDictionary.class))
-                .ifPresent(d -> d.setItem(COSName.TYPE, COSName.CATALOG));
+                        .ifPresent(d -> d.setItem(COSName.TYPE, COSName.CATALOG));
     }
 
     /**
@@ -122,8 +122,9 @@ public class COSDocument extends COSBase
      */
     public COSDictionary getCatalog()
     {
-        return Optional.ofNullable(
-                trailer.getCOSObject().getDictionaryObject(COSName.ROOT, COSDictionary.class))
+        return Optional
+                .ofNullable(trailer.getCOSObject().getDictionaryObject(COSName.ROOT,
+                        COSDictionary.class))
                 .orElseThrow(() -> new IllegalStateException("Catalog cannot be found"));
     }
 

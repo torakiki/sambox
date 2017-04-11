@@ -19,6 +19,7 @@ package org.sejda.sambox.xref;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.TreeSet;
 
 import org.sejda.sambox.cos.COSObjectKey;
 
@@ -68,11 +69,19 @@ public class Xref
     }
 
     /**
-     * @return and unmodifiable view of the entries in this xref
+     * @return an unmodifiable view of the entries in this xref
      */
     public Collection<XrefEntry> values()
     {
         return Collections.unmodifiableCollection(data.values());
+    }
+
+    /**
+     * @return the highest key in this xref
+     */
+    public COSObjectKey highestKey()
+    {
+        return new TreeSet<>(data.keySet()).last();
     }
 
     /**
@@ -83,4 +92,5 @@ public class Xref
     {
         return data.containsKey(objectKey);
     }
+
 }

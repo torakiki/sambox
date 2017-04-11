@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.sejda.sambox.pdmodel;
+package org.sejda.sambox.input;
 
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
@@ -30,6 +30,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.COSObjectable;
 import org.sejda.sambox.cos.IndirectCOSObjectIdentifier;
+import org.sejda.sambox.pdmodel.PDDocument;
+import org.sejda.util.IOUtils;
 
 /**
  * @author Andrea Vacondio
@@ -42,13 +44,13 @@ public class IncrementablePDDocument implements Closeable
     private Set<COSObjectable> newObjects = new HashSet<>();
 
     private PDDocument incremented;
-    public final long highestExistingObjNumber;
+    public final COSParser parser;
 
-    public IncrementablePDDocument(PDDocument incremented, long highestExistingObjNumber)
+    IncrementablePDDocument(PDDocument incremented, COSParser parser)
     {
         requireNotNullArg(incremented, "Incremented document cannot be null");
         this.incremented = incremented;
-        this.highestExistingObjNumber = highestExistingObjNumber;
+        this.parser = parser;
     }
 
     public PDDocument incremented()
@@ -85,6 +87,8 @@ public class IncrementablePDDocument implements Closeable
     public void close() throws IOException
     {
         incremented.close();
+        IOUtils.close(parser.provider());
+        IOUtils.close(parser);
     }
 
 }

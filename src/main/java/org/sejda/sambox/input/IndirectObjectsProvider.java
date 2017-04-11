@@ -27,8 +27,8 @@ import org.sejda.sambox.xref.XrefEntry;
 /**
  * Component providing {@link COSBase} objects for given keys. It's used when an indirect reference is asked to resolve
  * to the actual COS object. This component is populated during the xref parsing process by adding {@link XrefEntry}s
- * found in the xref table/stream, it's then initialized with {@link COSParser} to use to parse and retrieve
- * requested objects and the {@link SecurityHandler} required (if any) to decrypt streams and string.
+ * found in the xref table/stream, it's then initialized with {@link COSParser} to use to parse and retrieve requested
+ * objects and the {@link SecurityHandler} required (if any) to decrypt streams and string.
  * 
  * @author Andrea Vacondio
  *
@@ -40,14 +40,14 @@ interface IndirectObjectsProvider extends Closeable
      * @param key
      * @return the {@link COSBase} corresponding to the given key.
      */
-    public COSBase get(COSObjectKey key);
+    COSBase get(COSObjectKey key);
 
     /**
      * Signals that the object corresponding to the given key is no longer needed and can be released
      * 
      * @param key
      */
-    public void release(COSObjectKey key);
+    void release(COSObjectKey key);
 
     /**
      * Adds the given xref entry to the {@link Xref} if absent
@@ -57,7 +57,7 @@ interface IndirectObjectsProvider extends Closeable
      * was already present.
      * @see Xref#addIfAbsent(XrefEntry)
      */
-    public XrefEntry addEntryIfAbsent(XrefEntry entry);
+    XrefEntry addEntryIfAbsent(XrefEntry entry);
 
     /**
      * Adds the given xref entry to the {@link Xref}
@@ -67,7 +67,7 @@ interface IndirectObjectsProvider extends Closeable
      * generation.
      * @see Xref#add(XrefEntry)
      */
-    public XrefEntry addEntry(XrefEntry entry);
+    XrefEntry addEntry(XrefEntry entry);
 
     /**
      * Initialize the component with the {@link COSParser} to use to retrieve and parse requested object
@@ -75,7 +75,7 @@ interface IndirectObjectsProvider extends Closeable
      * @param parser
      * @return this provider
      */
-    public IndirectObjectsProvider initializeWith(COSParser parser);
+    IndirectObjectsProvider initializeWith(COSParser parser);
 
     /**
      * Initialize the component with the {@link SecurityHandler} to decrypt streams and strings.
@@ -83,7 +83,12 @@ interface IndirectObjectsProvider extends Closeable
      * @param handler
      * @return this provider
      */
-    public IndirectObjectsProvider initializeWith(SecurityHandler handler);
+    IndirectObjectsProvider initializeWith(SecurityHandler handler);
+
+    /**
+     * @return the highest key (object number + generation number) for this provider.
+     */
+    COSObjectKey highestKey();
 
     /**
      * @return the unique id for the provider.
