@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.Optional;
 
 import org.sejda.sambox.util.SpecVersionUtils;
+import org.sejda.sambox.xref.FileTrailer;
 
 /**
  * This is the in-memory representation of the PDF document.
@@ -35,28 +36,24 @@ public class COSDocument extends COSBase
 {
 
     private String headerVersion;
-    private COSDictionary trailer;
+    private FileTrailer trailer;
 
     public COSDocument()
     {
-        this(new COSDictionary(), SpecVersionUtils.V1_4);
+        this(new FileTrailer(), SpecVersionUtils.V1_4);
         COSDictionary catalog = new COSDictionary();
         catalog.setItem(COSName.TYPE, COSName.CATALOG);
-        trailer.setItem(COSName.ROOT, catalog);
+        trailer.getCOSObject().setItem(COSName.ROOT, catalog);
     }
 
-    public COSDocument(COSDictionary trailer)
-    {
-        this(trailer, SpecVersionUtils.V1_4);
-    }
-
-    public COSDocument(COSDictionary trailer, String headerVersion)
+    public COSDocument(FileTrailer trailer, String headerVersion)
     {
         requireNotNullArg(trailer, "Trailer cannot be null");
         requireNotBlank(headerVersion, "Header version cannot be blank");
         this.trailer = trailer;
         this.headerVersion = headerVersion;
-        ofNullable(this.trailer.getDictionaryObject(COSName.ROOT, COSDictionary.class))
+        ofNullable(
+                this.trailer.getCOSObject().getDictionaryObject(COSName.ROOT, COSDictionary.class))
                 .ifPresent(d -> d.setItem(COSName.TYPE, COSName.CATALOG));
     }
 
@@ -86,7 +83,7 @@ public class COSDocument extends COSBase
      */
     public boolean isEncrypted()
     {
-        return trailer.getDictionaryObject(COSName.ENCRYPT) != null;
+        return trailer.getCOSObject().getDictionaryObject(COSName.ENCRYPT) != null;
     }
 
     /**
@@ -96,7 +93,7 @@ public class COSDocument extends COSBase
      */
     public COSDictionary getEncryptionDictionary()
     {
-        return trailer.getDictionaryObject(COSName.ENCRYPT, COSDictionary.class);
+        return trailer.getCOSObject().getDictionaryObject(COSName.ENCRYPT, COSDictionary.class);
     }
 
     /**
@@ -106,17 +103,17 @@ public class COSDocument extends COSBase
      */
     public void setEncryptionDictionary(COSDictionary dictionary)
     {
-        trailer.setItem(COSName.ENCRYPT, dictionary);
+        trailer.getCOSObject().setItem(COSName.ENCRYPT, dictionary);
     }
 
     public COSArray getDocumentID()
     {
-        return trailer.getDictionaryObject(COSName.ID, COSArray.class);
+        return trailer.getCOSObject().getDictionaryObject(COSName.ID, COSArray.class);
     }
 
     public void setDocumentID(COSArray id)
     {
-        trailer.setItem(COSName.ID, id);
+        trailer.getCOSObject().setItem(COSName.ID, id);
     }
 
     /**
@@ -125,13 +122,14 @@ public class COSDocument extends COSBase
      */
     public COSDictionary getCatalog()
     {
-        return Optional.ofNullable(trailer.getDictionaryObject(COSName.ROOT, COSDictionary.class))
+        return Optional.ofNullable(
+                trailer.getCOSObject().getDictionaryObject(COSName.ROOT, COSDictionary.class))
                 .orElseThrow(() -> new IllegalStateException("Catalog cannot be found"));
     }
 
     public COSDictionary getTrailer()
     {
-        return trailer;
+        return trailer.getCOSObject();
     }
 
     @Override

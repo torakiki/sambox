@@ -54,12 +54,13 @@ public class XrefFullScannerTest
                 getClass().getResourceAsStream("/sambox/test_multiple_xref_tables.pdf")));
         victim = new XrefFullScanner(parser);
         assertEquals(XrefScanOutcome.FOUND, victim.scan());
-        assertEquals(408, victim.trailer().getInt(COSName.PREV));
-        assertEquals(8, victim.trailer().getInt(COSName.SIZE));
-        assertNotNull(victim.trailer().getDictionaryObject(COSName.ROOT));
+        assertEquals(408, victim.trailer().getCOSObject().getInt(COSName.PREV));
+        assertEquals(8, victim.trailer().getCOSObject().getInt(COSName.SIZE));
+        assertNotNull(victim.trailer().getCOSObject().getDictionaryObject(COSName.ROOT));
         COSDictionary overriddenObj = (COSDictionary) parser.provider().get(new COSObjectKey(3, 0))
                 .getCOSObject();
         assertNotNull(overriddenObj.getDictionaryObject(COSName.ANNOTS));
+        assertEquals(839, victim.trailer().xrefOffset());
     }
 
     @Test
@@ -69,12 +70,13 @@ public class XrefFullScannerTest
                 getClass().getResourceAsStream("/sambox/test_xref_stream_and_table.pdf")));
         victim = new XrefFullScanner(parser);
         victim.scan();
-        assertEquals(562, victim.trailer().getInt(COSName.PREV));
-        assertEquals(9, victim.trailer().getInt(COSName.SIZE));
-        assertNotNull(victim.trailer().getDictionaryObject(COSName.ROOT));
+        assertEquals(562, victim.trailer().getCOSObject().getInt(COSName.PREV));
+        assertEquals(9, victim.trailer().getCOSObject().getInt(COSName.SIZE));
+        assertNotNull(victim.trailer().getCOSObject().getDictionaryObject(COSName.ROOT));
         COSDictionary overriddenObj = (COSDictionary) parser.provider().get(new COSObjectKey(3, 0))
                 .getCOSObject();
         assertNull(overriddenObj.getDictionaryObject(COSName.ANNOTS));
+        assertEquals(919, victim.trailer().xrefOffset());
     }
 
     @Test
@@ -85,7 +87,8 @@ public class XrefFullScannerTest
         victim = new XrefFullScanner(parser);
         victim.scan();
         assertEquals(XrefScanOutcome.WITH_ERRORS, victim.scan());
-        assertNotNull(victim.trailer().getDictionaryObject(COSName.ROOT));
+        assertNotNull(victim.trailer().getCOSObject().getDictionaryObject(COSName.ROOT));
+        assertEquals(562, victim.trailer().xrefOffset());
     }
 
     @Test
@@ -95,6 +98,7 @@ public class XrefFullScannerTest
                 getClass().getResourceAsStream("/sambox/test_xref_missing_xref.pdf")));
         victim = new XrefFullScanner(parser);
         assertEquals(XrefScanOutcome.NOT_FOUND, victim.scan());
+        assertEquals(-1, victim.trailer().xrefOffset());
     }
 
     @Test
@@ -104,6 +108,7 @@ public class XrefFullScannerTest
                 getClass().getResourceAsStream("/sambox/test_xref_missing_trailer.pdf")));
         victim = new XrefFullScanner(parser);
         assertEquals(XrefScanOutcome.NOT_FOUND, victim.scan());
+        assertEquals(-1, victim.trailer().xrefOffset());
     }
 
     @Test
@@ -113,6 +118,7 @@ public class XrefFullScannerTest
                 getClass().getResourceAsStream("/sambox/test_trunkated_xref_table.pdf")));
         victim = new XrefFullScanner(parser);
         assertEquals(XrefScanOutcome.WITH_ERRORS, victim.scan());
+        assertEquals(919, victim.trailer().xrefOffset());
     }
 
     @Test
@@ -122,6 +128,7 @@ public class XrefFullScannerTest
                 .getResourceAsStream("/sambox/test_multiple_xref_tables_negative_offset.pdf")));
         victim = new XrefFullScanner(parser);
         assertEquals(XrefScanOutcome.WITH_ERRORS, victim.scan());
+        assertEquals(839, victim.trailer().xrefOffset());
     }
 
 }

@@ -25,6 +25,7 @@ import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSStream;
+import org.sejda.sambox.xref.FileTrailer;
 import org.sejda.sambox.xref.XrefEntry;
 import org.sejda.sambox.xref.XrefType;
 import org.slf4j.Logger;
@@ -40,7 +41,7 @@ class XrefFullScanner
 {
     private static final Logger LOG = LoggerFactory.getLogger(XrefFullScanner.class);
 
-    private COSDictionary trailer = new COSDictionary();
+    private FileTrailer trailer = new FileTrailer();
     private AbstractXrefStreamParser xrefStreamParser;
     private AbstractXrefTableParser xrefTableParser;
     private COSParser parser;
@@ -55,7 +56,7 @@ class XrefFullScanner
             @Override
             void onTrailerFound(COSDictionary found)
             {
-                trailer.merge(found);
+                trailer.getCOSObject().merge(found);
             }
 
             @Override
@@ -70,7 +71,7 @@ class XrefFullScanner
             @Override
             void onTrailerFound(COSDictionary found)
             {
-                trailer.merge(found);
+                trailer.getCOSObject().merge(found);
             }
 
             @Override
@@ -138,10 +139,11 @@ class XrefFullScanner
     private void parseFoundXrefTable(long offset) throws IOException
     {
         LOG.debug("Found xref table at " + offset);
+        trailer.xrefOffset(offset);
         xrefTableParser.parse(offset);
     }
 
-    COSDictionary trailer()
+    FileTrailer trailer()
     {
         return trailer;
     }
@@ -156,6 +158,7 @@ class XrefFullScanner
                 && COSName.XREF.equals(((COSDictionary) found).getItem(COSName.TYPE)))
         {
             LOG.debug("Found xref stream at " + offset);
+            trailer.xrefOffset(offset);
             parseFoundXrefStream((COSDictionary) found);
         }
     }

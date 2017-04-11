@@ -30,6 +30,7 @@ import java.util.Set;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.input.XrefFullScanner.XrefScanOutcome;
+import org.sejda.sambox.xref.FileTrailer;
 import org.sejda.sambox.xref.XrefEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +53,7 @@ class XrefParser
     private static final int DEFAULT_TRAIL_BYTECOUNT = 2048;
     private static final String STARTXREF = "startxref";
 
-    private COSDictionary trailer = new COSDictionary();
+    private FileTrailer trailer = new FileTrailer();
     private AbstractXrefStreamParser xrefStreamParser;
     private AbstractXrefTableParser xrefTableParser;
     private COSParser parser;
@@ -65,7 +66,7 @@ class XrefParser
             @Override
             void onTrailerFound(COSDictionary found)
             {
-                trailer.mergeWithoutOverwriting(found);
+                trailer.getCOSObject().mergeWithoutOverwriting(found);
             }
 
             @Override
@@ -80,7 +81,7 @@ class XrefParser
             @Override
             void onTrailerFound(COSDictionary found)
             {
-                trailer.mergeWithoutOverwriting(found);
+                trailer.getCOSObject().mergeWithoutOverwriting(found);
             }
 
             @Override
@@ -106,7 +107,7 @@ class XrefParser
             if (xrefScanStatus != XrefScanOutcome.NOT_FOUND)
             {
                 // something was found so we keep the trailer
-                this.trailer = fallbackFullScanner.trailer();
+                trailer = fallbackFullScanner.trailer();
             }
             if (xrefScanStatus != XrefScanOutcome.FOUND)
             {
@@ -129,7 +130,7 @@ class XrefParser
                                 parser.position(offset);
                                 parser.skipExpected(TRAILER);
                                 parser.skipSpaces();
-                                trailer.merge(parser.nextDictionary());
+                                trailer.getCOSObject().merge(parser.nextDictionary());
                                 parser.skipSpaces();
                             }
                             else if (line.contains(COSName.CATALOG.getName()))
@@ -146,7 +147,8 @@ class XrefParser
                                     if (COSName.CATALOG
                                             .equals(possibleCatalog.getCOSName(COSName.TYPE)))
                                     {
-                                        trailer.putIfAbsent(COSName.ROOT, possibleCatalog);
+                                        trailer.getCOSObject().putIfAbsent(COSName.ROOT,
+                                                possibleCatalog);
                                     }
                                     parser.skipSpaces();
                                 }
@@ -155,6 +157,11 @@ class XrefParser
                                     LOG.warn("Unable to parse potential Catalog", e);
                                     parser.position(position);
                                 }
+                            }
+                            else if (line.startsWith(XREF))
+                            {
+                                LOG.debug("Found xref at " + offset);
+                                trailer.xrefOffset(offset);
                             }
                         }
                     }
@@ -165,7 +172,7 @@ class XrefParser
                         lastObjectOffset = offset;
                     }
                 };
-                // and we consider it scan more reliable compared to what was found in the somehow broken xrefs
+                // and we consider it more reliable compared to what was found in the somehow broken xrefs
                 objectsFullScanner.entries().values().stream().forEach(parser.provider()::addEntry);
             }
         }
@@ -226,19 +233,20 @@ class XrefParser
                 "Offset '" + xrefOffset + "' doesn't point to an xref table or stream");
 
         Set<Long> parsedOffsets = new HashSet<>();
-        while (xrefOffset > -1)
+        long currentOffset = xrefOffset;
+        while (currentOffset > -1)
         {
-            requireIOCondition(!parsedOffsets.contains(xrefOffset), "/Prev loop detected");
-            requireIOCondition(isValidXrefOffset(xrefOffset),
-                    "Offset '" + xrefOffset + "' doesn't point to an xref table or stream");
+            requireIOCondition(!parsedOffsets.contains(currentOffset), "/Prev loop detected");
+            requireIOCondition(isValidXrefOffset(currentOffset),
+                    "Offset '" + currentOffset + "' doesn't point to an xref table or stream");
 
-            parser.position(xrefOffset);
+            parser.position(currentOffset);
             parser.skipSpaces();
 
             if (parser.isNextToken(XREF))
             {
-                COSDictionary trailer = xrefTableParser.parse(xrefOffset);
-                parsedOffsets.add(xrefOffset);
+                COSDictionary trailer = xrefTableParser.parse(currentOffset);
+                parsedOffsets.add(currentOffset);
                 long streamOffset = trailer.getLong(COSName.XREF_STM);
                 if (streamOffset > 0)
                 {
@@ -246,15 +254,16 @@ class XrefParser
                             "Offset '" + streamOffset + "' doesn't point to an xref stream");
                     xrefStreamParser.parse(streamOffset);
                 }
-                xrefOffset = trailer.getLong(COSName.PREV);
+                currentOffset = trailer.getLong(COSName.PREV);
             }
             else
             {
-                COSDictionary streamDictionary = xrefStreamParser.parse(xrefOffset);
-                parsedOffsets.add(xrefOffset);
-                xrefOffset = streamDictionary.getLong(COSName.PREV);
+                COSDictionary streamDictionary = xrefStreamParser.parse(currentOffset);
+                parsedOffsets.add(currentOffset);
+                currentOffset = streamDictionary.getLong(COSName.PREV);
             }
         }
+        trailer.xrefOffset(xrefOffset);
         return true;
     }
 
@@ -295,7 +304,7 @@ class XrefParser
         }
     }
 
-    public COSDictionary trailer()
+    public FileTrailer trailer()
     {
         return this.trailer;
     }
