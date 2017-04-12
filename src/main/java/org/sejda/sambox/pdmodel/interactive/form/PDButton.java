@@ -295,15 +295,17 @@ public abstract class PDButton extends PDTerminalField
      */
     public List<String> getOnValuesList()
     {
-        // we need a set as the field can appear multiple times
-        List<String> onValues = new ArrayList<>();
-
-        if (getExportValues().size() > 0)
+        List<String> exportValues = getExportValues();
+        if (exportValues.size() > 0)
         {
-            onValues.addAll(getExportValues());
-            return onValues;
+            return exportValues;
         }
 
+        return getNormalAppearanceValues();
+    }
+
+    public List<String> getNormalAppearanceValues() {
+        List<String> values = new ArrayList<>();
         List<PDAnnotationWidget> widgets = this.getWidgets();
         for (PDAnnotationWidget widget : widgets)
         {
@@ -318,13 +320,13 @@ public abstract class PDButton extends PDTerminalField
                     {
                         if (COSName.Off.compareTo(entry) != 0)
                         {
-                            onValues.add(entry.getName());
+                            values.add(entry.getName());
                         }
                     }
                 }
             }
         }
-        return onValues;
+        return values;
     }
 
     /**
@@ -407,8 +409,8 @@ public abstract class PDButton extends PDTerminalField
             // see PDFBOX-3682
             if (optionsIndex != -1)
             {
-                String[] onValues = getOnValues().toArray(new String[getOnValues().size()]);
-                updateByValue(onValues[optionsIndex]);
+                List<String> appearanceValues = getNormalAppearanceValues();
+                updateByValue(appearanceValues.get(optionsIndex));
             }
         }
     }

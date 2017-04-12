@@ -138,6 +138,57 @@ public class PDButtonTest
 
     }
 
+    @Test
+    public void testRadioButtonWithOptionsThatDontMatchNormalAppearance() throws IOException
+    {
+        try (PDDocument document = PDFParser.parse(
+                SeekableSources.inMemorySeekableSourceFrom(this.getClass().getResourceAsStream(
+                        "/org/sejda/sambox/pdmodel/interactive/form/simple_form.pdf"))))
+        {
+
+            PDRadioButton radioButton = (PDRadioButton) document.getDocumentCatalog().getAcroForm()
+                    .getField("Choice_Caption_0wUBrGuJDKIWD9g7kWcKpg");
+            radioButton.setValue("Second Choice");
+
+            assertEquals("Export value does not exist in normal appearance. Don't export value",
+                    radioButton.getValue(), "1");
+
+            assertEquals("First widget should be Off", COSName.Off,
+                    radioButton.getWidgets().get(0).getCOSObject().getItem(COSName.AS));
+
+            assertEquals("Second widget should be set to 1", COSName.getPDFName("1"),
+                    radioButton.getWidgets().get(1).getCOSObject().getItem(COSName.AS));
+
+        }
+    }
+
+    @Test
+    public void testRadioButtonWithOptionsThatDoMatchNormalAppearance() throws IOException
+    {
+        try (PDDocument document = PDFParser.parse(
+                SeekableSources.inMemorySeekableSourceFrom(this.getClass().getResourceAsStream(
+                        "/org/sejda/sambox/pdmodel/interactive/form/PDFBOX-3656 - test.pdf"))))
+        {
+
+            PDRadioButton radioButton = (PDRadioButton) document.getDocumentCatalog().getAcroForm()
+                    .getField("RadioButton");
+            radioButton.setValue("c");
+
+            assertEquals("Export value does exist in normal appearance. Do export value",
+                    radioButton.getValue(), "c");
+
+            assertEquals("First widget should be Off", COSName.Off,
+                    radioButton.getWidgets().get(0).getCOSObject().getItem(COSName.AS));
+
+            assertEquals("Second widget should be Off", COSName.Off,
+                    radioButton.getWidgets().get(1).getCOSObject().getItem(COSName.AS));
+
+            assertEquals("Third widget should be set to c", COSName.getPDFName("c"),
+                    radioButton.getWidgets().get(2).getCOSObject().getItem(COSName.AS));
+
+        }
+    }
+
     /**
      * PDFBOX-3682
      *
@@ -223,7 +274,7 @@ public class PDButtonTest
     }
 
     @Test
-    public void testCheckboxWithExportValues() throws IOException
+    public void testCheckboxWithExportValuesThatDoNotMatchAppearances() throws IOException
     {
         PDCheckBox checkbox = (PDCheckBox) acrobatAcroForm.getField("Checkbox");
         checkbox.setExportValues(Collections.singletonList("exportValue1"));
@@ -234,7 +285,7 @@ public class PDButtonTest
         assertEquals(checkbox.isChecked(), false);
 
         checkbox.check();
-        assertEquals(checkbox.getValue(), "exportValue1");
+        assertEquals(checkbox.getValue(), "Yes");
         assertEquals(checkbox.isChecked(), true);
     }
 

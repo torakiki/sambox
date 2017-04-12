@@ -64,7 +64,16 @@ public final class PDCheckBox extends PDButton
      */
     public boolean isChecked()
     {
-        return getValue().compareTo(getOnValue()) == 0;
+        if(COSName.Off.getName().equals(getValue()))
+        {
+            return false;
+        }
+
+        return getOnValues().contains(getValue()) ||
+                // export values exist but they don't match normal appearances
+                getNormalAppearanceValues().contains(getValue()) ||
+                // no appearances
+                COSName.YES.getName().equals(getValue());
     }
 
     /**
