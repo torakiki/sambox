@@ -179,7 +179,7 @@ public class DefaultPDFWriterTest
     {
         COSDictionary existingTrailer = new COSDictionary();
         IndirectCOSObjectReference ref = spy(context.createIndirectReferenceFor(COSInteger.get(1)));
-        context.putWritten(ref.xrefEntry());
+        context.addWritten(ref.xrefEntry());
         victim.writeXrefStream(existingTrailer);
         verify(writer, never()).write("1 0 R");
     }

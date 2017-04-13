@@ -26,6 +26,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.sejda.sambox.cos.COSDictionary;
@@ -76,6 +78,34 @@ public class PDFWriteContextTest
     }
 
     @Test
+    public void highestExisting()
+    {
+        context = new PDFWriteContext(50, null);
+        IndirectCOSObjectReference ref = context
+                .getOrCreateIndirectReferenceFor(new COSDictionary());
+        assertEquals(51, ref.xrefEntry().getObjectNumber());
+    }
+
+    @Test
+    public void contiguousGroups()
+    {
+        context.addWritten(XrefEntry.unknownOffsetEntry(1, 0));
+        context.addWritten(XrefEntry.unknownOffsetEntry(2, 0));
+        context.addWritten(XrefEntry.unknownOffsetEntry(111, 0));
+        context.addWritten(XrefEntry.unknownOffsetEntry(3, 0));
+        context.addWritten(XrefEntry.unknownOffsetEntry(40, 0));
+        context.addWritten(XrefEntry.unknownOffsetEntry(7, 0));
+        context.addWritten(XrefEntry.unknownOffsetEntry(8, 0));
+        context.addWritten(XrefEntry.unknownOffsetEntry(110, 0));
+        List<List<Long>> groups = context.getWrittenContiguousGroups();
+        assertEquals(4, groups.size());
+        assertEquals(3, groups.get(0).size());
+        assertEquals(2, groups.get(1).size());
+        assertEquals(1, groups.get(2).size());
+        assertEquals(2, groups.get(3).size());
+    }
+
+    @Test
     public void getOrCreateIndirectReferenceFor()
     {
         COSDictionary dic = new COSDictionary();
@@ -122,10 +152,23 @@ public class PDFWriteContextTest
     }
 
     @Test
+    public void addExisting()
+    {
+        ExistingIndirectCOSObject existing = mock(ExistingIndirectCOSObject.class);
+        when(existing.id())
+                .thenReturn(new IndirectCOSObjectIdentifier(new COSObjectKey(10, 0), "Source"));
+        when(existing.hasId()).thenReturn(Boolean.TRUE);
+        context.addExistingReference(existing);
+        assertTrue(context.hasIndirectReferenceFor(existing));
+        assertEquals(existing.id().objectIdentifier,
+                context.getIndirectReferenceFor(existing).xrefEntry().key());
+    }
+
+    @Test
     public void written()
     {
         assertEquals(0, context.written());
-        context.putWritten(entry);
+        context.addWritten(entry);
         assertEquals(1, context.written());
     }
 
@@ -133,23 +176,23 @@ public class PDFWriteContextTest
     public void hasWritten()
     {
         assertFalse(context.hasWritten(entry));
-        context.putWritten(entry);
+        context.addWritten(entry);
         assertTrue(context.hasWritten(entry));
     }
 
     @Test
-    public void putGetWritten()
+    public void addGetWritten()
     {
         assertNull(context.getWritten(10L));
-        context.putWritten(entry);
+        context.addWritten(entry);
         assertEquals(entry, context.getWritten(10L));
     }
 
     @Test
     public void highestLowestWritten()
     {
-        context.putWritten(entry);
-        context.putWritten(entry2);
+        context.addWritten(entry);
+        context.addWritten(entry2);
         assertEquals(entry, context.lowestWritten());
         assertEquals(entry2, context.highestWritten());
     }

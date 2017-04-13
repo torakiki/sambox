@@ -73,7 +73,7 @@ class ObjectsStreamPDFBodyWriter extends AbstractPDFBodyWriter
         else
         {
             IndirectCOSObjectReference streamRef = context().getIndirectReferenceFor(currentStream);
-            context().putWritten(
+            context().addWritten(
                     CompressedXrefEntry.compressedEntry(ref.xrefEntry().getObjectNumber(),
                             streamRef.xrefEntry().getObjectNumber(), currentStream.counter));
             currentStream.addItem(ref);

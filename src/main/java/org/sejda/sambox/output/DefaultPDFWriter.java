@@ -73,7 +73,7 @@ class DefaultPDFWriter implements Closeable
     {
         long startxref = writer().offset();
         LOG.debug("Writing xref table at offset " + startxref);
-        if (writer.context().putWritten(XrefEntry.DEFAULT_FREE_ENTRY) != null)
+        if (writer.context().addWritten(XrefEntry.DEFAULT_FREE_ENTRY) != null)
         {
             LOG.warn("Reserved object number 0 has been overwritten with the expected free entry");
         }
@@ -99,13 +99,13 @@ class DefaultPDFWriter implements Closeable
     {
         long startxref = writer().offset();
         LOG.debug("Writing xref table at offset " + startxref);
-        if (writer.context().putWritten(XrefEntry.DEFAULT_FREE_ENTRY) != null)
+        if (writer.context().addWritten(XrefEntry.DEFAULT_FREE_ENTRY) != null)
         {
             LOG.warn("Reserved object number 0 has been overwritten with the expected free entry");
         }
         writer().write("xref");
         writer().writeEOL();
-        for (List<Long> continuos : writer.context().getWrittenContinuosGroups())
+        for (List<Long> continuos : writer.context().getWrittenContiguousGroups())
         {
             writer().write(continuos.get(0).toString() + " " + continuos.size());
             writer().writeEOL();
@@ -174,7 +174,7 @@ class DefaultPDFWriter implements Closeable
         sanitizeTrailer(trailer, prev);
         XrefEntry entry = XrefEntry
                 .inUseEntry(writer.context().highestWritten().getObjectNumber() + 1, startxref, 0);
-        writer.context().putWritten(entry);
+        writer.context().addWritten(entry);
         writer.writeObject(new IndirectCOSObjectReference(entry.getObjectNumber(),
                 entry.getGenerationNumber(), new XrefStream(trailer, writer.context())));
         writeXrefFooter(startxref);

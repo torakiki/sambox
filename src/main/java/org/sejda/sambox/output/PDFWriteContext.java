@@ -87,7 +87,6 @@ class PDFWriteContext
     IndirectCOSObjectReference createIndirectReferenceFor(COSBase item)
     {
         return createNewReference(item, referencesProvider::nextReferenceFor);
-
     }
 
     /**
@@ -224,7 +223,7 @@ class PDFWriteContext
      * @param entry
      * @return the previous value if an entry with the same object number has been already written, null otherwise.
      */
-    XrefEntry putWritten(XrefEntry entry)
+    XrefEntry addWritten(XrefEntry entry)
     {
         return written.put(entry.getObjectNumber(), entry);
     }
@@ -254,13 +253,16 @@ class PDFWriteContext
         return written.get(objectNumber);
     }
 
-    List<List<Long>> getWrittenContinuosGroups()
+    /**
+     * @return a list of contiguous groups of written object numbers
+     */
+    List<List<Long>> getWrittenContiguousGroups()
     {
-        List<List<Long>> continuos = new ArrayList<>();
+        List<List<Long>> contiguous = new ArrayList<>();
         if (!written.isEmpty())
         {
             LinkedList<Long> group = new LinkedList<>();
-            continuos.add(group);
+            contiguous.add(group);
             for (Long current : written.keySet())
             {
                 if (group.isEmpty() || current == group.getLast() + 1)
@@ -270,12 +272,11 @@ class PDFWriteContext
                 else
                 {
                     group = new LinkedList<>(Arrays.asList(current));
-                    continuos.add(group);
+                    contiguous.add(group);
                 }
             }
-
         }
-        return continuos;
+        return contiguous;
     }
 
     /**

@@ -32,6 +32,7 @@ import org.sejda.io.CountingWritableByteChannel;
 import org.sejda.sambox.TestUtils;
 import org.sejda.sambox.cos.COSDocument;
 import org.sejda.sambox.pdmodel.PDDocument;
+import org.sejda.sambox.xref.FileTrailer;
 
 /**
  * @author Andrea Vacondio
@@ -74,7 +75,9 @@ public class PDDocumentWriterTest
     {
         PDDocument document = mock(PDDocument.class);
         COSDocument cosDoc = mock(COSDocument.class);
+        FileTrailer trailer = new FileTrailer();
         when(document.getDocument()).thenReturn(cosDoc);
+        when(cosDoc.getTrailer()).thenReturn(trailer);
         this.victim = new PDDocumentWriter(
                 CountingWritableByteChannel.from(new ByteArrayOutputStream()), null,
                 WriteOption.SYNC_BODY_WRITE);
@@ -88,7 +91,9 @@ public class PDDocumentWriterTest
     {
         PDDocument document = mock(PDDocument.class);
         COSDocument cosDoc = mock(COSDocument.class);
+        FileTrailer trailer = new FileTrailer();
         when(document.getDocument()).thenReturn(cosDoc);
+        when(cosDoc.getTrailer()).thenReturn(trailer);
         this.victim = new PDDocumentWriter(
                 CountingWritableByteChannel.from(new ByteArrayOutputStream()), null,
                 WriteOption.SYNC_BODY_WRITE, WriteOption.OBJECT_STREAMS);
@@ -102,7 +107,9 @@ public class PDDocumentWriterTest
     {
         PDDocument document = mock(PDDocument.class);
         COSDocument cosDoc = mock(COSDocument.class);
+        FileTrailer trailer = new FileTrailer();
         when(document.getDocument()).thenReturn(cosDoc);
+        when(cosDoc.getTrailer()).thenReturn(trailer);
         victim.write(document);
         verify(cosDoc).accept(isA(AsyncPDFBodyWriter.class));
     }

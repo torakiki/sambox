@@ -89,7 +89,7 @@ class IndirectObjectsWriter implements Closeable
     {
         context.writing(object.xrefEntry().key());
         doWriteObject(object);
-        context.putWritten(object.xrefEntry());
+        context.addWritten(object.xrefEntry());
         onWritten(object);
     }
 

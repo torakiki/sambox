@@ -44,8 +44,8 @@ public class XrefStreamTest
     public void setUp()
     {
         context = new PDFWriteContext(null);
-        context.putWritten(CompressedXrefEntry.compressedEntry(2, 4, 1));
-        context.putWritten(XrefEntry.inUseEntry(4, 256, 0));
+        context.addWritten(CompressedXrefEntry.compressedEntry(2, 4, 1));
+        context.addWritten(XrefEntry.inUseEntry(4, 256, 0));
     }
 
     @Test
