@@ -18,7 +18,6 @@ package org.sejda.sambox.output;
 
 import static java.util.Optional.ofNullable;
 import static org.sejda.sambox.util.CharUtils.ASCII_SPACE;
-import static org.sejda.util.RequireUtils.requireNotNullArg;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -58,7 +57,6 @@ class ObjectsStreamPDFBodyWriter extends AbstractPDFBodyWriter
     {
         super(ofNullable(wrapped).map(AbstractPDFBodyWriter::context)
                 .orElseThrow(() -> new IllegalArgumentException("Wrapped writer cannot be null")));
-        requireNotNullArg(wrapped, "Wrapped writer cannot be null");
         this.wrapped = wrapped;
         currentStream = new ObjectsStream(context());
         context().createIndirectReferenceFor(currentStream);

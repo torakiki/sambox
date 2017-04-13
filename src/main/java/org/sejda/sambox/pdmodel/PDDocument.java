@@ -75,7 +75,7 @@ public class PDDocument implements Closeable
      */
     static
     {
-        PDDeviceRGB.INSTANCE.toRGB(new float[]{1,1,1,1});
+        PDDeviceRGB.INSTANCE.toRGB(new float[] { 1, 1, 1, 1 });
         try
         {
             // TODO remove this and deprecated COSNumber statics in 3.0
@@ -214,12 +214,12 @@ public class PDDocument implements Closeable
      */
     public PDDocumentInformation getDocumentInformation()
     {
-        COSDictionary infoDic = document.getTrailer().getDictionaryObject(COSName.INFO,
-                COSDictionary.class);
+        COSDictionary infoDic = document.getTrailer().getCOSObject()
+                .getDictionaryObject(COSName.INFO, COSDictionary.class);
         if (infoDic == null)
         {
             infoDic = new COSDictionary();
-            document.getTrailer().setItem(COSName.INFO, infoDic);
+            document.getTrailer().getCOSObject().setItem(COSName.INFO, infoDic);
         }
         return new PDDocumentInformation(infoDic);
     }
@@ -232,7 +232,8 @@ public class PDDocument implements Closeable
     public void setDocumentInformation(PDDocumentInformation documentInformation)
     {
         requireOpen();
-        document.getTrailer().setItem(COSName.INFO, documentInformation.getCOSObject());
+        document.getTrailer().getCOSObject().setItem(COSName.INFO,
+                documentInformation.getCOSObject());
     }
 
     /**
@@ -390,32 +391,43 @@ public class PDDocument implements Closeable
     }
 
     /**
-     * Generates file identifier as defined in the chap 14.4 PDF 32000-1:2008 and sets it as ID value of the document
-     * trailer.
+     * Generates file identifier as defined in the chap 14.4 PDF 32000-1:2008 and sets it as first and second value for
+     * the ID array in the document trailer.
      * 
      * @param md5Update
      * @param encContext
      */
     private void generateFileIdentifier(byte[] md5Update, Optional<EncryptionContext> encContext)
     {
+        COSString id = generateFileIdentifier(md5Update);
+        encContext.ifPresent(c -> c.documentId(id.getBytes()));
+        DirectCOSObject directId = asDirectObject(id);
+        getDocument().getTrailer().getCOSObject().setItem(COSName.ID,
+                asDirectObject(new COSArray(directId, directId)));
+    }
+
+    /**
+     * 
+     * @param md5Update
+     * @return a newly generated ID based on the input bytes, current timestamp and some other information, to be used
+     * as value of the ID array in the document trailer.
+     */
+    public COSString generateFileIdentifier(byte[] md5Update)
+    {
         MessageDigest md5 = MessageDigests.md5();
         md5.update(Long.toString(System.currentTimeMillis()).getBytes(StandardCharsets.ISO_8859_1));
         md5.update(md5Update);
-        ofNullable(
-                getDocument().getTrailer().getDictionaryObject(COSName.INFO, COSDictionary.class))
-                        .ifPresent(d -> {
-                            for (COSBase current : d.getValues())
-                            {
-                                md5.update(
-                                        current.toString().getBytes(StandardCharsets.ISO_8859_1));
-                            }
-                        });
+        ofNullable(getDocument().getTrailer().getCOSObject().getDictionaryObject(COSName.INFO,
+                COSDictionary.class)).ifPresent(d -> {
+                    for (COSBase current : d.getValues())
+                    {
+                        md5.update(current.toString().getBytes(StandardCharsets.ISO_8859_1));
+                    }
+                });
         COSString retVal = COSString.newInstance(md5.digest());
-        encContext.ifPresent(c -> c.documentId(retVal.getBytes()));
         retVal.setForceHexForm(true);
         retVal.encryptable(false);
-        DirectCOSObject id = asDirectObject(retVal);
-        getDocument().getTrailer().setItem(COSName.ID, asDirectObject(new COSArray(id, id)));
+        return retVal;
     }
 
     /**

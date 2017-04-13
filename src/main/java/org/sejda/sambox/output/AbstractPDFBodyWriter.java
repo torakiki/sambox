@@ -36,6 +36,7 @@ import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.cos.COSVisitor;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
 import org.sejda.sambox.input.ExistingIndirectCOSObject;
+import org.sejda.sambox.input.IncrementablePDDocument;
 
 /**
  * Base component providing methods to write the body of a pdf document. This implementation starts from the document
@@ -65,6 +66,20 @@ abstract class AbstractPDFBodyWriter implements COSVisitor, Closeable
     }
 
     /**
+     * Writes the given document
+     * 
+     * @param document
+     * @throws IOException
+     */
+    public void write(IncrementablePDDocument document) throws IOException
+    {
+        requireState(open, "The writer is closed");
+        document.trailer().getCOSObject().accept(this);
+        document.replacements().forEach(stack::add);
+        startWriting();
+    }
+
+    /**
      * Writes the body of the given document
      * 
      * @param document
@@ -81,10 +96,10 @@ abstract class AbstractPDFBodyWriter implements COSVisitor, Closeable
     {
         for (COSName k : Arrays.asList(COSName.ROOT, COSName.ENCRYPT))
         {
-            ofNullable(document.getTrailer().getItem(k)).ifPresent(
+            ofNullable(document.getTrailer().getCOSObject().getItem(k)).ifPresent(
                     r -> stack.add(context.createNonStorableInObjectStreamIndirectReferenceFor(r)));
         }
-        ofNullable(document.getTrailer().getItem(COSName.INFO))
+        ofNullable(document.getTrailer().getCOSObject().getItem(COSName.INFO))
                 .ifPresent(this::createIndirectReferenceIfNeededFor);
         startWriting();
     }

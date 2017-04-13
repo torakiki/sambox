@@ -21,6 +21,7 @@ import static org.sejda.util.RequireUtils.requireNotNullArg;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 import org.sejda.io.BufferedCountingChannelWriter;
@@ -164,6 +165,16 @@ class IndirectObjectsWriter implements Closeable
     public void write(byte b) throws IOException
     {
         writer.writer().write(b);
+    }
+
+    /**
+     * @see BufferedCountingChannelWriter#write(InputStream)
+     * @param stream
+     * @throws IOException
+     */
+    public void write(InputStream stream) throws IOException
+    {
+        writer.writer().write(stream);
     }
 
     /**

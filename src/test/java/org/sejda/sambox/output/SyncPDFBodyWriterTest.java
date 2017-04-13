@@ -84,7 +84,7 @@ public class SyncPDFBodyWriterTest
     @Test
     public void nullSafeWriteBody() throws IOException
     {
-        document.getDocument().getTrailer().setItem(COSName.INFO, null);
+        document.getDocument().getTrailer().getCOSObject().setItem(COSName.INFO, null);
         victim.write(document.getDocument());
     }
 

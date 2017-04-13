@@ -18,7 +18,9 @@ package org.sejda.sambox.output;
 
 import static java.util.Optional.ofNullable;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -63,6 +65,15 @@ class PDFWriteContext
     {
         this.encryptor = ofNullable(encryptor);
         this.opts = Arrays.asList(options);
+        this.referencesProvider = new IndirectReferenceProvider();
+    }
+
+    PDFWriteContext(long highestExistingReferenceNumber, GeneralEncryptionAlgorithm encryptor,
+            WriteOption... options)
+    {
+        this.encryptor = ofNullable(encryptor);
+        this.opts = Arrays.asList(options);
+        this.referencesProvider = new IndirectReferenceProvider(highestExistingReferenceNumber);
     }
 
     /**
@@ -158,6 +169,20 @@ class PDFWriteContext
     }
 
     /**
+     * adds the reference to the context. When later queried, the context will return the existing indirect reference an
+     * no new reference will be created. This is used during incremental updates when we don't want to create new
+     * references for existing objects
+     * 
+     * @param existing
+     */
+    void addExistingReference(ExistingIndirectCOSObject existing)
+    {
+        lookupNewRef.put(existing.id(),
+                new IndirectCOSObjectReference(existing.id().objectIdentifier.objectNumber(),
+                        existing.id().objectIdentifier.generation(), null));
+    }
+
+    /**
      * @param item
      * @return true if the given item has been added to the context and an indirect reference created for it.
      */
@@ -227,6 +252,30 @@ class PDFWriteContext
     XrefEntry getWritten(Long objectNumber)
     {
         return written.get(objectNumber);
+    }
+
+    List<List<Long>> getWrittenContinuosGroups()
+    {
+        List<List<Long>> continuos = new ArrayList<>();
+        if (!written.isEmpty())
+        {
+            LinkedList<Long> group = new LinkedList<>();
+            continuos.add(group);
+            for (Long current : written.keySet())
+            {
+                if (group.isEmpty() || current == group.getLast() + 1)
+                {
+                    group.addLast(current);
+                }
+                else
+                {
+                    group = new LinkedList<>(Arrays.asList(current));
+                    continuos.add(group);
+                }
+            }
+
+        }
+        return continuos;
     }
 
     /**

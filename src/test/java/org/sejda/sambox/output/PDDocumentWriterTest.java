@@ -114,7 +114,8 @@ public class PDDocumentWriterTest
         {
             victim.write(document);
             verify(writer).writeXrefTable();
-            verify(writer).writeTrailer(eq(document.getDocument().getTrailer()), anyLong());
+            verify(writer).writeTrailer(eq(document.getDocument().getTrailer().getCOSObject()),
+                    anyLong());
         }
     }
 
@@ -128,7 +129,7 @@ public class PDDocumentWriterTest
                     WriteOption.XREF_STREAM);
             TestUtils.setProperty(victim, "writer", this.writer);
             victim.write(document);
-            verify(writer).writeXrefStream(document.getDocument().getTrailer());
+            verify(writer).writeXrefStream(document.getDocument().getTrailer().getCOSObject());
         }
     }
 

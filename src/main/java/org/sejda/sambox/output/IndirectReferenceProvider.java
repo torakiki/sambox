@@ -30,7 +30,20 @@ import org.sejda.sambox.cos.NonStorableInObjectStreams;
  */
 class IndirectReferenceProvider
 {
-    private AtomicLong referencesCounter = new AtomicLong(0);
+    private final AtomicLong referencesCounter;
+
+    IndirectReferenceProvider()
+    {
+        referencesCounter = new AtomicLong(0);
+    }
+
+    /**
+     * @param next reference number will be highestAlreadyExisting+1
+     */
+    IndirectReferenceProvider(long highestAlreadyExisting)
+    {
+        referencesCounter = new AtomicLong(highestAlreadyExisting);
+    }
 
     IndirectCOSObjectReference nextReferenceFor(COSBase baseObject)
     {

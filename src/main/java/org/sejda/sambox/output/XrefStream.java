@@ -51,15 +51,6 @@ class XrefStream extends COSStream
     XrefStream(COSDictionary dictionary, PDFWriteContext context) throws IOException
     {
         super(dictionary);
-        removeItem(COSName.PREV);
-        removeItem(COSName.XREF_STM);
-        removeItem(COSName.DOC_CHECKSUM);
-        removeItem(COSName.DECODE_PARMS);
-        removeItem(COSName.FILTER);
-        removeItem(COSName.F_DECODE_PARMS);
-        removeItem(COSName.F_FILTER);
-        removeItem(COSName.F);
-        removeItem(COSName.LENGTH);
         setName(COSName.TYPE, COSName.XREF.getName());
         setItem(COSName.SIZE, asDirect(context.highestWritten().getObjectNumber() + 1));
         setItem(COSName.INDEX,

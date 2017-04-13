@@ -22,7 +22,14 @@ public class IndirectReferenceProviderTest
     {
         assertEquals(1, victim.nextReferenceFor(COSInteger.ONE).xrefEntry().getObjectNumber());
         assertEquals(2, victim.nextReferenceFor(COSInteger.ONE).xrefEntry().getObjectNumber());
-        assertEquals(3, victim.nextReferenceFor(COSInteger.ONE).xrefEntry().getObjectNumber());
+    }
+
+    @Test
+    public void nextRefFromSeed()
+    {
+        victim = new IndirectReferenceProvider(5);
+        assertEquals(6, victim.nextReferenceFor(COSInteger.ONE).xrefEntry().getObjectNumber());
+        assertEquals(7, victim.nextReferenceFor(COSInteger.ONE).xrefEntry().getObjectNumber());
     }
 
     @Test

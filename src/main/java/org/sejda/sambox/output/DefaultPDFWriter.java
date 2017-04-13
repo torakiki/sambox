@@ -22,6 +22,7 @@ import static org.sejda.util.RequireUtils.requireNotNullArg;
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Optional;
 
 import org.sejda.sambox.cos.COSDictionary;
@@ -82,23 +83,65 @@ class DefaultPDFWriter implements Closeable
         writer().writeEOL();
         for (long key = 0; key <= writer.context().highestWritten().getObjectNumber(); key++)
         {
-            writer().write(
-                    Optional.ofNullable(writer.context().getWritten(key))
-                            .orElse(XrefEntry.DEFAULT_FREE_ENTRY).toXrefTableEntry());
+            writer().write(Optional.ofNullable(writer.context().getWritten(key))
+                    .orElse(XrefEntry.DEFAULT_FREE_ENTRY).toXrefTableEntry());
         }
         return startxref;
     }
 
+    /**
+     * writes the xref table in an incremental update
+     * 
+     * @return
+     * @throws IOException
+     */
+    public long writeIncrementalXrefTable() throws IOException
+    {
+        long startxref = writer().offset();
+        LOG.debug("Writing xref table at offset " + startxref);
+        if (writer.context().putWritten(XrefEntry.DEFAULT_FREE_ENTRY) != null)
+        {
+            LOG.warn("Reserved object number 0 has been overwritten with the expected free entry");
+        }
+        writer().write("xref");
+        writer().writeEOL();
+        for (List<Long> continuos : writer.context().getWrittenContinuosGroups())
+        {
+            writer().write(continuos.get(0).toString() + " " + continuos.size());
+            writer().writeEOL();
+            for (long key : continuos)
+            {
+                writer().write(Optional.ofNullable(writer.context().getWritten(key))
+                        .orElse(XrefEntry.DEFAULT_FREE_ENTRY).toXrefTableEntry());
+            }
+        }
+        return startxref;
+    }
+
+    /**
+     * Writes the given trailer setting startxref to the given offsets
+     * 
+     * @param trailer
+     * @param startxref
+     * @throws IOException
+     */
     public void writeTrailer(COSDictionary trailer, long startxref) throws IOException
     {
+        writeTrailer(trailer, startxref, -1);
+    }
+
+    /**
+     * Writes the given trailer setting the /Prev entry and startxref to the given offsets
+     * 
+     * @param trailer
+     * @param startxref
+     * @param prev prev offset, written only if != -1
+     * @throws IOException
+     */
+    public void writeTrailer(COSDictionary trailer, long startxref, long prev) throws IOException
+    {
         LOG.trace("Writing trailer");
-        trailer.removeItem(COSName.PREV);
-        trailer.removeItem(COSName.XREF_STM);
-        trailer.removeItem(COSName.DOC_CHECKSUM);
-        trailer.removeItem(COSName.DECODE_PARMS);
-        trailer.removeItem(COSName.F_DECODE_PARMS);
-        trailer.removeItem(COSName.F_FILTER);
-        trailer.removeItem(COSName.F);
+        sanitizeTrailer(trailer, prev);
         trailer.setLong(COSName.SIZE, writer.context().highestWritten().getObjectNumber() + 1);
         writer.write("trailer".getBytes(StandardCharsets.US_ASCII));
         writer.writeEOL();
@@ -106,16 +149,52 @@ class DefaultPDFWriter implements Closeable
         writeXrefFooter(startxref);
     }
 
+    /**
+     * Writes an xref stream using the given trailer
+     * 
+     * @param trailer
+     * @throws IOException
+     */
     public void writeXrefStream(COSDictionary trailer) throws IOException
+    {
+        writeXrefStream(trailer, -1);
+    }
+
+    /**
+     * Writes an xref stream using the given trailer and setting the /Prev entry to the given offset
+     * 
+     * @param trailer
+     * @param prev
+     * @throws IOException
+     */
+    public void writeXrefStream(COSDictionary trailer, long prev) throws IOException
     {
         long startxref = writer().offset();
         LOG.debug("Writing xref stream at offset " + startxref);
-        XrefEntry entry = XrefEntry.inUseEntry(
-                writer.context().highestWritten().getObjectNumber() + 1, startxref, 0);
+        sanitizeTrailer(trailer, prev);
+        XrefEntry entry = XrefEntry
+                .inUseEntry(writer.context().highestWritten().getObjectNumber() + 1, startxref, 0);
         writer.context().putWritten(entry);
-        writer.writeObject(new IndirectCOSObjectReference(entry.getObjectNumber(), entry
-                .getGenerationNumber(), new XrefStream(trailer, writer.context())));
+        writer.writeObject(new IndirectCOSObjectReference(entry.getObjectNumber(),
+                entry.getGenerationNumber(), new XrefStream(trailer, writer.context())));
         writeXrefFooter(startxref);
+    }
+
+    private static void sanitizeTrailer(COSDictionary trailer, long prev)
+    {
+        trailer.removeItem(COSName.PREV);
+        trailer.removeItem(COSName.XREF_STM);
+        trailer.removeItem(COSName.DOC_CHECKSUM);
+        trailer.removeItem(COSName.DECODE_PARMS);
+        trailer.removeItem(COSName.FILTER);
+        trailer.removeItem(COSName.F_DECODE_PARMS);
+        trailer.removeItem(COSName.F_FILTER);
+        trailer.removeItem(COSName.F);
+        trailer.removeItem(COSName.LENGTH);
+        if (prev != -1)
+        {
+            trailer.setLong(COSName.PREV, prev);
+        }
     }
 
     private void writeXrefFooter(long startxref) throws IOException

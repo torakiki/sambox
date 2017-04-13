@@ -128,9 +128,9 @@ public class COSDocument extends COSBase
                 .orElseThrow(() -> new IllegalStateException("Catalog cannot be found"));
     }
 
-    public COSDictionary getTrailer()
+    public FileTrailer getTrailer()
     {
-        return trailer.getCOSObject();
+        return trailer;
     }
 
     @Override
