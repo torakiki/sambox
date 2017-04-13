@@ -254,7 +254,7 @@ public abstract class PDButton extends PDTerminalField
     void constructAppearances() throws IOException
     {
         List<String> exportValues = getExportValues();
-        if (exportValues.size() > 0)
+        if (exportValues.contains(getValue()))
         {
             // the value is the index value of the option. So we need to get that
             // and use it to set the value

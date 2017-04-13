@@ -32,6 +32,7 @@ import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceDictionary;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceEntry;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.*;
 
 /**
@@ -187,6 +188,33 @@ public class PDButtonTest
             assertEquals("Third widget should be set to c", COSName.getPDFName("c"),
                     radioButton.getWidgets().get(2).getCOSObject().getItem(COSName.AS));
 
+        }
+    }
+
+    @Test
+    public void testCheckboxWithExportValuesMoreThanWidgets() throws IOException
+    {
+        try (PDDocument document = PDFParser.parse(
+                SeekableSources.inMemorySeekableSourceFrom(this.getClass().getResourceAsStream(
+                        "/org/sejda/sambox/pdmodel/interactive/form/P020130830121570742708.pdf"))))
+        {
+
+            PDCheckBox checkbox = (PDCheckBox) document.getDocumentCatalog().getAcroForm()
+                    .getField("Check Box3");
+            try
+            {
+                checkbox.check();
+                fail("Expecting exception, since this will use the first export value");
+                // TODO: fix getOnValue to return the first normal appearance value?
+            }
+            catch (IllegalArgumentException ex)
+            {
+                assertThat(ex.getMessage(), containsString(
+                        "The number of options doesn't match the number of widgets"));
+            }
+
+            checkbox.setValue("0");
+            assertEquals(checkbox.getValue(), "0");
         }
     }
 
