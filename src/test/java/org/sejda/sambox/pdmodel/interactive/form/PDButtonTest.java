@@ -148,6 +148,7 @@ public class PDButtonTest
 
             PDRadioButton radioButton = (PDRadioButton) document.getDocumentCatalog().getAcroForm()
                     .getField("Choice_Caption_0wUBrGuJDKIWD9g7kWcKpg");
+            radioButton.setValue("1");
             radioButton.setValue("Second Choice");
 
             assertEquals("Export value does not exist in normal appearance. Don't export value",

@@ -148,9 +148,9 @@ public abstract class PDButton extends PDTerminalField
 
         // if there are export values/an Opt entry there is a different
         // approach to setting the value
-        boolean hasExportValues = getExportValues().size() > 0;
+        List<String> exportValues = getExportValues();
 
-        if (hasExportValues)
+        if (exportValues.contains(value))
         {
             updateByOption(value);
         }
@@ -295,13 +295,10 @@ public abstract class PDButton extends PDTerminalField
      */
     public List<String> getOnValuesList()
     {
-        List<String> exportValues = getExportValues();
-        if (exportValues.size() > 0)
-        {
-            return exportValues;
-        }
-
-        return getNormalAppearanceValues();
+        List<String> onValues = new ArrayList<>();
+        onValues.addAll(getExportValues());
+        onValues.addAll(getNormalAppearanceValues());
+        return onValues;
     }
 
     public List<String> getNormalAppearanceValues() {

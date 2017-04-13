@@ -70,8 +70,6 @@ public final class PDCheckBox extends PDButton
         }
 
         return getOnValues().contains(getValue()) ||
-                // export values exist but they don't match normal appearances
-                getNormalAppearanceValues().contains(getValue()) ||
                 // no appearances
                 COSName.YES.getName().equals(getValue());
     }
