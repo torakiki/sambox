@@ -303,7 +303,7 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
     {
         if (pageNum < 0)
         {
-            throw new PageNotFoundException("Index out of bounds: " + pageNum);
+            throw new PageNotFoundException("Index out of bounds: " + pageNum + " in " + getSourcePath(), pageNum, getSourcePath());
         }
 
         if (isPageTreeNode(node))
@@ -338,18 +338,22 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
                 }
 
                 throw new PageNotFoundException(
-                        "Unable to find page " + pageNum + " in " + ofNullable(getCOSObject().id())
-                                .map(i -> i.ownerIdentifier).orElse("Unknown"));
+                        "Unable to find page " + pageNum + " in " + getSourcePath(), pageNum, getSourcePath());
             }
             throw new PageNotFoundException(
-                    "Index out of bounds: " + pageNum + " in " + ofNullable(getCOSObject().id())
-                            .map(i -> i.ownerIdentifier).orElse("Unknown"));
+                    "Index out of bounds: " + pageNum + " in " + getSourcePath(), pageNum, getSourcePath());
         }
         if (encountered == pageNum)
         {
             return node;
         }
-        throw new PageNotFoundException();
+
+        throw new PageNotFoundException("Unable to find page " + pageNum + " in " + getSourcePath(), pageNum, getSourcePath());
+    }
+
+    private String getSourcePath() {
+        return ofNullable(getCOSObject().id())
+                .map(i -> i.ownerIdentifier).orElse("Unknown");
     }
 
     /**

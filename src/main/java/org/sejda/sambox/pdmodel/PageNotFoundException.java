@@ -18,11 +18,23 @@
 package org.sejda.sambox.pdmodel;
 
 public class PageNotFoundException extends RuntimeException {
-    public PageNotFoundException() {
-        super();
+
+    private int page;
+    private String sourcePath;
+
+    public PageNotFoundException(String message, int page, String sourcePath) {
+        super(message);
+        this.page = page;
+        this.sourcePath = sourcePath;
     }
 
-    public PageNotFoundException(String message) {
-        super(message);
+    public int getPage()
+    {
+        return page;
+    }
+
+    public String getSourcePath()
+    {
+        return sourcePath;
     }
 }

@@ -16,9 +16,11 @@
  */
 package org.sejda.sambox.pdmodel;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.junit.Test;
@@ -27,6 +29,10 @@ import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.interactive.documentnavigation.outline.PDDocumentOutline;
 import org.sejda.sambox.pdmodel.interactive.documentnavigation.outline.PDOutlineItem;
+
+import static org.hamcrest.CoreMatchers.endsWith;
+import static org.hamcrest.CoreMatchers.startsWith;
+import static org.junit.Assert.*;
 
 /**
  * @author Andrea Vacondio
@@ -140,6 +146,23 @@ public class PDPageTreeTest
             // found localized cosname in the wild o_O
             page.getCOSObject().setName(COSName.TYPE, "Pagina");
             assertEquals(COSName.PAGE, doc.getPage(0).getCOSObject().getItem(COSName.TYPE));
+        }
+    }
+
+    @Test
+    public void pageNotFoundIncludesSourcePathAndPageNumber() throws IOException
+    {
+        try (PDDocument doc = PDFParser.parse(SeekableSources.onTempFileSeekableSourceFrom(
+                PDPageTreeTest.class.getResourceAsStream("with_outline.pdf"))))
+        {
+            try {
+                doc.getPage(99 /* 0 based */);
+                fail("Exception expected");
+            } catch (PageNotFoundException ex) {
+                assertEquals(ex.getPage(), 100 /* 1 based, for humans */);
+                assertThat(ex.getSourcePath(), containsString(File.separator + "SejdaIO"));
+                assertThat(ex.getSourcePath(), endsWith(".tmp"));
+            }
         }
     }
 }
