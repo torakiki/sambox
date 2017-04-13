@@ -108,10 +108,12 @@ public class DefaultPDFWriterTest
         existingTrailer.setName(COSName.XREF_STM, "value");
         existingTrailer.setName(COSName.DOC_CHECKSUM, "value");
         existingTrailer.setName(COSName.DECODE_PARMS, "value");
+        existingTrailer.setName(COSName.FILTER, "value");
         existingTrailer.setName(COSName.F_DECODE_PARMS, "value");
         existingTrailer.setName(COSName.F_FILTER, "value");
         existingTrailer.setName(COSName.F, "value");
-        existingTrailer.setName(COSName.ENCRYPT, "value");
+        existingTrailer.setName(COSName.LENGTH, "value");
+
         victim.writeTrailer(existingTrailer, 1);
         assertFalse(existingTrailer.containsKey(COSName.PREV));
         assertFalse(existingTrailer.containsKey(COSName.XREF_STM));
@@ -120,6 +122,8 @@ public class DefaultPDFWriterTest
         assertFalse(existingTrailer.containsKey(COSName.F_DECODE_PARMS));
         assertFalse(existingTrailer.containsKey(COSName.F_FILTER));
         assertFalse(existingTrailer.containsKey(COSName.F));
+        assertFalse(existingTrailer.containsKey(COSName.FILTER));
+        assertFalse(existingTrailer.containsKey(COSName.LENGTH));
     }
 
     @Test
@@ -172,6 +176,34 @@ public class DefaultPDFWriterTest
         inOrder.verify(writer).writeEOL();
         inOrder.verify(writer).write("12345");
         inOrder.verify(writer).writeEOL();
+    }
+
+    @Test
+    public void writeXrefStreamSomeKeysAreRemoved() throws IOException
+    {
+        COSDictionary existingTrailer = new COSDictionary();
+        existingTrailer.setName(COSName.PREV, "value");
+        existingTrailer.setName(COSName.XREF_STM, "value");
+        existingTrailer.setName(COSName.DOC_CHECKSUM, "value");
+        existingTrailer.setName(COSName.DECODE_PARMS, "value");
+        existingTrailer.setName(COSName.F_DECODE_PARMS, "value");
+        existingTrailer.setName(COSName.F_FILTER, "value");
+        existingTrailer.setName(COSName.F, "value");
+        existingTrailer.setInt(COSName.LENGTH, 10);
+        existingTrailer.setName(COSName.ENCRYPT, "value");
+        IndirectCOSObjectReference ref = new IndirectCOSObjectReference(1, 0, COSInteger.get(100));
+        when(writer.offset()).thenReturn(12345l);
+        objectWriter.writeObject(ref);
+        victim.writeXrefStream(existingTrailer);
+        assertFalse(existingTrailer.containsKey(COSName.PREV));
+        assertFalse(existingTrailer.containsKey(COSName.XREF_STM));
+        assertFalse(existingTrailer.containsKey(COSName.DOC_CHECKSUM));
+        assertFalse(existingTrailer.containsKey(COSName.DECODE_PARMS));
+        assertFalse(existingTrailer.containsKey(COSName.F_DECODE_PARMS));
+        assertFalse(existingTrailer.containsKey(COSName.F_FILTER));
+        assertFalse(existingTrailer.containsKey(COSName.F));
+        assertFalse(existingTrailer.containsKey(COSName.FILTER));
+        assertFalse(existingTrailer.containsKey(COSName.LENGTH));
     }
 
     @Test

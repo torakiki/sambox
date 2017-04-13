@@ -17,7 +17,6 @@
 package org.sejda.sambox.output;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
@@ -46,33 +45,6 @@ public class XrefStreamTest
         context = new PDFWriteContext(null);
         context.addWritten(CompressedXrefEntry.compressedEntry(2, 4, 1));
         context.addWritten(XrefEntry.inUseEntry(4, 256, 0));
-    }
-
-    @Test
-    public void someKeysAreRemoved() throws IOException
-    {
-        COSDictionary existingTrailer = new COSDictionary();
-        existingTrailer.setName(COSName.PREV, "value");
-        existingTrailer.setName(COSName.XREF_STM, "value");
-        existingTrailer.setName(COSName.DOC_CHECKSUM, "value");
-        existingTrailer.setName(COSName.DECODE_PARMS, "value");
-        existingTrailer.setName(COSName.F_DECODE_PARMS, "value");
-        existingTrailer.setName(COSName.F_FILTER, "value");
-        existingTrailer.setName(COSName.F, "value");
-        existingTrailer.setInt(COSName.LENGTH, 10);
-        existingTrailer.setName(COSName.ENCRYPT, "value");
-
-        try (XrefStream victim = new XrefStream(existingTrailer, context))
-        {
-            assertFalse(victim.containsKey(COSName.PREV));
-            assertFalse(victim.containsKey(COSName.XREF_STM));
-            assertFalse(victim.containsKey(COSName.DOC_CHECKSUM));
-            assertFalse(victim.containsKey(COSName.DECODE_PARMS));
-            assertFalse(victim.containsKey(COSName.F_DECODE_PARMS));
-            assertFalse(victim.containsKey(COSName.F_FILTER));
-            assertFalse(victim.containsKey(COSName.F));
-            assertFalse(victim.containsKey(COSName.LENGTH));
-        }
     }
 
     @Test
