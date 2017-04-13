@@ -18,6 +18,7 @@ package org.sejda.sambox.pdmodel;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static org.sejda.util.RequireUtils.requireNotNullArg;
 
@@ -336,11 +337,13 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
                     }
                 }
 
-                throw new PageNotFoundException("Unable to find page " + pageNum + " in "
-                        + getCOSObject().id().ownerIdentifier);
+                throw new PageNotFoundException(
+                        "Unable to find page " + pageNum + " in " + ofNullable(getCOSObject().id())
+                                .map(i -> i.ownerIdentifier).orElse("Unknown"));
             }
-            throw new PageNotFoundException("Index out of bounds: " + pageNum + " in "
-                    + getCOSObject().id().ownerIdentifier);
+            throw new PageNotFoundException(
+                    "Index out of bounds: " + pageNum + " in " + ofNullable(getCOSObject().id())
+                            .map(i -> i.ownerIdentifier).orElse("Unknown"));
         }
         if (encountered == pageNum)
         {
