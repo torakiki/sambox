@@ -67,7 +67,7 @@ public class IncrementablePDDocumentWriter implements Closeable
      */
     public void write(IncrementablePDDocument document) throws IOException
     {
-        requireNotNullArg(document, "PDDocument cannot be null");
+        requireNotNullArg(document, "Incremented document cannot be null");
         this.context = new PDFWriteContext(document.highestExistingReference().objectNumber(),
                 this.encryptionContext.map(EncryptionContext::encryptionAlgorithm).orElse(null),
                 options);

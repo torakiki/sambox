@@ -196,7 +196,7 @@ public class IncrementablePDDocument implements Closeable
             throws IOException
     {
         requireState(incremented.isOpen(), "The document is closed");
-        // TODO what if the doc has no update?
+        requireState(!replacements.isEmpty(), "No update to be incrementally written");
         updateDocumentInformation();
         updateId(output.toString().getBytes(StandardCharsets.ISO_8859_1));
 
