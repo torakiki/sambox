@@ -96,7 +96,7 @@ public class SyncPDFBodyWriterTest
         {
             victim.write(document.getDocument());
         }
-        verify(writer, times(8)).writeObjectIfNotWritten(any());
+        verify(writer, times(9)).writeObjectIfNotWritten(any());
     }
 
     @Test

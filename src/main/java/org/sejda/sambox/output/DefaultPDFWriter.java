@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.output;
 
+import static java.util.Objects.nonNull;
 import static org.sejda.sambox.util.SpecVersionUtils.PDF_HEADER;
 import static org.sejda.util.RequireUtils.requireNotNullArg;
 
@@ -73,7 +74,7 @@ class DefaultPDFWriter implements Closeable
     {
         long startxref = writer().offset();
         LOG.debug("Writing xref table at offset " + startxref);
-        if (writer.context().addWritten(XrefEntry.DEFAULT_FREE_ENTRY) != null)
+        if (nonNull(writer.context().addWritten(XrefEntry.DEFAULT_FREE_ENTRY)))
         {
             LOG.warn("Reserved object number 0 has been overwritten with the expected free entry");
         }
@@ -99,7 +100,7 @@ class DefaultPDFWriter implements Closeable
     {
         long startxref = writer().offset();
         LOG.debug("Writing xref table at offset " + startxref);
-        if (writer.context().addWritten(XrefEntry.DEFAULT_FREE_ENTRY) != null)
+        if (nonNull(writer.context().addWritten(XrefEntry.DEFAULT_FREE_ENTRY)))
         {
             LOG.warn("Reserved object number 0 has been overwritten with the expected free entry");
         }

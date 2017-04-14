@@ -52,9 +52,9 @@ public class XrefParserTest
                 getClass().getResourceAsStream("/sambox/simple_test.pdf")));
         victim = new XrefParser(parser);
         victim.parse();
-        assertEquals(9, victim.trailer().getCOSObject().getInt(COSName.SIZE));
+        assertEquals(11, victim.trailer().getCOSObject().getInt(COSName.SIZE));
         assertNotNull(victim.trailer().getCOSObject().getDictionaryObject(COSName.ROOT));
-        assertEquals(564, victim.trailer().xrefOffset());
+        assertEquals(718, victim.trailer().xrefOffset());
     }
 
     @Test

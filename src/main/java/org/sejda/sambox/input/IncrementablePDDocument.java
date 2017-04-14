@@ -24,6 +24,7 @@ import static org.sejda.sambox.util.SpecVersionUtils.V1_4;
 import static org.sejda.sambox.util.SpecVersionUtils.isAtLeast;
 import static org.sejda.util.RequireUtils.requireNotBlank;
 import static org.sejda.util.RequireUtils.requireNotNullArg;
+import static org.sejda.util.RequireUtils.requireState;
 
 import java.io.Closeable;
 import java.io.File;
@@ -58,6 +59,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Model for a document to be used to incrementally update an existing PDF file. Has info regarding PDF objects that
+ * need to be replaced in the original document.
+ * 
  * @author Andrea Vacondio
  *
  */
@@ -72,6 +76,7 @@ public class IncrementablePDDocument implements Closeable
     IncrementablePDDocument(PDDocument incremented, COSParser parser)
     {
         requireNotNullArg(incremented, "Incremented document cannot be null");
+        requireNotNullArg(parser, "COSParser cannot be null");
         this.incremented = incremented;
         this.parser = parser;
     }
@@ -81,11 +86,18 @@ public class IncrementablePDDocument implements Closeable
         return incremented;
     }
 
+    /**
+     * @return the trailer of the incremented document
+     */
     public FileTrailer trailer()
     {
         return incremented.getDocument().getTrailer();
     }
 
+    /**
+     * @return the incremented document as a stream to be written "as is"
+     * @throws IOException
+     */
     public InputStream incrementedAsStream() throws IOException
     {
         parser.source().position(0);
@@ -101,6 +113,18 @@ public class IncrementablePDDocument implements Closeable
     }
 
     /**
+     * Replaces the object with the given {@link IndirectCOSObjectIdentifier} during the incremental update
+     * 
+     * @param toReplace
+     * @param replacement
+     */
+    public void replace(IndirectCOSObjectIdentifier toReplace, COSObjectable replacement)
+    {
+        requireNotNullArg(toReplace, "Missing id of the object to be replaced");
+        replacements.put(toReplace, ofNullable(replacement).orElse(COSNull.NULL));
+    }
+
+    /**
      * @return a list of {@link IndirectCOSObjectReference} to be written as replacements for this incremental update
      */
     public List<IndirectCOSObjectReference> replacements()
@@ -112,32 +136,12 @@ public class IncrementablePDDocument implements Closeable
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Replaces the object with the given {@link IndirectCOSObjectIdentifier} during the incremental update
-     * 
-     * @param toReplace
-     * @param replacement
-     */
-    public void replace(IndirectCOSObjectIdentifier toReplace, COSObjectable replacement)
-    {
-        requireNotNullArg(replacement, "Missing id of the object to be replaced");
-        replacements.put(toReplace, ofNullable(replacement).orElse(COSNull.NULL));
-    }
-
     @Override
     public void close() throws IOException
     {
         incremented.close();
         IOUtils.close(parser.provider());
         IOUtils.close(parser);
-    }
-
-    private void requireOpen() throws IllegalStateException
-    {
-        if (!incremented.isOpen())
-        {
-            throw new IllegalStateException("The document is closed");
-        }
     }
 
     /**
@@ -191,7 +195,7 @@ public class IncrementablePDDocument implements Closeable
     private void writeTo(CountingWritableByteChannel output, WriteOption... options)
             throws IOException
     {
-        requireOpen();
+        requireState(incremented.isOpen(), "The document is closed");
         // TODO what if the doc has no update?
         updateDocumentInformation();
         updateId(output.toString().getBytes(StandardCharsets.ISO_8859_1));
@@ -244,6 +248,11 @@ public class IncrementablePDDocument implements Closeable
         }
     }
 
+    /**
+     * Sets the version for this document if not at the minimum version required
+     * 
+     * @param version
+     */
     public void requireMinVersion(String version)
     {
         if (!isAtLeast(incremented.getVersion(), version))
@@ -255,24 +264,28 @@ public class IncrementablePDDocument implements Closeable
 
     public void setVersion(String newVersion)
     {
-        requireOpen();
+        requireState(incremented.isOpen(), "The document is closed");
         requireNotBlank(newVersion, "Spec version cannot be blank");
         int compare = incremented.getVersion().compareTo(newVersion);
         if (compare > 0)
         {
             LOG.info("Spec version downgrade not allowed");
         }
-        else if (compare < 0 && isAtLeast(newVersion, V1_4))
+        else if (compare < 0)
         {
-            COSDictionary catalog = incremented.getDocument().getCatalog();
-            catalog.setName(COSName.VERSION, newVersion);
-            replacements.put(catalog.id(), catalog);
+            if (isAtLeast(newVersion, V1_4))
+            {
+                COSDictionary catalog = incremented.getDocument().getCatalog();
+                catalog.setName(COSName.VERSION, newVersion);
+                replacements.put(catalog.id(), catalog);
+            }
+            else
+            {
+                LOG.warn(
+                        "Sepc version must be at least 1.4 to be set as catalog entry in an incremental update");
+            }
         }
-        else
-        {
-            LOG.warn(
-                    "Sepc version must be at least 1.4 to be set as catalog entry in an incremental update");
-        }
+
     }
 
 }

@@ -16,11 +16,13 @@
  */
 package org.sejda.sambox.output;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -35,6 +37,7 @@ import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.COSObjectKey;
 import org.sejda.sambox.cos.IndirectCOSObjectIdentifier;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
+import org.sejda.sambox.cos.NonStorableInObjectStreams;
 import org.sejda.sambox.encryption.GeneralEncryptionAlgorithm;
 import org.sejda.sambox.input.ExistingIndirectCOSObject;
 import org.sejda.sambox.xref.XrefEntry;
@@ -106,12 +109,27 @@ public class PDFWriteContextTest
     }
 
     @Test
+    public void emptyContiguousGroups()
+    {
+        List<List<Long>> groups = context.getWrittenContiguousGroups();
+        assertEquals(0, groups.size());
+    }
+
+    @Test
     public void getOrCreateIndirectReferenceFor()
     {
         COSDictionary dic = new COSDictionary();
         IndirectCOSObjectReference ref = context.getOrCreateIndirectReferenceFor(dic);
         IndirectCOSObjectReference ref2 = context.getOrCreateIndirectReferenceFor(dic);
         assertEquals(ref, ref2);
+    }
+
+    @Test
+    public void createNonStorableInObjectStreamIndirectReferenceFor()
+    {
+        IndirectCOSObjectReference ref = context
+                .createNonStorableInObjectStreamIndirectReferenceFor(new COSDictionary());
+        assertThat(ref, instanceOf(NonStorableInObjectStreams.class));
     }
 
     @Test

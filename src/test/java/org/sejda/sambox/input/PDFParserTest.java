@@ -35,6 +35,19 @@ import org.sejda.sambox.util.SpecVersionUtils;
  */
 public class PDFParserTest
 {
+    @Test
+    public void positive() throws IOException
+    {
+        assertNotNull(PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/simple_test.pdf"))));
+    }
+
+    @Test
+    public void positiveIncremental() throws IOException
+    {
+        assertNotNull(PDFParser.parseToIncrement(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/simple_test.pdf"))));
+    }
 
     @Test(expected = IOException.class)
     public void notAPdf() throws IOException
@@ -52,7 +65,7 @@ public class PDFParserTest
             assertNotNull(doc);
             assertFalse(doc.isEncrypted());
             assertTrue(doc.isOpen());
-            assertEquals(SpecVersionUtils.V1_4, doc.getVersion());
+            assertEquals(SpecVersionUtils.V1_5, doc.getVersion());
         }
     }
 
@@ -80,7 +93,7 @@ public class PDFParserTest
             assertNotNull(doc);
             assertFalse(doc.isEncrypted());
             assertTrue(doc.isOpen());
-            assertEquals(SpecVersionUtils.V1_4, doc.getVersion());
+            assertEquals(SpecVersionUtils.V1_5, doc.getVersion());
         }
     }
 

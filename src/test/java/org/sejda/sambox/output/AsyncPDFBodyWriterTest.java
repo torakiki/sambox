@@ -108,6 +108,6 @@ public class AsyncPDFBodyWriterTest
         {
             victim.write(document.getDocument());
         }
-        verify(writer, timeout(1000).times(8)).writeObjectIfNotWritten(any());
+        verify(writer, timeout(1000).times(9)).writeObjectIfNotWritten(any());
     }
 }

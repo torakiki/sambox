@@ -75,7 +75,7 @@ public class LazyIndirectObjectsProviderTest
     @Test
     public void get()
     {
-        COSBase dictionary = victim.get(new COSObjectKey(3, 0));
+        COSBase dictionary = victim.get(new COSObjectKey(4, 0));
         assertThat(dictionary, is(instanceOf(COSDictionary.class)));
         assertNotNull(((COSDictionary) dictionary).getItem(COSName.ANNOTS));
     }

@@ -99,6 +99,36 @@ public class DefaultPDFWriterTest
     }
 
     @Test
+    public void writeIncrementalXrefTable() throws IOException
+    {
+        IndirectCOSObjectReference ref = new IndirectCOSObjectReference(1, 0, COSInteger.get(100));
+        IndirectCOSObjectReference ref2 = new IndirectCOSObjectReference(2, 0, COSInteger.get(200));
+        IndirectCOSObjectReference ref3 = new IndirectCOSObjectReference(3, 0, COSInteger.get(300));
+        IndirectCOSObjectReference ref4 = new IndirectCOSObjectReference(8, 0, COSInteger.get(400));
+        InOrder inOrder = Mockito.inOrder(writer);
+        when(writer.offset()).thenReturn(1l);
+        objectWriter.writeObject(ref);
+        when(writer.offset()).thenReturn(2l);
+        objectWriter.writeObject(ref2);
+        when(writer.offset()).thenReturn(3l);
+        objectWriter.writeObject(ref3);
+        when(writer.offset()).thenReturn(4l);
+        objectWriter.writeObject(ref4);
+        assertEquals(4, victim.writeIncrementalXrefTable());
+        inOrder.verify(writer).write("xref");
+        inOrder.verify(writer).writeEOL();
+        inOrder.verify(writer).write("0 4");
+        inOrder.verify(writer).writeEOL();
+        inOrder.verify(writer).write(XrefEntry.DEFAULT_FREE_ENTRY.toXrefTableEntry());
+        inOrder.verify(writer).write(ref.xrefEntry().toXrefTableEntry());
+        inOrder.verify(writer).write(ref2.xrefEntry().toXrefTableEntry());
+        inOrder.verify(writer).write(ref3.xrefEntry().toXrefTableEntry());
+        inOrder.verify(writer).write("8 1");
+        inOrder.verify(writer).writeEOL();
+        inOrder.verify(writer).write(ref4.xrefEntry().toXrefTableEntry());
+    }
+
+    @Test
     public void writeTrailerSomeKeysAreRemoved() throws IOException
     {
         IndirectCOSObjectReference ref = new IndirectCOSObjectReference(1, 0, COSInteger.get(100));
@@ -157,6 +187,16 @@ public class DefaultPDFWriterTest
     }
 
     @Test
+    public void writeTrailerWithPrev() throws IOException
+    {
+        IndirectCOSObjectReference ref = new IndirectCOSObjectReference(1, 0, COSInteger.get(100));
+        objectWriter.writeObject(ref);
+        COSDictionary existingTrailer = new COSDictionary();
+        victim.writeTrailer(existingTrailer, 10, 123);
+        assertEquals(123, existingTrailer.getLong(COSName.PREV));
+    }
+
+    @Test
     public void writeXrefStream() throws IOException
     {
         COSDictionary existingTrailer = new COSDictionary();
@@ -176,6 +216,17 @@ public class DefaultPDFWriterTest
         inOrder.verify(writer).writeEOL();
         inOrder.verify(writer).write("12345");
         inOrder.verify(writer).writeEOL();
+    }
+
+    @Test
+    public void writeXrefStreamWithPrev() throws IOException
+    {
+        COSDictionary existingTrailer = new COSDictionary();
+        IndirectCOSObjectReference ref = new IndirectCOSObjectReference(1, 0, COSInteger.get(100));
+        when(writer.offset()).thenReturn(12345l);
+        objectWriter.writeObject(ref);
+        victim.writeXrefStream(existingTrailer, 123);
+        assertEquals(123, existingTrailer.getLong(COSName.PREV));
     }
 
     @Test
