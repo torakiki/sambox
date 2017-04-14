@@ -27,10 +27,13 @@ import java.io.IOException;
 
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
+import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSObjectable;
 import org.sejda.sambox.pdmodel.MissingResourceException;
 import org.sejda.sambox.pdmodel.PDResources;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A color space specifies how the colours of graphics objects will be painted on the page.
@@ -40,6 +43,8 @@ import org.sejda.sambox.pdmodel.PDResources;
  */
 public abstract class PDColorSpace implements COSObjectable
 {
+    private static final Logger LOG = LoggerFactory.getLogger(PDColorSpace.class);
+
     /**
      * Creates a color space given a name or array.
      * 
@@ -197,10 +202,18 @@ public abstract class PDColorSpace implements COSObjectable
                 throw new IOException("Invalid color space kind: " + name);
             }
         }
-        else
+        else if (colorSpace instanceof COSDictionary)
         {
-            throw new IOException("Expected a name or array but got: " + colorSpace);
+            COSDictionary csAsDic = (COSDictionary) colorSpace;
+            if (csAsDic.containsKey(COSName.COLORSPACE))
+            {
+                LOG.warn("Found invalid color space defined as dictionary {}", csAsDic);
+                return create(csAsDic.getDictionaryObject(COSName.COLORSPACE), resources,
+                        wasDefault);
+            }
         }
+
+        throw new IOException("Expected a name or array but got: " + colorSpace);
     }
 
     // array for the given parameters
