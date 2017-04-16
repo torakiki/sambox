@@ -32,7 +32,7 @@ import org.junit.Test;
 import org.sejda.sambox.SAMBox;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.output.ObjectsStreamPDFBodyWriter.ObjectsStream;
+import org.sejda.sambox.output.ObjectsStreamPDFBodyObjectsWriter.ObjectsStream;
 
 /**
  * @author Andrea Vacondio
@@ -52,7 +52,7 @@ public class ObjectsStreamTest
     }
 
     @After
-    public void tearDown() throws IOException
+    public void tearDown()
     {
         IOUtils.closeQuietly(victim);
     }

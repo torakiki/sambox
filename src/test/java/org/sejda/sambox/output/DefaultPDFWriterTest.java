@@ -77,28 +77,6 @@ public class DefaultPDFWriterTest
     }
 
     @Test
-    public void writeXrefTable() throws IOException
-    {
-        IndirectCOSObjectReference ref = new IndirectCOSObjectReference(1, 0, COSInteger.get(100));
-        IndirectCOSObjectReference ref2 = new IndirectCOSObjectReference(3, 0, COSInteger.get(200));
-        InOrder inOrder = Mockito.inOrder(writer);
-        when(writer.offset()).thenReturn(12345l);
-        objectWriter.writeObject(ref);
-        when(writer.offset()).thenReturn(54321l);
-        objectWriter.writeObject(ref2);
-        when(writer.offset()).thenReturn(98765l);
-        assertEquals(98765, victim.writeXrefTable());
-        inOrder.verify(writer).write("xref");
-        inOrder.verify(writer).writeEOL();
-        inOrder.verify(writer).write("0 3");
-        inOrder.verify(writer).writeEOL();
-        inOrder.verify(writer).write(XrefEntry.DEFAULT_FREE_ENTRY.toXrefTableEntry());
-        inOrder.verify(writer).write(ref.xrefEntry().toXrefTableEntry());
-        inOrder.verify(writer).write(XrefEntry.DEFAULT_FREE_ENTRY.toXrefTableEntry());
-        inOrder.verify(writer).write(ref2.xrefEntry().toXrefTableEntry());
-    }
-
-    @Test
     public void writeIncrementalXrefTable() throws IOException
     {
         IndirectCOSObjectReference ref = new IndirectCOSObjectReference(1, 0, COSInteger.get(100));
@@ -114,7 +92,7 @@ public class DefaultPDFWriterTest
         objectWriter.writeObject(ref3);
         when(writer.offset()).thenReturn(4l);
         objectWriter.writeObject(ref4);
-        assertEquals(4, victim.writeIncrementalXrefTable());
+        assertEquals(4, victim.writeXrefTable());
         inOrder.verify(writer).write("xref");
         inOrder.verify(writer).writeEOL();
         inOrder.verify(writer).write("0 4");

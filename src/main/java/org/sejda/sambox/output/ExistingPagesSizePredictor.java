@@ -39,30 +39,23 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Andrea Vacondio
  */
-public class ExistingPagesSizePredictor extends AbstractPDFBodyWriter
+public class ExistingPagesSizePredictor extends PDFBodyWriter
 {
     private static final Logger LOG = LoggerFactory.getLogger(ExistingPagesSizePredictor.class);
 
     // stream, endstream and 2x CRLF
     private static final int STREAM_WRAPPING_SIZE = 19;
-
+    private CountingWritableByteChannel channel;
     private IndirectObjectsWriter writer;
-    private CountingWritableByteChannel channel = CountingWritableByteChannel
-            .from(new DevNullWritableByteChannel());
-    private long streamsSize;
+
     private long pages;
 
-    public ExistingPagesSizePredictor(WriteOption... opts)
+    private ExistingPagesSizePredictor(PDFWriteContext context, IndirectObjectsWriter writer,
+            CountingWritableByteChannel channel)
     {
-        super(new PDFWriteContext(null, opts));
-        this.writer = new IndirectObjectsWriter(channel, context())
-        {
-            @Override
-            protected void onWritten(IndirectCOSObjectReference ref)
-            {
-                // don't release
-            }
-        };
+        super(context, new BodyObjectsWriter(context, writer));
+        this.channel = channel;
+        this.writer = writer;
     }
 
     /**
@@ -112,7 +105,7 @@ public class ExistingPagesSizePredictor extends AbstractPDFBodyWriter
     public long predictedPagesSize() throws IOException
     {
         writer.writer().writer().flush();
-        return streamsSize + channel.count();
+        return ((BodyObjectsWriter) objectsWriter).streamsSize + channel.count();
     }
 
     /**
@@ -123,31 +116,6 @@ public class ExistingPagesSizePredictor extends AbstractPDFBodyWriter
     {
         // each entry is 21 bytes plus the xref keyword and section header
         return (21 * (context().written() + 1)) + 10;
-    }
-
-    @Override
-    void writeObject(IndirectCOSObjectReference ref) throws IOException
-    {
-        if (!context().hasWritten(ref.xrefEntry()))
-        {
-            COSBase wrapped = ref.getCOSObject().getCOSObject();
-            if (wrapped instanceof COSStream)
-            {
-                COSStream stream = (COSStream) wrapped;
-                // we don't simulate the write of the whole stream, we just save the expected size and simulate the
-                // dictionary write
-                streamsSize += stream.getFilteredLength();
-                streamsSize += STREAM_WRAPPING_SIZE;
-                ref.setValue(stream.duplicate());
-            }
-        }
-        writer.writeObject(ref);
-    }
-
-    @Override
-    void onCompletion()
-    {
-        // no op
     }
 
     /**
@@ -171,5 +139,71 @@ public class ExistingPagesSizePredictor extends AbstractPDFBodyWriter
     {
         super.close();
         IOUtils.close(writer);
+    }
+
+    /**
+     * Factory method for an ExistingPagesSizePredictor
+     * 
+     * @param opts
+     * @return
+     */
+    public static ExistingPagesSizePredictor instance(WriteOption... opts)
+    {
+        CountingWritableByteChannel channel = CountingWritableByteChannel
+                .from(new DevNullWritableByteChannel());
+        PDFWriteContext context = new PDFWriteContext(null, opts);
+        IndirectObjectsWriter writer = new IndirectObjectsWriter(channel, context)
+        {
+            @Override
+            protected void onWritten(IndirectCOSObjectReference ref)
+            {
+                // don't release
+            }
+        };
+        return new ExistingPagesSizePredictor(context, writer, channel);
+    }
+
+    private static class BodyObjectsWriter implements PDFBodyObjectsWriter
+    {
+        long streamsSize;
+        private PDFWriteContext context;
+        private IndirectObjectsWriter writer;
+
+        public BodyObjectsWriter(PDFWriteContext context, IndirectObjectsWriter writer)
+        {
+            this.context = context;
+            this.writer = writer;
+        }
+
+        @Override
+        public void writeObject(IndirectCOSObjectReference ref) throws IOException
+        {
+            if (!context.hasWritten(ref.xrefEntry()))
+            {
+                COSBase wrapped = ref.getCOSObject().getCOSObject();
+                if (wrapped instanceof COSStream)
+                {
+                    COSStream stream = (COSStream) wrapped;
+                    // we don't simulate the write of the whole stream, we just save the expected size and simulate the
+                    // dictionary write
+                    streamsSize += stream.getFilteredLength();
+                    streamsSize += STREAM_WRAPPING_SIZE;
+                    ref.setValue(stream.duplicate());
+                }
+            }
+            writer.writeObject(ref);
+        }
+
+        @Override
+        public void onWriteCompletion()
+        {
+            // no op
+        }
+
+        @Override
+        public void close()
+        {
+            // no op
+        }
     }
 }

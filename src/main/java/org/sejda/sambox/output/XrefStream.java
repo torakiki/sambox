@@ -22,6 +22,7 @@ import static org.sejda.sambox.xref.XrefEntry.freeEntry;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -53,19 +54,24 @@ class XrefStream extends COSStream
         super(dictionary);
         setName(COSName.TYPE, COSName.XREF.getName());
         setItem(COSName.SIZE, asDirect(context.highestWritten().getObjectNumber() + 1));
-        setItem(COSName.INDEX,
-                new COSArray(asDirect(context.lowestWritten().getObjectNumber()),
-                        asDirect(context.highestWritten().getObjectNumber()
-                                - context.lowestWritten().getObjectNumber() + 1)));
+        COSArray index = new COSArray();
+        for (List<Long> continuos : context.getWrittenContiguousGroups())
+        {
+            index.add(asDirect(continuos.get(0)));
+            index.add(asDirect(continuos.size()));
+        }
+        setItem(COSName.INDEX, index);
         int secondFieldLength = sizeOf(context.highestWritten().getByteOffset());
         setItem(COSName.W, new COSArray(asDirect(1), asDirect(secondFieldLength), asDirect(2)));
         try (OutputStream out = createUnfilteredStream())
         {
-            for (long key = context.lowestWritten().getObjectNumber(); key <= context
-                    .highestWritten().getObjectNumber(); key++)
+            for (List<Long> continuos : context.getWrittenContiguousGroups())
             {
-                out.write(Optional.ofNullable(context.getWritten(key)).orElse(freeEntry(key, 0))
-                        .toXrefStreamEntry(secondFieldLength, 2));
+                for (long key : continuos)
+                {
+                    out.write(Optional.ofNullable(context.getWritten(key)).orElse(freeEntry(key, 0))
+                            .toXrefStreamEntry(secondFieldLength, 2));
+                }
             }
         }
         setItem(COSName.DL, asDirect(getUnfilteredLength()));

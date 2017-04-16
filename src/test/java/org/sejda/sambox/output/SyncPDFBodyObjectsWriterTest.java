@@ -16,33 +16,31 @@
  */
 package org.sejda.sambox.output;
 
-import org.sejda.sambox.cos.COSBase;
-import org.sejda.sambox.input.ExistingIndirectCOSObject;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
+import org.junit.Test;
+import org.sejda.sambox.cos.IndirectCOSObjectReference;
 
 /**
- * Synchronous body writer for incremental updates.
- * 
  * @author Andrea Vacondio
+ *
  */
-public class IncrementalPDFBodyWriter extends PDFBodyWriter
+public class SyncPDFBodyObjectsWriterTest
 {
-
-    IncrementalPDFBodyWriter(PDFWriteContext context, PDFBodyObjectsWriter objectsWriter)
+    @Test(expected = IllegalArgumentException.class)
+    public void nullConstructor()
     {
-        super(context, objectsWriter);
+        new SyncPDFBodyObjectsWriter(null);
     }
 
-    @Override
-    void createIndirectReferenceIfNeededFor(COSBase item)
+    @Test
+    public void writeObject() throws Exception
     {
-        if (item instanceof ExistingIndirectCOSObject)
-        {
-            context().addExistingReference((ExistingIndirectCOSObject) item);
-        }
-        else
-        {
-            super.createIndirectReferenceIfNeededFor(item);
-        }
+        IndirectObjectsWriter writer = mock(IndirectObjectsWriter.class);
+        SyncPDFBodyObjectsWriter victim = new SyncPDFBodyObjectsWriter(writer);
+        IndirectCOSObjectReference ref = mock(IndirectCOSObjectReference.class);
+        victim.writeObject(ref);
+        verify(writer).writeObjectIfNotWritten(ref);
     }
-
 }

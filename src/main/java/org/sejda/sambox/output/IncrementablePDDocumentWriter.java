@@ -100,19 +100,28 @@ public class IncrementablePDDocumentWriter implements Closeable
 
     private void writeBody(IncrementablePDDocument document) throws IOException
     {
-        try (AbstractPDFBodyWriter bodyWriter = objectStreamWriter(
-                new IncrementalPDFBodyWriter(writer.writer(), context)))
+        try (PDFBodyWriter bodyWriter = new IncrementalPDFBodyWriter(context,
+                objectStreamWriter(objectsWriter())))
         {
-            LOG.debug("Writing body using " + bodyWriter.getClass());
+            LOG.debug("Writing body using " + bodyWriter.objectsWriter.getClass());
             bodyWriter.write(document);
         }
     }
 
-    private AbstractPDFBodyWriter objectStreamWriter(AbstractPDFBodyWriter wrapped)
+    private PDFBodyObjectsWriter objectsWriter()
+    {
+        if (context.hasWriteOption(WriteOption.SYNC_BODY_WRITE))
+        {
+            return new SyncPDFBodyObjectsWriter(writer.writer());
+        }
+        return new AsyncPDFBodyObjectsWriter(writer.writer());
+    }
+
+    private PDFBodyObjectsWriter objectStreamWriter(PDFBodyObjectsWriter wrapped)
     {
         if (context.hasWriteOption(WriteOption.OBJECT_STREAMS))
         {
-            return new ObjectsStreamPDFBodyWriter(wrapped);
+            return new ObjectsStreamPDFBodyObjectsWriter(context, wrapped);
         }
         return wrapped;
     }
@@ -128,7 +137,7 @@ public class IncrementablePDDocumentWriter implements Closeable
         }
         else
         {
-            long startxref = writer.writeIncrementalXrefTable();
+            long startxref = writer.writeXrefTable();
             writer.writeTrailer(document.trailer().getCOSObject(), startxref,
                     document.trailer().xrefOffset());
         }

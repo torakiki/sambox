@@ -16,8 +16,8 @@
  */
 package org.sejda.sambox.output;
 
-import static java.util.Optional.ofNullable;
 import static org.sejda.sambox.util.CharUtils.ASCII_SPACE;
+import static org.sejda.util.RequireUtils.requireNotNullArg;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -40,40 +40,42 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * {@link AbstractPDFBodyWriter} implementation where objects are written to an Object Stream and later the stream is
- * written as COSStream using the wrapped {@link AbstractPDFBodyWriter}
+ * Implementation of a PDFBodyObjectsWriter where objects are written to an ObjectsStream and later the ObjectsStream is
+ * written as COSStream using the delegate {@link PDFBodyObjectsWriter}
  * 
  * @author Andrea Vacondio
- *
  */
-class ObjectsStreamPDFBodyWriter extends AbstractPDFBodyWriter
+public class ObjectsStreamPDFBodyObjectsWriter implements PDFBodyObjectsWriter
 {
-    private static final Logger LOG = LoggerFactory.getLogger(ObjectsStreamPDFBodyWriter.class);
+    private static final Logger LOG = LoggerFactory
+            .getLogger(ObjectsStreamPDFBodyObjectsWriter.class);
 
-    private AbstractPDFBodyWriter wrapped;
+    private PDFWriteContext context;
+    private PDFBodyObjectsWriter delegate;
     private ObjectsStream currentStream;
 
-    public ObjectsStreamPDFBodyWriter(AbstractPDFBodyWriter wrapped)
+    public ObjectsStreamPDFBodyObjectsWriter(PDFWriteContext context, PDFBodyObjectsWriter delegate)
     {
-        super(ofNullable(wrapped).map(AbstractPDFBodyWriter::context)
-                .orElseThrow(() -> new IllegalArgumentException("Wrapped writer cannot be null")));
-        this.wrapped = wrapped;
-        currentStream = new ObjectsStream(context());
-        context().createIndirectReferenceFor(currentStream);
+        requireNotNullArg(context, "Write context cannot be null");
+        requireNotNullArg(delegate, "Delegate writer cannot be null");
+        this.context = context;
+        this.delegate = delegate;
+        currentStream = new ObjectsStream(context);
+        context.createIndirectReferenceFor(currentStream);
     }
 
     @Override
-    void writeObject(IndirectCOSObjectReference ref) throws IOException
+    public void writeObject(IndirectCOSObjectReference ref) throws IOException
     {
         if (ref instanceof NonStorableInObjectStreams
                 || ref.getCOSObject().getCOSObject() instanceof COSStream)
         {
-            wrapped.writeObject(ref);
+            delegate.writeObject(ref);
         }
         else
         {
-            IndirectCOSObjectReference streamRef = context().getIndirectReferenceFor(currentStream);
-            context().addWritten(
+            IndirectCOSObjectReference streamRef = context.getIndirectReferenceFor(currentStream);
+            context.addWritten(
                     CompressedXrefEntry.compressedEntry(ref.xrefEntry().getObjectNumber(),
                             streamRef.xrefEntry().getObjectNumber(), currentStream.counter));
             currentStream.addItem(ref);
@@ -82,40 +84,40 @@ class ObjectsStreamPDFBodyWriter extends AbstractPDFBodyWriter
         if (currentStream.isFull())
         {
             doWriteObjectsStream();
-            currentStream = new ObjectsStream(context());
-            context().createIndirectReferenceFor(currentStream);
+            currentStream = new ObjectsStream(context);
+            context.createIndirectReferenceFor(currentStream);
         }
+
     }
 
     private void doWriteObjectsStream() throws IOException
     {
-        IndirectCOSObjectReference ref = context().getIndirectReferenceFor(currentStream);
+        IndirectCOSObjectReference ref = context.getIndirectReferenceFor(currentStream);
         LOG.debug("Writing object stream {}", ref);
         currentStream.prepareForWriting();
-        IndirectCOSObjectReference length = context()
+        IndirectCOSObjectReference length = context
                 .createNonStorableInObjectStreamIndirectReference();
         currentStream.setItem(COSName.LENGTH, length);
-        wrapped.writeObject(ref);
+        delegate.writeObject(ref);
         LOG.trace("Writing object stream length {}", length);
-        wrapped.writeObject(length);
+        delegate.writeObject(length);
     }
 
     @Override
-    void onCompletion() throws IOException
+    public void onWriteCompletion() throws IOException
     {
         if (currentStream.hasItems())
         {
             doWriteObjectsStream();
         }
         // complete writing
-        wrapped.onCompletion();
+        delegate.onWriteCompletion();
     }
 
     @Override
     public void close() throws IOException
     {
-        IOUtils.close(wrapped);
-        super.close();
+        IOUtils.close(delegate);
         currentStream = null;
     }
 

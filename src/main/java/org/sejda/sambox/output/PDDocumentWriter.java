@@ -89,27 +89,28 @@ public class PDDocumentWriter implements Closeable
 
     private void writeBody(COSDocument document) throws IOException
     {
-        try (AbstractPDFBodyWriter bodyWriter = objectStreamWriter(bodyWriter()))
+        try (PDFBodyWriter bodyWriter = new PDFBodyWriter(context,
+                objectStreamWriter(objectsWriter())))
         {
-            LOG.debug("Writing body using " + bodyWriter.getClass());
+            LOG.debug("Writing body using " + bodyWriter.objectsWriter.getClass());
             bodyWriter.write(document);
         }
     }
 
-    private AbstractPDFBodyWriter bodyWriter()
+    private PDFBodyObjectsWriter objectsWriter()
     {
         if (context.hasWriteOption(WriteOption.SYNC_BODY_WRITE))
         {
-            return new SyncPDFBodyWriter(writer.writer(), context);
+            return new SyncPDFBodyObjectsWriter(writer.writer());
         }
-        return new AsyncPDFBodyWriter(writer.writer(), context);
+        return new AsyncPDFBodyObjectsWriter(writer.writer());
     }
 
-    private AbstractPDFBodyWriter objectStreamWriter(AbstractPDFBodyWriter wrapped)
+    private PDFBodyObjectsWriter objectStreamWriter(PDFBodyObjectsWriter wrapped)
     {
         if (context.hasWriteOption(WriteOption.OBJECT_STREAMS))
         {
-            return new ObjectsStreamPDFBodyWriter(wrapped);
+            return new ObjectsStreamPDFBodyObjectsWriter(context, wrapped);
         }
         return wrapped;
     }

@@ -30,15 +30,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Asynchronous implementation of an {@link AbstractPDFBodyWriter} where a objects are written submitting a task to a
- * single thread executor service.
+ * Implementation of a PDFBodyObjectsWriter that asynchronously writes {@link IndirectCOSObjectReference}. Objects are
+ * written submitting a task to a single thread executor service.
  * 
  * @author Andrea Vacondio
  *
  */
-class AsyncPDFBodyWriter extends AbstractPDFBodyWriter
+class AsyncPDFBodyObjectsWriter implements PDFBodyObjectsWriter
 {
-    private static final Logger LOG = LoggerFactory.getLogger(AsyncPDFBodyWriter.class);
+
+    private static final Logger LOG = LoggerFactory.getLogger(AsyncPDFBodyObjectsWriter.class);
 
     private ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactory()
     {
@@ -51,41 +52,14 @@ class AsyncPDFBodyWriter extends AbstractPDFBodyWriter
     private AtomicReference<IOException> executionException = new AtomicReference<>();
     private IndirectObjectsWriter writer;
 
-    AsyncPDFBodyWriter(IndirectObjectsWriter writer, PDFWriteContext context)
+    AsyncPDFBodyObjectsWriter(IndirectObjectsWriter writer)
     {
-        super(context);
         requireNotNullArg(writer, "Cannot write to a null writer");
         this.writer = writer;
     }
 
     @Override
-    void onCompletion() throws IOException
-    {
-        assertCanSubmitAsyncTask();
-        try
-        {
-            executor.submit(() -> {
-                IOException previous = executionException.get();
-                if (previous != null)
-                {
-                    throw previous;
-                }
-                LOG.debug("Written document body");
-                return null;
-            }).get();
-        }
-        catch (InterruptedException e)
-        {
-            throw new IOException(e);
-        }
-        catch (ExecutionException e)
-        {
-            throw new IOException(e.getCause());
-        }
-    }
-
-    @Override
-    void writeObject(IndirectCOSObjectReference ref) throws IOException
+    public void writeObject(IndirectCOSObjectReference ref) throws IOException
     {
         assertCanSubmitAsyncTask();
         executor.execute(() -> {
@@ -118,10 +92,35 @@ class AsyncPDFBodyWriter extends AbstractPDFBodyWriter
     }
 
     @Override
-    public void close() throws IOException
+    public void onWriteCompletion() throws IOException
     {
-        super.close();
-        executor.shutdown();
+        assertCanSubmitAsyncTask();
+        try
+        {
+            executor.submit(() -> {
+                IOException previous = executionException.get();
+                if (previous != null)
+                {
+                    throw previous;
+                }
+                LOG.debug("Written document body");
+                return null;
+            }).get();
+        }
+        catch (InterruptedException e)
+        {
+            throw new IOException(e);
+        }
+        catch (ExecutionException e)
+        {
+            throw new IOException(e.getCause());
+        }
+
     }
 
+    @Override
+    public void close()
+    {
+        executor.shutdown();
+    }
 }

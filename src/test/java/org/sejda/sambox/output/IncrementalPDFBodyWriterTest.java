@@ -33,14 +33,14 @@ public class IncrementalPDFBodyWriterTest
 
     private IncrementalPDFBodyWriter victim;
     private PDFWriteContext context;
-    private IndirectObjectsWriter writer;
+    private PDFBodyObjectsWriter writer;
 
     @Before
     public void setUp()
     {
-        writer = mock(IndirectObjectsWriter.class);
+        writer = mock(PDFBodyObjectsWriter.class);
         context = mock(PDFWriteContext.class);
-        victim = new IncrementalPDFBodyWriter(writer, context);
+        victim = new IncrementalPDFBodyWriter(context, writer);
     }
 
     @Test

@@ -23,7 +23,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 
@@ -40,25 +39,30 @@ import org.sejda.sambox.xref.CompressedXrefEntry;
  * @author Andrea Vacondio
  *
  */
-public class ObjectsStreamPDFBodyWriterTest
+public class ObjectsStreamPDFBodyObjectsWriterTest
 {
-    private AbstractPDFBodyWriter writer;
-    private ObjectsStreamPDFBodyWriter victim;
+    private PDFBodyObjectsWriter delegate;
+    private ObjectsStreamPDFBodyObjectsWriter victim;
     private PDFWriteContext context;
 
     @Before
     public void setUp()
     {
-        this.writer = mock(AbstractPDFBodyWriter.class);
+        this.delegate = mock(PDFBodyObjectsWriter.class);
         context = new PDFWriteContext(null);
-        when(writer.context()).thenReturn(context);
-        this.victim = new ObjectsStreamPDFBodyWriter(writer);
+        this.victim = new ObjectsStreamPDFBodyObjectsWriter(context, delegate);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void nullConstructor()
+    public void nullContext()
     {
-        new ObjectsStreamPDFBodyWriter(null);
+        new ObjectsStreamPDFBodyObjectsWriter(null, delegate);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void nullDelegate()
+    {
+        new ObjectsStreamPDFBodyObjectsWriter(context, null);
     }
 
     @Test
@@ -66,7 +70,7 @@ public class ObjectsStreamPDFBodyWriterTest
     {
         IndirectCOSObjectReference ref = new IndirectCOSObjectReference(1, 0, new COSStream());
         this.victim.writeObject(ref);
-        verify(writer).writeObject(ref);
+        verify(delegate).writeObject(ref);
     }
 
     @Test
@@ -79,39 +83,39 @@ public class ObjectsStreamPDFBodyWriterTest
     }
 
     @Test
-    public void onCompletionDelegate() throws IOException
+    public void fillingStreamWritesItDown() throws IOException
     {
-        victim.onCompletion();
-        verify(writer).onCompletion();
+        System.setProperty(SAMBox.OBJECTS_STREAM_SIZE_PROPERTY, "2");
+        victim.writeObject(new IndirectCOSObjectReference(2, 0, COSInteger.THREE));
+        verify(delegate, never()).writeObject(any());
+        victim.writeObject(new IndirectCOSObjectReference(3, 0, COSInteger.THREE));
+        // stream and length
+        verify(delegate, times(2)).writeObject(any());
+        System.getProperties().remove(SAMBox.OBJECTS_STREAM_SIZE_PROPERTY);
+    }
+
+    @Test
+    public void onWriteCompletionWritesDown() throws IOException
+    {
+        victim.writeObject(new IndirectCOSObjectReference(2, 0, COSInteger.THREE));
+        victim.writeObject(new IndirectCOSObjectReference(3, 0, COSInteger.THREE));
+        verify(delegate, never()).writeObject(any());
+        victim.onWriteCompletion();
+        // stream and length
+        verify(delegate, times(2)).writeObject(any());
+    }
+
+    @Test
+    public void onWriteCompletion() throws IOException
+    {
+        victim.onWriteCompletion();
+        verify(delegate).onWriteCompletion();
     }
 
     @Test
     public void closeDelegate() throws IOException
     {
         victim.close();
-        verify(writer).close();
-    }
-
-    @Test
-    public void fillingStreamWritesItDown() throws IOException
-    {
-        System.setProperty(SAMBox.OBJECTS_STREAM_SIZE_PROPERTY, "2");
-        victim.writeObject(new IndirectCOSObjectReference(2, 0, COSInteger.THREE));
-        verify(writer, never()).writeObject(any());
-        victim.writeObject(new IndirectCOSObjectReference(3, 0, COSInteger.THREE));
-        // stream and length
-        verify(writer, times(2)).writeObject(any());
-        System.getProperties().remove(SAMBox.OBJECTS_STREAM_SIZE_PROPERTY);
-    }
-
-    @Test
-    public void onCompletionWritesDown() throws IOException
-    {
-        victim.writeObject(new IndirectCOSObjectReference(2, 0, COSInteger.THREE));
-        victim.writeObject(new IndirectCOSObjectReference(3, 0, COSInteger.THREE));
-        verify(writer, never()).writeObject(any());
-        victim.onCompletion();
-        // stream and length
-        verify(writer, times(2)).writeObject(any());
+        verify(delegate).close();
     }
 }

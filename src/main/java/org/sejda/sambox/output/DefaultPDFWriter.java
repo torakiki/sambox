@@ -80,32 +80,6 @@ class DefaultPDFWriter implements Closeable
         }
         writer().write("xref");
         writer().writeEOL();
-        writer().write("0 " + writer.context().written());
-        writer().writeEOL();
-        for (long key = 0; key <= writer.context().highestWritten().getObjectNumber(); key++)
-        {
-            writer().write(Optional.ofNullable(writer.context().getWritten(key))
-                    .orElse(XrefEntry.DEFAULT_FREE_ENTRY).toXrefTableEntry());
-        }
-        return startxref;
-    }
-
-    /**
-     * writes the xref table in an incremental update
-     * 
-     * @return
-     * @throws IOException
-     */
-    public long writeIncrementalXrefTable() throws IOException
-    {
-        long startxref = writer().offset();
-        LOG.debug("Writing xref table at offset " + startxref);
-        if (nonNull(writer.context().addWritten(XrefEntry.DEFAULT_FREE_ENTRY)))
-        {
-            LOG.warn("Reserved object number 0 has been overwritten with the expected free entry");
-        }
-        writer().write("xref");
-        writer().writeEOL();
         for (List<Long> continuos : writer.context().getWrittenContiguousGroups())
         {
             writer().write(continuos.get(0).toString() + " " + continuos.size());

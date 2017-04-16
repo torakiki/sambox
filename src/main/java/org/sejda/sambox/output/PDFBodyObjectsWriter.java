@@ -16,43 +16,26 @@
  */
 package org.sejda.sambox.output;
 
-import static org.sejda.util.RequireUtils.requireNotNullArg;
-
+import java.io.Closeable;
 import java.io.IOException;
 
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- * Synchronous implementation of an {@link AbstractPDFBodyWriter}.
+ * Component responsible for writing pdf body objects
  * 
  * @author Andrea Vacondio
- *
  */
-class SyncPDFBodyWriter extends AbstractPDFBodyWriter
+public interface PDFBodyObjectsWriter extends Closeable
 {
-    private static final Logger LOG = LoggerFactory.getLogger(SyncPDFBodyWriter.class);
 
-    private IndirectObjectsWriter writer;
+    void writeObject(IndirectCOSObjectReference ref) throws IOException;
 
-    SyncPDFBodyWriter(IndirectObjectsWriter writer, PDFWriteContext context)
-    {
-        super(context);
-        requireNotNullArg(writer, "Cannot write to a null writer");
-        this.writer = writer;
-    }
-
-    @Override
-    void writeObject(IndirectCOSObjectReference ref) throws IOException
-    {
-        writer.writeObjectIfNotWritten(ref);
-    }
-
-    @Override
-    void onCompletion()
-    {
-        LOG.debug("Written document body");
-    }
+    /**
+     * callback to perform once all the objects have been written
+     * 
+     * @throws IOException
+     */
+    void onWriteCompletion() throws IOException;
 
 }

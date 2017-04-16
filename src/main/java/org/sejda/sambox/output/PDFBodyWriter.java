@@ -48,16 +48,19 @@ import org.sejda.sambox.input.IncrementablePDDocument;
  * 
  * @author Andrea Vacondio
  */
-abstract class AbstractPDFBodyWriter implements COSVisitor, Closeable
+class PDFBodyWriter implements COSVisitor, Closeable
 {
     private Queue<IndirectCOSObjectReference> stack = new LinkedList<>();
     private PDFWriteContext context;
     private boolean open = true;
+    PDFBodyObjectsWriter objectsWriter;
 
-    AbstractPDFBodyWriter(PDFWriteContext context)
+    PDFBodyWriter(PDFWriteContext context, PDFBodyObjectsWriter objectsWriter)
     {
         requireNotNullArg(context, "Write context cannot be null");
+        requireNotNullArg(objectsWriter, "Objects writer cannot be null");
         this.context = context;
+        this.objectsWriter = objectsWriter;
     }
 
     PDFWriteContext context()
@@ -115,25 +118,10 @@ abstract class AbstractPDFBodyWriter implements COSVisitor, Closeable
         {
             IndirectCOSObjectReference item = stack.poll();
             item.getCOSObject().accept(this);
-            writeObject(item);
+            objectsWriter.writeObject(item);
         }
-        onCompletion();
+        objectsWriter.onWriteCompletion();
     }
-
-    /**
-     * writes the given object
-     * 
-     * @param ref
-     * @throws IOException
-     */
-    abstract void writeObject(IndirectCOSObjectReference ref) throws IOException;
-
-    /**
-     * callback to perform once all the objects have been written
-     * 
-     * @throws IOException
-     */
-    abstract void onCompletion() throws IOException;
 
     @Override
     public void visit(COSArray array) throws IOException
@@ -202,6 +190,7 @@ abstract class AbstractPDFBodyWriter implements COSVisitor, Closeable
     @Override
     public void close() throws IOException
     {
+        objectsWriter.close();
         context = null;
         this.open = false;
     }

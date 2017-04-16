@@ -52,7 +52,7 @@ public class ExistingPagesSizePredictorTest
     @Before
     public void setUp() throws IOException
     {
-        victim = new ExistingPagesSizePredictor();
+        victim = ExistingPagesSizePredictor.instance();
         document = new PDDocument();
         page = new PDPage();
         document.addPage(page);
