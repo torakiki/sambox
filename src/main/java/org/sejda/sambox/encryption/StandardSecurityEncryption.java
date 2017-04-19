@@ -140,7 +140,7 @@ public enum StandardSecurityEncryption
     public COSDictionary generateEncryptionDictionary(EncryptionContext context)
     {
         COSDictionary encryptionDictionary = new COSDictionary();
-        encryptionDictionary.setName(COSName.FILTER, "Standard");
+        encryptionDictionary.setItem(COSName.FILTER, COSName.STANDARD);
         encryptionDictionary.setInt(COSName.V, this.version);
         encryptionDictionary.setInt(COSName.LENGTH, this.revision.length * 8);
         encryptionDictionary.setInt(COSName.R, this.revision.revisionNumber);

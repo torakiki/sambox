@@ -17,6 +17,7 @@
 package org.sejda.sambox.output;
 
 import static java.util.Optional.ofNullable;
+import static org.sejda.sambox.encryption.EncryptionContext.encryptionAlgorithmFromEncryptionDictionary;
 import static org.sejda.util.RequireUtils.requireNotNullArg;
 
 import java.io.Closeable;
@@ -68,8 +69,10 @@ public class IncrementablePDDocumentWriter implements Closeable
     public void write(IncrementablePDDocument document) throws IOException
     {
         requireNotNullArg(document, "Incremented document cannot be null");
+
         this.context = new PDFWriteContext(document.highestExistingReference().objectNumber(),
-                this.encryptionContext.map(EncryptionContext::encryptionAlgorithm).orElse(null),
+                encryptionAlgorithmFromEncryptionDictionary(document.encryptionDictionary(),
+                        document.encryptionKey()),
                 options);
         this.writer = new DefaultPDFWriter(new IndirectObjectsWriter(channel, context));
 
@@ -78,16 +81,7 @@ public class IncrementablePDDocumentWriter implements Closeable
         {
             document.requireMinVersion(SpecVersionUtils.V1_5);
         }
-        // TODO encryption
-        /**
-         * ofNullable(document.getDocument().getTrailer()).map(t -> t.getCOSObject()) .ifPresent(t ->
-         * t.removeItem(COSName.ENCRYPT));
-         * 
-         * encryptionContext.ifPresent(c -> { document.getDocument()
-         * .setEncryptionDictionary(c.security.encryption.generateEncryptionDictionary(c)); LOG.debug(
-         * "Generated encryption dictionary"); ofNullable(document.getDocumentCatalog().getMetadata()).map(m ->
-         * m.getCOSObject()) .ifPresent(str -> str.encryptable(c.security.encryptMetadata)); });
-         **/
+
         // TODO what to do if doc was corrupted and we did a fullscan
         try (InputStream stream = document.incrementedAsStream())
         {

@@ -72,4 +72,10 @@ class Algorithm1A implements GeneralEncryptionAlgorithm
     {
         // nothing
     }
+
+    @Override
+    public String toString()
+    {
+        return "Algorithm1A with engine " + engine;
+    }
 }

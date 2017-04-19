@@ -61,11 +61,6 @@ public class PDEncryption
     public static final int VERSION4_SECURITY_HANDLER = 4;
 
     /**
-     * The default security handler.
-     */
-    public static final String DEFAULT_NAME = "Standard";
-
-    /**
      * The default length for the encryption key.
      */
     public static final int DEFAULT_LENGTH = 40;

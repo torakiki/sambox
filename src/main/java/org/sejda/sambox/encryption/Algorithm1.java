@@ -110,6 +110,12 @@ class Algorithm1 implements GeneralEncryptionAlgorithm
         }
     }
 
+    @Override
+    public String toString()
+    {
+        return "Algorithm1 with engine " + engine;
+    }
+
     /**
      * Factory method for an {@link Algorithm1} with an {@link AESEngine}
      * 

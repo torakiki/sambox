@@ -20,7 +20,7 @@ import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.input.ExistingIndirectCOSObject;
 
 /**
- * Synchronous body writer for incremental updates.
+ * Body writer for incremental updates.
  * 
  * @author Andrea Vacondio
  */

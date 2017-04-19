@@ -77,7 +77,7 @@ public abstract class SecurityHandler
     protected int keyLength = DEFAULT_KEY_LENGTH;
 
     /** The encryption key that will used to encrypt / decrypt. */
-    protected byte[] encryptionKey;
+    private byte[] encryptionKey;
 
     /** The RC4 implementation used for cryptographic functions. */
     private final RC4Cipher rc4 = new RC4Cipher();
@@ -520,6 +520,16 @@ public abstract class SecurityHandler
     public void setAES(boolean aesValue)
     {
         useAES = aesValue;
+    }
+
+    public byte[] getEncryptionKey()
+    {
+        return encryptionKey;
+    }
+
+    protected void setEncryptionKey(byte[] encryptionKey)
+    {
+        this.encryptionKey = encryptionKey;
     }
 
     /**

@@ -46,6 +46,7 @@ import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.COSObjectKey;
 import org.sejda.sambox.cos.COSObjectable;
+import org.sejda.sambox.cos.COSString;
 import org.sejda.sambox.cos.DirectCOSObject;
 import org.sejda.sambox.cos.IndirectCOSObjectIdentifier;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
@@ -136,6 +137,17 @@ public class IncrementablePDDocument implements Closeable
                 .collect(Collectors.toList());
     }
 
+    public COSDictionary encryptionDictionary()
+    {
+        return incremented.getDocument().getEncryptionDictionary();
+    }
+
+    public byte[] encryptionKey()
+    {
+        return ofNullable(incremented.getSecurityHandler()).map(s -> s.getEncryptionKey())
+                .orElse(null);
+    }
+
     @Override
     public void close() throws IOException
     {
@@ -223,6 +235,7 @@ public class IncrementablePDDocument implements Closeable
                 .getDictionaryObject(COSName.ID, COSArray.class);
         if (nonNull(existingId) && existingId.size() == 2)
         {
+            ((COSString) existingId.get(0).getCOSObject()).encryptable(false);
             existingId.set(1, id);
             if (existingId.hasId())
             {

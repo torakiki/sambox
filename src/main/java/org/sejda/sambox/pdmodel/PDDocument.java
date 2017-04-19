@@ -54,6 +54,7 @@ import org.sejda.sambox.output.WriteOption;
 import org.sejda.sambox.pdmodel.common.PDStream;
 import org.sejda.sambox.pdmodel.encryption.AccessPermission;
 import org.sejda.sambox.pdmodel.encryption.PDEncryption;
+import org.sejda.sambox.pdmodel.encryption.SecurityHandler;
 import org.sejda.sambox.pdmodel.font.PDFont;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceRGB;
 import org.sejda.sambox.util.Version;
@@ -90,7 +91,7 @@ public class PDDocument implements Closeable
 
     private final COSDocument document;
     private PDDocumentCatalog documentCatalog;
-    private AccessPermission permission;
+    private SecurityHandler securityHandler;
     private boolean open = true;
     private OnClose onClose;
     private ResourceCache resourceCache = new DefaultResourceCache();
@@ -123,13 +124,12 @@ public class PDDocument implements Closeable
      * Constructor that uses an existing document. The COSDocument that is passed in must be valid.
      * 
      * @param document The COSDocument that this document wraps.
-     * @param permission he access permissions of the pdf
-     * 
+     * @param securityHandler
      */
-    public PDDocument(COSDocument document, AccessPermission permission)
+    public PDDocument(COSDocument document, SecurityHandler securityHandler)
     {
         this.document = document;
-        this.permission = permission;
+        this.securityHandler = securityHandler;
     }
 
     /**
@@ -312,7 +312,13 @@ public class PDDocument implements Closeable
      */
     public AccessPermission getCurrentAccessPermission()
     {
-        return ofNullable(permission).orElseGet(AccessPermission::getOwnerAccessPermission);
+        return ofNullable(securityHandler).map(s -> s.getCurrentAccessPermission())
+                .orElseGet(AccessPermission::getOwnerAccessPermission);
+    }
+
+    public SecurityHandler getSecurityHandler()
+    {
+        return securityHandler;
     }
 
     /**

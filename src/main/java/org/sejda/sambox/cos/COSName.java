@@ -460,6 +460,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName SOUND = newCommonInstance("Sound");
     public static final COSName SS = newCommonInstance("SS");
     public static final COSName ST = newCommonInstance("St");
+    public static final COSName STANDARD = newCommonInstance("Standard");
     public static final COSName STANDARD_ENCODING = newCommonInstance("StandardEncoding");
     public static final COSName STATE = newCommonInstance("State");
     public static final COSName STATE_MODEL = newCommonInstance("StateModel");
@@ -518,6 +519,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName URL = newCommonInstance("URL");
     // V
     public static final COSName V = newCommonInstance("V");
+    public static final COSName V2 = newCommonInstance("V2");
     public static final COSName VERISIGN_PPKVS = newCommonInstance("VeriSign.PPKVS");
     public static final COSName VERSION = newCommonInstance("Version");
     public static final COSName VERTICES = newCommonInstance("Vertices");

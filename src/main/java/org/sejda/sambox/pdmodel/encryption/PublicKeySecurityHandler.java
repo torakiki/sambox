@@ -195,8 +195,8 @@ public final class PublicKeySecurityHandler extends SecurityHandler
             byte[] mdResult = md.digest(sha1Input);
 
             // we have the encryption key ...
-            encryptionKey = new byte[this.keyLength / 8];
-            System.arraycopy(mdResult, 0, encryptionKey, 0, this.keyLength / 8);
+            setEncryptionKey(new byte[this.keyLength / 8]);
+            System.arraycopy(mdResult, 0, getEncryptionKey(), 0, this.keyLength / 8);
         }
         catch (CMSException e)
         {

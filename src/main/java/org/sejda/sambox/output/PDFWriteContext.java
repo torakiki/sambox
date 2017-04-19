@@ -72,6 +72,7 @@ class PDFWriteContext
             WriteOption... options)
     {
         this.encryptor = ofNullable(encryptor);
+        this.encryptor.ifPresent(e -> LOG.debug("Encryptor: {}", e));
         this.opts = Arrays.asList(options);
         this.referencesProvider = new IndirectReferenceProvider(highestExistingReferenceNumber);
     }

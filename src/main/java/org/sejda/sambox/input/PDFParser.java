@@ -158,7 +158,7 @@ public class PDFParser
             securityHandler.prepareForDecryption(encryption, document.getDocumentID(), Optional
                     .ofNullable(decryptionMaterial).orElse(new StandardDecryptionMaterial("")));
             parser.provider().initializeWith(securityHandler);
-            return new PDDocument(document, securityHandler.getCurrentAccessPermission());
+            return new PDDocument(document, securityHandler);
         }
         return new PDDocument(document);
     }

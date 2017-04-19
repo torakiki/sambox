@@ -166,8 +166,9 @@ public final class StandardSecurityHandler extends SecurityHandler
                         dicRevision, dicLength);
             }
 
-            encryptionKey = computeEncryptedKey(computedPassword, ownerKey, userKey, oe, ue,
-                    dicPermissions, documentIDBytes, dicRevision, dicLength, encryptMetadata, true);
+            setEncryptionKey(
+                    computeEncryptedKey(computedPassword, ownerKey, userKey, oe, ue, dicPermissions,
+                            documentIDBytes, dicRevision, dicLength, encryptMetadata, true));
         }
         else if (isUserPassword(password.getBytes(passwordCharset), userKey, ownerKey,
                 dicPermissions, documentIDBytes, dicRevision, dicLength, encryptMetadata))
@@ -175,9 +176,9 @@ public final class StandardSecurityHandler extends SecurityHandler
             currentAccessPermission = new AccessPermission(dicPermissions);
             setCurrentAccessPermission(currentAccessPermission);
 
-            encryptionKey = computeEncryptedKey(password.getBytes(passwordCharset), ownerKey,
+            setEncryptionKey(computeEncryptedKey(password.getBytes(passwordCharset), ownerKey,
                     userKey, oe, ue, dicPermissions, documentIDBytes, dicRevision, dicLength,
-                    encryptMetadata, false);
+                    encryptMetadata, false));
         }
         else
         {
@@ -233,7 +234,7 @@ public final class StandardSecurityHandler extends SecurityHandler
         try
         {
             BufferedBlockCipher cipher = new BufferedBlockCipher(new AESFastEngine());
-            cipher.init(false, new KeyParameter(encryptionKey));
+            cipher.init(false, new KeyParameter(getEncryptionKey()));
 
             byte[] buf = new byte[cipher.getOutputSize(encryption.getPerms().length)];
             int len = cipher.processBytes(encryption.getPerms(), 0, encryption.getPerms().length,
@@ -780,7 +781,7 @@ public final class StandardSecurityHandler extends SecurityHandler
             byte[] k = md.digest(input);
 
             byte[] e = null;
-            for (int round = 0; round < 64 || ((int) e[e.length - 1] & 0xFF) > round - 32; round++)
+            for (int round = 0; round < 64 || (e[e.length - 1] & 0xFF) > round - 32; round++)
             {
                 byte[] k1;
                 if (userKey != null && userKey.length >= 48)
