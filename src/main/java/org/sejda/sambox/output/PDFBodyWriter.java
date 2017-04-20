@@ -77,6 +77,7 @@ class PDFBodyWriter implements COSVisitor, Closeable
     public void write(IncrementablePDDocument document) throws IOException
     {
         requireState(open, "The writer is closed");
+        document.newIndirects().forEach(o -> stack.add(context.getOrCreateIndirectReferenceFor(o)));
         document.trailer().getCOSObject().accept(this);
         document.replacements().forEach(stack::add);
         startWriting();
@@ -131,7 +132,7 @@ class PDFBodyWriter implements COSVisitor, Closeable
             COSBase item = ofNullable(array.get(i)).orElse(COSNull.NULL);
             if (item instanceof ExistingIndirectCOSObject || item instanceof COSDictionary)
             {
-                createIndirectReferenceIfNeededFor(item);
+                onPotentialIndirectObject(item);
             }
             else
             {
@@ -149,7 +150,7 @@ class PDFBodyWriter implements COSVisitor, Closeable
             if (item instanceof ExistingIndirectCOSObject || item instanceof COSDictionary
                     || COSName.THREADS.equals(key))
             {
-                createIndirectReferenceIfNeededFor(item);
+                onPotentialIndirectObject(item);
             }
             else
             {
@@ -179,7 +180,19 @@ class PDFBodyWriter implements COSVisitor, Closeable
 
     }
 
-    void createIndirectReferenceIfNeededFor(COSBase item)
+    /**
+     * Called during the visit on the objects graph, when a potential indirect object is met. Default implementation
+     * creates a new indirect reference for it.
+     * 
+     * @param item
+     * @throws IOException
+     */
+    public void onPotentialIndirectObject(COSBase item) throws IOException
+    {
+        createIndirectReferenceIfNeededFor(item);
+    }
+
+    final void createIndirectReferenceIfNeededFor(COSBase item)
     {
         if (!context.hasIndirectReferenceFor(item))
         {

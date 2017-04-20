@@ -16,20 +16,22 @@
  */
 package org.sejda.sambox.output;
 
-import static java.util.Optional.ofNullable;
 import static org.sejda.sambox.encryption.EncryptionContext.encryptionAlgorithmFromEncryptionDictionary;
+import static org.sejda.sambox.util.SpecVersionUtils.V1_5;
+import static org.sejda.sambox.util.SpecVersionUtils.isAtLeast;
 import static org.sejda.util.RequireUtils.requireNotNullArg;
+import static org.sejda.util.RequireUtils.requireState;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Optional;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.sejda.io.CountingWritableByteChannel;
-import org.sejda.sambox.encryption.EncryptionContext;
 import org.sejda.sambox.input.IncrementablePDDocument;
 import org.sejda.sambox.pdmodel.PDDocument;
-import org.sejda.sambox.util.SpecVersionUtils;
 import org.sejda.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,20 +45,18 @@ import org.slf4j.LoggerFactory;
 public class IncrementablePDDocumentWriter implements Closeable
 {
     private static final Logger LOG = LoggerFactory.getLogger(IncrementablePDDocumentWriter.class);
+
     private DefaultPDFWriter writer;
     private PDFWriteContext context;
-    private Optional<EncryptionContext> encryptionContext;
     private CountingWritableByteChannel channel;
-    private WriteOption[] options;
+    private Set<WriteOption> options;
 
     public IncrementablePDDocumentWriter(CountingWritableByteChannel channel,
             WriteOption... options)
     {
         requireNotNullArg(channel, "Cannot write to a null channel");
         this.channel = channel;
-        this.options = options;
-        this.encryptionContext = ofNullable(encryptionContext).orElseGet(Optional::empty);
-
+        this.options = new HashSet<>(Arrays.asList(options));
     }
 
     /**
@@ -69,20 +69,18 @@ public class IncrementablePDDocumentWriter implements Closeable
     public void write(IncrementablePDDocument document) throws IOException
     {
         requireNotNullArg(document, "Incremented document cannot be null");
-
+        // we managed to perform a full scan so we might be able to handle the doc but incremental updates require to
+        // have the newly created xref to point to the previous one and we don't have the previous one offset
+        // TODO idea: we write the incremented to a tmp file so we generate a new xref table?
+        requireState(document.trailer().xrefOffset() != -1,
+                "The incremented document has errors and its xref table couldn't be found");
+        sanitizeWriteOptions(document);
         this.context = new PDFWriteContext(document.highestExistingReference().objectNumber(),
                 encryptionAlgorithmFromEncryptionDictionary(document.encryptionDictionary(),
                         document.encryptionKey()),
-                options);
+                options.stream().toArray(WriteOption[]::new));
         this.writer = new DefaultPDFWriter(new IndirectObjectsWriter(channel, context));
 
-        if (context.hasWriteOption(WriteOption.XREF_STREAM)
-                || context.hasWriteOption(WriteOption.OBJECT_STREAMS))
-        {
-            document.requireMinVersion(SpecVersionUtils.V1_5);
-        }
-
-        // TODO what to do if doc was corrupted and we did a fullscan
         try (InputStream stream = document.incrementedAsStream())
         {
             writer.writer().write(stream);
@@ -90,6 +88,27 @@ public class IncrementablePDDocumentWriter implements Closeable
         writer.writer().writeEOL();
         writeBody(document);
         writeXref(document);
+    }
+
+    private void sanitizeWriteOptions(IncrementablePDDocument document)
+    {
+        // for incremental updates we have to write xref stream if the incremented doc has xref streams, xref table
+        // otherwise
+        if (document.trailer().isXrefStream())
+        {
+            options.add(WriteOption.XREF_STREAM);
+        }
+        else
+        {
+            options.remove(WriteOption.XREF_STREAM);
+            options.remove(WriteOption.OBJECT_STREAMS);
+        }
+        // we remove the write option instead of increasing version because increasing the version would require to
+        // update the Catalog as part of the incremental update, potentially breaking existing signatures
+        if (!isAtLeast(document.incremented().getVersion(), V1_5))
+        {
+            options.remove(WriteOption.OBJECT_STREAMS);
+        }
     }
 
     private void writeBody(IncrementablePDDocument document) throws IOException
@@ -122,7 +141,6 @@ public class IncrementablePDDocumentWriter implements Closeable
 
     private void writeXref(IncrementablePDDocument document) throws IOException
     {
-        // TODO if pref xref is -1 due to full scan
         if (context.hasWriteOption(WriteOption.XREF_STREAM)
                 || context.hasWriteOption(WriteOption.OBJECT_STREAMS))
         {

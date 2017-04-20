@@ -16,13 +16,26 @@
  */
 package org.sejda.sambox.output;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+
+import java.io.IOException;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.sejda.io.SeekableSources;
+import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.input.ExistingIndirectCOSObject;
+import org.sejda.sambox.input.IncrementablePDDocument;
+import org.sejda.sambox.input.PDFParser;
+import org.sejda.sambox.pdmodel.PDPage;
+import org.sejda.sambox.pdmodel.common.PDRectangle;
+import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationText;
 
 /**
  * @author Andrea Vacondio
@@ -44,11 +57,20 @@ public class IncrementalPDFBodyWriterTest
     }
 
     @Test
-    public void createIndirectReferenceIfNeededForExisting()
+    public void existingOnPotentialIndirectObject() throws IOException
     {
         ExistingIndirectCOSObject ref = mock(ExistingIndirectCOSObject.class);
-        victim.createIndirectReferenceIfNeededFor(ref);
+        victim.onPotentialIndirectObject(ref);
         verify(context).addExistingReference(ref);
+    }
+
+    @Test
+    public void nonExistingOnPotentialIndirectObject() throws IOException
+    {
+        COSDictionary ref = mock(COSDictionary.class);
+        victim.onPotentialIndirectObject(ref);
+        verify(context, never()).addExistingReference(any());
+        verify(ref).accept(victim);
     }
 
     @Test
@@ -57,5 +79,28 @@ public class IncrementalPDFBodyWriterTest
         COSDictionary ref = new COSDictionary();
         victim.createIndirectReferenceIfNeededFor(ref);
         verify(context).getOrCreateIndirectReferenceFor(ref);
+    }
+
+    @Test
+    public void writeBodyIncrementedDocument() throws Exception
+    {
+        try (IncrementablePDDocument incrementable = PDFParser
+                .parseToIncrement(SeekableSources.inMemorySeekableSourceFrom(
+                        getClass().getResourceAsStream("/sambox/simple_test.pdf"))))
+        {
+            victim = new IncrementalPDFBodyWriter(new PDFWriteContext(
+                    incrementable.highestExistingReference().objectNumber(), null), writer);
+            PDAnnotationText annot = new PDAnnotationText();
+            annot.setContents("My Annot");
+            annot.setRectangle(new PDRectangle(266, 116, 430, 204));
+            PDPage page = incrementable.incremented().getPage(0);
+            COSArray annots = page.getCOSObject().getDictionaryObject(COSName.ANNOTS,
+                    COSArray.class);
+            annots.add(annot.getCOSObject());
+            incrementable.modified(page);
+            incrementable.newIndirect(annot);
+            victim.write(incrementable);
+        }
+        verify(writer, times(2)).writeObject(any());
     }
 }

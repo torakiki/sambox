@@ -33,14 +33,17 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.WritableByteChannel;
 import java.nio.charset.StandardCharsets;
-import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.sejda.io.CountingWritableByteChannel;
 import org.sejda.sambox.cos.COSArray;
+import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSNull;
@@ -53,7 +56,6 @@ import org.sejda.sambox.cos.IndirectCOSObjectReference;
 import org.sejda.sambox.output.IncrementablePDDocumentWriter;
 import org.sejda.sambox.output.WriteOption;
 import org.sejda.sambox.pdmodel.PDDocument;
-import org.sejda.sambox.util.Version;
 import org.sejda.sambox.xref.FileTrailer;
 import org.sejda.util.IOUtils;
 import org.slf4j.Logger;
@@ -70,7 +72,8 @@ public class IncrementablePDDocument implements Closeable
 {
     private static final Logger LOG = LoggerFactory.getLogger(IncrementablePDDocument.class);
 
-    private Map<IndirectCOSObjectIdentifier, COSObjectable> replacements = new HashMap<>();
+    private Map<IndirectCOSObjectIdentifier, COSBase> replacements = new HashMap<>();
+    private Set<COSBase> newIndirects = new HashSet<>();
     private PDDocument incremented;
     public final COSParser parser;
 
@@ -122,7 +125,42 @@ public class IncrementablePDDocument implements Closeable
     public void replace(IndirectCOSObjectIdentifier toReplace, COSObjectable replacement)
     {
         requireNotNullArg(toReplace, "Missing id of the object to be replaced");
-        replacements.put(toReplace, ofNullable(replacement).orElse(COSNull.NULL));
+        replacements.put(toReplace,
+                ofNullable(replacement).map(COSObjectable::getCOSObject).orElse(COSNull.NULL));
+    }
+
+    /**
+     * Adds the given object as modified, this object will be written as part of the incremental update.
+     * 
+     * @param modified
+     * @return true if the {@link COSBase} was added, false if not. In case where false is returned, the {@link COSBase}
+     * doesn't have an id, meaning it's not written as indirect object in the original document but it's written as
+     * direct object. In this case we have to call {@link IncrementablePDDocument#modified(COSBase)} on the first
+     * indirect parent because incremental updates are meant to replace indirect references.
+     */
+    public boolean modified(COSObjectable modified)
+    {
+        requireNotNullArg(modified, "Missing modified object");
+        if (modified.getCOSObject().hasId())
+        {
+            replacements.put(modified.getCOSObject().id(), modified.getCOSObject());
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Adds the given object to the set of the new indirect objects. These objects will be written as new indirect
+     * objects (with a new object number) as part of the incremental update. If, when writing the incremental update, a
+     * new object that was not added using this method is found, it will be written as direct object and no indirect
+     * reference will be created.
+     * 
+     * @param newObject
+     */
+    public void newIndirect(COSObjectable newObject)
+    {
+        requireNotNullArg(newObject, "Missing new object object");
+        newIndirects.add(newObject.getCOSObject());
     }
 
     /**
@@ -137,11 +175,25 @@ public class IncrementablePDDocument implements Closeable
                 .collect(Collectors.toList());
     }
 
+    /**
+     * @return a set of objects for which a new indirect reference should be created
+     */
+    public Set<COSBase> newIndirects()
+    {
+        return Collections.unmodifiableSet(newIndirects);
+    }
+
+    /**
+     * @return the encryption dictionary for the existing document
+     */
     public COSDictionary encryptionDictionary()
     {
         return incremented.getDocument().getEncryptionDictionary();
     }
 
+    /**
+     * @return the encryption key, if the incremented document is encrypted, null otherwise.
+     */
     public byte[] encryptionKey()
     {
         return ofNullable(incremented.getSecurityHandler()).map(s -> s.getEncryptionKey())
@@ -209,7 +261,6 @@ public class IncrementablePDDocument implements Closeable
     {
         requireState(incremented.isOpen(), "The document is closed");
         requireState(!replacements.isEmpty(), "No update to be incrementally written");
-        updateDocumentInformation();
         updateId(output.toString().getBytes(StandardCharsets.ISO_8859_1));
 
         try (IncrementablePDDocumentWriter writer = new IncrementablePDDocumentWriter(output,
@@ -237,27 +288,11 @@ public class IncrementablePDDocument implements Closeable
         {
             ((COSString) existingId.get(0).getCOSObject()).encryptable(false);
             existingId.set(1, id);
-            if (existingId.hasId())
-            {
-                replacements.put(existingId.id(), existingId);
-            }
         }
         else
         {
             incremented.getDocument().getTrailer().getCOSObject().setItem(COSName.ID,
                     asDirectObject(new COSArray(id, id)));
-        }
-    }
-
-    private void updateDocumentInformation()
-    {
-        incremented.getDocumentInformation()
-                .setProducer("SAMBox " + Version.getVersion() + " (www.sejda.org)");
-        incremented.getDocumentInformation().setModificationDate(Calendar.getInstance());
-        COSDictionary info = incremented.getDocumentInformation().getCOSObject();
-        if (info.hasId())
-        {
-            replacements.put(info.id(), info);
         }
     }
 
@@ -290,7 +325,7 @@ public class IncrementablePDDocument implements Closeable
             {
                 COSDictionary catalog = incremented.getDocument().getCatalog();
                 catalog.setName(COSName.VERSION, newVersion);
-                replacements.put(catalog.id(), catalog);
+                modified(catalog);
             }
             else
             {
@@ -298,7 +333,6 @@ public class IncrementablePDDocument implements Closeable
                         "Sepc version must be at least 1.4 to be set as catalog entry in an incremental update");
             }
         }
-
     }
 
 }

@@ -117,7 +117,7 @@ class DefaultPDFWriter implements Closeable
     {
         LOG.trace("Writing trailer");
         sanitizeTrailer(trailer, prev);
-        trailer.setLong(COSName.SIZE, writer.context().highestWritten().getObjectNumber() + 1);
+        trailer.setLong(COSName.SIZE, writer.context().highestObjectNumber() + 1);
         writer.write("trailer".getBytes(StandardCharsets.US_ASCII));
         writer.writeEOL();
         trailer.getCOSObject().accept(writer.writer());
@@ -148,7 +148,7 @@ class DefaultPDFWriter implements Closeable
         LOG.debug("Writing xref stream at offset " + startxref);
         sanitizeTrailer(trailer, prev);
         XrefEntry entry = XrefEntry
-                .inUseEntry(writer.context().highestWritten().getObjectNumber() + 1, startxref, 0);
+                .inUseEntry(writer.context().highestObjectNumber() + 1, startxref, 0);
         writer.context().addWritten(entry);
         writer.writeObject(new IndirectCOSObjectReference(entry.getObjectNumber(),
                 entry.getGenerationNumber(), new XrefStream(trailer, writer.context())));
@@ -166,6 +166,10 @@ class DefaultPDFWriter implements Closeable
         trailer.removeItem(COSName.F_FILTER);
         trailer.removeItem(COSName.F);
         trailer.removeItem(COSName.LENGTH);
+        trailer.removeItem(COSName.W);
+        trailer.removeItem(COSName.DL);
+        trailer.removeItem(COSName.TYPE);
+        trailer.removeItem(COSName.INDEX);
         if (prev != -1)
         {
             trailer.setLong(COSName.PREV, prev);

@@ -19,6 +19,7 @@ package org.sejda.sambox.input;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
@@ -34,6 +35,7 @@ import org.sejda.sambox.cos.COSObjectKey;
 import org.sejda.sambox.cos.IndirectCOSObjectIdentifier;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
 import org.sejda.sambox.pdmodel.PDDocument;
+import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationLink;
 import org.sejda.sambox.util.SpecVersionUtils;
 
 /**
@@ -67,6 +69,16 @@ public class IncrementablePDDocumentTest
         }
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void negativeReplace() throws IOException
+    {
+        try (IncrementablePDDocument incrementable = new IncrementablePDDocument(new PDDocument(),
+                mock(COSParser.class)))
+        {
+            incrementable.replace(null, COSInteger.TWO);
+        }
+    }
+
     @Test
     public void replacements() throws IOException
     {
@@ -83,6 +95,76 @@ public class IncrementablePDDocumentTest
             assertEquals(2, replacements.size());
             assertEquals(new COSObjectKey(10, 0), replacements.get(0).xrefEntry().key());
             assertEquals(COSInteger.TWO, replacements.get(0).getCOSObject());
+        }
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void negativeModified() throws IOException
+    {
+        try (IncrementablePDDocument incrementable = new IncrementablePDDocument(new PDDocument(),
+                mock(COSParser.class)))
+        {
+            incrementable.modified(null);
+        }
+    }
+
+    @Test
+    public void modified() throws IOException
+    {
+        try (IncrementablePDDocument incrementable = PDFParser
+                .parseToIncrement(SeekableSources.inMemorySeekableSourceFrom(
+                        getClass().getResourceAsStream("/sambox/simple_test.pdf"))))
+        {
+            assertFalse(incrementable.modified(new COSDictionary()));
+            assertTrue(incrementable.modified(incrementable.incremented().getDocumentCatalog()));
+        }
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void negativeNewIndirect() throws IOException
+    {
+        try (IncrementablePDDocument incrementable = new IncrementablePDDocument(new PDDocument(),
+                mock(COSParser.class)))
+        {
+            incrementable.newIndirect(null);
+        }
+    }
+
+    @Test
+    public void newIndirect() throws IOException
+    {
+        try (IncrementablePDDocument incrementable = new IncrementablePDDocument(new PDDocument(),
+                mock(COSParser.class)))
+        {
+            PDAnnotationLink link = new PDAnnotationLink();
+            incrementable.newIndirect(link);
+            assertEquals(1, incrementable.newIndirects().size());
+            assertEquals(link.getCOSObject(),
+                    incrementable.newIndirects().stream().findFirst().get());
+        }
+    }
+
+    @Test
+    public void notEncrypted() throws IOException
+    {
+        try (IncrementablePDDocument incrementable = PDFParser
+                .parseToIncrement(SeekableSources.inMemorySeekableSourceFrom(
+                        getClass().getResourceAsStream("/sambox/simple_test.pdf"))))
+        {
+            assertNull(incrementable.encryptionDictionary());
+            assertNull(incrementable.encryptionKey());
+        }
+    }
+
+    @Test
+    public void encrypted() throws IOException
+    {
+        try (IncrementablePDDocument incrementable = PDFParser
+                .parseToIncrement(SeekableSources.inMemorySeekableSourceFrom(
+                        getClass().getResourceAsStream("/sambox/encrypted_simple_test.pdf"))))
+        {
+            assertNotNull(incrementable.encryptionDictionary());
+            assertNotNull(incrementable.encryptionKey());
         }
     }
 

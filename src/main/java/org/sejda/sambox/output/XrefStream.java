@@ -52,8 +52,8 @@ class XrefStream extends COSStream
     XrefStream(COSDictionary dictionary, PDFWriteContext context) throws IOException
     {
         super(dictionary);
-        setName(COSName.TYPE, COSName.XREF.getName());
-        setItem(COSName.SIZE, asDirect(context.highestWritten().getObjectNumber() + 1));
+        setItem(COSName.TYPE, COSName.XREF);
+        setItem(COSName.SIZE, asDirect(context.highestObjectNumber() + 1));
         COSArray index = new COSArray();
         for (List<Long> continuos : context.getWrittenContiguousGroups())
         {

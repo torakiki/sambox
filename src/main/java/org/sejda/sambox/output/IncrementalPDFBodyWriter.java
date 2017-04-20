@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.output;
 
+import java.io.IOException;
+
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.input.ExistingIndirectCOSObject;
 
@@ -33,7 +35,7 @@ public class IncrementalPDFBodyWriter extends PDFBodyWriter
     }
 
     @Override
-    void createIndirectReferenceIfNeededFor(COSBase item)
+    public void onPotentialIndirectObject(COSBase item) throws IOException
     {
         if (item instanceof ExistingIndirectCOSObject)
         {
@@ -41,7 +43,7 @@ public class IncrementalPDFBodyWriter extends PDFBodyWriter
         }
         else
         {
-            super.createIndirectReferenceIfNeededFor(item);
+            item.accept(this);
         }
     }
 

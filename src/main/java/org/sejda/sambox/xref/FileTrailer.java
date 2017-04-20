@@ -17,6 +17,7 @@
 package org.sejda.sambox.xref;
 
 import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.common.PDDictionaryWrapper;
 
 /**
@@ -49,4 +50,11 @@ public class FileTrailer extends PDDictionaryWrapper
         this.xrefOffset = offset;
     }
 
+    /**
+     * @return true if the type of this dictionary is {@link COSName#XREF}
+     */
+    public boolean isXrefStream()
+    {
+        return COSName.XREF.equals(getCOSObject().getCOSName(COSName.TYPE));
+    }
 }

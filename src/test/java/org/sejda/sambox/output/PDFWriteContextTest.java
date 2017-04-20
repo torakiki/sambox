@@ -90,6 +90,15 @@ public class PDFWriteContextTest
     }
 
     @Test
+    public void highestObjectNumber()
+    {
+        context = new PDFWriteContext(50, null);
+        assertEquals(50, context.highestObjectNumber());
+        context.getOrCreateIndirectReferenceFor(new COSDictionary());
+        assertEquals(51, context.highestObjectNumber());
+    }
+
+    @Test
     public void contiguousGroups()
     {
         context.addWritten(XrefEntry.unknownOffsetEntry(1, 0));
@@ -207,11 +216,10 @@ public class PDFWriteContextTest
     }
 
     @Test
-    public void highestLowestWritten()
+    public void highestWritten()
     {
         context.addWritten(entry);
         context.addWritten(entry2);
-        assertEquals(entry, context.lowestWritten());
         assertEquals(entry2, context.highestWritten());
     }
 

@@ -30,7 +30,7 @@ import org.sejda.sambox.cos.NonStorableInObjectStreams;
  */
 class IndirectReferenceProvider
 {
-    private final AtomicLong referencesCounter;
+    final AtomicLong referencesCounter;
 
     IndirectReferenceProvider()
     {

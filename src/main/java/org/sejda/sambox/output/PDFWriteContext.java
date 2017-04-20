@@ -75,6 +75,8 @@ class PDFWriteContext
         this.encryptor.ifPresent(e -> LOG.debug("Encryptor: {}", e));
         this.opts = Arrays.asList(options);
         this.referencesProvider = new IndirectReferenceProvider(highestExistingReferenceNumber);
+        LOG.debug("PDFWriteContext created with highest object reference number {}",
+                highestExistingReferenceNumber);
     }
 
     /**
@@ -209,7 +211,6 @@ class PDFWriteContext
     }
 
     /**
-     * 
      * @param entry
      * @return true if the given entry has been already written
      */
@@ -238,11 +239,15 @@ class PDFWriteContext
     }
 
     /**
-     * @return the written entry with the lowest object number
+     * @return the highest object number that this context knows
      */
-    XrefEntry lowestWritten()
+    long highestObjectNumber()
     {
-        return written.get(written.firstKey());
+        if (written.isEmpty())
+        {
+            return referencesProvider.referencesCounter.get();
+        }
+        return Math.max(written.lastKey(), referencesProvider.referencesCounter.get());
     }
 
     /**
