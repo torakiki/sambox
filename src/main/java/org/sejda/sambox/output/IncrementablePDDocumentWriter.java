@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.output;
 
+import static java.util.Optional.ofNullable;
 import static org.sejda.sambox.encryption.EncryptionContext.encryptionAlgorithmFromEncryptionDictionary;
 import static org.sejda.sambox.util.SpecVersionUtils.V1_5;
 import static org.sejda.sambox.util.SpecVersionUtils.isAtLeast;
@@ -56,7 +57,8 @@ public class IncrementablePDDocumentWriter implements Closeable
     {
         requireNotNullArg(channel, "Cannot write to a null channel");
         this.channel = channel;
-        this.options = new HashSet<>(Arrays.asList(options));
+        this.options = ofNullable(options).map(Arrays::asList).map(HashSet::new)
+                .orElseGet(HashSet::new);
     }
 
     /**
@@ -69,8 +71,9 @@ public class IncrementablePDDocumentWriter implements Closeable
     public void write(IncrementablePDDocument document) throws IOException
     {
         requireNotNullArg(document, "Incremented document cannot be null");
-        // we managed to perform a full scan so we might be able to handle the doc but incremental updates require to
-        // have the newly created xref to point to the previous one and we don't have the previous one offset
+        // Trailer offset is -1, we managed to perform a full scan so SAMBox might be able to handle the doc but not for
+        // an incremental update which requires to have the newly created xref to point to the previous one and we don't
+        // have the previous one offset
         // TODO idea: we write the incremented to a tmp file so we generate a new xref table?
         requireState(document.trailer().xrefOffset() != -1,
                 "The incremented document has errors and its xref table couldn't be found");

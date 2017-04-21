@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox;
 
+import static java.util.Objects.isNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
@@ -30,11 +31,17 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import org.sejda.io.SeekableSources;
+import org.sejda.sambox.cos.COSArray;
+import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.encryption.StandardSecurity;
 import org.sejda.sambox.encryption.StandardSecurityEncryption;
+import org.sejda.sambox.input.IncrementablePDDocument;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.output.WriteOption;
 import org.sejda.sambox.pdmodel.PDDocument;
+import org.sejda.sambox.pdmodel.PDPage;
+import org.sejda.sambox.pdmodel.common.PDRectangle;
+import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationText;
 
 /**
  * @author Andrea Vacondio
@@ -73,6 +80,7 @@ public class ShakeDownTest
     public void write() throws IOException
     {
         doTest();
+        doIncrementalTest();
         doTestEncrypted();
     }
 
@@ -80,6 +88,7 @@ public class ShakeDownTest
     public void writeObjectStream() throws IOException
     {
         doTest(WriteOption.OBJECT_STREAMS);
+        doIncrementalTest(WriteOption.OBJECT_STREAMS);
         doTestEncrypted(WriteOption.OBJECT_STREAMS);
     }
 
@@ -87,6 +96,7 @@ public class ShakeDownTest
     public void writeCompressed() throws IOException
     {
         doTest(WriteOption.COMPRESS_STREAMS);
+        doIncrementalTest(WriteOption.COMPRESS_STREAMS);
         doTestEncrypted(WriteOption.COMPRESS_STREAMS);
     }
 
@@ -94,6 +104,7 @@ public class ShakeDownTest
     public void writeObjectStreamCompressed() throws IOException
     {
         doTest(WriteOption.OBJECT_STREAMS, WriteOption.COMPRESS_STREAMS);
+        doIncrementalTest(WriteOption.OBJECT_STREAMS, WriteOption.COMPRESS_STREAMS);
         doTestEncrypted(WriteOption.OBJECT_STREAMS, WriteOption.COMPRESS_STREAMS);
     }
 
@@ -101,6 +112,7 @@ public class ShakeDownTest
     public void writeSync() throws IOException
     {
         doTest(WriteOption.SYNC_BODY_WRITE);
+        doIncrementalTest(WriteOption.SYNC_BODY_WRITE);
         doTestEncrypted(WriteOption.SYNC_BODY_WRITE);
     }
 
@@ -108,6 +120,7 @@ public class ShakeDownTest
     public void writeXrefStream() throws IOException
     {
         doTest(WriteOption.XREF_STREAM);
+        doIncrementalTest(WriteOption.XREF_STREAM);
         doTestEncrypted(WriteOption.XREF_STREAM);
     }
 
@@ -121,6 +134,45 @@ public class ShakeDownTest
                 current.writeTo(out, options);
                 try (PDDocument outDoc = PDFParser
                         .parse(SeekableSources.inMemorySeekableSourceFrom(out.toByteArray())))
+                {
+                    assertTrue(outDoc.getNumberOfPages() > 0);
+                }
+            }
+        }
+    }
+
+    private void doIncrementalTest(WriteOption... options) throws IOException
+    {
+        try (IncrementablePDDocument incrementable = PDFParser.parseToIncrement(SeekableSources
+                .inMemorySeekableSourceFrom(getClass().getResourceAsStream(inputFile)), pwd))
+        {
+            try (ByteArrayOutputStream out = new ByteArrayOutputStream())
+            {
+                PDAnnotationText annot = new PDAnnotationText();
+                annot.setContents("Chuck Norris");
+                annot.setRectangle(new PDRectangle(266, 116, 430, 204));
+                PDPage page = incrementable.incremented().getPage(0);
+                COSArray annots = page.getCOSObject().getDictionaryObject(COSName.ANNOTS,
+                        COSArray.class);
+                if (isNull(annots))
+                {
+                    annots = new COSArray();
+                    page.getCOSObject().setItem(COSName.ANNOTS, annots);
+                }
+                annots.add(annot.getCOSObject());
+                incrementable.newIndirect(annot);
+                if (annots.hasId())
+                {
+                    incrementable.modified(annots);
+                }
+                else
+                {
+                    incrementable.modified(page);
+                }
+
+                incrementable.writeTo(out, options);
+                try (PDDocument outDoc = PDFParser
+                        .parse(SeekableSources.inMemorySeekableSourceFrom(out.toByteArray()), pwd))
                 {
                     assertTrue(outDoc.getNumberOfPages() > 0);
                 }
