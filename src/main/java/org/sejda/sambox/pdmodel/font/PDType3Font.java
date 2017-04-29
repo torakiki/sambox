@@ -275,9 +275,9 @@ public class PDType3Font extends PDSimpleFont
                 if (base instanceof COSStream)
                 {
                     PDType3CharProc charProc = new PDType3CharProc(this, (COSStream) base);
-                    try
+                    PDRectangle glyphBBox = charProc.getGlyphBBox();
+                    if (nonNull(glyphBBox))
                     {
-                        PDRectangle glyphBBox = charProc.getGlyphBBox();
                         rect.setLowerLeftX(
                                 Math.min(rect.getLowerLeftX(), glyphBBox.getLowerLeftX()));
                         rect.setLowerLeftY(
@@ -286,10 +286,6 @@ public class PDType3Font extends PDSimpleFont
                                 Math.max(rect.getUpperRightX(), glyphBBox.getUpperRightX()));
                         rect.setUpperRightY(
                                 Math.max(rect.getUpperRightY(), glyphBBox.getUpperRightY()));
-                    }
-                    catch (IOException ex)
-                    {
-                        // ignore
                     }
                 }
             }

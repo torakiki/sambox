@@ -33,6 +33,8 @@ import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.common.PDStream;
 import org.sejda.sambox.util.Matrix;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A Type 3 character procedure. This is a standalone PDF content stream.
@@ -41,6 +43,8 @@ import org.sejda.sambox.util.Matrix;
  */
 public final class PDType3CharProc implements COSObjectable, PDContentStream
 {
+    private static final Logger LOG = LoggerFactory.getLogger(PDType3CharProc.class);
+
     private final PDType3Font font;
     private final COSStream charStream;
 
@@ -88,36 +92,42 @@ public final class PDType3CharProc implements COSObjectable, PDContentStream
      * Calculate the bounding box of this glyph. This will work only if the first operator in the stream is d1.
      *
      * @return the bounding box of this glyph, or null if the first operator is not d1.
-     * @throws IOException If an io error occurs while parsing the stream.
      */
-    public PDRectangle getGlyphBBox() throws IOException
+    public PDRectangle getGlyphBBox()
     {
         List<COSBase> arguments = new ArrayList<>();
-        ContentStreamParser parser = new ContentStreamParser(this);
-        Object token = null;
-        while ((token = parser.nextParsedToken()) != null)
+        try
         {
-            if (token instanceof Operator)
+            ContentStreamParser parser = new ContentStreamParser(this);
+            Object token = null;
+            while ((token = parser.nextParsedToken()) != null)
             {
-                if (((Operator) token).getName().equals("d1") && arguments.size() == 6)
+                if (token instanceof Operator)
                 {
-                    for (int i = 0; i < 6; ++i)
+                    if (((Operator) token).getName().equals("d1") && arguments.size() == 6)
                     {
-                        if (!(arguments.get(i) instanceof COSNumber))
+                        for (int i = 0; i < 6; ++i)
                         {
-                            return null;
+                            if (!(arguments.get(i) instanceof COSNumber))
+                            {
+                                return null;
+                            }
                         }
+                        return new PDRectangle(((COSNumber) arguments.get(2)).floatValue(),
+                                ((COSNumber) arguments.get(3)).floatValue(),
+                                ((COSNumber) arguments.get(4)).floatValue()
+                                        - ((COSNumber) arguments.get(2)).floatValue(),
+                                ((COSNumber) arguments.get(5)).floatValue()
+                                        - ((COSNumber) arguments.get(3)).floatValue());
                     }
-                    return new PDRectangle(((COSNumber) arguments.get(2)).floatValue(),
-                            ((COSNumber) arguments.get(3)).floatValue(),
-                            ((COSNumber) arguments.get(4)).floatValue()
-                                    - ((COSNumber) arguments.get(2)).floatValue(),
-                            ((COSNumber) arguments.get(5)).floatValue()
-                                    - ((COSNumber) arguments.get(3)).floatValue());
+                    return null;
                 }
-                return null;
+                arguments.add((COSBase) token);
             }
-            arguments.add((COSBase) token);
+        }
+        catch (IOException e)
+        {
+            LOG.warn("An error occured while calculating the glyph bbox", e);
         }
         return null;
     }
@@ -129,12 +139,12 @@ public final class PDType3CharProc implements COSObjectable, PDContentStream
     }
 
     /**
-    * Get the width from a type3 charproc stream.
-    *
-    * @return the glyph width.
-    * @throws IOException if the stream could not be read, or did not have d0 or d1 as first
-    * operator, or if their first argument was not a number.
-    */
+     * Get the width from a type3 charproc stream.
+     *
+     * @return the glyph width.
+     * @throws IOException if the stream could not be read, or did not have d0 or d1 as first operator, or if their
+     * first argument was not a number.
+     */
     public float getWidth() throws IOException
     {
         List<COSBase> arguments = new ArrayList<>();
