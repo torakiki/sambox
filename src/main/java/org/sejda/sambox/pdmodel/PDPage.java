@@ -134,7 +134,10 @@ public class PDPage implements COSObjectable, PDContentStream
             for (int i = 0; i < array.size(); i++)
             {
                 COSStream stream = (COSStream) array.getObject(i);
-                streams.add(new PDStream(stream));
+                if (nonNull(stream))
+                {
+                    streams.add(new PDStream(stream));
+                }
             }
         }
         return streams.iterator();
@@ -431,12 +434,13 @@ public class PDPage implements COSObjectable, PDContentStream
     /**
      * @return true if the given box fits into the media box
      */
-    private boolean inMediaBoxBounds(PDRectangle box) {
+    private boolean inMediaBoxBounds(PDRectangle box)
+    {
         PDRectangle mediaBox = getMediaBox();
-        return mediaBox.getLowerLeftX() <= box.getLowerLeftX() &&
-                mediaBox.getLowerLeftY() <= box.getLowerLeftY() &&
-                mediaBox.getUpperRightX() >= box.getUpperRightX() &&
-                mediaBox.getUpperRightY() >= box.getUpperRightY();
+        return mediaBox.getLowerLeftX() <= box.getLowerLeftX()
+                && mediaBox.getLowerLeftY() <= box.getLowerLeftY()
+                && mediaBox.getUpperRightX() >= box.getUpperRightX()
+                && mediaBox.getUpperRightY() >= box.getUpperRightY();
     }
 
     /**
