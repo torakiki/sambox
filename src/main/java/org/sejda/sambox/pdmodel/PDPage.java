@@ -283,6 +283,17 @@ public class PDPage implements COSObjectable, PDContentStream
         return mediaBox;
     }
 
+    public PDRectangle getMediaBoxRaw()
+    {
+        COSArray array = (COSArray) PDPageTree.getInheritableAttribute(page, COSName.MEDIA_BOX);
+        if (array != null)
+        {
+            return new PDRectangle(array);
+        }
+
+        return null;
+    }
+
     /**
      * This will set the mediaBox for this page.
      * 
@@ -313,6 +324,16 @@ public class PDPage implements COSObjectable, PDContentStream
             return clipToMediaBox(new PDRectangle(array));
         }
         return getMediaBox();
+    }
+
+    public PDRectangle getCropBoxRaw()
+    {
+        COSArray array = (COSArray) PDPageTree.getInheritableAttribute(page, COSName.CROP_BOX);
+        if (array != null)
+        {
+            return new PDRectangle(array);
+        }
+        return null;
     }
 
     /**
@@ -348,6 +369,16 @@ public class PDPage implements COSObjectable, PDContentStream
         return getCropBox();
     }
 
+    public PDRectangle getBleedBoxRaw()
+    {
+        COSArray array = page.getDictionaryObject(COSName.BLEED_BOX, COSArray.class);
+        if (nonNull(array))
+        {
+            return new PDRectangle(array);
+        }
+        return null;
+    }
+
     /**
      * This will set the BleedBox for this page.
      * 
@@ -381,6 +412,16 @@ public class PDPage implements COSObjectable, PDContentStream
         return getCropBox();
     }
 
+    public PDRectangle getTrimBoxRaw()
+    {
+        COSArray array = (COSArray) page.getDictionaryObject(COSName.TRIM_BOX);
+        if (nonNull(array))
+        {
+            return new PDRectangle(array);
+        }
+        return null;
+    }
+
     /**
      * This will set the TrimBox for this page.
      * 
@@ -412,6 +453,16 @@ public class PDPage implements COSObjectable, PDContentStream
             return new PDRectangle(array);
         }
         return getCropBox();
+    }
+
+    public PDRectangle getArtBoxRaw()
+    {
+        COSArray array = page.getDictionaryObject(COSName.ART_BOX, COSArray.class);
+        if (nonNull(array))
+        {
+            return new PDRectangle(array);
+        }
+        return null;
     }
 
     /**
