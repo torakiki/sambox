@@ -308,9 +308,9 @@ public class PDPage implements COSObjectable, PDContentStream
     public PDRectangle getCropBox()
     {
         COSArray array = (COSArray) PDPageTree.getInheritableAttribute(page, COSName.CROP_BOX);
-        if (array != null && inMediaBoxBounds(new PDRectangle(array)))
+        if (array != null)
         {
-            return new PDRectangle(array);
+            return clipToMediaBox(new PDRectangle(array));
         }
         return getMediaBox();
     }
@@ -429,6 +429,20 @@ public class PDPage implements COSObjectable, PDContentStream
         {
             page.setItem(COSName.ART_BOX, artBox);
         }
+    }
+
+    /**
+     * Clips the given box to the bounds of the media box.
+     */
+    private PDRectangle clipToMediaBox(PDRectangle box)
+    {
+        PDRectangle mediaBox = getMediaBox();
+        PDRectangle result = new PDRectangle();
+        result.setLowerLeftX(Math.max(mediaBox.getLowerLeftX(), box.getLowerLeftX()));
+        result.setLowerLeftY(Math.max(mediaBox.getLowerLeftY(), box.getLowerLeftY()));
+        result.setUpperRightX(Math.min(mediaBox.getUpperRightX(), box.getUpperRightX()));
+        result.setUpperRightY(Math.min(mediaBox.getUpperRightY(), box.getUpperRightY()));
+        return result;
     }
 
     /**
