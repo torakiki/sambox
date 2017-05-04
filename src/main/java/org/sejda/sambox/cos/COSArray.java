@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.cos;
 
+import static java.util.Optional.ofNullable;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -157,7 +159,20 @@ public class COSArray extends COSBase implements List<COSBase>
     {
         return Optional.of(objects.get(index)).map(COSBase::getCOSObject)
                 .filter(i -> i != COSNull.NULL).orElse(null);
+    }
 
+    /**
+     * This will get an object from the array. This will dereference the object. If the type is not compatible, null is
+     * returned
+     * 
+     * @param index
+     * @param clazz
+     * @return The object that matches the key and the type or null.
+     */
+    public <T extends COSBase> T getObject(int index, Class<T> clazz)
+    {
+        return ofNullable(objects.get(index)).map(COSBase::getCOSObject)
+                .filter(i -> clazz.isInstance(i)).map(clazz::cast).orElse(null);
     }
 
     /**

@@ -17,7 +17,6 @@
 package org.sejda.sambox.pdmodel.graphics.color;
 
 import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSFloat;
 import org.sejda.sambox.cos.COSNumber;
 import org.sejda.sambox.cos.COSObjectable;
@@ -64,11 +63,8 @@ public final class PDTristimulus implements COSObjectable
         }
     }
 
-    /**
-     * Convert this standard java object to a COS object.
-     * @return the cos object that matches this Java object
-     */
-    public COSBase getCOSObject()
+    @Override
+    public COSArray getCOSObject()
     {
         return values;
     }
@@ -79,7 +75,7 @@ public final class PDTristimulus implements COSObjectable
      */
     public float getX()
     {
-        return ((COSNumber)values.get(0)).floatValue();
+        return values.getObject(0, COSNumber.class).floatValue();
     }
 
     /**
@@ -97,7 +93,7 @@ public final class PDTristimulus implements COSObjectable
      */
     public float getY()
     {
-        return ((COSNumber)values.get(1)).floatValue();
+        return values.getObject(1, COSNumber.class).floatValue();
     }
 
     /**
@@ -115,7 +111,7 @@ public final class PDTristimulus implements COSObjectable
      */
     public float getZ()
     {
-        return ((COSNumber)values.get(2)).floatValue();
+        return values.getObject(2, COSNumber.class).floatValue();
     }
 
     /**
