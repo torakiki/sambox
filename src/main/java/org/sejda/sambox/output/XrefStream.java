@@ -60,9 +60,10 @@ class XrefStream extends COSStream
             index.add(asDirect(continuos.get(0)));
             index.add(asDirect(continuos.size()));
         }
-        setItem(COSName.INDEX, index);
+        setItem(COSName.INDEX, asDirectObject(index));
         int secondFieldLength = sizeOf(context.highestWritten().getByteOffset());
-        setItem(COSName.W, new COSArray(asDirect(1), asDirect(secondFieldLength), asDirect(2)));
+        setItem(COSName.W, asDirectObject(
+                new COSArray(asDirect(1), asDirect(secondFieldLength), asDirect(2))));
         try (OutputStream out = createUnfilteredStream())
         {
             for (List<Long> continuos : context.getWrittenContiguousGroups())
@@ -75,7 +76,7 @@ class XrefStream extends COSStream
             }
         }
         setItem(COSName.DL, asDirect(getUnfilteredLength()));
-        addCompression();
+        setItem(COSName.FILTER, asDirectObject(COSName.FLATE_DECODE));
     }
 
     private static DirectCOSObject asDirect(long num)

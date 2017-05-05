@@ -16,8 +16,10 @@
  */
 package org.sejda.sambox.output;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
 
@@ -28,6 +30,7 @@ import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.cos.DirectCOSObject;
 import org.sejda.sambox.xref.CompressedXrefEntry;
 import org.sejda.sambox.xref.XrefEntry;
 
@@ -54,18 +57,32 @@ public class XrefStreamTest
         {
             assertEquals(COSName.XREF, victim.getCOSName(COSName.TYPE));
             assertEquals(5, victim.getLong(COSName.SIZE));
-            COSArray index = (COSArray) victim.getItem(COSName.INDEX);
+            COSArray index = (COSArray) victim.getDictionaryObject(COSName.INDEX);
             assertNotNull(index);
             assertEquals(4, index.size());
             assertEquals(2, ((COSInteger) index.getObject(0)).intValue());
             assertEquals(1, ((COSInteger) index.getObject(1)).intValue());
             assertEquals(4, ((COSInteger) index.getObject(2)).intValue());
             assertEquals(1, ((COSInteger) index.getObject(3)).intValue());
-            COSArray w = (COSArray) victim.getItem(COSName.W);
+            COSArray w = (COSArray) victim.getDictionaryObject(COSName.W);
             assertEquals(1, ((COSInteger) w.getObject(0)).intValue());
             assertEquals(2, ((COSInteger) w.getObject(1)).intValue());
             assertEquals(2, ((COSInteger) w.getObject(2)).intValue());
             assertEquals(victim.getLong(COSName.DL), victim.getUnfilteredLength());
+            assertThat(victim.getItem(COSName.FILTER), instanceOf(DirectCOSObject.class));
+        }
+    }
+
+    @Test
+    public void directValues() throws IOException
+    {
+        try (XrefStream victim = new XrefStream(new COSDictionary(), context))
+        {
+            assertThat(victim.getItem(COSName.SIZE), instanceOf(DirectCOSObject.class));
+            assertThat(victim.getItem(COSName.W), instanceOf(DirectCOSObject.class));
+            assertThat(victim.getItem(COSName.DL), instanceOf(DirectCOSObject.class));
+            assertThat(victim.getItem(COSName.INDEX), instanceOf(DirectCOSObject.class));
+            assertThat(victim.getItem(COSName.FILTER), instanceOf(DirectCOSObject.class));
         }
     }
 
