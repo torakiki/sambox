@@ -17,12 +17,8 @@
 package org.sejda.sambox.text;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.LineNumberReader;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.text.Bidi;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,6 +40,7 @@ import org.sejda.sambox.pdmodel.PDPageTree;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.interactive.documentnavigation.outline.PDOutlineItem;
 import org.sejda.sambox.pdmodel.interactive.pagenavigation.PDThreadBead;
+import org.sejda.sambox.util.BidiUtils;
 import org.sejda.sambox.util.QuickSort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1691,7 +1688,7 @@ public class PDFTextStripper extends PDFTextStreamEngine
     {
         if (listOfPatterns == null)
         {
-            listOfPatterns = new ArrayList<Pattern>();
+            listOfPatterns = new ArrayList<>();
             for (String expression : LIST_ITEM_EXPRESSIONS)
             {
                 Pattern p = Pattern.compile(expression);
@@ -1753,9 +1750,9 @@ public class PDFTextStripper extends PDFTextStreamEngine
      */
     private List<WordWithTextPositions> normalize(List<LineItem> line)
     {
-        List<WordWithTextPositions> normalized = new LinkedList<WordWithTextPositions>();
+        List<WordWithTextPositions> normalized = new LinkedList<>();
         StringBuilder lineBuilder = new StringBuilder();
-        List<TextPosition> wordPositions = new ArrayList<TextPosition>();
+        List<TextPosition> wordPositions = new ArrayList<>();
 
         for (LineItem item : line)
         {
@@ -1767,157 +1764,6 @@ public class PDFTextStripper extends PDFTextStreamEngine
             normalized.add(createWord(lineBuilder.toString(), wordPositions));
         }
         return normalized;
-    }
-
-    /**
-     * Handles the LTR and RTL direction of the given words. The whole implementation stands and falls with the given
-     * word. If the word is a full line, the results will be the best. If the word contains of single words or
-     * characters, the order of the characters in a word or words in a line may wrong, due to RTL and LTR marks and
-     * characters!
-     * 
-     * Based on http://www.nesterovsky-bros.com/weblog/2013/07/28/VisualToLogicalConversionInJava.aspx
-     * 
-     * @param word The word that shall be processed
-     * @return new word with the correct direction of the containing characters
-     */
-    private String handleDirection(String word)
-    {
-        Bidi bidi = new Bidi(word, Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT);
-
-        // if there is pure LTR text no need to process further
-        if (!bidi.isMixed() && bidi.getBaseLevel() == Bidi.DIRECTION_LEFT_TO_RIGHT)
-        {
-            return word;
-        }
-
-        // collect individual bidi information
-        int runCount = bidi.getRunCount();
-        byte[] levels = new byte[runCount];
-        Integer[] runs = new Integer[runCount];
-
-        for (int i = 0; i < runCount; i++)
-        {
-            levels[i] = (byte) bidi.getRunLevel(i);
-            runs[i] = i;
-        }
-
-        // reorder individual parts based on their levels
-        Bidi.reorderVisually(levels, 0, runs, 0, runCount);
-
-        // collect the parts based on the direction within the run
-        StringBuilder result = new StringBuilder();
-
-        for (int i = 0; i < runCount; i++)
-        {
-            int index = runs[i];
-            int start = bidi.getRunStart(index);
-            int end = bidi.getRunLimit(index);
-
-            int level = levels[index];
-
-            if ((level & 1) != 0)
-            {
-                while (--end >= start)
-                {
-                    char character = word.charAt(end);
-                    if (Character.isMirrored(word.codePointAt(end)))
-                    {
-                        if (MIRRORING_CHAR_MAP.containsKey(character))
-                        {
-                            result.append(MIRRORING_CHAR_MAP.get(character));
-                        }
-                        else
-                        {
-                            result.append(character);
-                        }
-                    }
-                    else
-                    {
-                        result.append(character);
-                    }
-                }
-            }
-            else
-            {
-                result.append(word, start, end);
-            }
-        }
-
-        return result.toString();
-    }
-
-    private static Map<Character, Character> MIRRORING_CHAR_MAP = new HashMap<Character, Character>();
-
-    static
-    {
-        String path = "org/sejda/sambox/resources/text/BidiMirroring.txt";
-        InputStream input = PDFTextStripper.class.getClassLoader().getResourceAsStream(path);
-        try
-        {
-            parseBidiFile(input);
-        }
-        catch (IOException e)
-        {
-            LOG.warn("Could not parse BidiMirroring.txt, mirroring char map will be empty: "
-                    + e.getMessage());
-        }
-        finally
-        {
-            try
-            {
-                input.close();
-            }
-            catch (IOException e)
-            {
-                LOG.error("Could not close BidiMirroring.txt ", e);
-            }
-        }
-    }
-
-    /**
-     * This method parses the bidi file provided as inputstream.
-     * 
-     * @param inputStream - The bidi file as inputstream
-     * @throws IOException if any line could not be read by the LineNumberReader
-     */
-    private static void parseBidiFile(InputStream inputStream) throws IOException
-    {
-        LineNumberReader rd = new LineNumberReader(new InputStreamReader(inputStream));
-
-        do
-        {
-            String s = rd.readLine();
-            if (s == null)
-            {
-                break;
-            }
-
-            int comment = s.indexOf('#'); // ignore comments
-            if (comment != -1)
-            {
-                s = s.substring(0, comment);
-            }
-
-            if (s.length() < 2)
-            {
-                continue;
-            }
-
-            StringTokenizer st = new StringTokenizer(s, ";");
-            int nFields = st.countTokens();
-            Character[] fields = new Character[nFields];
-            for (int i = 0; i < nFields; i++)
-            {
-                fields[i] = (char) Integer.parseInt(st.nextToken().trim(), 16);
-            }
-
-            if (fields.length == 2)
-            {
-                // initialize the MIRRORING_CHAR_MAP
-                MIRRORING_CHAR_MAP.put(fields[0], fields[1]);
-            }
-
-        } while (true);
     }
 
     /**
@@ -1975,13 +1821,10 @@ public class PDFTextStripper extends PDFTextStreamEngine
         }
         if (builder == null)
         {
-            return handleDirection(word);
+            return BidiUtils.visualToLogical(word);
         }
-        else
-        {
-            builder.append(word.substring(p, q));
-            return handleDirection(builder.toString());
-        }
+        builder.append(word.substring(p, q));
+        return BidiUtils.visualToLogical(builder.toString());
     }
 
     /**
@@ -1995,7 +1838,7 @@ public class PDFTextStripper extends PDFTextStreamEngine
         if (item.isWordSeparator())
         {
             normalized.add(
-                    createWord(lineBuilder.toString(), new ArrayList<TextPosition>(wordPositions)));
+                    createWord(lineBuilder.toString(), new ArrayList<>(wordPositions)));
             lineBuilder = new StringBuilder();
             wordPositions.clear();
         }
