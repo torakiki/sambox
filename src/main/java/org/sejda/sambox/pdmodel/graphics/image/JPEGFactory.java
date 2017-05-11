@@ -68,8 +68,7 @@ public final class JPEGFactory
      * 
      * The input stream data will be preserved and embedded in the PDF file without modification.
      * 
-     * @param document the document where the image will be created
-     * @param a JPEG file
+     * @param file a JPEG file
      * @return a new Image XObject
      * 
      * @throws IOException if the input stream cannot be read
