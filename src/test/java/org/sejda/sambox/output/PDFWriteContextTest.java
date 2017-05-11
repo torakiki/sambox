@@ -33,6 +33,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.COSObjectKey;
 import org.sejda.sambox.cos.IndirectCOSObjectIdentifier;
@@ -157,6 +158,30 @@ public class PDFWriteContextTest
         assertNull(COSNull.NULL.id());
         context.getOrCreateIndirectReferenceFor(COSNull.NULL);
         assertNull(COSNull.NULL.id());
+    }
+
+    @Test
+    public void getIndirectReferenceForCOSNameAsExisting()
+    {
+        IndirectCOSObjectIdentifier id = new IndirectCOSObjectIdentifier(new COSObjectKey(10, 0),
+                "Source");
+        COSDictionary dic = new COSDictionary();
+        dic.idIfAbsent(id);
+        ExistingIndirectCOSObject existing = mock(ExistingIndirectCOSObject.class);
+        when(existing.id()).thenReturn(id);
+        when(existing.getCOSObject()).thenReturn(dic);
+        context.getOrCreateIndirectReferenceFor(existing);
+        assertTrue(context.hasIndirectReferenceFor(dic));
+
+        IndirectCOSObjectIdentifier id2 = new IndirectCOSObjectIdentifier(new COSObjectKey(11, 0),
+                "Source");
+        COSName name = COSName.getPDFName("Chuck");
+        name.idIfAbsent(id2);
+        ExistingIndirectCOSObject existing2 = mock(ExistingIndirectCOSObject.class);
+        when(existing2.id()).thenReturn(id2);
+        when(existing2.getCOSObject()).thenReturn(name);
+        context.getOrCreateIndirectReferenceFor(existing2);
+        assertFalse(context.hasIndirectReferenceFor(name));
     }
 
     @Test

@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.output;
 
+import static org.sejda.sambox.cos.DirectCOSObject.asDirectObject;
 import static org.sejda.sambox.util.CharUtils.ASCII_SPACE;
 import static org.sejda.util.RequireUtils.requireNotNullArg;
 
@@ -29,6 +30,7 @@ import java.util.zip.DeflaterInputStream;
 import org.sejda.io.CountingWritableByteChannel;
 import org.sejda.io.FastByteArrayOutputStream;
 import org.sejda.sambox.SAMBox;
+import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.cos.DisposableCOSObject;
@@ -182,9 +184,9 @@ public class ObjectsStreamPDFBodyObjectsWriter implements PDFBodyObjectsWriter
         void prepareForWriting()
         {
             IOUtils.closeQuietly(dataWriter);
-            setInt(COSName.N, counter);
-            setInt(COSName.FIRST, header.size());
-            setItem(COSName.FILTER, COSName.FLATE_DECODE);
+            setItem(COSName.N, asDirectObject(COSInteger.get(counter)));
+            setItem(COSName.FIRST, asDirectObject(COSInteger.get(header.size())));
+            setItem(COSName.FILTER, asDirectObject(COSName.FLATE_DECODE));
             this.filtered = new DeflaterInputStream(
                     new SequenceInputStream(new ByteArrayInputStream(header.toByteArray()),
                             new ByteArrayInputStream(data.toByteArray())));

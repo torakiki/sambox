@@ -31,6 +31,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.function.Function;
 
 import org.sejda.sambox.cos.COSBase;
+import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.COSObjectKey;
 import org.sejda.sambox.cos.IndirectCOSObjectIdentifier;
@@ -126,7 +127,12 @@ class PDFWriteContext
             IndirectCOSObjectReference newRef = supplier.apply(item);
             LOG.trace("Created new indirect reference {} replacing the existing one {}", newRef,
                     existingItem.id());
-            lookupNewRef.put(existingItem.id(), newRef);
+            // if a COSName was indirect in the original doc we write it as indirect but we don't as indirect every
+            // occurrence of it, just this
+            if (!(item.getCOSObject() instanceof COSName))
+            {
+                lookupNewRef.put(existingItem.id(), newRef);
+            }
             return newRef;
 
         }
