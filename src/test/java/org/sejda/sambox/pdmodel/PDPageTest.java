@@ -16,17 +16,15 @@
  */
 package org.sejda.sambox.pdmodel;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
 import org.junit.Test;
-import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSDictionary;
-import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.cos.COSNull;
-import org.sejda.sambox.cos.COSNumber;
+import org.sejda.sambox.cos.*;
+import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationLink;
 
 /**
@@ -104,5 +102,23 @@ public class PDPageTest
         COSArray beads = new COSArray(new PDAnnotationLink().getCOSObject());
         victim.getCOSObject().setItem(COSName.ANNOTS, beads);
         assertFalse(victim.getAnnotations().isEmpty());
+    }
+
+    @Test
+    public void cropBoxSlighlyOutOfMediaBoxBounds()
+    {
+        PDPage page = new PDPage();
+        page.setMediaBox(new PDRectangle(toArray(0, 0, 287.07f, 831)));
+        page.setCropBox(new PDRectangle(toArray(1, 214, 294, 624)));
+        assertEquals(page.getCropBox(), new PDRectangle(toArray(1, 214, 287.07f, 624)));
+    }
+
+    COSArray toArray(float n1, float n2, float n3, float n4) {
+        COSArray result = new COSArray();
+        result.add(new COSFloat(n1));
+        result.add(new COSFloat(n2));
+        result.add(new COSFloat(n3));
+        result.add(new COSFloat(n4));
+        return result;
     }
 }
