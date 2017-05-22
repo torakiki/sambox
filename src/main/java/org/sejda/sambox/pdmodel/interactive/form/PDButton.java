@@ -278,13 +278,9 @@ public abstract class PDButton extends PDTerminalField
         }
     }
 
-    public Set<String> getOnValues() {
-        return new HashSet<>(getOnValuesList());
-    }
-
     /**
      * Get the values to set individual buttons within a group to the on state.
-     * 
+     *
      * <p>
      * The On value could be an arbitrary string as long as it is within the limitations of a PDF name object. The Off
      * value shall always be 'Off'. If not set or not part of the normal appearance keys 'Off' is the default
@@ -293,9 +289,9 @@ public abstract class PDButton extends PDTerminalField
      * @return the potential values setting the check box to the On state. If an empty Set is returned there is no
      * appearance definition.
      */
-    public List<String> getOnValuesList()
+    public Set<String> getOnValues()
     {
-        List<String> onValues = new ArrayList<>();
+        Set<String> onValues = new HashSet<>();
         onValues.addAll(getExportValues());
         onValues.addAll(getNormalAppearanceValues());
         return onValues;
@@ -306,24 +302,56 @@ public abstract class PDButton extends PDTerminalField
         List<PDAnnotationWidget> widgets = this.getWidgets();
         for (PDAnnotationWidget widget : widgets)
         {
-            PDAppearanceDictionary apDictionary = widget.getAppearance();
-            if (apDictionary != null)
+            String value = getOnValueForWidget(widget);
+            if(value != null)
             {
-                PDAppearanceEntry normalAppearance = apDictionary.getNormalAppearance();
-                if (normalAppearance != null)
+                values.add(value);
+            }
+        }
+        return values;
+    }
+
+    /*
+     * Get the on value for an individual widget by it's index.
+     */
+    private String getOnValue(int index)
+    {
+        List<PDAnnotationWidget> widgets = this.getWidgets();
+        if (index < widgets.size())
+        {
+            return getOnValueForWidget(widgets.get(index));
+        }
+        // PDFBox returns an empty string here.
+        // Chose to return null so it's clear it's an undefined value
+        // Caller should choose to not act on these values
+        return null;
+    }
+
+    /*
+     * Get the on value for an individual widget.
+     */
+    private String getOnValueForWidget(PDAnnotationWidget widget)
+    {
+        PDAppearanceDictionary apDictionary = widget.getAppearance();
+        if (apDictionary != null)
+        {
+            PDAppearanceEntry normalAppearance = apDictionary.getNormalAppearance();
+            if (normalAppearance != null)
+            {
+                Set<COSName> entries = normalAppearance.getSubDictionary().keySet();
+                for (COSName entry : entries)
                 {
-                    Set<COSName> entries = normalAppearance.getSubDictionary().keySet();
-                    for (COSName entry : entries)
+                    if (COSName.Off.compareTo(entry) != 0)
                     {
-                        if (COSName.Off.compareTo(entry) != 0)
-                        {
-                            values.add(entry.getName());
-                        }
+                        return entry.getName();
                     }
                 }
             }
         }
-        return values;
+        // PDFBox returns an empty string here.
+        // Chose to return null so it's clear it's an undefined value
+        // Caller should choose to not act on these values
+        return null;
     }
 
     /**
@@ -406,8 +434,11 @@ public abstract class PDButton extends PDTerminalField
             // see PDFBOX-3682
             if (optionsIndex != -1)
             {
-                List<String> appearanceValues = getNormalAppearanceValues();
-                updateByValue(appearanceValues.get(optionsIndex));
+                String onValue = getOnValue(optionsIndex);
+                if(onValue != null)
+                {
+                    updateByValue(onValue);
+                }
             }
         }
     }
