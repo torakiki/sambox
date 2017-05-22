@@ -19,7 +19,6 @@ package org.sejda.sambox.pdmodel.common;
 import static java.util.Objects.nonNull;
 
 import java.io.IOException;
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -179,7 +178,7 @@ public class PDNumberTreeNode implements COSObjectable
         COSArray namesArray = (COSArray) node.getDictionaryObject(COSName.NUMS);
         if (namesArray != null)
         {
-            indices = new HashMap<Integer, COSObjectable>();
+            indices = new HashMap<>();
             for (int i = 0; i < namesArray.size(); i += 2)
             {
                 COSInteger key = (COSInteger) namesArray.getObject(i);
@@ -202,18 +201,14 @@ public class PDNumberTreeNode implements COSObjectable
      */
     protected COSObjectable convertCOSToPD(COSBase base) throws IOException
     {
-        COSObjectable retval = null;
         try
         {
-            Constructor<? extends COSObjectable> ctor = valueType.getConstructor(base.getClass());
-            retval = ctor.newInstance(base);
+            return valueType.getConstructor(base.getClass()).newInstance(base);
         }
         catch (Throwable t)
         {
-            throw new IOException(
-                    "Error while trying to create value in number tree:" + t.getMessage(), t);
+            throw new IOException("Error while trying to create value in number tree", t);
         }
-        return retval;
     }
 
     /**

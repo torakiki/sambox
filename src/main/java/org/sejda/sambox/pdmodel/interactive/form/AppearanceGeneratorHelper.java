@@ -17,6 +17,7 @@
 package org.sejda.sambox.pdmodel.interactive.form;
 
 import static java.util.Arrays.asList;
+import static java.util.Objects.nonNull;
 import static org.sejda.io.CountingWritableByteChannel.from;
 
 import java.awt.geom.AffineTransform;
@@ -26,6 +27,7 @@ import java.util.List;
 
 import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.cos.COSString;
 import org.sejda.sambox.input.ContentStreamParser;
 import org.sejda.sambox.output.ContentStreamWriter;
 import org.sejda.sambox.pdmodel.PDPageContentStream;
@@ -58,7 +60,8 @@ class AppearanceGeneratorHelper
     private static final Operator EMC = Operator.getOperator("EMC");
 
     private final PDVariableText field;
-    private final PDDefaultAppearanceString defaultAppearance;
+
+    private PDDefaultAppearanceString defaultAppearance;
     private String value;
 
     /**
@@ -94,7 +97,50 @@ class AppearanceGeneratorHelper
     AppearanceGeneratorHelper(PDVariableText field) throws IOException
     {
         this.field = field;
+        validateAndEnsureAcroFormResources();
         this.defaultAppearance = field.getDefaultAppearanceString();
+    }
+
+    /*
+     * Adobe Reader/Acrobat are adding resources which are at the field/widget level to the AcroForm level.
+     */
+    private void validateAndEnsureAcroFormResources()
+    {
+        // add font resources which might be available at the field
+        // level but are not at the AcroForm level to the AcroForm
+        // to match Adobe Reader/Acrobat behavior
+        if (field.getAcroForm().getDefaultResources() == null)
+        {
+            return;
+        }
+
+        PDResources acroFormResources = field.getAcroForm().getDefaultResources();
+
+        for (PDAnnotationWidget widget : field.getWidgets())
+        {
+            if (widget.getNormalAppearanceStream() != null
+                    && widget.getNormalAppearanceStream().getResources() != null)
+            {
+                PDResources widgetResources = widget.getNormalAppearanceStream().getResources();
+                for (COSName fontResourceName : widgetResources.getFontNames())
+                {
+                    try
+                    {
+                        if (acroFormResources.getFont(fontResourceName) == null)
+                        {
+                            LOG.debug("Adding font resource " + fontResourceName
+                                    + " from widget to AcroForm");
+                            acroFormResources.put(fontResourceName,
+                                    widgetResources.getFont(fontResourceName));
+                        }
+                    }
+                    catch (IOException e)
+                    {
+                        LOG.warn("Unable to match field level font with AcroForm font");
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -109,6 +155,15 @@ class AppearanceGeneratorHelper
 
         for (PDAnnotationWidget widget : field.getWidgets())
         {
+            // some fields have the /Da at the widget level if the
+            // widgets differ in layout.
+            PDDefaultAppearanceString acroFormAppearance = defaultAppearance;
+
+            if (widget.getCOSObject().getDictionaryObject(COSName.DA) != null)
+            {
+                defaultAppearance = getWidgetDefaultAppearanceString(widget);
+            }
+
             PDRectangle rect = widget.getRectangle();
             if (rect == null)
             {
@@ -136,7 +191,7 @@ class AppearanceGeneratorHelper
                 // TODO support appearances other than "normal"
 
                 PDAppearanceStream appearanceStream;
-                if (appearance.isStream())
+                if (nonNull(appearance) && appearance.isStream())
                 {
                     appearanceStream = appearance.getAppearanceStream();
                 }
@@ -175,7 +230,17 @@ class AppearanceGeneratorHelper
                 }
                 setAppearanceContent(widget, appearanceStream);
             }
+            // restore the field level appearance;
+            defaultAppearance = acroFormAppearance;
         }
+    }
+
+    private PDDefaultAppearanceString getWidgetDefaultAppearanceString(PDAnnotationWidget widget)
+            throws IOException
+    {
+        COSString da = (COSString) widget.getCOSObject().getDictionaryObject(COSName.DA);
+        PDResources dr = field.getAcroForm().getDefaultResources();
+        return new PDDefaultAppearanceString(da, dr);
     }
 
     private int resolveRotation(PDAnnotationWidget widget)
@@ -337,10 +402,16 @@ class AppearanceGeneratorHelper
         contents.clip();
 
         // get the font
-        PDFont font = field.getAppearanceFont();
+        // TODO edi review
+        PDFont font = defaultAppearance.getFont();
 
         // calculate the fontSize (because 0 = autosize)
-        float fontSize = calculateFontSize(font, contentRect);
+        float fontSize = defaultAppearance.getFontSize();
+
+        if (fontSize == 0)
+        {
+            fontSize = calculateFontSize(font, contentRect);
+        }
 
         // for a listbox generate the highlight rectangle for the selected
         // options
@@ -353,7 +424,7 @@ class AppearanceGeneratorHelper
         contents.beginText();
 
         // write the /DA string
-        field.getDefaultAppearanceString().writeTo(contents, fontSize);
+        defaultAppearance.writeTo(contents, fontSize);
         // calculate the y-position of the baseline
         float y;
 

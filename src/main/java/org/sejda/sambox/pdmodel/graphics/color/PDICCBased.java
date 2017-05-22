@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.pdmodel.graphics.color;
 
+import static org.sejda.util.RequireUtils.requireIOCondition;
+
 import java.awt.Color;
 import java.awt.color.CMMException;
 import java.awt.color.ColorSpace;
@@ -43,8 +45,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * ICCBased colour spaces are based on a cross-platform colour profile as defined by the
- * International Color Consortium (ICC).
+ * ICCBased colour spaces are based on a cross-platform colour profile as defined by the International Color Consortium
+ * (ICC).
  *
  * @author Ben Litchfield
  * @author John Hewson
@@ -75,10 +77,14 @@ public final class PDICCBased extends PDCIEBasedColorSpace
      * Creates a new ICC color space using the PDF array.
      *
      * @param iccArray the ICC stream object
-     * @throws java.io.IOException if there is an error reading the ICC profile.
+     * @throws IOException if there is an error reading the ICC profile or if the parameter is invalid
      */
     public PDICCBased(COSArray iccArray) throws IOException
     {
+        requireIOCondition(iccArray.size() >= 2,
+                "ICCBased colorspace array must have two elements");
+        requireIOCondition(iccArray.getObject(1) instanceof COSStream,
+                "ICCBased colorspace array must have a stream as second element");
         array = iccArray;
         stream = new PDStream((COSStream) iccArray.getObject(1));
         loadICCProfile();
@@ -92,6 +98,7 @@ public final class PDICCBased extends PDCIEBasedColorSpace
 
     /**
      * Get the underlying ICC profile stream.
+     * 
      * @return the underlying ICC profile stream
      */
     public PDStream getPDStream()
@@ -144,15 +151,15 @@ public final class PDICCBased extends PDCIEBasedColorSpace
         }
         catch (RuntimeException e)
         {
-            if (e instanceof ProfileDataException ||
-                e instanceof CMMException ||
-                e instanceof IllegalArgumentException ||
-                e instanceof ArrayIndexOutOfBoundsException)
+            if (e instanceof ProfileDataException || e instanceof CMMException
+                    || e instanceof IllegalArgumentException
+                    || e instanceof ArrayIndexOutOfBoundsException)
             {
                 // fall back to alternateColorSpace color space
                 awtColorSpace = null;
                 alternateColorSpace = getAlternateColorSpace();
-                LOG.error("Can't read embedded ICC profile (" + e.getLocalizedMessage() + "), using alternate color space: " + alternateColorSpace.getName());
+                LOG.error("Can't read embedded ICC profile (" + e.getLocalizedMessage()
+                        + "), using alternate color space: " + alternateColorSpace.getName());
                 initialColor = alternateColorSpace.getInitialColor();
             }
             else
@@ -198,7 +205,7 @@ public final class PDICCBased extends PDCIEBasedColorSpace
         {
             return toRGBImageAWT(raster, awtColorSpace);
         }
-            return alternateColorSpace.toRGBImage(raster);
+        return alternateColorSpace.toRGBImage(raster);
     }
 
     @Override
@@ -238,8 +245,9 @@ public final class PDICCBased extends PDCIEBasedColorSpace
     }
 
     /**
-     * Returns a list of alternate color spaces for non-conforming readers.
-     * WARNING: Do not use the information in a conforming reader.
+     * Returns a list of alternate color spaces for non-conforming readers. WARNING: Do not use the information in a
+     * conforming reader.
+     * 
      * @return A list of alternateColorSpace color spaces.
      * @throws IOException If there is an error getting the alternateColorSpace color spaces.
      */
@@ -247,7 +255,7 @@ public final class PDICCBased extends PDCIEBasedColorSpace
     {
         COSBase alternate = stream.getCOSObject().getDictionaryObject(COSName.ALTERNATE);
         COSArray alternateArray;
-        if(alternate == null)
+        if (alternate == null)
         {
             alternateArray = new COSArray();
             int numComponents = getNumberOfComponents();
@@ -270,28 +278,28 @@ public final class PDICCBased extends PDCIEBasedColorSpace
         }
         else
         {
-            if(alternate instanceof COSArray)
+            if (alternate instanceof COSArray)
             {
-                alternateArray = (COSArray)alternate;
+                alternateArray = (COSArray) alternate;
             }
-            else if(alternate instanceof COSName)
+            else if (alternate instanceof COSName)
             {
                 alternateArray = new COSArray();
                 alternateArray.add(alternate);
             }
             else
             {
-                throw new IOException("Error: expected COSArray or COSName and not " +
-                    alternate.getClass().getName());
+                throw new IOException("Error: expected COSArray or COSName and not "
+                        + alternate.getClass().getName());
             }
         }
         return PDColorSpace.create(alternateArray);
     }
 
     /**
-     * Returns the range for a certain component number.
-     * This will never return null.
-     * If it is not present then the range 0..1 will be returned.
+     * Returns the range for a certain component number. This will never return null. If it is not present then the
+     * range 0..1 will be returned.
+     * 
      * @param n the component number to get the range for
      * @return the range for this component
      */
@@ -307,6 +315,7 @@ public final class PDICCBased extends PDCIEBasedColorSpace
 
     /**
      * Returns the metadata stream for this object, or null if there is no metadata stream.
+     * 
      * @return the metadata stream, or null if there is none
      */
     public COSStream getMetadata()
@@ -315,8 +324,9 @@ public final class PDICCBased extends PDCIEBasedColorSpace
     }
 
     /**
-     * Returns the type of the color space in the ICC profile.
-     * Will be one of {@code TYPE_GRAY}, {@code TYPE_RGB}, or {@code TYPE_CMYK}.
+     * Returns the type of the color space in the ICC profile. Will be one of {@code TYPE_GRAY}, {@code TYPE_RGB}, or
+     * {@code TYPE_CMYK}.
+     * 
      * @return an ICC color space type
      */
     public int getColorSpaceType()
@@ -330,19 +340,20 @@ public final class PDICCBased extends PDCIEBasedColorSpace
         switch (alternateColorSpace.getNumberOfComponents())
         {
         case 1:
-                return ICC_ColorSpace.TYPE_GRAY;
+            return ICC_ColorSpace.TYPE_GRAY;
         case 3:
-                return ICC_ColorSpace.TYPE_RGB;
+            return ICC_ColorSpace.TYPE_RGB;
         case 4:
-                return ICC_ColorSpace.TYPE_CMYK;
+            return ICC_ColorSpace.TYPE_CMYK;
         default:
-                // should not happen as all ICC color spaces in PDF must have 1,3, or 4 components
-                return -1;
+            // should not happen as all ICC color spaces in PDF must have 1,3, or 4 components
+            return -1;
         }
     }
 
     /**
      * Sets the number of color components.
+     * 
      * @param n the number of color components
      */
     // TODO it's probably not safe to use this
@@ -361,7 +372,7 @@ public final class PDICCBased extends PDCIEBasedColorSpace
     public void setAlternateColorSpaces(List<PDColorSpace> list)
     {
         COSArray altArray = null;
-        if(list != null)
+        if (list != null)
         {
             altArray = COSArrayList.converterToCOSArray(list);
         }
@@ -370,6 +381,7 @@ public final class PDICCBased extends PDCIEBasedColorSpace
 
     /**
      * Sets the range for this color space.
+     * 
      * @param range the new range for the a component
      * @param n the component to set the range for
      */
@@ -387,12 +399,13 @@ public final class PDICCBased extends PDCIEBasedColorSpace
             rangeArray.add(new COSFloat(0));
             rangeArray.add(new COSFloat(1));
         }
-        rangeArray.set(n*2, new COSFloat(range.getMin()));
-        rangeArray.set(n*2+1, new COSFloat(range.getMax()));
+        rangeArray.set(n * 2, new COSFloat(range.getMin()));
+        rangeArray.set(n * 2 + 1, new COSFloat(range.getMax()));
     }
-    
+
     /**
      * Sets the metadata stream that is associated with this color space.
+     * 
      * @param metadata the new metadata stream
      */
     public void setMetadata(COSStream metadata)

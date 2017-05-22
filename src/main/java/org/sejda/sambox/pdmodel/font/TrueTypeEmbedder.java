@@ -19,6 +19,7 @@ package org.sejda.sambox.pdmodel.font;
 
 import static java.util.Objects.nonNull;
 
+import java.awt.geom.GeneralPath;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -233,11 +234,26 @@ abstract class TrueTypeEmbedder implements Subsetter
         }
         else
         {
-            // estimate by summing the typographical +ve ascender and -ve descender
-            fd.setCapHeight((os2.getTypoAscender() + os2.getTypoDescender()) * scaling);
-
-            // estimate by halving the typographical ascender
-            fd.setXHeight(os2.getTypoAscender() / 2.0f * scaling);
+            GeneralPath capHPath = ttf.getPath("H");
+            if (capHPath != null)
+            {
+                fd.setCapHeight(Math.round(capHPath.getBounds2D().getMaxY()) * scaling);
+            }
+            else
+            {
+                // estimate by summing the typographical +ve ascender and -ve descender
+                fd.setCapHeight((os2.getTypoAscender() + os2.getTypoDescender()) * scaling);
+            }
+            GeneralPath xPath = ttf.getPath("x");
+            if (xPath != null)
+            {
+                fd.setXHeight(Math.round(xPath.getBounds2D().getMaxY()) * scaling);
+            }
+            else
+            {
+                // estimate by halving the typographical ascender
+                fd.setXHeight(os2.getTypoAscender() / 2.0f * scaling);
+            }
         }
 
         // StemV - there's no true TTF equivalent of this, so we estimate it

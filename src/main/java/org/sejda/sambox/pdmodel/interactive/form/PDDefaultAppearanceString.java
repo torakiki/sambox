@@ -36,7 +36,8 @@ import org.sejda.sambox.pdmodel.font.PDFont;
 import org.sejda.sambox.pdmodel.font.PDType1Font;
 import org.sejda.sambox.pdmodel.graphics.color.PDColor;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
-import org.sejda.sambox.pdmodel.graphics.color.PDDeviceColorSpace;
+import org.sejda.sambox.pdmodel.graphics.color.PDDeviceCMYK;
+import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceRGB;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceStream;
 import org.slf4j.Logger;
@@ -137,7 +138,15 @@ class PDDefaultAppearanceString
         {
             processSetFont(operands);
         }
+        else if ("g".equals(name))
+        {
+            processSetFontColor(operands);
+        }
         else if ("rg".equals(name))
+        {
+            processSetFontColor(operands);
+        }
+        else if ("k".equals(name))
         {
             processSetFontColor(operands);
         }
@@ -175,7 +184,8 @@ class PDDefaultAppearanceString
         // todo: handle cases where font == null with special mapping logic (see PDFBOX-2661)
         if (font == null)
         {
-            LOG.warn("Could not find font: /" + fontName.getName() + ", will use Helvetica instead");
+            LOG.warn(
+                    "Could not find font: /" + fontName.getName() + ", will use Helvetica instead");
             font = PDType1Font.HELVETICA;
         }
         setFontName(fontName);
@@ -193,9 +203,21 @@ class PDDefaultAppearanceString
      */
     private void processSetFontColor(List<COSBase> operands) throws IOException
     {
-        PDColorSpace colorSpace = PDDeviceRGB.INSTANCE;
-        if (colorSpace instanceof PDDeviceColorSpace
-                && operands.size() < colorSpace.getNumberOfComponents())
+        PDColorSpace colorSpace = null;
+
+        if (operands.size() == 1)
+        {
+            colorSpace = PDDeviceGray.INSTANCE;
+        }
+        else if (operands.size() == 3)
+        {
+            colorSpace = PDDeviceRGB.INSTANCE;
+        }
+        else if (operands.size() == 4)
+        {
+            colorSpace = PDDeviceCMYK.INSTANCE;
+        }
+        else
         {
             throw new IOException("Missing operands for set non stroking color operator "
                     + Arrays.toString(operands.toArray()));

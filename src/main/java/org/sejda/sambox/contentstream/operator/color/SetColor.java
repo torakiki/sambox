@@ -24,6 +24,7 @@ import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.contentstream.operator.OperatorProcessor;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
+import org.sejda.sambox.cos.COSNumber;
 import org.sejda.sambox.pdmodel.graphics.color.PDColor;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
 import org.sejda.sambox.pdmodel.graphics.color.PDPattern;
@@ -39,10 +40,16 @@ public abstract class SetColor extends OperatorProcessor
     public void process(Operator operator, List<COSBase> arguments) throws IOException
     {
         PDColorSpace colorSpace = getColorSpace();
-        if (!(colorSpace instanceof PDPattern)
-                && arguments.size() < colorSpace.getNumberOfComponents())
+        if (!(colorSpace instanceof PDPattern))
         {
-            throw new MissingOperandException(operator, arguments);
+            if (arguments.size() < colorSpace.getNumberOfComponents())
+            {
+                throw new MissingOperandException(operator, arguments);
+            }
+            if (!checkArrayTypesClass(arguments, COSNumber.class))
+            {
+                return;
+            }
         }
         COSArray array = new COSArray();
         array.addAll(arguments);

@@ -20,11 +20,14 @@
 package org.sejda.sambox.pdmodel.font;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.fontbox.ttf.TTFParser;
 import org.apache.fontbox.ttf.TrueTypeFont;
+import org.junit.Assert;
+import org.junit.Test;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.PDDocument;
@@ -32,6 +35,7 @@ import org.sejda.sambox.pdmodel.PDPage;
 import org.sejda.sambox.pdmodel.PDPageContentStream;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.rendering.PDFRenderer;
+import org.sejda.sambox.text.PDFTextStripper;
 
 import junit.framework.TestCase;
 
@@ -83,6 +87,47 @@ public class PDFontTest extends TestCase
             cs.close();
             doc.writeTo(new ByteArrayOutputStream());
             doc.close();
+        }
+    }
+
+    /**
+     * PDFBOX-3747: Test that using "-" with Calibri in Windows 7 has "-" in text extraction and not \u2010, which was
+     * because of a wrong ToUnicode mapping because prior to the bugfix, CmapSubtable#getCharCodes provided values in
+     * random order.
+     *
+     * @throws IOException
+     */
+    @Test
+    public void testPDFBox3747() throws IOException
+    {
+        File file = new File("c:/windows/fonts", "calibri.ttf");
+        if (!file.exists())
+        {
+            System.out.println("testPDFBox3747 skipped");
+            return;
+        }
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (PDDocument doc = new PDDocument())
+        {
+            PDPage page = new PDPage();
+            doc.addPage(page);
+            PDFont font = PDType0Font.load(doc, file);
+
+            PDPageContentStream cs = new PDPageContentStream(doc, page);
+            cs.beginText();
+            cs.setFont(font, 10);
+            cs.showText("PDFBOX-3747");
+            cs.endText();
+            cs.close();
+
+            doc.writeTo(baos);
+        }
+        try (PDDocument doc = PDFParser
+                .parse(SeekableSources.inMemorySeekableSourceFrom(baos.toByteArray())))
+        {
+            PDFTextStripper stripper = new PDFTextStripper();
+            String text = stripper.getText(doc);
+            Assert.assertEquals("PDFBOX-3747", text.trim());
         }
     }
 }

@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
@@ -83,5 +84,11 @@ public class PDPushButton extends PDButton
     public String getValueAsString()
     {
         return getValue();
+    }
+
+    @Override
+    void constructAppearances() throws IOException
+    {
+        // TODO: add appearance handler to generate/update appearance
     }
 }

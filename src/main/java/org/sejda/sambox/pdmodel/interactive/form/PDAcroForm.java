@@ -38,6 +38,7 @@ import org.sejda.sambox.pdmodel.PDPageContentStream.AppendMode;
 import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.common.PDDictionaryWrapper;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
+import org.sejda.sambox.pdmodel.font.PDType1Font;
 import org.sejda.sambox.pdmodel.graphics.PDXObject;
 import org.sejda.sambox.pdmodel.graphics.form.PDFormXObject;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotation;
@@ -78,6 +79,41 @@ public final class PDAcroForm extends PDDictionaryWrapper
     {
         super(form);
         this.document = document;
+        verifyOrCreateDefaults();
+    }
+
+    /**
+     * Verify that there are default entries for required properties.
+     * 
+     * If these are missing create default entries similar to Adobe Reader / Adobe Acrobat
+     * 
+     */
+    private void verifyOrCreateDefaults()
+    {
+        // TODO: the handling of the missing properties is suitable
+        // if there are no entries at all. It might be necessary to enhance that
+        // if only parts are missing
+
+        final String AdobeDefaultAppearanceString = "/Helv 0 Tf 0 g ";
+
+        // DA entry is required
+        if (getDefaultAppearance().length() == 0)
+        {
+            setDefaultAppearance(AdobeDefaultAppearanceString);
+        }
+
+        // DR entry is required
+        if (getDefaultResources() == null)
+        {
+            // Adobe Acrobat uses Helvetica as a default font and
+            // stores that under the name '/Helv' in the resources dictionary
+            // Zapf Dingbats is included per default for check boxes and
+            // radio buttons as /ZaDb.
+            PDResources resources = new PDResources();
+            resources.put(COSName.getPDFName("Helv"), PDType1Font.HELVETICA);
+            resources.put(COSName.getPDFName("ZaDb"), PDType1Font.ZAPF_DINGBATS);
+            setDefaultResources(resources);
+        }
     }
 
     /**
@@ -378,7 +414,7 @@ public final class PDAcroForm extends PDDictionaryWrapper
      */
     public PDField getField(String fullyQualifiedName)
     {
-        if(fullyQualifiedName == null)
+        if (fullyQualifiedName == null)
         {
             return null;
         }

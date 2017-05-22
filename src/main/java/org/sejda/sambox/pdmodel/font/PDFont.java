@@ -127,11 +127,20 @@ public abstract class PDFont implements COSObjectable, PDFontLike
         COSBase toUnicode = dict.getDictionaryObject(COSName.TO_UNICODE);
         if (toUnicode != null)
         {
-            toUnicodeCMap = readCMap(toUnicode);
-            if (toUnicodeCMap != null && !toUnicodeCMap.hasUnicodeMappings())
+            CMap cmap = null;
+            try
             {
-                LOG.warn("Invalid ToUnicode CMap in font " + getName());
+                cmap = readCMap(toUnicode);
+                if (cmap != null && !cmap.hasUnicodeMappings())
+                {
+                    LOG.warn("Invalid ToUnicode CMap in font " + getName());
+                }
             }
+            catch (IOException ex)
+            {
+                LOG.error("Could not read ToUnicode CMap in font " + getName(), ex);
+            }
+            toUnicodeCMap = cmap;
         }
         else
         {
@@ -235,7 +244,8 @@ public abstract class PDFont implements COSObjectable, PDFontLike
         // embedded", however PDFBOX-427 shows that it also applies to embedded fonts.
 
         // Type1, Type1C, Type3
-        if (dict.containsKey(COSName.WIDTHS) || dict.containsKey(COSName.MISSING_WIDTH))
+        if (dict.getDictionaryObject(COSName.WIDTHS) != null
+                || dict.containsKey(COSName.MISSING_WIDTH))
         {
             int firstChar = dict.getInt(COSName.FIRST_CHAR, -1);
             int lastChar = dict.getInt(COSName.LAST_CHAR, -1);
@@ -253,7 +263,7 @@ public abstract class PDFont implements COSObjectable, PDFontLike
             }
 
             PDFontDescriptor fd = getFontDescriptor();
-            if (fd != null && fd.hasMissingWidth())
+            if (fd != null)
             {
                 // get entry from /MissingWidth entry
                 width = fd.getMissingWidth();
@@ -521,6 +531,12 @@ public abstract class PDFont implements COSObjectable, PDFontLike
                 else
                 {
                     fontWidthOfSpace = getWidth(32);
+                }
+
+                // try to get it from the font itself
+                if (fontWidthOfSpace <= 0)
+                {
+                    fontWidthOfSpace = getWidthFromFont(32);
                 }
                 // use the average font width as fall back
                 if (fontWidthOfSpace <= 0)

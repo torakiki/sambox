@@ -33,16 +33,14 @@ import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 
 /**
- * Decompress data encoded using the wavelet-based JPEG 2000 standard,
- * reproducing the original data.
+ * Decompress data encoded using the wavelet-based JPEG 2000 standard, reproducing the original data.
  *
  * Requires the Java Advanced Imaging (JAI) Image I/O Tools to be installed from java.net, see
- * <a href="http://download.java.net/media/jai-imageio/builds/release/1.1/">jai-imageio</a>.
- * Alternatively you can build from the source available in the
- * <a href="https://java.net/projects/jai-imageio-core/">jai-imageio-core svn repo</a>.
+ * <a href="http://download.java.net/media/jai-imageio/builds/release/1.1/">jai-imageio</a>. Alternatively you can build
+ * from the source available in the <a href="https://java.net/projects/jai-imageio-core/">jai-imageio-core svn repo</a>.
  *
- * Mac OS X users should download the tar.gz file for linux and unpack it to obtain the
- * required jar files. The .so file can be safely ignored.
+ * Mac OS X users should download the tar.gz file for linux and unpack it to obtain the required jar files. The .so file
+ * can be safely ignored.
  *
  * @author John Hewson
  * @author Timo Boehme
@@ -50,8 +48,8 @@ import org.sejda.sambox.cos.COSName;
 public final class JPXFilter extends Filter
 {
     @Override
-    public DecodeResult decode(InputStream encoded, OutputStream decoded,
-                                         COSDictionary parameters, int index) throws IOException
+    public DecodeResult decode(InputStream encoded, OutputStream decoded, COSDictionary parameters,
+            int index) throws IOException
     {
         DecodeResult result = new DecodeResult(new COSDictionary());
         result.getParameters().addAll(parameters);
@@ -60,32 +58,31 @@ public final class JPXFilter extends Filter
         WritableRaster raster = image.getRaster();
         switch (raster.getDataBuffer().getDataType())
         {
-            case DataBuffer.TYPE_BYTE:
-                DataBufferByte byteBuffer = (DataBufferByte) raster.getDataBuffer();
-                decoded.write(byteBuffer.getData());
-                return result;
+        case DataBuffer.TYPE_BYTE:
+            DataBufferByte byteBuffer = (DataBufferByte) raster.getDataBuffer();
+            decoded.write(byteBuffer.getData());
+            return result;
 
-            case DataBuffer.TYPE_USHORT:
-                DataBufferUShort wordBuffer = (DataBufferUShort) raster.getDataBuffer();
-                int size = wordBuffer.getSize();
-                short[] data = wordBuffer.getData();
-                for (int i = 0; i < size; ++i)
-                {
-                    short w = data[i];
-                    decoded.write(w >> 8);
-                    decoded.write(w);
-                }
-                return result;
+        case DataBuffer.TYPE_USHORT:
+            DataBufferUShort wordBuffer = (DataBufferUShort) raster.getDataBuffer();
+            for (short w : wordBuffer.getData())
+            {
+                decoded.write(w >> 8);
+                decoded.write(w);
+            }
+            return result;
 
-            default:
-                throw new IOException("Data type " + raster.getDataBuffer().getDataType() + " not implemented");
+        default:
+            throw new IOException(
+                    "Data type " + raster.getDataBuffer().getDataType() + " not implemented");
         }
     }
 
     // try to read using JAI Image I/O
     private BufferedImage readJPX(InputStream input, DecodeResult result) throws IOException
     {
-        ImageReader reader = findImageReader("JPEG2000", "Java Advanced Imaging (JAI) Image I/O Tools are not installed");
+        ImageReader reader = findImageReader("JPEG2000",
+                "Java Advanced Imaging (JAI) Image I/O Tools are not installed");
         ImageInputStream iis = null;
         try
         {

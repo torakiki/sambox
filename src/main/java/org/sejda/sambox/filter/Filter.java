@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.filter;
 
+import static java.util.Objects.nonNull;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -118,7 +120,7 @@ public abstract class Filter
         while (readers.hasNext())
         {
             reader = readers.next();
-            if (reader.canReadRaster())
+            if (nonNull(reader) && reader.canReadRaster())
             {
                 break;
             }

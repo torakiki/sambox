@@ -35,8 +35,12 @@ import static org.sejda.util.RequireUtils.requireNotNullArg;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
+import org.sejda.io.FastByteArrayOutputStream;
 import org.sejda.io.SeekableSource;
 import org.sejda.sambox.SAMBox;
 import org.sejda.sambox.cos.COSObjectKey;
@@ -347,49 +351,50 @@ class SourceReader implements Closeable
     public String readName() throws IOException
     {
         skipExpected('/');
-        StringBuilder builder = pool.borrow();
+        FastByteArrayOutputStream buffer = new FastByteArrayOutputStream();
+        int i;
+        while (((i = source.read()) != -1) && !isEndOfName(i))
+        {
+            if (i == '#')
+            {
+                int ch1 = source.read();
+                int ch2 = source.read();
+                requireIOCondition(ch2 != -1 && ch1 != -1,
+                        "Expected 2-digit hexadecimal code but was end of file");
+
+                // Prior to PDF v1.2, the # was not a special character. Also,
+                // it has been observed that various PDF tools do not follow the
+                // spec with respect to the # escape, even though they report
+                // PDF versions of 1.2 or later. The solution here is that we
+                // interpret the # as an escape only when it is followed by two
+                // valid hex digits.
+                //
+                if (isHexDigit((char) ch1) && isHexDigit((char) ch2))
+                {
+                    String hex = "" + (char) ch1 + (char) ch2;
+                    i = Integer.parseInt(hex, 16);
+                }
+                else
+                {
+                    source.back(2);
+                    LOG.warn(
+                            "Found NUMBER SIGN (#) not used as escaping char while reading name at "
+                                    + position());
+                }
+            }
+            buffer.write(i);
+        }
+        unreadIfValid(i);
+        byte[] bytes = buffer.toByteArray();
         try
         {
-            int i;
-            while (((i = source.read()) != -1) && !isEndOfName(i))
-            {
-                char c = (char) i;
-                if (c == '#')
-                {
-                    int ch1 = source.read();
-                    int ch2 = source.read();
-                    requireIOCondition(ch2 != -1 && ch1 != -1,
-                            "Expected 2-digit hexadecimal code but was end of file");
-
-                    // Prior to PDF v1.2, the # was not a special character. Also,
-                    // it has been observed that various PDF tools do not follow the
-                    // spec with respect to the # escape, even though they report
-                    // PDF versions of 1.2 or later. The solution here is that we
-                    // interpret the # as an escape only when it is followed by two
-                    // valid hex digits.
-                    //
-                    if (isHexDigit((char) ch1) && isHexDigit((char) ch2))
-                    {
-                        String hex = "" + (char) ch1 + (char) ch2;
-                        c = (char) Integer.parseInt(hex, 16);
-                    }
-                    else
-                    {
-                        source.back(2);
-                        LOG.warn(
-                                "Found NUMBER SIGN (#) not used as escaping char while reading name at "
-                                        + position());
-                    }
-                }
-                builder.append(c);
-            }
-            unreadIfValid(i);
-            return builder.toString();
+            StandardCharsets.UTF_8.newDecoder().decode(ByteBuffer.wrap(bytes));
         }
-        finally
+        catch (CharacterCodingException e)
         {
-            pool.give(builder);
+            return new String(bytes, Charset.forName("Windows-1252"));
         }
+        return new String(bytes, StandardCharsets.UTF_8);
     }
 
     /**

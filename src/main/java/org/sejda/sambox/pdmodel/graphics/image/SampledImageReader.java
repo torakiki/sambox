@@ -35,6 +35,7 @@ import javax.imageio.stream.MemoryCacheImageInputStream;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSNumber;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
+import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
 import org.sejda.sambox.pdmodel.graphics.color.PDIndexed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,12 +63,11 @@ final class SampledImageReader
      */
     public static BufferedImage getStencilImage(PDImage pdImage, Paint paint) throws IOException
     {
-        // get mask (this image)
-        BufferedImage mask = getRGBImage(pdImage, null);
+        int width = pdImage.getWidth();
+        int height = pdImage.getHeight();
 
         // compose to ARGB
-        BufferedImage masked = new BufferedImage(mask.getWidth(), mask.getHeight(),
-                BufferedImage.TYPE_INT_ARGB);
+        BufferedImage masked = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g = masked.createGraphics();
 
         // draw the mask
@@ -76,29 +76,58 @@ final class SampledImageReader
         // fill with paint using src-in
         // g.setComposite(AlphaComposite.SrcIn);
         g.setPaint(paint);
-        g.fillRect(0, 0, mask.getWidth(), mask.getHeight());
+        g.fillRect(0, 0, width, height);
         g.dispose();
 
         // set the alpha
-        int width = masked.getWidth();
-        int height = masked.getHeight();
         WritableRaster raster = masked.getRaster();
-        WritableRaster alpha = mask.getRaster();
 
         final int[] transparent = new int[4];
-        int[] alphaPixel = null;
-        for (int y = 0; y < height; y++)
+        // avoid getting a BufferedImage for the mask to lessen memory footprint.
+        // Such masks are always bpc=1 and have no colorspace, but have a decode.
+        // (see 8.9.6.2 Stencil Masking)
+        try (ImageInputStream iis = new MemoryCacheImageInputStream(pdImage.createInputStream()))
         {
-            for (int x = 0; x < width; x++)
+            final float[] decode = getDecodeArray(pdImage);
+            int value = decode[0] < decode[1] ? 1 : 0;
+            int rowLen = width / 8;
+            if (width % 8 > 0)
             {
-                alphaPixel = alpha.getPixel(x, y, alphaPixel);
-                if (alphaPixel[0] == 255)
+                rowLen++;
+            }
+            byte[] buff = new byte[rowLen];
+            for (int y = 0; y < height; y++)
+            {
+                int x = 0;
+                int readLen = iis.read(buff);
+                for (int r = 0; r < rowLen && r < readLen; r++)
                 {
-                    raster.setPixel(x, y, transparent);
+                    int byteValue = buff[r];
+                    int mask = 128;
+                    int shift = 7;
+                    for (int i = 0; i < 8; i++)
+                    {
+                        int bit = (byteValue & mask) >> shift;
+                        mask >>= 1;
+                        --shift;
+                        if (bit == value)
+                        {
+                            raster.setPixel(x, y, transparent);
+                        }
+                        x++;
+                        if (x == width)
+                        {
+                            break;
+                        }
+                    }
+                }
+                if (readLen != rowLen)
+                {
+                    LOG.warn("premature EOF, image will be incomplete");
+                    break;
                 }
             }
         }
-
         return masked;
     }
 
@@ -129,42 +158,56 @@ final class SampledImageReader
 
         if (width <= 0 || height <= 0)
         {
-            throw new IOException("image weight and height must be positive");
+            throw new IOException("image width and height must be positive");
+        }
+
+        if (bitsPerComponent == 1 && colorKey == null && numComponents == 1)
+        {
+            return from1Bit(pdImage);
         }
 
         //
         // An AWT raster must use 8/16/32 bits per component. Images with < 8bpc
         // will be unpacked into a byte-backed raster. Images with 16bpc will be reduced
         // in depth to 8bpc as they will be drawn to TYPE_INT_RGB images anyway. All code
-        // in PDColorSpace#toRGBImage expects and 8-bit range, i.e. 0-255.
+        // in PDColorSpace#toRGBImage expects an 8-bit range, i.e. 0-255.
         //
         WritableRaster raster = Raster.createBandedRaster(DataBuffer.TYPE_BYTE, width, height,
                 numComponents, new Point(0, 0));
-
-        // convert image, faster path for non-decoded, non-colormasked 8-bit images
         final float[] defaultDecode = pdImage.getColorSpace().getDefaultDecode(8);
         if (bitsPerComponent == 8 && Arrays.equals(decode, defaultDecode) && colorKey == null)
         {
+            // convert image, faster path for non-decoded, non-colormasked 8-bit images
             return from8bit(pdImage, raster);
         }
-        else if (bitsPerComponent == 1 && colorKey == null && numComponents == 1)
-        {
-            return from1Bit(pdImage, raster);
-        }
-        else
-        {
-            return fromAny(pdImage, raster, colorKey);
-        }
+        return fromAny(pdImage, raster, colorKey);
     }
 
-    private static BufferedImage from1Bit(PDImage pdImage, WritableRaster raster) throws IOException
+    private static BufferedImage from1Bit(PDImage pdImage) throws IOException
     {
         final PDColorSpace colorSpace = pdImage.getColorSpace();
         final int width = pdImage.getWidth();
         final int height = pdImage.getHeight();
         final float[] decode = getDecodeArray(pdImage);
-        byte[] output = ((DataBufferByte) raster.getDataBuffer()).getData();
+        BufferedImage bim = null;
+        WritableRaster raster;
+        byte[] output;
+        if (colorSpace instanceof PDDeviceGray)
+        {
+            // TYPE_BYTE_GRAY and not TYPE_BYTE_BINARY because this one is handled
+            // without conversion to RGB by Graphics.drawImage
+            // this reduces the memory footprint, only one byte per pixel instead of three.
+            bim = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY);
+            raster = bim.getRaster();
+        }
+        else
+        {
+            raster = Raster.createBandedRaster(DataBuffer.TYPE_BYTE, width, height, 1,
+                    new Point(0, 0));
+        }
+        output = ((DataBufferByte) raster.getDataBuffer()).getData();
 
+        // read bit stream
         try (InputStream iis = pdImage.createInputStream())
         {
             final boolean isIndexed = colorSpace instanceof PDIndexed;
@@ -193,8 +236,8 @@ final class SampledImageReader
             for (int y = 0; y < height; y++)
             {
                 int x = 0;
-                iis.read(buff);
-                for (int r = 0; r < rowLen; r++)
+                int readLen = iis.read(buff);
+                for (int r = 0; r < rowLen && r < readLen; r++)
                 {
                     int value = buff[r];
                     int mask = 128;
@@ -210,12 +253,20 @@ final class SampledImageReader
                         }
                     }
                 }
+                if (readLen != rowLen)
+                {
+                    LOG.warn("premature EOF, image will be incomplete");
+                    break;
+                }
+            }
+
+            if (bim != null)
+            {
+                return bim;
             }
 
             // use the color space to convert the image to RGB
-            BufferedImage rgbImage = colorSpace.toRGBImage(raster);
-
-            return rgbImage;
+            return colorSpace.toRGBImage(raster);
         }
     }
 
