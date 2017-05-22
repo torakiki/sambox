@@ -402,8 +402,18 @@ class AppearanceGeneratorHelper
         contents.clip();
 
         // get the font
-        // TODO edi review
-        PDFont font = defaultAppearance.getFont();
+
+        // field's defined appearance font has priority
+        // callers might have determined that the default font does not support rendering the field's value
+        // so the font was substituted to another one, which has better unicode support
+        // see PDVariableText.setAppearanceOverrideFont()
+        PDFont font = field.getAppearanceFont();
+
+        // fallback to default appearance
+        if(font == null)
+        {
+            font = defaultAppearance.getFont();
+        }
 
         // calculate the fontSize (because 0 = autosize)
         float fontSize = defaultAppearance.getFontSize();
