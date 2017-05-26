@@ -429,7 +429,7 @@ public final class PDAcroForm extends PDDictionaryWrapper
      */
     public String getDefaultAppearance()
     {
-        return ofNullable(getCOSObject().getItem(COSName.DA)).map(i -> (COSString) i)
+        return ofNullable(getCOSObject().getDictionaryObject(COSName.DA, COSString.class))
                 .map(COSString::getString).orElse("");
     }
 
