@@ -125,22 +125,22 @@ public abstract class PDCIDFont implements COSObjectable, PDFontLike, PDVectorFo
         }
 
         // vertical metrics for individual CIDs.
-        COSArray w2 = (COSArray) dict.getDictionaryObject(COSName.W2);
+        COSArray w2 = dict.getDictionaryObject(COSName.W2, COSArray.class);
         if (w2 != null)
         {
             for (int i = 0; i < w2.size(); i++)
             {
-                COSNumber c = (COSNumber) w2.get(i);
-                COSBase next = w2.get(++i);
+                COSNumber c = (COSNumber) w2.getObject(i);
+                COSBase next = w2.getObject(++i);
                 if (next instanceof COSArray)
                 {
                     COSArray array = (COSArray) next;
                     for (int j = 0; j < array.size(); j++)
                     {
                         int cid = c.intValue() + j;
-                        COSNumber w1y = (COSNumber) array.get(j);
-                        COSNumber v1x = (COSNumber) array.get(++j);
-                        COSNumber v1y = (COSNumber) array.get(++j);
+                        COSNumber w1y = (COSNumber) array.getObject(j);
+                        COSNumber v1x = (COSNumber) array.getObject(++j);
+                        COSNumber v1y = (COSNumber) array.getObject(++j);
                         verticalDisplacementY.put(cid, w1y.floatValue());
                         positionVectors.put(cid, new Vector(v1x.floatValue(), v1y.floatValue()));
                     }
@@ -149,9 +149,9 @@ public abstract class PDCIDFont implements COSObjectable, PDFontLike, PDVectorFo
                 {
                     int first = c.intValue();
                     int last = ((COSNumber) next).intValue();
-                    COSNumber w1y = (COSNumber) w2.get(++i);
-                    COSNumber v1x = (COSNumber) w2.get(++i);
-                    COSNumber v1y = (COSNumber) w2.get(++i);
+                    COSNumber w1y = (COSNumber) w2.getObject(++i);
+                    COSNumber v1x = (COSNumber) w2.getObject(++i);
+                    COSNumber v1y = (COSNumber) w2.getObject(++i);
                     for (int cid = first; cid <= last; cid++)
                     {
                         verticalDisplacementY.put(cid, w1y.floatValue());
