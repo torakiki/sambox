@@ -19,6 +19,7 @@ package org.sejda.sambox.cos;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +33,7 @@ public class PDFDocEncodingTest
 {
 
     static List<String> deviations = new ArrayList<String>();
-    
+
     static
     {
         // all deviations (based on the table in ISO 32000-1:2008)
@@ -80,15 +81,31 @@ public class PDFDocEncodingTest
         deviations.add(String.valueOf('\u20AC')); // EURO SIGN
         // end of deviations
     }
-    
+
     @Test
     public void testDeviations()
     {
-        for (String deviation: deviations)
+        for (String deviation : deviations)
         {
             COSString cosString = COSString.parseLiteral(deviation);
             assertEquals(cosString.getString(), deviation);
         }
     }
-}
 
+    /**
+     * PDFBOX-3864: Test that chars smaller than 256 which are NOT part of PDFDocEncoding are handled correctly.
+     *
+     * @throws IOException
+     */
+    @Test
+    public void testPDFBox3864() throws IOException
+    {
+        for (int i = 0; i < 256; i++)
+        {
+            String hex = String.format("FEFF%04X", i);
+            COSString cs1 = COSString.parseHex(hex);
+            COSString cs2 = COSString.parseLiteral(cs1.getString());
+            assertEquals(cs1.getString(), cs2.getString());
+        }
+    }
+}
