@@ -164,6 +164,26 @@ public class PDFParserTest
     }
 
     @Test
+    public void thirdLineHeader() throws IOException
+    {
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/third_line_header.pdf"))))
+        {
+            assertNotNull(doc);
+            assertFalse(doc.isEncrypted());
+            assertTrue(doc.isOpen());
+            assertEquals(SpecVersionUtils.V1_4, doc.getVersion());
+        }
+    }
+
+    @Test(expected = IOException.class)
+    public void tooMuchPreGarbageHeader() throws IOException
+    {
+        PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/too_much_garbage_header.pdf")));
+    }
+
+    @Test
     public void missingPageType() throws IOException
     {
         try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(

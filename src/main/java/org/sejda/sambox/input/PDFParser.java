@@ -170,11 +170,8 @@ public class PDFParser
         String header = parser.readLine();
         while ((headerIndex = header.indexOf(PDF_HEADER)) < 0)
         {
-            // if a line starts with a digit, it has to be the first one with data in it
-            if ((header.length() > 0) && (Character.isDigit(header.charAt(0))))
-            {
-                throw new IOException("Unable to find expected file header");
-            }
+            // we seach the header up to a certain point, then we fail
+            requireIOCondition(parser.position() <= 1024, "Unable to find expected file header");
             header = parser.readLine();
         }
 
