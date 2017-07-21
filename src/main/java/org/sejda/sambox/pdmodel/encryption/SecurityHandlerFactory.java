@@ -19,11 +19,8 @@ package org.sejda.sambox.pdmodel.encryption;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.security.Security;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 /**
  * Manages security handlers for the application.
@@ -39,18 +36,12 @@ public final class SecurityHandlerFactory
     /** Singleton instance */
     public static final SecurityHandlerFactory INSTANCE = new SecurityHandlerFactory();
 
-    static
-    {
-        Security.addProvider(new BouncyCastleProvider());
-    }
-
     private final Map<String, Class<? extends SecurityHandler>> nameToHandler =
-            new HashMap<String, Class<? extends SecurityHandler>>();
+            new HashMap<>();
 
     private final Map<Class<? extends ProtectionPolicy>,
                       Class<? extends SecurityHandler>> policyToHandler =
-            new HashMap<Class<? extends ProtectionPolicy>,
-                        Class<? extends SecurityHandler>>();
+            new HashMap<>();
 
     private SecurityHandlerFactory()
     {

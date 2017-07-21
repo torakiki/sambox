@@ -218,7 +218,7 @@ public abstract class PDSimpleFont extends PDFont
                 // sanity check, should never happen
                 if (!(this instanceof PDTrueTypeFont))
                 {
-                    throw new IllegalStateException("PDFBox bug: encoding should not be null!");
+                    throw new IllegalStateException("Encoding should not be null!");
                 }
 
                 // TTF without its non-symbolic flag set must be symbolic

@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.fontbox.ttf.HorizontalMetricsTable;
+import org.apache.fontbox.ttf.TrueTypeFont;
 import org.sejda.sambox.cos.COSArrayList;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
@@ -45,14 +46,14 @@ final class PDTrueTypeFontEmbedder extends TrueTypeEmbedder
      * Creates a new TrueType font embedder for the given TTF as a PDTrueTypeFont.
      *
      * @param dict Font dictionary
-     * @param ttfStream TTF stream
+     * @param ttf TTF font
      * @param encoding The PostScript encoding vector to be used for embedding.
      * @throws IOException if the TTF could not be read
      */
-    PDTrueTypeFontEmbedder(COSDictionary dict, InputStream ttfStream,
+    PDTrueTypeFontEmbedder(COSDictionary dict, TrueTypeFont ttf,
                            Encoding encoding) throws IOException
     {
-        super(dict, ttfStream, false);
+        super(dict, ttf, false);
         dict.setItem(COSName.SUBTYPE, COSName.TRUE_TYPE);
         
         GlyphList glyphList = GlyphList.getAdobeGlyphList();

@@ -20,8 +20,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import org.apache.commons.io.IOUtils;
 import org.sejda.sambox.cos.COSDictionary;
-import org.sejda.util.IOUtils;
 
 /**
  * Decodes data encoded in an ASCII base-85 representation, reproducing the original binary data.
@@ -33,22 +33,12 @@ final class ASCII85Filter extends Filter
     public DecodeResult decode(InputStream encoded, OutputStream decoded,
                                          COSDictionary parameters, int index) throws IOException
     {
-        ASCII85InputStream is = null;
-        try
+        try (ASCII85InputStream is = new ASCII85InputStream(encoded))
         {
-            is = new ASCII85InputStream(encoded);
-            byte[] buffer = new byte[1024];
-            int amountRead;
-            while((amountRead = is.read(buffer, 0, 1024))!= -1)
-            {
-                decoded.write(buffer, 0, amountRead);
-            }
-            decoded.flush();
+            IOUtils.copy(is, decoded);
+
         }
-        finally
-        {
-            IOUtils.closeQuietly(is);
-        }
+        decoded.flush();
         return new DecodeResult(parameters);
     }
 
@@ -56,14 +46,10 @@ final class ASCII85Filter extends Filter
     public void encode(InputStream input, OutputStream encoded, COSDictionary parameters)
         throws IOException
     {
-        ASCII85OutputStream os = new ASCII85OutputStream(encoded);
-        byte[] buffer = new byte[1024];
-        int amountRead;
-        while((amountRead = input.read(buffer, 0, 1024))!= -1)
+        try (ASCII85OutputStream os = new ASCII85OutputStream(encoded))
         {
-            os.write(buffer, 0, amountRead);
+            IOUtils.copy(input, os);
         }
-        os.close();
         encoded.flush();
     }
 }

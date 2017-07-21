@@ -23,14 +23,10 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.TexturePaint;
 import java.awt.Transparency;
-import java.awt.color.ColorSpace;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
-import java.awt.image.ComponentColorModel;
-import java.awt.image.DataBuffer;
-import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -134,10 +130,6 @@ class TilingPaint implements Paint
             PDColorSpace colorSpace, PDColor color, AffineTransform xform, Rectangle2D anchorRect)
             throws IOException
     {
-        ColorSpace outputCS = ColorSpace.getInstance(ColorSpace.CS_sRGB);
-        ColorModel cm = new ComponentColorModel(outputCS, true, false,
-                Transparency.TRANSLUCENT, DataBuffer.TYPE_BYTE);
-
         float width = (float) Math.abs(anchorRect.getWidth());
         float height = (float) Math.abs(anchorRect.getHeight());
 
@@ -151,9 +143,8 @@ class TilingPaint implements Paint
         int rasterWidth = Math.max(1, ceiling(width));
         int rasterHeight = Math.max(1, ceiling(height));
 
-        // create raster
-        WritableRaster raster = cm.createCompatibleWritableRaster(rasterWidth, rasterHeight);
-        BufferedImage image = new BufferedImage(cm, raster, false, null);
+        BufferedImage image = new BufferedImage(rasterWidth, rasterHeight,
+                BufferedImage.TYPE_INT_ARGB);
 
         Graphics2D graphics = image.createGraphics();
 

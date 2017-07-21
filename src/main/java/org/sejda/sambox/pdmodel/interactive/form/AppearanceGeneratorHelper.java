@@ -23,6 +23,7 @@ import static org.sejda.io.CountingWritableByteChannel.from;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.sejda.sambox.contentstream.operator.Operator;
@@ -584,19 +585,17 @@ class AppearanceGeneratorHelper
                 + (appearanceStream.getBBox().getHeight() - ascentAtFontSize) / 2;
 
         float prevCharWidth = 0f;
-        float currCharWidth = 0f;
 
         float xOffset = combWidth / 2;
 
-        String combString = "";
 
         contents.saveGraphicsState();
         contents.setFont(font, fontSize);
 
         for (int i = 0; i < numChars; i++)
         {
-            combString = value.substring(i, i + 1);
-            currCharWidth = font.getStringWidth(combString) / FONTSCALE * fontSize / 2;
+            String combString = value.substring(i, i + 1);
+            float currCharWidth = font.getStringWidth(combString) / FONTSCALE * fontSize / 2;
 
             xOffset = xOffset + prevCharWidth / 2 - currCharWidth / 2;
 
@@ -618,19 +617,13 @@ class AppearanceGeneratorHelper
         List<String> values = ((PDListBox) field).getValue();
         List<String> options = ((PDListBox) field).getOptionsExportValues();
 
-        // TODO: support highlighting multiple items if multiselect is set
-
-        int selectedIndex = 0;
-
-        if (!values.isEmpty() && !options.isEmpty())
+        if (!values.isEmpty() && !options.isEmpty() && indexEntries.isEmpty())
         {
-            if (!indexEntries.isEmpty())
+            // create indexEntries from options
+            indexEntries = new ArrayList<>();
+            for (String v : values)
             {
-                selectedIndex = indexEntries.get(0);
-            }
-            else
-            {
-                selectedIndex = options.indexOf(values.get(0));
+                indexEntries.add(options.indexOf(v));
             }
         }
 
@@ -639,17 +632,22 @@ class AppearanceGeneratorHelper
         // display starts with the first entry in Opt.
         int topIndex = ((PDListBox) field).getTopIndex();
 
-        float highlightBoxHeight = font.getBoundingBox().getHeight() * fontSize / FONTSCALE - 2f;
+        float highlightBoxHeight = font.getBoundingBox().getHeight() * fontSize / FONTSCALE;
 
         // the padding area
         PDRectangle paddingEdge = applyPadding(appearanceStream.getBBox(), 1);
 
-        contents.setNonStrokingColor(HIGHLIGHT_COLOR[0], HIGHLIGHT_COLOR[1], HIGHLIGHT_COLOR[2]);
+        for (int selectedIndex : indexEntries)
+        {
+            contents.setNonStrokingColor(HIGHLIGHT_COLOR[0], HIGHLIGHT_COLOR[1],
+                    HIGHLIGHT_COLOR[2]);
 
-        contents.addRect(paddingEdge.getLowerLeftX(),
-                paddingEdge.getUpperRightY() - highlightBoxHeight * (selectedIndex - topIndex + 1),
-                paddingEdge.getWidth(), highlightBoxHeight);
-        contents.fill();
+            contents.addRect(paddingEdge.getLowerLeftX(),
+                    paddingEdge.getUpperRightY()
+                            - highlightBoxHeight * (selectedIndex - topIndex + 1) + 2,
+                    paddingEdge.getWidth(), highlightBoxHeight);
+            contents.fill();
+        }
         contents.setNonStrokingColor(0);
     }
 

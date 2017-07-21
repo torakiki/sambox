@@ -21,7 +21,12 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.fontbox.ttf.TrueTypeFont;
 import org.sejda.sambox.cos.COSArray;
@@ -224,9 +229,10 @@ final class PDCIDFontType2Embedder extends TrueTypeEmbedder
             out.write(new byte[] { (byte) (gid >> 8 & 0xff), (byte) (gid & 0xff) });
         }
 
-        InputStream input = new ByteArrayInputStream(out.toByteArray());
+        byte[] byteArray = out.toByteArray();
+        InputStream input = new ByteArrayInputStream(byteArray);
         PDStream stream = new PDStream(input, COSName.FLATE_DECODE);
-        stream.getCOSObject().setInt(COSName.LENGTH1, stream.toByteArray().length);
+        stream.getCOSObject().setInt(COSName.LENGTH1, byteArray.length);
 
         cidFont.setItem(COSName.CID_TO_GID_MAP, stream);
     }

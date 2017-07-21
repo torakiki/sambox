@@ -17,8 +17,6 @@
 
 package org.sejda.sambox.pdmodel.font;
 
-import static java.util.Objects.nonNull;
-
 import java.awt.geom.GeneralPath;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -65,30 +63,24 @@ abstract class TrueTypeEmbedder implements Subsetter
     /**
      * Creates a new TrueType font for embedding.
      */
-    TrueTypeEmbedder(COSDictionary dict, InputStream ttfStream, boolean embedSubset)
-            throws IOException
-    {
-        this.embedSubset = embedSubset;
-
-        buildFontFile2(ttfStream);
-        dict.setName(COSName.BASE_FONT, ttf.getName());
-
-        // choose a Unicode "cmap"
-        cmap = ttf.getUnicodeCmap();
-    }
-
-    /**
-     * Creates a new TrueType font for embedding.
-     */
     TrueTypeEmbedder(COSDictionary dict, TrueTypeFont ttf, boolean embedSubset) throws IOException
     {
         this.embedSubset = embedSubset;
         this.ttf = ttf;
         fontDescriptor = createFontDescriptor(ttf);
 
-        PDStream stream = new PDStream(ttf.getOriginalData(), COSName.FLATE_DECODE);
-        stream.getCOSObject().setInt(COSName.LENGTH1, stream.toByteArray().length);
-        fontDescriptor.setFontFile2(stream);
+        if (!isEmbeddingPermitted(ttf))
+        {
+            throw new IOException("This font does not permit embedding");
+        }
+
+        if (!embedSubset)
+        {
+            // full embedding
+            PDStream stream = new PDStream(ttf.getOriginalData(), COSName.FLATE_DECODE);
+            stream.getCOSObject().setLong(COSName.LENGTH1, ttf.getOriginalDataSize());
+            fontDescriptor.setFontFile2(stream);
+        }
 
         dict.setName(COSName.BASE_FONT, ttf.getName());
 
@@ -99,17 +91,12 @@ abstract class TrueTypeEmbedder implements Subsetter
     public void buildFontFile2(InputStream ttfStream) throws IOException
     {
         PDStream stream = new PDStream(ttfStream, COSName.FLATE_DECODE);
-        stream.getCOSObject().setInt(COSName.LENGTH1, stream.toByteArray().length);
 
         // as the stream was closed within the PDStream constructor, we have to recreate it
         InputStream input = null;
         try
         {
             input = stream.createInputStream();
-            if (nonNull(ttf))
-            {
-                ttf.close();
-            }
             ttf = new TTFParser().parseEmbedded(input);
             if (!isEmbeddingPermitted(ttf))
             {
@@ -124,7 +111,7 @@ abstract class TrueTypeEmbedder implements Subsetter
         {
             IOUtils.closeQuietly(input);
         }
-
+        stream.getCOSObject().setLong(COSName.LENGTH1, ttf.getOriginalDataSize());
         fontDescriptor.setFontFile2(stream);
     }
 
@@ -265,6 +252,7 @@ abstract class TrueTypeEmbedder implements Subsetter
     /**
      * Returns the FontBox font.
      */
+    @Deprecated
     public TrueTypeFont getTrueTypeFont()
     {
         return ttf;
@@ -312,7 +300,7 @@ abstract class TrueTypeEmbedder implements Subsetter
         tables.add("gasp");
 
         // set the GIDs to subset
-        TTFSubsetter subsetter = new TTFSubsetter(getTrueTypeFont(), tables);
+        TTFSubsetter subsetter = new TTFSubsetter(ttf, tables);
         subsetter.addAll(subsetCodePoints);
 
         // calculate deterministic tag based on the chosen subset

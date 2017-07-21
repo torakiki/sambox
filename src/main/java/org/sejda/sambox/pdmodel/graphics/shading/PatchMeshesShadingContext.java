@@ -15,6 +15,8 @@
  */
 package org.sejda.sambox.pdmodel.graphics.shading;
 
+import static java.util.Objects.isNull;
+
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
@@ -94,8 +96,12 @@ abstract class PatchMeshesShadingContext extends TriangleBasedShadingContext
         for (int i = 0; i < numberOfColorComponents; ++i)
         {
             colRange[i] = shadingType.getDecodeForParameter(2 + i);
+            if (isNull(colRange[i]))
+            {
+                throw new IOException("Range missing in shading /Decode entry");
+            }
         }
-        List<Patch> list = new ArrayList<Patch>();
+        List<Patch> list = new ArrayList<>();
         long maxSrcCoord = (long) Math.pow(2, bitsPerCoordinate) - 1;
         long maxSrcColor = (long) Math.pow(2, bitsPerColorComponent) - 1;
         COSStream cosStream = (COSStream) dict;
