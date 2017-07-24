@@ -321,12 +321,12 @@ public class PDRectangle implements COSObjectable
     }
 
     /**
-     * @return a new rectangle at the same coordinates but rotated clockwise by 90 degrees
+     * @return a new rectangle at the same coordinates but rotated clockwise by in degrees
      */
     public PDRectangle rotate(int degrees)
     {
         PDRectangle ret = this;
-        for (int i = 0; i < (degrees % 360) / 90; i++)
+        for (int i = 0; i < Math.abs((degrees % 360) / 90); i++)
         {
             ret = ret.rotate();
         }

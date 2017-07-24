@@ -75,6 +75,17 @@ public class PDRectangleTest
     }
 
     @Test
+    public void testRotatenegative90Degrees()
+    {
+        PDRectangle victim = new PDRectangle(10, 50, 120, 200);
+        PDRectangle rotated = victim.rotate(-90);
+        assertEquals(victim.getLowerLeftX(), rotated.getLowerLeftX(), 0);
+        assertEquals(victim.getLowerLeftY(), rotated.getLowerLeftY(), 0);
+        assertEquals(victim.getWidth(), rotated.getHeight(), 0);
+        assertEquals(victim.getHeight(), rotated.getWidth(), 0);
+    }
+
+    @Test
     public void testRotate360Degrees()
     {
         PDRectangle victim = new PDRectangle(10, 50, 120, 200);
