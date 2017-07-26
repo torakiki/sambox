@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.pdmodel.interactive.annotation;
 
+import static java.util.Optional.ofNullable;
+
 import java.io.IOException;
 
 import org.sejda.sambox.cos.COSArray;
@@ -203,7 +205,7 @@ public class PDAnnotationLink extends PDAnnotation
     {
         COSArray newQuadPoints = new COSArray();
         newQuadPoints.setFloatArray(quadPoints);
-        getCOSObject().setItem("QuadPoints", newQuadPoints);
+        getCOSObject().setItem(COSName.QUADPOINTS, newQuadPoints);
     }
 
     /**
@@ -213,11 +215,7 @@ public class PDAnnotationLink extends PDAnnotation
      */
     public float[] getQuadPoints()
     {
-        COSArray quadPoints = (COSArray) getCOSObject().getDictionaryObject("QuadPoints");
-        if (quadPoints != null)
-        {
-            return quadPoints.toFloatArray();
-        }
-        return null; // Should never happen as this is a required item
+        return ofNullable(getCOSObject().getDictionaryObject(COSName.QUADPOINTS, COSArray.class))
+                .map(COSArray::toFloatArray).orElse(null);
     }
 }

@@ -17,6 +17,7 @@
 package org.sejda.sambox.pdmodel.interactive.annotation;
 
 import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
 
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
@@ -144,8 +145,8 @@ public class PDAnnotationLine extends PDAnnotationMarkup
      */
     public float[] getLine()
     {
-        COSArray l = (COSArray) getCOSObject().getDictionaryObject(COSName.L);
-        return l.toFloatArray();
+        return ofNullable(getCOSObject().getDictionaryObject(COSName.L, COSArray.class))
+                .map(COSArray::toFloatArray).orElse(null);
     }
 
     /**
