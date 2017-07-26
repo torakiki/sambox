@@ -16,10 +16,11 @@
  */
 package org.sejda.sambox.pdmodel.interactive.annotation;
 
+import static java.util.Optional.ofNullable;
+
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
-
 /**
  * This is the abstract class that represents a text markup annotation Introduced in PDF 1.3 specification, except
  * Squiggly lines in 1.4.
@@ -84,16 +85,12 @@ public class PDAnnotationTextMarkup extends PDAnnotationMarkup
     /**
      * This will retrieve the set of quadpoints which encompass the areas of this annotation.
      *
-     * @return An array of floats representing the quad points.
+     * @return An array of floats representing the quad points or null if not present.
      */
     public float[] getQuadPoints()
     {
-        COSArray quadPoints = (COSArray) getCOSObject().getDictionaryObject(COSName.QUADPOINTS);
-        if (quadPoints != null)
-        {
-            return quadPoints.toFloatArray();
-        }
-        return null; // Should never happen as this is a required item
+        return ofNullable(getCOSObject().getDictionaryObject(COSName.QUADPOINTS, COSArray.class))
+                .map(COSArray::toFloatArray).orElse(null);
     }
 
     /**
