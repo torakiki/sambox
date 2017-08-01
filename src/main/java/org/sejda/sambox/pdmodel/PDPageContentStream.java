@@ -295,6 +295,14 @@ public final class PDPageContentStream implements Closeable
         inTextMode = false;
     }
 
+    public void endTextIfRequired() throws IOException
+    {
+        if (inTextMode)
+        {
+            endText();
+        }
+    }
+
     /**
      * Set the font and font size to draw text with.
      *

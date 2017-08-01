@@ -504,7 +504,8 @@ class AppearanceGeneratorHelper
             formatter.format();
         }
 
-        contents.endText();
+
+        contents.endTextIfRequired();
         contents.restoreGraphicsState();
     }
 
