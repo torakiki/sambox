@@ -160,7 +160,7 @@ public class PDAnnotationLine extends PDAnnotationMarkup
         {
             style = LE_NONE;
         }
-        COSArray array = (COSArray) getCOSObject().getDictionaryObject(COSName.LE);
+        COSArray array = getCOSObject().getDictionaryObject(COSName.LE, COSArray.class);
         if (array == null)
         {
             array = new COSArray();
