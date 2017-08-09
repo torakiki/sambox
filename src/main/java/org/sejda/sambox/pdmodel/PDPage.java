@@ -405,7 +405,7 @@ public class PDPage implements COSObjectable, PDContentStream
      */
     public PDRectangle getTrimBox()
     {
-        COSArray array = (COSArray) page.getDictionaryObject(COSName.TRIM_BOX);
+        COSArray array = page.getDictionaryObject(COSName.TRIM_BOX, COSArray.class);
         if (nonNull(array) && inMediaBoxBounds(new PDRectangle(array)))
         {
             return new PDRectangle(array);
@@ -415,7 +415,7 @@ public class PDPage implements COSObjectable, PDContentStream
 
     public PDRectangle getTrimBoxRaw()
     {
-        COSArray array = (COSArray) page.getDictionaryObject(COSName.TRIM_BOX);
+        COSArray array = page.getDictionaryObject(COSName.TRIM_BOX, COSArray.class);
         if (nonNull(array))
         {
             return new PDRectangle(array);
@@ -737,7 +737,7 @@ public class PDPage implements COSObjectable, PDContentStream
     }
 
     /**
-     * Returns the resource cache associated with this page, or null if there is none.
+     * @return the resource cache associated with this page, or null if there is none.
      */
     public ResourceCache getResourceCache()
     {
