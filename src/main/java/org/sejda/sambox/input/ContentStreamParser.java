@@ -18,7 +18,10 @@ package org.sejda.sambox.input;
 
 import static org.sejda.sambox.contentstream.operator.Operator.BI_OPERATOR;
 import static org.sejda.sambox.contentstream.operator.Operator.ID_OPERATOR;
+import static org.sejda.sambox.util.CharUtils.ASCII_SPACE;
 import static org.sejda.sambox.util.CharUtils.isEOF;
+import static org.sejda.sambox.util.CharUtils.isEOL;
+import static org.sejda.sambox.util.CharUtils.isSpace;
 import static org.sejda.sambox.util.CharUtils.isWhitespace;
 
 import java.io.IOException;
@@ -156,14 +159,42 @@ public class ContentStreamParser extends SourceReader
     private boolean isEndOfImageFrom(long position) throws IOException
     {
         long currentPosition = source().position();
+        source().position(position);
+        int current = source().read();
+        if (current == 'E')
+        {
+            current = source().read();
+            // if not a EI we restore the position and go on
+            if (current == 'I' && (isEndOfImage() || isEOF(source().peek())))
+            {
+                return true;
+            }
+        }
+        source().position(currentPosition);
+        return false;
+    }
+
+    private boolean isEndOfImage() throws IOException
+    {
+        long currentPosition = source().position();
         try
         {
-            source().position(position);
             int current = source().read();
-            if (current == 'E')
+            // we do what PDF.js does
+            if (isSpace(current) || isEOL(current))
             {
-                current = source().read();
-                return current == 'I' && (isWhitespace(source().peek()) || isEOF(source().peek()));
+                // from PDF.js: Let's check the next five bytes are ASCII... just be sure.
+                for (int i = 0; i < 5; i++)
+                {
+                    current = source().read();
+                    if (!isEOF(current) && !isEOL(current)
+                            && (current < ASCII_SPACE || current > 0x7F))
+                    {
+                        // from PDF.js: Not a LF, CR, SPACE or any visible ASCII character, i.e. it's binary stuff.
+                        return false;
+                    }
+                }
+                return true;
             }
             return false;
         }

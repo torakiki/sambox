@@ -467,7 +467,7 @@ public abstract class PDFStreamEngine
             if (token instanceof Operator)
             {
                 processOperator((Operator) token, arguments);
-                arguments = new ArrayList<>();
+                arguments.clear();
             }
             else
             {

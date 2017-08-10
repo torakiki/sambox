@@ -78,6 +78,8 @@ public class ContentStreamParserTest
         Operator operator = (Operator) victim.nextParsedToken();
         assertEquals(5, operator.getImageParameters().size());
         assertEquals(14, operator.getImageData().length);
+        operator = (Operator) victim.nextParsedToken();
+        assertEquals("Q", operator.getName());
     }
 
     @Test
@@ -108,5 +110,29 @@ public class ContentStreamParserTest
         Operator operator = (Operator) victim.nextParsedToken();
         assertEquals(5, operator.getImageParameters().size());
         assertEquals(14, operator.getImageData().length);
+    }
+
+    @Test
+    public void nextInlineImageEINULL() throws IOException
+    {
+        victim = new ContentStreamParser(inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/inline_image_EI_NULL_in_stream.txt")));
+        Operator operator = (Operator) victim.nextParsedToken();
+        assertEquals(5, operator.getImageParameters().size());
+        assertEquals(17, operator.getImageData().length);
+        operator = (Operator) victim.nextParsedToken();
+        assertEquals("q", operator.getName());
+    }
+
+    @Test
+    public void nextInlineImageEISpace() throws IOException
+    {
+        victim = new ContentStreamParser(inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/inline_image_EI_SPACE_in_stream.txt")));
+        Operator operator = (Operator) victim.nextParsedToken();
+        assertEquals(5, operator.getImageParameters().size());
+        assertEquals(17, operator.getImageData().length);
+        operator = (Operator) victim.nextParsedToken();
+        assertEquals("q", operator.getName());
     }
 }
