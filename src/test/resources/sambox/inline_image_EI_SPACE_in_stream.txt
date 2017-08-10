@@ -1,0 +1,13 @@
+BI
+/F /DCTDecode
+/BPC 8
+/H 362
+/CS /DeviceRGB
+/W 232
+ID
+¾3ÆEI µmC	òÄ9ÜÙ$
+EI
+q
+Q
+S
+q 1 0 0 1 45 615 cm /Xi0 Do Q
