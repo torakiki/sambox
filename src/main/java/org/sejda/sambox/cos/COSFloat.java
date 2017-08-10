@@ -70,6 +70,11 @@ public class COSFloat extends COSNumber
                     // PDFBOX-3589 --242.0
                     value = new BigDecimal(aFloat.replaceFirst("^(-)([\\-|\\+]+)", "-"));
                 }
+                else if (aFloat.matches("^0\\-(\\.|\\d+)*"))
+                {
+                    // SAMBox 75
+                    value = BigDecimal.ZERO;
+                }
                 else
                 {
                     // PDFBOX-2990 has 0.00000-33917698

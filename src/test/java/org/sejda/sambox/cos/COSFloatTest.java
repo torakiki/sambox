@@ -103,6 +103,14 @@ public class COSFloatTest
         assertEquals(-0.0040f, COSFloat.get("0.00-40").floatValue(), 0);
     }
 
+    @Test
+    public void sambox75() throws IOException
+    {
+        assertEquals(0, COSFloat.get("0-66.7").floatValue(), 0);
+        assertEquals(0, COSFloat.get("0-").floatValue(), 0);
+        assertEquals(0, COSFloat.get("0-66").floatValue(), 0);
+    }
+
     @Test(expected = IOException.class)
     public void invalidValue() throws IOException
     {
