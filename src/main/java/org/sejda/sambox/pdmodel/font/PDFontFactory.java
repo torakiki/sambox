@@ -43,7 +43,7 @@ public final class PDFontFactory
      * @return a PDFont instance, based on the SubType entry of the dictionary
      * @throws IOException if something goes wrong
      */
-    public static PDFont createFont(COSDictionary dictionary) throws IOException
+    synchronized public static PDFont createFont(COSDictionary dictionary) throws IOException
     {
         COSName type = dictionary.getCOSName(COSName.TYPE, COSName.FONT);
         if (!COSName.FONT.equals(type))

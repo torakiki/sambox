@@ -50,22 +50,31 @@ public class ExistingIndirectCOSObject extends COSBase implements DisposableCOSO
     @Override
     public COSBase getCOSObject()
     {
-        COSBase baseObject = Optional.ofNullable(provider.get(id.objectIdentifier))
-                .orElse(COSNull.NULL);
-        baseObject.idIfAbsent(id);
-        return baseObject;
+        synchronized (ExistingIndirectCOSObject.class)
+        {
+            COSBase baseObject = Optional.ofNullable(provider.get(id.objectIdentifier))
+                    .orElse(COSNull.NULL);
+            baseObject.idIfAbsent(id);
+            return baseObject;
+        }
     }
 
     @Override
     public void releaseCOSObject()
     {
-        provider.release(id.objectIdentifier);
+        synchronized (ExistingIndirectCOSObject.class)
+        {
+            provider.release(id.objectIdentifier);
+        }
     }
 
     @Override
     public void accept(COSVisitor visitor) throws IOException
     {
-        getCOSObject().accept(visitor);
+        synchronized (ExistingIndirectCOSObject.class)
+        {
+            getCOSObject().accept(visitor);
+        }
     }
 
     @Override

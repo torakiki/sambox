@@ -115,7 +115,7 @@ public final class PDResources implements COSObjectable
      * @param name Name of the font resource.
      * @throws java.io.IOException if something went wrong.
      */
-    public PDFont getFont(COSName name) throws IOException
+    synchronized public PDFont getFont(COSName name) throws IOException
     {
         COSObjectKey key = getIndirectKey(COSName.FONT, name);
         if (cache != null && key != null)
@@ -164,7 +164,7 @@ public final class PDResources implements COSObjectable
      * @param name Name of the color space resource.
      * @throws java.io.IOException if something went wrong.
      */
-    public PDColorSpace getColorSpace(COSName name) throws IOException
+    synchronized public PDColorSpace getColorSpace(COSName name) throws IOException
     {
         return getColorSpace(name, false);
     }
@@ -178,7 +178,7 @@ public final class PDResources implements COSObjectable
      * @return a new color space.
      * @throws IOException if something went wrong.
      */
-    public PDColorSpace getColorSpace(COSName name, boolean wasDefault) throws IOException
+    synchronized public PDColorSpace getColorSpace(COSName name, boolean wasDefault) throws IOException
     {
         COSObjectKey key = getIndirectKey(COSName.COLORSPACE, name);
         if (cache != null && key != null)
@@ -225,7 +225,7 @@ public final class PDResources implements COSObjectable
      *
      * @param name Name of the graphics state resource.
      */
-    public PDExtendedGraphicsState getExtGState(COSName name)
+    synchronized public PDExtendedGraphicsState getExtGState(COSName name)
     {
         COSObjectKey key = getIndirectKey(COSName.EXT_G_STATE, name);
         if (cache != null && key != null)
@@ -258,7 +258,7 @@ public final class PDResources implements COSObjectable
      * @param name Name of the shading resource.
      * @throws java.io.IOException if something went wrong.
      */
-    public PDShading getShading(COSName name) throws IOException
+    synchronized public PDShading getShading(COSName name) throws IOException
     {
         COSObjectKey key = getIndirectKey(COSName.SHADING, name);
         if (cache != null && key != null)
@@ -291,7 +291,7 @@ public final class PDResources implements COSObjectable
      * @param name Name of the pattern resource.
      * @throws java.io.IOException if something went wrong.
      */
-    public PDAbstractPattern getPattern(COSName name) throws IOException
+    synchronized public PDAbstractPattern getPattern(COSName name) throws IOException
     {
         COSObjectKey key = getIndirectKey(COSName.PATTERN, name);
         if (cache != null && key != null)
@@ -323,7 +323,7 @@ public final class PDResources implements COSObjectable
      * 
      * @param name Name of the property list resource.
      */
-    public PDPropertyList getProperties(COSName name)
+    synchronized public PDPropertyList getProperties(COSName name)
     {
         COSObjectKey key = getIndirectKey(COSName.PROPERTIES, name);
         if (cache != null && key != null)
@@ -356,7 +356,7 @@ public final class PDResources implements COSObjectable
      * @param name Name of the XObject resource.
      * @return true if it is an image XObject, false if not.
      */
-    public boolean isImageXObject(COSName name)
+    synchronized public boolean isImageXObject(COSName name)
     {
         // get the instance
         return Optional.ofNullable(get(COSName.XOBJECT, name)).map(COSBase::getCOSObject)
@@ -370,7 +370,7 @@ public final class PDResources implements COSObjectable
      * @param name Name of the XObject resource.
      * @return true if it is an form XObject, false if not.
      */
-    public boolean isFormXObject(COSName name)
+    synchronized public boolean isFormXObject(COSName name)
     {
         // get the instance
         return Optional.ofNullable(get(COSName.XOBJECT, name)).map(COSBase::getCOSObject)
@@ -384,7 +384,7 @@ public final class PDResources implements COSObjectable
      * @param name Name of the XObject resource.
      * @throws java.io.IOException if something went wrong.
      */
-    public PDXObject getXObject(COSName name) throws IOException
+    synchronized public PDXObject getXObject(COSName name) throws IOException
     {
         COSObjectKey key = getIndirectKey(COSName.XOBJECT, name);
         if (cache != null && key != null)
@@ -483,7 +483,7 @@ public final class PDResources implements COSObjectable
     /**
      * Returns the names of the color space resources, if any.
      */
-    public Iterable<COSName> getColorSpaceNames()
+    synchronized public Iterable<COSName> getColorSpaceNames()
     {
         return getNames(COSName.COLORSPACE);
     }
@@ -491,7 +491,7 @@ public final class PDResources implements COSObjectable
     /**
      * Returns the names of the XObject resources, if any.
      */
-    public Iterable<COSName> getXObjectNames()
+    synchronized public Iterable<COSName> getXObjectNames()
     {
         return getNames(COSName.XOBJECT);
     }
@@ -499,7 +499,7 @@ public final class PDResources implements COSObjectable
     /**
      * Returns the names of the font resources, if any.
      */
-    public Iterable<COSName> getFontNames()
+    synchronized public Iterable<COSName> getFontNames()
     {
         return getNames(COSName.FONT);
     }
@@ -507,7 +507,7 @@ public final class PDResources implements COSObjectable
     /**
      * Returns the names of the property list resources, if any.
      */
-    public Iterable<COSName> getPropertiesNames()
+    synchronized public Iterable<COSName> getPropertiesNames()
     {
         return getNames(COSName.PROPERTIES);
     }
@@ -515,7 +515,7 @@ public final class PDResources implements COSObjectable
     /**
      * Returns the names of the shading resources, if any.
      */
-    public Iterable<COSName> getShadingNames()
+    synchronized public Iterable<COSName> getShadingNames()
     {
         return getNames(COSName.SHADING);
     }
@@ -523,7 +523,7 @@ public final class PDResources implements COSObjectable
     /**
      * Returns the names of the pattern resources, if any.
      */
-    public Iterable<COSName> getPatternNames()
+    synchronized public Iterable<COSName> getPatternNames()
     {
         return getNames(COSName.PATTERN);
     }
@@ -531,7 +531,7 @@ public final class PDResources implements COSObjectable
     /**
      * Returns the names of the extended graphics state resources, if any.
      */
-    public Iterable<COSName> getExtGStateNames()
+    synchronized public Iterable<COSName> getExtGStateNames()
     {
         return getNames(COSName.EXT_G_STATE);
     }
@@ -552,7 +552,7 @@ public final class PDResources implements COSObjectable
      * @param font the font to add
      * @return the name of the resource in the resources dictionary
      */
-    public COSName add(PDFont font)
+    synchronized public COSName add(PDFont font)
     {
         return add(COSName.FONT, "F", font);
     }
@@ -564,7 +564,7 @@ public final class PDResources implements COSObjectable
      * @param colorSpace the color space to add
      * @return the name of the resource in the resources dictionary
      */
-    public COSName add(PDColorSpace colorSpace)
+    synchronized public COSName add(PDColorSpace colorSpace)
     {
         return add(COSName.COLORSPACE, "cs", colorSpace);
     }
@@ -576,7 +576,7 @@ public final class PDResources implements COSObjectable
      * @param extGState the extended graphics state to add
      * @return the name of the resource in the resources dictionary
      */
-    public COSName add(PDExtendedGraphicsState extGState)
+    synchronized public COSName add(PDExtendedGraphicsState extGState)
     {
         return add(COSName.EXT_G_STATE, "gs", extGState);
     }
@@ -588,7 +588,7 @@ public final class PDResources implements COSObjectable
      * @param shading the shading to add
      * @return the name of the resource in the resources dictionary
      */
-    public COSName add(PDShading shading)
+    synchronized public COSName add(PDShading shading)
     {
         return add(COSName.SHADING, "sh", shading);
     }
@@ -600,7 +600,7 @@ public final class PDResources implements COSObjectable
      * @param pattern the pattern to add
      * @return the name of the resource in the resources dictionary
      */
-    public COSName add(PDAbstractPattern pattern)
+    synchronized public COSName add(PDAbstractPattern pattern)
     {
         return add(COSName.PATTERN, "p", pattern);
     }
@@ -612,7 +612,7 @@ public final class PDResources implements COSObjectable
      * @param properties the property list to add
      * @return the name of the resource in the resources dictionary
      */
-    public COSName add(PDPropertyList properties)
+    synchronized public COSName add(PDPropertyList properties)
     {
         if (properties instanceof PDOptionalContentGroup)
         {
@@ -628,7 +628,7 @@ public final class PDResources implements COSObjectable
      * @param image the image to add
      * @return the name of the resource in the resources dictionary
      */
-    public COSName add(PDImageXObject image)
+    synchronized public COSName add(PDImageXObject image)
     {
         return add(COSName.XOBJECT, "Im", image);
     }
@@ -640,7 +640,7 @@ public final class PDResources implements COSObjectable
      * @param form the form to add
      * @return the name of the resource in the resources dictionary
      */
-    public COSName add(PDFormXObject form)
+    synchronized public COSName add(PDFormXObject form)
     {
         return add(COSName.XOBJECT, "Form", form);
     }
@@ -653,7 +653,7 @@ public final class PDResources implements COSObjectable
      * @param prefix the prefix to be used when creating the resource name
      * @return the name of the resource in the resources dictionary
      */
-    public COSName add(PDXObject xobject, String prefix)
+    synchronized public COSName add(PDXObject xobject, String prefix)
     {
         return add(COSName.XOBJECT, prefix, xobject);
     }
@@ -715,7 +715,7 @@ public final class PDResources implements COSObjectable
      * @param name the name of the resource
      * @param font the font to be added
      */
-    public void put(COSName name, PDFont font)
+    synchronized public void put(COSName name, PDFont font)
     {
         put(COSName.FONT, name, font);
     }
@@ -726,7 +726,7 @@ public final class PDResources implements COSObjectable
      * @param name the name of the resource
      * @param colorSpace the color space to be added
      */
-    public void put(COSName name, PDColorSpace colorSpace)
+    synchronized public void put(COSName name, PDColorSpace colorSpace)
     {
         put(COSName.COLORSPACE, name, colorSpace);
     }
@@ -737,7 +737,7 @@ public final class PDResources implements COSObjectable
      * @param name the name of the resource
      * @param extGState the extended graphics state to be added
      */
-    public void put(COSName name, PDExtendedGraphicsState extGState)
+    synchronized public void put(COSName name, PDExtendedGraphicsState extGState)
     {
         put(COSName.EXT_G_STATE, name, extGState);
     }
@@ -748,7 +748,7 @@ public final class PDResources implements COSObjectable
      * @param name the name of the resource
      * @param shading the shading to be added
      */
-    public void put(COSName name, PDShading shading)
+    synchronized public void put(COSName name, PDShading shading)
     {
         put(COSName.SHADING, name, shading);
     }
@@ -759,7 +759,7 @@ public final class PDResources implements COSObjectable
      * @param name the name of the resource
      * @param pattern the pattern to be added
      */
-    public void put(COSName name, PDAbstractPattern pattern)
+    synchronized public void put(COSName name, PDAbstractPattern pattern)
     {
         put(COSName.PATTERN, name, pattern);
     }
@@ -770,7 +770,7 @@ public final class PDResources implements COSObjectable
      * @param name the name of the resource
      * @param properties the property list to be added
      */
-    public void put(COSName name, PDPropertyList properties)
+    synchronized public void put(COSName name, PDPropertyList properties)
     {
         put(COSName.PROPERTIES, name, properties);
     }
@@ -781,7 +781,7 @@ public final class PDResources implements COSObjectable
      * @param name the name of the resource
      * @param xobject the XObject to be added
      */
-    public void put(COSName name, PDXObject xobject)
+    synchronized public void put(COSName name, PDXObject xobject)
     {
         put(COSName.XOBJECT, name, xobject);
     }
