@@ -105,8 +105,8 @@ public class PDFunctionType2 extends PDFunction
         float[] result = new float[Math.min(c0.size(), c1.size())];
         for (int j = 0; j < result.length; j++)
         {
-            float c0j = ((COSNumber) c0.get(j)).floatValue();
-            float c1j = ((COSNumber) c1.get(j)).floatValue();
+            float c0j = ((COSNumber) c0.getObject(j)).floatValue();
+            float c1j = ((COSNumber) c1.getObject(j)).floatValue();
             result[j] = c0j + xToN * (c1j - c0j);
         }
 
