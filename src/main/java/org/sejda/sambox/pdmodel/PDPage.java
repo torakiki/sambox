@@ -286,13 +286,8 @@ public class PDPage implements COSObjectable, PDContentStream
 
     public PDRectangle getMediaBoxRaw()
     {
-        COSArray array = (COSArray) PDPageTree.getInheritableAttribute(page, COSName.MEDIA_BOX);
-        if (array != null)
-        {
-            return new PDRectangle(array);
-        }
-
-        return null;
+        return PDRectangle
+                .rectangleFrom(page.getDictionaryObject(COSName.MEDIA_BOX, COSArray.class));
     }
 
     /**
@@ -329,12 +324,8 @@ public class PDPage implements COSObjectable, PDContentStream
 
     public PDRectangle getCropBoxRaw()
     {
-        COSArray array = (COSArray) PDPageTree.getInheritableAttribute(page, COSName.CROP_BOX);
-        if (array != null)
-        {
-            return new PDRectangle(array);
-        }
-        return null;
+        return PDRectangle
+                .rectangleFrom(page.getDictionaryObject(COSName.CROP_BOX, COSArray.class));
     }
 
     /**
@@ -372,12 +363,8 @@ public class PDPage implements COSObjectable, PDContentStream
 
     public PDRectangle getBleedBoxRaw()
     {
-        COSArray array = page.getDictionaryObject(COSName.BLEED_BOX, COSArray.class);
-        if (nonNull(array))
-        {
-            return new PDRectangle(array);
-        }
-        return null;
+        return PDRectangle
+                .rectangleFrom(page.getDictionaryObject(COSName.BLEED_BOX, COSArray.class));
     }
 
     /**
@@ -415,12 +402,8 @@ public class PDPage implements COSObjectable, PDContentStream
 
     public PDRectangle getTrimBoxRaw()
     {
-        COSArray array = page.getDictionaryObject(COSName.TRIM_BOX, COSArray.class);
-        if (nonNull(array))
-        {
-            return new PDRectangle(array);
-        }
-        return null;
+        return PDRectangle
+                .rectangleFrom(page.getDictionaryObject(COSName.TRIM_BOX, COSArray.class));
     }
 
     /**
@@ -458,12 +441,7 @@ public class PDPage implements COSObjectable, PDContentStream
 
     public PDRectangle getArtBoxRaw()
     {
-        COSArray array = page.getDictionaryObject(COSName.ART_BOX, COSArray.class);
-        if (nonNull(array))
-        {
-            return new PDRectangle(array);
-        }
-        return null;
+        return PDRectangle.rectangleFrom(page.getDictionaryObject(COSName.ART_BOX, COSArray.class));
     }
 
     /**

@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.pdmodel.common;
 
+import static java.util.Objects.nonNull;
+
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -363,5 +365,18 @@ public class PDRectangle implements COSObjectable
     {
         return "[" + getLowerLeftX() + "," + getLowerLeftY() + "," + getUpperRightX() + ","
                 + getUpperRightY() + "]";
+    }
+
+    /**
+     * @param array
+     * @return a {@link PDRectangle} if the the array is not null and has enough elements, null otherwise
+     */
+    public static PDRectangle rectangleFrom(COSArray array)
+    {
+        if (nonNull(array) && array.size() >= 4)
+        {
+            return new PDRectangle(array);
+        }
+        return null;
     }
 }

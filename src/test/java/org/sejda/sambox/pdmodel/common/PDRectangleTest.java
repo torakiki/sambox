@@ -17,6 +17,8 @@
 package org.sejda.sambox.pdmodel.common;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 import org.sejda.sambox.cos.COSArray;
@@ -127,4 +129,15 @@ public class PDRectangleTest
         assertEquals(one, two);
     }
 
+    @Test
+    public void factoryMethod()
+    {
+        assertNull(PDRectangle.rectangleFrom(null));
+        assertNull(PDRectangle.rectangleFrom(new COSArray()));
+        assertNull(PDRectangle.rectangleFrom(new COSArray(COSInteger.get(50))));
+        assertNotNull(PDRectangle.rectangleFrom(new COSArray(COSInteger.get(10), COSInteger.get(50),
+                COSInteger.get(120), COSInteger.get(200))));
+        assertNotNull(PDRectangle.rectangleFrom(new COSArray(COSInteger.get(10), COSInteger.get(50),
+                COSInteger.get(120), COSInteger.get(200), COSInteger.get(300))));
+    }
 }
