@@ -19,6 +19,8 @@ package org.sejda.sambox.pdmodel;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 
+import java.awt.Point;
+import java.awt.geom.Point2D;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -690,6 +692,38 @@ public class PDPage implements COSObjectable, PDContentStream
             }
         }
         return new COSArrayList<>(actuals, annots);
+    }
+
+    /**
+     * Assuming the rotated crop box is plane where the lower left corner has coordinates 0,0 and assuming the given
+     * point belongs to this plane, it returns the unrotated media box coordinates where this point should be drawn
+     * 
+     * @param point
+     * @return
+     */
+    public Point cropBoxCoordinatesToDraw(Point2D point)
+    {
+        PDRectangle cropBox = getCropBox();
+        double x = point.getX() + cropBox.getLowerLeftX();
+        double y = point.getY() + cropBox.getLowerLeftY();
+
+        if (getRotation() == 90)
+        {
+            x = cropBox.getUpperRightX() - point.getY();
+            y = cropBox.getLowerLeftY() + point.getX();
+        }
+        else if (getRotation() == 180)
+        {
+            x = cropBox.getUpperRightX() - point.getX();
+            y = cropBox.getUpperRightY() - point.getY();
+        }
+        else if (getRotation() == 270)
+        {
+            x = cropBox.getLowerLeftX() + point.getY();
+            y = cropBox.getUpperRightY() - point.getX();
+        }
+
+        return new Point((int) x, (int) y);
     }
 
     /**

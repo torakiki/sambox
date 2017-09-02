@@ -20,10 +20,17 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.awt.Point;
+import java.awt.geom.Point2D;
 import java.io.IOException;
 
 import org.junit.Test;
-import org.sejda.sambox.cos.*;
+import org.sejda.sambox.cos.COSArray;
+import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSFloat;
+import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.cos.COSNull;
+import org.sejda.sambox.cos.COSNumber;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationLink;
 
@@ -113,7 +120,22 @@ public class PDPageTest
         assertEquals(page.getCropBox(), new PDRectangle(toArray(1, 214, 287.07f, 624)));
     }
 
-    COSArray toArray(float n1, float n2, float n3, float n4) {
+    @Test
+    public void cropBoxCoordinatesToDraw()
+    {
+        PDPage page = new PDPage(PDRectangle.A4);
+        page.setCropBox(new PDRectangle(2, 10, 500, 800));
+        assertEquals(new Point(8, 20), page.cropBoxCoordinatesToDraw(new Point2D.Float(6, 10)));
+        page.setRotation(90);
+        assertEquals(new Point(492, 16), page.cropBoxCoordinatesToDraw(new Point2D.Float(6, 10)));
+        page.setRotation(180);
+        assertEquals(new Point(496, 800), page.cropBoxCoordinatesToDraw(new Point2D.Float(6, 10)));
+        page.setRotation(270);
+        assertEquals(new Point(12, 804), page.cropBoxCoordinatesToDraw(new Point2D.Float(6, 10)));
+    }
+
+    COSArray toArray(float n1, float n2, float n3, float n4)
+    {
         COSArray result = new COSArray();
         result.add(new COSFloat(n1));
         result.add(new COSFloat(n2));
