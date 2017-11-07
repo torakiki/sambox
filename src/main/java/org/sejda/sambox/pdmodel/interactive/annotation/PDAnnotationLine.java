@@ -161,7 +161,7 @@ public class PDAnnotationLine extends PDAnnotationMarkup
             style = LE_NONE;
         }
         COSArray array = getCOSObject().getDictionaryObject(COSName.LE, COSArray.class);
-        if (array == null)
+        if (array == null || array.size() == 0)
         {
             array = new COSArray();
             array.add(COSName.getPDFName(style));
@@ -181,14 +181,13 @@ public class PDAnnotationLine extends PDAnnotationMarkup
      */
     public String getStartPointEndingStyle()
     {
-        String retval = LE_NONE;
-        COSArray array = (COSArray) getCOSObject().getDictionaryObject(COSName.LE);
-        if (array != null)
+        COSArray array = getCOSObject().getDictionaryObject(COSName.LE, COSArray.class);
+        if (nonNull(array))
         {
-            retval = array.getName(0);
+            return array.getName(0);
         }
 
-        return retval;
+        return LE_NONE;
     }
 
     /**
@@ -202,8 +201,8 @@ public class PDAnnotationLine extends PDAnnotationMarkup
         {
             style = LE_NONE;
         }
-        COSArray array = (COSArray) getCOSObject().getDictionaryObject(COSName.LE);
-        if (array == null)
+        COSArray array = getCOSObject().getDictionaryObject(COSName.LE, COSArray.class);
+        if (array == null || array.size() < 2)
         {
             array = new COSArray();
             array.add(COSName.getPDFName(LE_NONE));
@@ -224,7 +223,7 @@ public class PDAnnotationLine extends PDAnnotationMarkup
     public String getEndPointEndingStyle()
     {
         COSArray array = getCOSObject().getDictionaryObject(COSName.LE, COSArray.class);
-        if (nonNull(array))
+        if (nonNull(array) && array.size() >= 2)
         {
             return array.getName(1);
         }

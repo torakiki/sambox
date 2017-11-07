@@ -27,6 +27,8 @@ import org.junit.Test;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.PDDocument;
+import org.sejda.sambox.pdmodel.PDDocumentInformation;
+import org.sejda.sambox.util.DateConverter;
 import org.sejda.sambox.util.SpecVersionUtils;
 
 /**
@@ -219,4 +221,71 @@ public class PDFParserTest
         }
     }
 
+    @Test
+    public void testPDFBox3208() throws IOException
+    {
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(getClass()
+                .getResourceAsStream(
+                        "/org/sejda/sambox/input/PDFBOX-3208-L33MUTT2SVCWGCS6UIYL5TH3PNPXHIS6.pdf"))))
+        {
+            PDDocumentInformation di = doc.getDocumentInformation();
+            assertEquals("Liquent Enterprise Services", di.getAuthor());
+            assertEquals("Liquent services server", di.getCreator());
+            assertEquals("Amyuni PDF Converter version 4.0.0.9", di.getProducer());
+            assertEquals("", di.getKeywords());
+            assertEquals("", di.getSubject());
+            assertEquals("892B77DE781B4E71A1BEFB81A51A5ABC_20140326022424.docx", di.getTitle());
+            assertEquals(DateConverter.toCalendar("D:20140326142505-02'00'"), di.getCreationDate());
+            assertEquals(DateConverter.toCalendar("20140326172513Z"), di.getModificationDate());
+        }
+    }
+
+    @Test
+    public void testPDFBox3940() throws IOException
+    {
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/org/sejda/sambox/input/PDFBOX-3940-079977.pdf"))))
+        {
+            PDDocumentInformation di = doc.getDocumentInformation();
+            assertEquals("Unknown", di.getAuthor());
+            assertEquals("C:REGULA~1IREGSFR_EQ_EM.WP", di.getCreator());
+            assertEquals("Acrobat PDFWriter 3.02 for Windows", di.getProducer());
+            assertEquals("", di.getKeywords());
+            assertEquals("", di.getSubject());
+            assertEquals("C:REGULA~1IREGSFR_EQ_EM.PDF", di.getTitle());
+            assertEquals(DateConverter.toCalendar("Tuesday, July 28, 1998 4:00:09 PM"),
+                    di.getCreationDate());
+        }
+    }
+
+    /**
+     * PDFBOX-3783: test parsing of file with trash after %%EOF.
+     * 
+     * @throws IOException
+     */
+    @Test
+    public void testPDFBox3783() throws IOException
+    {
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(getClass()
+                .getResourceAsStream(
+                        "/org/sejda/sambox/input/PDFBOX-3783-72GLBIGUC6LB46ELZFBARRJTLN4RBSQM.pdf"))))
+        {
+            // noop
+        }
+    }
+
+    /**
+     * Test parsing the "genko_oc_shiryo1.pdf" file, which is susceptible to regression.
+     * 
+     * @throws IOException
+     */
+    @Test
+    public void testParseGenko() throws IOException
+    {
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(getClass()
+                .getResourceAsStream("/org/sejda/sambox/input/genko_oc_shiryo1.pdf"))))
+        {
+            // noop
+        }
+    }
 }

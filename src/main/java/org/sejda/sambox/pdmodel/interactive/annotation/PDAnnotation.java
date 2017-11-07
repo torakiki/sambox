@@ -33,6 +33,7 @@ import org.sejda.sambox.cos.COSNumber;
 import org.sejda.sambox.pdmodel.PDPage;
 import org.sejda.sambox.pdmodel.common.PDDictionaryWrapper;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
+import org.sejda.sambox.pdmodel.documentinterchange.markedcontent.PDPropertyList;
 import org.sejda.sambox.pdmodel.graphics.color.PDColor;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceCMYK;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
@@ -155,6 +156,7 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
                 || PDAnnotationTextMarkup.SUB_TYPE_SQUIGGLY.equals(subtype)
                 || PDAnnotationTextMarkup.SUB_TYPE_STRIKEOUT.equals(subtype))
         {
+            // see 12.5.6.10 Text Markup Annotations
             return new PDAnnotationTextMarkup(annotDic);
         }
         else if (PDAnnotationLink.SUB_TYPE.equals(subtype))
@@ -263,14 +265,7 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
      */
     public void setAppearanceState(String as)
     {
-        if (as == null)
-        {
-            getCOSObject().removeItem(COSName.AS);
-        }
-        else
-        {
-            getCOSObject().setItem(COSName.AS, COSName.getPDFName(as));
-        }
+        getCOSObject().setName(COSName.AS, as);
     }
 
     /**
@@ -291,12 +286,8 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
      */
     public void setAppearance(PDAppearanceDictionary appearance)
     {
-        COSDictionary ap = null;
-        if (appearance != null)
-        {
-            ap = appearance.getCOSObject();
-        }
-        getCOSObject().setItem(COSName.AP, ap);
+        getCOSObject().setItem(COSName.AP, appearance);
+
     }
 
     /**
@@ -601,6 +592,31 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
     }
 
     /**
+     * This will get the optional content group or optional content membership dictionary for the annotation.
+     *
+     * @return The optional content group or optional content membership dictionary or null if there is none.
+     */
+    public PDPropertyList getOptionalContent()
+    {
+        COSDictionary base = getCOSObject().getDictionaryObject(COSName.OC, COSDictionary.class);
+        if (nonNull(base))
+        {
+            return PDPropertyList.create(base);
+        }
+        return null;
+    }
+
+    /**
+     * Sets the optional content group or optional content membership dictionary for the annotation.
+     *
+     * @param oc The optional content group or optional content membership dictionary.
+     */
+    public void setOptionalContent(PDPropertyList oc)
+    {
+        getCOSObject().setItem(COSName.OC, oc);
+    }
+
+    /**
      * This will retrieve the border array. If none is available then it will return the default, which is [0 0 1]. The
      * array consists of at least three numbers defining the horizontal corner radius, vertical corner radius, and
      * border width. The array may have a fourth element, an optional dash array defining a pattern of dashes and gaps
@@ -704,10 +720,10 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
      */
     public PDPage getPage()
     {
-        COSBase p = this.getCOSObject().getDictionaryObject(COSName.P);
-        if (p != null && p instanceof COSDictionary)
+        COSDictionary p = this.getCOSObject().getDictionaryObject(COSName.P, COSDictionary.class);
+        if (nonNull(p))
         {
-            return new PDPage((COSDictionary) p);
+            return new PDPage(p);
         }
         return null;
     }

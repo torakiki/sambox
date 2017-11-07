@@ -21,6 +21,7 @@ import static org.sejda.sambox.contentstream.operator.Operator.ID_OPERATOR;
 import static org.sejda.sambox.util.CharUtils.ASCII_SPACE;
 import static org.sejda.sambox.util.CharUtils.isEOF;
 import static org.sejda.sambox.util.CharUtils.isEOL;
+import static org.sejda.sambox.util.CharUtils.isNul;
 import static org.sejda.sambox.util.CharUtils.isSpace;
 import static org.sejda.sambox.util.CharUtils.isWhitespace;
 
@@ -183,10 +184,25 @@ public class ContentStreamParser extends SourceReader
             // we do what PDF.js does
             if (isSpace(current) || isEOL(current))
             {
-                // from PDF.js: Let's check the next five bytes are ASCII... just be sure.
-                for (int i = 0; i < 5; i++)
+                // from PDF.js: Let's check the next ten bytes are ASCII... just be sure.
+                for (int i = 0; i < 10; i++)
                 {
                     current = source().read();
+                    if (isNul(current) && !isNul(source().peek()))
+                    {
+
+                        // from PDF.js: NUL bytes are not supposed to occur *outside* of inline
+                        // images, but some PDF generators violate that assumption,
+                        // thus breaking the EI detection heuristics used below.
+                        //
+                        // However, we can't unconditionally treat NUL bytes as "ASCII",
+                        // since that *could* result in inline images being truncated.
+                        //
+                        // To attempt to address this, we'll still treat any *sequence*
+                        // of NUL bytes as non-ASCII, but for a *single* NUL byte we'll
+                        // continue checking the `followingBytes` (fixes issue8823.pdf).
+                        continue;
+                    }
                     if (!isEOF(current) && !isEOL(current)
                             && (current < ASCII_SPACE || current > 0x7F))
                     {

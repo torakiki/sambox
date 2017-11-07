@@ -198,9 +198,6 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         graphics.translate(0, pageSize.getHeight());
         graphics.scale(1, -1);
 
-        // TODO use getStroke() to set the initial stroke
-        graphics.setStroke(new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
-
         // adjust for non-(0,0) crop box
         graphics.translate(-pageSize.getLowerLeftX(), -pageSize.getLowerLeftY());
 
@@ -651,33 +648,31 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         PDLineDashPattern dashPattern = state.getLineDashPattern();
         int phaseStart = dashPattern.getPhase();
         float[] dashArray = dashPattern.getDashArray();
-        if (dashArray != null)
+        // apply the CTM
+        for (int i = 0; i < dashArray.length; ++i)
         {
-            // apply the CTM
+            // minimum line dash width avoids JVM crash,
+            // see PDFBOX-2373, PDFBOX-2929, PDFBOX-3204, PDFBOX-3813
+            // also avoid 0 in array like "[ 0 1000 ] 0 d", see PDFBOX-3724
+            float w = transformWidth(dashArray[i]);
+            dashArray[i] = Math.max(w, 0.062f);
+        }
+        phaseStart = (int) transformWidth(phaseStart);
+
+        // empty dash array is illegal
+        // avoid also infinite and NaN values (PDFBOX-3360)
+        if (dashArray.length == 0 || Float.isInfinite(phaseStart) || Float.isNaN(phaseStart))
+        {
+            dashArray = null;
+        }
+        else
+        {
             for (int i = 0; i < dashArray.length; ++i)
             {
-                // minimum line dash width avoids JVM crash, see PDFBOX-2373, PDFBOX-2929, PDFBOX-3204
-                // also avoid 0 in array like "[ 0 1000 ] 0 d", see PDFBOX-3724
-                float w = transformWidth(dashArray[i]);
-                dashArray[i] = Math.max(w, 0.062f);
-            }
-            phaseStart = (int) transformWidth(phaseStart);
-
-            // empty dash array is illegal
-            // avoid also infinite and NaN values (PDFBOX-3360)
-            if (dashArray.length == 0 || Float.isInfinite(phaseStart) || Float.isNaN(phaseStart))
-            {
-                dashArray = null;
-            }
-            else
-            {
-                for (int i = 0; i < dashArray.length; ++i)
+                if (Float.isInfinite(dashArray[i]) || Float.isNaN(dashArray[i]))
                 {
-                    if (Float.isInfinite(dashArray[i]) || Float.isNaN(dashArray[i]))
-                    {
-                        dashArray = null;
-                        break;
-                    }
+                    dashArray = null;
+                    break;
                 }
             }
         }

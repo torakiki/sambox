@@ -163,8 +163,8 @@ public class PDFontTest extends TestCase
             stripper.setLineSeparator("\n");
             String text = stripper.getText(doc);
             Assert.assertEquals(
-                    "testMultipleFontFileReuse1\ntestMultipleFontFileReuse2\ntestMultipleFontFileReuse3\n",
-                    text);
+                    "testMultipleFontFileReuse1\ntestMultipleFontFileReuse2\ntestMultipleFontFileReuse3",
+                    text.trim());
         }
     }
 

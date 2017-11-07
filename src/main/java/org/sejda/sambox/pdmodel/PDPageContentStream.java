@@ -712,7 +712,7 @@ public final class PDPageContentStream implements Closeable
     {
         if (strokingColorSpaceStack.isEmpty()
                 || strokingColorSpaceStack.peek() != color.getColorSpace()
-                && color.getColorSpace() != null)
+                        && color.getColorSpace() != null)
         {
             writeOperand(getName(color.getColorSpace()));
             writeOperator("CS");
@@ -1423,11 +1423,9 @@ public final class PDPageContentStream implements Closeable
      */
     public void setMiterLimit(float miterLimit) throws IOException
     {
-        if (inTextMode)
-        {
-            throw new IllegalStateException(
-                    "Error: setMiterLimit is not allowed within a text block.");
-        }
+        requireState(!inTextMode, "setMiterLimit is not allowed within a text block");
+        requireState(miterLimit > 0,
+                "A miter limit <= 0 is invalid and will not render in Acrobat Reader");
         writeOperand(miterLimit);
         writeOperator("M");
     }
@@ -1645,4 +1643,15 @@ public final class PDPageContentStream implements Closeable
         writeOperator("Tw");
     }
 
+    /**
+     * Set the horizontal scaling to scale / 100.
+     *
+     * @param scale number specifying the percentage of the normal width. Default value: 100 (normal width).
+     * @throws IOException If the content stream could not be written.
+     */
+    public void setHorizontalScaling(float scale) throws IOException
+    {
+        writeOperand(scale);
+        writeOperator("Tz");
+    }
 }

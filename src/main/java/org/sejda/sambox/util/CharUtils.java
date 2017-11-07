@@ -98,6 +98,11 @@ public final class CharUtils
                 || isSpace(c);
     }
 
+    public static boolean isNul(int c)
+    {
+        return c == ASCII_NULL;
+    }
+
     /**
      * @param c The character to check against space
      * @return true if the character is a space character.

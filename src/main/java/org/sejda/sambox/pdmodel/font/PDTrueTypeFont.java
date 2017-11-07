@@ -129,6 +129,7 @@ public class PDTrueTypeFont extends PDSimpleFont implements PDVectorFont
     {
         return new PDTrueTypeFont(ttf, encoding, false);
     }
+
     private CmapSubtable cmapWinUnicode = null;
     private CmapSubtable cmapWinSymbol = null;
     private CmapSubtable cmapMacRoman = null;
@@ -574,6 +575,22 @@ public class PDTrueTypeFont extends PDSimpleFont implements PDVectorFont
             if (gid == 0 && cmapMacRoman != null)
             {
                 gid = cmapMacRoman.getGlyphId(code);
+            }
+
+            // PDFBOX-3965: fallback for font has that the symbol flag but isn't
+            if (gid == 0 && cmapWinUnicode != null && encoding != null)
+            {
+                String name = encoding.getName(code);
+                if (".notdef".equals(name))
+                {
+                    return 0;
+                }
+                String unicode = GlyphList.getAdobeGlyphList().toUnicode(name);
+                if (unicode != null)
+                {
+                    int uni = unicode.codePointAt(0);
+                    gid = cmapWinUnicode.getGlyphId(uni);
+                }
             }
         }
 

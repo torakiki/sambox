@@ -61,6 +61,7 @@ public final class PDICCBased extends PDCIEBasedColorSpace
     private PDColorSpace alternateColorSpace;
     private ICC_ColorSpace awtColorSpace;
     private PDColor initialColor;
+    private boolean isRGB = false;
 
     /**
      * Creates a new ICC color space with an empty stream.
@@ -124,6 +125,7 @@ public final class PDICCBased extends PDCIEBasedColorSpace
                 profile = ICC_Profile.getInstance(input);
                 if (is_sRGB(profile))
                 {
+                    isRGB = true;
                     awtColorSpace = (ICC_ColorSpace) ColorSpace.getInstance(ColorSpace.CS_sRGB);
                     iccProfile = awtColorSpace.getProfile();
                 }
@@ -158,7 +160,11 @@ public final class PDICCBased extends PDCIEBasedColorSpace
                 // fall back to alternateColorSpace color space
                 awtColorSpace = null;
                 alternateColorSpace = getAlternateColorSpace();
-                LOG.error("Can't read embedded ICC profile (" + e.getLocalizedMessage()
+                if (alternateColorSpace.equals(PDDeviceRGB.INSTANCE))
+                {
+                    isRGB = true;
+                }
+                LOG.warn("Can't read embedded ICC profile (" + e.getLocalizedMessage()
                         + "), using alternate color space: " + alternateColorSpace.getName());
                 initialColor = alternateColorSpace.getInitialColor();
             }
@@ -187,15 +193,16 @@ public final class PDICCBased extends PDCIEBasedColorSpace
     @Override
     public float[] toRGB(float[] value) throws IOException
     {
+        if (isRGB)
+        {
+            return value;
+        }
         if (awtColorSpace != null)
         {
             // WARNING: toRGB is very slow when used with LUT-based ICC profiles
             return awtColorSpace.toRGB(value);
         }
-        else
-        {
-            return alternateColorSpace.toRGB(value);
-        }
+        return alternateColorSpace.toRGB(value);
     }
 
     @Override

@@ -32,10 +32,10 @@ import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.pdmodel.common.function.PDFunction;
 
 /**
- * A Separation color space used to specify either additional colorants or for isolating the
- * control of individual colour components of a device colour space for a subtractive device.
- * When such a space is the current colour space, the current colour shall be a single-component
- * value, called a tint, that controls the given colorant or colour components only.
+ * A Separation color space used to specify either additional colorants or for isolating the control of individual
+ * colour components of a device colour space for a subtractive device. When such a space is the current colour space,
+ * the current colour shall be a single-component value, called a tint, that controls the given colorant or colour
+ * components only.
  *
  * @author Ben Litchfield
  * @author John Hewson
@@ -54,6 +54,14 @@ public class PDSeparation extends PDSpecialColorSpace
     private PDFunction tintTransform = null;
 
     /**
+     * Map used to speed up {@link #toRGB(float[])}. Note that this class contains three maps (this and the two in
+     * {@link #toRGBImage(java.awt.image.WritableRaster) } and {@link #toRGBImage2(java.awt.image.WritableRaster) }. The
+     * maps use different key intervals. This map here is needed for shading, which produce more than 256 different
+     * float values, which we cast to int so that the map can work.
+     */
+    private Map<Integer, float[]> toRGBMap = null;
+
+    /**
      * Creates a new Separation color space.
      */
     public PDSeparation()
@@ -68,6 +76,7 @@ public class PDSeparation extends PDSpecialColorSpace
 
     /**
      * Creates a new Separation color space from a PDF color space array.
+     * 
      * @param separation an array containing all separation information.
      * @throws IOException if the color space or the function could not be created.
      */
@@ -105,8 +114,20 @@ public class PDSeparation extends PDSpecialColorSpace
     @Override
     public float[] toRGB(float[] value) throws IOException
     {
+        if (toRGBMap == null)
+        {
+            toRGBMap = new HashMap<>();
+        }
+        int key = (int) (value[0] * 255);
+        float[] retval = toRGBMap.get(key);
+        if (retval != null)
+        {
+            return retval;
+        }
         float[] altColor = tintTransform.eval(value);
-        return alternateColorSpace.toRGB(altColor);
+        retval = alternateColorSpace.toRGB(altColor);
+        toRGBMap.put(key, retval);
+        return retval;
     }
 
     //
@@ -124,8 +145,7 @@ public class PDSeparation extends PDSpecialColorSpace
         // use the tint transform to convert the sample into
         // the alternate color space (this is usually 1:many)
         WritableRaster altRaster = Raster.createBandedRaster(DataBuffer.TYPE_BYTE,
-                raster.getWidth(), raster.getHeight(),
-                alternateColorSpace.getNumberOfComponents(),
+                raster.getWidth(), raster.getHeight(), alternateColorSpace.getNumberOfComponents(),
                 new Point(0, 0));
 
         int numAltComponents = alternateColorSpace.getNumberOfComponents();
@@ -146,7 +166,7 @@ public class PDSeparation extends PDSpecialColorSpace
                     alt = new int[numAltComponents];
                     tintTransform(samples, alt);
                     calculatedValues.put(hash, alt);
-                }                
+                }
                 altRaster.setPixel(x, y, alt);
             }
         }
@@ -202,25 +222,28 @@ public class PDSeparation extends PDSpecialColorSpace
 
     /**
      * Returns the colorant name.
+     * 
      * @return the name of the colorant
      */
     public PDColorSpace getAlternateColorSpace()
     {
-       return alternateColorSpace;
+        return alternateColorSpace;
     }
 
     /**
      * Returns the colorant name.
+     * 
      * @return the name of the colorant
      */
     public String getColorantName()
     {
-        COSName name = (COSName)array.getObject(COLORANT_NAMES);
+        COSName name = (COSName) array.getObject(COLORANT_NAMES);
         return name.getName();
     }
 
     /**
      * Sets the colorant name.
+     * 
      * @param name the name of the colorant
      */
     public void setColorantName(String name)
@@ -230,6 +253,7 @@ public class PDSeparation extends PDSpecialColorSpace
 
     /**
      * Sets the alternate color space.
+     * 
      * @param colorSpace The alternate color space.
      */
     public void setAlternateColorSpace(PDColorSpace colorSpace)
@@ -245,6 +269,7 @@ public class PDSeparation extends PDSpecialColorSpace
 
     /**
      * Sets the tint transform function.
+     * 
      * @param tint the tint transform function
      */
     public void setTintTransform(PDFunction tint)
@@ -256,9 +281,7 @@ public class PDSeparation extends PDSpecialColorSpace
     @Override
     public String toString()
     {
-        return getName() + "{" +
-                "\"" + getColorantName() + "\"" + " " +
-                alternateColorSpace.getName() + " " +
-                tintTransform + "}";
+        return getName() + "{" + "\"" + getColorantName() + "\"" + " "
+                + alternateColorSpace.getName() + " " + tintTransform + "}";
     }
 }

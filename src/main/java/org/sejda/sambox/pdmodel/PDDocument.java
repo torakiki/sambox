@@ -23,6 +23,9 @@ import static org.sejda.sambox.util.SpecVersionUtils.V1_4;
 import static org.sejda.sambox.util.SpecVersionUtils.isAtLeast;
 import static org.sejda.util.RequireUtils.requireNotBlank;
 
+import java.awt.Point;
+import java.awt.image.DataBuffer;
+import java.awt.image.Raster;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -76,7 +79,15 @@ public class PDDocument implements Closeable
      */
     static
     {
-        PDDeviceRGB.INSTANCE.toRGB(new float[] { 1, 1, 1, 1 });
+        try
+        {
+            PDDeviceRGB.INSTANCE.toRGBImage(
+                    Raster.createBandedRaster(DataBuffer.TYPE_BYTE, 1, 1, 3, new Point(0, 0)));
+        }
+        catch (IOException e)
+        {
+            LOG.warn("This shouldn't happen", e);
+        }
         try
         {
             // TODO remove this and deprecated COSNumber statics in 3.0

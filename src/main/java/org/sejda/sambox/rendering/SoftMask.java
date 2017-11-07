@@ -96,7 +96,7 @@ class SoftMask implements Paint
             AffineTransform xform, RenderingHints hints)
     {
         PaintContext ctx = paint.createContext(cm, deviceBounds, userBounds, xform, hints);
-        return new SoftPaintContext(cm, deviceBounds, userBounds, xform, hints, ctx);
+        return new SoftPaintContext(ctx);
     }
 
     @Override
@@ -109,8 +109,7 @@ class SoftMask implements Paint
     {
         private final PaintContext context;
 
-        SoftPaintContext(ColorModel cm, Rectangle deviceBounds, Rectangle2D userBounds,
-                AffineTransform xform, RenderingHints hints, PaintContext context)
+        SoftPaintContext(PaintContext context)
         {
             this.context = context;
         }
@@ -124,7 +123,7 @@ class SoftMask implements Paint
         @Override
         public Raster getRaster(int x1, int y1, int w, int h)
         {
-            WritableRaster raster = (WritableRaster) context.getRaster(x1, y1, w, h);
+            Raster raster = context.getRaster(x1, y1, w, h);
             ColorModel rasterCM = context.getColorModel();
             float[] input = null;
             Float[] map = null;

@@ -99,19 +99,19 @@ public class PDCIDFontType2 extends PDCIDFont
             boolean fontIsDamaged = false;
             TrueTypeFont ttfFont = null;
 
-            PDStream stream;
-            if (fd.getFontFile2() != null)
+            PDStream stream = null;
+            if (fd != null)
             {
                 stream = fd.getFontFile2();
-            }
-            else if (fd.getFontFile3() != null)
-            {
-                stream = fd.getFontFile3();
-            }
-            else
-            {
-                // Acrobat looks in FontFile too, even though it is not in the spec, see PDFBOX-2599
-                stream = fd.getFontFile();
+                if (stream == null)
+                {
+                    stream = fd.getFontFile3();
+                }
+                if (stream == null)
+                {
+                    // Acrobat looks in FontFile too, even though it is not in the spec, see PDFBOX-2599
+                    stream = fd.getFontFile();
+                }
             }
 
             if (stream != null)
@@ -153,29 +153,34 @@ public class PDCIDFontType2 extends PDCIDFont
 
             if (ttfFont == null)
             {
-                // find font or substitute
-                CIDFontMapping mapping = FontMappers.instance().getCIDFont(getBaseFont(),
-                        getFontDescriptor(), getCIDSystemInfo());
-
-                if (mapping.isCIDFont())
-                {
-                    ttfFont = mapping.getFont();
-                }
-                else
-                {
-                    ttfFont = (TrueTypeFont) mapping.getTrueTypeFont();
-                }
-
-                if (mapping.isFallback())
-                {
-                    LOG.warn("Using fallback font " + ttfFont.getName()
-                            + " for CID-keyed TrueType font " + getBaseFont());
-                }
+                ttfFont = findFontOrSubstitute();
             }
             ttf = ttfFont;
         }
         cmap = ttf.getUnicodeCmap(false);
         cid2gid = readCIDToGIDMap();
+    }
+
+    private TrueTypeFont findFontOrSubstitute() throws IOException
+    {
+        TrueTypeFont ttfFont;
+
+        CIDFontMapping mapping = FontMappers.instance().getCIDFont(getBaseFont(),
+                getFontDescriptor(), getCIDSystemInfo());
+        if (mapping.isCIDFont())
+        {
+            ttfFont = mapping.getFont();
+        }
+        else
+        {
+            ttfFont = (TrueTypeFont) mapping.getTrueTypeFont();
+        }
+        if (mapping.isFallback())
+        {
+            LOG.warn("Using fallback font " + ttfFont.getName() + " for CID-keyed TrueType font "
+                    + getBaseFont());
+        }
+        return ttfFont;
     }
 
     @Override
@@ -205,8 +210,7 @@ public class PDCIDFontType2 extends PDCIDFont
         {
             PDRectangle bbox = getFontDescriptor().getFontBoundingBox();
             if (nonNull(bbox) && bbox.getLowerLeftX() != 0 || bbox.getLowerLeftY() != 0
-                    || bbox.getUpperRightX() != 0
-                    || bbox.getUpperRightY() != 0)
+                    || bbox.getUpperRightX() != 0 || bbox.getUpperRightY() != 0)
             {
                 return new BoundingBox(bbox.getLowerLeftX(), bbox.getLowerLeftY(),
                         bbox.getUpperRightX(), bbox.getUpperRightY());
@@ -362,7 +366,8 @@ public class PDCIDFontType2 extends PDCIDFont
                 }
             }
 
-            if(cid == -1) {
+            if (cid == -1)
+            {
                 // invert the ToUnicode CMap
                 // this helps when re-encoding text with an existing subset font
                 cid = lookupInInvertedUnicodeCmap(unicode);
@@ -396,10 +401,11 @@ public class PDCIDFontType2 extends PDCIDFont
     /**
      * Inverts the unicode cmap from the parent and uses it for lookup
      */
-    private Map<String, Integer> generateInvertedUnicodeCmap() {
+    private Map<String, Integer> generateInvertedUnicodeCmap()
+    {
         CMap cMap = parent.getToUnicodeCMap();
 
-        if(cMap != null)
+        if (cMap != null)
         {
             // fontbox doesn't expose the charToUnicode map via getter
             // use reflection to get access to the underlying data
@@ -425,8 +431,10 @@ public class PDCIDFontType2 extends PDCIDFont
         return new HashMap<>();
     }
 
-    private int lookupInInvertedUnicodeCmap(int unicode) {
-        if(invertedUnicodeCmap == null) {
+    private int lookupInInvertedUnicodeCmap(int unicode)
+    {
+        if (invertedUnicodeCmap == null)
+        {
             invertedUnicodeCmap = generateInvertedUnicodeCmap();
         }
 

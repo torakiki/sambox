@@ -83,6 +83,18 @@ public class ContentStreamParserTest
     }
 
     @Test
+    public void nextInlineImage00Q() throws IOException
+    {
+        victim = new ContentStreamParser(inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/inline_image_stream_0Q.txt")));
+        Operator operator = (Operator) victim.nextParsedToken();
+        assertEquals(5, operator.getImageParameters().size());
+        assertEquals(14, operator.getImageData().length);
+        operator = (Operator) victim.nextParsedToken();
+        assertEquals("Q", operator.getName());
+    }
+
+    @Test
     public void nextInlineImageNoSpace() throws IOException
     {
         victim = new ContentStreamParser(inMemorySeekableSourceFrom(

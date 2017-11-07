@@ -238,6 +238,8 @@ public class PDFRenderer
                 translateX = cropBox.getWidth();
                 translateY = cropBox.getHeight();
                 break;
+            default:
+                break;
             }
             graphics.translate(translateX, translateY);
             graphics.rotate((float) Math.toRadians(rotationAngle));

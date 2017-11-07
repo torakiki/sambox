@@ -20,6 +20,7 @@ import java.awt.Color;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.sejda.io.SeekableSources;
@@ -54,6 +55,7 @@ public class TestOptionalContentGroups extends TestCase
 
     /**
      * Tests OCG generation.
+     * 
      * @throws Exception if an error occurs
      */
     public void testOCGGeneration() throws Exception
@@ -61,33 +63,33 @@ public class TestOptionalContentGroups extends TestCase
         PDDocument doc = new PDDocument();
         try
         {
-            //Create new page
+            // Create new page
             PDPage page = new PDPage();
             doc.addPage(page);
             PDResources resources = page.getResources();
-            if( resources == null )
+            if (resources == null)
             {
                 resources = new PDResources();
-                page.setResources( resources );
+                page.setResources(resources);
             }
 
-            //Prepare OCG functionality
+            // Prepare OCG functionality
             PDOptionalContentProperties ocprops = new PDOptionalContentProperties();
             doc.getDocumentCatalog().setOCProperties(ocprops);
-            //ocprops.setBaseState(BaseState.ON); //ON=default
+            // ocprops.setBaseState(BaseState.ON); //ON=default
 
-            //Create OCG for background
+            // Create OCG for background
             PDOptionalContentGroup background = new PDOptionalContentGroup("background");
             ocprops.addGroup(background);
             assertTrue(ocprops.isGroupEnabled("background"));
 
-            //Create OCG for enabled
+            // Create OCG for enabled
             PDOptionalContentGroup enabled = new PDOptionalContentGroup("enabled");
             ocprops.addGroup(enabled);
             assertFalse(ocprops.setGroupEnabled("enabled", true));
             assertTrue(ocprops.isGroupEnabled("enabled"));
 
-            //Create OCG for disabled
+            // Create OCG for disabled
             PDOptionalContentGroup disabled = new PDOptionalContentGroup("disabled");
             ocprops.addGroup(disabled);
             assertFalse(ocprops.setGroupEnabled("disabled", true));
@@ -95,7 +97,7 @@ public class TestOptionalContentGroups extends TestCase
             assertTrue(ocprops.setGroupEnabled("disabled", false));
             assertFalse(ocprops.isGroupEnabled("disabled"));
 
-            //Setup page content stream and paint background/title
+            // Setup page content stream and paint background/title
             PDPageContentStream contentStream = new PDPageContentStream(doc, page,
                     AppendMode.OVERWRITE, false);
             PDFont font = PDType1Font.HELVETICA_BOLD;
@@ -113,25 +115,24 @@ public class TestOptionalContentGroups extends TestCase
             contentStream.endText();
             contentStream.endMarkedContent();
 
-            //Paint enabled layer
+            // Paint enabled layer
             contentStream.beginMarkedContent(COSName.OC, enabled);
             contentStream.setNonStrokingColor(Color.GREEN);
             contentStream.beginText();
             contentStream.setFont(font, 12);
             contentStream.newLineAtOffset(80, 600);
-            contentStream.showText(
-                    "This is from an enabled layer. If you see this, that's good.");
+            contentStream.showText("This is from an enabled layer. If you see this, that's good.");
             contentStream.endText();
             contentStream.endMarkedContent();
 
-            //Paint disabled layer
+            // Paint disabled layer
             contentStream.beginMarkedContent(COSName.OC, disabled);
             contentStream.setNonStrokingColor(Color.RED);
             contentStream.beginText();
             contentStream.setFont(font, 12);
             contentStream.newLineAtOffset(80, 500);
-            contentStream.showText(
-                    "This is from a disabled layer. If you see this, that's NOT good!");
+            contentStream
+                    .showText("This is from a disabled layer. If you see this, that's NOT good!");
             contentStream.endText();
             contentStream.endMarkedContent();
 
@@ -148,6 +149,7 @@ public class TestOptionalContentGroups extends TestCase
 
     /**
      * Tests OCG functions on a loaded PDF.
+     * 
      * @throws Exception if an error occurs
      */
     public void testOCGConsumption() throws Exception
@@ -167,7 +169,7 @@ public class TestOptionalContentGroups extends TestCase
             PDResources resources = page.getResources();
 
             COSName mc0 = COSName.getPDFName("oc1");
-            PDOptionalContentGroup ocg = (PDOptionalContentGroup)resources.getProperties(mc0);
+            PDOptionalContentGroup ocg = (PDOptionalContentGroup) resources.getProperties(mc0);
             assertNotNull(ocg);
             assertEquals("background", ocg.getName());
 
@@ -191,7 +193,16 @@ public class TestOptionalContentGroups extends TestCase
             assertNull(ocgs.getGroup("inexistent"));
 
             Collection<PDOptionalContentGroup> coll = ocgs.getOptionalContentGroups();
-            coll.contains(background);
+            assertEquals(3, coll.size());
+
+            Set<String> nameSet = new HashSet<>();
+            for (PDOptionalContentGroup ocg2 : coll)
+            {
+                nameSet.add(ocg2.getName());
+            }
+            assertTrue(nameSet.contains("background"));
+            assertTrue(nameSet.contains("enabled"));
+            assertTrue(nameSet.contains("disabled"));
 
         }
     }

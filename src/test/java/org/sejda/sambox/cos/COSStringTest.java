@@ -150,4 +150,15 @@ public class COSStringTest
         }
         return sb.toString().toUpperCase();
     }
+
+    /**
+     * PDFBOX-3881: Test that if String has only the BOM, that it be an empty string.
+     * 
+     * @throws IOException
+     */
+    public void testEmptyStringWithBOM() throws IOException
+    {
+        assertTrue(COSString.parseHex("FEFF").getString().isEmpty());
+        assertTrue(COSString.parseHex("FFFE").getString().isEmpty());
+    }
 }

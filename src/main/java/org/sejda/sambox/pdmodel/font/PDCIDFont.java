@@ -49,9 +49,9 @@ public abstract class PDCIDFont implements COSObjectable, PDFontLike, PDVectorFo
     private float defaultWidth;
     private float averageWidth;
 
-    private final Map<Integer, Float> verticalDisplacementY = new HashMap<Integer, Float>(); // w1y
-    private final Map<Integer, Vector> positionVectors = new HashMap<Integer, Vector>(); // v
-    private float[] dw2;
+    private final Map<Integer, Float> verticalDisplacementY = new HashMap<>(); // w1y
+    private final Map<Integer, Vector> positionVectors = new HashMap<>(); // v
+    private float[] dw2 = new float[] { 880, -1000 };
 
     protected final COSDictionary dict;
     private PDFontDescriptor fontDescriptor;
@@ -72,15 +72,15 @@ public abstract class PDCIDFont implements COSObjectable, PDFontLike, PDVectorFo
     private void readWidths()
     {
         widths = new HashMap<>();
-        COSArray widths = (COSArray) dict.getDictionaryObject(COSName.W);
-        if (widths != null)
+        COSArray wArray = dict.getDictionaryObject(COSName.W, COSArray.class);
+        if (nonNull(wArray))
         {
-            int size = widths.size();
+            int size = wArray.size();
             int counter = 0;
             while (counter < size)
             {
-                COSNumber firstCode = (COSNumber) widths.getObject(counter++);
-                COSBase next = widths.getObject(counter++);
+                COSNumber firstCode = (COSNumber) wArray.getObject(counter++);
+                COSBase next = wArray.getObject(counter++);
                 if (next instanceof COSArray)
                 {
                     COSArray array = (COSArray) next;
@@ -89,19 +89,19 @@ public abstract class PDCIDFont implements COSObjectable, PDFontLike, PDVectorFo
                     for (int i = 0; i < arraySize; i++)
                     {
                         COSNumber width = (COSNumber) array.getObject(i);
-                        this.widths.put(startRange + i, width.floatValue());
+                        widths.put(startRange + i, width.floatValue());
                     }
                 }
                 else
                 {
                     COSNumber secondCode = (COSNumber) next;
-                    COSNumber rangeWidth = (COSNumber) widths.getObject(counter++);
+                    COSNumber rangeWidth = (COSNumber) wArray.getObject(counter++);
                     int startRange = firstCode.intValue();
                     int endRange = secondCode.intValue();
                     float width = rangeWidth.floatValue();
                     for (int i = startRange; i <= endRange; i++)
                     {
-                        this.widths.put(i, width);
+                        widths.put(i, width);
                     }
                 }
             }
@@ -112,26 +112,27 @@ public abstract class PDCIDFont implements COSObjectable, PDFontLike, PDVectorFo
     private void readVerticalDisplacements()
     {
         // default position vector and vertical displacement vector
-        COSArray cosDW2 = (COSArray) dict.getDictionaryObject(COSName.DW2);
-        if (cosDW2 != null)
+        COSArray dw2Array = dict.getDictionaryObject(COSName.DW2, COSArray.class);
+        if (nonNull(dw2Array))
         {
             dw2 = new float[2];
-            dw2[0] = ((COSNumber) cosDW2.get(0)).floatValue();
-            dw2[1] = ((COSNumber) cosDW2.get(1)).floatValue();
-        }
-        else
-        {
-            dw2 = new float[] { 880, -1000 };
+            COSBase base0 = dw2Array.getObject(0);
+            COSBase base1 = dw2Array.getObject(1);
+            if (base0 instanceof COSNumber && base1 instanceof COSNumber)
+            {
+                dw2[0] = ((COSNumber) base0).floatValue();
+                dw2[1] = ((COSNumber) base1).floatValue();
+            }
         }
 
         // vertical metrics for individual CIDs.
-        COSArray w2 = dict.getDictionaryObject(COSName.W2, COSArray.class);
-        if (w2 != null)
+        COSArray w2Array = dict.getDictionaryObject(COSName.W2, COSArray.class);
+        if (nonNull(w2Array))
         {
-            for (int i = 0; i < w2.size(); i++)
+            for (int i = 0; i < w2Array.size(); i++)
             {
-                COSNumber c = (COSNumber) w2.getObject(i);
-                COSBase next = w2.getObject(++i);
+                COSNumber c = (COSNumber) w2Array.getObject(i);
+                COSBase next = w2Array.getObject(++i);
                 if (next instanceof COSArray)
                 {
                     COSArray array = (COSArray) next;
@@ -149,9 +150,9 @@ public abstract class PDCIDFont implements COSObjectable, PDFontLike, PDVectorFo
                 {
                     int first = c.intValue();
                     int last = ((COSNumber) next).intValue();
-                    COSNumber w1y = (COSNumber) w2.getObject(++i);
-                    COSNumber v1x = (COSNumber) w2.getObject(++i);
-                    COSNumber v1y = (COSNumber) w2.getObject(++i);
+                    COSNumber w1y = (COSNumber) w2Array.getObject(++i);
+                    COSNumber v1x = (COSNumber) w2Array.getObject(++i);
+                    COSNumber v1y = (COSNumber) w2Array.getObject(++i);
                     for (int cid = first; cid <= last; cid++)
                     {
                         verticalDisplacementY.put(cid, w1y.floatValue());
@@ -336,15 +337,14 @@ public abstract class PDCIDFont implements COSObjectable, PDFontLike, PDVectorFo
      */
     public PDCIDSystemInfo getCIDSystemInfo()
     {
-        COSDictionary cidSystemInfoDict = (COSDictionary) dict
-                .getDictionaryObject(COSName.CIDSYSTEMINFO);
+        COSDictionary cidSystemInfoDict = dict.getDictionaryObject(COSName.CIDSYSTEMINFO,
+                COSDictionary.class);
 
-        PDCIDSystemInfo cidSystemInfo = null;
-        if (cidSystemInfoDict != null)
+        if (nonNull(cidSystemInfoDict))
         {
-            cidSystemInfo = new PDCIDSystemInfo(cidSystemInfoDict);
+            return new PDCIDSystemInfo(cidSystemInfoDict);
         }
-        return cidSystemInfo;
+        return null;
     }
 
     /**

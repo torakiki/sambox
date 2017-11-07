@@ -41,12 +41,38 @@ public class IdentityFilterTest
     }
 
     @Test
+    public void validNameDicDP()
+    {
+        COSDictionary filter = new COSDictionary();
+        filter.setItem(COSName.FILTER, COSName.JBIG2_DECODE);
+        COSDictionary dp = new COSDictionary();
+        dp.setInt(COSName.A, 5);
+        filter.setItem(COSName.DECODE_PARMS, dp);
+        COSDictionary params = victim.getDecodeParams(filter, 0);
+        assertEquals(dp, params);
+    }
+
+    @Test
+    public void validArrayArrayDP()
+    {
+        COSDictionary filter = new COSDictionary();
+        filter.setItem(COSName.FILTER, new COSArray(COSName.JBIG2_DECODE));
+        COSDictionary dp = new COSDictionary();
+        dp.setInt(COSName.A, 5);
+        filter.setItem(COSName.DECODE_PARMS, new COSArray(dp));
+        COSDictionary params = victim.getDecodeParams(filter, 0);
+        assertEquals(dp, params);
+    }
+
+    @Test
     public void invalidTypeGetDecode()
     {
-        COSDictionary dic = new COSDictionary();
-        dic.setInt(COSName.DECODE_PARMS, 10);
-        COSDictionary params = victim.getDecodeParams(dic, 10);
+        COSDictionary filter = new COSDictionary();
+        filter.setItem(COSName.FILTER, COSName.JBIG2_DECODE);
+        filter.setInt(COSName.A, 5);
+        COSDictionary params = victim.getDecodeParams(filter, 0);
         assertNotNull(params);
+        assertEquals(0, params.size());
     }
 
     @Test
@@ -57,6 +83,7 @@ public class IdentityFilterTest
         dic.setItem(COSName.DECODE_PARMS, array);
         COSDictionary params = victim.getDecodeParams(dic, 0);
         assertNotNull(params);
+        assertEquals(0, params.size());
     }
 
     @Test
@@ -67,6 +94,8 @@ public class IdentityFilterTest
         value.setInt(COSName.A, 213);
         COSArray array = new COSArray(value);
         dic.setItem(COSName.DECODE_PARMS, array);
-        assertEquals(value, victim.getDecodeParams(dic, 0));
+        COSDictionary params = victim.getDecodeParams(dic, 0);
+        assertNotNull(params);
+        assertEquals(0, params.size());
     }
 }

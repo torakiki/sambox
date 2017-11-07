@@ -35,9 +35,9 @@ import org.sejda.sambox.pdmodel.font.PDFont;
  */
 public abstract class PDVariableText extends PDTerminalField
 {
-    static final int QUADDING_LEFT = 0;
-    static final int QUADDING_CENTERED = 1;
-    static final int QUADDING_RIGHT = 2;
+    public static final int QUADDING_LEFT = 0;
+    public static final int QUADDING_CENTERED = 1;
+    public static final int QUADDING_RIGHT = 2;
 
     private PDFont appearanceOverrideFont = null;
 
@@ -238,12 +238,15 @@ public abstract class PDVariableText extends PDTerminalField
     {
         try
         {
-            if(appearanceOverrideFont != null) {
+            if (appearanceOverrideFont != null)
+            {
                 return appearanceOverrideFont;
             }
 
             return getDefaultAppearanceString().getFont();
-        } catch (IOException ioe) {
+        }
+        catch (IOException ioe)
+        {
             return null;
         }
     }

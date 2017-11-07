@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.Optional;
+import java.util.zip.Deflater;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -43,6 +44,12 @@ import org.slf4j.LoggerFactory;
 public abstract class Filter
 {
     private static final Logger LOG = LoggerFactory.getLogger(Filter.class);
+    /**
+     * Compression Level System Property. Set this to a value from 0 to 9 to change the zlib deflate compression level
+     * used to compress /Flate streams. The default value is -1 which is {@link Deflater#DEFAULT_COMPRESSION}. To set
+     * maximum compression, use {@code System.setProperty(Filter.SYSPROP_DEFLATELEVEL, "9");}
+     */
+    public static final String SYSPROP_DEFLATELEVEL = "org.apache.pdfbox.filter.deflatelevel";
 
     protected Filter()
     {
@@ -76,16 +83,22 @@ public abstract class Filter
     // normalise the DecodeParams entry so that it is always a dictionary
     protected COSDictionary getDecodeParams(COSDictionary dictionary, int index)
     {
-        COSBase obj = Optional
+        // AV: PDFBOX-3932 considers valid only the case name,dictionary and array,array but discards dp in the case
+        // name,array of 1 where we previously picked the one element as dp
+        COSBase filter = dictionary.getDictionaryObject(COSName.FILTER, COSName.F);
+        COSBase dp = Optional
                 .ofNullable(dictionary.getDictionaryObject(COSName.DECODE_PARMS, COSName.DP))
                 .orElseGet(COSDictionary::new);
-        if (obj instanceof COSDictionary)
+        if (filter instanceof COSName && dp instanceof COSDictionary)
         {
-            return (COSDictionary) obj;
+            // PDFBOX-3932: The PDF specification requires "If there is only one filter and that
+            // filter has parameters, DecodeParms shall be set to the filter’s parameter dictionary"
+            // but tests show that Adobe means "one filter name object".
+            return (COSDictionary) dp;
         }
-        if (obj instanceof COSArray)
+        if (filter instanceof COSArray && dp instanceof COSArray)
         {
-            COSArray array = (COSArray) obj;
+            COSArray array = (COSArray) dp;
             if (index < array.size())
             {
                 COSBase params = Optional.ofNullable(array.getObject(index))
@@ -99,8 +112,11 @@ public abstract class Filter
                 return new COSDictionary();
             }
         }
-        LOG.error("Ignoring invalid DecodeParams. Expected array or dictionary but found {}",
-                obj.getClass().getName());
+        if (!(dp instanceof COSArray || dp instanceof COSArray))
+        {
+            LOG.error("Ignoring invalid DecodeParams. Expected array or dictionary but found {}",
+                    dp.getClass().getName());
+        }
         return new COSDictionary();
     }
 

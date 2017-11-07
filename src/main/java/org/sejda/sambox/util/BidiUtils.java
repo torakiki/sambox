@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.util;
 
+import static java.util.Objects.nonNull;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -48,7 +50,15 @@ public final class BidiUtils
             try (InputStream input = BidiUtils.class.getClassLoader()
                     .getResourceAsStream("org/sejda/sambox/resources/text/BidiMirroring.txt"))
             {
-                parseBidiFile(input);
+                if (nonNull(input))
+                {
+                    parseBidiFile(input);
+                }
+                else
+                {
+                    LOG.warn(
+                            "Could not find 'BidiMirroring.txt', mirroring char map will be empty");
+                }
             }
         }
         catch (IOException e)

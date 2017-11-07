@@ -90,10 +90,6 @@ public final class PDAcroForm extends PDDictionaryWrapper
      */
     private void verifyOrCreateDefaults()
     {
-        // TODO: the handling of the missing properties is suitable
-        // if there are no entries at all. It might be necessary to enhance that
-        // if only parts are missing
-
         final String adobeDefaultAppearanceString = "/Helv 0 Tf 0 g ";
 
         // DA entry is required
@@ -103,16 +99,24 @@ public final class PDAcroForm extends PDDictionaryWrapper
         }
 
         // DR entry is required
-        if (getDefaultResources() == null)
+        PDResources defaultResources = getDefaultResources();
+        if (defaultResources == null)
         {
-            // Adobe Acrobat uses Helvetica as a default font and
-            // stores that under the name '/Helv' in the resources dictionary
-            // Zapf Dingbats is included per default for check boxes and
-            // radio buttons as /ZaDb.
-            PDResources resources = new PDResources();
-            resources.put(COSName.getPDFName("Helv"), PDType1Font.HELVETICA);
-            resources.put(COSName.getPDFName("ZaDb"), PDType1Font.ZAPF_DINGBATS);
-            setDefaultResources(resources);
+            defaultResources = new PDResources();
+            setDefaultResources(defaultResources);
+        }
+
+        // Adobe Acrobat uses Helvetica as a default font and
+        // stores that under the name '/Helv' in the resources dictionary
+        // Zapf Dingbats is included per default for check boxes and
+        // radio buttons as /ZaDb.
+        if (!defaultResources.getCOSObject().containsKey("Helv"))
+        {
+            defaultResources.put(COSName.getPDFName("Helv"), PDType1Font.HELVETICA);
+        }
+        if (!defaultResources.getCOSObject().containsKey("ZaDb"))
+        {
+            defaultResources.put(COSName.getPDFName("ZaDb"), PDType1Font.ZAPF_DINGBATS);
         }
     }
 
@@ -530,7 +534,7 @@ public final class PDAcroForm extends PDDictionaryWrapper
      * This will get the 'quadding' or justification of the text to be displayed. 0 - Left(default)<br/>
      * 1 - Centered<br />
      * 2 - Right<br />
-     * Please see the QUADDING_CONSTANTS.
+     * See the QUADDING constants of {@link PDVariableText}.
      *
      * @return The justification of the text strings.
      */

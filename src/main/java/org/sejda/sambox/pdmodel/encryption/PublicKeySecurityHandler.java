@@ -120,7 +120,8 @@ public final class PublicKeySecurityHandler extends SecurityHandler
                 COSString recipientFieldString = encryption.getRecipientStringAt(i);
                 byte[] recipientBytes = recipientFieldString.getBytes();
                 CMSEnvelopedData data = new CMSEnvelopedData(recipientBytes);
-                Iterator<?> recipCertificatesIt = data.getRecipientInfos().getRecipients().iterator();
+                Iterator<?> recipCertificatesIt = data.getRecipientInfos().getRecipients()
+                        .iterator();
                 int j = 0;
                 while (recipCertificatesIt.hasNext())
                 {

@@ -363,7 +363,8 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
     {
         // some files such as PDFBOX-2250-229205.pdf don't have Pages set as the Type, so we have
         // to check for the presence of Kids too
-        return node.getCOSName(COSName.TYPE) == COSName.PAGES || node.containsKey(COSName.KIDS);
+        return nonNull(node) && (node.getCOSName(COSName.TYPE) == COSName.PAGES
+                || node.containsKey(COSName.KIDS));
     }
 
     /**
