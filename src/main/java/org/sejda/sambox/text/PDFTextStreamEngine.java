@@ -285,7 +285,11 @@ public class PDFTextStreamEngine extends PDFStreamEngine
             {
                 // Acrobat doesn't seem to coerce composite font's character codes, instead it
                 // skips them. See the "allah2.pdf" TestTextStripper file.
-                return;
+                // return;
+
+                // this seems to work better though
+                char c = (char) code;
+                unicode = new String(new char[] { c });
             }
         }
         // adjust for cropbox if needed
