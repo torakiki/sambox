@@ -493,7 +493,7 @@ class AppearanceGeneratorHelper
         // chars
         if (shallComb())
         {
-            insertGeneratedCombAppearance(contents, appearanceStream, font, fontSize);
+            insertGeneratedCombAppearance(contents, bbox, font, fontSize);
         }
         else if (field instanceof PDListBox)
         {
@@ -574,13 +574,13 @@ class AppearanceGeneratorHelper
      * Generate the appearance for comb fields.
      * 
      * @param contents the content stream to write to
-     * @param appearanceStream the appearance stream used
+     * @param bbox the bbox used
      * @param font the font to be used
      * @param fontSize the font size to be used
      * @throws IOException
      */
     private void insertGeneratedCombAppearance(PDPageContentStream contents,
-            PDAppearanceStream appearanceStream, PDFont font, float fontSize) throws IOException
+            PDRectangle bbox, PDFont font, float fontSize) throws IOException
     {
 
         // TODO: Currently the quadding is not taken into account
@@ -589,12 +589,12 @@ class AppearanceGeneratorHelper
         int maxLen = ((PDTextField) field).getMaxLen();
         int numChars = Math.min(value.length(), maxLen);
 
-        PDRectangle paddingEdge = applyPadding(appearanceStream.getBBox(), 1);
+        PDRectangle paddingEdge = applyPadding(bbox, 1);
 
-        float combWidth = appearanceStream.getBBox().getWidth() / maxLen;
+        float combWidth = bbox.getWidth() / maxLen;
         float ascentAtFontSize = font.getFontDescriptor().getAscent() / FONTSCALE * fontSize;
         float baselineOffset = paddingEdge.getLowerLeftY()
-                + (appearanceStream.getBBox().getHeight() - ascentAtFontSize) / 2;
+                + (bbox.getHeight() - ascentAtFontSize) / 2;
 
         float prevCharWidth = 0f;
 
