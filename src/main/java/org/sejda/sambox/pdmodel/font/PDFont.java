@@ -327,6 +327,40 @@ public abstract class PDFont implements COSObjectable, PDFontLike
     }
 
     /**
+     * Similar to encode() but handles leniently cases where fonts don't have a glyph by assuming
+     * the identity mapping
+     */
+    public final byte[] encodeLeniently(String text) throws IOException
+    {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        for (int offset = 0; offset < text.length();)
+        {
+            int codePoint = text.codePointAt(offset);
+
+            // multi-byte encoding with 1 to 4 bytes
+            byte[] bytes;
+            try
+            {
+                bytes = encode(codePoint);
+            } catch (IllegalArgumentException e)
+            {
+                if(e.getMessage().contains("No glyph"))
+                {
+                    bytes = new byte[] { (byte) codePoint };
+                }
+                else
+                {
+                    throw e;
+                }
+            }
+            out.write(bytes);
+
+            offset += Character.charCount(codePoint);
+        }
+        return out.toByteArray();
+    }
+
+    /**
      * Encodes the given Unicode code point for use in a PDF content stream. Content streams use a multi-byte encoding
      * with 1 to 4 bytes.
      *
@@ -349,6 +383,27 @@ public abstract class PDFont implements COSObjectable, PDFontLike
     public float getStringWidth(String text) throws IOException
     {
         byte[] bytes = encode(text);
+        ByteArrayInputStream in = new ByteArrayInputStream(bytes);
+
+        float width = 0;
+        while (in.available() > 0)
+        {
+            int code = readCode(in);
+            width += getWidth(code);
+        }
+
+        return width;
+    }
+
+    /**
+     * Similar to getStringWidth() but handles leniently fonts where glyphs are missing, assuming
+     * the identity mapping of glyphs
+     *
+     * Uses encodeLeniently() instead of encode()
+     */
+    public float getStringWidthLeniently(String text) throws IOException
+    {
+        byte[] bytes = encodeLeniently(text);
         ByteArrayInputStream in = new ByteArrayInputStream(bytes);
 
         float width = 0;
