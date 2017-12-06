@@ -61,6 +61,7 @@ final class FileSystemFontProvider extends FontProvider
 
     private final List<FSFontInfo> fontInfoList = new ArrayList<>();
     private final FontCache cache;
+    private boolean initialized = false;
 
     private static class FSFontInfo extends FontInfo
     {
@@ -200,6 +201,19 @@ final class FileSystemFontProvider extends FontProvider
     FileSystemFontProvider(FontCache cache)
     {
         this.cache = cache;
+        // init block moved to lazy initialization when required
+    }
+
+    private synchronized void initializeIfRequired()
+    {
+        if(!this.initialized) {
+            initialize();
+            this.initialized = true;
+        }
+    }
+
+    private void initialize()
+    {
         try
         {
             LOG.trace("Will search the local system for fonts");
@@ -679,6 +693,7 @@ final class FileSystemFontProvider extends FontProvider
     @Override
     public String toDebugString()
     {
+        initializeIfRequired();
         StringBuilder sb = new StringBuilder();
         for (FSFontInfo info : fontInfoList)
         {
@@ -695,6 +710,7 @@ final class FileSystemFontProvider extends FontProvider
     @Override
     public List<? extends FontInfo> getFontInfo()
     {
+        initializeIfRequired();
         return fontInfoList;
     }
 }
