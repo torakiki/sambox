@@ -231,4 +231,28 @@ public class AbstractXrefTableParserTest
         victim.parse(15);
         assertEquals(3, found.size());
     }
+
+    @Test(expected = IOException.class)
+    public void parseNegativeGeneration() throws IOException
+    {
+        Set<XrefEntry> found = new HashSet<>();
+        AbstractXrefTableParser victim = new AbstractXrefTableParser(
+                new COSParser(inMemorySeekableSourceFrom(
+                        getClass().getResourceAsStream("/sambox/xref_table_negative.txt"))))
+        {
+            @Override
+            void onTrailerFound(COSDictionary trailer)
+            {
+                assertNotNull(trailer);
+            }
+
+            @Override
+            void onEntryFound(XrefEntry entry)
+            {
+                assertNotNull(entry);
+                found.add(entry);
+            }
+        };
+        victim.parse(15);
+    }
 }

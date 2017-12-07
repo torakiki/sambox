@@ -120,10 +120,12 @@ abstract class AbstractXrefTableParser
                         onEntryFound(inUseEntry(currentObjectNumber, Long.parseLong(splitString[0]),
                                 Integer.parseInt(splitString[1])));
                     }
-                    catch (NumberFormatException e)
+                    catch (IllegalArgumentException e)
                     {
-                        throw new IOException("Corrupted xref table entry.", e);
+                        throw new IOException(
+                                "Corrupted xref table entry. Invalid xref line: " + currentLine, e);
                     }
+
                 }
                 else if (!"f".equals(entryType))
                 {
