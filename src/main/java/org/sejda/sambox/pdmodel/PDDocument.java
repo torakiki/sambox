@@ -58,7 +58,7 @@ import org.sejda.sambox.pdmodel.common.PDStream;
 import org.sejda.sambox.pdmodel.encryption.AccessPermission;
 import org.sejda.sambox.pdmodel.encryption.PDEncryption;
 import org.sejda.sambox.pdmodel.encryption.SecurityHandler;
-import org.sejda.sambox.pdmodel.font.PDFont;
+import org.sejda.sambox.pdmodel.font.Subsettable;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceRGB;
 import org.sejda.sambox.util.Version;
 import org.sejda.util.IOUtils;
@@ -108,7 +108,7 @@ public class PDDocument implements Closeable
     private ResourceCache resourceCache = new DefaultResourceCache();
 
     // fonts to subset before saving
-    private final Set<PDFont> fontsToSubset = new HashSet<>();
+    private final Set<Subsettable> fontsToSubset = new HashSet<>();
 
     public PDDocument()
     {
@@ -286,7 +286,7 @@ public class PDDocument implements Closeable
     /**
      * @return the list of fonts which will be subset before the document is saved.
      */
-    Set<PDFont> getFontsToSubset()
+    public Set<Subsettable> getFontsToSubset()
     {
         return fontsToSubset;
     }
@@ -569,7 +569,7 @@ public class PDDocument implements Closeable
         requireOpen();
         getDocumentInformation().setProducer("SAMBox " + Version.getVersion() + " (www.sejda.org)");
         getDocumentInformation().setModificationDate(Calendar.getInstance());
-        for (PDFont font : fontsToSubset)
+        for (Subsettable font : fontsToSubset)
         {
             font.subset();
         }

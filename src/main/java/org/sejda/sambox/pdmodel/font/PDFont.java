@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Ben Litchfield
  */
-public abstract class PDFont implements COSObjectable, PDFontLike
+public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
 {
     private static final Logger LOG = LoggerFactory.getLogger(PDFont.class);
     protected static final Matrix DEFAULT_FONT_MATRIX = new Matrix(0.001f, 0, 0, 0.001f, 0, 0);
@@ -629,25 +629,6 @@ public abstract class PDFont implements COSObjectable, PDFontLike
         // if the name matches, this is a Standard 14 font
         return Standard14Fonts.containsName(getName());
     }
-
-    /**
-     * Adds the given Unicode point to the subset.
-     * 
-     * @param codePoint Unicode code point
-     */
-    public abstract void addToSubset(int codePoint);
-
-    /**
-     * Replaces this font with a subset containing only the given Unicode characters.
-     *
-     * @throws IOException if the subset could not be written
-     */
-    public abstract void subset() throws IOException;
-
-    /**
-     * Returns true if this font will be subset when embedded.
-     */
-    public abstract boolean willBeSubset();
 
     @Override
     public abstract boolean isDamaged();

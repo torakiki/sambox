@@ -17,14 +17,17 @@
 
 package org.sejda.sambox.pdmodel.font;
 
+import static org.sejda.sambox.pdmodel.font.FontUtils.getTag;
+import static org.sejda.sambox.pdmodel.font.FontUtils.isEmbeddingPermitted;
+import static org.sejda.sambox.pdmodel.font.FontUtils.isSubsettingPermitted;
+
 import java.awt.geom.GeneralPath;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -41,7 +44,6 @@ import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.common.PDStream;
 import org.sejda.util.IOUtils;
-
 /**
  * Common functionality for embedding TrueType fonts.
  *
@@ -52,7 +54,6 @@ abstract class TrueTypeEmbedder implements Subsetter
 {
     private static final int ITALIC = 1;
     private static final int OBLIQUE = 512;
-    private static final String BASE25 = "BCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     protected TrueTypeFont ttf;
     protected PDFontDescriptor fontDescriptor;
@@ -115,48 +116,6 @@ abstract class TrueTypeEmbedder implements Subsetter
         fontDescriptor.setFontFile2(stream);
     }
 
-    /**
-     * Returns true if the fsType in the OS/2 table permits embedding.
-     */
-    private boolean isEmbeddingPermitted(TrueTypeFont ttf) throws IOException
-    {
-        if (ttf.getOS2Windows() != null)
-        {
-            int fsType = ttf.getOS2Windows().getFsType();
-            int exclusive = fsType & 0x8; // bits 0-3 are a set of exclusive bits
-
-            if ((exclusive
-                    & OS2WindowsMetricsTable.FSTYPE_RESTRICTED) == OS2WindowsMetricsTable.FSTYPE_RESTRICTED)
-            {
-                // restricted License embedding
-                return false;
-            }
-            else if ((exclusive
-                    & OS2WindowsMetricsTable.FSTYPE_BITMAP_ONLY) == OS2WindowsMetricsTable.FSTYPE_BITMAP_ONLY)
-            {
-                // bitmap embedding only
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Returns true if the fsType in the OS/2 table permits subsetting.
-     */
-    private boolean isSubsettingPermitted(TrueTypeFont ttf) throws IOException
-    {
-        if (ttf.getOS2Windows() != null)
-        {
-            int fsType = ttf.getOS2Windows().getFsType();
-            if ((fsType
-                    & OS2WindowsMetricsTable.FSTYPE_NO_SUBSETTING) == OS2WindowsMetricsTable.FSTYPE_NO_SUBSETTING)
-            {
-                return false;
-            }
-        }
-        return true;
-    }
 
     /**
      * Creates a new font descriptor dictionary for the given TTF.
@@ -288,21 +247,9 @@ abstract class TrueTypeEmbedder implements Subsetter
         }
 
         // PDF spec required tables (if present), all others will be removed
-        List<String> tables = new ArrayList<String>();
-        tables.add("head");
-        tables.add("hhea");
-        tables.add("loca");
-        tables.add("maxp");
-        tables.add("cvt ");
-        tables.add("prep");
-        tables.add("glyf");
-        tables.add("hmtx");
-        tables.add("fpgm");
-        // Windows ClearType
-        tables.add("gasp");
-
         // set the GIDs to subset
-        TTFSubsetter subsetter = new TTFSubsetter(ttf, tables);
+        TTFSubsetter subsetter = new TTFSubsetter(ttf, Arrays.asList("head", "hhea", "loca", "maxp",
+                "cvt", "prep", "glyf", "hmtx", "fpgm", "gasp"));
         subsetter.addAll(subsetCodePoints);
 
         // calculate deterministic tag based on the chosen subset
@@ -320,7 +267,7 @@ abstract class TrueTypeEmbedder implements Subsetter
     }
 
     /**
-     * Returns true if the font needs to be subset.
+     * @return true if the font needs to be subset.
      */
     public boolean needsSubset()
     {
@@ -328,36 +275,10 @@ abstract class TrueTypeEmbedder implements Subsetter
     }
 
     /**
-     * Rebuild a font subset.
+     * @return a font subset.
      */
     protected abstract void buildSubset(InputStream ttfSubset, String tag,
             Map<Integer, Integer> gidToCid) throws IOException;
 
-    /**
-     * Returns an uppercase 6-character unique tag for the given subset.
-     */
-    public String getTag(Map<Integer, Integer> gidToCid)
-    {
-        // deterministic
-        long num = gidToCid.hashCode();
 
-        // base25 encode
-        StringBuilder sb = new StringBuilder();
-        do
-        {
-            long div = num / 25;
-            int mod = (int) (num % 25);
-            sb.append(BASE25.charAt(mod));
-            num = div;
-        } while (num != 0 && sb.length() < 6);
-
-        // pad
-        while (sb.length() < 6)
-        {
-            sb.insert(0, 'A');
-        }
-
-        sb.append('+');
-        return sb.toString();
-    }
 }
