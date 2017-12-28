@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.contentstream;
 
+import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
 
 import java.awt.geom.GeneralPath;
@@ -102,6 +103,22 @@ public abstract class PDFStreamEngine
     {
         op.setContext(this);
         operators.put(op.getName(), op);
+    }
+
+    /**
+     * Adds an operator processor to the engine if there isn't an operator already associated with the PDF operator.
+     *
+     * @param op operator processor
+     * @return true if the operator is added, false if not (there's already an operator associated)
+     */
+    public final boolean addOperatorIfAbsent(OperatorProcessor op)
+    {
+        if (isNull(operators.putIfAbsent(op.getName(), op)))
+        {
+            op.setContext(this);
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -431,7 +448,7 @@ public abstract class PDFStreamEngine
      * @param contentStream the content stream
      * @throws IOException if there is an exception while processing the stream
      */
-    protected void processStream(PDContentStream contentStream) throws IOException
+    public void processStream(PDContentStream contentStream) throws IOException
     {
         PDResources parent = pushResources(contentStream);
         Stack<PDGraphicsState> savedStack = saveGraphicsStack();
