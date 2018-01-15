@@ -309,7 +309,11 @@ class PDDefaultAppearanceString
         {
             fontSize = zeroFontSize;
         }
-        contents.setFont(getFont(), fontSize);
+
+        if(getFont() != null)
+        {
+            contents.setFont(getFont(), fontSize);
+        }
 
         if (getFontColor() != null)
         {
