@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.cos;
 
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static org.sejda.util.RequireUtils.requireNotBlank;
 import static org.sejda.util.RequireUtils.requireNotNullArg;
@@ -83,7 +84,8 @@ public class COSDocument extends COSBase
      */
     public boolean isEncrypted()
     {
-        return trailer.getCOSObject().getDictionaryObject(COSName.ENCRYPT) != null;
+        return nonNull(
+                trailer.getCOSObject().getDictionaryObject(COSName.ENCRYPT, COSDictionary.class));
     }
 
     /**
