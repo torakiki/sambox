@@ -49,47 +49,57 @@ final class ASCIIHexFilter extends Filter
     };
 
     @Override
-    public DecodeResult decode(InputStream encoded, OutputStream decoded,
-                                         COSDictionary parameters, int index) throws IOException
+    public DecodeResult decode(InputStream encoded, OutputStream decoded, COSDictionary parameters,
+            int index) throws IOException
     {
+        // TODO iText and pdfjs both have similar impl which is different from what we have. Maybe we can replace this
+        // with the algorithm in pdfjs
         int value, firstByte, secondByte;
-        while ((firstByte = encoded.read()) != -1)
+        try
         {
-            // always after first char
-            while (isWhitespace(firstByte))
+            while ((firstByte = encoded.read()) != -1)
             {
-                firstByte = encoded.read();
-            }
-            if (firstByte == -1 || isEOD(firstByte))
-            {
-                break;
-            }
-       
-            if (REVERSE_HEX[firstByte] == -1)
-            {
-                LOG.error("Invalid hex, int: " + firstByte + " char: " + (char)firstByte);
-            }
-            value = REVERSE_HEX[firstByte] * 16;
-            secondByte = encoded.read();
-       
-            if (secondByte == -1 || isEOD(secondByte)) 
-            {
-                // second value behaves like 0 in case of EOD
-                decoded.write(value);
-                break;
-            }
-            if (secondByte >= 0) 
-            {
-                if (REVERSE_HEX[secondByte] == -1)
+                // always after first char
+                while (isWhitespace(firstByte))
                 {
-                    LOG.error("Invalid hex, int: " + secondByte + " char: " + (char)secondByte);
+                    firstByte = encoded.read();
                 }
-                value += REVERSE_HEX[secondByte];
+                if (firstByte == -1 || isEOD(firstByte))
+                {
+                    break;
+                }
+
+                if (REVERSE_HEX[firstByte] == -1)
+                {
+                    LOG.error("Invalid hex, int: " + firstByte + " char: " + (char) firstByte);
+                }
+                value = REVERSE_HEX[firstByte] * 16;
+                secondByte = encoded.read();
+
+                if (secondByte == -1 || isEOD(secondByte))
+                {
+                    // second value behaves like 0 in case of EOD
+                    decoded.write(value);
+                    break;
+                }
+                if (secondByte >= 0)
+                {
+                    if (REVERSE_HEX[secondByte] == -1)
+                    {
+                        LOG.error(
+                                "Invalid hex, int: " + secondByte + " char: " + (char) secondByte);
+                    }
+                    value += REVERSE_HEX[secondByte];
+                }
+                decoded.write(value);
             }
-            decoded.write(value);
+            decoded.flush();
+            return new DecodeResult(parameters);
         }
-        decoded.flush();
-        return new DecodeResult(parameters);
+        catch (ArrayIndexOutOfBoundsException e)
+        {
+            throw new IOException("Illegal character in ASCIIHexFilter", e);
+        }
     }
 
     // whitespace

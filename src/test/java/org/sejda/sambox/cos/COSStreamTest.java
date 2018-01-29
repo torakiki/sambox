@@ -145,6 +145,22 @@ public class COSStreamTest
     }
 
     /**
+     * test addCompression doesn't throw anything when ASCIIHex stream has garbage
+     *
+     * @throws IOException
+     */
+    @Test
+    public void addCompressionWithGarbageAsciiHex() throws IOException
+    {
+        byte[] testString = "This is a test string to be used as input for TestCOSStream"
+                .getBytes("ASCII");
+        byte[] testStringEncoded = encodeData(testString, COSName.FLATE_DECODE);
+        COSStream stream = createStream(testStringEncoded);
+        stream.setItem(COSName.FILTER, COSName.ASCII_HEX_DECODE);
+        stream.addCompression();
+    }
+
+    /**
      * Tests decoding of a stream with 2 filters applied.
      *
      * @throws IOException
@@ -208,6 +224,16 @@ public class COSStreamTest
     {
         COSStream stream = new COSStream();
         try (OutputStream output = stream.createFilteredStream(filters))
+        {
+            output.write(testString);
+        }
+        return stream;
+    }
+
+    private static COSStream createStream(byte[] testString) throws IOException
+    {
+        COSStream stream = new COSStream();
+        try (OutputStream output = stream.createFilteredStream())
         {
             output.write(testString);
         }
