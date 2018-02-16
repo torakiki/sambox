@@ -692,7 +692,13 @@ public class TextPosition
      */
     public boolean isVisible()
     {
-        return new Rectangle2D.Float(0, 0, pageWidth, pageHeight).contains(getX(), getY());
+        Rectangle2D.Float rectangle = new Rectangle2D.Float(0, 0, pageWidth, pageHeight);
+        if(this.rotation == 90 || this.rotation == 270) {
+            // flip width and height
+            rectangle = new Rectangle2D.Float(0, 0, pageHeight, pageWidth);
+        }
+
+        return rectangle.contains(getX(), getY());
     }
 
     /**
