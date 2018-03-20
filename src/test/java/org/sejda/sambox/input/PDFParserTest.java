@@ -24,6 +24,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 
 import org.junit.Test;
+import org.sejda.io.DevNullWritableByteChannel;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.PDDocument;
@@ -286,6 +287,16 @@ public class PDFParserTest
                 .getResourceAsStream("/org/sejda/sambox/input/genko_oc_shiryo1.pdf"))))
         {
             // noop
+        }
+    }
+
+    @Test
+    public void loopInIndirectObject() throws IOException
+    {
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/self_indirect_ref.pdf"))))
+        {
+            doc.writeTo(new DevNullWritableByteChannel());
         }
     }
 }

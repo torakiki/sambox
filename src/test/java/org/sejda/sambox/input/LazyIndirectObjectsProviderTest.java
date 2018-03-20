@@ -125,6 +125,18 @@ public class LazyIndirectObjectsProviderTest
     }
 
     @Test
+    public void selfIndirectRef() throws IOException
+    {
+        victim = new LazyIndirectObjectsProvider();
+        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/self_indirect_ref.pdf")), victim);
+        victim.initializeWith(parser);
+        XrefParser xrefParser = new XrefParser(parser);
+        xrefParser.parse();
+        assertEquals(COSNull.NULL, victim.get(new COSObjectKey(9, 0)).getCOSObject());
+    }
+
+    @Test
     public void getCompressedNullContainingStream() throws IOException
     {
         victim = new LazyIndirectObjectsProvider();
