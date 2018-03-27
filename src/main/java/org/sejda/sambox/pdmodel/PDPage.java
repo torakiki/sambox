@@ -316,11 +316,19 @@ public class PDPage implements COSObjectable, PDContentStream
      */
     public PDRectangle getCropBox()
     {
-        COSArray array = (COSArray) PDPageTree.getInheritableAttribute(page, COSName.CROP_BOX);
-        if (array != null)
+        try
         {
-            return clipToMediaBox(new PDRectangle(array));
+            COSArray array = (COSArray) PDPageTree.getInheritableAttribute(page, COSName.CROP_BOX);
+            if (array != null)
+            {
+                return clipToMediaBox(new PDRectangle(array));
+            }
         }
+        catch (Exception ex)
+        {
+            LOG.debug("An error occurred parsing the crop box", ex);
+        }
+
         return getMediaBox();
     }
 
@@ -355,10 +363,17 @@ public class PDPage implements COSObjectable, PDContentStream
      */
     public PDRectangle getBleedBox()
     {
-        COSArray array = page.getDictionaryObject(COSName.BLEED_BOX, COSArray.class);
-        if (nonNull(array) && inMediaBoxBounds(new PDRectangle(array)))
+        try
         {
-            return new PDRectangle(array);
+            COSArray array = page.getDictionaryObject(COSName.BLEED_BOX, COSArray.class);
+            if (nonNull(array) && inMediaBoxBounds(new PDRectangle(array)))
+            {
+                return new PDRectangle(array);
+            }
+        }
+        catch (Exception ex)
+        {
+            LOG.debug("An error occurred parsing page bleed box", ex);
         }
         return getCropBox();
     }
@@ -394,10 +409,17 @@ public class PDPage implements COSObjectable, PDContentStream
      */
     public PDRectangle getTrimBox()
     {
-        COSArray array = page.getDictionaryObject(COSName.TRIM_BOX, COSArray.class);
-        if (nonNull(array) && inMediaBoxBounds(new PDRectangle(array)))
+        try
         {
-            return new PDRectangle(array);
+            COSArray array = page.getDictionaryObject(COSName.TRIM_BOX, COSArray.class);
+            if (nonNull(array) && inMediaBoxBounds(new PDRectangle(array)))
+            {
+                return new PDRectangle(array);
+            }
+        }
+        catch (Exception ex)
+        {
+            LOG.debug("An error occurred parsing page trim box", ex);
         }
         return getCropBox();
     }
