@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import org.apache.commons.io.IOUtils;
 import org.sejda.sambox.cos.COSDictionary;
 
 /**
@@ -30,19 +31,12 @@ import org.sejda.sambox.cos.COSDictionary;
  */
 final class IdentityFilter extends Filter
 {
-    private static final int BUFFER_SIZE = 1024;
-
     @Override
     public DecodeResult decode(InputStream encoded, OutputStream decoded,
                                          COSDictionary parameters, int index)
         throws IOException
     {
-        byte[] buffer = new byte[BUFFER_SIZE];
-        int amountRead;
-        while((amountRead = encoded.read(buffer, 0, BUFFER_SIZE)) != -1)
-        {
-            decoded.write(buffer, 0, amountRead);
-        }
+        IOUtils.copy(encoded, decoded);
         decoded.flush();
         return new DecodeResult(parameters);
     }
@@ -51,12 +45,7 @@ final class IdentityFilter extends Filter
     public void encode(InputStream input, OutputStream encoded, COSDictionary parameters)
         throws IOException
     {
-        byte[] buffer = new byte[BUFFER_SIZE];
-        int amountRead;
-        while((amountRead = input.read(buffer, 0, BUFFER_SIZE)) != -1)
-        {
-            encoded.write(buffer, 0, amountRead);
-        }
+        IOUtils.copy(input, encoded);
         encoded.flush();
     }
 }

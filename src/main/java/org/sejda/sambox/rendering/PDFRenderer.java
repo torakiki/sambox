@@ -20,13 +20,19 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-
+import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.PDPage;
+import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
+import org.sejda.sambox.pdmodel.graphics.blend.BlendMode;
+import org.sejda.sambox.pdmodel.graphics.state.PDExtendedGraphicsState;
+import org.sejda.sambox.pdmodel.interactive.annotation.AnnotationFilter;
+import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotation;
 
 /**
- * Renders a PDF document to an AWT BufferedImage. This class may be overridden in order to perform custom rendering.
+ * Renders a PDF document to an AWT BufferedImage.
+ * This class may be overridden in order to perform custom rendering.
  *
  * @author John Hewson
  */
@@ -36,8 +42,19 @@ public class PDFRenderer
     // TODO keep rendering state such as caches here
 
     /**
+     * Default annotations filter, returns all annotations
+     */
+    private AnnotationFilter annotationFilter = new AnnotationFilter()
+    {
+        @Override
+        public boolean accept(PDAnnotation annotation)
+        {
+            return true;
+        }
+    };
+
+    /**
      * Creates a new PDFRenderer.
-     * 
      * @param document the document to render
      */
     public PDFRenderer(PDDocument document)
@@ -46,8 +63,29 @@ public class PDFRenderer
     }
 
     /**
+     * Return the AnnotationFilter.
+     *
+     * @return the AnnotationFilter
+     */
+    public AnnotationFilter getAnnotationsFilter()
+    {
+        return annotationFilter;
+    }
+
+    /**
+     * Set the AnnotationFilter.
+     *
+     * <p>Allows to only render annotation accepted by the filter.
+     *
+     * @param annotationsFilter the AnnotationFilter
+     */
+    public void setAnnotationsFilter(AnnotationFilter annotationsFilter)
+    {
+        this.annotationFilter = annotationsFilter;
+    }
+
+    /**
      * Returns the given page as an RGB image at 72 DPI
-     * 
      * @param pageIndex the zero-based index of the page to be converted.
      * @return the rendered page image
      * @throws IOException if the PDF cannot be read
@@ -58,8 +96,8 @@ public class PDFRenderer
     }
 
     /**
-     * Returns the given page as an RGB image at the given scale. A scale of 1 will render at 72 DPI.
-     * 
+     * Returns the given page as an RGB image at the given scale.
+     * A scale of 1 will render at 72 DPI.
      * @param pageIndex the zero-based index of the page to be converted
      * @param scale the scaling factor, where 1 = 72 DPI
      * @return the rendered page image
@@ -72,7 +110,6 @@ public class PDFRenderer
 
     /**
      * Returns the given page as an RGB image at the given DPI.
-     * 
      * @param pageIndex the zero-based index of the page to be converted
      * @param dpi the DPI (dots per inch) to render at
      * @return the rendered page image
@@ -84,10 +121,11 @@ public class PDFRenderer
     }
 
     /**
-     * @param page the zero-based index of the page to be converted
+     * Returns the given page as an RGB image at the given DPI.
+     * @param pageIndex the zero-based index of the page to be converted
      * @param dpi the DPI (dots per inch) to render at
      * @param imageType the type of image to return
-     * @return the page rendered as a {@link BufferedImage}
+     * @return the rendered page image
      * @throws IOException if the PDF cannot be read
      */
     public BufferedImage renderImageWithDPI(int pageIndex, float dpi, ImageType imageType)
@@ -97,39 +135,14 @@ public class PDFRenderer
     }
 
     /**
-     * @param page the zero-based index of the page to be converted
-     * @param dpi the DPI (dots per inch) to render at
-     * @param bufferedImageType the type of image to return
-     * @return the page rendered as a {@link BufferedImage}
-     * @throws IOException if the PDF cannot be read
-     */
-    public BufferedImage renderImageWithDPI(int page, float dpi, int bufferedImageType)
-            throws IOException
-    {
-        return renderImage(page, dpi / 72f, bufferedImageType);
-    }
-
-    /**
+     * Returns the given page as an RGB or ARGB image at the given scale.
      * @param pageIndex the zero-based index of the page to be converted
      * @param scale the scaling factor, where 1 = 72 DPI
-     * @param bufferedImageType the type of image to return
-     * @return the page rendered as a {@link BufferedImage}
+     * @param imageType the type of image to return
+     * @return the rendered page image
      * @throws IOException if the PDF cannot be read
      */
     public BufferedImage renderImage(int pageIndex, float scale, ImageType imageType)
-            throws IOException
-    {
-        return renderImage(pageIndex, scale, imageType.toBufferedImageType());
-    }
-
-    /**
-     * @param pageIndex the zero-based index of the page to be converted
-     * @param scale the scaling factor, where 1 = 72 DPI
-     * @param bufferedImageType the type of image to return
-     * @return the page rendered as a {@link BufferedImage}
-     * @throws IOException if the PDF cannot be read
-     */
-    public BufferedImage renderImage(int pageIndex, float scale, int bufferedImageType)
             throws IOException
     {
         PDPage page = document.getPage(pageIndex);
@@ -141,20 +154,30 @@ public class PDFRenderer
         int heightPx = Math.round(heightPt * scale);
         int rotationAngle = page.getRotation();
 
+        int bimType = imageType.toBufferedImageType();
+        if (imageType != ImageType.ARGB && hasBlendMode(page))
+        {
+            // PDFBOX-4095: if the PDF has blending on the top level, draw on transparent background
+            // Inpired from PDF.js: if a PDF page uses any blend modes other than Normal, 
+            // PDF.js renders everything on a fully transparent RGBA canvas. 
+            // Finally when the page has been rendered, PDF.js draws the RGBA canvas on a white canvas.
+            bimType = BufferedImage.TYPE_INT_ARGB;
+        }
+
         // swap width and height
         BufferedImage image;
         if (rotationAngle == 90 || rotationAngle == 270)
         {
-            image = new BufferedImage(heightPx, widthPx, bufferedImageType);
+            image = new BufferedImage(heightPx, widthPx, bimType);
         }
         else
         {
-            image = new BufferedImage(widthPx, heightPx, bufferedImageType);
+            image = new BufferedImage(widthPx, heightPx, bimType);
         }
 
-        // use a transparent background if the imageType supports alpha
+        // use a transparent background if the image type supports alpha
         Graphics2D g = image.createGraphics();
-        if (bufferedImageType == BufferedImage.TYPE_INT_ARGB)
+        if (image.getType() == BufferedImage.TYPE_INT_ARGB)
         {
             g.setBackground(new Color(0, 0, 0, 0));
         }
@@ -173,12 +196,24 @@ public class PDFRenderer
 
         g.dispose();
 
+        if (image.getType() != imageType.toBufferedImageType())
+        {
+            // PDFBOX-4095: draw temporary transparent image on white background
+            BufferedImage newImage =
+                    new BufferedImage(image.getWidth(), image.getHeight(), imageType.toBufferedImageType());
+            Graphics2D dstGraphics = newImage.createGraphics();
+            dstGraphics.setBackground(Color.WHITE);
+            dstGraphics.clearRect(0, 0, image.getWidth(), image.getHeight());
+            dstGraphics.drawImage(image, 0, 0, null);
+            dstGraphics.dispose();
+            image = newImage;
+        }
+
         return image;
     }
 
     /**
      * Renders a given page to an AWT Graphics2D instance.
-     * 
      * @param pageIndex the zero-based index of the page to be converted
      * @param graphics the Graphics2D on which to draw the page
      * @throws IOException if the PDF cannot be read
@@ -190,7 +225,6 @@ public class PDFRenderer
 
     /**
      * Renders a given page to an AWT Graphics2D instance.
-     * 
      * @param pageIndex the zero-based index of the page to be converted
      * @param graphics the Graphics2D on which to draw the page
      * @param scale the scale to draw the page at
@@ -213,7 +247,7 @@ public class PDFRenderer
         drawer.drawPage(graphics, cropBox);
     }
 
-    /// scale rotate translate
+    // scale rotate translate
     private void transform(Graphics2D graphics, PDPage page, float scale)
     {
         graphics.scale(scale, scale);
@@ -251,6 +285,34 @@ public class PDFRenderer
      */
     protected PageDrawer createPageDrawer(PageDrawerParameters parameters) throws IOException
     {
-        return new PageDrawer(parameters);
+        PageDrawer pageDrawer = new PageDrawer(parameters);
+        pageDrawer.setAnnotationFilter(annotationFilter);
+        return pageDrawer;
+    }
+
+    private boolean hasBlendMode(PDPage page)
+    {
+        // check the current resources for blend modes
+        PDResources resources = page.getResources();
+        if (resources == null)
+        {
+            return false;
+        }
+        for (COSName name : resources.getExtGStateNames())
+        {
+            PDExtendedGraphicsState extGState = resources.getExtGState(name);
+            if (extGState == null)
+            {
+                // can happen if key exists but no value 
+                // see PDFBOX-3950-23EGDHXSBBYQLKYOKGZUOVYVNE675PRD.pdf
+                continue;
+            }
+            BlendMode blendMode = extGState.getBlendMode();
+            if (blendMode != BlendMode.NORMAL)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }

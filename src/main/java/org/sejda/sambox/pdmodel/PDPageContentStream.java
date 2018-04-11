@@ -52,6 +52,7 @@ import org.sejda.sambox.pdmodel.graphics.color.PDSeparation;
 import org.sejda.sambox.pdmodel.graphics.form.PDFormXObject;
 import org.sejda.sambox.pdmodel.graphics.image.PDImageXObject;
 import org.sejda.sambox.pdmodel.graphics.image.PDInlineImage;
+import org.sejda.sambox.pdmodel.graphics.pattern.PDTilingPattern;
 import org.sejda.sambox.pdmodel.graphics.shading.PDShading;
 import org.sejda.sambox.pdmodel.graphics.state.PDExtendedGraphicsState;
 import org.sejda.sambox.pdmodel.graphics.state.RenderingMode;
@@ -263,6 +264,26 @@ public final class PDPageContentStream implements Closeable
     }
 
     /**
+     * Create a new appearance stream. Note that this is not actually a "page" content stream.
+     *
+     * @param doc The document the appearance is part of.
+     * @param pattern The pattern to add to.
+     * @param outputStream The output stream to write to.
+     * @throws IOException If there is an error writing to the page contents.
+     */
+    public PDPageContentStream(PDDocument doc, PDTilingPattern pattern, ContentStreamWriter writer)
+            throws IOException
+    {
+        this.document = doc;
+
+        this.writer = writer;
+        this.resources = pattern.getResources();
+
+        formatDecimal.setMaximumFractionDigits(4);
+        formatDecimal.setGroupingUsed(false);
+    }
+
+    /**
      * Begin some text operations.
      *
      * @throws IOException If there is an error writing to the stream or if you attempt to nest beginText calls.
@@ -332,12 +353,60 @@ public final class PDPageContentStream implements Closeable
     }
 
     /**
+     * Shows the given text at the location specified by the current text matrix with the given
+     * interspersed positioning. This allows the user to efficiently position each glyph or sequence
+     * of glyphs.
+     *
+     * @param textWithPositioningArray An array consisting of String and Float types. Each String is
+     * output to the page using the current text matrix. Using the default coordinate system, each
+     * interspersed number adjusts the current text matrix by translating to the left or down for
+     * horizontal and vertical text respectively. The number is expressed in thousands of a text
+     * space unit, and may be negative.
+     *
+     * @throws IOException if an io exception occurs.
+     */
+    public void showTextWithPositioning(Object[] textWithPositioningArray) throws IOException
+    {
+        write("[");
+        for (Object obj : textWithPositioningArray)
+        {
+            if (obj instanceof String)
+            {
+                showTextInternal((String) obj);
+            }
+            else if (obj instanceof Float)
+            {
+                writeOperand((Float) obj);
+            }
+            else
+            {
+                throw new IllegalArgumentException("Argument must consist of array of Float and String types");
+            }
+        }
+        write("] ");
+        writeOperator("TJ");
+    }
+
+    /**
      * Shows the given text at the location specified by the current text matrix.
      *
      * @param text The Unicode text to show.
      * @throws IOException If an io exception occurs.
      */
     public void showText(String text) throws IOException
+    {
+        showTextInternal(text);
+        writer.writeSpace();
+        writeOperator("Tj");
+    }
+
+    /**
+     * Shows the given text at the location specified by the current text matrix.
+     *
+     * @param text The Unicode text to show.
+     * @throws IOException If an io exception occurs.
+     */
+    protected void showTextInternal(String text) throws IOException
     {
         if (!inTextMode)
         {
@@ -363,8 +432,6 @@ public final class PDPageContentStream implements Closeable
         }
 
         COSString.newInstance(font.encode(text)).accept(writer);
-        writer.writeSpace();
-        writeOperator("Tj");
     }
 
     /**
@@ -373,9 +440,9 @@ public final class PDPageContentStream implements Closeable
      * @param leading The leading in unscaled text units.
      * @throws IOException If there is an error writing to the stream.
      */
-    public void setLeading(double leading) throws IOException
+    public void setLeading(float leading) throws IOException
     {
-        writeOperand((float) leading);
+        writeOperand(leading);
         writeOperator("TL");
     }
 
@@ -812,13 +879,13 @@ public final class PDPageContentStream implements Closeable
      * @throws IOException If an IO error occurs while writing to the stream.
      * @throws IllegalArgumentException If the parameter is invalid.
      */
-    public void setStrokingColor(double g) throws IOException
+    public void setStrokingColor(float g) throws IOException
     {
         if (isOutsideOneInterval(g))
         {
             throw new IllegalArgumentException("Parameter must be within 0..1, but is " + g);
         }
-        writeOperand((float) g);
+        writeOperand(g);
         writeOperator("G");
         setStrokingColorSpaceStack(PDDeviceGray.INSTANCE);
     }
@@ -929,7 +996,7 @@ public final class PDPageContentStream implements Closeable
      * @param k The black value.
      * @throws IOException If an IO error occurs while writing to the stream.
      */
-    public void setNonStrokingColor(double c, double m, double y, double k) throws IOException
+    public void setNonStrokingColor(float c, float m, float y, float k) throws IOException
     {
         if (isOutsideOneInterval(c) || isOutsideOneInterval(m) || isOutsideOneInterval(y)
                 || isOutsideOneInterval(k))
@@ -937,10 +1004,10 @@ public final class PDPageContentStream implements Closeable
             throw new IllegalArgumentException("Parameters must be within 0..1, but are "
                     + String.format("(%.2f,%.2f,%.2f,%.2f)", c, m, y, k));
         }
-        writeOperand((float) c);
-        writeOperand((float) m);
-        writeOperand((float) y);
-        writeOperand((float) k);
+        writeOperand(c);
+        writeOperand(m);
+        writeOperand(y);
+        writeOperand(k);
         writeOperator("k");
         setNonStrokingColorSpaceStack(PDDeviceCMYK.INSTANCE);
     }

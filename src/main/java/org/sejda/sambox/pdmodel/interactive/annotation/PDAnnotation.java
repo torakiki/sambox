@@ -159,10 +159,6 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
             // see 12.5.6.10 Text Markup Annotations
             return new PDAnnotationTextMarkup(annotDic);
         }
-        else if (PDAnnotationLink.SUB_TYPE.equals(subtype))
-        {
-            return new PDAnnotationLink(annotDic);
-        }
         else if (COSName.WIDGET.getName().equals(subtype))
         {
             return new PDAnnotationWidget(annotDic);

@@ -19,16 +19,13 @@ package org.sejda.sambox.pdmodel.font;
 import static java.util.Objects.nonNull;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.fontbox.util.BoundingBox;
-import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSBase;
-import org.sejda.sambox.cos.COSDictionary;
-import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.cos.COSNumber;
-import org.sejda.sambox.cos.COSObjectable;
+import org.sejda.sambox.cos.*;
 import org.sejda.sambox.util.Matrix;
 import org.sejda.sambox.util.Vector;
 
@@ -138,7 +135,7 @@ public abstract class PDCIDFont implements COSObjectable, PDFontLike, PDVectorFo
                     COSArray array = (COSArray) next;
                     for (int j = 0; j < array.size(); j++)
                     {
-                        int cid = c.intValue() + j;
+                        int cid = c.intValue() + j / 3;
                         COSNumber w1y = (COSNumber) array.getObject(j);
                         COSNumber v1x = (COSNumber) array.getObject(++j);
                         COSNumber v1y = (COSNumber) array.getObject(++j);
@@ -255,6 +252,12 @@ public abstract class PDCIDFont implements COSObjectable, PDFontLike, PDVectorFo
             width = getDefaultWidth();
         }
         return width;
+    }
+
+    @Override
+    public boolean hasExplicitWidth(int code) throws IOException
+    {
+        return widths.get(codeToCID(code)) != null;
     }
 
     @Override
@@ -375,4 +378,28 @@ public abstract class PDCIDFont implements COSObjectable, PDFontLike, PDVectorFo
      * @throws IOException If the text could not be encoded.
      */
     protected abstract byte[] encode(int unicode) throws IOException;
+
+    final int[] readCIDToGIDMap() throws IOException
+    {
+        int[] cid2gid = null;
+        COSBase map = dict.getDictionaryObject(COSName.CID_TO_GID_MAP);
+        if (map instanceof COSStream)
+        {
+            COSStream stream = (COSStream) map;
+
+            InputStream is = stream.getUnfilteredStream();
+            byte[] mapAsBytes = IOUtils.toByteArray(is);
+            IOUtils.closeQuietly(is);
+            int numberOfInts = mapAsBytes.length / 2;
+            cid2gid = new int[numberOfInts];
+            int offset = 0;
+            for (int index = 0; index < numberOfInts; index++)
+            {
+                int gid = (mapAsBytes[offset] & 0xff) << 8 | mapAsBytes[offset + 1] & 0xff;
+                cid2gid[index] = gid;
+                offset += 2;
+            }
+        }
+        return cid2gid;
+    }
 }

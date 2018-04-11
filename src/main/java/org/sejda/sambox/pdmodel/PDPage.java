@@ -44,7 +44,9 @@ import org.sejda.sambox.pdmodel.common.PDMetadata;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.common.PDStream;
 import org.sejda.sambox.pdmodel.interactive.action.PDPageAdditionalActions;
+import org.sejda.sambox.pdmodel.interactive.annotation.AnnotationFilter;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotation;
+import org.sejda.sambox.pdmodel.interactive.measurement.PDViewportDictionary;
 import org.sejda.sambox.pdmodel.interactive.pagenavigation.PDThreadBead;
 import org.sejda.sambox.pdmodel.interactive.pagenavigation.PDTransition;
 import org.sejda.sambox.util.Matrix;
@@ -272,10 +274,10 @@ public class PDPage implements COSObjectable, PDContentStream
     {
         if (mediaBox == null)
         {
-            COSArray array = (COSArray) PDPageTree.getInheritableAttribute(page, COSName.MEDIA_BOX);
-            if (array != null)
+            COSBase base = PDPageTree.getInheritableAttribute(page, COSName.MEDIA_BOX);
+            if (base instanceof COSArray)
             {
-                mediaBox = new PDRectangle(array);
+                mediaBox = new PDRectangle((COSArray) base);
             }
         }
         if (mediaBox == null)
@@ -318,10 +320,10 @@ public class PDPage implements COSObjectable, PDContentStream
     {
         try
         {
-            COSArray array = (COSArray) PDPageTree.getInheritableAttribute(page, COSName.CROP_BOX);
-            if (array != null)
+            COSBase base = PDPageTree.getInheritableAttribute(page, COSName.CROP_BOX);
+            if (base instanceof COSArray)
             {
-                return clipToMediaBox(new PDRectangle(array));
+                return clipToMediaBox(new PDRectangle((COSArray) base));
             }
         }
         catch (Exception ex)
@@ -365,10 +367,13 @@ public class PDPage implements COSObjectable, PDContentStream
     {
         try
         {
-            COSArray array = page.getDictionaryObject(COSName.BLEED_BOX, COSArray.class);
-            if (nonNull(array) && inMediaBoxBounds(new PDRectangle(array)))
+            COSBase base = page.getDictionaryObject(COSName.BLEED_BOX);
+            if (base instanceof COSArray)
             {
-                return new PDRectangle(array);
+                COSArray array = (COSArray) base;
+                if(inMediaBoxBounds(new PDRectangle(array))) {
+                    return new PDRectangle((COSArray) base);
+                }
             }
         }
         catch (Exception ex)
@@ -411,10 +416,14 @@ public class PDPage implements COSObjectable, PDContentStream
     {
         try
         {
-            COSArray array = page.getDictionaryObject(COSName.TRIM_BOX, COSArray.class);
-            if (nonNull(array) && inMediaBoxBounds(new PDRectangle(array)))
+            COSBase base = page.getDictionaryObject(COSName.TRIM_BOX);
+            if (base instanceof COSArray)
             {
-                return new PDRectangle(array);
+                COSArray array = (COSArray) base;
+                if(inMediaBoxBounds(new PDRectangle(array)))
+                {
+                    return new PDRectangle(array);
+                }
             }
         }
         catch (Exception ex)
@@ -455,10 +464,14 @@ public class PDPage implements COSObjectable, PDContentStream
      */
     public PDRectangle getArtBox()
     {
-        COSArray array = page.getDictionaryObject(COSName.ART_BOX, COSArray.class);
-        if (nonNull(array) && inMediaBoxBounds(new PDRectangle(array)))
+        COSBase base = page.getDictionaryObject(COSName.ART_BOX);
+        if (base instanceof COSArray)
         {
-            return new PDRectangle(array);
+            COSArray array = (COSArray) base;
+            if(inMediaBoxBounds(new PDRectangle(array)))
+            {
+                return new PDRectangle(array);
+            }
         }
         return getCropBox();
     }
@@ -687,11 +700,33 @@ public class PDPage implements COSObjectable, PDContentStream
     }
 
     /**
-     * This will return a list of the Annotations for this page.
-     * 
-     * @return List of the PDAnnotation objects, never null.
+     * This will return a list of the annotations for this page.
+     *
+     * @return List of the PDAnnotation objects, never null. The returned list is backed by the
+     * annotations COSArray, so any adding or deleting in this list will change the document too.
+     *
      */
     public List<PDAnnotation> getAnnotations()
+    {
+        return getAnnotations(new AnnotationFilter()
+        {
+            @Override
+            public boolean accept(PDAnnotation annotation)
+            {
+                return true;
+            }
+        });
+    }
+
+    /**
+     * This will return a list of the annotations for this page.
+     *
+     * @param annotationFilter the annotation filter provided allowing to filter out specific annotations
+     * @return List of the PDAnnotation objects, never null. The returned list is backed by the
+     * annotations COSArray, so any adding or deleting in this list will change the document too.
+     *
+     */
+    public List<PDAnnotation> getAnnotations(AnnotationFilter annotationFilter)
     {
         COSArray annots = page.getDictionaryObject(COSName.ANNOTS, COSArray.class);
         if (annots == null)
@@ -708,7 +743,7 @@ public class PDPage implements COSObjectable, PDContentStream
                         LOG.warn("Ignored annotation expected to be a dictionary but was {}", item);
                         return null;
                     });
-            if (nonNull(annotation))
+            if (nonNull(annotation) && annotationFilter.accept(annotation))
             {
                 actuals.add(annotation);
             }
@@ -776,5 +811,54 @@ public class PDPage implements COSObjectable, PDContentStream
     public ResourceCache getResourceCache()
     {
         return resourceCache;
+    }
+
+    /**
+     * Get the viewports.
+     *
+     * @return a list of viewports or null if there is no /VP entry.
+     */
+    public List<PDViewportDictionary> getViewports()
+    {
+        COSBase base = page.getDictionaryObject(COSName.VP);
+        if (!(base instanceof COSArray))
+        {
+            return null;
+        }
+        COSArray array = (COSArray) base;
+        List<PDViewportDictionary> viewports = new ArrayList<PDViewportDictionary>();
+        for (int i = 0; i < array.size(); ++i)
+        {
+            COSBase base2 = array.getObject(i);
+            if (base2 instanceof COSDictionary)
+            {
+                viewports.add(new PDViewportDictionary((COSDictionary) base2));
+            }
+            else
+            {
+                LOG.warn("Array element {} is skipped, must be a (viewport) dictionary", base2);
+            }
+        }
+        return viewports;
+    }
+
+    /**
+     * Set the viewports.
+     *
+     * @param viewports A list of viewports, or null if the entry is to be deleted.
+     */
+    public void setViewports(List<PDViewportDictionary> viewports)
+    {
+        if (viewports == null)
+        {
+            page.removeItem(COSName.VP);
+            return;
+        }
+        COSArray array = new COSArray();
+        for (PDViewportDictionary viewport : viewports)
+        {
+            array.add(viewport);
+        }
+        page.setItem(COSName.VP, array);
     }
 }

@@ -25,13 +25,10 @@ import java.awt.image.ComponentColorModel;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
 
-import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSBase;
-import org.sejda.sambox.cos.COSDictionary;
-import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.cos.COSObjectable;
+import org.sejda.sambox.cos.*;
 import org.sejda.sambox.pdmodel.MissingResourceException;
 import org.sejda.sambox.pdmodel.PDResources;
+import org.sejda.sambox.pdmodel.ResourceCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +51,7 @@ public abstract class PDColorSpace implements COSObjectable
      */
     public static PDColorSpace create(COSBase colorSpace) throws IOException
     {
-        return create(colorSpace, null);
+        return create(colorSpace, null, false);
     }
 
     /**
@@ -72,6 +69,29 @@ public abstract class PDColorSpace implements COSObjectable
         return create(colorSpace, resources, false);
     }
 
+    public static PDColorSpace create(COSBase colorSpace, PDResources resources, boolean wasDefault) throws IOException {
+        boolean canCache = colorSpace.hasId() && resources != null && resources.getResourceCache() != null;
+        if(canCache) {
+            ResourceCache cache = resources.getResourceCache();
+            PDColorSpace existing = cache.getColorSpace(colorSpace.id().objectIdentifier);
+            if(existing != null) {
+                LOG.debug("Using cached color space for {}", colorSpace.id().objectIdentifier);
+                return existing;
+            }
+        }
+
+        PDColorSpace result = createUncached(colorSpace, resources, wasDefault);
+
+        if(colorSpace.hasId() && resources != null) {
+            ResourceCache cache = resources.getResourceCache();
+            if(cache != null) {
+                cache.put(colorSpace.id().objectIdentifier, result);
+            }
+        }
+
+        return result;
+    }
+
     /**
      * Creates a color space given a name or array. Abbreviated device color names are not supported here, please
      * replace them first. This method is for PDFBox internal use only, others should use {@link create(COSBase,
@@ -84,7 +104,7 @@ public abstract class PDColorSpace implements COSObjectable
      * @throws MissingResourceException if the color space is missing in the resources dictionary
      * @throws IOException if the color space is unknown or cannot be created.
      */
-    public static PDColorSpace create(COSBase colorSpace, PDResources resources, boolean wasDefault)
+    private static PDColorSpace createUncached(COSBase colorSpace, PDResources resources, boolean wasDefault)
             throws IOException
     {
         colorSpace = colorSpace.getCOSObject();
@@ -204,7 +224,7 @@ public abstract class PDColorSpace implements COSObjectable
                     || name == COSName.DEVICEGRAY)
             {
                 // not allowed in an array, but we sometimes encounter these regardless
-                return create(name, resources, wasDefault);
+                return createUncached(name, resources, wasDefault);
             }
             else
             {
@@ -217,7 +237,7 @@ public abstract class PDColorSpace implements COSObjectable
             if (csAsDic.containsKey(COSName.COLORSPACE))
             {
                 LOG.warn("Found invalid color space defined as dictionary {}", csAsDic);
-                return create(csAsDic.getDictionaryObject(COSName.COLORSPACE), resources,
+                return createUncached(csAsDic.getDictionaryObject(COSName.COLORSPACE), resources,
                         wasDefault);
             }
         }

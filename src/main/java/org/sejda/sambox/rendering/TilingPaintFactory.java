@@ -18,6 +18,7 @@ package org.sejda.sambox.rendering;
 
 import java.awt.geom.AffineTransform;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.Map;
 import java.util.WeakHashMap;
 
@@ -35,7 +36,7 @@ import org.sejda.sambox.util.Matrix;
 class TilingPaintFactory
 {
     private final PageDrawer drawer;
-    private final Map<TilingPaintParameter, TilingPaint> weakCache = new WeakHashMap<>();
+    private final Map<TilingPaintParameter, WeakReference<TilingPaint>> weakCache = new WeakHashMap<>();
 
     TilingPaintFactory(PageDrawer drawer)
     {
@@ -45,14 +46,19 @@ class TilingPaintFactory
     TilingPaint create(PDTilingPattern pattern, PDColorSpace colorSpace, PDColor color,
             AffineTransform xform) throws IOException
     {
-        TilingPaint paint;
-        TilingPaintParameter tilingPaintParameter = new TilingPaintParameter(
-                drawer.getInitialMatrix(), pattern.getCOSObject(), colorSpace, color, xform);
-        paint = weakCache.get(tilingPaintParameter);
+        TilingPaint paint = null;
+        TilingPaintParameter tilingPaintParameter
+                = new TilingPaintParameter(drawer.getInitialMatrix(), pattern.getCOSObject(), colorSpace, color, xform);
+        WeakReference<TilingPaint> weakRef = weakCache.get(tilingPaintParameter);
+        if (weakRef != null)
+        {
+            // PDFBOX-4058: additional WeakReference makes gc work better
+            paint = weakRef.get();
+        }
         if (paint == null)
         {
             paint = new TilingPaint(drawer, pattern, colorSpace, color, xform);
-            weakCache.put(tilingPaintParameter, paint);
+            weakCache.put(tilingPaintParameter, new WeakReference(paint));
         }
         return paint;
     }

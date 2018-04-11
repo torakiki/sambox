@@ -101,7 +101,7 @@ abstract class GouraudShadingContext extends TriangleBasedShadingContext
         return new Vertex(p, colorComponentTab);
     }
 
-    void setTriangleList(List<ShadedTriangle> triangleList)
+    final void setTriangleList(List<ShadedTriangle> triangleList)
     {
         this.triangleList = triangleList;
     }

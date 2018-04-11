@@ -27,7 +27,7 @@ import java.util.Map;
 
 import org.apache.fontbox.cff.Type2CharString;
 import org.apache.fontbox.cmap.CMap;
-import org.apache.fontbox.ttf.CmapSubtable;
+import org.apache.fontbox.ttf.CmapLookup;
 import org.apache.fontbox.ttf.GlyphData;
 import org.apache.fontbox.ttf.OTFParser;
 import org.apache.fontbox.ttf.OpenTypeFont;
@@ -58,7 +58,7 @@ public class PDCIDFontType2 extends PDCIDFont
     private final int[] cid2gid;
     private final boolean isEmbedded;
     private final boolean isDamaged;
-    private final CmapSubtable cmap; // may be null
+    private final CmapLookup cmap; // may be null
     private Matrix fontMatrix;
     private BoundingBox fontBBox;
 
@@ -157,7 +157,7 @@ public class PDCIDFontType2 extends PDCIDFont
             }
             ttf = ttfFont;
         }
-        cmap = ttf.getUnicodeCmap(false);
+        cmap = ttf.getUnicodeCmapLookup(false);
         cid2gid = readCIDToGIDMap();
     }
 
@@ -211,8 +211,10 @@ public class PDCIDFontType2 extends PDCIDFont
             PDRectangle bbox = getFontDescriptor().getFontBoundingBox();
             if(nonNull(bbox))
             {
-                if (bbox.getLowerLeftX() != 0 || bbox.getLowerLeftY() != 0
-                        || bbox.getUpperRightX() != 0 || bbox.getUpperRightY() != 0)
+                if ((Float.compare(bbox.getLowerLeftX(), 0) != 0 ||
+                        Float.compare(bbox.getLowerLeftY(), 0) != 0 ||
+                        Float.compare(bbox.getUpperRightX(), 0) != 0 ||
+                        Float.compare(bbox.getUpperRightY(), 0) != 0))
                 {
                     return new BoundingBox(bbox.getLowerLeftX(), bbox.getLowerLeftY(),
                             bbox.getUpperRightX(), bbox.getUpperRightY());
@@ -221,30 +223,6 @@ public class PDCIDFontType2 extends PDCIDFont
 
         }
         return ttf.getFontBBox();
-    }
-
-    private int[] readCIDToGIDMap() throws IOException
-    {
-        int[] cid2gid = null;
-        COSBase map = dict.getDictionaryObject(COSName.CID_TO_GID_MAP);
-        if (map instanceof COSStream)
-        {
-            COSStream stream = (COSStream) map;
-
-            InputStream is = stream.getUnfilteredStream();
-            byte[] mapAsBytes = IOUtils.toByteArray(is);
-            IOUtils.closeQuietly(is);
-            int numberOfInts = mapAsBytes.length / 2;
-            cid2gid = new int[numberOfInts];
-            int offset = 0;
-            for (int index = 0; index < numberOfInts; index++)
-            {
-                int gid = (mapAsBytes[offset] & 0xff) << 8 | mapAsBytes[offset + 1] & 0xff;
-                cid2gid[index] = gid;
-                offset += 2;
-            }
-        }
-        return cid2gid;
     }
 
     @Override

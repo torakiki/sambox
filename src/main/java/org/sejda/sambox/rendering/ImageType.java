@@ -27,7 +27,7 @@ public enum ImageType
     BINARY
     {
         @Override
-        int toBufferedImageType()
+        public int toBufferedImageType()
         {
             return BufferedImage.TYPE_BYTE_BINARY;
         }
@@ -37,7 +37,7 @@ public enum ImageType
     GRAY
     {
         @Override
-        int toBufferedImageType()
+        public int toBufferedImageType()
         {
             return BufferedImage.TYPE_BYTE_GRAY;
         }
@@ -47,7 +47,7 @@ public enum ImageType
     RGB
     {
         @Override
-        int toBufferedImageType()
+        public int toBufferedImageType()
         {
             return BufferedImage.TYPE_INT_RGB;
         }
@@ -57,11 +57,11 @@ public enum ImageType
     ARGB
     {
         @Override
-        int toBufferedImageType()
+        public int toBufferedImageType()
         {
             return BufferedImage.TYPE_INT_ARGB;
         }
     };
 
-    abstract int toBufferedImageType();
+    public abstract int toBufferedImageType();
 }

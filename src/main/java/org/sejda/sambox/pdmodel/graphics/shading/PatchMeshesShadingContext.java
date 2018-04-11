@@ -24,10 +24,7 @@ import java.awt.geom.Point2D;
 import java.awt.image.ColorModel;
 import java.io.EOFException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.MemoryCacheImageInputStream;
@@ -89,9 +86,18 @@ abstract class PatchMeshesShadingContext extends TriangleBasedShadingContext
             Matrix matrix, int controlPoints) throws IOException
     {
         COSDictionary dict = shadingType.getCOSObject();
+        if (!(dict instanceof COSStream))
+        {
+            return Collections.emptyList();
+        }
         int bitsPerFlag = shadingType.getBitsPerFlag();
         PDRange rangeX = shadingType.getDecodeForParameter(0);
         PDRange rangeY = shadingType.getDecodeForParameter(1);
+        if (Float.compare(rangeX.getMin(), rangeX.getMax()) == 0 ||
+                Float.compare(rangeY.getMin(), rangeY.getMax()) == 0)
+        {
+            return Collections.emptyList();
+        }
         PDRange[] colRange = new PDRange[numberOfColorComponents];
         for (int i = 0; i < numberOfColorComponents; ++i)
         {

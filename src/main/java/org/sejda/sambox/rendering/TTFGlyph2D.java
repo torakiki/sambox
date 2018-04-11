@@ -114,6 +114,13 @@ final class TTFGlyph2D implements Glyph2D
      */
     public GeneralPath getPathForGID(int gid, int code) throws IOException
     {
+        if (gid == 0 && !isCIDFont && code == 10 && font.isStandard14())
+        {
+            // PDFBOX-4001 return empty path for line feed on std14
+            // need to catch this early because all "bad" glyphs have gid 0
+            LOG.warn("No glyph for code " + code + " in font " + font.getName());
+            return new GeneralPath();
+        }
         GeneralPath glyphPath = glyphs.get(gid);
         if (glyphPath == null)
         {
@@ -123,8 +130,8 @@ final class TTFGlyph2D implements Glyph2D
                 {
                     int cid = ((PDType0Font) font).codeToCID(code);
                     String cidHex = String.format("%04x", cid);
-                    LOG.warn("No glyph for " + code + " (CID " + cidHex + ") in font "
-                            + font.getName());
+                    LOG.warn("No glyph for code " + code + " (CID " + cidHex + ") in font " +
+                            font.getName());
                 }
                 else
                 {

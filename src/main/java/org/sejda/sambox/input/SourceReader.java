@@ -476,16 +476,34 @@ class SourceReader implements Closeable
     public final String readNumber() throws IOException
     {
         StringBuilder builder = pool.borrow();
+        int lastAppended = -1;
         try
         {
             int c = source.read();
             if (c != -1 && (isDigit(c) || c == '+' || c == '-' || c == '.'))
             {
                 builder.append((char) c);
+                lastAppended = c;
+
+                // Ignore double negative (this is consistent with Adobe Reader)
+                if (c == '-' && source.peek() == c)
+                {
+                    source.read();
+                }
+
                 while ((c = source.read()) != -1
                         && (isDigit(c) || c == '.' || c == 'E' || c == 'e' || c == '+' || c == '-'))
                 {
-                    builder.append((char) c);
+                    if (c == '-' && !(lastAppended == 'e' || lastAppended == 'E'))
+                    {
+                        // PDFBOX-4064: ignore "-" in the middle of a number
+                        // but not if its a negative exponent 1e-23
+                    }
+                    else
+                    {
+                        builder.append((char) c);
+                        lastAppended = c;
+                    }
                 }
             }
             unreadIfValid(c);

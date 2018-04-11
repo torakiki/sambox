@@ -137,7 +137,10 @@ final class FileSystemFontProvider extends FontProvider
             default:
                 throw new RuntimeException("can't happen");
             }
-            parent.cache.addFont(this, font);
+            if(font != null)
+            {
+                parent.cache.addFont(this, font);
+            }
             return font;
         }
 
@@ -290,57 +293,60 @@ final class FileSystemFontProvider extends FontProvider
      */
     private void saveDiskCache()
     {
-        File file = getDiskCacheFile();
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file)))
+        try
         {
-            for (FSFontInfo fontInfo : fontInfoList)
+            File file = getDiskCacheFile();
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file)))
             {
-                writer.write(fontInfo.postScriptName.trim().replace("|", "\\|"));
-                writer.write(FONT_CACHE_SEPARATOR);
-                writer.write(fontInfo.format.toString());
-                writer.write(FONT_CACHE_SEPARATOR);
-                if (fontInfo.cidSystemInfo != null)
+                for (FSFontInfo fontInfo : fontInfoList)
                 {
-                    writer.write(fontInfo.cidSystemInfo.getRegistry() + '-'
-                            + fontInfo.cidSystemInfo.getOrdering() + '-'
-                            + fontInfo.cidSystemInfo.getSupplement());
-                }
-                writer.write(FONT_CACHE_SEPARATOR);
-                if (fontInfo.usWeightClass > -1)
-                {
-                    writer.write(Integer.toHexString(fontInfo.usWeightClass));
-                }
-                writer.write(FONT_CACHE_SEPARATOR);
-                if (fontInfo.sFamilyClass > -1)
-                {
-                    writer.write(Integer.toHexString(fontInfo.sFamilyClass));
-                }
-                writer.write(FONT_CACHE_SEPARATOR);
-                writer.write(Integer.toHexString(fontInfo.ulCodePageRange1));
-                writer.write(FONT_CACHE_SEPARATOR);
-                writer.write(Integer.toHexString(fontInfo.ulCodePageRange2));
-                writer.write(FONT_CACHE_SEPARATOR);
-                if (fontInfo.macStyle > -1)
-                {
-                    writer.write(Integer.toHexString(fontInfo.macStyle));
-                }
-                writer.write(FONT_CACHE_SEPARATOR);
-                if (fontInfo.panose != null)
-                {
-                    byte[] bytes = fontInfo.panose.getBytes();
-                    for (int i = 0; i < 10; i++)
+                    writer.write(fontInfo.postScriptName.trim().replace("|", "\\|"));
+                    writer.write(FONT_CACHE_SEPARATOR);
+                    writer.write(fontInfo.format.toString());
+                    writer.write(FONT_CACHE_SEPARATOR);
+                    if (fontInfo.cidSystemInfo != null)
                     {
-                        String str = Integer.toHexString(bytes[i]);
-                        if (str.length() == 1)
-                        {
-                            writer.write('0');
-                        }
-                        writer.write(str);
+                        writer.write(
+                                fontInfo.cidSystemInfo.getRegistry() + '-' + fontInfo.cidSystemInfo.getOrdering() + '-'
+                                        + fontInfo.cidSystemInfo.getSupplement());
                     }
+                    writer.write(FONT_CACHE_SEPARATOR);
+                    if (fontInfo.usWeightClass > -1)
+                    {
+                        writer.write(Integer.toHexString(fontInfo.usWeightClass));
+                    }
+                    writer.write(FONT_CACHE_SEPARATOR);
+                    if (fontInfo.sFamilyClass > -1)
+                    {
+                        writer.write(Integer.toHexString(fontInfo.sFamilyClass));
+                    }
+                    writer.write(FONT_CACHE_SEPARATOR);
+                    writer.write(Integer.toHexString(fontInfo.ulCodePageRange1));
+                    writer.write(FONT_CACHE_SEPARATOR);
+                    writer.write(Integer.toHexString(fontInfo.ulCodePageRange2));
+                    writer.write(FONT_CACHE_SEPARATOR);
+                    if (fontInfo.macStyle > -1)
+                    {
+                        writer.write(Integer.toHexString(fontInfo.macStyle));
+                    }
+                    writer.write(FONT_CACHE_SEPARATOR);
+                    if (fontInfo.panose != null)
+                    {
+                        byte[] bytes = fontInfo.panose.getBytes();
+                        for (int i = 0; i < 10; i++)
+                        {
+                            String str = Integer.toHexString(bytes[i]);
+                            if (str.length() == 1)
+                            {
+                                writer.write('0');
+                            }
+                            writer.write(str);
+                        }
+                    }
+                    writer.write(FONT_CACHE_SEPARATOR);
+                    writer.write(fontInfo.file.getAbsolutePath());
+                    writer.newLine();
                 }
-                writer.write(FONT_CACHE_SEPARATOR);
-                writer.write(fontInfo.file.getAbsolutePath());
-                writer.newLine();
             }
         }
         catch (IOException | SecurityException e)
@@ -430,10 +436,18 @@ final class FileSystemFontProvider extends FontProvider
                     }
                     fontFile = new File(parts[9]);
 
-                    FSFontInfo info = new FSFontInfo(fontFile, format, postScriptName,
-                            cidSystemInfo, usWeightClass, sFamilyClass, ulCodePageRange1,
-                            ulCodePageRange2, macStyle, panose, this);
-                    results.add(info);
+                    if(fontFile.exists())
+                    {
+
+                        FSFontInfo info = new FSFontInfo(fontFile, format, postScriptName,
+                                cidSystemInfo, usWeightClass, sFamilyClass, ulCodePageRange1,
+                                ulCodePageRange2, macStyle, panose, this);
+                        results.add(info);
+                    }
+                    else
+                    {
+                        LOG.debug("Font file {} not found, skipped", fontFile.getAbsolutePath());
+                    }
                     pending.remove(fontFile.getAbsolutePath());
                 }
             }

@@ -124,6 +124,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName CMAPNAME = newCommonInstance("CMapName");
     public static final COSName CMYK = newCommonInstance("CMYK");
     public static final COSName CO = newCommonInstance("CO");
+    public static final COSName COLOR = new COSName("Color");
     public static final COSName COLOR_BURN = newCommonInstance("ColorBurn");
     public static final COSName COLOR_DODGE = newCommonInstance("ColorDodge");
     public static final COSName COLORANTS = newCommonInstance("Colorants");
@@ -184,6 +185,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName DOC_OPEN = newCommonInstance("DocOpen");
     public static final COSName DOC_TIME_STAMP = newCommonInstance("DocTimeStamp");
     public static final COSName DOCMDP = newCommonInstance("DocMDP");
+    public static final COSName DOCUMENT = new COSName("Document");
     public static final COSName DOMAIN = newCommonInstance("Domain");
     public static final COSName DOS = newCommonInstance("DOS");
     public static final COSName DP = newCommonInstance("DP");
@@ -264,6 +266,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName HIDE_MENUBAR = newCommonInstance("HideMenubar");
     public static final COSName HIDE_TOOLBAR = newCommonInstance("HideToolbar");
     public static final COSName HIDE_WINDOWUI = newCommonInstance("HideWindowUI");
+    public static final COSName HUE = new COSName("Hue");
     // I
     public static final COSName I = newCommonInstance("I");
     public static final COSName IC = newCommonInstance("IC");
@@ -334,6 +337,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName MCID = newCommonInstance("MCID");
     public static final COSName MDP = newCommonInstance("MDP");
     public static final COSName MEDIA_BOX = newCommonInstance("MediaBox");
+    public static final COSName MEASURE = new COSName("Measure");
     public static final COSName METADATA = newCommonInstance("Metadata");
     public static final COSName MISSING_WIDTH = newCommonInstance("MissingWidth");
     public static final COSName MK = newCommonInstance("MK");
@@ -346,6 +350,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName NAME = newCommonInstance("Name");
     public static final COSName NAMES = newCommonInstance("Names");
     public static final COSName NEED_APPEARANCES = newCommonInstance("NeedAppearances");
+    public static final COSName NEW_WINDOW = new COSName("NewWindow");
     public static final COSName NEXT = newCommonInstance("Next");
     public static final COSName NM = newCommonInstance("NM");
     public static final COSName NON_EFONT_NO_WARN = newCommonInstance("NonEFontNoWarn");
@@ -444,6 +449,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     // S
     public static final COSName S = newCommonInstance("S");
     public static final COSName SA = newCommonInstance("SA");
+    public static final COSName SATURATION = new COSName("Saturation");
     public static final COSName SCREEN = newCommonInstance("Screen");
     public static final COSName SE = newCommonInstance("SE");
     public static final COSName SEPARATION = newCommonInstance("Separation");
@@ -527,6 +533,8 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName VIEW_AREA = newCommonInstance("ViewArea");
     public static final COSName VIEW_CLIP = newCommonInstance("ViewClip");
     public static final COSName VIEWER_PREFERENCES = newCommonInstance("ViewerPreferences");
+    public static final COSName VOLUME = new COSName("Volume");
+    public static final COSName VP = new COSName("VP");
     // W
     public static final COSName W = newCommonInstance("W");
     public static final COSName W2 = newCommonInstance("W2");

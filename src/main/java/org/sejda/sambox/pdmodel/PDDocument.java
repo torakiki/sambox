@@ -40,6 +40,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.sejda.io.CountingWritableByteChannel;
+import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
@@ -52,6 +53,7 @@ import org.sejda.sambox.cos.DirectCOSObject;
 import org.sejda.sambox.encryption.EncryptionContext;
 import org.sejda.sambox.encryption.MessageDigests;
 import org.sejda.sambox.encryption.StandardSecurity;
+import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.output.PDDocumentWriter;
 import org.sejda.sambox.output.WriteOption;
 import org.sejda.sambox.pdmodel.common.PDStream;
@@ -635,6 +637,11 @@ public class PDDocument implements Closeable
     public ResourceCache getResourceCache()
     {
         return resourceCache;
+    }
+
+    // bridge to pdfbox style api, used in tests
+    public static PDDocument load(File file) throws IOException {
+        return PDFParser.parse(SeekableSources.seekableSourceFrom(file));
     }
 
 }

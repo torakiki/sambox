@@ -401,7 +401,7 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
     /**
      * Sets the function to be used to encrypt this stream.
      * 
-     * @param encrypted
+     * @param encryptor
      */
     public void setEncryptor(Function<InputStream, InputStream> encryptor)
     {

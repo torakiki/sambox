@@ -131,6 +131,7 @@ public final class PDICCBased extends PDCIEBasedColorSpace
                 }
                 else
                 {
+                    profile = ensureDisplayProfile(profile);
                     awtColorSpace = new ICC_ColorSpace(profile);
                     iccProfile = profile;
                 }
@@ -190,6 +191,33 @@ public final class PDICCBased extends PDCIEBasedColorSpace
         return deviceModel.equals("sRGB");
     }
 
+    // PDFBOX-4114: fix profile that has the wrong display class,
+    // as done by Harald Kuhr in twelvemonkeys JPEGImageReader.ensureDisplayProfile()
+    private static ICC_Profile ensureDisplayProfile(ICC_Profile profile)
+    {
+        if (profile.getProfileClass() != ICC_Profile.CLASS_DISPLAY)
+        {
+            byte[] profileData = profile.getData(); // Need to clone entire profile, due to a OpenJDK bug
+
+            if (profileData[ICC_Profile.icHdrRenderingIntent] == ICC_Profile.icPerceptual)
+            {
+                LOG.warn("ICC profile is Perceptual, ignoring, treating as Display class");
+                intToBigEndian(ICC_Profile.icSigDisplayClass, profileData, ICC_Profile.icHdrDeviceClass);
+                return ICC_Profile.getInstance(profileData);
+            }
+        }
+        return profile;
+    }
+
+    private static void intToBigEndian(int value, byte[] array, int index)
+    {
+        array[index] = (byte) (value >> 24);
+        array[index + 1] = (byte) (value >> 16);
+        array[index + 2] = (byte) (value >> 8);
+        array[index + 3] = (byte) (value);
+    }
+
+
     @Override
     public float[] toRGB(float[] value) throws IOException
     {
@@ -199,10 +227,23 @@ public final class PDICCBased extends PDCIEBasedColorSpace
         }
         if (awtColorSpace != null)
         {
+            // PDFBOX-2142: clamp bad values
             // WARNING: toRGB is very slow when used with LUT-based ICC profiles
-            return awtColorSpace.toRGB(value);
+            return awtColorSpace.toRGB(clampColors(awtColorSpace, value));
         }
         return alternateColorSpace.toRGB(value);
+    }
+
+    private float[] clampColors(ICC_ColorSpace cs, float[] value)
+    {
+        float[] result = new float[value.length];
+        for (int i = 0; i < value.length; ++i)
+        {
+            float minValue = cs.getMinValue(i);
+            float maxValue = cs.getMaxValue(i);
+            result[i] = value[i] < minValue ? minValue : (value[i] > maxValue ? maxValue : value[i]);
+        }
+        return result;
     }
 
     @Override

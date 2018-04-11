@@ -42,7 +42,6 @@ public class PDActionURI extends PDAction
      */
     public PDActionURI()
     {
-        action = new COSDictionary();
         setSubType(SUB_TYPE);
     }
 

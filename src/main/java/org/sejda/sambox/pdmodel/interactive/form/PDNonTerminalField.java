@@ -30,6 +30,8 @@ import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A non terminal field in an interactive form.
@@ -41,6 +43,9 @@ import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
  */
 public class PDNonTerminalField extends PDField
 {
+
+    private static final Logger LOG = LoggerFactory.getLogger(PDNonTerminalField.class);
+
     /**
      * Constructor.
      * 
@@ -89,6 +94,11 @@ public class PDNonTerminalField extends PDField
             {
                 if (nonNull(kid) && kid.getCOSObject() instanceof COSDictionary)
                 {
+                    if (kid.getCOSObject() == this.getCOSObject())
+                    {
+                        LOG.warn("Child field is same object as parent");
+                        continue;
+                    }
                     children.add(PDField.fromDictionary(getAcroForm(),
                             (COSDictionary) kid.getCOSObject(), this));
                 }

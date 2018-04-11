@@ -18,6 +18,7 @@ package org.sejda.sambox.pdmodel.graphics.pattern;
 
 import java.io.IOException;
 
+import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.graphics.shading.PDShading;
@@ -64,12 +65,11 @@ public class PDShadingPattern extends PDAbstractPattern
     {
         if (extendedGraphicsState == null)
         {
-            COSDictionary dictionary = (COSDictionary)getCOSObject()
-                    .getDictionaryObject(COSName.EXT_G_STATE);
+            COSBase base = getCOSObject().getDictionaryObject(COSName.EXT_G_STATE);
 
-            if( dictionary != null )
+            if(base instanceof COSDictionary)
             {
-                extendedGraphicsState = new PDExtendedGraphicsState( dictionary );
+                extendedGraphicsState = new PDExtendedGraphicsState((COSDictionary) base);
             }
         }
         return extendedGraphicsState;
@@ -94,10 +94,10 @@ public class PDShadingPattern extends PDAbstractPattern
     {
         if (shading == null) 
         {
-            COSDictionary dictionary = (COSDictionary) getCOSObject().getDictionaryObject(COSName.SHADING);
-            if( dictionary != null )
+            COSBase base = getCOSObject().getDictionaryObject(COSName.SHADING);
+            if(base instanceof COSDictionary)
             {
-                shading = PDShading.create(dictionary);
+                shading = PDShading.create((COSDictionary) base);
             }
         }
         return shading;

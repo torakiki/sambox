@@ -180,7 +180,10 @@ public abstract class PDFStreamEngine
             throw new IllegalStateException("No current page, call "
                     + "#processChildStream(PDContentStream, PDPage) instead");
         }
-        processStream(form);
+        if (!form.getCOSObject().isEmpty())
+        {
+            processStream(form);
+        }
     }
 
     /**

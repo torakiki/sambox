@@ -40,8 +40,7 @@ import org.slf4j.LoggerFactory;
  * monochrome (1 bit per pixel) image data (or an approximation of that data).
  *
  * Requires a JBIG2 plugin for Java Image I/O to be installed. A known working
- * plug-in is <a href="http://code.google.com/p/jbig2-imageio/">jbig2-imageio</a>
- * which is available under the GPL v3 license.
+ * plug-in is the Apache PDFBox JBIG2 plugin.
  *
  * @author Timo Boehme
  */
@@ -49,11 +48,29 @@ final class JBIG2Filter extends Filter
 {
     private static final Logger LOG = LoggerFactory.getLogger(JBIG2Filter.class);
 
+    private static boolean levigoLogged = false;
+
+    private static synchronized void logLevigoDonated()
+    {
+        if (!levigoLogged)
+        {
+            LOG.info("The Levigo JBIG2 plugin has been donated to the Apache Foundation");
+            LOG.info("and an improved version is available for download at "
+                    + "https://pdfbox.apache.org/download.cgi");
+            levigoLogged = true;
+        }
+    }
+
     @Override
-    public DecodeResult decode(InputStream encoded, OutputStream decoded,
-                                         COSDictionary parameters, int index) throws IOException
+    public DecodeResult decode(InputStream encoded, OutputStream decoded, COSDictionary
+            parameters, int index) throws IOException
     {
         ImageReader reader = findImageReader("JBIG2", "jbig2-imageio is not installed");
+        if (reader.getClass().getName().contains("levigo"))
+        {
+            logLevigoDonated();
+        }
+
         DecodeResult result = new DecodeResult(new COSDictionary());
         result.getParameters().addAll(parameters);
 
@@ -125,12 +142,6 @@ final class JBIG2Filter extends Filter
                 iis.close();
             }
             reader.dispose();
-        }
-
-        // repair missing color space
-        if (!parameters.containsKey(COSName.COLORSPACE))
-        {
-            result.getParameters().setName(COSName.COLORSPACE, COSName.DEVICEGRAY.getName());
         }
 
         return new DecodeResult(parameters);

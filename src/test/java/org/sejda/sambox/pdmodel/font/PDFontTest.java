@@ -19,16 +19,13 @@
 
 package org.sejda.sambox.pdmodel.font;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
-
 import org.apache.fontbox.ttf.TTFParser;
 import org.apache.fontbox.ttf.TrueTypeFont;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSName;
@@ -45,9 +42,18 @@ import junit.framework.TestCase;
 /**
  * 
  * @author adam
+ * @author Tilman Hausherr
  */
 public class PDFontTest extends TestCase
 {
+
+    private static final File OUT_DIR = new File("target/test-output");
+
+    @Before
+    public void setUp() throws Exception
+    {
+        OUT_DIR.mkdirs();
+    }
 
     /**
      * Test of the error reported in PDFBox-988
@@ -73,12 +79,7 @@ public class PDFontTest extends TestCase
     @Test
     public void testPDFBox3747() throws IOException
     {
-        File file = new File("c:/windows/fonts", "calibri.ttf");
-        if (!file.exists())
-        {
-            System.out.println("testPDFBox3747 skipped");
-            return;
-        }
+        File file = new File("target/fonts", "PDFBOX-3747-calibri.ttf");
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (PDDocument doc = new PDDocument())
         {
@@ -126,6 +127,56 @@ public class PDFontTest extends TestCase
         TrueTypeFont ttf2 = new TTFParser().parse(new FileInputStream(fontFile));
         testPDFBox3826checkFonts(testPDFBox3826createDoc(ttf2), fontFile);
         ttf2.close();
+    }
+
+    /**
+     * PDFBOX-4115: Test ability to create PDF with german umlaut glyphs with a type 1 font.
+     * Test for everything that went wrong before this was fixed.
+     *
+     * @throws IOException
+     */
+    @Test
+    public void testPDFBOX4115() throws IOException
+    {
+        File fontFile = new File("target/fonts", "n019003l.pfb");
+        File outputFile = new File(OUT_DIR, "FontType1.pdf");
+        String text = "äöüÄÖÜ";
+
+        PDDocument doc = new PDDocument();
+
+        PDPage page = new PDPage();
+        PDPageContentStream contentStream = new PDPageContentStream(doc, page);
+
+        PDType1Font font = new PDType1Font(doc, new FileInputStream(fontFile), WinAnsiEncoding.INSTANCE);
+
+        contentStream.beginText();
+        contentStream.setFont(font, 10);
+        contentStream.newLineAtOffset(10, 700);
+        contentStream.showText(text);
+        contentStream.endText();
+        contentStream.close();
+
+        doc.addPage(page);
+
+        doc.writeTo(outputFile);
+        doc.close();
+
+        doc = PDFParser.parse(SeekableSources.seekableSourceFrom(outputFile));
+
+        font = (PDType1Font) doc.getPage(0).getResources().getFont(COSName.getPDFName("F1"));
+        Assert.assertEquals(font.getEncoding(), WinAnsiEncoding.INSTANCE);
+
+        for (char c : text.toCharArray())
+        {
+            String name = font.getEncoding().getName(c);
+            Assert.assertEquals("dieresis", name.substring(1));
+            Assert.assertFalse(font.getPath(name).getBounds2D().isEmpty());
+        }
+
+        PDFTextStripper stripper = new PDFTextStripper();
+        Assert.assertEquals(text, stripper.getText(doc).trim());
+
+        doc.close();
     }
 
     private void testPDFBox3826checkFonts(byte[] byteArray, File fontFile) throws IOException

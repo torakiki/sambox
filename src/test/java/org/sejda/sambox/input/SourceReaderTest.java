@@ -639,4 +639,18 @@ public class SourceReaderTest
         victim.unreadUntilSpaces();
         assertEquals(11, victim.position());
     }
+
+    @Test
+    public void readNumberWithDoubleNegative() throws IOException
+    {
+        victim = new SourceReader(inMemorySeekableSourceFrom("--5".getBytes()));
+        assertEquals("-5", victim.readNumber());
+    }
+
+    @Test
+    public void readNumberWithNegativeSignInTheMiddle() throws IOException
+    {
+        victim = new SourceReader(inMemorySeekableSourceFrom("0.00-50".getBytes()));
+        assertEquals("0.0050", victim.readNumber());
+    }
 }

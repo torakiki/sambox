@@ -111,7 +111,7 @@ public class PDAnnotationLine extends PDAnnotationMarkup
      */
     public PDAnnotationLine()
     {
-        getCOSObject().setItem(COSName.SUBTYPE, COSName.getPDFName(SUB_TYPE));
+        getCOSObject().setName(COSName.SUBTYPE, SUB_TYPE);
         // Dictionary value L is mandatory, fill in with arbitary value
         setLine(new float[] { 0, 0, 0, 0 });
     }
@@ -306,7 +306,7 @@ public class PDAnnotationLine extends PDAnnotationMarkup
      */
     public float getLeaderLineLength()
     {
-        return this.getCOSObject().getFloat(COSName.LL);
+        return this.getCOSObject().getFloat(COSName.LL, 0);
     }
 
     /**
@@ -326,7 +326,7 @@ public class PDAnnotationLine extends PDAnnotationMarkup
      */
     public float getLeaderLineExtensionLength()
     {
-        return this.getCOSObject().getFloat(COSName.LLE);
+        return this.getCOSObject().getFloat(COSName.LLE, 0);
     }
 
     /**
@@ -346,7 +346,7 @@ public class PDAnnotationLine extends PDAnnotationMarkup
      */
     public float getLeaderLineOffsetLength()
     {
-        return this.getCOSObject().getFloat(COSName.LLO);
+        return this.getCOSObject().getFloat(COSName.LLO, 0);
     }
 
     /**
@@ -366,7 +366,7 @@ public class PDAnnotationLine extends PDAnnotationMarkup
      */
     public String getCaptionPositioning()
     {
-        return this.getCOSObject().getString(COSName.CP);
+        return this.getCOSObject().getNameAsString(COSName.CP);
     }
 
     /**
@@ -376,7 +376,7 @@ public class PDAnnotationLine extends PDAnnotationMarkup
      */
     public void setCaptionPositioning(String captionPositioning)
     {
-        this.getCOSObject().setString(COSName.CP, captionPositioning);
+        this.getCOSObject().setName(COSName.CP, captionPositioning);
     }
 
     /**

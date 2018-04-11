@@ -22,6 +22,8 @@ import static org.junit.Assert.assertNull;
 import org.junit.Test;
 import org.sejda.sambox.pdmodel.PDPage;
 
+import java.util.List;
+
 /**
  * @author Andrea Vacondio
  *
@@ -83,5 +85,15 @@ public class COSArrayTest
         PDPage page = new PDPage();
         victim.set(1, page);
         assertEquals(page.getCOSObject(), victim.get(1));
+    }
+
+    @Test
+    public void toList()
+    {
+        COSArray victim = new COSArray();
+        victim.add(COSName.ANNOT);
+        List<? extends COSBase> list = victim.toList();
+        assertEquals(list.size(), 1);
+        assertEquals(list.get(0), COSName.ANNOT);
     }
 }

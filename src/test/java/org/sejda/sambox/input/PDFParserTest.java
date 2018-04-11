@@ -21,6 +21,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.junit.Test;
@@ -29,8 +30,11 @@ import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.PDDocumentInformation;
+import org.sejda.sambox.rendering.PDFRenderer;
 import org.sejda.sambox.util.DateConverter;
 import org.sejda.sambox.util.SpecVersionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Andrea Vacondio
@@ -38,6 +42,10 @@ import org.sejda.sambox.util.SpecVersionUtils;
  */
 public class PDFParserTest
 {
+
+    private static final Logger LOG = LoggerFactory.getLogger(PDFParserTest.class);
+    private static final File TARGETPDFDIR = new File("target/pdfs");
+
     @Test
     public void positive() throws IOException
     {
@@ -290,6 +298,96 @@ public class PDFParserTest
         }
     }
 
+    /**
+     * PDFBOX-3964: test parsing of broken file.
+     *
+     * @throws IOException
+     */
+    @Test
+    public void testPDFBox3964() throws IOException
+    {
+        PDDocument doc = PDDocument.load(new File(TARGETPDFDIR, "PDFBOX-3964-c687766d68ac766be3f02aaec5e0d713_2.pdf"));
+        assertEquals(10, doc.getNumberOfPages());
+        doc.close();
+    }
+
+    /**
+     * PDFBOX-3703: ArrayIndexOutOfBoundsException in PDDeviceRGB.toRGB()
+     */
+    @Test
+    public void testPDFBox3703() throws IOException
+    {
+        try(PDDocument doc = PDDocument.load(new File(TARGETPDFDIR, "PDFBOX-3703-966635-p12.pdf")))
+        {
+            doc.writeTo(new DevNullWritableByteChannel());
+            doc.close();
+        }
+    }
+
+    /**
+     * PDFBOX-3951: test parsing of truncated file.
+     *
+     * @throws IOException
+     */
+    @Test
+    public void testPDFBox3951() throws IOException
+    {
+        PDDocument doc = PDDocument.load(new File(TARGETPDFDIR, "PDFBOX-3951-FIHUZWDDL2VGPOE34N6YHWSIGSH5LVGZ.pdf"));
+        assertEquals(143, doc.getNumberOfPages());
+        doc.close();
+    }
+
+    /**
+     * PDFBOX-3950: test parsing and rendering of truncated file with missing pages.
+     *
+     * @throws IOException
+     */
+    @Test
+    public void testPDFBox3950() throws IOException
+    {
+        PDDocument doc = PDDocument.load(new File(TARGETPDFDIR, "PDFBOX-3950-23EGDHXSBBYQLKYOKGZUOVYVNE675PRD.pdf"));
+        assertEquals(8, doc.getNumberOfPages());
+        PDFRenderer renderer = new PDFRenderer(doc);
+        for (int i = 0; i < doc.getNumberOfPages(); ++i)
+        {
+            try
+            {
+                renderer.renderImage(i);
+            }
+            catch (IOException ex)
+            {
+                if (i == 3 && ex.getMessage().equals("Missing descendant font array"))
+                {
+                    continue;
+                }
+                throw ex;
+            }
+        }
+        doc.close();
+    }
+
+    /**
+     * PDFBOX-3949: test parsing of file with incomplete object stream.
+     *
+     * @throws IOException
+     */
+    @Test
+    public void testPDFBox3949() throws IOException
+    {
+        PDDocument.load(new File(TARGETPDFDIR, "PDFBOX-3949-MKFYUGZWS3OPXLLVU2Z4LWCTVA5WNOGF.pdf")).close();
+    }
+
+    /**
+     * PDFBOX-3948: test parsing of file with object stream containing some unexpected newlines.
+     *
+     * @throws IOException
+     */
+    @Test
+    public void testPDFBox3948() throws IOException
+    {
+        PDDocument.load(new File(TARGETPDFDIR, "PDFBOX-3948-EUWO6SQS5TM4VGOMRD3FLXZHU35V2CP2.pdf")).close();
+    }
+
     @Test
     public void loopInIndirectObject() throws IOException
     {
@@ -297,6 +395,7 @@ public class PDFParserTest
                 getClass().getResourceAsStream("/sambox/self_indirect_ref.pdf"))))
         {
             doc.writeTo(new DevNullWritableByteChannel());
+            doc.close();
         }
     }
 }

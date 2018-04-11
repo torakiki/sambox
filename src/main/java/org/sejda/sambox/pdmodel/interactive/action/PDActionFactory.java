@@ -99,6 +99,10 @@ public final class PDActionFactory
             {
                 return new PDActionThread(action);
             }
+            else if (PDActionEmbeddedGoTo.SUB_TYPE.equals(type))
+            {
+                return new PDActionEmbeddedGoTo(action);
+            }
         }
         return null;
     }

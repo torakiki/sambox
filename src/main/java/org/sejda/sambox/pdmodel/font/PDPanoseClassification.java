@@ -90,7 +90,7 @@ public class PDPanoseClassification
     @Override
     public String toString()
     {
-        return "{ FamilyType = " + getFamilyKind() + ", " + "SerifStyle = " + getSerifStyle() + ", "
+        return "{ FamilyKind = " + getFamilyKind() + ", " + "SerifStyle = " + getSerifStyle() + ", "
                 + "Weight = " + getWeight() + ", " + "Proportion = " + getProportion() + ", "
                 + "Contrast = " + getContrast() + ", " + "StrokeVariation = " + getStrokeVariation()
                 + ", " + "ArmStyle = " + getArmStyle() + ", " + "Letterform = " + getLetterform()

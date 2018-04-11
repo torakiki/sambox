@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.pdmodel.interactive.action;
 
+import org.sejda.sambox.cos.COSBoolean;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.common.filespecification.FileSpecifications;
@@ -204,26 +205,47 @@ public class PDActionLaunch extends PDAction
     }
 
     /**
-     * This will specify whether to open the destination document in a new window.
-     * If this flag is false, the destination document will replace the current
-     * document in the same window. If this entry is absent, the viewer application
-     * should behave in accordance with the current user preference. This entry is
-     * ignored if the file designated by the F entry is not a PDF document.
+     * This will specify whether to open the destination document in a new window, in the same
+     * window, or behave in accordance with the current user preference.
      *
-     * @return A flag specifying whether to open the destination document in a new window.
+     * @return A flag specifying how to open the destination document.
      */
-    public boolean shouldOpenInNewWindow()
+    public OpenMode getOpenInNewWindow()
     {
-        return action.getBoolean( "NewWindow", true );
+        if (getCOSObject().getDictionaryObject(COSName.NEW_WINDOW) instanceof COSBoolean)
+        {
+            COSBoolean b = (COSBoolean) getCOSObject().getDictionaryObject(COSName.NEW_WINDOW);
+            return b.getValue() ? OpenMode.NEW_WINDOW : OpenMode.SAME_WINDOW;
+        }
+        return OpenMode.USER_PREFERENCE;
     }
 
     /**
-     * This will specify the destination document to open in a new window.
+     * This will specify whether to open the destination document in a new window.
      *
      * @param value The flag value.
      */
-    public void setOpenInNewWindow( boolean value )
+    public void setOpenInNewWindow(OpenMode value)
     {
-        action.setBoolean( "NewWindow", value );
+        if (null == value)
+        {
+            getCOSObject().removeItem(COSName.NEW_WINDOW);
+            return;
+        }
+        switch (value)
+        {
+        case USER_PREFERENCE:
+            getCOSObject().removeItem(COSName.NEW_WINDOW);
+            break;
+        case SAME_WINDOW:
+            getCOSObject().setBoolean(COSName.NEW_WINDOW, false);
+            break;
+        case NEW_WINDOW:
+            getCOSObject().setBoolean(COSName.NEW_WINDOW, true);
+            break;
+        default:
+            // shouldn't happen unless the enum type is changed
+            break;
+        }
     }
 }

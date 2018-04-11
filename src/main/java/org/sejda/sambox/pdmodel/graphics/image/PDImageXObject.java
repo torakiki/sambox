@@ -18,16 +18,16 @@ package org.sejda.sambox.pdmodel.graphics.image;
 
 import static org.sejda.util.RequireUtils.requireNotNullArg;
 
-import java.awt.Graphics2D;
-import java.awt.Paint;
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.ref.SoftReference;
 import java.nio.ByteBuffer;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 
@@ -36,6 +36,7 @@ import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSStream;
+import org.sejda.sambox.filter.DecodeResult;
 import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.common.PDMetadata;
 import org.sejda.sambox.pdmodel.common.PDStream;
@@ -53,7 +54,7 @@ import org.sejda.sambox.util.filetypedetector.FileTypeDetector;
  */
 public final class PDImageXObject extends PDXObject implements PDImage
 {
-    private BufferedImage cachedImage;
+    private SoftReference<BufferedImage> cachedImage;
     private PDColorSpace colorSpace;
     private PDResources resources; // current resource dictionary (has color spaces)
 
@@ -74,7 +75,6 @@ public final class PDImageXObject extends PDXObject implements PDImage
     /**
      * Creates an Image XObject in the given document.
      * 
-     * @param document the current document
      * @throws java.io.IOException if there is an error creating the XObject.
      */
     public PDImageXObject() throws IOException
@@ -129,9 +129,14 @@ public final class PDImageXObject extends PDXObject implements PDImage
     public PDImageXObject(PDStream stream, PDResources resources) throws IOException
     {
         super(stream, COSName.IMAGE);
-        stream.getCOSObject().addAll(stream.getCOSObject().getDecodeResult().getParameters());
         this.resources = resources;
-        this.colorSpace = stream.getCOSObject().getDecodeResult().getJPXColorSpace();
+        List<COSName> filters = stream.getFilters();
+        if (filters != null && !filters.isEmpty() && COSName.JPX_DECODE.equals(filters.get(filters.size() - 1)))
+        {
+            DecodeResult decodeResult = stream.getCOSObject().getDecodeResult();
+            stream.getCOSObject().addAll(decodeResult.getParameters());
+            this.colorSpace = decodeResult.getJPXColorSpace();
+        }
     }
 
     public static PDImageXObject createFromFile(String imagePath) throws IOException
@@ -212,7 +217,11 @@ public final class PDImageXObject extends PDXObject implements PDImage
     {
         if (cachedImage != null)
         {
-            return cachedImage;
+            BufferedImage cached = cachedImage.get();
+            if(cached != null)
+            {
+                return cached;
+            }
         }
 
         // get image as RGB
@@ -234,7 +243,7 @@ public final class PDImageXObject extends PDXObject implements PDImage
             }
         }
 
-        cachedImage = image;
+        cachedImage = new SoftReference<>(image);
         return image;
     }
 

@@ -16,7 +16,12 @@
  */
 package org.sejda.sambox.pdmodel.common.filespecification;
 
+import org.sejda.sambox.cos.COSBase;
+import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSObjectable;
+import org.sejda.sambox.cos.COSString;
+
+import java.io.IOException;
 
 /**
  * This represents a file specification.
@@ -25,6 +30,38 @@ import org.sejda.sambox.cos.COSObjectable;
  */
 public interface PDFileSpecification extends COSObjectable
 {
+
+    /**
+     * A file specfication can either be a COSString or a COSDictionary.  This
+     * will create the file specification either way.
+     *
+     * @param base The cos object that describes the fs.
+     *
+     * @return The file specification for the COSBase object.
+     *
+     * @throws IOException If there is an error creating the file spec.
+     */
+    static PDFileSpecification createFS( COSBase base ) throws IOException
+    {
+        PDFileSpecification retval = null;
+        if( base == null )
+        {
+            //then simply return null
+        }
+        else if( base instanceof COSString )
+        {
+            retval = new PDSimpleFileSpecification( (COSString)base );
+        }
+        else if( base instanceof COSDictionary)
+        {
+            retval = new PDComplexFileSpecification( (COSDictionary)base );
+        }
+        else
+        {
+            throw new IOException( "Error: Unknown file specification " + base );
+        }
+        return retval;
+    }
 
     /**
      * @return The file name.

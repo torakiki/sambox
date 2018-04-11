@@ -25,9 +25,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
+import javax.imageio.stream.MemoryCacheImageInputStream;
 
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
@@ -86,7 +86,9 @@ public final class JPXFilter extends Filter
         ImageInputStream iis = null;
         try
         {
-            iis = ImageIO.createImageInputStream(input);
+            // PDFBOX-4121: ImageIO.createImageInputStream() is much slower
+            iis = new MemoryCacheImageInputStream(input);
+
             reader.setInput(iis, true, true);
 
             BufferedImage image;
@@ -116,8 +118,8 @@ public final class JPXFilter extends Filter
             }
 
             // override dimensions, see PDFBOX-1735
-            parameters.setInt(COSName.WIDTH, image.getWidth());
-            parameters.setInt(COSName.HEIGHT, image.getHeight());
+            parameters.setInt(COSName.WIDTH, reader.getWidth(0));
+            parameters.setInt(COSName.HEIGHT, reader.getHeight(0));
 
             // extract embedded color space
             if (!parameters.containsKey(COSName.COLORSPACE))

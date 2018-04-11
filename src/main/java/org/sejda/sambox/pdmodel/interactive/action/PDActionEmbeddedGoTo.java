@@ -16,30 +16,35 @@
  */
 package org.sejda.sambox.pdmodel.interactive.action;
 
+import java.io.IOException;
+
+import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSBoolean;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.pdmodel.common.filespecification.FileSpecifications;
 import org.sejda.sambox.pdmodel.common.filespecification.PDFileSpecification;
+import org.sejda.sambox.pdmodel.interactive.documentnavigation.destination.PDDestination;
+import org.sejda.sambox.pdmodel.interactive.documentnavigation.destination.PDPageDestination;
 
 /**
- * This represents a remote go-to action that can be executed in a PDF document.
+ * This represents a embedded go-to action that can be executed in a PDF document.
  *
  * @author Ben Litchfield
  * @author Panagiotis Toumasis
+ * @author Tilman Hausherr
  */
-public class PDActionRemoteGoTo extends PDAction
+public class PDActionEmbeddedGoTo extends PDAction
 {
     /**
      * This type of action this object represents.
      */
-    public static final String SUB_TYPE = "GoToR";
+    public static final String SUB_TYPE = "GoToE";
 
     /**
      * Default constructor.
      */
-    public PDActionRemoteGoTo()
+    public PDActionEmbeddedGoTo()
     {
         setSubType(SUB_TYPE);
     }
@@ -49,46 +54,59 @@ public class PDActionRemoteGoTo extends PDAction
      *
      * @param a The action dictionary.
      */
-    public PDActionRemoteGoTo(COSDictionary a)
+    public PDActionEmbeddedGoTo(COSDictionary a)
     {
         super(a);
     }
 
     /**
-     * This will get the type of action that the actions dictionary describes. It must be GoToR for a remote go-to
-     * action.
+     * This will get the destination to jump to.
      *
-     * @return The S entry of the specific remote go-to action dictionary.
-     * @deprecated use {@link #getSubType() }.
+     * @return The D entry of the specific go-to action dictionary.
+     *
+     * @throws IOException If there is an error creating the destination.
      */
-    @Deprecated
-    public String getS()
+    public PDDestination getDestination() throws IOException
     {
-        return action.getNameAsString(COSName.S);
+        return PDDestination.create(getCOSObject().getDictionaryObject(COSName.D));
     }
 
     /**
-     * This will set the type of action that the actions dictionary describes. It must be GoToR for a remote go-to
-     * action.
+     * This will set the destination to jump to.
      *
-     * @param s The remote go-to action.
-     * @deprecated use {@link #getSubType() }.
+     * @param d The destination.
+     *
+     * @throws IllegalArgumentException if the destination is not a page dictionary object.
      */
-    @Deprecated
-    public void setS(String s)
+    public void setDestination(PDDestination d)
     {
-        action.setName(COSName.S, s);
+        if (d instanceof PDPageDestination)
+        {
+            PDPageDestination pageDest = (PDPageDestination) d;
+            COSArray destArray = pageDest.getCOSObject();
+            if (destArray.size() >= 1)
+            {
+                COSBase page = destArray.getObject(0);
+                if (!(page instanceof COSDictionary))
+                {
+                    throw new IllegalArgumentException("Destination of a GoToE action must be "
+                            + "a page dictionary object");
+                }
+            }
+        }
+        getCOSObject().setItem(COSName.D, d);
     }
 
     /**
      * This will get the file in which the destination is located.
      *
-     * @return The F entry of the specific remote go-to action dictionary.
+     * @return The F entry of the specific embedded go-to action dictionary.
      *
+     * @throws IOException If there is an error creating the file spec.
      */
-    public PDFileSpecification getFile() 
+    public PDFileSpecification getFile() throws IOException
     {
-        return FileSpecifications.fileSpecificationFor(action.getDictionaryObject(COSName.F));
+        return PDFileSpecification.createFS(getCOSObject().getDictionaryObject(COSName.F));
     }
 
     /**
@@ -98,35 +116,7 @@ public class PDActionRemoteGoTo extends PDAction
      */
     public void setFile(PDFileSpecification fs)
     {
-        action.setItem(COSName.F, fs);
-    }
-
-    /**
-     * This will get the destination to jump to. If the value is an array defining an explicit destination, its first
-     * element must be a page number within the remote document rather than an indirect reference to a page object in
-     * the current document. The first page is numbered 0.
-     *
-     * @return The D entry of the specific remote go-to action dictionary.
-     */
-
-    // Array or String.
-    public COSBase getD()
-    {
-        return action.getDictionaryObject(COSName.D);
-    }
-
-    /**
-     * This will set the destination to jump to. If the value is an array defining an explicit destination, its first
-     * element must be a page number within the remote document rather than an indirect reference to a page object in
-     * the current document. The first page is numbered 0.
-     *
-     * @param d The destination.
-     */
-
-    // In case the value is an array.
-    public void setD(COSBase d)
-    {
-        action.setItem(COSName.D, d);
+        getCOSObject().setItem(COSName.F, fs);
     }
 
     /**
@@ -172,5 +162,30 @@ public class PDActionRemoteGoTo extends PDAction
             // shouldn't happen unless the enum type is changed
             break;
         }
+    }
+
+    /**
+     * Get the target directory.
+     *
+     * @return the target directory or null if there is none.
+     */
+    public PDTargetDirectory getTargetDirectory()
+    {
+        COSBase base = getCOSObject().getDictionaryObject(COSName.T);
+        if (base instanceof COSDictionary)
+        {
+            return new PDTargetDirectory((COSDictionary) base);
+        }
+        return null;
+    }
+
+    /**
+     * Sets the target directory.
+     *
+     * @param targetDirectory the target directory.
+     */
+    public void setTargetDirectory(PDTargetDirectory targetDirectory)
+    {
+        getCOSObject().setItem(COSName.T, targetDirectory);
     }
 }

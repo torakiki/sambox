@@ -43,7 +43,9 @@ import java.awt.image.DataBufferByte;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.sejda.sambox.contentstream.PDFGraphicsStreamEngine;
@@ -76,10 +78,7 @@ import org.sejda.sambox.pdmodel.graphics.shading.PDShading;
 import org.sejda.sambox.pdmodel.graphics.state.PDGraphicsState;
 import org.sejda.sambox.pdmodel.graphics.state.PDSoftMask;
 import org.sejda.sambox.pdmodel.graphics.state.RenderingMode;
-import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotation;
-import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationLink;
-import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationMarkup;
-import org.sejda.sambox.pdmodel.interactive.annotation.PDBorderStyleDictionary;
+import org.sejda.sambox.pdmodel.interactive.annotation.*;
 import org.sejda.sambox.util.Matrix;
 import org.sejda.sambox.util.Vector;
 import org.slf4j.Logger;
@@ -89,9 +88,11 @@ import org.slf4j.LoggerFactory;
  * Paints a page in a PDF document to a Graphics context. May be subclassed to provide custom rendering.
  * 
  * <p>
- * If you want to do custom graphics processing rather than Graphics2D rendering, then you should subclass
- * PDFGraphicsStreamEngine instead. Subclassing PageDrawer is only suitable for cases where the goal is to render onto a
- * Graphics2D surface.
+ If you want to do custom graphics processing rather than Graphics2D rendering, then you should
+ * subclass {@link PDFGraphicsStreamEngine} instead. Subclassing PageDrawer is only suitable for
+ * cases where the goal is to render onto a {@link Graphics2D} surface. In that case you'll also
+ * have to subclass {@link PDFRenderer} and modify
+ * {@link PDFRenderer#createPageDrawer(PageDrawerParameters)}.
  * 
  * @author Ben Litchfield
  */
@@ -122,6 +123,9 @@ public class PageDrawer extends PDFGraphicsStreamEngine
     // last clipping path
     private Area lastClip;
 
+    // shapes of glyphs being drawn to be used for clipping
+    private List<Shape> textClippings;
+
     // buffered clipping area for text being drawn
     private Area textClippingArea;
 
@@ -129,6 +133,18 @@ public class PageDrawer extends PDFGraphicsStreamEngine
     private final Map<PDFont, Glyph2D> fontGlyph2D = new HashMap<PDFont, Glyph2D>();
 
     private final TilingPaintFactory tilingPaintFactory = new TilingPaintFactory(this);
+
+    /**
+     * Default annotations filter, returns all annotations
+     */
+    private AnnotationFilter annotationFilter = new AnnotationFilter()
+    {
+        @Override
+        public boolean accept(PDAnnotation annotation)
+        {
+            return true;
+        }
+    };
 
     /**
      * Constructor.
@@ -140,6 +156,28 @@ public class PageDrawer extends PDFGraphicsStreamEngine
     {
         super(parameters.getPage());
         this.renderer = parameters.getRenderer();
+    }
+
+    /**
+     * Return the AnnotationFilter.
+     *
+     * @return the AnnotationFilter
+     */
+    public AnnotationFilter getAnnotationFilter()
+    {
+        return annotationFilter;
+    }
+
+    /**
+     * Set the AnnotationFilter.
+     *
+     * <p>Allows to only render annotation accepted by the filter.
+     *
+     * @param annotationFilter the AnnotationFilter
+     */
+    public void setAnnotationFilter(AnnotationFilter annotationFilter)
+    {
+        this.annotationFilter = annotationFilter;
     }
 
     /**
@@ -203,7 +241,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
 
         processPage(getPage());
 
-        for (PDAnnotation annotation : getPage().getAnnotations())
+        for (PDAnnotation annotation : getPage().getAnnotations(annotationFilter))
         {
             showAnnotation(annotation);
         }
@@ -333,8 +371,8 @@ public class PageDrawer extends PDFGraphicsStreamEngine
      */
     private void beginTextClip()
     {
-        // buffer the text clip because it represents a single clipping area
-        textClippingArea = new Area();
+        // buffer the text clippings because they represents a single clipping area
+        textClippings = new ArrayList<Shape>();
     }
 
     /**
@@ -346,10 +384,17 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         RenderingMode renderingMode = state.getTextState().getRenderingMode();
 
         // apply the buffered clip as one area
-        if (renderingMode.isClip() && !textClippingArea.isEmpty())
+        if (renderingMode.isClip() && !textClippings.isEmpty())
         {
-            state.intersectClippingPath(textClippingArea);
-            textClippingArea = null;
+            // PDFBOX-4150: this is much faster than using textClippingArea.add(new Area(glyph))
+            // https://stackoverflow.com/questions/21519007/fast-union-of-shapes-in-java
+            GeneralPath path = new GeneralPath();
+            for (Shape shape : textClippings)
+            {
+                path.append(shape, false);
+            }
+            state.intersectClippingPath(path);
+            textClippings = new ArrayList<Shape>();
 
             // PDFBOX-3681: lastClip needs to be reset, because after intersection it is still the same
             // object, thus setClip() would believe that it is cached.
@@ -387,8 +432,10 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         GeneralPath path = glyph2D.getPathForCharacterCode(code);
         if (path != null)
         {
-            // stretch non-embedded glyph if it does not match the width contained in the PDF
-            if (!font.isEmbedded())
+            // Stretch non-embedded glyph if it does not match the height/width contained in the PDF.
+            // Vertical fonts have zero X displacement, so the following code scales to 0 if we don't skip it.
+            // TODO: How should vertical fonts be handled?
+            if (!font.isEmbedded() && !font.isVertical() && !font.isStandard14() && font.hasExplicitWidth(code))
             {
                 float fontWidth = font.getWidthFromFont(code);
                 if (fontWidth > 0 && // ignore spaces
@@ -421,7 +468,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
 
             if (renderingMode.isClip())
             {
-                textClippingArea.add(new Area(glyph));
+                textClippings.add(glyph);
             }
         }
     }
@@ -1371,12 +1418,15 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         // adjust bbox (x,y) position at the initial scale + cropbox
         float x = bbox.getLowerLeftX() - pageSize.getLowerLeftX();
         float y = pageSize.getUpperRightY() - bbox.getUpperRightY();
-        graphics.translate(x * xScale, y * yScale);
 
         if (flipTG)
         {
             graphics.translate(0, image.getHeight());
             graphics.scale(1, -1);
+        }
+        else
+        {
+            graphics.translate(x * xScale, y * yScale);
         }
 
         PDSoftMask softMask = getGraphicsState().getSoftMask();

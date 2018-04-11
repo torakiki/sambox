@@ -112,7 +112,7 @@ public abstract class Filter
                 return new COSDictionary();
             }
         }
-        if (!(dp instanceof COSArray || dp instanceof COSArray))
+        if (!(filter instanceof COSArray || dp instanceof COSArray))
         {
             LOG.error("Ignoring invalid DecodeParams. Expected array or dictionary but found {}",
                     dp.getClass().getName());
