@@ -84,6 +84,8 @@ class AppearanceGeneratorHelper
      */
     private static final float DEFAULT_FONT_SIZE = 12;
 
+    private static final int MINIMUM_LINES_TO_FIT_IN_A_MULTILINE_FIELD = 5;
+
     /**
      * The default padding applied by Acrobat to the fields bbox.
      */
@@ -428,11 +430,11 @@ class AppearanceGeneratorHelper
             font = defaultAppearance.getFont();
         }
 
-        // calculate the fontSize (because 0 = autosize)
         float fontSize = defaultAppearance.getFontSize();
 
         if (fontSize == 0)
         {
+            // calculate the fontSize (because 0 = autosize)
             fontSize = calculateFontSize(font, contentRect);
         }
 
@@ -459,7 +461,7 @@ class AppearanceGeneratorHelper
 
         if (field instanceof PDTextField && ((PDTextField) field).isMultiline())
         {
-            y = contentRect.getUpperRightY() - fontBoundingBoxAtSize;
+            y = contentRect.getUpperRightY() - calculateLineHeight(font, fontScaleY);
         }
         else
         {
@@ -508,7 +510,7 @@ class AppearanceGeneratorHelper
             appearanceStyle.setFontSize(fontSize);
 
             // Adobe Acrobat uses the font's bounding box for the leading between the lines
-            appearanceStyle.setLeading(font.getBoundingBox().getHeight() * fontScaleY);
+            appearanceStyle.setLeading(calculateLineHeight(font, fontScaleY));
 
             PlainTextFormatter formatter = new PlainTextFormatter.Builder(contents)
                     .style(appearanceStyle).text(textContent).width(contentRect.getWidth())
@@ -717,44 +719,70 @@ class AppearanceGeneratorHelper
         }
     }
 
+    private float calculateLineHeight(PDFont font, float fontScaleY) throws IOException {
+        float fontBoundingBoxAtSize = font.getBoundingBox().getHeight() * fontScaleY;
+        float fontCapAtSize = font.getFontDescriptor().getCapHeight() * fontScaleY;
+        float fontDescentAtSize = font.getFontDescriptor().getDescent() * fontScaleY;
+
+        float lineHeight = fontCapAtSize - fontDescentAtSize;
+        if(lineHeight < 0)
+        {
+            lineHeight = fontBoundingBoxAtSize;
+        }
+
+        return lineHeight;
+    }
+
     /**
      * My "not so great" method for calculating the fontsize. It does not work superb, but it handles ok.
      * 
      * @return the calculated font-size
      * @throws IOException If there is an error getting the font information.
      */
-    private float calculateFontSize(PDFont font, PDRectangle contentRect) throws IOException
+    float calculateFontSize(PDFont font, PDRectangle contentRect) throws IOException
     {
-        float fontSize = defaultAppearance.getFontSize();
+        float yScalingFactor = FONTSCALE * font.getFontMatrix().getScaleY();
+        float xScalingFactor = FONTSCALE * font.getFontMatrix().getScaleX();
 
-        // zero is special, it means the text is auto-sized
-        if (fontSize == 0)
+        if (isMultiLine())
         {
-            if (isMultiLine())
+            // Acrobat defaults to 12 for multiline text with size 0
+            // PDFBOX decided to just return that and finish with it
+            // return DEFAULT_FONT_SIZE;
+
+            // SAMBOX specifics below
+            // We calculate a font size that fits at least 5 lines
+            // We detect faux multiline fields (text fields flagged as multiline which have a small height to just fit one line)
+
+            float lineHeight = calculateLineHeight(font, font.getFontMatrix().getScaleY());
+            float scaledContentHeight = contentRect.getHeight() * yScalingFactor;
+
+            if(calculateLineHeight(font, DEFAULT_FONT_SIZE / FONTSCALE) > scaledContentHeight)
             {
-                // Acrobat defaults to 12 for multiline text with size 0
-                return DEFAULT_FONT_SIZE;
+                // faux multiline detected
+                // because 1 line written with the default font size would not fit the height
+                // just continue to the non multiline part of the algorightm
+                LOG.warn("Faux multiline field found: {}", field.getFullyQualifiedName());
             }
-            float yScalingFactor = FONTSCALE * font.getFontMatrix().getScaleY();
-            float xScalingFactor = FONTSCALE * font.getFontMatrix().getScaleX();
-
-            // fit width
-            float width = font.getStringWidth(value) * font.getFontMatrix().getScaleX();
-            float widthBasedFontSize = contentRect.getWidth() / width * xScalingFactor;
-
-            // fit height
-            float height = (font.getFontDescriptor().getCapHeight()
-                    + -font.getFontDescriptor().getDescent()) * font.getFontMatrix().getScaleY();
-            if (height <= 0)
+            else
             {
-                height = font.getBoundingBox().getHeight() * font.getFontMatrix().getScaleY();
+                // calculate a font size which fits at least x lines
+                float fontSize = scaledContentHeight / (MINIMUM_LINES_TO_FIT_IN_A_MULTILINE_FIELD * lineHeight);
+                // don't return a font size larger than the default
+                return Math.min(fontSize, DEFAULT_FONT_SIZE);
             }
-
-            float heightBasedFontSize = contentRect.getHeight() / height * yScalingFactor;
-
-            return Math.min(heightBasedFontSize, widthBasedFontSize);
         }
-        return fontSize;
+
+        // fit width
+        float width = font.getStringWidth(value) * font.getFontMatrix().getScaleX();
+        float widthBasedFontSize = contentRect.getWidth() / width * xScalingFactor;
+
+        // fit height
+        float height = calculateLineHeight(font, font.getFontMatrix().getScaleY());
+
+        float heightBasedFontSize = contentRect.getHeight() / height * yScalingFactor;
+
+        return Math.min(heightBasedFontSize, widthBasedFontSize);
     }
 
     /**
