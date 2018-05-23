@@ -56,6 +56,7 @@ public class PDCIDFontType2 extends PDCIDFont
 
     private final TrueTypeFont ttf;
     private final int[] cid2gid;
+    private final HashMap<Integer, Integer> gid2cid = new HashMap<Integer, Integer>();
     private final boolean isEmbedded;
     private final boolean isDamaged;
     private final CmapLookup cmap; // may be null
@@ -159,6 +160,15 @@ public class PDCIDFontType2 extends PDCIDFont
         }
         cmap = ttf.getUnicodeCmapLookup(false);
         cid2gid = readCIDToGIDMap();
+        if(cid2gid != null) {
+            for (int cid = 0; cid < cid2gid.length; cid++)
+            {
+                int gid = cid2gid[cid];
+                if(gid != 0) {
+                    gid2cid.put(gid, cid);
+                }
+            }
+        }
     }
 
     private TrueTypeFont findFontOrSubstitute() throws IOException
@@ -336,7 +346,11 @@ public class PDCIDFontType2 extends PDCIDFont
             {
                 if (cmap != null)
                 {
-                    cid = cmap.getGlyphId(unicode);
+                    int gid = cmap.getGlyphId(unicode);
+                    // SAMBOX specific here
+                    // if there's a gid to cid mapping, use it.
+                    // otherwise fallback to the old behaviour, which is to assume cid = gid
+                    cid = gid2cid.getOrDefault(gid, gid);
                 }
             }
             else
