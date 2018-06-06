@@ -33,8 +33,6 @@ import org.sejda.sambox.pdmodel.PDDocumentInformation;
 import org.sejda.sambox.rendering.PDFRenderer;
 import org.sejda.sambox.util.DateConverter;
 import org.sejda.sambox.util.SpecVersionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Andrea Vacondio
@@ -43,7 +41,6 @@ import org.slf4j.LoggerFactory;
 public class PDFParserTest
 {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PDFParserTest.class);
     private static final File TARGETPDFDIR = new File("target/pdfs");
 
     @Test

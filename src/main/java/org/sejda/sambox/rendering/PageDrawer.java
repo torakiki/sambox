@@ -78,7 +78,11 @@ import org.sejda.sambox.pdmodel.graphics.shading.PDShading;
 import org.sejda.sambox.pdmodel.graphics.state.PDGraphicsState;
 import org.sejda.sambox.pdmodel.graphics.state.PDSoftMask;
 import org.sejda.sambox.pdmodel.graphics.state.RenderingMode;
-import org.sejda.sambox.pdmodel.interactive.annotation.*;
+import org.sejda.sambox.pdmodel.interactive.annotation.AnnotationFilter;
+import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotation;
+import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationLink;
+import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationMarkup;
+import org.sejda.sambox.pdmodel.interactive.annotation.PDBorderStyleDictionary;
 import org.sejda.sambox.util.Matrix;
 import org.sejda.sambox.util.Vector;
 import org.slf4j.Logger;
@@ -125,9 +129,6 @@ public class PageDrawer extends PDFGraphicsStreamEngine
 
     // shapes of glyphs being drawn to be used for clipping
     private List<Shape> textClippings;
-
-    // buffered clipping area for text being drawn
-    private Area textClippingArea;
 
     // glyph cache
     private final Map<PDFont, Glyph2D> fontGlyph2D = new HashMap<PDFont, Glyph2D>();
