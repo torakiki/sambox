@@ -92,6 +92,10 @@ class PDDefaultAppearanceString
         processAppearanceStringOperators(defaultAppearance.getBytes());
     }
 
+    PDDefaultAppearanceString() throws IOException {
+        this(null, null);
+    }
+
     /**
      * Processes the operators of the given content stream.
      *
