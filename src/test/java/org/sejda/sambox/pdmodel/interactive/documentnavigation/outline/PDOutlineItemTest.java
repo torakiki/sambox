@@ -17,9 +17,13 @@
 package org.sejda.sambox.pdmodel.interactive.documentnavigation.outline;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.sejda.sambox.cos.COSArray;
+import org.sejda.sambox.cos.COSInteger;
+import org.sejda.sambox.cos.COSName;
 
 /**
  * @author Andrea Vacondio
@@ -187,5 +191,13 @@ public class PDOutlineItemTest
         child.insertSiblingAfter(new PDOutlineItem());
         child.insertSiblingAfter(new PDOutlineItem());
         root.insertSiblingAfter(child);
+    }
+
+    @Test
+    public void noClassCastExceptionInGetAction()
+    {
+        PDOutlineItem victim = new PDOutlineItem();
+        victim.getCOSObject().setItem(COSName.A, new COSArray(COSInteger.ONE));
+        assertNull(victim.getAction());
     }
 }

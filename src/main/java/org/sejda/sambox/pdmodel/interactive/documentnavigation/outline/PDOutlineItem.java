@@ -240,8 +240,8 @@ public final class PDOutlineItem extends PDOutlineNode
         PDPageDestination pageDestination = null;
         if (dest instanceof PDNamedDestination)
         {
-            pageDestination = doc.getDocumentCatalog().findNamedDestinationPage(
-                    (PDNamedDestination) dest);
+            pageDestination = doc.getDocumentCatalog()
+                    .findNamedDestinationPage((PDNamedDestination) dest);
             if (pageDestination == null)
             {
                 return null;
@@ -277,8 +277,8 @@ public final class PDOutlineItem extends PDOutlineNode
      */
     public PDAction getAction()
     {
-        return PDActionFactory.createAction((COSDictionary) getCOSObject().getDictionaryObject(
-                COSName.A));
+        return PDActionFactory
+                .createAction(getCOSObject().getDictionaryObject(COSName.A, COSDictionary.class));
     }
 
     /**
