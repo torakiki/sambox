@@ -18,6 +18,7 @@ package org.sejda.sambox.pdmodel.graphics.form;
 
 import java.io.IOException;
 
+import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.common.PDDictionaryWrapper;
@@ -56,7 +57,11 @@ public final class PDTransparencyGroupAttributes extends PDDictionaryWrapper
     {
         if (colorSpace == null && getCOSObject().containsKey(COSName.CS))
         {
-            colorSpace = PDColorSpace.create(getCOSObject().getDictionaryObject(COSName.CS));
+            COSBase dictionaryObject = getCOSObject().getDictionaryObject(COSName.CS);
+            if(dictionaryObject != null)
+            {
+                colorSpace = PDColorSpace.create(dictionaryObject);
+            }
         }
         return colorSpace;
     }
