@@ -24,7 +24,9 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.cos.COSName;
@@ -125,6 +127,7 @@ class AppearanceGeneratorHelper
                     && widget.getNormalAppearanceStream().getResources() != null)
             {
                 PDResources widgetResources = widget.getNormalAppearanceStream().getResources();
+                Map<COSName, PDFont> missingFonts = new HashMap<>();
                 for (COSName fontResourceName : widgetResources.getFontNames())
                 {
                     try
@@ -133,14 +136,19 @@ class AppearanceGeneratorHelper
                         {
                             LOG.debug("Adding font resource " + fontResourceName
                                     + " from widget to AcroForm");
-                            acroFormResources.put(fontResourceName,
-                                    widgetResources.getFont(fontResourceName));
+                            missingFonts.put(fontResourceName, widgetResources.getFont(fontResourceName));
                         }
                     }
                     catch (IOException e)
                     {
                         LOG.warn("Unable to match field level font with AcroForm font");
                     }
+                }
+
+                // add all missing font resources from widget to AcroForm
+                for(COSName key: missingFonts.keySet())
+                {
+                    acroFormResources.put(key, missingFonts.get(key));
                 }
             }
         }
