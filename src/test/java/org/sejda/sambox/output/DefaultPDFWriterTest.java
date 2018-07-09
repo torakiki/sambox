@@ -18,6 +18,7 @@ package org.sejda.sambox.output;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.AdditionalMatchers.aryEq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -183,6 +184,7 @@ public class DefaultPDFWriterTest
         objectWriter.writeObject(ref);
         InOrder inOrder = Mockito.inOrder(writer);
         victim.writeXrefStream(existingTrailer);
+        assertTrue(objectWriter.context().hasWritten(XrefEntry.DEFAULT_FREE_ENTRY));
         inOrder.verify(writer).write("2");
         inOrder.verify(writer).write(DefaultCOSWriter.SPACE);
         inOrder.verify(writer).write("0");

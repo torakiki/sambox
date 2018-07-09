@@ -132,6 +132,10 @@ class DefaultPDFWriter implements Closeable
      */
     public void writeXrefStream(COSDictionary trailer) throws IOException
     {
+        if (nonNull(writer.context().addWritten(XrefEntry.DEFAULT_FREE_ENTRY)))
+        {
+            LOG.warn("Reserved object number 0 has been overwritten with the expected free entry");
+        }
         writeXrefStream(trailer, -1);
     }
 
