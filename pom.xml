@@ -444,7 +444,7 @@
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>2.5</version>
+			<version>2.6</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.pdfbox</groupId>
@@ -461,18 +461,18 @@
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcmail-jdk15on</artifactId>
 			<optional>true</optional>
-			<version>1.56</version>
+			<version>1.60</version>
 		</dependency>
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcprov-jdk15on</artifactId>
 			<optional>true</optional>
-			<version>1.56</version>
+			<version>1.60</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.pdfbox</groupId>
 			<artifactId>jbig2-imageio</artifactId>
-			<version>3.0.0</version>
+			<version>3.0.1</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
