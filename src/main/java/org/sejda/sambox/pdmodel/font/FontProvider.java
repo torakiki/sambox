@@ -23,16 +23,11 @@ import java.util.List;
  *
  * @author John Hewson
  */
-public abstract class FontProvider
+public interface FontProvider
 {
-    /**
-     * Returns a string containing debugging information. This will be written to the log if no
-     * suitable fonts are found and no fallback fonts are available. May be null.
-     */
-    public abstract String toDebugString();
 
     /**
-     * Returns a list of information about fonts on the system.
+     * @return a list of information about fonts on the system.
      */
-    public abstract List<? extends FontInfo> getFontInfo();
+    List<? extends FontInfo> getFontInfo();
 }

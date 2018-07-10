@@ -53,14 +53,14 @@ import org.slf4j.LoggerFactory;
  *
  * @author John Hewson
  */
-final class FileSystemFontProvider extends FontProvider
+public final class FileSystemFontProvider implements FontProvider
 {
     private static final String FONT_CACHE_SEPARATOR = "|";
 
     private static final Logger LOG = LoggerFactory.getLogger(FileSystemFontProvider.class);
 
     private final List<FSFontInfo> fontInfoList = new ArrayList<>();
-    private final FontCache cache;
+    private final FontCache cache = new FontCache();
     private boolean initialized = false;
 
     private static class FSFontInfo extends FontInfo
@@ -196,15 +196,6 @@ final class FileSystemFontProvider extends FontProvider
         {
             super(file, format, postScriptName, null, 0, 0, 0, 0, 0, null, null);
         }
-    }
-
-    /**
-     * Constructor.
-     */
-    FileSystemFontProvider(FontCache cache)
-    {
-        this.cache = cache;
-        // init block moved to lazy initialization when required
     }
 
     private synchronized void initializeIfRequired()
@@ -380,6 +371,7 @@ final class FileSystemFontProvider extends FontProvider
 
         if (fileExists)
         {
+            LOG.trace("Loading font cache from {}", file.getAbsolutePath());
             try (BufferedReader reader = new BufferedReader(new FileReader(file)))
             {
                 String line;
@@ -702,23 +694,6 @@ final class FileSystemFontProvider extends FontProvider
             LOG.error("Could not load font file: " + file, e);
         }
         return null;
-    }
-
-    @Override
-    public String toDebugString()
-    {
-        initializeIfRequired();
-        StringBuilder sb = new StringBuilder();
-        for (FSFontInfo info : fontInfoList)
-        {
-            sb.append(info.getFormat());
-            sb.append(": ");
-            sb.append(info.getPostScriptName());
-            sb.append(": ");
-            sb.append(info.file.getPath());
-            sb.append('\n');
-        }
-        return sb.toString();
     }
 
     @Override

@@ -16,6 +16,10 @@
  */
 package org.sejda.sambox.pdmodel.font;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static java.util.stream.StreamSupport.stream;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -23,12 +27,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
-import java.util.Set;
+import java.util.ServiceLoader;
 
 import org.apache.fontbox.FontBoxFont;
 import org.apache.fontbox.ttf.OpenTypeFont;
@@ -43,8 +46,6 @@ import org.apache.fontbox.type1.Type1Font;
  */
 final class FontMapperImpl implements FontMapper
 {
-    private static final FontCache fontCache = new FontCache(); // todo: static cache isn't ideal
-    private FontProvider fontProvider;
     private Map<String, FontInfo> fontInfoByName;
     private final TrueTypeFont lastResortFont;
 
@@ -117,68 +118,18 @@ final class FontMapperImpl implements FontMapper
         }
     }
 
-    // lazy thread safe singleton
-    private static class DefaultFontProvider
+    synchronized void initIfRequired()
     {
-        private static final FontProvider INSTANCE = new FileSystemFontProvider(fontCache);
-    }
-
-    /**
-     * Sets the font service provider.
-     */
-    public synchronized void setProvider(FontProvider fontProvider)
-    {
-        fontInfoByName = createFontInfoByName(fontProvider.getFontInfo());
-        this.fontProvider = fontProvider;
-    }
-
-    /**
-     * Returns the font service provider. Defaults to using FileSystemFontProvider.
-     */
-    public synchronized FontProvider getProvider()
-    {
-        if (fontProvider == null)
+        if (isNull(fontInfoByName))
         {
-            setProvider(DefaultFontProvider.INSTANCE);
+            fontInfoByName = new LinkedHashMap<>();
+            stream(ServiceLoader.load(FontProvider.class).spliterator(), true)
+                    .flatMap(fp -> fp.getFontInfo().stream()).forEach(i -> {
+                        fontInfoByName.put(i.getPostScriptName(), i);
+                        // remove hyphens (e.g. Arial-Black -> ArialBlack)
+                        fontInfoByName.put(i.getPostScriptName().replaceAll("-", ""), i);
+                    });
         }
-        return fontProvider;
-    }
-
-    /**
-     * Returns the font cache associated with this FontMapper. This method is needed by FontProvider subclasses.
-     */
-    public FontCache getFontCache()
-    {
-        return fontCache;
-    }
-
-    private Map<String, FontInfo> createFontInfoByName(List<? extends FontInfo> fontInfoList)
-    {
-        Map<String, FontInfo> map = new LinkedHashMap<>();
-        for (FontInfo info : fontInfoList)
-        {
-            for (String name : getPostScriptNames(info.getPostScriptName()))
-            {
-                map.put(name, info);
-            }
-        }
-        return map;
-    }
-
-    /**
-     * Gets alternative names, as seen in some PDFs, e.g. PDFBOX-142.
-     */
-    private Set<String> getPostScriptNames(String postScriptName)
-    {
-        Set<String> names = new HashSet<String>();
-
-        // built-in PostScript name
-        names.add(postScriptName);
-
-        // remove hyphens (e.g. Arial-Black -> ArialBlack)
-        names.add(postScriptName.replaceAll("-", ""));
-
-        return names;
     }
 
     /**
@@ -186,7 +137,7 @@ final class FontMapperImpl implements FontMapper
      */
     private List<String> copySubstitutes(String postScriptName)
     {
-        return new ArrayList<String>(substitutes.get(postScriptName));
+        return new ArrayList<>(substitutes.get(postScriptName));
     }
 
     /**
@@ -309,7 +260,7 @@ final class FontMapperImpl implements FontMapper
         TrueTypeFont ttf = (TrueTypeFont) findFont(FontFormat.TTF, baseFont);
         if (ttf != null)
         {
-            return new FontMapping<TrueTypeFont>(ttf, false);
+            return new FontMapping<>(ttf, false);
         }
         // fallback - todo: i.e. fuzzy match
         String fontName = getFallbackFontName(fontDescriptor);
@@ -319,7 +270,7 @@ final class FontMapperImpl implements FontMapper
             // we have to return something here as TTFs aren't strictly required on the system
             ttf = lastResortFont;
         }
-        return new FontMapping<TrueTypeFont>(ttf, true);
+        return new FontMapping<>(ttf, true);
     }
 
     /**
@@ -334,7 +285,7 @@ final class FontMapperImpl implements FontMapper
         FontBoxFont font = findFontBoxFont(baseFont);
         if (font != null)
         {
-            return new FontMapping<FontBoxFont>(font, false);
+            return new FontMapping<>(font, false);
         }
         // fallback - todo: i.e. fuzzy match
         String fallbackName = getFallbackFontName(fontDescriptor);
@@ -344,7 +295,7 @@ final class FontMapperImpl implements FontMapper
             // we have to return something here as TTFs aren't strictly required on the system
             font = lastResortFont;
         }
-        return new FontMapping<FontBoxFont>(font, true);
+        return new FontMapping<>(font, true);
     }
 
     /**
@@ -383,55 +334,52 @@ final class FontMapperImpl implements FontMapper
     private FontBoxFont findFont(FontFormat format, String postScriptName)
     {
         // handle damaged PDFs, see PDFBOX-2884
-        if (postScriptName == null)
+        if (nonNull(postScriptName) && postScriptName.trim().length() > 0)
         {
-            return null;
-        }
 
-        // make sure the font provider is initialized
-        if (fontProvider == null)
-        {
-            getProvider();
-        }
+            if (isNull(fontInfoByName))
+            {
+                initIfRequired();
+            }
 
-        // first try to match the PostScript name
-        FontInfo info = getFont(format, postScriptName);
-        if (info != null)
-        {
-            return info.getFont();
-        }
+            // first try to match the PostScript name
+            FontInfo info = getFont(format, postScriptName);
+            if (info != null)
+            {
+                return info.getFont();
+            }
 
-        // remove hyphens (e.g. Arial-Black -> ArialBlack)
-        info = getFont(format, postScriptName.replaceAll("-", ""));
-        if (info != null)
-        {
-            return info.getFont();
-        }
+            // remove hyphens (e.g. Arial-Black -> ArialBlack)
+            info = getFont(format, postScriptName.replaceAll("-", ""));
+            if (info != null)
+            {
+                return info.getFont();
+            }
 
-        // then try named substitutes
-        for (String substituteName : getSubstitutes(postScriptName))
-        {
-            info = getFont(format, substituteName);
+            // then try named substitutes
+            for (String substituteName : getSubstitutes(postScriptName))
+            {
+                info = getFont(format, substituteName);
+                if (info != null)
+                {
+                    return info.getFont();
+                }
+            }
+
+            // then try converting Windows names e.g. (ArialNarrow,Bold) -> (ArialNarrow-Bold)
+            info = getFont(format, postScriptName.replaceAll(",", "-"));
+            if (info != null)
+            {
+                return info.getFont();
+            }
+
+            // try appending "-Regular", works for Wingdings on windows
+            info = getFont(format, postScriptName + "-Regular");
             if (info != null)
             {
                 return info.getFont();
             }
         }
-
-        // then try converting Windows names e.g. (ArialNarrow,Bold) -> (ArialNarrow-Bold)
-        info = getFont(format, postScriptName.replaceAll(",", "-"));
-        if (info != null)
-        {
-            return info.getFont();
-        }
-
-        // try appending "-Regular", works for Wingdings on windows
-        info = getFont(format, postScriptName + "-Regular");
-        if (info != null)
-        {
-            return info.getFont();
-        }
-
         // no matches
         return null;
     }
