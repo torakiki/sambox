@@ -92,10 +92,9 @@ import org.slf4j.LoggerFactory;
  * Paints a page in a PDF document to a Graphics context. May be subclassed to provide custom rendering.
  * 
  * <p>
- If you want to do custom graphics processing rather than Graphics2D rendering, then you should
- * subclass {@link PDFGraphicsStreamEngine} instead. Subclassing PageDrawer is only suitable for
- * cases where the goal is to render onto a {@link Graphics2D} surface. In that case you'll also
- * have to subclass {@link PDFRenderer} and modify
+ * If you want to do custom graphics processing rather than Graphics2D rendering, then you should subclass
+ * {@link PDFGraphicsStreamEngine} instead. Subclassing PageDrawer is only suitable for cases where the goal is to
+ * render onto a {@link Graphics2D} surface. In that case you'll also have to subclass {@link PDFRenderer} and modify
  * {@link PDFRenderer#createPageDrawer(PageDrawerParameters)}.
  * 
  * @author Ben Litchfield
@@ -131,7 +130,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
     private List<Shape> textClippings;
 
     // glyph cache
-    private final Map<PDFont, Glyph2D> fontGlyph2D = new HashMap<PDFont, Glyph2D>();
+    private final Map<PDFont, Glyph2D> fontGlyph2D = new HashMap<>();
 
     private final TilingPaintFactory tilingPaintFactory = new TilingPaintFactory(this);
 
@@ -172,7 +171,8 @@ public class PageDrawer extends PDFGraphicsStreamEngine
     /**
      * Set the AnnotationFilter.
      *
-     * <p>Allows to only render annotation accepted by the filter.
+     * <p>
+     * Allows to only render annotation accepted by the filter.
      *
      * @param annotationFilter the AnnotationFilter
      */
@@ -373,7 +373,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
     private void beginTextClip()
     {
         // buffer the text clippings because they represents a single clipping area
-        textClippings = new ArrayList<Shape>();
+        textClippings = new ArrayList<>();
     }
 
     /**
@@ -395,7 +395,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
                 path.append(shape, false);
             }
             state.intersectClippingPath(path);
-            textClippings = new ArrayList<Shape>();
+            textClippings = new ArrayList<>();
 
             // PDFBOX-3681: lastClip needs to be reset, because after intersection it is still the same
             // object, thus setClip() would believe that it is cached.
@@ -436,7 +436,8 @@ public class PageDrawer extends PDFGraphicsStreamEngine
             // Stretch non-embedded glyph if it does not match the height/width contained in the PDF.
             // Vertical fonts have zero X displacement, so the following code scales to 0 if we don't skip it.
             // TODO: How should vertical fonts be handled?
-            if (!font.isEmbedded() && !font.isVertical() && !font.isStandard14() && font.hasExplicitWidth(code))
+            if (!font.isEmbedded() && !font.isVertical() && !font.isStandard14()
+                    && font.hasExplicitWidth(code))
             {
                 float fontWidth = font.getWidthFromFont(code);
                 if (fontWidth > 0 && // ignore spaces
@@ -1201,7 +1202,12 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         lastClip = null;
         // TODO support more annotation flags (Invisible, NoZoom, NoRotate)
         // Example for NoZoom can be found in p5 of PDFBOX-2348
-        int deviceType = graphics.getDeviceConfiguration().getDevice().getType();
+        int deviceType = -1;
+        if (graphics.getDeviceConfiguration() != null
+                && graphics.getDeviceConfiguration().getDevice() != null)
+        {
+            deviceType = graphics.getDeviceConfiguration().getDevice().getType();
+        }
         if (deviceType == GraphicsDevice.TYPE_PRINTER && !annotation.isPrinted())
         {
             return;
