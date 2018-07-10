@@ -592,7 +592,6 @@ public class COSDictionary extends COSBase
 
     /**
      * Convenience method that will get the dictionary object that is expected to be a name and convert it to a string.
-     * Null is returned if the entry does not exist in the dictionary.
      *
      * @param key The key to the item in the dictionary.
      * @param defaultValue The value to return if the dictionary item is null.
@@ -605,7 +604,6 @@ public class COSDictionary extends COSBase
 
     /**
      * Convenience method that will get the dictionary object that is expected to be a name and convert it to a string.
-     * Null is returned if the entry does not exist in the dictionary.
      *
      * @param key The key to the item in the dictionary.
      * @param defaultValue The value to return if the dictionary item is null.
@@ -643,7 +641,6 @@ public class COSDictionary extends COSBase
 
     /**
      * Convenience method that will get the dictionary object that is expected to be a name and convert it to a string.
-     * Null is returned if the entry does not exist in the dictionary.
      *
      * @param key The key to the item in the dictionary.
      * @param defaultValue The default value to return.
@@ -656,7 +653,6 @@ public class COSDictionary extends COSBase
 
     /**
      * Convenience method that will get the dictionary object that is expected to be a name and convert it to a string.
-     * Null is returned if the entry does not exist in the dictionary.
      *
      * @param key The key to the item in the dictionary.
      * @param defaultValue The default value to return.
@@ -709,7 +705,6 @@ public class COSDictionary extends COSBase
 
     /**
      * Convenience method that will get the dictionary object that is expected to be a name and convert it to a string.
-     * Null is returned if the entry does not exist in the dictionary.
      *
      * @param embedded The embedded dictionary.
      * @param key The key to the item in the dictionary.

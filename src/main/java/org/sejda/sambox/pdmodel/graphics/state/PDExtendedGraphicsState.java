@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.pdmodel.graphics.state;
 
+import static java.util.Objects.nonNull;
+
 import java.io.IOException;
 
 import org.sejda.sambox.cos.COSArray;
@@ -264,18 +266,17 @@ public class PDExtendedGraphicsState implements COSObjectable
      */
     public PDLineDashPattern getLineDashPattern()
     {
-        PDLineDashPattern retval = null;
-        COSArray dp = (COSArray) dict.getDictionaryObject(COSName.D);
-        if (dp != null)
+        COSArray dp = dict.getDictionaryObject(COSName.D, COSArray.class);
+        if (nonNull(dp) && dp.size() == 2)
         {
-            COSArray array = new COSArray();
-            dp.addAll(dp);
-            dp.remove(dp.size() - 1);
-            int phase = dp.getInt(dp.size() - 1);
-
-            retval = new PDLineDashPattern(array, phase);
+            COSBase dashArray = dp.getObject(0);
+            COSBase phase = dp.getObject(1);
+            if (dashArray instanceof COSArray && phase instanceof COSNumber)
+            {
+                return new PDLineDashPattern((COSArray) dashArray, ((COSNumber) phase).intValue());
+            }
         }
-        return retval;
+        return null;
     }
 
     /**

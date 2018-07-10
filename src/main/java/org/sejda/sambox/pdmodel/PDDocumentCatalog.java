@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.pdmodel;
 
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static org.sejda.sambox.util.SpecVersionUtils.V1_5;
 
@@ -241,27 +242,23 @@ public class PDDocumentCatalog implements COSObjectable
      * Get the Document Open Action for this object.
      *
      * @return The action to perform when the document is opened.
-     * @throws IOException If there is an error creating the destination or action.
      */
     public PDDestinationOrAction getOpenAction() throws IOException
     {
         COSBase openAction = root.getDictionaryObject(COSName.OPEN_ACTION);
-        if (openAction == null)
+        if (nonNull(openAction))
         {
-            return null;
+            if (openAction instanceof COSDictionary)
+            {
+                return PDActionFactory.createAction((COSDictionary) openAction);
+            }
+            else if (openAction instanceof COSArray)
+            {
+                return PDDestination.create(openAction);
+            }
+            LOG.warn("Invalid OpenAction {}", openAction);
         }
-        else if (openAction instanceof COSDictionary)
-        {
-            return PDActionFactory.createAction((COSDictionary) openAction);
-        }
-        else if (openAction instanceof COSArray)
-        {
-            return PDDestination.create(openAction);
-        }
-        else
-        {
-            throw new IOException("Unknown OpenAction " + openAction);
-        }
+        return null;
     }
 
     /**

@@ -191,7 +191,6 @@ public class DefaultPDFWriterTest
         inOrder.verify(writer).write(DefaultCOSWriter.SPACE);
         inOrder.verify(writer).write(aryEq("obj".getBytes(StandardCharsets.US_ASCII)));
         inOrder.verify(writer).writeEOL();
-        // write the stream
         inOrder.verify(writer).write(aryEq("startxref".getBytes(StandardCharsets.US_ASCII)));
         inOrder.verify(writer).writeEOL();
         inOrder.verify(writer).write("12345");

@@ -21,8 +21,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-import junit.framework.TestCase;
-
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
@@ -33,6 +31,8 @@ import org.sejda.sambox.pdmodel.PDPage;
 import org.sejda.sambox.pdmodel.PDPageContentStream;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.text.PDFTextStripper;
+
+import junit.framework.TestCase;
 
 /**
  * Tests font embedding.
@@ -180,8 +180,8 @@ public class TestFontEmbedding extends TestCase
         PDPage page = new PDPage(PDRectangle.A4);
         document.addPage(page);
 
-        InputStream input = TestFontEmbedding.class.getClassLoader().getResourceAsStream(
-                "org/sejda/sambox/ttf/LiberationSans-Regular.ttf");
+        InputStream input = PDFont.class.getClassLoader()
+                .getResourceAsStream("org/sejda/sambox/resources/ttf/LiberationSans-Regular.ttf");
         PDType0Font font = PDType0Font.load(document, input, useSubset);
 
         PDPageContentStream stream = new PDPageContentStream(document, page);

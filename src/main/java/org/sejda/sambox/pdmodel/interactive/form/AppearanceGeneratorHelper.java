@@ -19,6 +19,7 @@ package org.sejda.sambox.pdmodel.interactive.form;
 import static java.util.Arrays.asList;
 import static java.util.Objects.nonNull;
 import static org.sejda.io.CountingWritableByteChannel.from;
+import static org.sejda.util.RequireUtils.requireNotNullArg;
 
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
@@ -136,7 +137,8 @@ class AppearanceGeneratorHelper
                         {
                             LOG.debug("Adding font resource " + fontResourceName
                                     + " from widget to AcroForm");
-                            missingFonts.put(fontResourceName, widgetResources.getFont(fontResourceName));
+                            missingFonts.put(fontResourceName,
+                                    widgetResources.getFont(fontResourceName));
                         }
                     }
                     catch (IOException e)
@@ -146,7 +148,7 @@ class AppearanceGeneratorHelper
                 }
 
                 // add all missing font resources from widget to AcroForm
-                for(COSName key: missingFonts.keySet())
+                for (COSName key : missingFonts.keySet())
                 {
                     acroFormResources.put(key, missingFonts.get(key));
                 }
@@ -425,18 +427,8 @@ class AppearanceGeneratorHelper
         contents.clip();
 
         // get the font
-
-        // field's defined appearance font has priority
-        // callers might have determined that the default font does not support rendering the field's value
-        // so the font was substituted to another one, which has better unicode support
-        // see PDVariableText.setAppearanceOverrideFont()
-        PDFont font = field.getAppearanceFont();
-
-        // fallback to default appearance
-        if (font == null)
-        {
-            font = defaultAppearance.getFont();
-        }
+        PDFont font = defaultAppearance.getFont();
+        requireNotNullArg(font, "font is null, check whether /DA entry is incomplete or incorrect");
 
         float fontSize = defaultAppearance.getFontSize();
 
@@ -589,8 +581,8 @@ class AppearanceGeneratorHelper
      * @param fontSize the font size to be used
      * @throws IOException
      */
-    private void insertGeneratedCombAppearance(PDPageContentStream contents,
-            PDRectangle bbox, PDFont font, float fontSize) throws IOException
+    private void insertGeneratedCombAppearance(PDPageContentStream contents, PDRectangle bbox,
+            PDFont font, float fontSize) throws IOException
     {
 
         // TODO: Currently the quadding is not taken into account
@@ -727,13 +719,14 @@ class AppearanceGeneratorHelper
         }
     }
 
-    private float calculateLineHeight(PDFont font, float fontScaleY) throws IOException {
+    private float calculateLineHeight(PDFont font, float fontScaleY) throws IOException
+    {
         float fontBoundingBoxAtSize = font.getBoundingBox().getHeight() * fontScaleY;
         float fontCapAtSize = font.getFontDescriptor().getCapHeight() * fontScaleY;
         float fontDescentAtSize = font.getFontDescriptor().getDescent() * fontScaleY;
 
         float lineHeight = fontCapAtSize - fontDescentAtSize;
-        if(lineHeight < 0)
+        if (lineHeight < 0)
         {
             lineHeight = fontBoundingBoxAtSize;
         }
@@ -760,12 +753,13 @@ class AppearanceGeneratorHelper
 
             // SAMBOX specifics below
             // We calculate a font size that fits at least 5 lines
-            // We detect faux multiline fields (text fields flagged as multiline which have a small height to just fit one line)
+            // We detect faux multiline fields (text fields flagged as multiline which have a small height to just fit
+            // one line)
 
             float lineHeight = calculateLineHeight(font, font.getFontMatrix().getScaleY());
             float scaledContentHeight = contentRect.getHeight() * yScalingFactor;
 
-            if(calculateLineHeight(font, DEFAULT_FONT_SIZE / FONTSCALE) > scaledContentHeight)
+            if (calculateLineHeight(font, DEFAULT_FONT_SIZE / FONTSCALE) > scaledContentHeight)
             {
                 // faux multiline detected
                 // because 1 line written with the default font size would not fit the height
@@ -775,7 +769,8 @@ class AppearanceGeneratorHelper
             else
             {
                 // calculate a font size which fits at least x lines
-                float fontSize = scaledContentHeight / (MINIMUM_LINES_TO_FIT_IN_A_MULTILINE_FIELD * lineHeight);
+                float fontSize = scaledContentHeight
+                        / (MINIMUM_LINES_TO_FIT_IN_A_MULTILINE_FIELD * lineHeight);
                 // don't return a font size larger than the default
                 return Math.min(fontSize, DEFAULT_FONT_SIZE);
             }

@@ -19,9 +19,13 @@
 
 package org.sejda.sambox.pdmodel.font;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+
 import org.apache.fontbox.ttf.TTFParser;
 import org.apache.fontbox.ttf.TrueTypeFont;
 import org.junit.Assert;
@@ -49,6 +53,7 @@ public class PDFontTest extends TestCase
 
     private static final File OUT_DIR = new File("target/test-output");
 
+    @Override
     @Before
     public void setUp() throws Exception
     {
@@ -116,8 +121,8 @@ public class PDFontTest extends TestCase
     @Test
     public void testPDFBox3826() throws IOException, URISyntaxException
     {
-        URL url = PDFontTest.class.getClassLoader()
-                .getResource("org/sejda/sambox/ttf/LiberationSans-Regular.ttf");
+        URL url = PDFont.class.getClassLoader()
+                .getResource("org/sejda/sambox/resources/ttf/LiberationSans-Regular.ttf");
         File fontFile = new File(url.toURI());
 
         TrueTypeFont ttf1 = new TTFParser().parse(fontFile);

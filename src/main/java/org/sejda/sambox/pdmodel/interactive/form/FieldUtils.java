@@ -173,23 +173,24 @@ public final class FieldUtils
         }
         else if (items instanceof COSArray)
         {
-            COSArray array = (COSArray) items;
-
-            List<String> result = new ArrayList<>();
-            int numItems = ((COSArray) items).size();
-            for (int i = 0; i < numItems; i++)
+            List<String> entryList = new ArrayList<>();
+            for (COSBase entry : (COSArray) items)
             {
-                COSBase item = array.get(i);
-                if(item instanceof COSArray)
+                if (entry instanceof COSString)
                 {
-                    COSArray pair = (COSArray) array.get(i);
-                    COSString displayValue = (COSString) pair.get(pairIdx);
-                    result.add(displayValue.getString());
-                } else if(item instanceof COSString) {
-                    result.add(((COSString) item).getString());
+                    entryList.add(((COSString) entry).getString());
+                }
+                else if (entry instanceof COSArray)
+                {
+                    COSArray cosArray = (COSArray) entry;
+                    if (cosArray.size() >= pairIdx + 1
+                            && cosArray.get(pairIdx) instanceof COSString)
+                    {
+                        entryList.add(((COSString) cosArray.get(pairIdx)).getString());
+                    }
                 }
             }
-            return result;
+            return entryList;
         }
         return Collections.emptyList();
     }

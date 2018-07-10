@@ -279,7 +279,7 @@ final class CCITTFaxDecoderStream extends FilterInputStream
     {
         if (optionByteAligned)
         {
-            bufferPos = -1; // Skip remaining bits and fetch the next byte at row start
+            resetBuffer();
         }
         eof: while (true)
         {
@@ -316,7 +316,7 @@ final class CCITTFaxDecoderStream extends FilterInputStream
     {
         if (optionByteAligned)
         {
-            bufferPos = -1; // Skip remaining bits and fetch the next byte at row start
+            resetBuffer();
         }
         decode2D();
     }
@@ -421,30 +421,14 @@ final class CCITTFaxDecoderStream extends FilterInputStream
                 {
                     return total;
                 }
-                else
-                {
-                    n = tree.root;
-                }
+                n = tree.root;
             }
         }
     }
 
-    private void resetBuffer() throws IOException
+    private void resetBuffer()
     {
-        for (int i = 0; i < decodedRow.length; i++)
-        {
-            decodedRow[i] = 0;
-        }
-
-        while (true)
-        {
-            if (bufferPos == -1)
-            {
-                return;
-            }
-
-            readBit();
-        }
+        bufferPos = -1;
     }
 
     int buffer = -1;
@@ -688,9 +672,8 @@ final class CCITTFaxDecoderStream extends FilterInputStream
         }
     }
 
-    static final short[][] BLACK_CODES = {
-            { // 2 bits
-                    0x2, 0x3, },
+    static final short[][] BLACK_CODES = { { // 2 bits
+            0x2, 0x3, },
             { // 3 bits
                     0x2, 0x3, },
             { // 4 bits
@@ -718,9 +701,8 @@ final class CCITTFaxDecoderStream extends FilterInputStream
             { // 13 bits
                     0x4a, 0x4b, 0x4c, 0x4d, 0x52, 0x53, 0x54, 0x55, 0x5a, 0x5b, 0x64, 0x65, 0x6c,
                     0x6d, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77, } };
-    static final short[][] BLACK_RUN_LENGTHS = {
-            { // 2 bits
-                    3, 2, },
+    static final short[][] BLACK_RUN_LENGTHS = { { // 2 bits
+            3, 2, },
             { // 3 bits
                     1, 4, },
             { // 4 bits
@@ -748,9 +730,8 @@ final class CCITTFaxDecoderStream extends FilterInputStream
                     640, 704, 768, 832, 1280, 1344, 1408, 1472, 1536, 1600, 1664, 1728, 512, 576,
                     896, 960, 1024, 1088, 1152, 1216, } };
 
-    public static final short[][] WHITE_CODES = {
-            { // 4 bits
-                    0x7, 0x8, 0xb, 0xc, 0xe, 0xf, },
+    public static final short[][] WHITE_CODES = { { // 4 bits
+            0x7, 0x8, 0xb, 0xc, 0xe, 0xf, },
             { // 5 bits
                     0x12, 0x13, 0x14, 0x1b, 0x7, 0x8, },
             { // 6 bits
@@ -771,9 +752,8 @@ final class CCITTFaxDecoderStream extends FilterInputStream
             { // 12 bits
                     0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x1c, 0x1d, 0x1e, 0x1f, } };
 
-    public static final short[][] WHITE_RUN_LENGTHS = {
-            { // 4 bits
-                    2, 3, 4, 5, 6, 7, },
+    public static final short[][] WHITE_RUN_LENGTHS = { { // 4 bits
+            2, 3, 4, 5, 6, 7, },
             { // 5 bits
                     128, 8, 9, 64, 10, 11, },
             { // 6 bits

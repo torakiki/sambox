@@ -35,9 +35,6 @@ import org.slf4j.LoggerFactory;
  */
 public final class BlendComposite implements Composite
 {
-    /**
-     * Log instance.
-     */
     private static final Logger LOG = LoggerFactory.getLogger(BlendComposite.class);
 
     /**
@@ -45,6 +42,7 @@ public final class BlendComposite implements Composite
      *
      * @param blendMode Desired blend mode
      * @param constantAlpha Constant alpha, must be in the inclusive range [0.0...1.0] or it will be clipped.
+     * @return a blend composite.
      */
     public static Composite getInstance(BlendMode blendMode, float constantAlpha)
     {
@@ -62,10 +60,11 @@ public final class BlendComposite implements Composite
         {
             return AlphaComposite.getInstance(AlphaComposite.SRC_OVER, constantAlpha);
         }
-        return new BlendComposite(blendMode, constantAlpha);
+        else
+        {
+            return new BlendComposite(blendMode, constantAlpha);
+        }
     }
-
-    // TODO - non-separable blending modes
 
     private final BlendMode blendMode;
     private final float constantAlpha;
@@ -81,21 +80,18 @@ public final class BlendComposite implements Composite
     public CompositeContext createContext(ColorModel srcColorModel, ColorModel dstColorModel,
             RenderingHints hints)
     {
-        return new BlendCompositeContext(srcColorModel, dstColorModel, hints);
+        return new BlendCompositeContext(srcColorModel, dstColorModel);
     }
 
     class BlendCompositeContext implements CompositeContext
     {
         private final ColorModel srcColorModel;
         private final ColorModel dstColorModel;
-        private final RenderingHints hints;
 
-        BlendCompositeContext(ColorModel srcColorModel, ColorModel dstColorModel,
-                RenderingHints hints)
+        BlendCompositeContext(ColorModel srcColorModel, ColorModel dstColorModel)
         {
             this.srcColorModel = srcColorModel;
             this.dstColorModel = dstColorModel;
-            this.hints = hints;
         }
 
         @Override
@@ -127,13 +123,16 @@ public final class BlendComposite implements Composite
             int numDstComponents = dstIn.getNumBands();
             boolean dstHasAlpha = (numDstComponents > numDstColorComponents);
 
-            int colorSpaceType = dstColorSpace.getType();
-            boolean subtractive = (colorSpaceType != ColorSpace.TYPE_RGB)
-                    && (colorSpaceType != ColorSpace.TYPE_GRAY);
+            int srcColorSpaceType = srcColorSpace.getType();
+            int dstColorSpaceType = dstColorSpace.getType();
+            boolean subtractive = (dstColorSpaceType != ColorSpace.TYPE_RGB)
+                    && (dstColorSpaceType != ColorSpace.TYPE_GRAY);
 
             boolean blendModeIsSeparable = blendMode instanceof SeparableBlendMode;
             SeparableBlendMode separableBlendMode = blendModeIsSeparable
                     ? (SeparableBlendMode) blendMode : null;
+            NonSeparableBlendMode nonSeparableBlendMode = !blendModeIsSeparable
+                    ? (NonSeparableBlendMode) blendMode : null;
 
             boolean needsColorConversion = !srcColorSpace.equals(dstColorSpace);
 
@@ -146,6 +145,8 @@ public final class BlendComposite implements Composite
 
             float[] srcColor = new float[numSrcColorComponents];
             float[] srcConverted;
+            float[] dstConverted;
+            float[] rgbResult = blendModeIsSeparable ? null : new float[dstHasAlpha ? 4 : 3];
 
             for (int y = y0; y < y1; y++)
             {
@@ -167,21 +168,21 @@ public final class BlendComposite implements Composite
                     float resultAlpha = dstAlpha + srcAlpha - srcAlpha * dstAlpha;
                     float srcAlphaRatio = (resultAlpha > 0) ? srcAlpha / resultAlpha : 0;
 
-                    // convert color
-                    System.arraycopy(srcComponents, 0, srcColor, 0, numSrcColorComponents);
-                    if (needsColorConversion)
-                    {
-                        // TODO - very very slow - Hash results???
-                        float[] cieXYZ = srcColorSpace.toCIEXYZ(srcColor);
-                        srcConverted = dstColorSpace.fromCIEXYZ(cieXYZ);
-                    }
-                    else
-                    {
-                        srcConverted = srcColor;
-                    }
-
                     if (separableBlendMode != null)
                     {
+                        // convert color
+                        System.arraycopy(srcComponents, 0, srcColor, 0, numSrcColorComponents);
+                        if (needsColorConversion)
+                        {
+                            // TODO - very very slow - Hash results???
+                            float[] cieXYZ = srcColorSpace.toCIEXYZ(srcColor);
+                            srcConverted = dstColorSpace.fromCIEXYZ(cieXYZ);
+                        }
+                        else
+                        {
+                            srcConverted = srcColor;
+                        }
+
                         for (int k = 0; k < numDstColorComponents; k++)
                         {
                             float srcValue = srcConverted[k];
@@ -207,7 +208,50 @@ public final class BlendComposite implements Composite
                     }
                     else
                     {
-                        // TODO - nonseparable modes
+                        // Nonseparable blend modes are computed in RGB color space.
+                        // TODO - CMYK color spaces need special treatment.
+
+                        if (srcColorSpaceType == ColorSpace.TYPE_RGB)
+                        {
+                            srcConverted = srcComponents;
+                        }
+                        else
+                        {
+                            srcConverted = srcColorSpace.toRGB(srcComponents);
+                        }
+
+                        if (dstColorSpaceType == ColorSpace.TYPE_RGB)
+                        {
+                            dstConverted = dstComponents;
+                        }
+                        else
+                        {
+                            dstConverted = dstColorSpace.toRGB(dstComponents);
+                        }
+
+                        nonSeparableBlendMode.blend(srcConverted, dstConverted, rgbResult);
+
+                        for (int k = 0; k < 3; k++)
+                        {
+                            float srcValue = srcConverted[k];
+                            float dstValue = dstConverted[k];
+                            float value = rgbResult[k];
+                            value = Math.max(Math.min(value, 1.0f), 0.0f);
+                            value = srcValue + dstAlpha * (value - srcValue);
+                            value = dstValue + srcAlphaRatio * (value - dstValue);
+                            rgbResult[k] = value;
+                        }
+
+                        if (dstColorSpaceType == ColorSpace.TYPE_RGB)
+                        {
+                            System.arraycopy(rgbResult, 0, dstComponents, 0, dstComponents.length);
+                        }
+                        else
+                        {
+                            float[] temp = dstColorSpace.fromRGB(rgbResult);
+                            System.arraycopy(temp, 0, dstComponents, 0,
+                                    Math.min(dstComponents.length, temp.length));
+                        }
                     }
 
                     if (dstHasAlpha)
@@ -219,11 +263,6 @@ public final class BlendComposite implements Composite
                     dstOut.setDataElements(dstOutXShift + x, dstOutYShift + y, dstPixel);
                 }
             }
-        }
-
-        public RenderingHints getHints()
-        {
-            return hints;
         }
     }
 }

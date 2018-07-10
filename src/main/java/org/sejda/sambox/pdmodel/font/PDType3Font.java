@@ -37,6 +37,8 @@ import org.sejda.sambox.pdmodel.font.encoding.Encoding;
 import org.sejda.sambox.pdmodel.font.encoding.GlyphList;
 import org.sejda.sambox.util.Matrix;
 import org.sejda.sambox.util.Vector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A PostScript Type 3 Font.
@@ -45,6 +47,8 @@ import org.sejda.sambox.util.Vector;
  */
 public class PDType3Font extends PDSimpleFont
 {
+    private static final Logger LOG = LoggerFactory.getLogger(PDType3Font.class);
+
     private PDResources resources;
     private COSDictionary charProcs;
     private Matrix fontMatrix;
@@ -65,8 +69,20 @@ public class PDType3Font extends PDSimpleFont
     @Override
     protected final void readEncoding()
     {
-        encoding = new DictionaryEncoding(
-                dict.getDictionaryObject(COSName.ENCODING, COSDictionary.class));
+        COSBase encodingBase = dict.getDictionaryObject(COSName.ENCODING);
+        if (encodingBase instanceof COSName)
+        {
+            COSName encodingName = (COSName) encodingBase;
+            encoding = Encoding.getInstance(encodingName);
+            if (encoding == null)
+            {
+                LOG.warn("Unknown encoding: {}", encodingName.getName());
+            }
+        }
+        else if (encodingBase instanceof COSDictionary)
+        {
+            encoding = new DictionaryEncoding((COSDictionary) encodingBase);
+        }
         glyphList = GlyphList.getAdobeGlyphList();
     }
 

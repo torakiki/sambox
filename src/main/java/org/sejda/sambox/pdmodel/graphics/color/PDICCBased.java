@@ -19,12 +19,15 @@ package org.sejda.sambox.pdmodel.graphics.color;
 import static org.sejda.util.RequireUtils.requireIOCondition;
 
 import java.awt.Color;
+import java.awt.Transparency;
 import java.awt.color.CMMException;
 import java.awt.color.ColorSpace;
 import java.awt.color.ICC_ColorSpace;
 import java.awt.color.ICC_Profile;
 import java.awt.color.ProfileDataException;
 import java.awt.image.BufferedImage;
+import java.awt.image.ComponentColorModel;
+import java.awt.image.DataBuffer;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.io.InputStream;
@@ -150,6 +153,9 @@ public final class PDICCBased extends PDCIEBasedColorSpace
                 awtColorSpace.toRGB(new float[awtColorSpace.getNumComponents()]);
                 // this one triggers an exception for PDFBOX-3549 with KCMS
                 new Color(awtColorSpace, new float[getNumberOfComponents()], 1f);
+                // PDFBOX-4015: this one triggers "CMMException: LCMS error 13" with LCMS
+                new ComponentColorModel(awtColorSpace, false, false, Transparency.OPAQUE,
+                        DataBuffer.TYPE_BYTE);
             }
         }
         catch (ProfileDataException e)

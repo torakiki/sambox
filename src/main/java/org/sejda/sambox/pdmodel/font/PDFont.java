@@ -19,7 +19,6 @@ package org.sejda.sambox.pdmodel.font;
 import static java.util.Objects.nonNull;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
@@ -32,6 +31,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.fontbox.afm.FontMetrics;
 import org.apache.fontbox.cmap.CMap;
 import org.apache.fontbox.util.BoundingBox;
+import org.sejda.io.FastByteArrayOutputStream;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSArrayList;
 import org.sejda.sambox.cos.COSBase;
@@ -312,8 +312,9 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
      */
     public final byte[] encode(String text) throws IOException
     {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        for (int offset = 0; offset < text.length();)
+        FastByteArrayOutputStream out = new FastByteArrayOutputStream();
+        int offset = 0;
+        while (offset < text.length())
         {
             int codePoint = text.codePointAt(offset);
 
@@ -327,12 +328,11 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
     }
 
     /**
-     * Similar to encode() but handles leniently cases where fonts don't have a glyph by assuming
-     * the identity mapping
+     * Similar to encode() but handles leniently cases where fonts don't have a glyph by assuming the identity mapping
      */
     public final byte[] encodeLeniently(String text) throws IOException
     {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        FastByteArrayOutputStream out = new FastByteArrayOutputStream();
         for (int offset = 0; offset < text.length();)
         {
             int codePoint = text.codePointAt(offset);
@@ -342,9 +342,10 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
             try
             {
                 bytes = encode(codePoint);
-            } catch (IllegalArgumentException e)
+            }
+            catch (IllegalArgumentException e)
             {
-                if(e.getMessage().contains("No glyph"))
+                if (e.getMessage().contains("No glyph"))
                 {
                     bytes = new byte[] { (byte) codePoint };
                 }
@@ -396,8 +397,8 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
     }
 
     /**
-     * Similar to getStringWidth() but handles leniently fonts where glyphs are missing, assuming
-     * the identity mapping of glyphs
+     * Similar to getStringWidth() but handles leniently fonts where glyphs are missing, assuming the identity mapping
+     * of glyphs
      *
      * Uses encodeLeniently() instead of encode()
      */

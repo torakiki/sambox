@@ -899,7 +899,7 @@ public abstract class PDFStreamEngine
     protected final Stack<PDGraphicsState> saveGraphicsStack()
     {
         Stack<PDGraphicsState> savedStack = graphicsStack;
-        graphicsStack = new Stack<PDGraphicsState>();
+        graphicsStack = new Stack<>();
         graphicsStack.add(savedStack.peek().clone());
         return savedStack;
     }
@@ -976,7 +976,7 @@ public abstract class PDFStreamEngine
     }
 
     /**
-     * Returns the stream' resources.
+     * @return the stream' resources. This is mainly to be used by the {@link OperatorProcessor} classes
      */
     public PDResources getResources()
     {

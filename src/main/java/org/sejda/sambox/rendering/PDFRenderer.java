@@ -20,6 +20,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.PDPage;
@@ -31,8 +32,7 @@ import org.sejda.sambox.pdmodel.interactive.annotation.AnnotationFilter;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotation;
 
 /**
- * Renders a PDF document to an AWT BufferedImage.
- * This class may be overridden in order to perform custom rendering.
+ * Renders a PDF document to an AWT BufferedImage. This class may be overridden in order to perform custom rendering.
  *
  * @author John Hewson
  */
@@ -55,6 +55,7 @@ public class PDFRenderer
 
     /**
      * Creates a new PDFRenderer.
+     * 
      * @param document the document to render
      */
     public PDFRenderer(PDDocument document)
@@ -75,7 +76,8 @@ public class PDFRenderer
     /**
      * Set the AnnotationFilter.
      *
-     * <p>Allows to only render annotation accepted by the filter.
+     * <p>
+     * Allows to only render annotation accepted by the filter.
      *
      * @param annotationsFilter the AnnotationFilter
      */
@@ -86,6 +88,7 @@ public class PDFRenderer
 
     /**
      * Returns the given page as an RGB image at 72 DPI
+     * 
      * @param pageIndex the zero-based index of the page to be converted.
      * @return the rendered page image
      * @throws IOException if the PDF cannot be read
@@ -96,8 +99,8 @@ public class PDFRenderer
     }
 
     /**
-     * Returns the given page as an RGB image at the given scale.
-     * A scale of 1 will render at 72 DPI.
+     * Returns the given page as an RGB image at the given scale. A scale of 1 will render at 72 DPI.
+     * 
      * @param pageIndex the zero-based index of the page to be converted
      * @param scale the scaling factor, where 1 = 72 DPI
      * @return the rendered page image
@@ -110,6 +113,7 @@ public class PDFRenderer
 
     /**
      * Returns the given page as an RGB image at the given DPI.
+     * 
      * @param pageIndex the zero-based index of the page to be converted
      * @param dpi the DPI (dots per inch) to render at
      * @return the rendered page image
@@ -122,6 +126,7 @@ public class PDFRenderer
 
     /**
      * Returns the given page as an RGB image at the given DPI.
+     * 
      * @param pageIndex the zero-based index of the page to be converted
      * @param dpi the DPI (dots per inch) to render at
      * @param imageType the type of image to return
@@ -136,6 +141,7 @@ public class PDFRenderer
 
     /**
      * Returns the given page as an RGB or ARGB image at the given scale.
+     * 
      * @param pageIndex the zero-based index of the page to be converted
      * @param scale the scaling factor, where 1 = 72 DPI
      * @param imageType the type of image to return
@@ -158,8 +164,8 @@ public class PDFRenderer
         if (imageType != ImageType.ARGB && hasBlendMode(page))
         {
             // PDFBOX-4095: if the PDF has blending on the top level, draw on transparent background
-            // Inpired from PDF.js: if a PDF page uses any blend modes other than Normal, 
-            // PDF.js renders everything on a fully transparent RGBA canvas. 
+            // Inpired from PDF.js: if a PDF page uses any blend modes other than Normal,
+            // PDF.js renders everything on a fully transparent RGBA canvas.
             // Finally when the page has been rendered, PDF.js draws the RGBA canvas on a white canvas.
             bimType = BufferedImage.TYPE_INT_ARGB;
         }
@@ -187,7 +193,7 @@ public class PDFRenderer
         }
         g.clearRect(0, 0, image.getWidth(), image.getHeight());
 
-        transform(g, page, scale);
+        transform(g, page, scale, scale);
 
         // the end-user may provide a custom PageDrawer
         PageDrawerParameters parameters = new PageDrawerParameters(this, page);
@@ -199,8 +205,8 @@ public class PDFRenderer
         if (image.getType() != imageType.toBufferedImageType())
         {
             // PDFBOX-4095: draw temporary transparent image on white background
-            BufferedImage newImage =
-                    new BufferedImage(image.getWidth(), image.getHeight(), imageType.toBufferedImageType());
+            BufferedImage newImage = new BufferedImage(image.getWidth(), image.getHeight(),
+                    imageType.toBufferedImageType());
             Graphics2D dstGraphics = newImage.createGraphics();
             dstGraphics.setBackground(Color.WHITE);
             dstGraphics.clearRect(0, 0, image.getWidth(), image.getHeight());
@@ -214,6 +220,7 @@ public class PDFRenderer
 
     /**
      * Renders a given page to an AWT Graphics2D instance.
+     * 
      * @param pageIndex the zero-based index of the page to be converted
      * @param graphics the Graphics2D on which to draw the page
      * @throws IOException if the PDF cannot be read
@@ -225,6 +232,7 @@ public class PDFRenderer
 
     /**
      * Renders a given page to an AWT Graphics2D instance.
+     * 
      * @param pageIndex the zero-based index of the page to be converted
      * @param graphics the Graphics2D on which to draw the page
      * @param scale the scale to draw the page at
@@ -233,10 +241,26 @@ public class PDFRenderer
     public void renderPageToGraphics(int pageIndex, Graphics2D graphics, float scale)
             throws IOException
     {
+        renderPageToGraphics(pageIndex, graphics, scale, scale);
+    }
+
+    /**
+     * Renders a given page to an AWT Graphics2D instance.
+     * 
+     * @param pageIndex the zero-based index of the page to be converted
+     * @param graphics the Graphics2D on which to draw the page
+     * @param scaleX the scale to draw the page at for the x-axis
+     * @param scaleY the scale to draw the page at for the y-axis
+     * @throws IOException if the PDF cannot be read
+     */
+    public void renderPageToGraphics(int pageIndex, Graphics2D graphics, float scaleX, float scaleY)
+            throws IOException
+
+    {
         PDPage page = document.getPage(pageIndex);
         // TODO need width/wight calculations? should these be in PageDrawer?
 
-        transform(graphics, page, scale);
+        transform(graphics, page, scaleX, scaleY);
 
         PDRectangle cropBox = page.getCropBox();
         graphics.clearRect(0, 0, (int) cropBox.getWidth(), (int) cropBox.getHeight());
@@ -248,9 +272,9 @@ public class PDFRenderer
     }
 
     // scale rotate translate
-    private void transform(Graphics2D graphics, PDPage page, float scale)
+    private void transform(Graphics2D graphics, PDPage page, float scaleX, float scaleY)
     {
-        graphics.scale(scale, scale);
+        graphics.scale(scaleX, scaleY);
 
         // TODO should we be passing the scale to PageDrawer rather than messing with Graphics?
         int rotationAngle = page.getRotation();
@@ -303,7 +327,7 @@ public class PDFRenderer
             PDExtendedGraphicsState extGState = resources.getExtGState(name);
             if (extGState == null)
             {
-                // can happen if key exists but no value 
+                // can happen if key exists but no value
                 // see PDFBOX-3950-23EGDHXSBBYQLKYOKGZUOVYVNE675PRD.pdf
                 continue;
             }
@@ -314,5 +338,14 @@ public class PDFRenderer
             }
         }
         return false;
+    }
+
+    /**
+     * @param subsamplingAllowed
+     */
+    public void setSubsamplingAllowed(boolean subsamplingAllowed)
+    {
+        // TODO Auto-generated method stub
+
     }
 }

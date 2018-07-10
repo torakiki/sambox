@@ -20,9 +20,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
+import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.cos.COSString;
 import org.sejda.sambox.pdmodel.PDDocument;
 
 /**
@@ -33,20 +38,26 @@ public class PDChoiceTest
 {
     private PDDocument document;
     private PDAcroForm acroForm;
+    private List<String> options = new ArrayList<>();
 
     @Before
     public void setUp()
     {
         document = new PDDocument();
         acroForm = new PDAcroForm(document);
+        options.clear();
+        options.add(" ");
+        options.add("A");
+        options.add("B");
     }
 
     @Test
     public void createListBox()
     {
         PDChoice choiceField = new PDListBox(acroForm);
-        
-        assertEquals(choiceField.getFieldType(), choiceField.getCOSObject().getNameAsString(COSName.FT));
+
+        assertEquals(choiceField.getFieldType(),
+                choiceField.getCOSObject().getNameAsString(COSName.FT));
         assertEquals(choiceField.getFieldType(), "Ch");
         assertFalse(choiceField.isCombo());
     }
@@ -55,11 +66,83 @@ public class PDChoiceTest
     public void createComboBox()
     {
         PDChoice choiceField = new PDComboBox(acroForm);
-        
-        assertEquals(choiceField.getFieldType(), choiceField.getCOSObject().getNameAsString(COSName.FT));
+
+        assertEquals(choiceField.getFieldType(),
+                choiceField.getCOSObject().getNameAsString(COSName.FT));
         assertEquals(choiceField.getFieldType(), "Ch");
         assertTrue(choiceField.isCombo());
     }
 
-}
+    @Test
+    public void getOptionsFromStrings()
+    {
+        PDChoice choiceField = new PDComboBox(acroForm);
+        COSArray choiceFieldOptions = new COSArray();
+        choiceFieldOptions.add(COSString.parseLiteral(" "));
+        choiceFieldOptions.add(COSString.parseLiteral("A"));
+        choiceFieldOptions.add(COSString.parseLiteral("B"));
 
+        // add the options using the low level COS model as the PD model will
+        // abstract the COSArray
+        choiceField.getCOSObject().setItem(COSName.OPT, choiceFieldOptions);
+
+        assertEquals(options, choiceField.getOptions());
+    }
+
+    @Test
+    public void getOptionsFromCOSArray()
+    {
+        PDChoice choiceField = new PDComboBox(acroForm);
+        COSArray choiceFieldOptions = new COSArray();
+
+        // add entry to options
+        COSArray entry = new COSArray();
+        entry.add(COSString.parseLiteral(" "));
+        choiceFieldOptions.add(entry);
+
+        // add entry to options
+        entry = new COSArray();
+        entry.add(COSString.parseLiteral("A"));
+        choiceFieldOptions.add(entry);
+
+        // add entry to options
+        entry = new COSArray();
+        entry.add(COSString.parseLiteral("B"));
+        choiceFieldOptions.add(entry);
+
+        // add the options using the low level COS model as the PD model will
+        // abstract the COSArray
+        choiceField.getCOSObject().setItem(COSName.OPT, choiceFieldOptions);
+
+        assertEquals(options, choiceField.getOptions());
+    }
+
+    /*
+     * Get the entries form a moxed values array. See PDFBOX-4185
+     */
+    @Test
+    public void getOptionsFromMixed()
+    {
+        PDChoice choiceField = new PDComboBox(acroForm);
+        COSArray choiceFieldOptions = new COSArray();
+
+        // add string entry to options
+        choiceFieldOptions.add(COSString.parseLiteral(" "));
+
+        // add array entry to options
+        COSArray entry = new COSArray();
+        entry.add(COSString.parseLiteral("A"));
+        choiceFieldOptions.add(entry);
+
+        // add array entry to options
+        entry = new COSArray();
+        entry.add(COSString.parseLiteral("B"));
+        choiceFieldOptions.add(entry);
+
+        // add the options using the low level COS model as the PD model will
+        // abstract the COSArray
+        choiceField.getCOSObject().setItem(COSName.OPT, choiceFieldOptions);
+
+        assertEquals(options, choiceField.getOptions());
+    }
+}

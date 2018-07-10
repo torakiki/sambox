@@ -353,15 +353,13 @@ public final class PDPageContentStream implements Closeable
     }
 
     /**
-     * Shows the given text at the location specified by the current text matrix with the given
-     * interspersed positioning. This allows the user to efficiently position each glyph or sequence
-     * of glyphs.
+     * Shows the given text at the location specified by the current text matrix with the given interspersed
+     * positioning. This allows the user to efficiently position each glyph or sequence of glyphs.
      *
-     * @param textWithPositioningArray An array consisting of String and Float types. Each String is
-     * output to the page using the current text matrix. Using the default coordinate system, each
-     * interspersed number adjusts the current text matrix by translating to the left or down for
-     * horizontal and vertical text respectively. The number is expressed in thousands of a text
-     * space unit, and may be negative.
+     * @param textWithPositioningArray An array consisting of String and Float types. Each String is output to the page
+     * using the current text matrix. Using the default coordinate system, each interspersed number adjusts the current
+     * text matrix by translating to the left or down for horizontal and vertical text respectively. The number is
+     * expressed in thousands of a text space unit, and may be negative.
      *
      * @throws IOException if an io exception occurs.
      */
@@ -380,7 +378,8 @@ public final class PDPageContentStream implements Closeable
             }
             else
             {
-                throw new IllegalArgumentException("Argument must consist of array of Float and String types");
+                throw new IllegalArgumentException(
+                        "Argument must consist of array of Float and String types");
             }
         }
         write("] ");
@@ -423,7 +422,8 @@ public final class PDPageContentStream implements Closeable
         // Unicode code points to keep when subsetting
         if (font.willBeSubset())
         {
-            for (int offset = 0; offset < text.length();)
+            int offset = 0;
+            while (offset < text.length())
             {
                 int codePoint = text.codePointAt(offset);
                 font.addToSubset(codePoint);
@@ -702,6 +702,11 @@ public final class PDPageContentStream implements Closeable
      */
     public void transform(Matrix matrix) throws IOException
     {
+        if (inTextMode)
+        {
+            LOG.warn(
+                    "Modifying the current transformation matrix is not allowed within text objects.");
+        }
         writeAffineTransform(matrix.createAffineTransform());
         writeOperator("cm");
     }
@@ -713,6 +718,10 @@ public final class PDPageContentStream implements Closeable
      */
     public void saveGraphicsState() throws IOException
     {
+        if (inTextMode)
+        {
+            LOG.warn("Saving the graphics state is not allowed within text objects.");
+        }
         if (!fontStack.isEmpty())
         {
             fontStack.push(fontStack.peek());
@@ -735,6 +744,10 @@ public final class PDPageContentStream implements Closeable
      */
     public void restoreGraphicsState() throws IOException
     {
+        if (inTextMode)
+        {
+            LOG.warn("Restoring the graphics state is not allowed within text objects.");
+        }
         if (!fontStack.isEmpty())
         {
             fontStack.pop();
@@ -757,10 +770,7 @@ public final class PDPageContentStream implements Closeable
         {
             return COSName.getPDFName(colorSpace.getName());
         }
-        else
-        {
-            return resources.add(colorSpace);
-        }
+        return resources.add(colorSpace);
     }
 
     public void setTextRenderingMode(RenderingMode renderingMode) throws IOException
@@ -1636,12 +1646,12 @@ public final class PDPageContentStream implements Closeable
         IOUtils.close(writer);
     }
 
-    private boolean isOutside255Interval(int val)
+    private static boolean isOutside255Interval(int val)
     {
         return val < 0 || val > 255;
     }
 
-    private boolean isOutsideOneInterval(double val)
+    private static boolean isOutsideOneInterval(double val)
     {
         return val < 0 || val > 1;
     }
@@ -1720,5 +1730,19 @@ public final class PDPageContentStream implements Closeable
     {
         writeOperand(scale);
         writeOperator("Tz");
+    }
+
+    /**
+     * Set the text rise value, i.e. move the baseline up or down. This is useful for drawing superscripts or
+     * subscripts.
+     *
+     * @param rise Specifies the distance, in unscaled text space units, to move the baseline up or down from its
+     * default location. 0 restores the default location.
+     * @throws IOException
+     */
+    public void setTextRise(float rise) throws IOException
+    {
+        writeOperand(rise);
+        writeOperator("Ts");
     }
 }

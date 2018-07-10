@@ -63,8 +63,8 @@ public final class FileTypeDetector
         ROOT.addPath(FileType.PCX, new byte[] { 0x0A, 0x05, 0x01 });
         ROOT.addPath(FileType.RIFF, "RIFF".getBytes(StandardCharsets.ISO_8859_1));
 
-        ROOT.addPath(FileType.ARW, "II".getBytes(StandardCharsets.ISO_8859_1),
-                new byte[] { 0x2a, 0x00, 0x08, 0x00 });
+        // https://github.com/drewnoakes/metadata-extractor/issues/217
+        // root.addPath(FileType.ARW, "II".getBytes(Charsets.ISO_8859_1), new byte[]{0x2a, 0x00, 0x08, 0x00})
         ROOT.addPath(FileType.CRW, "II".getBytes(StandardCharsets.ISO_8859_1),
                 new byte[] { 0x1a, 0x00, 0x00, 0x00 },
                 "HEAPCCDR".getBytes(StandardCharsets.ISO_8859_1));

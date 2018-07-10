@@ -108,7 +108,7 @@ public class PDAppearanceCharacteristicsDictionary extends PDDictionaryWrapper
      */
     public String getNormalCaption()
     {
-        return this.getCOSObject().getString("CA");
+        return this.getCOSObject().getString(COSName.CA);
     }
 
     /**
@@ -118,7 +118,7 @@ public class PDAppearanceCharacteristicsDictionary extends PDDictionaryWrapper
      */
     public void setNormalCaption(String caption)
     {
-        this.getCOSObject().setString("CA", caption);
+        this.getCOSObject().setString(COSName.CA, caption);
     }
 
     /**
@@ -138,7 +138,7 @@ public class PDAppearanceCharacteristicsDictionary extends PDDictionaryWrapper
      */
     public void setRolloverCaption(String caption)
     {
-        this.getCOSObject().setString("RC", caption);
+        this.getCOSObject().setString(COSName.RC, caption);
     }
 
     /**
@@ -148,7 +148,7 @@ public class PDAppearanceCharacteristicsDictionary extends PDDictionaryWrapper
      */
     public String getAlternateCaption()
     {
-        return this.getCOSObject().getString("AC");
+        return this.getCOSObject().getString(COSName.AC);
     }
 
     /**
@@ -158,7 +158,7 @@ public class PDAppearanceCharacteristicsDictionary extends PDDictionaryWrapper
      */
     public void setAlternateCaption(String caption)
     {
-        this.getCOSObject().setString("AC", caption);
+        this.getCOSObject().setString(COSName.AC, caption);
     }
 
     /**
@@ -168,7 +168,7 @@ public class PDAppearanceCharacteristicsDictionary extends PDDictionaryWrapper
      */
     public PDFormXObject getNormalIcon()
     {
-        COSStream i = this.getCOSObject().getDictionaryObject("I", COSStream.class);
+        COSStream i = this.getCOSObject().getDictionaryObject(COSName.I, COSStream.class);
         if (nonNull(i))
         {
             return new PDFormXObject(i);
@@ -183,7 +183,7 @@ public class PDAppearanceCharacteristicsDictionary extends PDDictionaryWrapper
      */
     public PDFormXObject getRolloverIcon()
     {
-        COSStream i = this.getCOSObject().getDictionaryObject("RI", COSStream.class);
+        COSStream i = this.getCOSObject().getDictionaryObject(COSName.RI, COSStream.class);
         if (nonNull(i))
         {
             return new PDFormXObject(i);
@@ -198,7 +198,7 @@ public class PDAppearanceCharacteristicsDictionary extends PDDictionaryWrapper
      */
     public PDFormXObject getAlternateIcon()
     {
-        COSStream i = this.getCOSObject().getDictionaryObject("IX", COSStream.class);
+        COSStream i = this.getCOSObject().getDictionaryObject(COSName.IX, COSStream.class);
         if (nonNull(i))
         {
             return new PDFormXObject(i);

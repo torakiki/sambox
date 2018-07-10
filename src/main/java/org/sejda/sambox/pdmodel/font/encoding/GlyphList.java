@@ -16,12 +16,15 @@
  */
 package org.sejda.sambox.pdmodel.font.encoding;
 
+import static java.util.Objects.nonNull;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,7 +98,7 @@ public final class GlyphList
     private final Map<String, String> unicodeToName;
 
     // additional read/write cache for uniXXXX names
-    private final Map<String, String> uniNameToUnicodeCache = new HashMap<>();
+    private final Map<String, String> uniNameToUnicodeCache = new ConcurrentHashMap<>();
 
     /**
      * Creates a new GlyphList from a glyph list file.
@@ -283,7 +286,11 @@ public final class GlyphList
                     LOG.warn("Not a number in Unicode character name: {}", name);
                 }
             }
-            uniNameToUnicodeCache.put(name, unicode);
+            if (nonNull(unicode))
+            {
+                // null value not allowed in ConcurrentHashMap
+                uniNameToUnicodeCache.put(name, unicode);
+            }
         }
         return unicode;
     }

@@ -15,8 +15,6 @@
  */
 package org.sejda.sambox.filter;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -53,60 +51,39 @@ public class LZWFilter extends Filter
      * The LZW end of data code.
      */
     public static final long EOD = 257;
-    
-    //BEWARE: codeTable must be local to each method, because there is only
+
+    // BEWARE: codeTable must be local to each method, because there is only
     // one instance of each filter
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public DecodeResult decode(InputStream encoded, OutputStream decoded,
-            COSDictionary parameters, int index) throws IOException
+    public DecodeResult decode(InputStream encoded, OutputStream decoded, COSDictionary parameters,
+            int index) throws IOException
     {
-        int predictor = -1;
-        int earlyChange = 1;
 
         COSDictionary decodeParams = getDecodeParams(parameters, index);
-        if (decodeParams != null)
-        {
-            predictor = decodeParams.getInt(COSName.PREDICTOR);
-            earlyChange = decodeParams.getInt(COSName.EARLY_CHANGE, 1);
-            if (earlyChange != 0 && earlyChange != 1)
-            {
-                earlyChange = 1;
-            }
-        }
-        if (predictor > 1)
-        {
-            @SuppressWarnings("null")
-            int colors = Math.min(decodeParams.getInt(COSName.COLORS, 1), 32);
-            int bitsPerPixel = decodeParams.getInt(COSName.BITS_PER_COMPONENT, 8);
-            int columns = decodeParams.getInt(COSName.COLUMNS, 1);
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            doLZWDecode(encoded, baos, earlyChange);
-            ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-            Predictor.decodePredictor(predictor, colors, bitsPerPixel, columns, bais, decoded);
-            decoded.flush();
-            baos.reset();
-            bais.reset();
-        }
-        else
+        int earlyChange = decodeParams.getInt(COSName.EARLY_CHANGE, 1);
+
+        if (earlyChange != 0 && earlyChange != 1)
         {
             doLZWDecode(encoded, decoded, earlyChange);
         }
+
+        doLZWDecode(encoded, Predictor.wrapPredictor(decoded, decodeParams), earlyChange);
         return new DecodeResult(parameters);
     }
 
-    private void doLZWDecode(InputStream encoded, OutputStream decoded, int earlyChange) throws IOException
+    private void doLZWDecode(InputStream encoded, OutputStream decoded, int earlyChange)
+            throws IOException
     {
-        List<byte[]> codeTable = new ArrayList<byte[]>();
+        List<byte[]> codeTable = new ArrayList<>();
         int chunk = 9;
-        final MemoryCacheImageInputStream in = new MemoryCacheImageInputStream(encoded);
         long nextCommand;
         long prevCommand = -1;
 
-        try
+        try (MemoryCacheImageInputStream in = new MemoryCacheImageInputStream(encoded))
         {
             while ((nextCommand = in.readBits(chunk)) != EOD)
             {
@@ -141,7 +118,7 @@ public class LZWFilter extends Filter
                         decoded.write(newData);
                         codeTable.add(newData);
                     }
-                    
+
                     chunk = calculateChunk(codeTable.size(), earlyChange);
                     prevCommand = nextCommand;
                 }
@@ -154,8 +131,8 @@ public class LZWFilter extends Filter
         decoded.flush();
     }
 
-    private void checkIndexBounds(List<byte[]> codeTable, long index, MemoryCacheImageInputStream in)
-            throws IOException
+    private static void checkIndexBounds(List<byte[]> codeTable, long index,
+            MemoryCacheImageInputStream in) throws IOException
     {
         if (index < 0)
         {
@@ -177,68 +154,69 @@ public class LZWFilter extends Filter
         int chunk = 9;
 
         byte[] inputPattern = null;
-        final MemoryCacheImageOutputStream out = new MemoryCacheImageOutputStream(encoded);
-        out.writeBits(CLEAR_TABLE, chunk);
-        int foundCode = -1;
-        int r;
-        while ((r = rawData.read()) != -1)
+        try (MemoryCacheImageOutputStream out = new MemoryCacheImageOutputStream(encoded))
         {
-            byte by = (byte) r;
-            if (inputPattern == null)
+            out.writeBits(CLEAR_TABLE, chunk);
+            int foundCode = -1;
+            int r;
+            while ((r = rawData.read()) != -1)
             {
-                inputPattern = new byte[] { by };
-                foundCode = by & 0xff;
-            }
-            else
-            {
-                inputPattern = Arrays.copyOf(inputPattern, inputPattern.length + 1);
-                inputPattern[inputPattern.length - 1] = by;
-                int newFoundCode = findPatternCode(codeTable, inputPattern);
-                if (newFoundCode == -1)
+                byte by = (byte) r;
+                if (inputPattern == null)
                 {
-                    // use previous
-                    chunk = calculateChunk(codeTable.size() - 1, 1);
-                    out.writeBits(foundCode, chunk);
-                    // create new table entry
-                    codeTable.add(inputPattern);
-
-                    if (codeTable.size() == 4096)
-                    {
-                        // code table is full
-                        out.writeBits(CLEAR_TABLE, chunk);
-                        codeTable = createCodeTable();
-                    }
-
                     inputPattern = new byte[] { by };
                     foundCode = by & 0xff;
                 }
                 else
                 {
-                    foundCode = newFoundCode;
+                    inputPattern = Arrays.copyOf(inputPattern, inputPattern.length + 1);
+                    inputPattern[inputPattern.length - 1] = by;
+                    int newFoundCode = findPatternCode(codeTable, inputPattern);
+                    if (newFoundCode == -1)
+                    {
+                        // use previous
+                        chunk = calculateChunk(codeTable.size() - 1, 1);
+                        out.writeBits(foundCode, chunk);
+                        // create new table entry
+                        codeTable.add(inputPattern);
+
+                        if (codeTable.size() == 4096)
+                        {
+                            // code table is full
+                            out.writeBits(CLEAR_TABLE, chunk);
+                            codeTable = createCodeTable();
+                        }
+
+                        inputPattern = new byte[] { by };
+                        foundCode = by & 0xff;
+                    }
+                    else
+                    {
+                        foundCode = newFoundCode;
+                    }
                 }
             }
-        }
-        if (foundCode != -1)
-        {
-            chunk = calculateChunk(codeTable.size() - 1, 1);
-            out.writeBits(foundCode, chunk);
-        }
+            if (foundCode != -1)
+            {
+                chunk = calculateChunk(codeTable.size() - 1, 1);
+                out.writeBits(foundCode, chunk);
+            }
 
-        // PPDFBOX-1977: the decoder wouldn't know that the encoder would output 
-        // an EOD as code, so he would have increased his own code table and 
-        // possibly adjusted the chunk. Therefore, the encoder must behave as 
-        // if the code table had just grown and thus it must be checked it is
-        // needed to adjust the chunk, based on an increased table size parameter
-        chunk = calculateChunk(codeTable.size(), 1);
+            // PPDFBOX-1977: the decoder wouldn't know that the encoder would output
+            // an EOD as code, so he would have increased his own code table and
+            // possibly adjusted the chunk. Therefore, the encoder must behave as
+            // if the code table had just grown and thus it must be checked it is
+            // needed to adjust the chunk, based on an increased table size parameter
+            chunk = calculateChunk(codeTable.size(), 1);
 
-        out.writeBits(EOD, chunk);
-        
-        // pad with 0
-        out.writeBits(0, 7);
-        
-        // must do or file will be empty :-(
-        out.flush();
-        out.close();
+            out.writeBits(EOD, chunk);
+
+            // pad with 0
+            out.writeBits(0, 7);
+
+            // must do or file will be empty :-(
+            out.flush();
+        }
     }
 
     /**
@@ -246,8 +224,7 @@ public class LZWFilter extends Filter
      *
      * @param codeTable The LZW code table.
      * @param pattern The pattern to be searched for.
-     * @return The index of the longest matching pattern or -1 if nothing is
-     * found.
+     * @return The index of the longest matching pattern or -1 if nothing is found.
      */
     private int findPatternCode(List<byte[]> codeTable, byte[] pattern)
     {
@@ -261,7 +238,7 @@ public class LZWFilter extends Filter
                 if (foundCode != -1)
                 {
                     // we already found pattern with size > 1
-                    return foundCode; 
+                    return foundCode;
                 }
                 else if (pattern.length > 1)
                 {
@@ -270,7 +247,8 @@ public class LZWFilter extends Filter
                 }
             }
             byte[] tryPattern = codeTable.get(i);
-            if ((foundCode != -1 || tryPattern.length > foundLen) && Arrays.equals(tryPattern, pattern))
+            if ((foundCode != -1 || tryPattern.length > foundLen)
+                    && Arrays.equals(tryPattern, pattern))
             {
                 foundCode = i;
                 foundLen = tryPattern.length;
@@ -280,12 +258,11 @@ public class LZWFilter extends Filter
     }
 
     /**
-     * Init the code table with 1 byte entries and the EOD and CLEAR_TABLE
-     * markers.
+     * Init the code table with 1 byte entries and the EOD and CLEAR_TABLE markers.
      */
     private List<byte[]> createCodeTable()
     {
-        List<byte[]> codeTable = new ArrayList<byte[]>(4096);
+        List<byte[]> codeTable = new ArrayList<>(4096);
         for (int i = 0; i < 256; ++i)
         {
             codeTable.add(new byte[] { (byte) (i & 0xFF) });

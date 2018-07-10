@@ -549,7 +549,8 @@ public class PDType0Font extends PDFont implements PDVectorFont
         {
             descendant = getDescendantFont().getClass().getSimpleName();
         }
-        return getClass().getSimpleName() + "/" + descendant + " " + getBaseFont();
+        return getClass().getSimpleName() + "/" + descendant + ", PostScript name: "
+                + getBaseFont();
     }
 
     @Override

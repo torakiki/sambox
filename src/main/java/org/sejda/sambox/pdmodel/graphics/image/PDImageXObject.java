@@ -18,7 +18,9 @@ package org.sejda.sambox.pdmodel.graphics.image;
 
 import static org.sejda.util.RequireUtils.requireNotNullArg;
 
-import java.awt.*;
+import java.awt.Graphics2D;
+import java.awt.Paint;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.io.File;
@@ -45,6 +47,8 @@ import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
 import org.sejda.sambox.util.filetypedetector.FileType;
 import org.sejda.sambox.util.filetypedetector.FileTypeDetector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An Image XObject.
@@ -54,6 +58,9 @@ import org.sejda.sambox.util.filetypedetector.FileTypeDetector;
  */
 public final class PDImageXObject extends PDXObject implements PDImage
 {
+
+    private static final Logger LOG = LoggerFactory.getLogger(PDImageXObject.class);
+
     private SoftReference<BufferedImage> cachedImage;
     private PDColorSpace colorSpace;
     private PDResources resources; // current resource dictionary (has color spaces)
@@ -131,7 +138,8 @@ public final class PDImageXObject extends PDXObject implements PDImage
         super(stream, COSName.IMAGE);
         this.resources = resources;
         List<COSName> filters = stream.getFilters();
-        if (filters != null && !filters.isEmpty() && COSName.JPX_DECODE.equals(filters.get(filters.size() - 1)))
+        if (filters != null && !filters.isEmpty()
+                && COSName.JPX_DECODE.equals(filters.get(filters.size() - 1)))
         {
             DecodeResult decodeResult = stream.getCOSObject().getDecodeResult();
             stream.getCOSObject().addAll(decodeResult.getParameters());
@@ -156,11 +164,21 @@ public final class PDImageXObject extends PDXObject implements PDImage
         }
         if (fileType.equals(FileType.TIFF))
         {
-            return CCITTFactory.createFromFile(file);
+            try
+            {
+                return CCITTFactory.createFromFile(file);
+            }
+            catch (IOException ex)
+            {
+                LOG.warn("Reading as TIFF failed, setting fileType to PNG", ex);
+                // Plan B: try reading with ImageIO
+                // common exception:
+                // First image in tiff is not CCITT T4 or T6 compressed
+            }
         }
         // last resort, let's see if ImageIO can read it
         BufferedImage image = ImageIO.read(file);
-        requireNotNullArg(image, "Image type not supported " + file.getName());
+        requireNotNullArg(image, "Image type " + fileType + " not supported " + file.getName());
         return LosslessFactory.createFromImage(image);
     }
 
@@ -218,7 +236,7 @@ public final class PDImageXObject extends PDXObject implements PDImage
         if (cachedImage != null)
         {
             BufferedImage cached = cachedImage.get();
-            if(cached != null)
+            if (cached != null)
             {
                 return cached;
             }
@@ -349,9 +367,12 @@ public final class PDImageXObject extends PDXObject implements PDImage
     {
         BufferedImage image2 = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         Graphics2D g = image2.createGraphics();
-        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-                RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-        g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        if (getInterpolate())
+        {
+            g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                    RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+            g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        }
         g.drawImage(image, 0, 0, width, height, 0, 0, image.getWidth(), image.getHeight(), null);
         g.dispose();
         return image2;

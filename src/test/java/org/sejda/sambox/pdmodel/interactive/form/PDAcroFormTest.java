@@ -20,10 +20,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
@@ -37,6 +40,7 @@ import org.sejda.sambox.pdmodel.PDDocumentCatalog;
 import org.sejda.sambox.pdmodel.PDPage;
 import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
+import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotation;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
 
 /**
@@ -123,6 +127,80 @@ public class PDAcroFormTest
             doc.getDocumentCatalog().getAcroForm().flatten();
             assertTrue(doc.getDocumentCatalog().getAcroForm().getFields().isEmpty());
         }
+    }
+
+    @Test
+    public void testFlattenSpecificFieldsOnly() throws IOException
+    {
+
+        try (PDDocument doc = PDFParser
+                .parse(SeekableSources.inMemorySeekableSourceFrom(getClass().getResourceAsStream(
+                        "/org/sejda/sambox/pdmodel/interactive/form/AlignmentTests.pdf"))))
+        {
+            List<PDField> fieldsToFlatten = new ArrayList<>();
+            PDAcroForm acroFormToFlatten = doc.getDocumentCatalog().getAcroForm();
+            int numFieldsBeforeFlatten = acroFormToFlatten.getFields().size();
+            int numWidgetsBeforeFlatten = countWidgets(doc);
+
+            fieldsToFlatten.add(acroFormToFlatten.getField("AlignLeft-Border_Small-Filled"));
+            fieldsToFlatten.add(acroFormToFlatten.getField("AlignLeft-Border_Medium-Filled"));
+            fieldsToFlatten.add(acroFormToFlatten.getField("AlignLeft-Border_Wide-Filled"));
+            fieldsToFlatten.add(acroFormToFlatten.getField("AlignLeft-Border_Wide_Clipped-Filled"));
+
+            acroFormToFlatten.flatten(fieldsToFlatten, true);
+            int numFieldsAfterFlatten = acroFormToFlatten.getFields().size();
+            int numWidgetsAfterFlatten = countWidgets(doc);
+
+            assertEquals(numFieldsBeforeFlatten, numFieldsAfterFlatten + fieldsToFlatten.size());
+            assertEquals(numWidgetsBeforeFlatten, numWidgetsAfterFlatten + fieldsToFlatten.size());
+        }
+    }
+
+    /**
+     * PDFBOX-4235: a bad /DA string should not result in an NPE.
+     * 
+     * @throws IOException
+     */
+    @Test
+    public void testBadDA() throws IOException
+    {
+        PDDocument doc = new PDDocument();
+
+        PDPage page = new PDPage();
+        doc.addPage(page);
+
+        PDAcroForm acroForm = new PDAcroForm(document);
+        doc.getDocumentCatalog().setAcroForm(acroForm);
+        acroForm.setDefaultResources(new PDResources());
+
+        PDTextField textBox = new PDTextField(acroForm);
+        textBox.setPartialName("SampleField");
+
+        // https://stackoverflow.com/questions/50609478/
+        // "tf" is a typo, should have been "Tf" and this results that no font is chosen
+        textBox.setDefaultAppearance("/Helv 0 tf 0 g");
+        acroForm.getFields().add(textBox);
+
+        PDAnnotationWidget widget = textBox.getWidgets().get(0);
+        PDRectangle rect = new PDRectangle(50, 750, 200, 20);
+        widget.setRectangle(rect);
+        widget.setPage(page);
+
+        page.getAnnotations().add(widget);
+
+        try
+        {
+            textBox.setValue("huhu");
+        }
+        catch (IllegalArgumentException ex)
+        {
+            return;
+        }
+        finally
+        {
+            doc.close();
+        }
+        fail("IllegalArgumentException should have been thrown");
     }
 
     @Test
@@ -250,5 +328,21 @@ public class PDAcroFormTest
             document.writeTo(baos); // this is a working PDF
         }
         return baos.toByteArray();
+    }
+
+    private int countWidgets(PDDocument documentToTest)
+    {
+        int count = 0;
+        for (PDPage page : documentToTest.getPages())
+        {
+            for (PDAnnotation annotation : page.getAnnotations())
+            {
+                if (annotation instanceof PDAnnotationWidget)
+                {
+                    count++;
+                }
+            }
+        }
+        return count;
     }
 }

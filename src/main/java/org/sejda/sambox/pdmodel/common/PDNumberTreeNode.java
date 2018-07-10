@@ -175,13 +175,20 @@ public class PDNumberTreeNode implements COSObjectable
     public Map<Integer, COSObjectable> getNumbers() throws IOException
     {
         Map<Integer, COSObjectable> indices = null;
-        COSArray namesArray = (COSArray) node.getDictionaryObject(COSName.NUMS);
-        if (namesArray != null)
+        COSArray namesArray = node.getDictionaryObject(COSName.NUMS, COSArray.class);
+        if (nonNull(namesArray))
         {
             indices = new HashMap<>();
             for (int i = 0; i < namesArray.size(); i += 2)
             {
-                COSInteger key = (COSInteger) namesArray.getObject(i);
+                COSBase base = namesArray.getObject(i);
+                if (!(base instanceof COSInteger))
+                {
+                    LOG.error("page labels ignored, index {} should be a number, but is {}", i,
+                            base);
+                    return null;
+                }
+                COSInteger key = (COSInteger) base;
                 COSBase cosValue = namesArray.getObject(i + 1);
                 COSObjectable pdValue = convertCOSToPD(cosValue);
                 indices.put(key.intValue(), pdValue);

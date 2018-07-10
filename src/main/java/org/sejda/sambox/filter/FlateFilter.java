@@ -16,7 +16,6 @@
  */
 package org.sejda.sambox.filter;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -25,9 +24,7 @@ import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.Inflater;
 
-import org.sejda.io.FastByteArrayOutputStream;
 import org.sejda.sambox.cos.COSDictionary;
-import org.sejda.sambox.cos.COSName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,33 +43,11 @@ final class FlateFilter extends Filter
     public DecodeResult decode(InputStream encoded, OutputStream decoded, COSDictionary parameters,
             int index) throws IOException
     {
-        int predictor = -1;
-
         final COSDictionary decodeParams = getDecodeParams(parameters, index);
-        if (decodeParams != null)
-        {
-            predictor = decodeParams.getInt(COSName.PREDICTOR);
-        }
 
         try
         {
-            if (predictor > 1)
-            {
-                int colors = Math.min(decodeParams.getInt(COSName.COLORS, 1), 32);
-                int bitsPerPixel = decodeParams.getInt(COSName.BITS_PER_COMPONENT, 8);
-                int columns = decodeParams.getInt(COSName.COLUMNS, 1);
-                FastByteArrayOutputStream baos = new FastByteArrayOutputStream();
-                decompress(encoded, baos);
-                ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-                Predictor.decodePredictor(predictor, colors, bitsPerPixel, columns, bais, decoded);
-                decoded.flush();
-                baos.reset();
-                bais.reset();
-            }
-            else
-            {
-                decompress(encoded, decoded);
-            }
+            decompress(encoded, Predictor.wrapPredictor(decoded, decodeParams));
         }
         catch (DataFormatException e)
         {
@@ -154,18 +129,19 @@ final class FlateFilter extends Filter
         }
         compressionLevel = Math.max(-1, Math.min(Deflater.BEST_COMPRESSION, compressionLevel));
         Deflater deflater = new Deflater(compressionLevel);
-        DeflaterOutputStream out = new DeflaterOutputStream(encoded, deflater);
-        int amountRead;
-        int mayRead = input.available();
-        if (mayRead > 0)
+        try (DeflaterOutputStream out = new DeflaterOutputStream(encoded, deflater))
         {
-            byte[] buffer = new byte[Math.min(mayRead, BUFFER_SIZE)];
-            while ((amountRead = input.read(buffer, 0, Math.min(mayRead, BUFFER_SIZE))) != -1)
+            int amountRead;
+            int mayRead = input.available();
+            if (mayRead > 0)
             {
-                out.write(buffer, 0, amountRead);
+                byte[] buffer = new byte[Math.min(mayRead, BUFFER_SIZE)];
+                while ((amountRead = input.read(buffer, 0, Math.min(mayRead, BUFFER_SIZE))) != -1)
+                {
+                    out.write(buffer, 0, amountRead);
+                }
             }
         }
-        out.close();
         encoded.flush();
     }
 }
