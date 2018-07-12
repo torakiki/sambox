@@ -48,7 +48,6 @@ public final class PDFPrintable implements Printable
     private final Scaling scaling;
     private final float dpi;
     private final boolean center;
-    private boolean subsamplingAllowed = false;
 
     /**
      * Creates a new PDFPrintable.
@@ -116,34 +115,6 @@ public final class PDFPrintable implements Printable
         this.showPageBorder = showPageBorder;
         this.dpi = dpi;
         this.center = center;
-    }
-
-    /**
-     * Value indicating if the renderer is allowed to subsample images before drawing, according to image dimensions and
-     * requested scale.
-     *
-     * Subsampling may be faster and less memory-intensive in some cases, but it may also lead to loss of quality,
-     * especially in images with high spatial frequency.
-     *
-     * @return true if subsampling of images is allowed, false otherwise.
-     */
-    public boolean isSubsamplingAllowed()
-    {
-        return subsamplingAllowed;
-    }
-
-    /**
-     * Sets a value instructing the renderer whether it is allowed to subsample images before drawing. The subsampling
-     * frequency is determined according to image size and requested scale.
-     *
-     * Subsampling may be faster and less memory-intensive in some cases, but it may also lead to loss of quality,
-     * especially in images with high spatial frequency.
-     *
-     * @param subsamplingAllowed The new value indicating if subsampling is allowed.
-     */
-    public void setSubsamplingAllowed(boolean subsamplingAllowed)
-    {
-        this.subsamplingAllowed = subsamplingAllowed;
     }
 
     @Override
@@ -216,7 +187,6 @@ public final class PDFPrintable implements Printable
             // draw to graphics using PDFRender
             AffineTransform transform = (AffineTransform) graphics2D.getTransform().clone();
             graphics2D.setBackground(Color.WHITE);
-            renderer.setSubsamplingAllowed(subsamplingAllowed);
             renderer.renderPageToGraphics(pageIndex, graphics2D, (float) scale);
 
             // draw crop box

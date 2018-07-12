@@ -339,13 +339,4 @@ public class PDFRenderer
         }
         return false;
     }
-
-    /**
-     * @param subsamplingAllowed
-     */
-    public void setSubsamplingAllowed(boolean subsamplingAllowed)
-    {
-        // TODO Auto-generated method stub
-
-    }
 }
