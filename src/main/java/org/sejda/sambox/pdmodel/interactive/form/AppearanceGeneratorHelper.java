@@ -440,7 +440,8 @@ class AppearanceGeneratorHelper
         // callers might have determined that the default font does not support rendering the field's value
         // so the font was substituted to another one, which has better unicode support
         // see PDVariableText.setAppearanceOverrideFont()
-        PDFont font = ofNullable(field.getAppearanceFont()).orElse(defaultAppearance.getFont());
+        PDFont font = ofNullable(field.getAppearanceFont())
+                .orElseGet(() -> defaultAppearance.getFont());
 
         requireNotNullArg(font, "font is null, check whether /DA entry is incomplete or incorrect");
 
