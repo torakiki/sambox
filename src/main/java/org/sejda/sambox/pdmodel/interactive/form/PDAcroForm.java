@@ -16,12 +16,14 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -201,29 +203,24 @@ public final class PDAcroForm extends PDDictionaryWrapper
 
         // the content stream to write to
         PDPageContentStream contentStream;
-
-        // get the widgets per page
-        Map<COSDictionary, Map<COSDictionary, PDAnnotationWidget>> pagesWidgetsMap = buildPagesWidgetsMap(
-                fields);
+        Map<COSDictionary, PDAnnotationWidget> toFlatten = widgets(fields);
 
         // preserve all non widget annotations
         for (PDPage page : document.getPages())
         {
-            Map<COSDictionary, PDAnnotationWidget> widgetsForPageMap = pagesWidgetsMap
-                    .get(page.getCOSObject());
             isContentStreamWrapped = false;
 
             List<PDAnnotation> annotations = new ArrayList<>();
 
             for (PDAnnotation annotation : page.getAnnotations())
             {
-                if (widgetsForPageMap != null
-                        && widgetsForPageMap.get(annotation.getCOSObject()) == null)
+                PDAnnotationWidget widget = toFlatten.get(annotation.getCOSObject());
+                if (isNull(widget))
                 {
                     annotations.add(annotation);
                 }
                 else if (!annotation.isInvisible() && !annotation.isHidden()
-                        && annotation.getNormalAppearanceStream() != null)
+                        && nonNull(annotation.getNormalAppearanceStream()))
                 {
                     if (!isContentStreamWrapped)
                     {
@@ -665,87 +662,32 @@ public final class PDAcroForm extends PDDictionaryWrapper
         return resources != null && resources.getXObjectNames().iterator().hasNext();
     }
 
-    private Map<COSDictionary, Map<COSDictionary, PDAnnotationWidget>> buildPagesWidgetsMap(
-            List<PDField> fields)
+    private Map<COSDictionary, PDAnnotationWidget> widgets(List<PDField> fields)
     {
-        Map<COSDictionary, Map<COSDictionary, PDAnnotationWidget>> pagesAnnotationsMap = new HashMap<>();
-        boolean hasMissingPageRef = false;
+        return fields.stream().flatMap(f -> f.getWidgets().stream())
+                .collect(toMap(w -> w.getCOSObject(), identity()));
 
-        for (PDField field : fields)
-        {
-            List<PDAnnotationWidget> widgets = field.getWidgets();
-            for (PDAnnotationWidget widget : widgets)
-            {
-                PDPage pageForWidget = widget.getPage();
-                if (pageForWidget != null)
-                {
-                    if (pagesAnnotationsMap.get(pageForWidget.getCOSObject()) == null)
-                    {
-                        Map<COSDictionary, PDAnnotationWidget> widgetsForPage = new HashMap<>();
-                        widgetsForPage.put(widget.getCOSObject(), widget);
-                        pagesAnnotationsMap.put(pageForWidget.getCOSObject(), widgetsForPage);
-                    }
-                    else
-                    {
-                        Map<COSDictionary, PDAnnotationWidget> widgetsForPage = pagesAnnotationsMap
-                                .get(pageForWidget.getCOSObject());
-                        widgetsForPage.put(widget.getCOSObject(), widget);
-                    }
-                }
-                else
-                {
-                    hasMissingPageRef = true;
-                }
-            }
-        }
-
-        // TODO: if there is a widget with a missing page reference
-        // we'd need to build the map reverse i.e. form the annotations to the
-        // widget. But this will be much slower so will be omitted for now.
-        if (hasMissingPageRef)
-        {
-            LOG.warn(
-                    "There has been a widget with a missing page reference. Please report to the PDFBox project");
-        }
-
-        return pagesAnnotationsMap;
     }
 
     private void removeFields(List<PDField> fields)
     {
-        for (PDField field : fields)
+        for (PDField current : fields)
         {
-            if (field.getParent() == null)
+            if (current.isTerminal())
             {
-                COSArray cosFields = getCOSObject().getDictionaryObject(COSName.FIELDS,
-                        COSArray.class);
-                if (nonNull(cosFields))
+                if (nonNull(current.getParent()))
                 {
-                    for (int i = 0; i < cosFields.size(); i++)
-                    {
-                        COSDictionary element = (COSDictionary) cosFields.getObject(i);
-                        if (field.getCOSObject().equals(element))
-                        {
-                            cosFields.remove(i);
-                        }
-                    }
+                    current.getParent().removeChild(current);
+                }
+                else
+                {
+                    // it's a root field
+                    removeField(current);
                 }
             }
             else
             {
-                COSArray kids = field.getParent().getCOSObject().getDictionaryObject(COSName.KIDS,
-                        COSArray.class);
-                if (nonNull(kids))
-                {
-                    for (int i = 0; i < kids.size(); i++)
-                    {
-                        COSDictionary element = (COSDictionary) kids.getObject(i);
-                        if (field.getCOSObject().equals(element))
-                        {
-                            kids.remove(i);
-                        }
-                    }
-                }
+                LOG.warn("Unable to remove non terminal field {}", current.getFullyQualifiedName());
             }
         }
     }

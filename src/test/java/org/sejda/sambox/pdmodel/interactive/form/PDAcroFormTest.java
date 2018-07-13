@@ -31,6 +31,7 @@ import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.sejda.io.FastByteArrayOutputStream;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
@@ -153,6 +154,51 @@ public class PDAcroFormTest
 
             assertEquals(numFieldsBeforeFlatten, numFieldsAfterFlatten + fieldsToFlatten.size());
             assertEquals(numWidgetsBeforeFlatten, numWidgetsAfterFlatten + fieldsToFlatten.size());
+        }
+    }
+
+    /**
+     * PDFBOX_3941 and PDFBOX-3809
+     * 
+     * @throws IOException
+     */
+    @Test
+    public void testFlattenOnySomeFields() throws IOException
+    {
+        flattenOnlySome("/org/sejda/sambox/pdmodel/interactive/form/flatten_fields_hierarchy.pdf");
+    }
+
+    /**
+     * PDFBOX_3941 and PDFBOX-3809
+     * 
+     * @throws IOException
+     */
+    @Test
+    public void testFlattenOnySomeFieldsWithHierarchy() throws IOException
+    {
+        flattenOnlySome("/org/sejda/sambox/pdmodel/interactive/form/flatten_fields.pdf");
+
+    }
+
+    public void flattenOnlySome(String victim) throws IOException
+    {
+        FastByteArrayOutputStream out = new FastByteArrayOutputStream();
+        try (PDDocument doc = PDFParser.parse(
+                SeekableSources.inMemorySeekableSourceFrom(getClass().getResourceAsStream(victim))))
+        {
+            PDAcroForm acroForm = doc.getDocumentCatalog().getAcroForm();
+            List<PDField> fields = new ArrayList<>();
+            fields.add(acroForm.getField("flatten"));
+            acroForm.flatten(fields, true);
+            doc.writeTo(out);
+        }
+        try (PDDocument doc = PDFParser
+                .parse(SeekableSources.inMemorySeekableSourceFrom(out.toByteArray())))
+        {
+            PDAcroForm acroForm = doc.getDocumentCatalog().getAcroForm();
+            assertNotNull(acroForm);
+            assertNull(acroForm.getField("flatten"));
+            assertNotNull(acroForm.getField("do_not_flatten"));
         }
     }
 

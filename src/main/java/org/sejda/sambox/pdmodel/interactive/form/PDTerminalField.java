@@ -16,19 +16,20 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSArrayList;
-import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.pdmodel.interactive.action.PDFormFieldAdditionalActions;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
 
@@ -106,25 +107,21 @@ public abstract class PDTerminalField extends PDField
     @Override
     public List<PDAnnotationWidget> getWidgets()
     {
-        List<PDAnnotationWidget> widgets = new ArrayList<>();
-        COSArray kids = (COSArray) getCOSObject().getDictionaryObject(COSName.KIDS);
-        if (kids == null)
+        COSArray kids = getCOSObject().getDictionaryObject(COSName.KIDS, COSArray.class);
+        if (isNull(kids))
         {
             // the field itself is a widget
-            widgets.add(new PDAnnotationWidget(getCOSObject()));
+            return Arrays.asList(new PDAnnotationWidget(getCOSObject()));
         }
-        else if (kids.size() > 0)
+        if (kids.size() > 0)
         {
-            // there are multiple widgets
-            for (COSBase kid : kids)
-            {
-                if (nonNull(kid) && !COSNull.NULL.equals(kid.getCOSObject()))
-                {
-                    widgets.add(new PDAnnotationWidget((COSDictionary) kid.getCOSObject()));
-                }
-            }
+            return kids.stream().filter(k -> nonNull(k)).map(k -> k.getCOSObject())
+                    .filter(k -> k instanceof COSDictionary)
+                    .map(k -> new PDAnnotationWidget((COSDictionary) k))
+                    .collect(Collectors.toList());
+
         }
-        return widgets;
+        return Collections.emptyList();
     }
 
     /**
