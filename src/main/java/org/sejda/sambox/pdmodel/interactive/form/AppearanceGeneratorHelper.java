@@ -18,6 +18,7 @@ package org.sejda.sambox.pdmodel.interactive.form;
 
 import static java.util.Arrays.asList;
 import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
 import static org.sejda.io.CountingWritableByteChannel.from;
 import static org.sejda.util.RequireUtils.requireNotNullArg;
 
@@ -427,7 +428,12 @@ class AppearanceGeneratorHelper
         contents.clip();
 
         // get the font
-        PDFont font = defaultAppearance.getFont();
+        // field's defined appearance font has priority
+        // callers might have determined that the default font does not support rendering the field's value
+        // so the font was substituted to another one, which has better unicode support
+        // see PDVariableText.setAppearanceOverrideFont()
+        PDFont font = ofNullable(field.getAppearanceFont()).orElse(defaultAppearance.getFont());
+
         requireNotNullArg(font, "font is null, check whether /DA entry is incomplete or incorrect");
 
         float fontSize = defaultAppearance.getFontSize();
