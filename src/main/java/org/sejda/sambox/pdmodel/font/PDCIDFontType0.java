@@ -228,11 +228,13 @@ public class PDCIDFontType0 extends PDCIDFont
         if (getFontDescriptor() != null)
         {
             PDRectangle bbox = getFontDescriptor().getFontBoundingBox();
-            if (bbox.getLowerLeftX() != 0 || bbox.getLowerLeftY() != 0 || bbox.getUpperRightX() != 0
-                    || bbox.getUpperRightY() != 0)
+            if(bbox != null)
             {
-                return new BoundingBox(bbox.getLowerLeftX(), bbox.getLowerLeftY(),
-                        bbox.getUpperRightX(), bbox.getUpperRightY());
+                if (bbox.getLowerLeftX() != 0 || bbox.getLowerLeftY() != 0 || bbox.getUpperRightX() != 0
+                        || bbox.getUpperRightY() != 0) {
+                    return new BoundingBox(bbox.getLowerLeftX(), bbox.getLowerLeftY(),
+                            bbox.getUpperRightX(), bbox.getUpperRightY());
+                }
             }
         }
         if (cidFont != null)
