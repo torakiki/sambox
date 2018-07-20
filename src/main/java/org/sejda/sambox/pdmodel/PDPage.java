@@ -464,14 +464,21 @@ public class PDPage implements COSObjectable, PDContentStream
      */
     public PDRectangle getArtBox()
     {
-        COSBase base = page.getDictionaryObject(COSName.ART_BOX);
-        if (base instanceof COSArray)
+        try
         {
-            COSArray array = (COSArray) base;
-            if(inMediaBoxBounds(new PDRectangle(array)))
+            COSBase base = page.getDictionaryObject(COSName.ART_BOX);
+            if (base instanceof COSArray)
             {
-                return new PDRectangle(array);
+                COSArray array = (COSArray) base;
+                if(inMediaBoxBounds(new PDRectangle(array)))
+                {
+                    return new PDRectangle(array);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            LOG.debug("An error occurred parsing page art box", ex);
         }
         return getCropBox();
     }
