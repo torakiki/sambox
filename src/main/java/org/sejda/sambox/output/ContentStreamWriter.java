@@ -123,7 +123,10 @@ public class ContentStreamWriter extends DefaultCOSWriter
             {
                 key.accept(this);
                 writeSpace();
-                imageParams.getDictionaryObject(key).accept(this);
+                COSBase imageParamsDictionaryObject = imageParams.getDictionaryObject(key);
+                if(imageParamsDictionaryObject != null) {
+                    imageParamsDictionaryObject.accept(this);
+                }
                 writeEOL();
             }
             writer().write(ID_OPERATOR.getBytes(StandardCharsets.US_ASCII));
