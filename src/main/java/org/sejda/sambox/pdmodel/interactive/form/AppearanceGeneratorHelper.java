@@ -266,7 +266,15 @@ class AppearanceGeneratorHelper
     {
         COSString da = (COSString) widget.getCOSObject().getDictionaryObject(COSName.DA);
         PDResources dr = field.getAcroForm().getDefaultResources();
-        return new PDDefaultAppearanceString(da, dr);
+        try
+        {
+            return new PDDefaultAppearanceString(da, dr);
+        }
+        catch (IOException ex)
+        {
+            LOG.warn("Failed to process default appearance string for widget {}, will use fallback default appearance", widget);
+            return new PDDefaultAppearanceString();
+        }
     }
 
     private int resolveRotation(PDAnnotationWidget widget)
