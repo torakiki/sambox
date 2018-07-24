@@ -284,6 +284,20 @@ public class PDAcroFormTest
         assertNull(form.getField("B.D.C"));
     }
 
+    @Test
+    public void calculatingOrder() throws IOException
+    {
+        try (PDDocument doc = PDFParser
+                .parse(SeekableSources.inMemorySeekableSourceFrom(getClass().getResourceAsStream(
+                        "/org/sejda/sambox/pdmodel/interactive/form/test_form_with_calc.pdf"))))
+        {
+            PDAcroForm form = doc.getDocumentCatalog().getAcroForm();
+            assertEquals(2, form.getFields().size());
+            assertEquals(1, form.getCalculationOrder().size());
+            assertTrue(form.getFields().contains(form.getCalculationOrder().get(0)));
+        }
+    }
+
     /**
      * Test that we do not modify an AcroForm with missing resource information when loading the document only.
      * (PDFBOX-3752)

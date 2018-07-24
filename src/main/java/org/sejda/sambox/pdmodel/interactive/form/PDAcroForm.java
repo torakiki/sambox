@@ -27,6 +27,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSArrayList;
@@ -342,20 +344,19 @@ public final class PDAcroForm extends PDDictionaryWrapper
      */
     public List<PDField> getFields()
     {
-        List<PDField> pdFields = new ArrayList<>();
-        COSArray fields = getCOSObject().getDictionaryObject(COSName.FIELDS, COSArray.class);
-        if (nonNull(fields))
+        return fieldsFromArray(getCOSObject().getDictionaryObject(COSName.FIELDS, COSArray.class));
+    }
+
+    private List<PDField> fieldsFromArray(COSArray array)
+    {
+        if (nonNull(array) && array.size() > 0)
         {
-            for (COSBase field : fields)
-            {
-                if (nonNull(field) && field.getCOSObject() instanceof COSDictionary)
-                {
-                    pdFields.add(PDField.fromDictionary(this, (COSDictionary) field.getCOSObject(),
-                            null));
-                }
-            }
+            return array.stream().filter(Objects::nonNull).map(COSBase::getCOSObject)
+                    .filter(d -> d instanceof COSDictionary)
+                    .map(d -> PDField.fromDictionary(this, (COSDictionary) d, null))
+                    .collect(Collectors.toList());
         }
-        return pdFields;
+        return new ArrayList<>();
     }
 
     /**
@@ -455,6 +456,16 @@ public final class PDAcroForm extends PDDictionaryWrapper
     public void setDefaultAppearance(String daValue)
     {
         getCOSObject().setString(COSName.DA, daValue);
+    }
+
+    public List<PDField> getCalculationOrder()
+    {
+        return fieldsFromArray(getCOSObject().getDictionaryObject(COSName.CO, COSArray.class));
+    }
+
+    public void setCalculationOrder(COSArray co)
+    {
+        getCOSObject().setItem(COSName.CO, co);
     }
 
     /**
