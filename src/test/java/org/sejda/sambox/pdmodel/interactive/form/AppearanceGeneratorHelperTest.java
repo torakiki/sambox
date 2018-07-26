@@ -28,6 +28,16 @@ public class AppearanceGeneratorHelperTest {
     }
 
     @Test
+    public void testCalculateFontSizeForFauxMultilineFieldButUserEnteredMultipleLines() throws IOException {
+        AppearanceGeneratorHelper helper = new AppearanceGeneratorHelper(multilineTextField());
+        helper.setAppearanceValue("This is a test\nright here");
+        PDRectangle content = new PDRectangle(2, 2, 517, 10);
+
+        float fontSize = helper.calculateFontSize(PDType1Font.HELVETICA, content);
+        assertEquals(2.16, fontSize, 0.1);
+    }
+
+    @Test
     public void testCalculateFontSizeForMultiline() throws IOException {
         AppearanceGeneratorHelper helper = new AppearanceGeneratorHelper(multilineTextField());
         helper.setAppearanceValue("Line 1\nLine 2\nLine 3\nLine 4\nLine 5");

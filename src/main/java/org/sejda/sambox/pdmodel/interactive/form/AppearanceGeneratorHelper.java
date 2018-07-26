@@ -774,11 +774,15 @@ class AppearanceGeneratorHelper
             float lineHeight = calculateLineHeight(font, font.getFontMatrix().getScaleY());
             float scaledContentHeight = contentRect.getHeight() * yScalingFactor;
 
-            if (calculateLineHeight(font, DEFAULT_FONT_SIZE / FONTSCALE) > scaledContentHeight)
+            boolean looksLikeFauxMultiline = calculateLineHeight(font, DEFAULT_FONT_SIZE / FONTSCALE) > scaledContentHeight;
+            boolean userTypedMultipleLines = new PlainText(value).getParagraphs().size() > 1;
+
+            if (looksLikeFauxMultiline && !userTypedMultipleLines)
             {
                 // faux multiline detected
                 // because 1 line written with the default font size would not fit the height
-                // just continue to the non multiline part of the algorightm
+                // just continue to the non multiline part of the algorithm
+
                 LOG.warn("Faux multiline field found: {}", field.getFullyQualifiedName());
             }
             else
