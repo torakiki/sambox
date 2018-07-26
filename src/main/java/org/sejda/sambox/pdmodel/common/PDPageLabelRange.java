@@ -86,6 +86,20 @@ public class PDPageLabelRange implements COSObjectable
         root = dict;
     }
 
+    public PDPageLabelRange(String style, String prefix, Integer start) {
+        this();
+
+        if(style != null) {
+            setStyle(style);
+        }
+        if(prefix != null) {
+            setPrefix(prefix);
+        }
+        if(start != null) {
+            setStart(start);
+        }
+    }
+
     /**
      * Returns the underlying dictionary.
      * 
@@ -134,6 +148,13 @@ public class PDPageLabelRange implements COSObjectable
     public int getStart()
     {
         return root.getInt(KEY_START, 1);
+    }
+
+    /**
+     * @return true if the start value for page numbering is defined, false otherwise.
+     */
+    public boolean hasStart() {
+        return root.getInt(KEY_START) != -1;
     }
 
     /**

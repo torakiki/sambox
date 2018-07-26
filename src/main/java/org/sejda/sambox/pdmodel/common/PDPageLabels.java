@@ -20,6 +20,7 @@ import static java.util.Objects.nonNull;
 import static org.sejda.util.RequireUtils.requireArg;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -140,6 +141,10 @@ public class PDPageLabels implements COSObjectable
     {
         requireArg(startPage >= 0, "Cannot set a label starting from a negative page number");
         labels.put(startPage, item);
+    }
+
+    public Map<Integer, PDPageLabelRange> getLabels() {
+        return Collections.unmodifiableMap(labels);
     }
 
     @Override
