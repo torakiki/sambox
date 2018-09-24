@@ -818,11 +818,16 @@ class AppearanceGeneratorHelper
             PDAppearanceStream appearanceStream)
     {
         PDRectangle boundingBox = appearanceStream.getBBox();
-        if (boundingBox == null)
+        if (boundingBox == null || hasZeroDimensions(boundingBox))
         {
             boundingBox = fieldWidget.getRectangle().createRetranslatedRectangle();
         }
         return boundingBox;
+    }
+
+    private boolean hasZeroDimensions(PDRectangle bbox)
+    {
+        return bbox.getHeight() == 0 || bbox.getWidth() == 0;
     }
 
     /**
