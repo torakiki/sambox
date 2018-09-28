@@ -218,6 +218,21 @@ public class PDButtonTest
         }
     }
 
+    @Test
+    public void testMalformedCheckboxNormalAppearances() throws IOException
+    {
+        try (PDDocument document = PDFParser.parse(
+                SeekableSources.inMemorySeekableSourceFrom(this.getClass().getResourceAsStream(
+                        "/sambox/forms-malformed-checkbox-normal-appearances.pdf"))))
+        {
+
+            PDCheckBox checkbox = (PDCheckBox) document.getDocumentCatalog().getAcroForm()
+                    .getField("English IELTS");
+
+            assertEquals(checkbox.getOnValues().size(), 0);
+        }
+    }
+
     /**
      * PDFBOX-3682
      *
