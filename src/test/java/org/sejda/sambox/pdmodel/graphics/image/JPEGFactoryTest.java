@@ -34,7 +34,6 @@ import java.nio.file.StandardCopyOption;
 
 import javax.imageio.ImageIO;
 
-import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -216,8 +215,8 @@ public class JPEGFactoryTest
             InputStream dctStream = img.getCOSObject().getFilteredStream();
             ByteArrayOutputStream baos1 = new ByteArrayOutputStream();
             ByteArrayOutputStream baos2 = new ByteArrayOutputStream();
-            IOUtils.copy(resourceStream, baos1);
-            IOUtils.copy(dctStream, baos2);
+            resourceStream.transferTo(baos1);
+            dctStream.transferTo(baos2);
             resourceStream.close();
             dctStream.close();
             assertArrayEquals(baos1.toByteArray(), baos2.toByteArray());

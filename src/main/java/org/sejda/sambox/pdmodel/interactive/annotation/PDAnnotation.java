@@ -20,7 +20,7 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
-import static org.sejda.util.RequireUtils.requireArg;
+import static org.sejda.commons.util.RequireUtils.requireArg;
 
 import java.util.Calendar;
 

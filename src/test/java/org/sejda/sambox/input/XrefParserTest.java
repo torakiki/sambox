@@ -24,11 +24,11 @@ import java.io.IOException;
 
 import org.junit.After;
 import org.junit.Test;
+import org.sejda.commons.util.IOUtils;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSObjectKey;
-import org.sejda.util.IOUtils;
 
 /**
  * @author Andrea Vacondio

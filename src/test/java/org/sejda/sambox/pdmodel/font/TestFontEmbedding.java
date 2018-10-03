@@ -163,7 +163,7 @@ public class TestFontEmbedding extends TestCase
         assertEquals(12607, w2.getInt(0)); // Start CID
         COSArray metrics = (COSArray) w2.getObject(1);
         int i = 0;
-        for (int n : new int[] {-570, 500, 450, -570, 500, 880})
+        for (int n : new int[] { -570, 500, 450, -570, 500, 880 })
         {
             assertEquals(n, metrics.getInt(i++));
         }
@@ -180,8 +180,8 @@ public class TestFontEmbedding extends TestCase
         PDPage page = new PDPage(PDRectangle.A4);
         document.addPage(page);
 
-        InputStream input = PDFont.class.getClassLoader()
-                .getResourceAsStream("org/sejda/sambox/resources/ttf/LiberationSans-Regular.ttf");
+        InputStream input = PDFont.class
+                .getResourceAsStream("/org/sejda/sambox/resources/ttf/LiberationSans-Regular.ttf");
         PDType0Font font = PDType0Font.load(document, input, useSubset);
 
         PDPageContentStream stream = new PDPageContentStream(document, page);
@@ -195,7 +195,7 @@ public class TestFontEmbedding extends TestCase
 
         stream.endText();
         stream.close();
-        
+
         File file = new File(OUT_DIR, "CIDFontType2.pdf");
         document.writeTo(file);
         document.close();

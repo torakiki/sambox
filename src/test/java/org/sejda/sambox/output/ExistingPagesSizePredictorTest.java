@@ -29,6 +29,7 @@ import java.io.IOException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.sejda.commons.util.IOUtils;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.input.ExistingIndirectCOSObject;
 import org.sejda.sambox.pdmodel.PDDocument;
@@ -36,7 +37,6 @@ import org.sejda.sambox.pdmodel.PDPage;
 import org.sejda.sambox.pdmodel.PDPageContentStream;
 import org.sejda.sambox.pdmodel.font.PDFont;
 import org.sejda.sambox.pdmodel.font.PDType1Font;
-import org.sejda.util.IOUtils;
 
 /**
  * @author Andrea Vacondio

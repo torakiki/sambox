@@ -24,6 +24,7 @@ import java.util.List;
 import org.apache.fontbox.afm.FontMetrics;
 import org.apache.fontbox.pfb.PfbParser;
 import org.apache.fontbox.type1.Type1Font;
+import org.sejda.commons.util.IOUtils;
 import org.sejda.sambox.cos.COSArrayList;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
@@ -33,7 +34,6 @@ import org.sejda.sambox.pdmodel.common.PDStream;
 import org.sejda.sambox.pdmodel.font.encoding.Encoding;
 import org.sejda.sambox.pdmodel.font.encoding.GlyphList;
 import org.sejda.sambox.pdmodel.font.encoding.Type1Encoding;
-import org.sejda.util.IOUtils;
 
 /**
  * Embedded PDType1Font builder. Helper class to populate a PDType1Font from a PFB and AFM.

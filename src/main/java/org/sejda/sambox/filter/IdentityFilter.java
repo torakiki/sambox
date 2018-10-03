@@ -20,32 +20,30 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.apache.commons.io.IOUtils;
 import org.sejda.sambox.cos.COSDictionary;
 
 /**
- * The IdentityFilter filter passes the data through without any modifications.
- * It is defined in section 7.6.5 of the PDF 1.7 spec and also stated in table 26.
+ * The IdentityFilter filter passes the data through without any modifications. It is defined in section 7.6.5 of the
+ * PDF 1.7 spec and also stated in table 26.
  * 
  * @author Adam Nichols
  */
 final class IdentityFilter extends Filter
 {
     @Override
-    public DecodeResult decode(InputStream encoded, OutputStream decoded,
-                                         COSDictionary parameters, int index)
-        throws IOException
+    public DecodeResult decode(InputStream encoded, OutputStream decoded, COSDictionary parameters,
+            int index) throws IOException
     {
-        IOUtils.copy(encoded, decoded);
+        encoded.transferTo(decoded);
         decoded.flush();
         return new DecodeResult(parameters);
     }
 
     @Override
     public void encode(InputStream input, OutputStream encoded, COSDictionary parameters)
-        throws IOException
+            throws IOException
     {
-        IOUtils.copy(input, encoded);
+        input.transferTo(encoded);
         encoded.flush();
     }
 }

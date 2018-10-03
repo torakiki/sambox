@@ -1,5 +1,12 @@
 package org.sejda.sambox.pdmodel.interactive.form;
 
+import static org.hamcrest.CoreMatchers.startsWith;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+
+import java.io.IOException;
+import java.util.Collections;
+
 import org.junit.Test;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSString;
@@ -8,12 +15,6 @@ import org.sejda.sambox.pdmodel.PDPage;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.font.PDType1Font;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
-
-import java.io.IOException;
-import java.util.Collections;
-
-import static org.hamcrest.CoreMatchers.startsWith;
-import static org.junit.Assert.*;
 
 public class AppearanceGeneratorHelperTest {
 

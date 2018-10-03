@@ -16,9 +16,9 @@
  */
 package org.sejda.sambox.output;
 
+import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
 import static org.sejda.sambox.cos.DirectCOSObject.asDirectObject;
 import static org.sejda.sambox.util.CharUtils.ASCII_SPACE;
-import static org.sejda.util.RequireUtils.requireNotNullArg;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -27,8 +27,9 @@ import java.io.SequenceInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.zip.DeflaterInputStream;
 
+import org.sejda.commons.FastByteArrayOutputStream;
+import org.sejda.commons.util.IOUtils;
 import org.sejda.io.CountingWritableByteChannel;
-import org.sejda.io.FastByteArrayOutputStream;
 import org.sejda.sambox.SAMBox;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
@@ -37,7 +38,6 @@ import org.sejda.sambox.cos.DisposableCOSObject;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
 import org.sejda.sambox.cos.NonStorableInObjectStreams;
 import org.sejda.sambox.xref.CompressedXrefEntry;
-import org.sejda.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

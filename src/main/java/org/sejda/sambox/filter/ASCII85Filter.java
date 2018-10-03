@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.apache.commons.io.IOUtils;
 import org.sejda.sambox.cos.COSDictionary;
 
 /**
@@ -35,7 +34,7 @@ final class ASCII85Filter extends Filter
     {
         try (ASCII85InputStream is = new ASCII85InputStream(encoded))
         {
-            IOUtils.copy(is, decoded);
+            is.transferTo(decoded);
 
         }
         decoded.flush();
@@ -48,7 +47,7 @@ final class ASCII85Filter extends Filter
     {
         try (ASCII85OutputStream os = new ASCII85OutputStream(encoded))
         {
-            IOUtils.copy(input, os);
+            input.transferTo(os);
         }
         encoded.flush();
     }

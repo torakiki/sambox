@@ -5,8 +5,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.apache.commons.io.IOUtils;
 import org.junit.Test;
+import org.sejda.commons.util.IOUtils;
 
 public class PDImageXObjectTest
 {
@@ -17,7 +17,7 @@ public class PDImageXObjectTest
                 .getResourceAsStream("/org/sejda/sambox/resources/images/sample.png");
         File outFile = File.createTempFile("sample", ".jpeg");
         FileOutputStream out = new FileOutputStream(outFile);
-        IOUtils.copy(in, out);
+        in.transferTo(out);
         IOUtils.closeQuietly(in);
         IOUtils.closeQuietly(out);
 

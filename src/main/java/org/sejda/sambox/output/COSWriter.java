@@ -19,12 +19,12 @@ package org.sejda.sambox.output;
 import java.io.Closeable;
 import java.io.IOException;
 
+import org.sejda.commons.util.IOUtils;
 import org.sejda.io.BufferedCountingChannelWriter;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.cos.COSVisitor;
-import org.sejda.util.IOUtils;
 
 /**
  * Component capable of writing COS objects using a {@link BufferedCountingChannelWriter}.

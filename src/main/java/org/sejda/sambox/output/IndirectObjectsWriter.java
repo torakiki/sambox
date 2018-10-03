@@ -16,18 +16,18 @@
  */
 package org.sejda.sambox.output;
 
+import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
 import static org.sejda.sambox.output.DefaultCOSWriter.SPACE;
-import static org.sejda.util.RequireUtils.requireNotNullArg;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
+import org.sejda.commons.util.IOUtils;
 import org.sejda.io.BufferedCountingChannelWriter;
 import org.sejda.io.CountingWritableByteChannel;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
-import org.sejda.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

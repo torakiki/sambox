@@ -34,13 +34,13 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.sejda.io.FastByteArrayOutputStream;
+import org.sejda.commons.FastByteArrayOutputStream;
+import org.sejda.commons.util.IOUtils;
 import org.sejda.io.SeekableSource;
 import org.sejda.io.SeekableSourceSupplier;
 import org.sejda.sambox.filter.DecodeResult;
 import org.sejda.sambox.filter.Filter;
 import org.sejda.sambox.filter.FilterFactory;
-import org.sejda.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -457,7 +457,7 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
                     this.unfiltered = bytes;
                 }))
                 {
-                    org.apache.commons.io.IOUtils.copy(in, out);
+                    in.transferTo(out);
                 }
 
             }
@@ -575,10 +575,9 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
      */
     public String asTextString()
     {
-        try (FastByteArrayOutputStream out = new FastByteArrayOutputStream())
+        try
         {
-            org.apache.commons.io.IOUtils.copy(getUnfilteredStream(), out);
-            return COSString.newInstance(out.toByteArray()).getString();
+            return COSString.newInstance(IOUtils.toByteArray(getUnfilteredStream())).getString();
         }
         catch (IOException e)
         {

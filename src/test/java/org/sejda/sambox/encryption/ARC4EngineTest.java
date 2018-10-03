@@ -22,9 +22,9 @@ import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.Security;
 
-import org.apache.commons.io.IOUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.Test;
+import org.sejda.commons.util.IOUtils;
 
 public class ARC4EngineTest
 {
@@ -39,9 +39,9 @@ public class ARC4EngineTest
         byte[] expected = new byte[] { (byte) 0xa2, (byte) 0xc9, (byte) 0xf3, (byte) 0xfa,
                 (byte) 0x70, (byte) 0x8b, (byte) 0x59, (byte) 0xde, (byte) 0x4a, (byte) 0x8d,
                 (byte) 0xc1 };
-        assertArrayEquals(expected, new ARC4Engine().encryptBytes(
-                "ChuckNorris".getBytes(StandardCharsets.UTF_8),
-                "ABCDE".getBytes(StandardCharsets.UTF_8)));
+        assertArrayEquals(expected,
+                new ARC4Engine().encryptBytes("ChuckNorris".getBytes(StandardCharsets.UTF_8),
+                        "ABCDE".getBytes(StandardCharsets.UTF_8)));
     }
 
     @Test

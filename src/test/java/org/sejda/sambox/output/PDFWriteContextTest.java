@@ -155,9 +155,9 @@ public class PDFWriteContextTest
     @Test
     public void getIndirectReferenceForNull()
     {
-        assertNull(COSNull.NULL.id());
-        context.getOrCreateIndirectReferenceFor(COSNull.NULL);
-        assertNull(COSNull.NULL.id());
+        IndirectCOSObjectReference ref = context.getOrCreateIndirectReferenceFor(COSNull.NULL);
+        IndirectCOSObjectReference ref2 = context.getOrCreateIndirectReferenceFor(COSNull.NULL);
+        assertNotEquals(ref, ref2);
     }
 
     @Test

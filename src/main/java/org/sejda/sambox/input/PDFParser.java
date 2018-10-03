@@ -17,14 +17,15 @@
 package org.sejda.sambox.input;
 
 import static java.util.Objects.requireNonNull;
+import static org.sejda.commons.util.RequireUtils.requireIOCondition;
 import static org.sejda.sambox.util.SpecVersionUtils.EXPECTED_HEADER_LENGTH;
 import static org.sejda.sambox.util.SpecVersionUtils.PDF_HEADER;
 import static org.sejda.sambox.util.SpecVersionUtils.parseHeaderString;
-import static org.sejda.util.RequireUtils.requireIOCondition;
 
 import java.io.IOException;
 import java.util.Optional;
 
+import org.sejda.commons.util.IOUtils;
 import org.sejda.io.SeekableSource;
 import org.sejda.sambox.cos.COSDocument;
 import org.sejda.sambox.pdmodel.PDDocument;
@@ -32,7 +33,6 @@ import org.sejda.sambox.pdmodel.encryption.DecryptionMaterial;
 import org.sejda.sambox.pdmodel.encryption.PDEncryption;
 import org.sejda.sambox.pdmodel.encryption.SecurityHandler;
 import org.sejda.sambox.pdmodel.encryption.StandardDecryptionMaterial;
-import org.sejda.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

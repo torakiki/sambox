@@ -24,11 +24,11 @@ import java.util.List;
 
 import org.junit.After;
 import org.junit.Test;
+import org.sejda.commons.util.IOUtils;
 import org.sejda.io.SeekableSource;
 import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSNumber;
-import org.sejda.util.IOUtils;
 
 /**
  * @author Andrea Vacondio

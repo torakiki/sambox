@@ -17,11 +17,11 @@ package org.sejda.sambox.pdmodel.graphics.color;
 
 import java.util.Arrays;
 
-import junit.framework.TestCase;
-
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.pdmodel.common.PDRange;
+
+import junit.framework.TestCase;
 
 /**
  *

@@ -29,13 +29,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
-import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.AdditionalMatchers;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
+import org.sejda.commons.util.IOUtils;
 import org.sejda.io.BufferedCountingChannelWriter;
 import org.sejda.io.CountingWritableByteChannel;
 import org.sejda.sambox.cos.COSArray;
@@ -202,8 +202,8 @@ public class DefaultCOSWriterTest
         inOrder.verify(writer).write(AdditionalMatchers.aryEq(new byte[] { '\r', '\n' }));
         inOrder.verify(writer).write(any(InputStream.class));
         inOrder.verify(writer).write(AdditionalMatchers.aryEq(new byte[] { '\r', '\n' }));
-        inOrder.verify(writer).write(
-                AdditionalMatchers.aryEq("endstream".getBytes(StandardCharsets.US_ASCII)));
+        inOrder.verify(writer)
+                .write(AdditionalMatchers.aryEq("endstream".getBytes(StandardCharsets.US_ASCII)));
         inOrder.verify(writer).writeEOL();
     }
 
@@ -265,7 +265,8 @@ public class DefaultCOSWriterTest
     @Test
     public void visitIndirectCOSObjectReference() throws Exception
     {
-        IndirectCOSObjectReference ref = new IndirectCOSObjectReference(123, 0, new COSDictionary());
+        IndirectCOSObjectReference ref = new IndirectCOSObjectReference(123, 0,
+                new COSDictionary());
         victim.visit(ref);
         verify(writer).write(ref.toString());
     }

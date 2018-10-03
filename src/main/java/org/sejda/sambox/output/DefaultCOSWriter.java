@@ -17,9 +17,9 @@
 package org.sejda.sambox.output;
 
 import static java.util.Objects.isNull;
+import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
 import static org.sejda.sambox.util.CharUtils.isDigit;
 import static org.sejda.sambox.util.CharUtils.isLetter;
-import static org.sejda.util.RequireUtils.requireNotNullArg;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 
+import org.sejda.commons.util.IOUtils;
 import org.sejda.io.BufferedCountingChannelWriter;
 import org.sejda.io.CountingWritableByteChannel;
 import org.sejda.sambox.cos.COSArray;
@@ -41,7 +42,6 @@ import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.cos.COSString;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
 import org.sejda.sambox.util.Hex;
-import org.sejda.util.IOUtils;
 
 /**
  * Default implementation of a {@link COSWriter} that writes COS objects to the given

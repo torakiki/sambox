@@ -22,13 +22,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import junit.framework.TestCase;
-
 import org.junit.Assert;
 import org.sejda.sambox.cos.COSArrayList;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSObjectable;
+
+import junit.framework.TestCase;
 
 /**
  * A test case for PDNumberTreeNode.

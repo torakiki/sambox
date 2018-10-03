@@ -18,14 +18,15 @@ package org.sejda.sambox.util;
 
 import static java.util.Objects.nonNull;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.text.Bidi;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,26 +46,18 @@ public final class BidiUtils
 
     static
     {
-        try
+        InputStream stream = BidiUtils.class
+                .getResourceAsStream("/org/sejda/sambox/resources/text/BidiMirroring.txt");
+
+        if (nonNull(stream))
         {
-            try (InputStream input = BidiUtils.class.getClassLoader()
-                    .getResourceAsStream("org/sejda/sambox/resources/text/BidiMirroring.txt"))
-            {
-                if (nonNull(input))
-                {
-                    parseBidiFile(input);
-                }
-                else
-                {
-                    LOG.warn(
-                            "Could not find 'BidiMirroring.txt', mirroring char map will be empty");
-                }
-            }
+            parseBidiFile(stream);
         }
-        catch (IOException e)
+        else
         {
-            LOG.warn("An error occurred while parsing BidiMirroring.txt.", e);
+            LOG.warn("Could not find 'BidiMirroring.txt', mirroring char map will be empty");
         }
+
     }
 
     private BidiUtils()
@@ -148,22 +141,30 @@ public final class BidiUtils
      * @param inputStream - The bidi file as inputstream
      * @throws IOException if any line could not be read by the LineNumberReader
      */
-    private static void parseBidiFile(InputStream inputStream) throws IOException
+    private static void parseBidiFile(InputStream inputStream)
     {
-        IOUtils.readLines(inputStream, StandardCharsets.UTF_8).stream().map(l -> {
-            int comment = l.indexOf('#'); // ignore comments
-            if (comment != -1)
-            {
-                return l.substring(0, comment);
-            }
-            return l;
-        }).filter(l -> !CharUtils.isBlank(l)).filter(l -> l.length() > 1).forEach(l -> {
-            String[] tokens = l.split(";");
-            if (tokens.length == 2)
-            {
-                MIRRORING_CHAR_MAP.put((char) Integer.parseInt(tokens[0].trim(), 16),
-                        (char) Integer.parseInt(tokens[1].trim(), 16));
-            }
-        });
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(inputStream, StandardCharsets.UTF_8)))
+        {
+            reader.lines().map(l -> {
+                int comment = l.indexOf('#'); // ignore comments
+                if (comment != -1)
+                {
+                    return l.substring(0, comment);
+                }
+                return l;
+            }).filter(l -> !CharUtils.isBlank(l)).filter(l -> l.length() > 1).forEach(l -> {
+                String[] tokens = l.split(";");
+                if (tokens.length == 2)
+                {
+                    MIRRORING_CHAR_MAP.put((char) Integer.parseInt(tokens[0].trim(), 16),
+                            (char) Integer.parseInt(tokens[1].trim(), 16));
+                }
+            });
+        }
+        catch (IOException e)
+        {
+            LOG.warn("An error occurred while parsing BidiMirroring.txt", e);
+        }
     }
 }

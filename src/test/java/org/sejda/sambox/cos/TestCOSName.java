@@ -19,12 +19,12 @@ package org.sejda.sambox.cos;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import org.junit.Assert;
+import org.junit.Test;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.PDPage;
-import org.junit.Assert;
-import org.junit.Test;
 
 public class TestCOSName
 {

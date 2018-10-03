@@ -25,10 +25,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.zip.InflaterOutputStream;
 
-import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.sejda.commons.util.IOUtils;
 import org.sejda.sambox.SAMBox;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
@@ -87,7 +87,7 @@ public class ObjectsStreamTest
         assertEquals(2, victim.getInt(COSName.N));
         assertEquals(8, victim.getInt(COSName.FIRST));
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        IOUtils.copy(victim.getFilteredStream(), new InflaterOutputStream(out));
+        victim.getFilteredStream().transferTo(new InflaterOutputStream(out));
         byte[] data = new byte[] { 49, 32, 48, 32, 50, 32, 50, 32, 48, 32, 51, 32 };
         assertArrayEquals(data, out.toByteArray());
     }

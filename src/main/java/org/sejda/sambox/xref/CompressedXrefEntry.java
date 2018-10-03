@@ -16,7 +16,7 @@
  */
 package org.sejda.sambox.xref;
 
-import static org.sejda.util.RequireUtils.requireArg;
+import static org.sejda.commons.util.RequireUtils.requireArg;
 
 /**
  * An xref entry for a cross reference stream which represent a compressed objects (i.e. an object part of an object

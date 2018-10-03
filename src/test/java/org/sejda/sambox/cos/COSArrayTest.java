@@ -19,10 +19,10 @@ package org.sejda.sambox.cos;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
+import java.util.List;
+
 import org.junit.Test;
 import org.sejda.sambox.pdmodel.PDPage;
-
-import java.util.List;
 
 /**
  * @author Andrea Vacondio

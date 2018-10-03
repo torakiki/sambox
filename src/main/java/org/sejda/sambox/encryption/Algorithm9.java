@@ -20,7 +20,7 @@ import static java.util.Objects.requireNonNull;
 import static org.bouncycastle.util.Arrays.concatenate;
 import static org.bouncycastle.util.Arrays.copyOf;
 import static org.sejda.sambox.encryption.EncryptUtils.rnd;
-import static org.sejda.util.RequireUtils.requireArg;
+import static org.sejda.commons.util.RequireUtils.requireArg;
 
 /**
  * Algorithm 9 as defined in Chap 7.6.3.4.7 of ISO 32000-2

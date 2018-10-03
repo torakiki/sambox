@@ -18,8 +18,8 @@ package org.sejda.sambox.encryption;
 
 import static java.util.Objects.isNull;
 import static org.bouncycastle.util.Arrays.concatenate;
-import static org.sejda.util.RequireUtils.requireArg;
-import static org.sejda.util.RequireUtils.requireNotNullArg;
+import static org.sejda.commons.util.RequireUtils.requireArg;
+import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
 
 import java.security.MessageDigest;
 import java.util.Arrays;

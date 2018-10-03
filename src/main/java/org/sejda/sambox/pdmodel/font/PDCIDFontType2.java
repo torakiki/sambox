@@ -32,11 +32,11 @@ import org.apache.fontbox.ttf.OTFParser;
 import org.apache.fontbox.ttf.OpenTypeFont;
 import org.apache.fontbox.ttf.TrueTypeFont;
 import org.apache.fontbox.util.BoundingBox;
+import org.sejda.commons.util.ReflectionUtils;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.common.PDStream;
 import org.sejda.sambox.util.Matrix;
-import org.sejda.sambox.util.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +51,7 @@ public class PDCIDFontType2 extends PDCIDFont
 
     private final TrueTypeFont ttf;
     private final int[] cid2gid;
-    private final HashMap<Integer, Integer> gid2cid = new HashMap<Integer, Integer>();
+    private final HashMap<Integer, Integer> gid2cid = new HashMap<>();
     private final boolean isEmbedded;
     private final boolean isDamaged;
     private final CmapLookup cmap; // may be null

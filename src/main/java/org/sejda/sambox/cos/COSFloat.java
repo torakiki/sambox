@@ -16,7 +16,7 @@
  */
 package org.sejda.sambox.cos;
 
-import static org.sejda.util.RequireUtils.requireIOCondition;
+import static org.sejda.commons.util.RequireUtils.requireIOCondition;
 
 import java.io.IOException;
 import java.math.BigDecimal;

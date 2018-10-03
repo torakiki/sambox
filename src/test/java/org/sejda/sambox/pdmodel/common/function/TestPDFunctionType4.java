@@ -19,9 +19,9 @@ package org.sejda.sambox.pdmodel.common.function;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.sejda.commons.util.IOUtils;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSStream;
-import org.sejda.util.IOUtils;
 
 import junit.framework.TestCase;
 

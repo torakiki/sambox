@@ -121,8 +121,8 @@ public class PDFontTest extends TestCase
     @Test
     public void testPDFBox3826() throws IOException, URISyntaxException
     {
-        URL url = PDFont.class.getClassLoader()
-                .getResource("org/sejda/sambox/resources/ttf/LiberationSans-Regular.ttf");
+        URL url = PDFont.class
+                .getResource("/org/sejda/sambox/resources/ttf/LiberationSans-Regular.ttf");
         File fontFile = new File(url.toURI());
 
         TrueTypeFont ttf1 = new TTFParser().parse(fontFile);
@@ -135,8 +135,8 @@ public class PDFontTest extends TestCase
     }
 
     /**
-     * PDFBOX-4115: Test ability to create PDF with german umlaut glyphs with a type 1 font.
-     * Test for everything that went wrong before this was fixed.
+     * PDFBOX-4115: Test ability to create PDF with german umlaut glyphs with a type 1 font. Test for everything that
+     * went wrong before this was fixed.
      *
      * @throws IOException
      */
@@ -152,7 +152,8 @@ public class PDFontTest extends TestCase
         PDPage page = new PDPage();
         PDPageContentStream contentStream = new PDPageContentStream(doc, page);
 
-        PDType1Font font = new PDType1Font(doc, new FileInputStream(fontFile), WinAnsiEncoding.INSTANCE);
+        PDType1Font font = new PDType1Font(doc, new FileInputStream(fontFile),
+                WinAnsiEncoding.INSTANCE);
 
         contentStream.beginText();
         contentStream.setFont(font, 10);

@@ -16,7 +16,7 @@
  */
 package org.sejda.sambox.pdmodel.graphics.color;
 
-import static org.sejda.util.RequireUtils.requireIOCondition;
+import static org.sejda.commons.util.RequireUtils.requireIOCondition;
 
 import java.awt.Color;
 import java.awt.Transparency;
@@ -35,7 +35,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.io.IOUtils;
+import org.sejda.commons.util.IOUtils;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSArrayList;
 import org.sejda.sambox.cos.COSBase;
@@ -192,8 +192,8 @@ public final class PDICCBased extends PDCIEBasedColorSpace
         {
             isRGB = true;
         }
-        LOG.warn("Can't read embedded ICC profile (" + e.getLocalizedMessage() +
-                "), using alternate color space: " + alternateColorSpace.getName());
+        LOG.warn("Can't read embedded ICC profile (" + e.getLocalizedMessage()
+                + "), using alternate color space: " + alternateColorSpace.getName());
         initialColor = alternateColorSpace.getInitialColor();
     }
 
@@ -219,7 +219,8 @@ public final class PDICCBased extends PDCIEBasedColorSpace
             if (profileData[ICC_Profile.icHdrRenderingIntent] == ICC_Profile.icPerceptual)
             {
                 LOG.warn("ICC profile is Perceptual, ignoring, treating as Display class");
-                intToBigEndian(ICC_Profile.icSigDisplayClass, profileData, ICC_Profile.icHdrDeviceClass);
+                intToBigEndian(ICC_Profile.icSigDisplayClass, profileData,
+                        ICC_Profile.icHdrDeviceClass);
                 return ICC_Profile.getInstance(profileData);
             }
         }
@@ -233,7 +234,6 @@ public final class PDICCBased extends PDCIEBasedColorSpace
         array[index + 2] = (byte) (value >> 8);
         array[index + 3] = (byte) (value);
     }
-
 
     @Override
     public float[] toRGB(float[] value) throws IOException
@@ -258,7 +258,8 @@ public final class PDICCBased extends PDCIEBasedColorSpace
         {
             float minValue = cs.getMinValue(i);
             float maxValue = cs.getMaxValue(i);
-            result[i] = value[i] < minValue ? minValue : (value[i] > maxValue ? maxValue : value[i]);
+            result[i] = value[i] < minValue ? minValue
+                    : (value[i] > maxValue ? maxValue : value[i]);
         }
         return result;
     }

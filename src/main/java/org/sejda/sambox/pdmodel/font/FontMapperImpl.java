@@ -16,9 +16,10 @@
  */
 package org.sejda.sambox.pdmodel.font;
 
+import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
+
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -101,15 +102,11 @@ final class FontMapperImpl implements FontMapper
 
         try
         {
-            String ttfName = "org/sejda/sambox/resources/ttf/LiberationSans-Regular.ttf";
-            URL url = FontMapper.class.getClassLoader().getResource(ttfName);
-            if (url == null)
-            {
-                throw new IOException("Error loading resource: " + ttfName);
-            }
-            InputStream ttfStream = url.openStream();
-            TTFParser ttfParser = new TTFParser();
-            lastResortFont = ttfParser.parse(ttfStream);
+            InputStream stream = FontMapperImpl.class.getResourceAsStream(
+                    "/org/sejda/sambox/resources/ttf/LiberationSans-Regular.ttf");
+            requireNotNullArg(stream,
+                    "Unable to load org/sejda/sambox/resources/ttf/LiberationSans-Regular.ttf");
+            lastResortFont = new TTFParser().parse(stream);
         }
         catch (IOException e)
         {
@@ -170,7 +167,7 @@ final class FontMapperImpl implements FontMapper
      */
     private Set<String> getPostScriptNames(String postScriptName)
     {
-        Set<String> names = new HashSet<String>();
+        Set<String> names = new HashSet<>();
 
         // built-in PostScript name
         names.add(postScriptName);
@@ -186,7 +183,7 @@ final class FontMapperImpl implements FontMapper
      */
     private List<String> copySubstitutes(String postScriptName)
     {
-        return new ArrayList<String>(substitutes.get(postScriptName));
+        return new ArrayList<>(substitutes.get(postScriptName));
     }
 
     /**
@@ -309,7 +306,7 @@ final class FontMapperImpl implements FontMapper
         TrueTypeFont ttf = (TrueTypeFont) findFont(FontFormat.TTF, baseFont);
         if (ttf != null)
         {
-            return new FontMapping<TrueTypeFont>(ttf, false);
+            return new FontMapping<>(ttf, false);
         }
         // fallback - todo: i.e. fuzzy match
         String fontName = getFallbackFontName(fontDescriptor);
@@ -319,7 +316,7 @@ final class FontMapperImpl implements FontMapper
             // we have to return something here as TTFs aren't strictly required on the system
             ttf = lastResortFont;
         }
-        return new FontMapping<TrueTypeFont>(ttf, true);
+        return new FontMapping<>(ttf, true);
     }
 
     /**
@@ -334,7 +331,7 @@ final class FontMapperImpl implements FontMapper
         FontBoxFont font = findFontBoxFont(baseFont);
         if (font != null)
         {
-            return new FontMapping<FontBoxFont>(font, false);
+            return new FontMapping<>(font, false);
         }
         // fallback - todo: i.e. fuzzy match
         String fallbackName = getFallbackFontName(fontDescriptor);
@@ -344,7 +341,7 @@ final class FontMapperImpl implements FontMapper
             // we have to return something here as TTFs aren't strictly required on the system
             font = lastResortFont;
         }
-        return new FontMapping<FontBoxFont>(font, true);
+        return new FontMapping<>(font, true);
     }
 
     /**

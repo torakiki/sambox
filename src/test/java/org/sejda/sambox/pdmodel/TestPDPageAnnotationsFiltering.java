@@ -19,6 +19,9 @@ package org.sejda.sambox.pdmodel;
 import java.io.IOException;
 import java.util.List;
 
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
@@ -27,9 +30,6 @@ import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotation;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationLink;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationRubberStamp;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationSquareCircle;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * This unit test validates the correct working behavior of PDPage annotations

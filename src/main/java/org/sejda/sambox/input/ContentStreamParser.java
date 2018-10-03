@@ -31,7 +31,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import org.sejda.io.FastByteArrayOutputStream;
+import org.sejda.commons.FastByteArrayOutputStream;
+import org.sejda.commons.util.IOUtils;
 import org.sejda.io.SeekableSource;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.contentstream.PDContentStream;
@@ -39,7 +40,6 @@ import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
-import org.sejda.util.IOUtils;
 
 /**
  * Component responsible for parsing a a content stream to extract operands and such.

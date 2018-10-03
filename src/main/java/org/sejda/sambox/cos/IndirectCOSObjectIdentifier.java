@@ -16,8 +16,8 @@
  */
 package org.sejda.sambox.cos;
 
-import static org.sejda.util.RequireUtils.requireNotBlank;
-import static org.sejda.util.RequireUtils.requireNotNullArg;
+import static org.sejda.commons.util.RequireUtils.requireNotBlank;
+import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
 
 /**
  * Represent and indirect object identifier (as defined by chap. 7.3.10 of PDF 32000-1:2008 spec) with an additional

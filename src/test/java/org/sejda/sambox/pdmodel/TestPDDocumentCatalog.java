@@ -24,10 +24,10 @@ import java.io.InputStream;
 import java.util.List;
 
 import org.junit.Test;
+import org.sejda.commons.util.IOUtils;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.graphics.color.PDOutputIntent;
-import org.sejda.util.IOUtils;
 
 /**
  * Test PDDocument Catalog functionality.

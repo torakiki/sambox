@@ -24,8 +24,8 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Locale;
 
-import org.apache.commons.io.IOUtils;
 import org.junit.Test;
+import org.sejda.commons.util.IOUtils;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.util.SpecVersionUtils;

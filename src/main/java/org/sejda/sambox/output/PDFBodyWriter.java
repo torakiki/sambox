@@ -17,8 +17,8 @@
 package org.sejda.sambox.output;
 
 import static java.util.Optional.ofNullable;
-import static org.sejda.util.RequireUtils.requireNotNullArg;
-import static org.sejda.util.RequireUtils.requireState;
+import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
+import static org.sejda.commons.util.RequireUtils.requireState;
 
 import java.io.Closeable;
 import java.io.IOException;

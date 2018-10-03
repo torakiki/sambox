@@ -1,14 +1,14 @@
 package org.sejda.sambox.pdmodel.interactive.form;
 
-import org.junit.Test;
-import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSString;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 import java.util.Arrays;
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import org.junit.Test;
+import org.sejda.sambox.cos.COSArray;
+import org.sejda.sambox.cos.COSString;
 
 public class FieldUtilsTest
 {

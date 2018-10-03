@@ -26,7 +26,7 @@ import java.io.IOException;
 
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 
-import org.sejda.io.FastByteArrayOutputStream;
+import org.sejda.commons.FastByteArrayOutputStream;
 import org.sejda.io.SeekableSource;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;

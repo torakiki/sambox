@@ -16,7 +16,7 @@
  */
 package org.sejda.sambox.xref;
 
-import static org.sejda.util.RequireUtils.requireArg;
+import static org.sejda.commons.util.RequireUtils.requireArg;
 
 import java.util.Locale;
 

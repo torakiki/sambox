@@ -19,7 +19,7 @@ package org.sejda.sambox.input;
 import static java.util.Objects.nonNull;
 import static org.sejda.sambox.input.AbstractXrefTableParser.TRAILER;
 import static org.sejda.sambox.input.AbstractXrefTableParser.XREF;
-import static org.sejda.util.RequireUtils.requireIOCondition;
+import static org.sejda.commons.util.RequireUtils.requireIOCondition;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

@@ -17,19 +17,19 @@
 package org.sejda.sambox.output;
 
 import static java.util.Optional.ofNullable;
-import static org.sejda.util.RequireUtils.requireNotNullArg;
+import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Optional;
 
+import org.sejda.commons.util.IOUtils;
 import org.sejda.io.CountingWritableByteChannel;
 import org.sejda.sambox.cos.COSDocument;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.encryption.EncryptionContext;
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.util.SpecVersionUtils;
-import org.sejda.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

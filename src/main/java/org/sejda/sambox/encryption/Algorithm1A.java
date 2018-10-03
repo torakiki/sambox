@@ -16,8 +16,8 @@
  */
 package org.sejda.sambox.encryption;
 
-import static org.sejda.util.RequireUtils.requireArg;
-import static org.sejda.util.RequireUtils.requireNotNullArg;
+import static org.sejda.commons.util.RequireUtils.requireArg;
+import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
 
 import org.sejda.sambox.cos.COSObjectKey;
 import org.sejda.sambox.cos.COSStream;

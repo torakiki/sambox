@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.sejda.commons.util.IOUtils;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSArrayList;
 import org.sejda.sambox.cos.COSBase;
@@ -34,7 +35,6 @@ import org.sejda.sambox.cos.COSObjectable;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.pdmodel.common.filespecification.FileSpecifications;
 import org.sejda.sambox.pdmodel.common.filespecification.PDFileSpecification;
-import org.sejda.util.IOUtils;
 
 /**
  * A PDStream represents a stream in a PDF document. Streams are tied to a single PDF document.
@@ -114,7 +114,7 @@ public class PDStream implements COSObjectable
         stream = new COSStream();
         try (OutputStream output = stream.createFilteredStream(filter))
         {
-            org.apache.commons.io.IOUtils.copy(input, output);
+            input.transferTo(output);
         }
         finally
         {
@@ -232,18 +232,18 @@ public class PDStream implements COSObjectable
         if (dp instanceof COSDictionary)
         {
             Map<?, ?> map = COSDictionaryMap.convertBasicTypesToMap((COSDictionary) dp);
-            retval = new COSArrayList<Object>(map, dp, stream, COSName.DECODE_PARMS);
+            retval = new COSArrayList<>(map, dp, stream, COSName.DECODE_PARMS);
         }
         else if (dp instanceof COSArray)
         {
             COSArray array = (COSArray) dp;
-            List<Object> actuals = new ArrayList<Object>();
+            List<Object> actuals = new ArrayList<>();
             for (int i = 0; i < array.size(); i++)
             {
                 actuals.add(COSDictionaryMap
                         .convertBasicTypesToMap((COSDictionary) array.getObject(i)));
             }
-            retval = new COSArrayList<Object>(actuals, array);
+            retval = new COSArrayList<>(actuals, array);
         }
 
         return retval;
@@ -291,7 +291,7 @@ public class PDStream implements COSObjectable
         if (filters instanceof COSName)
         {
             COSName name = (COSName) filters;
-            retval = new COSArrayList<String>(name.getName(), name, stream, COSName.F_FILTER);
+            retval = new COSArrayList<>(name.getName(), name, stream, COSName.F_FILTER);
         }
         else if (filters instanceof COSArray)
         {
@@ -326,18 +326,18 @@ public class PDStream implements COSObjectable
         if (dp instanceof COSDictionary)
         {
             Map<?, ?> map = COSDictionaryMap.convertBasicTypesToMap((COSDictionary) dp);
-            retval = new COSArrayList<Object>(map, dp, stream, COSName.F_DECODE_PARMS);
+            retval = new COSArrayList<>(map, dp, stream, COSName.F_DECODE_PARMS);
         }
         else if (dp instanceof COSArray)
         {
             COSArray array = (COSArray) dp;
-            List<Object> actuals = new ArrayList<Object>();
+            List<Object> actuals = new ArrayList<>();
             for (int i = 0; i < array.size(); i++)
             {
                 actuals.add(COSDictionaryMap
                         .convertBasicTypesToMap((COSDictionary) array.getObject(i)));
             }
-            retval = new COSArrayList<Object>(actuals, array);
+            retval = new COSArrayList<>(actuals, array);
         }
 
         return retval;
@@ -364,7 +364,7 @@ public class PDStream implements COSObjectable
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         try (InputStream is = createInputStream())
         {
-            org.apache.commons.io.IOUtils.copy(is, output);
+            is.transferTo(output);
         }
         return output.toByteArray();
     }

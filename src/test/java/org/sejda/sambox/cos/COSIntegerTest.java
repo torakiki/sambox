@@ -33,7 +33,8 @@ public class COSIntegerTest
     @Test
     public void equalsContract()
     {
-        EqualsVerifier.forClass(COSInteger.class).suppress(Warning.NULL_FIELDS).verify();
+        EqualsVerifier.forClass(COSInteger.class).withIgnoredFields("id")
+                .suppress(Warning.NULL_FIELDS).verify();
     }
 
     @Test

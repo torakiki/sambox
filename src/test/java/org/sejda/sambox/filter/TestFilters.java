@@ -22,9 +22,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Random;
 
+import org.sejda.commons.util.IOUtils;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
-import org.sejda.util.IOUtils;
 
 import junit.framework.TestCase;
 

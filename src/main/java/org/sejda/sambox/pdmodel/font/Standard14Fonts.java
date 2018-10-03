@@ -17,6 +17,9 @@
 
 package org.sejda.sambox.pdmodel.font;
 
+import static java.util.Objects.nonNull;
+import static org.sejda.commons.util.RequireUtils.requireIOCondition;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -41,15 +44,15 @@ final class Standard14Fonts
     {
     }
 
-    private static final Set<String> STANDARD_14_NAMES = new HashSet<String>();
-    private static final Map<String, String> STANDARD_14_MAPPING = new HashMap<String, String>();
+    private static final Set<String> STANDARD_14_NAMES = new HashSet<>();
+    private static final Map<String, String> STANDARD_14_MAPPING = new HashMap<>();
     private static final Map<String, FontMetrics> STANDARD14_AFM_MAP;
 
     static
     {
         try
         {
-            STANDARD14_AFM_MAP = new HashMap<String, FontMetrics>();
+            STANDARD14_AFM_MAP = new HashMap<>();
             addAFM("Courier-Bold");
             addAFM("Courier-BoldOblique");
             addAFM("Courier");
@@ -116,20 +119,14 @@ final class Standard14Fonts
             STANDARD14_AFM_MAP.put(fontName, STANDARD14_AFM_MAP.get(afmName));
         }
 
-        String resourceName = "org/sejda/sambox/resources/afm/" + afmName + ".afm";
-        URL url = PDType1Font.class.getClassLoader().getResource(resourceName);
-        if (url != null)
+        String resourceName = "/org/sejda/sambox/resources/afm/" + afmName + ".afm";
+        URL url = PDType1Font.class.getResource(resourceName);
+        requireIOCondition(nonNull(url), "Unable to load " + resourceName);
+        try (InputStream afmStream = url.openStream())
         {
-            try (InputStream afmStream = url.openStream())
-            {
-                AFMParser parser = new AFMParser(afmStream);
-                FontMetrics metric = parser.parse(true);
-                STANDARD14_AFM_MAP.put(fontName, metric);
-            }
-        }
-        else
-        {
-            throw new IOException(resourceName + " not found");
+            AFMParser parser = new AFMParser(afmStream);
+            FontMetrics metric = parser.parse(true);
+            STANDARD14_AFM_MAP.put(fontName, metric);
         }
     }
 

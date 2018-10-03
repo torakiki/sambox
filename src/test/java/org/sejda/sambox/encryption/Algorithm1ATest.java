@@ -46,7 +46,7 @@ public class Algorithm1ATest
     @Before
     public void setUp()
     {
-        engine = mock(AESEncryptionAlgorithmEngine.class);
+        engine = mock(ConcatenatingAESEngine.class);
         victim = new Algorithm1A(key, engine);
     }
 

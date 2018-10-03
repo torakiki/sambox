@@ -16,7 +16,7 @@
  */
 package org.sejda.sambox.input;
 
-import static org.sejda.util.RequireUtils.requireNotNullArg;
+import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
 
 import java.io.IOException;
 import java.util.regex.Matcher;

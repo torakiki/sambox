@@ -21,7 +21,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 
-import org.apache.commons.io.IOUtils;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 
@@ -211,7 +210,7 @@ public final class Predictor
         if (predictor == 1)
         {
             // no prediction
-            IOUtils.copy(in, out);
+            in.transferTo(out);
         }
         else
         {

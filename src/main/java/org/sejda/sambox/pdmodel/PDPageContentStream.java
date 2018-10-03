@@ -17,8 +17,8 @@
 package org.sejda.sambox.pdmodel;
 
 import static java.util.Objects.nonNull;
+import static org.sejda.commons.util.RequireUtils.requireState;
 import static org.sejda.io.CountingWritableByteChannel.from;
-import static org.sejda.util.RequireUtils.requireState;
 
 import java.awt.Color;
 import java.awt.geom.AffineTransform;
@@ -29,6 +29,7 @@ import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.Stack;
 
+import org.sejda.commons.util.IOUtils;
 import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
@@ -57,7 +58,6 @@ import org.sejda.sambox.pdmodel.graphics.shading.PDShading;
 import org.sejda.sambox.pdmodel.graphics.state.PDExtendedGraphicsState;
 import org.sejda.sambox.pdmodel.graphics.state.RenderingMode;
 import org.sejda.sambox.util.Matrix;
-import org.sejda.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

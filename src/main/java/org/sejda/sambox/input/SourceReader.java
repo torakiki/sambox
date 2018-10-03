@@ -17,6 +17,8 @@
 package org.sejda.sambox.input;
 
 import static java.util.Arrays.asList;
+import static org.sejda.commons.util.RequireUtils.requireIOCondition;
+import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
 import static org.sejda.sambox.util.CharUtils.ASCII_BACKSPACE;
 import static org.sejda.sambox.util.CharUtils.ASCII_CARRIAGE_RETURN;
 import static org.sejda.sambox.util.CharUtils.ASCII_FORM_FEED;
@@ -30,8 +32,6 @@ import static org.sejda.sambox.util.CharUtils.isHexDigit;
 import static org.sejda.sambox.util.CharUtils.isLineFeed;
 import static org.sejda.sambox.util.CharUtils.isOctalDigit;
 import static org.sejda.sambox.util.CharUtils.isWhitespace;
-import static org.sejda.util.RequireUtils.requireIOCondition;
-import static org.sejda.util.RequireUtils.requireNotNullArg;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -40,13 +40,13 @@ import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
-import org.sejda.io.FastByteArrayOutputStream;
+import org.sejda.commons.FastByteArrayOutputStream;
+import org.sejda.commons.Pool;
+import org.sejda.commons.util.IOUtils;
 import org.sejda.io.SeekableSource;
 import org.sejda.sambox.SAMBox;
 import org.sejda.sambox.cos.COSObjectKey;
 import org.sejda.sambox.util.CharUtils;
-import org.sejda.sambox.util.Pool;
-import org.sejda.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

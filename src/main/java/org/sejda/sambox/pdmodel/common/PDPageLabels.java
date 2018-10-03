@@ -17,7 +17,7 @@
 package org.sejda.sambox.pdmodel.common;
 
 import static java.util.Objects.nonNull;
-import static org.sejda.util.RequireUtils.requireArg;
+import static org.sejda.commons.util.RequireUtils.requireArg;
 
 import java.io.IOException;
 import java.util.Collections;

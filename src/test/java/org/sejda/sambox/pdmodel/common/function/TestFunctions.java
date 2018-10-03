@@ -16,12 +16,12 @@
  */
 package org.sejda.sambox.pdmodel.common.function;
 
+import org.sejda.sambox.pdmodel.common.function.type4.TestOperators;
+import org.sejda.sambox.pdmodel.common.function.type4.TestParser;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
-import org.sejda.sambox.pdmodel.common.function.type4.TestOperators;
-import org.sejda.sambox.pdmodel.common.function.type4.TestParser;
 
 /**
  * Tests PDF functions.

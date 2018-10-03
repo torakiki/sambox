@@ -18,6 +18,7 @@ package org.sejda.sambox.output;
 
 import java.io.IOException;
 
+import org.sejda.commons.util.IOUtils;
 import org.sejda.io.CountingWritableByteChannel;
 import org.sejda.io.DevNullWritableByteChannel;
 import org.sejda.sambox.cos.COSArray;
@@ -28,7 +29,6 @@ import org.sejda.sambox.cos.COSObjectable;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
 import org.sejda.sambox.pdmodel.PDPage;
-import org.sejda.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -18,7 +18,7 @@ package org.sejda.sambox.encryption;
 
 import static org.bouncycastle.util.Arrays.concatenate;
 import static org.bouncycastle.util.Arrays.copyOf;
-import static org.sejda.util.RequireUtils.requireArg;
+import static org.sejda.commons.util.RequireUtils.requireArg;
 
 import java.security.SecureRandom;
 

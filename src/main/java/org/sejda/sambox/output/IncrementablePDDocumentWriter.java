@@ -17,11 +17,11 @@
 package org.sejda.sambox.output;
 
 import static java.util.Optional.ofNullable;
+import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
+import static org.sejda.commons.util.RequireUtils.requireState;
 import static org.sejda.sambox.encryption.EncryptionContext.encryptionAlgorithmFromEncryptionDictionary;
 import static org.sejda.sambox.util.SpecVersionUtils.V1_5;
 import static org.sejda.sambox.util.SpecVersionUtils.isAtLeast;
-import static org.sejda.util.RequireUtils.requireNotNullArg;
-import static org.sejda.util.RequireUtils.requireState;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -30,10 +30,10 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.sejda.commons.util.IOUtils;
 import org.sejda.io.CountingWritableByteChannel;
 import org.sejda.sambox.input.IncrementablePDDocument;
 import org.sejda.sambox.pdmodel.PDDocument;
-import org.sejda.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

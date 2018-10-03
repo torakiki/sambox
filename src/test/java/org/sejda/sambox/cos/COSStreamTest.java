@@ -26,9 +26,9 @@ import java.io.OutputStream;
 import java.util.Arrays;
 
 import org.junit.Test;
+import org.sejda.commons.util.IOUtils;
 import org.sejda.sambox.filter.Filter;
 import org.sejda.sambox.filter.FilterFactory;
-import org.sejda.util.IOUtils;
 
 public class COSStreamTest
 {

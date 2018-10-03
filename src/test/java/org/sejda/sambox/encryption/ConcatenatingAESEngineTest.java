@@ -22,9 +22,9 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.apache.commons.io.IOUtils;
 import org.bouncycastle.util.Arrays;
 import org.junit.Test;
+import org.sejda.commons.util.IOUtils;
 
 /**
  * @author Andrea Vacondio

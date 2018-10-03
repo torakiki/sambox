@@ -17,11 +17,11 @@
 package org.sejda.sambox.pdmodel;
 
 import static java.util.Optional.ofNullable;
+import static org.sejda.commons.util.RequireUtils.requireNotBlank;
 import static org.sejda.io.CountingWritableByteChannel.from;
 import static org.sejda.sambox.cos.DirectCOSObject.asDirectObject;
 import static org.sejda.sambox.util.SpecVersionUtils.V1_4;
 import static org.sejda.sambox.util.SpecVersionUtils.isAtLeast;
-import static org.sejda.util.RequireUtils.requireNotBlank;
 
 import java.awt.Point;
 import java.awt.image.DataBuffer;
@@ -39,6 +39,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import org.sejda.commons.util.IOUtils;
 import org.sejda.io.CountingWritableByteChannel;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSArray;
@@ -63,7 +64,6 @@ import org.sejda.sambox.pdmodel.encryption.SecurityHandler;
 import org.sejda.sambox.pdmodel.font.Subsettable;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceRGB;
 import org.sejda.sambox.util.Version;
-import org.sejda.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

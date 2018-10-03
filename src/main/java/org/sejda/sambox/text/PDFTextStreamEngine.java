@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.text;
 
+import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
+
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -46,7 +48,14 @@ import org.sejda.sambox.contentstream.operator.text.ShowTextLine;
 import org.sejda.sambox.contentstream.operator.text.ShowTextLineAndSpace;
 import org.sejda.sambox.pdmodel.PDPage;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
-import org.sejda.sambox.pdmodel.font.*;
+import org.sejda.sambox.pdmodel.font.PDCIDFont;
+import org.sejda.sambox.pdmodel.font.PDCIDFontType2;
+import org.sejda.sambox.pdmodel.font.PDFont;
+import org.sejda.sambox.pdmodel.font.PDFontDescriptor;
+import org.sejda.sambox.pdmodel.font.PDSimpleFont;
+import org.sejda.sambox.pdmodel.font.PDTrueTypeFont;
+import org.sejda.sambox.pdmodel.font.PDType0Font;
+import org.sejda.sambox.pdmodel.font.PDType3Font;
 import org.sejda.sambox.pdmodel.font.encoding.GlyphList;
 import org.sejda.sambox.pdmodel.graphics.state.PDGraphicsState;
 import org.sejda.sambox.util.Matrix;
@@ -99,8 +108,10 @@ public class PDFTextStreamEngine extends PDFStreamEngine
         addOperator(new ShowTextLineAndSpace());
 
         // load additional glyph list for Unicode mapping
-        String path = "org/sejda/sambox/resources/glyphlist/additional.txt";
-        InputStream input = GlyphList.class.getClassLoader().getResourceAsStream(path);
+        InputStream input = GlyphList.class
+                .getResourceAsStream("/org/sejda/sambox/resources/glyphlist/additional.txt");
+        requireNotNullArg(input,
+                "Unable to load org/sejda/sambox/resources/glyphlist/additional.txt");
         glyphList = new GlyphList(GlyphList.getAdobeGlyphList(), input);
     }
 

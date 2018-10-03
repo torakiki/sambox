@@ -23,9 +23,15 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.fontbox.util.BoundingBox;
-import org.sejda.sambox.cos.*;
+import org.sejda.commons.util.IOUtils;
+import org.sejda.sambox.cos.COSArray;
+import org.sejda.sambox.cos.COSBase;
+import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.cos.COSNumber;
+import org.sejda.sambox.cos.COSObjectable;
+import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.util.Matrix;
 import org.sejda.sambox.util.Vector;
 

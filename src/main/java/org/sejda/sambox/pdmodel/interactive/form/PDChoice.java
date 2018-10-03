@@ -16,7 +16,7 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
-import static org.sejda.util.RequireUtils.requireArg;
+import static org.sejda.commons.util.RequireUtils.requireArg;
 
 import java.io.IOException;
 import java.util.ArrayList;

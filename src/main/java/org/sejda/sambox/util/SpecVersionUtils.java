@@ -16,7 +16,7 @@
  */
 package org.sejda.sambox.util;
 
-import static org.sejda.util.RequireUtils.requireNotNullArg;
+import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
 
 import java.io.IOException;
 

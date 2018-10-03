@@ -17,7 +17,7 @@
 package org.sejda.sambox.pdmodel.graphics.image;
 
 import static java.util.Objects.nonNull;
-import static org.sejda.util.RequireUtils.requireIOCondition;
+import static org.sejda.commons.util.RequireUtils.requireIOCondition;
 
 import java.awt.Transparency;
 import java.awt.color.ColorSpace;
@@ -44,7 +44,7 @@ import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
 
-import org.apache.commons.io.IOUtils;
+import org.sejda.commons.util.IOUtils;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceCMYK;
@@ -253,10 +253,7 @@ public final class JPEGFactory
         {
             // clean up
             IOUtils.closeQuietly(out);
-            if (ios != null)
-            {
-                ios.close();
-            }
+            IOUtils.closeQuietly(ios);
             if (imageWriter != null)
             {
                 imageWriter.dispose();

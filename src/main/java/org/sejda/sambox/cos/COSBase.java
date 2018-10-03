@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.cos;
 
+import static java.util.Objects.nonNull;
+
 import java.io.IOException;
 
 /**
@@ -61,7 +63,7 @@ public abstract class COSBase implements COSObjectable
      */
     public void idIfAbsent(IndirectCOSObjectIdentifier id)
     {
-        if (!hasId() && id != null)
+        if (!hasId() && nonNull(id))
         {
             this.id = id;
         }
@@ -72,7 +74,7 @@ public abstract class COSBase implements COSObjectable
      */
     public boolean hasId()
     {
-        return id() != null;
+        return nonNull(id());
     }
 
 }

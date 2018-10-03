@@ -16,7 +16,7 @@
  */
 package org.sejda.sambox.pdmodel.graphics.image;
 
-import static org.sejda.util.RequireUtils.requireNotNullArg;
+import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
 
 import java.awt.Graphics2D;
 import java.awt.Paint;
@@ -33,7 +33,6 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
-import org.apache.commons.io.IOUtils;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSName;
@@ -121,7 +120,7 @@ public final class PDImageXObject extends PDXObject implements PDImage
         COSStream stream = new COSStream();
         try (OutputStream output = stream.createFilteredStream())
         {
-            IOUtils.copy(rawInput, output);
+            rawInput.transferTo(output);
         }
         return stream;
     }

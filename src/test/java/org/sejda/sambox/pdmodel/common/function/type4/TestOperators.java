@@ -16,9 +16,9 @@
  */
 package org.sejda.sambox.pdmodel.common.function.type4;
 
-import junit.framework.TestCase;
-
 import org.junit.Assert;
+
+import junit.framework.TestCase;
 
 /**
  * Tests all implemented PostScript operators.

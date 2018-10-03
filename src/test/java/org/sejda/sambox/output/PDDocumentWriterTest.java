@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.output;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.eq;
@@ -29,7 +30,6 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.internal.matchers.InstanceOf;
 import org.sejda.io.DevNullWritableByteChannel;
 import org.sejda.sambox.TestUtils;
 import org.sejda.sambox.cos.COSDocument;
@@ -86,7 +86,7 @@ public class PDDocumentWriterTest
         victim.write(document);
         verify(cosDoc).accept(bodyWriter.capture());
         assertThat(bodyWriter.getValue().objectsWriter,
-                new InstanceOf(SyncPDFBodyObjectsWriter.class));
+                instanceOf(SyncPDFBodyObjectsWriter.class));
     }
 
     @Test
@@ -104,7 +104,7 @@ public class PDDocumentWriterTest
         victim.write(document);
         verify(cosDoc).accept(bodyWriter.capture());
         assertThat(bodyWriter.getValue().objectsWriter,
-                new InstanceOf(ObjectsStreamPDFBodyObjectsWriter.class));
+                instanceOf(ObjectsStreamPDFBodyObjectsWriter.class));
     }
 
     @Test
@@ -119,7 +119,7 @@ public class PDDocumentWriterTest
         victim.write(document);
         verify(cosDoc).accept(bodyWriter.capture());
         assertThat(bodyWriter.getValue().objectsWriter,
-                new InstanceOf(AsyncPDFBodyObjectsWriter.class));
+                instanceOf(AsyncPDFBodyObjectsWriter.class));
     }
 
     @Test

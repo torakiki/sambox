@@ -28,6 +28,7 @@ import java.nio.charset.StandardCharsets;
 
 import org.junit.After;
 import org.junit.Test;
+import org.sejda.commons.util.IOUtils;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSBoolean;
@@ -38,7 +39,6 @@ import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.cos.COSString;
-import org.sejda.util.IOUtils;
 
 /**
  * @author Andrea Vacondio

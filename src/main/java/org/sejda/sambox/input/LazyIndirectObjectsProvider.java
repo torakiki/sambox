@@ -20,11 +20,11 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
+import static org.sejda.commons.util.RequireUtils.requireIOCondition;
 import static org.sejda.sambox.input.BaseCOSParser.ENDOBJ;
 import static org.sejda.sambox.input.BaseCOSParser.ENDSTREAM;
 import static org.sejda.sambox.input.BaseCOSParser.STREAM;
 import static org.sejda.sambox.input.SourceReader.OBJ;
-import static org.sejda.util.RequireUtils.requireIOCondition;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -33,6 +33,7 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.sejda.commons.util.IOUtils;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
@@ -44,7 +45,6 @@ import org.sejda.sambox.xref.CompressedXrefEntry;
 import org.sejda.sambox.xref.Xref;
 import org.sejda.sambox.xref.XrefEntry;
 import org.sejda.sambox.xref.XrefType;
-import org.sejda.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
