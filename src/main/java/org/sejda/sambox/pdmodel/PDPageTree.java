@@ -118,7 +118,8 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
             return value;
         }
 
-        COSDictionary parent = (COSDictionary) node.getDictionaryObject(COSName.PARENT, COSName.P);
+        COSDictionary parent = node.getDictionaryObject(COSName.PARENT, COSName.P,
+                COSDictionary.class);
         if (parent != null)
         {
             return getInheritableAttribute(parent, key);
@@ -303,7 +304,9 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
     {
         if (pageNum < 0)
         {
-            throw new PageNotFoundException("Index out of bounds: " + pageNum + " in " + getSourcePath(), pageNum, getSourcePath());
+            throw new PageNotFoundException(
+                    "Index out of bounds: " + pageNum + " in " + getSourcePath(), pageNum,
+                    getSourcePath());
         }
 
         if (isPageTreeNode(node))
@@ -338,22 +341,25 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
                 }
 
                 throw new PageNotFoundException(
-                        "Unable to find page " + pageNum + " in " + getSourcePath(), pageNum, getSourcePath());
+                        "Unable to find page " + pageNum + " in " + getSourcePath(), pageNum,
+                        getSourcePath());
             }
             throw new PageNotFoundException(
-                    "Index out of bounds: " + pageNum + " in " + getSourcePath(), pageNum, getSourcePath());
+                    "Index out of bounds: " + pageNum + " in " + getSourcePath(), pageNum,
+                    getSourcePath());
         }
         if (encountered == pageNum)
         {
             return node;
         }
 
-        throw new PageNotFoundException("Unable to find page " + pageNum + " in " + getSourcePath(), pageNum, getSourcePath());
+        throw new PageNotFoundException("Unable to find page " + pageNum + " in " + getSourcePath(),
+                pageNum, getSourcePath());
     }
 
-    private String getSourcePath() {
-        return ofNullable(getCOSObject().id())
-                .map(i -> i.ownerIdentifier).orElse("Unknown");
+    private String getSourcePath()
+    {
+        return ofNullable(getCOSObject().id()).map(i -> i.ownerIdentifier).orElse("Unknown");
     }
 
     /**

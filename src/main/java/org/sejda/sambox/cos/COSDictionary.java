@@ -134,6 +134,26 @@ public class COSDictionary extends COSBase
     }
 
     /**
+     * 
+     * @param firstKey
+     * @param secondKey
+     * @param clazz
+     * @return
+     * @see #getDictionaryObject(COSName, COSName)
+     */
+    public <T extends COSBase> T getDictionaryObject(COSName firstKey, COSName secondKey,
+            Class<T> clazz)
+    {
+        return ofNullable(getDictionaryObject(firstKey, clazz)).orElseGet(() -> {
+            if (nonNull(secondKey))
+            {
+                return getDictionaryObject(secondKey, clazz);
+            }
+            return null;
+        });
+    }
+
+    /**
      * Get an object from this dictionary. If the object is a reference then it will dereference it. If the object is
      * COSNull then null will be returned.
      *
@@ -1163,9 +1183,9 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * This is a special case of getItem that takes multiple keys, it will handle the situation
-     * where multiple keys could get the same value, ie if either CS or ColorSpace is used to get
-     * the colorspace. This will get an object from this dictionary.
+     * This is a special case of getItem that takes multiple keys, it will handle the situation where multiple keys
+     * could get the same value, ie if either CS or ColorSpace is used to get the colorspace. This will get an object
+     * from this dictionary.
      *
      * @param firstKey The first key to try.
      * @param secondKey The second key to try.
