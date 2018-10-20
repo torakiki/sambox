@@ -16,7 +16,7 @@
  */
 package org.sejda.sambox.pdmodel.graphics.image;
 
-import java.awt.*;
+import java.awt.Paint;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -272,7 +272,7 @@ public final class PDInlineImage implements PDImage
     @Override
     public COSArray getDecode()
     {
-        return (COSArray) parameters.getDictionaryObject(COSName.D, COSName.DECODE);
+        return parameters.getDictionaryObject(COSName.D, COSName.DECODE, COSArray.class);
     }
 
     @Override

@@ -120,8 +120,8 @@ public final class PDFieldFactory
         String retval = dic.getNameAsString(COSName.FT);
         if (retval == null)
         {
-            COSDictionary parent = (COSDictionary) dic.getDictionaryObject(COSName.PARENT,
-                    COSName.P);
+            COSDictionary parent = dic.getDictionaryObject(COSName.PARENT, COSName.P,
+                    COSDictionary.class);
             if (parent != null)
             {
                 retval = findFieldType(parent);

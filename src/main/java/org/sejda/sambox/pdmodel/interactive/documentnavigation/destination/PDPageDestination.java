@@ -128,15 +128,15 @@ public abstract class PDPageDestination extends PDDestination
             }
             else if (page instanceof COSDictionary)
             {
-                COSBase parent = page;
-                while (((COSDictionary) parent).getDictionaryObject(COSName.PARENT,
-                        COSName.P) != null)
+                COSDictionary parent = (COSDictionary) page;
+                while (parent.getDictionaryObject(COSName.PARENT, COSName.P,
+                        COSDictionary.class) != null)
                 {
-                    parent = ((COSDictionary) parent).getDictionaryObject(COSName.PARENT,
-                            COSName.P);
+                    parent = parent.getDictionaryObject(COSName.PARENT, COSName.P,
+                            COSDictionary.class);
                 }
                 // now parent is the pages node
-                PDPageTree pages = new PDPageTree((COSDictionary) parent);
+                PDPageTree pages = new PDPageTree(parent);
                 return pages.indexOf(new PDPage((COSDictionary) page));
             }
         }
