@@ -15,6 +15,10 @@
  */
 package org.sejda.sambox.pdmodel.graphics.image;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.sejda.sambox.pdmodel.graphics.image.ValidateXImage.checkIdent;
 import static org.sejda.sambox.pdmodel.graphics.image.ValidateXImage.colorCount;
 import static org.sejda.sambox.pdmodel.graphics.image.ValidateXImage.doWritePDF;
@@ -32,6 +36,8 @@ import java.util.Random;
 
 import javax.imageio.ImageIO;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.PDDocument;
@@ -42,21 +48,18 @@ import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceRGB;
 import org.sejda.sambox.rendering.PDFRenderer;
 
-import junit.framework.TestCase;
-
 /**
  * Unit tests for LosslessFactory
  *
  * @author Tilman Hausherr
  */
-public class LosslessFactoryTest extends TestCase
+public class LosslessFactoryTest
 {
     private final File testResultsDir = new File("target/test-output/graphics");
 
-    @Override
-    protected void setUp() throws Exception
+    @Before
+    public void setUp()
     {
-        super.setUp();
         testResultsDir.mkdirs();
     }
 
@@ -65,6 +68,7 @@ public class LosslessFactoryTest extends TestCase
      *
      * @throws java.io.IOException
      */
+    @Test
     public void testCreateLosslessFromImageRGB() throws IOException
     {
         File pdfFile = new File(testResultsDir, "misc.pdf");
@@ -132,6 +136,7 @@ public class LosslessFactoryTest extends TestCase
      *
      * @throws java.io.IOException
      */
+    @Test
     public void testCreateLosslessFromImageINT_ARGB() throws IOException
     {
         PDDocument document = new PDDocument();
@@ -173,6 +178,7 @@ public class LosslessFactoryTest extends TestCase
      *
      * @throws java.io.IOException
      */
+    @Test
     public void testCreateLosslessFromImageBITMASK_INT_ARGB() throws IOException
     {
         doBitmaskTransparencyTest(BufferedImage.TYPE_INT_ARGB, "bitmaskintargb.pdf");
@@ -184,6 +190,7 @@ public class LosslessFactoryTest extends TestCase
      *
      * @throws java.io.IOException
      */
+    @Test
     public void testCreateLosslessFromImageBITMASK4BYTE_ABGR() throws IOException
     {
         doBitmaskTransparencyTest(BufferedImage.TYPE_INT_ARGB, "bitmask4babgr.pdf");
@@ -194,6 +201,7 @@ public class LosslessFactoryTest extends TestCase
      *
      * @throws java.io.IOException
      */
+    @Test
     public void testCreateLosslessFromImage4BYTE_ABGR() throws IOException
     {
         PDDocument document = new PDDocument();
@@ -243,6 +251,7 @@ public class LosslessFactoryTest extends TestCase
      *
      * @throws java.io.IOException
      */
+    @Test
     public void testCreateLosslessFromTransparentGIF() throws IOException
     {
         PDDocument document = new PDDocument();
@@ -264,15 +273,17 @@ public class LosslessFactoryTest extends TestCase
 
         doWritePDF(document, ximage, testResultsDir, "gif.pdf");
     }
-    
+
     /**
      * Test file that had a predictor encoding bug in PDFBOX-4184.
      *
      * @throws java.io.IOException
      */
+    @Test
     public void testCreateLosslessFromGovdocs032163() throws IOException
     {
-        BufferedImage image = ImageIO.read(new File("target/imgs", "PDFBOX-4184-032163.jpg"));
+        BufferedImage image = ImageIO
+                .read(this.getClass().getResourceAsStream("PDFBOX-4184-032163.jpg"));
         PDImageXObject ximage = LosslessFactory.createFromImage(image);
         validate(ximage, 8, image.getWidth(), image.getHeight(), "png",
                 PDDeviceRGB.INSTANCE.getName());
