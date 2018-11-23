@@ -71,6 +71,7 @@ public abstract class PDColorSpace implements COSObjectable
 
     public static PDColorSpace create(COSBase colorSpace, PDResources resources, boolean wasDefault) throws IOException {
         boolean canCache = colorSpace.hasId() && resources != null && resources.getResourceCache() != null;
+
         if(canCache) {
             ResourceCache cache = resources.getResourceCache();
             PDColorSpace existing = cache.getColorSpace(colorSpace.id().objectIdentifier);
@@ -85,11 +86,22 @@ public abstract class PDColorSpace implements COSObjectable
         if(colorSpace.hasId() && resources != null) {
             ResourceCache cache = resources.getResourceCache();
             if(cache != null) {
-                cache.put(colorSpace.id().objectIdentifier, result);
+                if(isAllowedCache(result)) {
+                    cache.put(colorSpace.id().objectIdentifier, result);
+                }
             }
         }
 
         return result;
+    }
+
+    public static boolean isAllowedCache(PDColorSpace colorSpace) {
+        if(colorSpace instanceof  PDPattern) {
+            // cannot cache PDPattern color spaces in a global cache, they carry page resources
+            return false;
+        } else {
+            return true;
+        }
     }
 
     /**
