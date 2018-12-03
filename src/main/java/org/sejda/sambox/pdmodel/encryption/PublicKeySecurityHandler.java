@@ -49,7 +49,7 @@ public final class PublicKeySecurityHandler extends SecurityHandler
     public static final String FILTER = "Adobe.PubSec";
 
     private PublicKeyProtectionPolicy policy = null;
-    
+
     /**
      * Constructor.
      */
@@ -71,21 +71,17 @@ public final class PublicKeySecurityHandler extends SecurityHandler
     /**
      * Prepares everything to decrypt the document.
      *
-     * @param encryption encryption dictionary, can be retrieved via
-     * {@link PDDocument#getEncryption()}
-     * @param documentIDArray document id which is returned via
-     * {@link org.apache.pdfbox.cos.COSDocument#getDocumentID()} (not used by
-     * this handler)
+     * @param encryption encryption dictionary, can be retrieved via {@link PDDocument#getEncryption()}
+     * @param documentIDArray document id which is returned via {@link org.sejda.sambox.cos.COSDocument#getDocumentID()}
+     * (not used by this handler)
      * @param decryptionMaterial Information used to decrypt the document.
      *
-     * @throws IOException If there is an error accessing data. If verbose mode
-     * is enabled, the exception message will provide more details why the
-     * match wasn't successful.
+     * @throws IOException If there is an error accessing data. If verbose mode is enabled, the exception message will
+     * provide more details why the match wasn't successful.
      */
     @Override
     public void prepareForDecryption(PDEncryption encryption, COSArray documentIDArray,
-            DecryptionMaterial decryptionMaterial)
-            throws IOException
+            DecryptionMaterial decryptionMaterial) throws IOException
     {
         if (!(decryptionMaterial instanceof PublicKeyDecryptionMaterial))
         {
@@ -139,7 +135,8 @@ public final class PublicKeySecurityHandler extends SecurityHandler
                     {
                         foundRecipient = true;
                         PrivateKey privateKey = (PrivateKey) material.getPrivateKey();
-                        envelopedData = ri.getContent(new JceKeyTransEnvelopedRecipient(privateKey));
+                        envelopedData = ri
+                                .getContent(new JceKeyTransEnvelopedRecipient(privateKey));
                         break;
                     }
                     j++;
@@ -150,7 +147,8 @@ public final class PublicKeySecurityHandler extends SecurityHandler
                         extraInfo.append(": ");
                         if (rid instanceof KeyTransRecipientId)
                         {
-                            appendCertInfo(extraInfo, (KeyTransRecipientId) rid, certificate, materialCert);
+                            appendCertInfo(extraInfo, (KeyTransRecipientId) rid, certificate,
+                                    materialCert);
                         }
                     }
                 }
@@ -159,8 +157,8 @@ public final class PublicKeySecurityHandler extends SecurityHandler
             }
             if (!foundRecipient || envelopedData == null)
             {
-                throw new IOException("The certificate matches none of " + i
-                        + " recipient entries" + extraInfo.toString());
+                throw new IOException("The certificate matches none of " + i + " recipient entries"
+                        + extraInfo.toString());
             }
             if (envelopedData.length != 24)
             {
@@ -213,7 +211,7 @@ public final class PublicKeySecurityHandler extends SecurityHandler
         }
     }
 
-    private void appendCertInfo(StringBuilder extraInfo, KeyTransRecipientId ktRid, 
+    private void appendCertInfo(StringBuilder extraInfo, KeyTransRecipientId ktRid,
             X509Certificate certificate, X509CertificateHolder materialCert)
     {
         BigInteger ridSerialNumber = ktRid.getSerialNumber();
@@ -236,7 +234,7 @@ public final class PublicKeySecurityHandler extends SecurityHandler
             extraInfo.append("\' ");
         }
     }
-    
+
     /**
      * {@inheritDoc}
      */

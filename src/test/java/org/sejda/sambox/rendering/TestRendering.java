@@ -33,10 +33,10 @@ import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.PDDocument;
 
 /**
- * Functional test for PDF rendering. This test simply tries to render
- * a series of PDFs using PDFBox to make sure that no exceptions are thrown.
+ * Functional test for PDF rendering. This test simply tries to render a series of PDFs using PDFBox to make sure that
+ * no exceptions are thrown.
  *
- * It does not attempt to detect if rendering is correct, see {@link org.apache.pdfbox.rendering.TestPDFToImage}.
+ * It does not attempt to detect if rendering is correct, see {@link org.sejda.sambox.rendering.TestPDFToImage}.
  *
  * These tests should not run in parallel
  * http://stackoverflow.com/questions/26535842/multithreaded-jpeg-image-processing-in-java
@@ -81,8 +81,8 @@ public class TestRendering
         File file = new File(INPUT_DIR, fileName);
         try (PDDocument document = PDFParser.parse(SeekableSources.seekableSourceFrom(file)))
         {
-        PDFRenderer renderer = new PDFRenderer(document);
-        renderer.renderImage(0);
+            PDFRenderer renderer = new PDFRenderer(document);
+            renderer.renderImage(0);
         }
         // We don't actually do anything with the image for the same reason that
         // TestPDFToImage is disabled - different JVMs produce different results

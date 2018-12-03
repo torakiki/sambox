@@ -17,6 +17,7 @@
 package org.sejda.sambox.pdmodel.graphics.state;
 
 import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
 
 import java.io.IOException;
 
@@ -72,7 +73,7 @@ public class PDExtendedGraphicsState implements COSObjectable
         {
             if (key.equals(COSName.LW))
             {
-                gs.setLineWidth(getLineWidth());
+                gs.setLineWidth(defaultIfNull(getLineWidth(), 1));
             }
             else if (key.equals(COSName.LC))
             {
@@ -84,7 +85,7 @@ public class PDExtendedGraphicsState implements COSObjectable
             }
             else if (key.equals(COSName.ML))
             {
-                gs.setMiterLimit(getMiterLimit());
+                gs.setMiterLimit(defaultIfNull(getMiterLimit(), 10));
             }
             else if (key.equals(COSName.D))
             {
@@ -96,7 +97,7 @@ public class PDExtendedGraphicsState implements COSObjectable
             }
             else if (key.equals(COSName.OPM))
             {
-                gs.setOverprintMode(getOverprintMode().doubleValue());
+                gs.setOverprintMode(defaultIfNull(getOverprintMode(), 0));
             }
             else if (key.equals(COSName.FONT))
             {
@@ -109,11 +110,11 @@ public class PDExtendedGraphicsState implements COSObjectable
             }
             else if (key.equals(COSName.FL))
             {
-                gs.setFlatness(getFlatnessTolerance());
+                gs.setFlatness(defaultIfNull(getFlatnessTolerance(), 1.0f));
             }
             else if (key.equals(COSName.SM))
             {
-                gs.setSmoothness(getSmoothnessTolerance());
+                gs.setSmoothness(defaultIfNull(getSmoothnessTolerance(), 0));
             }
             else if (key.equals(COSName.SA))
             {
@@ -121,11 +122,11 @@ public class PDExtendedGraphicsState implements COSObjectable
             }
             else if (key.equals(COSName.CA))
             {
-                gs.setAlphaConstant(getStrokingAlphaConstant());
+                gs.setAlphaConstant(defaultIfNull(getStrokingAlphaConstant(), 1.0f));
             }
             else if (key.equals(COSName.CA_NS))
             {
-                gs.setNonStrokeAlphaConstants(getNonStrokingAlphaConstant());
+                gs.setNonStrokeAlphaConstants(defaultIfNull(getNonStrokingAlphaConstant(), 1.0f));
             }
             else if (key.equals(COSName.AIS))
             {
@@ -166,6 +167,11 @@ public class PDExtendedGraphicsState implements COSObjectable
                 gs.setTransfer(getTransfer2());
             }
         }
+    }
+
+    private float defaultIfNull(Float val, float fallback)
+    {
+        return nonNull(val) ? val : fallback;
     }
 
     /**
@@ -574,13 +580,8 @@ public class PDExtendedGraphicsState implements COSObjectable
      */
     private Float getFloatItem(COSName key)
     {
-        Float retval = null;
-        COSNumber value = (COSNumber) dict.getDictionaryObject(key);
-        if (value != null)
-        {
-            retval = value.floatValue();
-        }
-        return retval;
+        return ofNullable(dict.getDictionaryObject(key, COSNumber.class)).map(COSNumber::floatValue)
+                .orElse(null);
     }
 
     /**

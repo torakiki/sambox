@@ -135,8 +135,8 @@ public class PDFontTest extends TestCase
     }
 
     /**
-     * PDFBOX-4115: Test ability to create PDF with german umlaut glyphs with a type 1 font.
-     * Test for everything that went wrong before this was fixed.
+     * PDFBOX-4115: Test ability to create PDF with german umlaut glyphs with a type 1 font. Test for everything that
+     * went wrong before this was fixed.
      *
      * @throws IOException
      */
@@ -152,7 +152,8 @@ public class PDFontTest extends TestCase
         PDPage page = new PDPage();
         PDPageContentStream contentStream = new PDPageContentStream(doc, page);
 
-        PDType1Font font = new PDType1Font(doc, new FileInputStream(fontFile), WinAnsiEncoding.INSTANCE);
+        PDType1Font font = new PDType1Font(doc, new FileInputStream(fontFile),
+                WinAnsiEncoding.INSTANCE);
 
         contentStream.beginText();
         contentStream.setFont(font, 10);
@@ -182,6 +183,33 @@ public class PDFontTest extends TestCase
         Assert.assertEquals(text, stripper.getText(doc).trim());
 
         doc.close();
+    }
+
+    /**
+     * Test whether bug from PDFBOX-4318 is fixed, which had the wrong cache key.
+     * 
+     * @throws java.io.IOException
+     */
+    @Test
+    public void testPDFox4318() throws IOException
+    {
+        try
+        {
+            PDType1Font.HELVETICA_BOLD.encode("\u0080");
+            Assert.fail("should have thrown IllegalArgumentException");
+        }
+        catch (IllegalArgumentException ex)
+        {
+        }
+        PDType1Font.HELVETICA_BOLD.encode("€");
+        try
+        {
+            PDType1Font.HELVETICA_BOLD.encode("\u0080");
+            Assert.fail("should have thrown IllegalArgumentException");
+        }
+        catch (IllegalArgumentException ex)
+        {
+        }
     }
 
     private void testPDFBox3826checkFonts(byte[] byteArray, File fontFile) throws IOException

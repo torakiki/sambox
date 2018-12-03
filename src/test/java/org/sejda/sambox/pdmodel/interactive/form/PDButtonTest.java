@@ -16,6 +16,15 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -31,9 +40,6 @@ import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceDictionary;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceEntry;
-
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.*;
 
 /**
  * Test for the PDButton class.
@@ -283,7 +289,7 @@ public class PDButtonTest
     public void testAcrobatCheckBoxProperties() throws IOException
     {
         PDCheckBox checkbox = (PDCheckBox) acrobatAcroForm.getField("Checkbox");
-        assertEquals(checkbox.getValue(), "");
+        assertEquals(checkbox.getValue(), "Off");
         assertEquals(checkbox.isChecked(), false);
 
         checkbox.check();
@@ -353,7 +359,7 @@ public class PDButtonTest
     public void testAcrobatCheckBoxGroupProperties() throws IOException
     {
         PDCheckBox checkbox = (PDCheckBox) acrobatAcroForm.getField("CheckboxGroup");
-        assertEquals(checkbox.getValue(), "");
+        assertEquals(checkbox.getValue(), "Off");
         assertEquals(checkbox.isChecked(), false);
 
         checkbox.check();
@@ -537,13 +543,15 @@ public class PDButtonTest
         checkBox.check();
 
         assertTrue(checkBox.isChecked());
-        assertEquals(checkBox.getWidgets().get(0).getCOSObject().getCOSName(COSName.AS), COSName.YES);
+        assertEquals(checkBox.getWidgets().get(0).getCOSObject().getCOSName(COSName.AS),
+                COSName.YES);
 
         checkBox.unCheck();
 
         assertFalse(checkBox.isChecked());
 
-        assertEquals(checkBox.getWidgets().get(0).getCOSObject().getCOSName(COSName.AS), COSName.Off);
+        assertEquals(checkBox.getWidgets().get(0).getCOSObject().getCOSName(COSName.AS),
+                COSName.Off);
     }
 
     @After

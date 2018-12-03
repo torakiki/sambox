@@ -53,6 +53,8 @@ public class PDFRenderer
         }
     };
 
+    private BufferedImage pageImage;
+
     /**
      * Creates a new PDFRenderer.
      * 
@@ -156,8 +158,11 @@ public class PDFRenderer
         PDRectangle cropbBox = page.getCropBox();
         float widthPt = cropbBox.getWidth();
         float heightPt = cropbBox.getHeight();
-        int widthPx = Math.round(widthPt * scale);
-        int heightPx = Math.round(heightPt * scale);
+
+        // PDFBOX-4306 avoid single blank pixel line on the right or on the bottom
+        int widthPx = (int) Math.max(Math.floor(widthPt * scale), 1);
+        int heightPx = (int) Math.max(Math.floor(heightPt * scale), 1);
+
         int rotationAngle = page.getRotation();
 
         int bimType = imageType.toBufferedImageType();
@@ -180,6 +185,7 @@ public class PDFRenderer
         {
             image = new BufferedImage(widthPx, heightPx, bimType);
         }
+        pageImage = image;
 
         // use a transparent background if the image type supports alpha
         Graphics2D g = image.createGraphics();
@@ -338,5 +344,14 @@ public class PDFRenderer
             }
         }
         return false;
+    }
+
+    /**
+     * Returns the image to which the current page is being rendered. May be null if the page is rendered to a
+     * Graphics2D object instead of a BufferedImage.
+     */
+    BufferedImage getPageImage()
+    {
+        return pageImage;
     }
 }

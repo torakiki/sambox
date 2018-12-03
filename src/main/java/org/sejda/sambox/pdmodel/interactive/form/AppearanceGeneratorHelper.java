@@ -272,7 +272,9 @@ class AppearanceGeneratorHelper
         }
         catch (IOException ex)
         {
-            LOG.warn("Failed to process default appearance string for widget {}, will use fallback default appearance", widget);
+            LOG.warn(
+                    "Failed to process default appearance string for widget {}, will use fallback default appearance",
+                    widget);
             return new PDDefaultAppearanceString();
         }
     }
@@ -457,7 +459,7 @@ class AppearanceGeneratorHelper
         // options
         if (field instanceof PDListBox)
         {
-            insertGeneratedSelectionHighlight(contents, appearanceStream, font, fontSize);
+            insertGeneratedListboxSelectionHighlight(contents, appearanceStream, font, fontSize);
         }
 
         // start the text output
@@ -638,7 +640,7 @@ class AppearanceGeneratorHelper
         contents.restoreGraphicsState();
     }
 
-    private void insertGeneratedSelectionHighlight(PDPageContentStream contents,
+    private void insertGeneratedListboxSelectionHighlight(PDPageContentStream contents,
             PDAppearanceStream appearanceStream, PDFont font, float fontSize) throws IOException
     {
         List<Integer> indexEntries = ((PDListBox) field).getSelectedOptionsIndex();
@@ -727,7 +729,7 @@ class AppearanceGeneratorHelper
             contents.newLineAtOffset(contentRect.getLowerLeftX(), yTextPos);
             contents.showText(options.get(i));
 
-            if (i - topIndex != (numOptions - 1))
+            if (i != (numOptions - 1))
             {
                 contents.endText();
             }
@@ -774,7 +776,8 @@ class AppearanceGeneratorHelper
             float lineHeight = calculateLineHeight(font, font.getFontMatrix().getScaleY());
             float scaledContentHeight = contentRect.getHeight() * yScalingFactor;
 
-            boolean looksLikeFauxMultiline = calculateLineHeight(font, DEFAULT_FONT_SIZE / FONTSCALE) > scaledContentHeight;
+            boolean looksLikeFauxMultiline = calculateLineHeight(font,
+                    DEFAULT_FONT_SIZE / FONTSCALE) > scaledContentHeight;
             boolean userTypedMultipleLines = new PlainText(value).getParagraphs().size() > 1;
 
             if (looksLikeFauxMultiline && !userTypedMultipleLines)

@@ -65,6 +65,11 @@ public final class PDICCBased extends PDCIEBasedColorSpace
     private ICC_ColorSpace awtColorSpace;
     private PDColor initialColor;
     private boolean isRGB = false;
+    // allows to force using alternate color space instead of ICC color space for performance
+    // reasons with LittleCMS (LCMS), see PDFBOX-4309
+    // WARNING: do not activate this in a conforming reader
+    private boolean useOnlyAlternateColorSpace = Boolean
+            .getBoolean("org.sejda.sambox.rendering.UseAlternateInsteadOfICCColorSpace");
 
     /**
      * Creates a new ICC color space with an empty stream.
@@ -115,6 +120,18 @@ public final class PDICCBased extends PDCIEBasedColorSpace
      */
     private void loadICCProfile() throws IOException
     {
+        if (useOnlyAlternateColorSpace)
+        {
+            try
+            {
+                fallbackToAlternateColorSpace(null);
+                return;
+            }
+            catch (IOException e)
+            {
+                LOG.warn("Error initializing alternate color space: " + e.getLocalizedMessage());
+            }
+        }
         InputStream input = null;
         try
         {
@@ -192,8 +209,11 @@ public final class PDICCBased extends PDCIEBasedColorSpace
         {
             isRGB = true;
         }
-        LOG.warn("Can't read embedded ICC profile (" + e.getLocalizedMessage() +
-                "), using alternate color space: " + alternateColorSpace.getName());
+        if (e != null)
+        {
+            LOG.warn("Can't read embedded ICC profile (" + e.getLocalizedMessage()
+                    + "), using alternate color space: " + alternateColorSpace.getName());
+        }
         initialColor = alternateColorSpace.getInitialColor();
     }
 
@@ -219,7 +239,8 @@ public final class PDICCBased extends PDCIEBasedColorSpace
             if (profileData[ICC_Profile.icHdrRenderingIntent] == ICC_Profile.icPerceptual)
             {
                 LOG.debug("ICC profile is Perceptual, ignoring, treating as Display class");
-                intToBigEndian(ICC_Profile.icSigDisplayClass, profileData, ICC_Profile.icHdrDeviceClass);
+                intToBigEndian(ICC_Profile.icSigDisplayClass, profileData,
+                        ICC_Profile.icHdrDeviceClass);
                 return ICC_Profile.getInstance(profileData);
             }
         }
@@ -233,7 +254,6 @@ public final class PDICCBased extends PDCIEBasedColorSpace
         array[index + 2] = (byte) (value >> 8);
         array[index + 3] = (byte) (value);
     }
-
 
     @Override
     public float[] toRGB(float[] value) throws IOException
@@ -258,7 +278,8 @@ public final class PDICCBased extends PDCIEBasedColorSpace
         {
             float minValue = cs.getMinValue(i);
             float maxValue = cs.getMaxValue(i);
-            result[i] = value[i] < minValue ? minValue : (value[i] > maxValue ? maxValue : value[i]);
+            result[i] = value[i] < minValue ? minValue
+                    : (value[i] > maxValue ? maxValue : value[i]);
         }
         return result;
     }

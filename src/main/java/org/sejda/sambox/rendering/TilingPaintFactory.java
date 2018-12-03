@@ -47,8 +47,8 @@ class TilingPaintFactory
             AffineTransform xform) throws IOException
     {
         TilingPaint paint = null;
-        TilingPaintParameter tilingPaintParameter
-                = new TilingPaintParameter(drawer.getInitialMatrix(), pattern.getCOSObject(), colorSpace, color, xform);
+        TilingPaintParameter tilingPaintParameter = new TilingPaintParameter(
+                drawer.getInitialMatrix(), pattern.getCOSObject(), colorSpace, color, xform);
         WeakReference<TilingPaint> weakRef = weakCache.get(tilingPaintParameter);
         if (weakRef != null)
         {
@@ -58,7 +58,7 @@ class TilingPaintFactory
         if (paint == null)
         {
             paint = new TilingPaint(drawer, pattern, colorSpace, color, xform);
-            weakCache.put(tilingPaintParameter, new WeakReference(paint));
+            weakCache.put(tilingPaintParameter, new WeakReference<>(paint));
         }
         return paint;
     }

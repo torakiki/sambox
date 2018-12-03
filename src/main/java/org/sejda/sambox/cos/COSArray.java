@@ -454,7 +454,8 @@ public class COSArray extends COSBase implements List<COSBase>
         float[] retval = new float[size()];
         for (int i = 0; i < size(); i++)
         {
-            retval[i] = ((COSNumber) getObject(i)).floatValue();
+            retval[i] = ofNullable(getObject(i, COSNumber.class)).map(COSNumber::floatValue)
+                    .orElse(0f);
         }
         return retval;
     }

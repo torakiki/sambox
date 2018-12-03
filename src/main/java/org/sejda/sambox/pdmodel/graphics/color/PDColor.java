@@ -19,7 +19,10 @@ package org.sejda.sambox.pdmodel.graphics.color;
 import java.io.IOException;
 import java.util.Arrays;
 
-import org.sejda.sambox.cos.*;
+import org.sejda.sambox.cos.COSArray;
+import org.sejda.sambox.cos.COSBase;
+import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.cos.COSNumber;
 
 /**
  * A color value, consisting of one or more color components, or for pattern color spaces, a name and optional color
@@ -62,9 +65,12 @@ public final class PDColor
             for (int i = 0; i < array.size(); i++)
             {
                 COSBase component = array.get(i);
-                if(component instanceof COSNumber) {
+                if (component instanceof COSNumber)
+                {
                     components[i] = ((COSNumber) array.get(i)).floatValue();
-                } else {
+                }
+                else
+                {
                     components[i] = 0f;
                 }
 
@@ -121,7 +127,15 @@ public final class PDColor
      */
     public float[] getComponents()
     {
-        return components.clone();
+        if (colorSpace instanceof PDPattern || colorSpace == null)
+        {
+            // colorspace of the pattern color isn't known, so just clone
+            // null colorspace can happen with empty annotation color
+            // see PDFBOX-3351-538928-p4.pdf
+            return components.clone();
+        }
+        // PDFBOX-4279: copyOf instead of clone in case array is too small
+        return Arrays.copyOf(components, colorSpace.getNumberOfComponents());
     }
 
     /**

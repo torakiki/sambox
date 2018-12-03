@@ -113,7 +113,7 @@ public abstract class PDPageDestination extends PDDestination
      * Returns the page number for this destination, regardless of whether this is a page number or a reference to a
      * page.
      *
-     * @see org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline.PDOutlineItem
+     * @see org.sejda.sambox.pdmodel.interactive.documentnavigation.outline.PDOutlineItem
      * @return the 0-based page number, or -1 if the destination type is unknown.
      */
     public int retrievePageNumber()

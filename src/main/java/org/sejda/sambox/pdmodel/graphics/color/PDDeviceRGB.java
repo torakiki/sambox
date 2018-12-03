@@ -20,25 +20,19 @@ import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
-import java.util.StringTokenizer;
 
 import org.sejda.sambox.cos.COSName;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- * Colours in the DeviceRGB colour space are specified according to the additive
- * RGB (red-green-blue) colour model.
+ * Colours in the DeviceRGB colour space are specified according to the additive RGB (red-green-blue) colour model.
  *
  * @author Ben Litchfield
  * @author John Hewson
  */
 public final class PDDeviceRGB extends PDDeviceColorSpace
 {
-    /**  This is the single instance of this class. */
+    /** This is the single instance of this class. */
     public static final PDDeviceRGB INSTANCE = new PDDeviceRGB();
-
-    private static final Logger LOG = LoggerFactory.getLogger(PDDeviceRGB.class);
 
     private final PDColor initialColor = new PDColor(new float[] { 0, 0, 0 }, this);
     private volatile ColorSpace awtColorSpace;
@@ -57,8 +51,6 @@ public final class PDDeviceRGB extends PDDeviceColorSpace
         {
             return;
         }
-
-        suggestKCMS();
 
         synchronized (this)
         {
@@ -119,51 +111,10 @@ public final class PDDeviceRGB extends PDDeviceColorSpace
         // Please read PDFBOX-3854 and PDFBOX-2092 and look at the related commits first.
         // The current code returns TYPE_INT_RGB images which prevents slowness due to threads
         // blocking each other when TYPE_CUSTOM images are used.
-        BufferedImage image = new BufferedImage(raster.getWidth(), raster.getHeight(), BufferedImage.TYPE_INT_RGB);
+        BufferedImage image = new BufferedImage(raster.getWidth(), raster.getHeight(),
+                BufferedImage.TYPE_INT_RGB);
         image.setData(raster);
         return image;
     }
 
-    private static void suggestKCMS()
-    {
-        String cmmProperty = System.getProperty("sun.java2d.cmm");
-        if (isMinJdk8() && !"sun.java2d.cmm.kcms.KcmsServiceProvider".equals(cmmProperty))
-        {
-            try
-            {
-                // Make sure that class exists
-                Class.forName("sun.java2d.cmm.kcms.KcmsServiceProvider");
-
-                LOG.info("To get higher rendering speed on JDK8 or later,");
-                LOG.info("  use the option -Dsun.java2d.cmm=sun.java2d.cmm.kcms.KcmsServiceProvider");
-                LOG.info("  or call System.setProperty(\"sun.java2d.cmm\", \"sun.java2d.cmm.kcms.KcmsServiceProvider\")");
-            }
-            catch (ClassNotFoundException e)
-            {
-                LOG.debug("KCMS doesn't exist anymore. SO SAD!");
-            }
-        }
-    }
-
-    private static boolean isMinJdk8()
-    {
-        // strategy from lucene-solr/lucene/core/src/java/org/apache/lucene/util/Constants.java
-        String version = System.getProperty("java.specification.version");
-        final StringTokenizer st = new StringTokenizer(version, ".");
-        try
-        {
-            int major = Integer.parseInt(st.nextToken());
-            int minor = 0;
-            if (st.hasMoreTokens())
-            {
-                minor = Integer.parseInt(st.nextToken());
-            }
-            return major > 1 || (major == 1 && minor >= 8);
-        }
-        catch (NumberFormatException nfe)
-        {
-            // maybe some new numbering scheme in the 22nd century
-            return true;
-        }
-    }
 }

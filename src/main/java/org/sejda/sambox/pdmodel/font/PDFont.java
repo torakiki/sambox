@@ -495,7 +495,8 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
         if (toUnicodeCMap != null)
         {
             if (toUnicodeCMap.getName() != null && toUnicodeCMap.getName().startsWith("Identity-")
-                    && dict.getDictionaryObject(COSName.TO_UNICODE) instanceof COSName)
+                    && (dict.getDictionaryObject(COSName.TO_UNICODE) instanceof COSName
+                            || !toUnicodeCMap.hasUnicodeMappings()))
             {
                 // handle the undocumented case of using Identity-H/V as a ToUnicode CMap, this
                 // isn't actually valid as the Identity-x CMaps are code->CID maps, not

@@ -36,9 +36,11 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Calendar;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import org.apache.fontbox.ttf.TrueTypeFont;
 import org.sejda.io.CountingWritableByteChannel;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSArray;
@@ -106,7 +108,7 @@ public class PDDocument implements Closeable
     private PDDocumentCatalog documentCatalog;
     private SecurityHandler securityHandler;
     private boolean open = true;
-    private OnClose onClose;
+    private OnClose onClose = () -> LOG.debug("Closing document");
     private ResourceCache resourceCache = new DefaultResourceCache();
 
     // fonts to subset before saving
@@ -286,6 +288,18 @@ public class PDDocument implements Closeable
     }
 
     /**
+     * For internal PDFBox use when creating PDF documents: register a TrueTypeFont to make sure it is closed when the
+     * PDDocument is closed to avoid memory leaks. Users don't have to call this method, it is done by the appropriate
+     * PDFont classes.
+     *
+     * @param ttf
+     */
+    public void registerTrueTypeFontForClosing(TrueTypeFont ttf)
+    {
+        onClose.andThen(() -> IOUtils.closeQuietly(ttf));
+    }
+
+    /**
      * @return the list of fonts which will be subset before the document is saved.
      */
     public Set<Subsettable> getFontsToSubset()
@@ -398,7 +412,7 @@ public class PDDocument implements Closeable
     public void setOnCloseAction(OnClose onClose)
     {
         requireOpen();
-        this.onClose = onClose;
+        this.onClose = onClose.andThen(this.onClose);
     }
 
     private void requireOpen() throws IllegalStateException
@@ -607,10 +621,7 @@ public class PDDocument implements Closeable
     @Override
     public void close() throws IOException
     {
-        if (onClose != null)
-        {
-            onClose.onClose();
-        }
+        onClose.onClose();
         this.resourceCache.clear();
         this.open = false;
     }
@@ -629,6 +640,15 @@ public class PDDocument implements Closeable
          * @param onClose
          */
         void onClose() throws IOException;
+
+        default OnClose andThen(OnClose after)
+        {
+            Objects.requireNonNull(after);
+            return () -> {
+                onClose();
+                after.onClose();
+            };
+        }
     }
 
     /**
@@ -640,7 +660,8 @@ public class PDDocument implements Closeable
     }
 
     // bridge to pdfbox style api, used in tests
-    public static PDDocument load(File file) throws IOException {
+    public static PDDocument load(File file) throws IOException
+    {
         return PDFParser.parse(SeekableSources.seekableSourceFrom(file));
     }
 

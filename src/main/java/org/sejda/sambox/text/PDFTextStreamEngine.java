@@ -46,7 +46,14 @@ import org.sejda.sambox.contentstream.operator.text.ShowTextLine;
 import org.sejda.sambox.contentstream.operator.text.ShowTextLineAndSpace;
 import org.sejda.sambox.pdmodel.PDPage;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
-import org.sejda.sambox.pdmodel.font.*;
+import org.sejda.sambox.pdmodel.font.PDCIDFont;
+import org.sejda.sambox.pdmodel.font.PDCIDFontType2;
+import org.sejda.sambox.pdmodel.font.PDFont;
+import org.sejda.sambox.pdmodel.font.PDFontDescriptor;
+import org.sejda.sambox.pdmodel.font.PDSimpleFont;
+import org.sejda.sambox.pdmodel.font.PDTrueTypeFont;
+import org.sejda.sambox.pdmodel.font.PDType0Font;
+import org.sejda.sambox.pdmodel.font.PDType3Font;
 import org.sejda.sambox.pdmodel.font.encoding.GlyphList;
 import org.sejda.sambox.pdmodel.graphics.state.PDGraphicsState;
 import org.sejda.sambox.util.Matrix;
@@ -57,7 +64,7 @@ import org.slf4j.LoggerFactory;
 /**
  * PDFStreamEngine subclass for advanced processing of text via TextPosition.
  *
- * @see org.apache.pdfbox.text.TextPosition
+ * @see org.sejda.sambox.text.TextPosition
  * @author Ben Litchfield
  * @author John Hewson
  */
@@ -298,10 +305,9 @@ public class PDFTextStreamEngine extends PDFStreamEngine
             nextX -= cropBox.getLowerLeftX();
             nextY -= cropBox.getLowerLeftY();
         }
-        processTextPosition(new TextPosition(pageRotation, cropBox.getWidth(),
-                cropBox.getHeight(), translatedTextRenderingMatrix, nextX, nextY,
-                Math.abs(dyDisplay), dxDisplay, Math.abs(spaceWidthDisplay), unicode,
-                new int[] { code }, font, fontSize,
+        processTextPosition(new TextPosition(pageRotation, cropBox.getWidth(), cropBox.getHeight(),
+                translatedTextRenderingMatrix, nextX, nextY, Math.abs(dyDisplay), dxDisplay,
+                Math.abs(spaceWidthDisplay), unicode, new int[] { code }, font, fontSize,
                 (int) (fontSize * textMatrix.getScalingFactorX())));
     }
 

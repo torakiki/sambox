@@ -24,12 +24,6 @@ import java.util.List;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.PDDocument;
-import org.sejda.sambox.pdmodel.PDPage;
-import org.sejda.sambox.pdmodel.PDResources;
-import org.sejda.sambox.pdmodel.common.PDRectangle;
-import org.sejda.sambox.pdmodel.font.PDFont;
-import org.sejda.sambox.pdmodel.font.PDType1Font;
-import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -77,11 +71,11 @@ public class TestListBox extends TestCase
      *
      * @throws IOException If there is an error creating the field.
      */
-    public void testChoicePDModel() throws IOException
+    public void testListboxPDModel() throws IOException
     {
 
         /*
-         * Set up two data list which will be used for the tests
+         * Set up two data lists which will be used for the tests
          */
 
         // export values
@@ -101,36 +95,11 @@ public class TestListBox extends TestCase
         try
         {
             doc = new PDDocument();
-            PDPage page = new PDPage(PDRectangle.A4);
-            doc.addPage(page);
             PDAcroForm form = new PDAcroForm(doc);
+            PDListBox choice = new PDListBox(form);
 
-            // Adobe Acrobat uses Helvetica as a default font and
-            // stores that under the name '/Helv' in the resources dictionary
-            PDFont font = PDType1Font.HELVETICA;
-            PDResources resources = new PDResources();
-            resources.put(COSName.getPDFName("Helv"), font);
-
-            // Add and set the resources and default appearance at the form level
-            form.setDefaultResources(resources);
-
-            // Acrobat sets the font size on the form level to be
-            // auto sized as default. This is done by setting the font size to '0'
-            String defaultAppearanceString = "/Helv 0 Tf 0 g";
-            form.setDefaultAppearance(defaultAppearanceString);
-
-            PDChoice choice = new PDListBox(form);
-
-            choice.setDefaultAppearance("/Helv 12 Tf 0g");
-
-            // Specify the annotation associated with the field
-            PDAnnotationWidget widget = choice.getWidgets().get(0);
-            PDRectangle rect = new PDRectangle(50, 750, 200, 50);
-            widget.setRectangle(rect);
-            widget.setPage(page);
-
-            // Add the annotation to the page
-            page.getAnnotations().add(widget);
+            // appearance construction is not implemented, so turn on NeedAppearances
+            form.setNeedAppearances(true);
 
             // test that there are no nulls returned for an empty field
             // only specific methods are tested here
@@ -145,6 +114,12 @@ public class TestListBox extends TestCase
             choice.setOptions(exportValues);
             assertEquals(exportValues, choice.getOptionsDisplayValues());
             assertEquals(exportValues, choice.getOptionsExportValues());
+
+            // Test bug 1 of PDFBOX-4252 when top index is not null
+            choice.setTopIndex(1);
+            choice.setValue(exportValues.get(2));
+            assertEquals(exportValues.get(2), choice.getValue().get(0));
+            choice.setTopIndex(null); // reset
 
             // assert that the option values have been correctly set
             COSArray optItem = (COSArray) choice.getCOSObject().getItem(COSName.OPT);

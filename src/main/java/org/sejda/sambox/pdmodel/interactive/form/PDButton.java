@@ -136,7 +136,9 @@ public abstract class PDButton extends PDTerminalField
         {
             return ((COSName) value).getName();
         }
-        return "";
+        // Off is the default value if there is nothing else set.
+        // See PDF Spec.
+        return "Off";
     }
 
     /**
@@ -302,13 +304,14 @@ public abstract class PDButton extends PDTerminalField
         return onValues;
     }
 
-    public List<String> getNormalAppearanceValues() {
+    public List<String> getNormalAppearanceValues()
+    {
         List<String> values = new ArrayList<>();
         List<PDAnnotationWidget> widgets = this.getWidgets();
         for (PDAnnotationWidget widget : widgets)
         {
             String value = getOnValueForWidget(widget);
-            if(value != null)
+            if (value != null)
             {
                 values.add(value);
             }
@@ -356,7 +359,8 @@ public abstract class PDButton extends PDTerminalField
                 }
                 catch (IllegalStateException ex)
                 {
-                    LOG.warn("Could not parse normal appearances sub-dictionary for field {}", this.getFullyQualifiedName());
+                    LOG.warn("Could not parse normal appearances sub-dictionary for field {}",
+                            this.getFullyQualifiedName());
                 }
             }
         }
@@ -376,7 +380,8 @@ public abstract class PDButton extends PDTerminalField
     {
         Set<String> onValues = getOnValues();
 
-        if(onValues.isEmpty()) {
+        if (onValues.isEmpty())
+        {
             return;
         }
 
@@ -396,14 +401,16 @@ public abstract class PDButton extends PDTerminalField
         {
             boolean matchesAppearance = false;
             // don't crash when there's no appearances (eg: checkboxes)
-            if(widget.getAppearance() != null && widget.getAppearance().getNormalAppearance() != null)
+            if (widget.getAppearance() != null
+                    && widget.getAppearance().getNormalAppearance() != null)
             {
-                matchesAppearance =((COSDictionary) widget.getAppearance().getNormalAppearance().getCOSObject())
-                        .containsKey(value);
+                matchesAppearance = ((COSDictionary) widget.getAppearance().getNormalAppearance()
+                        .getCOSObject()).containsKey(value);
             }
 
             // checkbox with no appearances scenario
-            if(!COSName.OFF.getName().equals(value) && widget.getAppearance() == null && getWidgets().size() == 1)
+            if (!COSName.OFF.getName().equals(value) && widget.getAppearance() == null
+                    && getWidgets().size() == 1)
             {
                 matchesAppearance = true;
             }
@@ -417,7 +424,6 @@ public abstract class PDButton extends PDTerminalField
                 widget.getCOSObject().setItem(COSName.AS, COSName.Off);
             }
         }
-
 
     }
 
@@ -447,7 +453,7 @@ public abstract class PDButton extends PDTerminalField
             if (optionsIndex != -1)
             {
                 String onValue = getOnValue(optionsIndex);
-                if(onValue != null)
+                if (onValue != null)
                 {
                     updateByValue(onValue);
                 }

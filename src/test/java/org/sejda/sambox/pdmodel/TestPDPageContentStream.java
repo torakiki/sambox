@@ -86,4 +86,34 @@ public class TestPDPageContentStream extends TestCase
             assertEquals("K", ((Operator) pageTokens.get(4)).getName());
         }
     }
+
+    /**
+     * PDFBOX-3510: missing content stream should not fail.
+     * 
+     * @throws IOException
+     */
+    public void testMissingContentStream() throws IOException
+    {
+        PDPage page = new PDPage();
+        ContentStreamParser parser = new ContentStreamParser(page);
+        List<Object> tokens = parser.tokens();
+        assertEquals(0, tokens.size());
+    }
+
+    /**
+     * Check that close() can be called twice.
+     *
+     * @throws IOException
+     */
+    public void testCloseContract() throws IOException
+    {
+        PDDocument doc = new PDDocument();
+        PDPage page = new PDPage();
+        doc.addPage(page);
+        PDPageContentStream contentStream = new PDPageContentStream(doc, page, AppendMode.OVERWRITE,
+                true);
+        contentStream.close();
+        contentStream.close();
+        doc.close();
+    }
 }

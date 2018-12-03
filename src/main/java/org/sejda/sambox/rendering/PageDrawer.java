@@ -23,6 +23,7 @@ import java.awt.Graphics2D;
 import java.awt.GraphicsDevice;
 import java.awt.Paint;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.Stroke;
@@ -45,8 +46,11 @@ import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.Stack;
 
 import org.sejda.sambox.contentstream.PDFGraphicsStreamEngine;
 import org.sejda.sambox.cos.COSArray;
@@ -54,6 +58,7 @@ import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSNumber;
+import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.common.function.PDFunction;
 import org.sejda.sambox.pdmodel.font.PDCIDFontType0;
@@ -64,6 +69,8 @@ import org.sejda.sambox.pdmodel.font.PDType0Font;
 import org.sejda.sambox.pdmodel.font.PDType1CFont;
 import org.sejda.sambox.pdmodel.font.PDType1Font;
 import org.sejda.sambox.pdmodel.graphics.PDLineDashPattern;
+import org.sejda.sambox.pdmodel.graphics.PDXObject;
+import org.sejda.sambox.pdmodel.graphics.blend.BlendMode;
 import org.sejda.sambox.pdmodel.graphics.color.PDColor;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
@@ -75,6 +82,7 @@ import org.sejda.sambox.pdmodel.graphics.pattern.PDAbstractPattern;
 import org.sejda.sambox.pdmodel.graphics.pattern.PDShadingPattern;
 import org.sejda.sambox.pdmodel.graphics.pattern.PDTilingPattern;
 import org.sejda.sambox.pdmodel.graphics.shading.PDShading;
+import org.sejda.sambox.pdmodel.graphics.state.PDExtendedGraphicsState;
 import org.sejda.sambox.pdmodel.graphics.state.PDGraphicsState;
 import org.sejda.sambox.pdmodel.graphics.state.PDSoftMask;
 import org.sejda.sambox.pdmodel.graphics.state.RenderingMode;
@@ -113,8 +121,6 @@ public class PageDrawer extends PDFGraphicsStreamEngine
     // the page box to draw (usually the crop box but may be another)
     private PDRectangle pageSize;
 
-    private int pageRotation;
-
     // whether image of a transparency group must be flipped
     // needed when in a tiling pattern
     private boolean flipTG = false;
@@ -133,6 +139,8 @@ public class PageDrawer extends PDFGraphicsStreamEngine
     private final Map<PDFont, Glyph2D> fontGlyph2D = new HashMap<>();
 
     private final TilingPaintFactory tilingPaintFactory = new TilingPaintFactory(this);
+
+    private final Stack<TransparencyGroup> transparencyGroupStack = new Stack<TransparencyGroup>();
 
     /**
      * Default annotations filter, returns all annotations
@@ -230,7 +238,6 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         graphics = (Graphics2D) g;
         xform = graphics.getTransform();
         this.pageSize = pageSize;
-        pageRotation = getPage().getRotation() % 360;
 
         setRenderingHints();
 
@@ -597,7 +604,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         {
             throw new IOException("Invalid soft mask subtype.");
         }
-        gray = getRotatedImage(gray);
+        gray = adjustImage(gray);
         Rectangle2D tpgBounds = transparencyGroup.getBounds();
         adjustRectangle(tpgBounds);
         return new SoftMask(parentPaint, gray, tpgBounds, backdropColor,
@@ -613,57 +620,36 @@ public class PageDrawer extends PDFGraphicsStreamEngine
     private void adjustRectangle(Rectangle2D r)
     {
         Matrix m = new Matrix(xform);
-        if (pageRotation == 90)
-        {
-            r.setRect(pageSize.getHeight() * m.getScalingFactorY() - r.getY() - r.getHeight(),
-                    r.getX(), r.getWidth(), r.getHeight());
-        }
-        if (pageRotation == 180)
-        {
-            r.setRect(pageSize.getWidth() * m.getScalingFactorX() - r.getX() - r.getWidth(),
-                    pageSize.getHeight() * m.getScalingFactorY() - r.getY() - r.getHeight(),
-                    r.getWidth(), r.getHeight());
-        }
-        if (pageRotation == 270)
-        {
-            r.setRect(r.getY(),
-                    pageSize.getWidth() * m.getScalingFactorX() - r.getX() - r.getWidth(),
-                    r.getWidth(), r.getHeight());
-        }
+        double scaleX = m.getScalingFactorX();
+        double scaleY = m.getScalingFactorY();
+
+        AffineTransform adjustedTransform = new AffineTransform(xform);
+        adjustedTransform.scale(1.0 / scaleX, 1.0 / scaleY);
+        r.setRect(adjustedTransform.createTransformedShape(r).getBounds2D());
     }
 
-    // return quadrant-rotated image with adjusted size
-    private BufferedImage getRotatedImage(BufferedImage gray) throws IOException
+    // returns the image adjusted for applySoftMaskToPaint().
+    private BufferedImage adjustImage(BufferedImage gray)
     {
-        BufferedImage gray2;
-        AffineTransform at;
-        switch (pageRotation % 360)
-        {
-        case 90:
-            gray2 = new BufferedImage(gray.getHeight(), gray.getWidth(),
-                    BufferedImage.TYPE_BYTE_GRAY);
-            at = AffineTransform.getQuadrantRotateInstance(1, gray.getHeight() / 2d,
-                    gray.getHeight() / 2d);
-            break;
-        case 180:
-            gray2 = new BufferedImage(gray.getWidth(), gray.getHeight(),
-                    BufferedImage.TYPE_BYTE_GRAY);
-            at = AffineTransform.getQuadrantRotateInstance(2, gray.getWidth() / 2d,
-                    gray.getHeight() / 2d);
-            break;
-        case 270:
-            gray2 = new BufferedImage(gray.getHeight(), gray.getWidth(),
-                    BufferedImage.TYPE_BYTE_GRAY);
-            at = AffineTransform.getQuadrantRotateInstance(3, gray.getWidth() / 2d,
-                    gray.getWidth() / 2d);
-            break;
-        default:
-            return gray;
-        }
-        Graphics2D g2 = (Graphics2D) gray2.getGraphics();
+        AffineTransform at = new AffineTransform(xform);
+        Matrix m = new Matrix(at);
+        at.scale(1.0 / m.getScalingFactorX(), 1.0 / m.getScalingFactorY());
+
+        Rectangle originalBounds = new Rectangle(gray.getWidth(), gray.getHeight());
+        Rectangle2D transformedBounds = at.createTransformedShape(originalBounds).getBounds2D();
+        at.preConcatenate(AffineTransform.getTranslateInstance(-transformedBounds.getMinX(),
+                -transformedBounds.getMinY()));
+
+        int width = (int) Math.ceil(transformedBounds.getWidth());
+        int height = (int) Math.ceil(transformedBounds.getHeight());
+        BufferedImage transformedGray = new BufferedImage(width, height,
+                BufferedImage.TYPE_BYTE_GRAY);
+
+        Graphics2D g2 = (Graphics2D) transformedGray.getGraphics();
+
         g2.drawImage(gray, at, null);
         g2.dispose();
-        return gray2;
+        return transformedGray;
     }
 
     // returns the stroking AWT Paint
@@ -1416,11 +1402,9 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         float xScale = Math.abs(m.getScalingFactorX());
         float yScale = Math.abs(m.getScalingFactorY());
 
-        // adjust the initial translation (includes the translation used to "help" the rotation)
-        graphics.setTransform(
-                AffineTransform.getTranslateInstance(xform.getTranslateX(), xform.getTranslateY()));
-
-        graphics.rotate(Math.toRadians(pageRotation));
+        AffineTransform transform = new AffineTransform(xform);
+        transform.scale(1.0 / xScale, 1.0 / yScale);
+        graphics.setTransform(transform);
 
         // adjust bbox (x,y) position at the initial scale + cropbox
         float x = bbox.getLowerLeftX() - pageSize.getLowerLeftX();
@@ -1464,6 +1448,8 @@ public class PageDrawer extends PDFGraphicsStreamEngine
 
         private final int minX;
         private final int minY;
+        private final int maxX;
+        private final int maxY;
         private final int width;
         private final int height;
 
@@ -1500,6 +1486,8 @@ public class PageDrawer extends PDFGraphicsStreamEngine
                 bbox = null;
                 minX = 0;
                 minY = 0;
+                maxX = 0;
+                maxY = 0;
                 width = 0;
                 height = 0;
                 return;
@@ -1516,8 +1504,8 @@ public class PageDrawer extends PDFGraphicsStreamEngine
 
             minX = (int) Math.floor(bounds.getMinX());
             minY = (int) Math.floor(bounds.getMinY());
-            int maxX = (int) Math.floor(bounds.getMaxX()) + 1;
-            int maxY = (int) Math.floor(bounds.getMaxY()) + 1;
+            maxX = (int) Math.floor(bounds.getMaxX()) + 1;
+            maxY = (int) Math.floor(bounds.getMaxY()) + 1;
 
             width = maxX - minX;
             height = maxY - minY;
@@ -1531,7 +1519,39 @@ public class PageDrawer extends PDFGraphicsStreamEngine
             {
                 image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
             }
+            boolean needsBackdrop = !isSoftMask && !form.getGroup().isIsolated()
+                    && hasBlendMode(form, new HashSet<COSBase>());
+            BufferedImage backdropImage = null;
+            // Position of this group in parent group's coordinates
+            int backdropX = 0;
+            int backdropY = 0;
+            if (needsBackdrop)
+            {
+                if (transparencyGroupStack.isEmpty())
+                {
+                    // Use the current page as the parent group.
+                    backdropImage = renderer.getPageImage();
+                    needsBackdrop = backdropImage != null;
+                    backdropX = minX;
+                    backdropY = (backdropImage != null) ? (backdropImage.getHeight() - maxY) : 0;
+                }
+                else
+                {
+                    TransparencyGroup parentGroup = transparencyGroupStack.peek();
+                    backdropImage = parentGroup.image;
+                    backdropX = minX - parentGroup.minX;
+                    backdropY = parentGroup.maxY - maxY;
+                }
+            }
+
             Graphics2D g = image.createGraphics();
+            if (needsBackdrop)
+            {
+                // backdropImage must be included in group image but not in group alpha.
+                g.drawImage(backdropImage, 0, 0, width, height, backdropX, backdropY,
+                        backdropX + width, backdropY + height, null);
+                g = new GroupGraphics(image, g);
+            }
             if (isSoftMask && backdropColor != null)
             {
                 // "If the subtype is Luminosity, the transparency group XObject G shall be
@@ -1559,8 +1579,6 @@ public class PageDrawer extends PDFGraphicsStreamEngine
                     minY / Math.abs(m.getScalingFactorY()),
                     (float) bounds.getWidth() / Math.abs(m.getScalingFactorX()),
                     (float) bounds.getHeight() / Math.abs(m.getScalingFactorY()));
-            int pageRotationOriginal = pageRotation;
-            pageRotation = 0;
             int clipWindingRuleOriginal = clipWindingRule;
             clipWindingRule = -1;
             GeneralPath linePathOriginal = linePath;
@@ -1579,7 +1597,12 @@ public class PageDrawer extends PDFGraphicsStreamEngine
                 }
                 else
                 {
+                    transparencyGroupStack.push(this);
                     processTransparencyGroup(form);
+                    if (!transparencyGroupStack.isEmpty())
+                    {
+                        transparencyGroupStack.pop();
+                    }
                 }
             }
             finally
@@ -1592,7 +1615,10 @@ public class PageDrawer extends PDFGraphicsStreamEngine
                 linePath = linePathOriginal;
                 pageSize = pageSizeOriginal;
                 xform = xformOriginal;
-                pageRotation = pageRotationOriginal;
+                if (needsBackdrop)
+                {
+                    ((GroupGraphics) g).removeBackdrop(backdropImage, backdropX, backdropY);
+                }
             }
         }
 
@@ -1667,5 +1693,55 @@ public class PageDrawer extends PDFGraphicsStreamEngine
                     size.getY() - minY - height + pageSize.getLowerLeftY() * m.getScalingFactorY(),
                     width, height);
         }
+    }
+
+    private boolean hasBlendMode(PDTransparencyGroup group, Set<COSBase> groupsDone)
+    {
+        if (groupsDone.contains(group.getCOSObject()))
+        {
+            // The group was already processed. Avoid endless recursion.
+            return false;
+        }
+        groupsDone.add(group.getCOSObject());
+
+        PDResources resources = group.getResources();
+        if (resources == null)
+        {
+            return false;
+        }
+        for (COSName name : resources.getExtGStateNames())
+        {
+            PDExtendedGraphicsState extGState = resources.getExtGState(name);
+            if (extGState == null)
+            {
+                continue;
+            }
+            BlendMode blendMode = extGState.getBlendMode();
+            if (blendMode != BlendMode.NORMAL)
+            {
+                return true;
+            }
+        }
+
+        // Recursively process nested transparency groups
+        for (COSName name : resources.getXObjectNames())
+        {
+            PDXObject xObject;
+            try
+            {
+                xObject = resources.getXObject(name);
+            }
+            catch (IOException ex)
+            {
+                continue;
+            }
+            if (xObject instanceof PDTransparencyGroup
+                    && hasBlendMode((PDTransparencyGroup) xObject, groupsDone))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

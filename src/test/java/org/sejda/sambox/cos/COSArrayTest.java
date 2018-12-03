@@ -19,10 +19,10 @@ package org.sejda.sambox.cos;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
+import java.util.List;
+
 import org.junit.Test;
 import org.sejda.sambox.pdmodel.PDPage;
-
-import java.util.List;
 
 /**
  * @author Andrea Vacondio
@@ -95,5 +95,16 @@ public class COSArrayTest
         List<? extends COSBase> list = victim.toList();
         assertEquals(list.size(), 1);
         assertEquals(list.get(0), COSName.ANNOT);
+    }
+
+    @Test
+    public void toFloat()
+    {
+        COSArray victim = new COSArray(COSInteger.ONE, new COSFloat(2.2f), COSName.AC);
+        float[] array = victim.toFloatArray();
+        assertEquals(array.length, 3);
+        assertEquals(1f, array[0], 0);
+        assertEquals(2.2f, array[1], 0);
+        assertEquals(0f, array[2], 0);
     }
 }

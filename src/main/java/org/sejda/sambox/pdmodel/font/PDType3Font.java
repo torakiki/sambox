@@ -259,12 +259,8 @@ public class PDType3Font extends PDSimpleFont
      */
     public PDRectangle getFontBBox()
     {
-        COSArray rect = (COSArray) dict.getDictionaryObject(COSName.FONT_BBOX);
-        if (nonNull(rect))
-        {
-            return new PDRectangle(rect);
-        }
-        return null;
+        return ofNullable(dict.getDictionaryObject(COSName.FONT_BBOX, COSArray.class))
+                .map(PDRectangle::new).orElse(null);
     }
 
     @Override
@@ -333,15 +329,8 @@ public class PDType3Font extends PDSimpleFont
     public PDType3CharProc getCharProc(int code)
     {
         String name = getEncoding().getName(code);
-        if (!".notdef".equals(name))
-        {
-            COSStream stream = getCharProcs().getDictionaryObject(COSName.getPDFName(name),
-                    COSStream.class);
-            if (nonNull(stream))
-            {
-                return new PDType3CharProc(this, stream);
-            }
-        }
-        return null;
+        return ofNullable(
+                getCharProcs().getDictionaryObject(COSName.getPDFName(name), COSStream.class))
+                        .map((s) -> new PDType3CharProc(this, s)).orElse(null);
     }
 }

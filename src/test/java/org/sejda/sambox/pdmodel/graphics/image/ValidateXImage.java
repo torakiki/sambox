@@ -150,8 +150,8 @@ public class ValidateXImage
             {
                 if (expectedImage.getRGB(x, y) != actualImage.getRGB(x, y))
                 {
-                    errMsg = String.format("(%d,%d) %08X != %08X", x, y, expectedImage.getRGB(x, y),
-                            actualImage.getRGB(x, y));
+                    errMsg = String.format("(%d,%d) expected <%08X> but was: <%08X>", x, y,
+                            expectedImage.getRGB(x, y), actualImage.getRGB(x, y));
                 }
                 assertEquals(errMsg, expectedImage.getRGB(x, y), actualImage.getRGB(x, y));
             }

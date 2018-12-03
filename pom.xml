@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.sejda</groupId>
 	<artifactId>sambox</artifactId>
@@ -414,6 +416,21 @@
 							<sha512>6fefc869dff9db8cd539db177d35beeacc62304173245742eaee8882dab330860a31cbbd4c4ec6cc724603cc453afc07ec61361fbc1e80a47f44b04ccfbaf40d</sha512>
 						</configuration>
 					</execution>
+					<execution>
+						<id>PDFBOX-4184-2</id>
+						<phase>generate-test-resources</phase>
+						<goals>
+							<goal>wget</goal>
+						</goals>
+						<configuration>
+							<url>https://issues.apache.org/jira/secure/attachment/12929821/16bit.png</url>
+							<!-- originally from https://github.com/danfickle/openhtmltopdf/issues/173 
+								see "blurred" image link https://user-images.githubusercontent.com/29379074/36145630-f304cd0e-10d7-11e8-942c-66eb8040be70.png -->
+							<outputDirectory>${project.build.directory}/imgs</outputDirectory>
+							<outputFileName>PDFBOX-4184-16bit.png</outputFileName>
+							<sha512>45f148913590ea1a94c3ac17080969b74e579fe51967a5bf535caa3f7104ea81ee222b99deb8ee528b0a53640f97d87cf668633a1bdd61a62092246df1807471</sha512>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 		</plugins>
@@ -443,7 +460,7 @@
 		<dependency>
 			<groupId>org.apache.pdfbox</groupId>
 			<artifactId>fontbox</artifactId>
-			<version>2.0.11</version>
+			<version>2.0.12</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>commons-logging</artifactId>
@@ -466,7 +483,7 @@
 		<dependency>
 			<groupId>org.apache.pdfbox</groupId>
 			<artifactId>jbig2-imageio</artifactId>
-			<version>3.0.1</version>
+			<version>3.0.2</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
