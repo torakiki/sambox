@@ -34,12 +34,9 @@ import org.slf4j.LoggerFactory;
  * AWT Paint for radial shading.
  *
  */
-public class RadialShadingPaint implements Paint
+public class RadialShadingPaint extends ShadingPaint<PDShadingType3>
 {
     private static final Logger LOG = LoggerFactory.getLogger(RadialShadingPaint.class);
-
-    private final PDShadingType3 shading;
-    private final Matrix matrix;
 
     /**
      * Constructor.
@@ -49,8 +46,7 @@ public class RadialShadingPaint implements Paint
      */
     RadialShadingPaint(PDShadingType3 shading, Matrix matrix)
     {
-        this.shading = shading;
-        this.matrix = matrix;
+        super(shading, matrix);
     }
 
     @Override

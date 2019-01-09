@@ -318,8 +318,8 @@ public class TestTextStripper extends TestCase
                     LOG.error("FAILURE: Line mismatch for file " + inFile.getName() + " (sort = "
                             + bSort + ")" + " at expected line: " + expectedReader.getLineNumber()
                             + " at actual line: " + actualReader.getLineNumber()
-                            + "\nexpected line was: \"" + expectedLine + "\""
-                            + "\nactual line was:   \"" + actualLine + "\"" + "\n");
+                            + "\nexpected line was: \"" + expectedLine + "\" \"" + asUnicodes(expectedLine) + "\""
+                            + "\nactual line was:   \"" + actualLine + "\" \"" + asUnicodes(actualLine) + "\" \n");
 
                     // lets report all lines, even though this might produce some verbose logging
                     // break;
@@ -583,5 +583,18 @@ public class TestTextStripper extends TestCase
     {
         String[] arg = { TestTextStripper.class.getName() };
         junit.textui.TestRunner.main(arg);
+    }
+
+    // Useful to debug weird strings
+    public static String asUnicodes(String in) {
+        if(in == null) return null;
+
+        StringBuilder result = new StringBuilder();
+        for (int offset = 0; offset < in.length(); ) {
+            int codepoint = in.codePointAt(offset);
+            result.append("\\U+").append(Integer.toHexString(codepoint).toUpperCase());
+            offset += Character.charCount(codepoint);
+        }
+        return result.toString();
     }
 }

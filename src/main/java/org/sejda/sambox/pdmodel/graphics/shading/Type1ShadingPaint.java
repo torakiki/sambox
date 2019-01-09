@@ -17,7 +17,6 @@
 package org.sejda.sambox.pdmodel.graphics.shading;
 
 import java.awt.Color;
-import java.awt.Paint;
 import java.awt.PaintContext;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
@@ -33,12 +32,9 @@ import org.slf4j.LoggerFactory;
 /**
  * AWT PaintContext for function-based (Type 1) shading.
  */
-class Type1ShadingPaint implements Paint
+class Type1ShadingPaint extends ShadingPaint<PDShadingType1>
 {
     private static final Logger LOG = LoggerFactory.getLogger(Type1ShadingPaint.class);
-
-    private final PDShadingType1 shading;
-    private final Matrix matrix;
 
     /**
      * Constructor.
@@ -48,8 +44,7 @@ class Type1ShadingPaint implements Paint
      */
     Type1ShadingPaint(PDShadingType1 shading, Matrix matrix)
     {
-        this.shading = shading;
-        this.matrix = matrix;
+        super(shading, matrix);
     }
 
     @Override

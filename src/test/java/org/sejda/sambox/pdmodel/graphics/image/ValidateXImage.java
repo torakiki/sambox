@@ -20,7 +20,6 @@ import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.assertTrue;
 
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
@@ -28,7 +27,10 @@ import java.util.List;
 import java.util.Set;
 
 import javax.imageio.ImageIO;
+import javax.imageio.ImageWriter;
+import javax.imageio.spi.ImageWriterSpi;
 
+import org.apache.commons.io.output.NullOutputStream;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSStream;
@@ -67,9 +69,23 @@ public class ValidateXImage
         assertEquals(ximage.getWidth(), ximage.getImage().getWidth());
         assertEquals(ximage.getHeight(), ximage.getImage().getHeight());
 
-        boolean writeOk = ImageIO.write(ximage.getImage(), format, new ByteArrayOutputStream());
-        assertTrue(writeOk);
-        writeOk = ImageIO.write(ximage.getOpaqueImage(), format, new ByteArrayOutputStream());
+        boolean canEncode = true;
+        boolean writeOk;
+        // jdk11+ no longer encodes ARGB jpg
+        // https://bugs.openjdk.java.net/browse/JDK-8211748
+        if ("jpg".equals(format) &&
+                ximage.getImage().getType() == BufferedImage.TYPE_INT_ARGB)
+        {
+            ImageWriter writer = ImageIO.getImageWritersBySuffix(format).next();
+            ImageWriterSpi originatingProvider = writer.getOriginatingProvider();
+            canEncode = originatingProvider.canEncodeImage(ximage.getImage());
+        }
+        if (canEncode)
+        {
+            writeOk = ImageIO.write(ximage.getImage(), format, new NullOutputStream());
+            assertTrue(writeOk);
+        }
+        writeOk = ImageIO.write(ximage.getOpaqueImage(), format, new NullOutputStream());
         assertTrue(writeOk);
     }
 
