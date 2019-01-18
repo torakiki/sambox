@@ -169,7 +169,7 @@ public abstract class PDShading implements COSObjectable
         if (bBox == null)
         {
             COSArray array = (COSArray) dictionary.getDictionaryObject(COSName.BBOX);
-            if (array != null)
+            if (array != null && array.size() >= 4)
             {
                 bBox = new PDRectangle(array);
             }
