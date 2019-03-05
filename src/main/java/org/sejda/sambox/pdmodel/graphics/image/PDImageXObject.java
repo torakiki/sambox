@@ -216,7 +216,7 @@ public final class PDImageXObject extends PDXObject implements PDImage
      */
     public int getStructParent()
     {
-        return getCOSObject().getInt(COSName.STRUCT_PARENT, 0);
+        return getCOSObject().getInt(COSName.STRUCT_PARENT);
     }
 
     /**
@@ -339,6 +339,11 @@ public final class PDImageXObject extends PDXObject implements PDImage
         {
             width = mask.getWidth();
             height = mask.getHeight();
+            image = scaleImage(image, width, height);
+        }
+        else if (image.getRaster().getPixel(0, 0, (int[]) null).length < 3)
+        {
+            // PDFBOX-4470 bitonal image has only one element => copy into RGB
             image = scaleImage(image, width, height);
         }
 

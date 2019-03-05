@@ -111,17 +111,24 @@ public final class PDAcroForm extends PDDictionaryWrapper
             setDefaultResources(defaultResources);
         }
 
-        // Adobe Acrobat uses Helvetica as a default font and
+        // PDFBOX-3732: Adobe Acrobat uses Helvetica as a default font and
         // stores that under the name '/Helv' in the resources dictionary
         // Zapf Dingbats is included per default for check boxes and
         // radio buttons as /ZaDb.
-        if (!defaultResources.getCOSObject().containsKey("Helv"))
+        // PDFBOX-4393: the two fonts are added by Adobe when signing
+        // and this breaks a previous signature. (Might be an Adobe bug)
+        COSDictionary fontDict = ofNullable(defaultResources.getCOSObject()
+                .getDictionaryObject(COSName.FONT, COSDictionary.class))
+                        .orElseGet(COSDictionary::new);
+        defaultResources.getCOSObject().putIfAbsent(COSName.FONT, fontDict);
+
+        if (!fontDict.containsKey(COSName.HELV))
         {
-            defaultResources.put(COSName.getPDFName("Helv"), PDType1Font.HELVETICA);
+            defaultResources.put(COSName.HELV, PDType1Font.HELVETICA);
         }
-        if (!defaultResources.getCOSObject().containsKey("ZaDb"))
+        if (!fontDict.containsKey(COSName.ZA_DB))
         {
-            defaultResources.put(COSName.getPDFName("ZaDb"), PDType1Font.ZAPF_DINGBATS);
+            defaultResources.put(COSName.ZA_DB, PDType1Font.ZAPF_DINGBATS);
         }
     }
 
@@ -191,6 +198,14 @@ public final class PDAcroForm extends PDDictionaryWrapper
         {
             LOG.warn("Flatten for a dynamix XFA form is not supported");
             return;
+        }
+
+        if (!refreshAppearances && isNeedAppearances())
+        {
+            LOG.warn(
+                    "AcroForm NeedAppearances is true, visual field appearances may not have been set");
+            LOG.warn(
+                    "call acroForm.refreshAppearances() or use the flatten() method with refreshAppearances parameter");
         }
 
         // refresh the appearances if set

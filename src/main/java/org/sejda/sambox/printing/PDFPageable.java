@@ -17,6 +17,7 @@
 
 package org.sejda.sambox.printing;
 
+import java.awt.RenderingHints;
 import java.awt.print.Book;
 import java.awt.print.PageFormat;
 import java.awt.print.Paper;
@@ -37,6 +38,8 @@ public final class PDFPageable extends Book
     private final boolean showPageBorder;
     private final float dpi;
     private final Orientation orientation;
+    private boolean subsamplingAllowed = false;
+    private RenderingHints renderingHints = null;
 
     /**
      * Creates a new PDFPageable.
@@ -47,7 +50,7 @@ public final class PDFPageable extends Book
     {
         this(document, Orientation.AUTO, false, 0);
     }
-    
+
     /**
      * Creates a new PDFPageable with the given page orientation.
      *
@@ -58,10 +61,10 @@ public final class PDFPageable extends Book
     {
         this(document, orientation, false, 0);
     }
-    
+
     /**
-     * Creates a new PDFPageable with the given page orientation and with optional page borders
-     * shown. The image will be rasterized at the given DPI before being sent to the printer.
+     * Creates a new PDFPageable with the given page orientation and with optional page borders shown. The image will be
+     * rasterized at the given DPI before being sent to the printer.
      *
      * @param document the document to print
      * @param orientation page orientation policy
@@ -73,8 +76,8 @@ public final class PDFPageable extends Book
     }
 
     /**
-     * Creates a new PDFPageable with the given page orientation and with optional page borders
-     * shown. The image will be rasterized at the given DPI before being sent to the printer.
+     * Creates a new PDFPageable with the given page orientation and with optional page borders shown. The image will be
+     * rasterized at the given DPI before being sent to the printer.
      *
      * @param document the document to print
      * @param orientation page orientation policy
@@ -82,12 +85,61 @@ public final class PDFPageable extends Book
      * @param dpi if non-zero then the image will be rasterized at the given DPI
      */
     public PDFPageable(PDDocument document, Orientation orientation, boolean showPageBorder,
-                       float dpi)
+            float dpi)
     {
         this.document = document;
         this.orientation = orientation;
         this.showPageBorder = showPageBorder;
         this.dpi = dpi;
+    }
+
+    /**
+     * Get the rendering hints.
+     *
+     * @return the rendering hints or null if none are set.
+     */
+    public RenderingHints getRenderingHints()
+    {
+        return renderingHints;
+    }
+
+    /**
+     * Set the rendering hints. Use this to influence rendering quality and speed. If you don't set them yourself or
+     * pass null, PDFBox will decide <b><u>at runtime</u></b> depending on the destination.
+     *
+     * @param renderingHints
+     */
+    public void setRenderingHints(RenderingHints renderingHints)
+    {
+        this.renderingHints = renderingHints;
+    }
+
+    /**
+     * Value indicating if the renderer is allowed to subsample images before drawing, according to image dimensions and
+     * requested scale.
+     *
+     * Subsampling may be faster and less memory-intensive in some cases, but it may also lead to loss of quality,
+     * especially in images with high spatial frequency.
+     *
+     * @return true if subsampling of images is allowed, false otherwise.
+     */
+    public boolean isSubsamplingAllowed()
+    {
+        return subsamplingAllowed;
+    }
+
+    /**
+     * Sets a value instructing the renderer whether it is allowed to subsample images before drawing. The subsampling
+     * frequency is determined according to image size and requested scale.
+     *
+     * Subsampling may be faster and less memory-intensive in some cases, but it may also lead to loss of quality,
+     * especially in images with high spatial frequency.
+     *
+     * @param subsamplingAllowed The new value indicating if subsampling is allowed.
+     */
+    public void setSubsamplingAllowed(boolean subsamplingAllowed)
+    {
+        this.subsamplingAllowed = subsamplingAllowed;
     }
 
     @Override
@@ -107,7 +159,7 @@ public final class PDFPageable extends Book
         PDPage page = document.getPage(pageIndex);
         PDRectangle mediaBox = PDFPrintable.getRotatedMediaBox(page);
         PDRectangle cropBox = PDFPrintable.getRotatedCropBox(page);
-        
+
         // Java does not seem to understand landscape paper sizes, i.e. where width > height, it
         // always crops the imageable area as if the page were in portrait. I suspect that this is
         // a JDK bug but it might be by design, see PDFBOX-2922.
@@ -136,7 +188,7 @@ public final class PDFPageable extends Book
 
         PageFormat format = new PageFormat();
         format.setPaper(paper);
-        
+
         // auto portrait/landscape
         if (orientation == Orientation.AUTO)
         {
@@ -157,10 +209,10 @@ public final class PDFPageable extends Book
         {
             format.setOrientation(PageFormat.PORTRAIT);
         }
-        
+
         return format;
     }
-    
+
     @Override
     public Printable getPrintable(int i)
     {
@@ -168,6 +220,10 @@ public final class PDFPageable extends Book
         {
             throw new IndexOutOfBoundsException(i + " >= " + getNumberOfPages());
         }
-        return new PDFPrintable(document, Scaling.ACTUAL_SIZE, showPageBorder, dpi);
+        PDFPrintable printable = new PDFPrintable(document, Scaling.ACTUAL_SIZE, showPageBorder,
+                dpi);
+        printable.setSubsamplingAllowed(subsamplingAllowed);
+        printable.setRenderingHints(renderingHints);
+        return printable;
     }
 }

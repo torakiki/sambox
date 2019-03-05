@@ -37,6 +37,8 @@ import org.sejda.sambox.contentstream.operator.OperatorProcessor;
 import org.sejda.sambox.contentstream.operator.state.EmptyGraphicsStackException;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
+import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSNumber;
 import org.sejda.sambox.cos.COSString;
 import org.sejda.sambox.filter.MissingImageReaderException;
@@ -792,6 +794,25 @@ public abstract class PDFStreamEngine
         {
             processType3Stream(charProc, textRenderingMatrix);
         }
+    }
+
+    /**
+     * Called when a marked content group begins
+     *
+     * @param tag content tag
+     * @param properties optional properties
+     */
+    public void beginMarkedContentSequence(COSName tag, COSDictionary properties)
+    {
+        // overridden in subclasses
+    }
+
+    /**
+     * Called when a a marked content group ends
+     */
+    public void endMarkedContentSequence()
+    {
+        // overridden in subclasses
     }
 
     /**

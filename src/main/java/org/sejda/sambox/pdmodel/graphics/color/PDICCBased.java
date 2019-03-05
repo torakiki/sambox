@@ -42,6 +42,7 @@ import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSFloat;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSStream;
+import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.common.PDRange;
 import org.sejda.sambox.pdmodel.common.PDStream;
 import org.slf4j.Logger;
@@ -71,6 +72,14 @@ public final class PDICCBased extends PDCIEBasedColorSpace
     private boolean useOnlyAlternateColorSpace = Boolean
             .getBoolean("org.sejda.sambox.rendering.UseAlternateInsteadOfICCColorSpace");
 
+    private static final boolean IS_KCMS;
+
+    static
+    {
+        String cmmProperty = System.getProperty("sun.java2d.cmm");
+        IS_KCMS = "sun.java2d.cmm.kcms.KcmsServiceProvider".equals(cmmProperty);
+    }
+
     /**
      * Creates a new ICC color space with an empty stream.
      */
@@ -87,7 +96,11 @@ public final class PDICCBased extends PDCIEBasedColorSpace
      *
      * @param iccArray the ICC stream object
      * @throws IOException if there is an error reading the ICC profile or if the parameter is invalid
+     * @deprecated This will be private in 3.0. Please use
+     * {@link PDICCBased#create(org.apache.pdfbox.cos.COSArray, org.apache.pdfbox.pdmodel.PDResources)} instead, which
+     * supports caching.
      */
+    @Deprecated
     public PDICCBased(COSArray iccArray) throws IOException
     {
         requireIOCondition(iccArray.size() >= 2,
@@ -97,6 +110,42 @@ public final class PDICCBased extends PDCIEBasedColorSpace
         array = iccArray;
         stream = new PDStream((COSStream) iccArray.getObject(1));
         loadICCProfile();
+    }
+
+    /**
+     * Creates a new ICC color space using the PDF array, optionally using a resource cache.
+     *
+     * @param iccArray the ICC stream object.
+     * @param resources resources to use as cache, or null for no caching.
+     * @return an ICC color space.
+     * @throws IOException if there is an error reading the ICC profile or if the parameter is invalid.
+     */
+    public static PDICCBased create(COSArray iccArray, PDResources resources) throws IOException
+    {
+        requireIOCondition(iccArray.size() >= 2,
+                "ICCBased colorspace array must have two elements");
+        requireIOCondition(iccArray.getObject(1) instanceof COSStream,
+                "ICCBased colorspace array must have a stream as second element");
+
+        COSBase base = iccArray.get(1);
+        boolean canCache = base.hasId() && resources != null
+                && resources.getResourceCache() != null;
+
+        if (canCache)
+        {
+            PDColorSpace space = resources.getResourceCache()
+                    .getColorSpace(base.id().objectIdentifier);
+            if (space != null && space instanceof PDICCBased)
+            {
+                return (PDICCBased) space;
+            }
+        }
+        PDICCBased space = new PDICCBased(iccArray);
+        if (canCache)
+        {
+            resources.getResourceCache().put(base.id().objectIdentifier, space);
+        }
+        return space;
     }
 
     @Override
@@ -164,15 +213,20 @@ public final class PDICCBased extends PDCIEBasedColorSpace
                 }
                 initialColor = new PDColor(initial, this);
 
-                // do things that trigger a ProfileDataException
-                // or CMMException due to invalid profiles, see PDFBOX-1295 and PDFBOX-1740
-                // or ArrayIndexOutOfBoundsException, see PDFBOX-3610
-                awtColorSpace.toRGB(new float[awtColorSpace.getNumComponents()]);
-                // this one triggers an exception for PDFBOX-3549 with KCMS
-                new Color(awtColorSpace, new float[getNumberOfComponents()], 1f);
-                // PDFBOX-4015: this one triggers "CMMException: LCMS error 13" with LCMS
-                new ComponentColorModel(awtColorSpace, false, false, Transparency.OPAQUE,
-                        DataBuffer.TYPE_BYTE);
+                if (IS_KCMS)
+                {
+                    // do things that trigger a ProfileDataException
+                    // or CMMException due to invalid profiles, see PDFBOX-1295 and PDFBOX-1740 (ü-file)
+                    // or ArrayIndexOutOfBoundsException, see PDFBOX-3610
+                    // also triggers a ProfileDataException for PDFBOX-3549 with KCMS
+                    new Color(awtColorSpace, new float[getNumberOfComponents()], 1f);
+                }
+                else
+                {
+                    // PDFBOX-4015: this one triggers "CMMException: LCMS error 13" with LCMS
+                    new ComponentColorModel(awtColorSpace, false, false, Transparency.OPAQUE,
+                            DataBuffer.TYPE_BYTE);
+                }
             }
         }
         catch (ProfileDataException e)

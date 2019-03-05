@@ -156,6 +156,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName DECODE_PARMS = newCommonInstance("DecodeParms");
     public static final COSName DEFAULT = newCommonInstance("default");
     public static final COSName DEFAULT_CMYK = newCommonInstance("DefaultCMYK");
+    public static final COSName DEFAULT_CRYPT_FILTER = newCommonInstance("DefaultCryptFilter");
     public static final COSName DEFAULT_GRAY = newCommonInstance("DefaultGray");
     public static final COSName DEFAULT_RGB = newCommonInstance("DefaultRGB");
     public static final COSName DESC = newCommonInstance("Desc");
@@ -264,6 +265,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName H = newCommonInstance("H");
     public static final COSName HARD_LIGHT = newCommonInstance("HardLight");
     public static final COSName HEIGHT = newCommonInstance("Height");
+    public static final COSName HELV = newCommonInstance("Helv");
     public static final COSName HIDE_MENUBAR = newCommonInstance("HideMenubar");
     public static final COSName HIDE_TOOLBAR = newCommonInstance("HideToolbar");
     public static final COSName HIDE_WINDOWUI = newCommonInstance("HideWindowUI");
@@ -557,6 +559,8 @@ public final class COSName extends COSBase implements Comparable<COSName>
     // Y
     public static final COSName Y_STEP = newCommonInstance("YStep");
     public static final COSName YES = newCommonInstance("Yes");
+
+    public static final COSName ZA_DB = newCommonInstance("ZaDb");
 
     private final String name;
 

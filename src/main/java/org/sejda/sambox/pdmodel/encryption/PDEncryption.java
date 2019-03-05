@@ -456,13 +456,21 @@ public class PDEncryption
     }
 
     /**
-     * Returns the standard crypt filter.
      * 
      * @return the standard crypt filter if available.
      */
     public PDCryptFilterDictionary getStdCryptFilterDictionary()
     {
         return getCryptFilterDictionary(COSName.STD_CF);
+    }
+
+    /**
+     * 
+     * @return the default crypt filter if available.
+     */
+    public PDCryptFilterDictionary getDefaultCryptFilterDictionary()
+    {
+        return getCryptFilterDictionary(COSName.DEFAULT_CRYPT_FILTER);
     }
 
     /**
@@ -474,12 +482,12 @@ public class PDEncryption
      */
     public PDCryptFilterDictionary getCryptFilterDictionary(COSName cryptFilterName)
     {
-        COSDictionary cryptFilterDictionary = (COSDictionary) dictionary
-                .getDictionaryObject(COSName.CF);
+        COSDictionary cryptFilterDictionary = dictionary.getDictionaryObject(COSName.CF,
+                COSDictionary.class);
         if (cryptFilterDictionary != null)
         {
-            COSDictionary stdCryptFilterDictionary = (COSDictionary) cryptFilterDictionary
-                    .getDictionaryObject(cryptFilterName);
+            COSDictionary stdCryptFilterDictionary = cryptFilterDictionary
+                    .getDictionaryObject(cryptFilterName, COSDictionary.class);
             if (stdCryptFilterDictionary != null)
             {
                 return new PDCryptFilterDictionary(stdCryptFilterDictionary);
@@ -515,6 +523,16 @@ public class PDEncryption
     public void setStdCryptFilterDictionary(PDCryptFilterDictionary cryptFilterDictionary)
     {
         setCryptFilterDictionary(COSName.STD_CF, cryptFilterDictionary);
+    }
+
+    /**
+     * Sets the default crypt filter (for public-key security handler).
+     * 
+     * @param defaultFilterDictionary the standard crypt filter to set
+     */
+    public void setDefaultCryptFilterDictionary(PDCryptFilterDictionary defaultFilterDictionary)
+    {
+        setCryptFilterDictionary(COSName.DEFAULT_CRYPT_FILTER, defaultFilterDictionary);
     }
 
     /**

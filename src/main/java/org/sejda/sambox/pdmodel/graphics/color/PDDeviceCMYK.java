@@ -16,7 +16,8 @@
  */
 package org.sejda.sambox.pdmodel.graphics.color;
 
-import java.util.Arrays;
+import static java.util.Objects.nonNull;
+
 import java.awt.color.ColorSpace;
 import java.awt.color.ICC_ColorSpace;
 import java.awt.color.ICC_Profile;
@@ -24,20 +25,20 @@ import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
+import java.util.Arrays;
 
 import org.sejda.sambox.cos.COSName;
 
 /**
- * Allows colors to be specified according to the subtractive CMYK (cyan, magenta, yellow, black)
- * model typical of printers and other paper-based output devices.
+ * Allows colors to be specified according to the subtractive CMYK (cyan, magenta, yellow, black) model typical of
+ * printers and other paper-based output devices.
  *
  * @author John Hewson
  * @author Ben Litchfield
  */
 public class PDDeviceCMYK extends PDDeviceColorSpace
 {
-    /**  The single instance of this class. */
+    /** The single instance of this class. */
     public static PDDeviceCMYK INSTANCE;
     static
     {
@@ -81,19 +82,15 @@ public class PDDeviceCMYK extends PDDeviceColorSpace
         // Instead, the "ISO Coated v2 300% (basICColor)" is used, which
         // is an open alternative to the "ISO Coated v2 300% (ECI)" profile.
 
-        String name = "org/sejda/sambox/resources/icc/ISOcoated_v2_300_bas.icc";
-
-        URL url = PDDeviceCMYK.class.getClassLoader().getResource(name);
-        if (url == null)
+        String name = "/org/sejda/sambox/resources/icc/ISOcoated_v2_300_bas.icc";
+        try (InputStream is = PDDeviceCMYK.class.getResourceAsStream(name))
         {
-            throw new IOException("Error loading resource: " + name);
+            if (nonNull(is))
+            {
+                return ICC_Profile.getInstance(is);
+            }
         }
-
-        InputStream input = url.openStream();
-        ICC_Profile iccProfile = ICC_Profile.getInstance(input);
-        input.close();
-
-        return iccProfile;
+        throw new IOException("Error loading resource: " + name);
     }
 
     @Override

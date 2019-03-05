@@ -17,7 +17,11 @@
 package org.sejda.sambox.rendering;
 
 import java.awt.Color;
+import java.awt.DisplayMode;
 import java.awt.Graphics2D;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsDevice;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
@@ -27,6 +31,8 @@ import org.sejda.sambox.pdmodel.PDPage;
 import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.graphics.blend.BlendMode;
+import org.sejda.sambox.pdmodel.graphics.optionalcontent.PDOptionalContentGroup;
+import org.sejda.sambox.pdmodel.graphics.optionalcontent.PDOptionalContentProperties;
 import org.sejda.sambox.pdmodel.graphics.state.PDExtendedGraphicsState;
 import org.sejda.sambox.pdmodel.interactive.annotation.AnnotationFilter;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotation;
@@ -52,6 +58,12 @@ public class PDFRenderer
             return true;
         }
     };
+
+    private boolean subsamplingAllowed = false;
+
+    private RenderDestination defaultDestination;
+
+    private RenderingHints renderingHints = null;
 
     private BufferedImage pageImage;
 
@@ -86,6 +98,71 @@ public class PDFRenderer
     public void setAnnotationsFilter(AnnotationFilter annotationsFilter)
     {
         this.annotationFilter = annotationsFilter;
+    }
+
+    /**
+     * Value indicating if the renderer is allowed to subsample images before drawing, according to image dimensions and
+     * requested scale.
+     *
+     * Subsampling may be faster and less memory-intensive in some cases, but it may also lead to loss of quality,
+     * especially in images with high spatial frequency.
+     *
+     * @return true if subsampling of images is allowed, false otherwise.
+     */
+    public boolean isSubsamplingAllowed()
+    {
+        return subsamplingAllowed;
+    }
+
+    /**
+     * Sets a value instructing the renderer whether it is allowed to subsample images before drawing. The subsampling
+     * frequency is determined according to image size and requested scale.
+     *
+     * Subsampling may be faster and less memory-intensive in some cases, but it may also lead to loss of quality,
+     * especially in images with high spatial frequency.
+     *
+     * @param subsamplingAllowed The new value indicating if subsampling is allowed.
+     */
+    public void setSubsamplingAllowed(boolean subsamplingAllowed)
+    {
+        this.subsamplingAllowed = subsamplingAllowed;
+    }
+
+    /**
+     * @return the defaultDestination
+     */
+    public RenderDestination getDefaultDestination()
+    {
+        return defaultDestination;
+    }
+
+    /**
+     * @param defaultDestination the defaultDestination to set
+     */
+    public void setDefaultDestination(RenderDestination defaultDestination)
+    {
+        this.defaultDestination = defaultDestination;
+    }
+
+    /**
+     * Get the rendering hints.
+     *
+     * @return the rendering hints or null if none are set.
+     */
+    public RenderingHints getRenderingHints()
+    {
+        return renderingHints;
+    }
+
+    /**
+     * Set the rendering hints. Use this to influence rendering quality and speed. If you don't set them yourself or
+     * pass null, PDFBox will decide <b><u>at runtime</u></b> depending on the destination.
+     *
+     * @param renderingHints
+     */
+    public void setRenderingHints(RenderingHints renderingHints)
+    {
+        this.renderingHints = renderingHints;
     }
 
     /**
@@ -153,6 +230,23 @@ public class PDFRenderer
     public BufferedImage renderImage(int pageIndex, float scale, ImageType imageType)
             throws IOException
     {
+        return renderImage(pageIndex, scale, imageType,
+                defaultDestination == null ? RenderDestination.EXPORT : defaultDestination);
+    }
+
+    /**
+     * Returns the given page as an RGB or ARGB image at the given scale.
+     * 
+     * @param pageIndex the zero-based index of the page to be converted
+     * @param scale the scaling factor, where 1 = 72 DPI
+     * @param imageType the type of image to return
+     * @param destination controlling visibility of optional content groups
+     * @return the rendered page image
+     * @throws IOException if the PDF cannot be read
+     */
+    public BufferedImage renderImage(int pageIndex, float scale, ImageType imageType,
+            RenderDestination destination) throws IOException
+    {
         PDPage page = document.getPage(pageIndex);
 
         PDRectangle cropbBox = page.getCropBox();
@@ -202,7 +296,10 @@ public class PDFRenderer
         transform(g, page, scale, scale);
 
         // the end-user may provide a custom PageDrawer
-        PageDrawerParameters parameters = new PageDrawerParameters(this, page);
+        RenderingHints actualRenderingHints = renderingHints == null
+                ? createDefaultRenderingHints(g) : renderingHints;
+        PageDrawerParameters parameters = new PageDrawerParameters(this, page, subsamplingAllowed,
+                destination, actualRenderingHints);
         PageDrawer drawer = createPageDrawer(parameters);
         drawer.drawPage(g, page.getCropBox());
 
@@ -261,7 +358,23 @@ public class PDFRenderer
      */
     public void renderPageToGraphics(int pageIndex, Graphics2D graphics, float scaleX, float scaleY)
             throws IOException
+    {
+        renderPageToGraphics(pageIndex, graphics, scaleX, scaleY,
+                defaultDestination == null ? RenderDestination.VIEW : defaultDestination);
+    }
 
+    /**
+     * Renders a given page to an AWT Graphics2D instance.
+     * 
+     * @param pageIndex the zero-based index of the page to be converted
+     * @param graphics the Graphics2D on which to draw the page
+     * @param scaleX the scale to draw the page at for the x-axis
+     * @param scaleY the scale to draw the page at for the y-axis
+     * @param destination controlling visibility of optional content groups
+     * @throws IOException if the PDF cannot be read
+     */
+    public void renderPageToGraphics(int pageIndex, Graphics2D graphics, float scaleX, float scaleY,
+            RenderDestination destination) throws IOException
     {
         PDPage page = document.getPage(pageIndex);
         // TODO need width/wight calculations? should these be in PageDrawer?
@@ -272,9 +385,24 @@ public class PDFRenderer
         graphics.clearRect(0, 0, (int) cropBox.getWidth(), (int) cropBox.getHeight());
 
         // the end-user may provide a custom PageDrawer
-        PageDrawerParameters parameters = new PageDrawerParameters(this, page);
+        RenderingHints actualRenderingHints = renderingHints == null
+                ? createDefaultRenderingHints(graphics) : renderingHints;
+        PageDrawerParameters parameters = new PageDrawerParameters(this, page, subsamplingAllowed,
+                destination, actualRenderingHints);
         PageDrawer drawer = createPageDrawer(parameters);
         drawer.drawPage(graphics, cropBox);
+    }
+
+    /**
+     * Indicates whether an optional content group is enabled.
+     * 
+     * @param group the group
+     * @return true if the group is enabled
+     */
+    public boolean isGroupEnabled(PDOptionalContentGroup group)
+    {
+        PDOptionalContentProperties ocProperties = document.getDocumentCatalog().getOCProperties();
+        return ocProperties == null || ocProperties.isGroupEnabled(group);
     }
 
     // scale rotate translate
@@ -306,8 +434,40 @@ public class PDFRenderer
                 break;
             }
             graphics.translate(translateX, translateY);
-            graphics.rotate((float) Math.toRadians(rotationAngle));
+            graphics.rotate(Math.toRadians(rotationAngle));
         }
+    }
+
+    private boolean isBitonal(Graphics2D graphics)
+    {
+        GraphicsConfiguration deviceConfiguration = graphics.getDeviceConfiguration();
+        if (deviceConfiguration == null)
+        {
+            return false;
+        }
+        GraphicsDevice device = deviceConfiguration.getDevice();
+        if (device == null)
+        {
+            return false;
+        }
+        DisplayMode displayMode = device.getDisplayMode();
+        if (displayMode == null)
+        {
+            return false;
+        }
+        return displayMode.getBitDepth() == 1;
+    }
+
+    private RenderingHints createDefaultRenderingHints(Graphics2D graphics)
+    {
+        RenderingHints r = new RenderingHints(null);
+        r.put(RenderingHints.KEY_INTERPOLATION,
+                isBitonal(graphics) ? RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR
+                        : RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+        r.put(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        r.put(RenderingHints.KEY_ANTIALIASING, isBitonal(graphics)
+                ? RenderingHints.VALUE_ANTIALIAS_OFF : RenderingHints.VALUE_ANTIALIAS_ON);
+        return r;
     }
 
     /**

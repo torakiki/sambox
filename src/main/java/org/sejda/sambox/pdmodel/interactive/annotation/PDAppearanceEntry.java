@@ -76,7 +76,7 @@ public class PDAppearanceEntry implements COSObjectable
     {
         if (!isStream())
         {
-            throw new IllegalStateException();
+            throw new IllegalStateException("Expecting a stream, but got: " + this.entry);
         }
         return new PDAppearanceStream((COSStream) entry);
     }

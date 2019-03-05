@@ -223,8 +223,8 @@ public class TestFontEmbedding extends TestCase
         PDPage page = new PDPage(PDRectangle.A4);
         document.addPage(page);
 
-        InputStream input = PDFont.class.getClassLoader()
-                .getResourceAsStream("org/sejda/sambox/resources/ttf/LiberationSans-Regular.ttf");
+        InputStream input = PDFont.class
+                .getResourceAsStream("/org/sejda/sambox/resources/ttf/LiberationSans-Regular.ttf");
         PDType0Font font = PDType0Font.load(document, input, useSubset);
 
         PDPageContentStream stream = new PDPageContentStream(document, page);

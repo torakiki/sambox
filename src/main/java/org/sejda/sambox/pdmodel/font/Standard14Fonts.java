@@ -17,9 +17,10 @@
 
 package org.sejda.sambox.pdmodel.font;
 
+import static java.util.Objects.nonNull;
+
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,15 +42,15 @@ final class Standard14Fonts
     {
     }
 
-    private static final Set<String> STANDARD_14_NAMES = new HashSet<String>();
-    private static final Map<String, String> STANDARD_14_MAPPING = new HashMap<String, String>();
+    private static final Set<String> STANDARD_14_NAMES = new HashSet<>();
+    private static final Map<String, String> STANDARD_14_MAPPING = new HashMap<>();
     private static final Map<String, FontMetrics> STANDARD14_AFM_MAP;
 
     static
     {
         try
         {
-            STANDARD14_AFM_MAP = new HashMap<String, FontMetrics>();
+            STANDARD14_AFM_MAP = new HashMap<>();
             addAFM("Courier-Bold");
             addAFM("Courier-BoldOblique");
             addAFM("Courier");
@@ -116,20 +117,19 @@ final class Standard14Fonts
             STANDARD14_AFM_MAP.put(fontName, STANDARD14_AFM_MAP.get(afmName));
         }
 
-        String resourceName = "org/sejda/sambox/resources/afm/" + afmName + ".afm";
-        URL url = PDType1Font.class.getClassLoader().getResource(resourceName);
-        if (url != null)
+        String resourceName = "/org/sejda/sambox/resources/afm/" + afmName + ".afm";
+        try (InputStream afmStream = PDType1Font.class.getResourceAsStream(resourceName))
         {
-            try (InputStream afmStream = url.openStream())
+            if (nonNull(afmStream))
             {
                 AFMParser parser = new AFMParser(afmStream);
                 FontMetrics metric = parser.parse(true);
                 STANDARD14_AFM_MAP.put(fontName, metric);
             }
-        }
-        else
-        {
-            throw new IOException(resourceName + " not found");
+            else
+            {
+                throw new IOException(resourceName + " not found");
+            }
         }
     }
 

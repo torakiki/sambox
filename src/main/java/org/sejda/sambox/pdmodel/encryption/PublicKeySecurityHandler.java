@@ -20,11 +20,10 @@ package org.sejda.sambox.pdmodel.encryption;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.KeyStoreException;
-import java.security.MessageDigest;
 import java.security.PrivateKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
-import java.util.Iterator;
+import java.util.Collection;
 
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cms.CMSEnvelopedData;
@@ -34,6 +33,7 @@ import org.bouncycastle.cms.RecipientId;
 import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient;
 import org.sejda.sambox.cos.COSArray;
+import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSString;
 import org.sejda.sambox.pdmodel.PDDocument;
 
@@ -72,8 +72,8 @@ public final class PublicKeySecurityHandler extends SecurityHandler
      * Prepares everything to decrypt the document.
      *
      * @param encryption encryption dictionary, can be retrieved via {@link PDDocument#getEncryption()}
-     * @param documentIDArray document id which is returned via {@link org.sejda.sambox.cos.COSDocument#getDocumentID()}
-     * (not used by this handler)
+     * @param documentIDArray document id which is returned via
+     * {@link org.apache.pdfbox.cos.COSDocument#getDocumentID()} (not used by this handler)
      * @param decryptionMaterial Information used to decrypt the document.
      *
      * @throws IOException If there is an error accessing data. If verbose mode is enabled, the exception message will
@@ -101,40 +101,50 @@ public final class PublicKeySecurityHandler extends SecurityHandler
         {
             boolean foundRecipient = false;
 
+            X509Certificate certificate = material.getCertificate();
+            X509CertificateHolder materialCert = null;
+            if (certificate != null)
+            {
+                materialCert = new X509CertificateHolder(certificate.getEncoded());
+            }
+
             // the decrypted content of the enveloped data that match
             // the certificate in the decryption material provided
             byte[] envelopedData = null;
 
             // the bytes of each recipient in the recipients array
-            byte[][] recipientFieldsBytes = new byte[encryption.getRecipientsLength()][];
+            COSArray array = (COSArray) encryption.getCOSDictionary().getItem(COSName.RECIPIENTS);
+            if (array == null)
+            {
+                PDCryptFilterDictionary defaultCryptFilterDictionary = encryption
+                        .getDefaultCryptFilterDictionary();
+                array = (COSArray) defaultCryptFilterDictionary.getCOSDictionary()
+                        .getItem(COSName.RECIPIENTS);
+            }
+            byte[][] recipientFieldsBytes = new byte[array.size()][];
+            // TODO encryption.getRecipientsLength() and getRecipientStringAt() should be deprecated
 
             int recipientFieldsLength = 0;
-            int i = 0;
             StringBuilder extraInfo = new StringBuilder();
-            for (; i < encryption.getRecipientsLength(); i++)
+            for (int i = 0; i < array.size(); i++)
             {
-                COSString recipientFieldString = encryption.getRecipientStringAt(i);
+                COSString recipientFieldString = (COSString) array.getObject(i);
                 byte[] recipientBytes = recipientFieldString.getBytes();
                 CMSEnvelopedData data = new CMSEnvelopedData(recipientBytes);
-                Iterator<?> recipCertificatesIt = data.getRecipientInfos().getRecipients()
-                        .iterator();
+                Collection<RecipientInformation> recipCertificatesIt = data.getRecipientInfos()
+                        .getRecipients();
                 int j = 0;
-                while (recipCertificatesIt.hasNext())
+                for (RecipientInformation ri : recipCertificatesIt)
                 {
-                    RecipientInformation ri = (RecipientInformation) recipCertificatesIt.next();
                     // Impl: if a matching certificate was previously found it is an error,
                     // here we just don't care about it
-                    X509Certificate certificate = material.getCertificate();
-                    X509CertificateHolder materialCert = null;
-                    if (null != certificate)
-                    {
-                        materialCert = new X509CertificateHolder(certificate.getEncoded());
-                    }
                     RecipientId rid = ri.getRID();
-                    if (rid.match(materialCert) && !foundRecipient)
+                    if (!foundRecipient && rid.match(materialCert))
                     {
                         foundRecipient = true;
                         PrivateKey privateKey = (PrivateKey) material.getPrivateKey();
+                        // might need to call setContentProvider() if we use PKI token, see
+                        // http://bouncy-castle.1462172.n4.nabble.com/CMSException-exception-unwrapping-key-key-invalid-unknown-key-type-passed-to-RSA-td4658109.html
                         envelopedData = ri
                                 .getContent(new JceKeyTransEnvelopedRecipient(privateKey));
                         break;
@@ -157,8 +167,8 @@ public final class PublicKeySecurityHandler extends SecurityHandler
             }
             if (!foundRecipient || envelopedData == null)
             {
-                throw new IOException("The certificate matches none of " + i + " recipient entries"
-                        + extraInfo.toString());
+                throw new IOException("The certificate matches none of " + array.size()
+                        + " recipient entries" + extraInfo.toString());
             }
             if (envelopedData.length != 24)
             {
@@ -190,8 +200,27 @@ public final class PublicKeySecurityHandler extends SecurityHandler
                 sha1InputOffset += recipientFieldsByte.length;
             }
 
-            MessageDigest md = MessageDigests.getSHA1();
-            byte[] mdResult = md.digest(sha1Input);
+            byte[] mdResult;
+            if (encryption.getVersion() == 4 || encryption.getVersion() == 5)
+            {
+                mdResult = MessageDigests.getSHA256().digest(sha1Input);
+
+                // detect whether AES encryption is used. This assumes that the encryption algo is
+                // stored in the PDCryptFilterDictionary
+                // However, crypt filters are used only when V is 4 or 5.
+                PDCryptFilterDictionary defaultCryptFilterDictionary = encryption
+                        .getDefaultCryptFilterDictionary();
+                if (defaultCryptFilterDictionary != null)
+                {
+                    COSName cryptFilterMethod = defaultCryptFilterDictionary.getCryptFilterMethod();
+                    setAES(COSName.AESV2.equals(cryptFilterMethod)
+                            || COSName.AESV3.equals(cryptFilterMethod));
+                }
+            }
+            else
+            {
+                mdResult = MessageDigests.getSHA1().digest(sha1Input);
+            }
 
             // we have the encryption key ...
             setEncryptionKey(new byte[this.keyLength / 8]);

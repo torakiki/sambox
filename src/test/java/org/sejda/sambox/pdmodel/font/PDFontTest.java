@@ -121,8 +121,8 @@ public class PDFontTest extends TestCase
     @Test
     public void testPDFBox3826() throws IOException, URISyntaxException
     {
-        URL url = PDFont.class.getClassLoader()
-                .getResource("org/sejda/sambox/resources/ttf/LiberationSans-Regular.ttf");
+        URL url = PDFont.class
+                .getResource("/org/sejda/sambox/resources/ttf/LiberationSans-Regular.ttf");
         File fontFile = new File(url.toURI());
 
         TrueTypeFont ttf1 = new TTFParser().parse(fontFile);

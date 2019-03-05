@@ -47,8 +47,8 @@ public final class BidiUtils
     {
         try
         {
-            try (InputStream input = BidiUtils.class.getClassLoader()
-                    .getResourceAsStream("org/sejda/sambox/resources/text/BidiMirroring.txt"))
+            try (InputStream input = BidiUtils.class
+                    .getResourceAsStream("/org/sejda/sambox/resources/text/BidiMirroring.txt"))
             {
                 if (nonNull(input))
                 {

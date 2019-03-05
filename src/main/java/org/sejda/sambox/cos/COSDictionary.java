@@ -565,23 +565,6 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * This is a convenience method that will get the dictionary object that is expected to be a COSDictionary. Null is
-     * returned if the entry does not exist in the dictionary.
-     *
-     * @param key The key to the item in the dictionary.
-     * @return The COSDictionary.
-     */
-    public COSDictionary getCOSDictionary(COSName key)
-    {
-        COSBase dictionary = getDictionaryObject(key);
-        if (dictionary instanceof COSDictionary)
-        {
-            return (COSDictionary) dictionary;
-        }
-        return null;
-    }
-
-    /**
      * This is a convenience method that will get the dictionary object that is expected to be a COSArray. Null is
      * returned if the entry does not exist in the dictionary.
      *

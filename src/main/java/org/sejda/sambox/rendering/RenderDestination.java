@@ -14,30 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.sejda.sambox.contentstream.operator.markedcontent;
 
-import java.util.List;
-
-import org.sejda.sambox.contentstream.operator.Operator;
-import org.sejda.sambox.contentstream.operator.OperatorProcessor;
-import org.sejda.sambox.cos.COSBase;
+package org.sejda.sambox.rendering;
 
 /**
- * EMC : Ends a marked-content sequence begun by BMC or BDC.
- *
- * @author Johannes Koch
+ * Optional content groups are visible depending on the render purpose.
  */
-public class EndMarkedContentSequence extends OperatorProcessor
+public enum RenderDestination
 {
-    @Override
-    public void process(Operator operator, List<COSBase> arguments)
-    {
-        this.getContext().endMarkedContentSequence();
-    }
-
-    @Override
-    public String getName()
-    {
-        return "EMC";
-    }
+    /** graphics export */
+    EXPORT,
+    /** viewing */
+    VIEW,
+    /** printing */
+    PRINT
 }

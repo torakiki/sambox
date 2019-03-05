@@ -47,11 +47,11 @@ public final class GlyphList
      */
     private static GlyphList load(String filename, int numberOfEntries)
     {
-        ClassLoader loader = GlyphList.class.getClassLoader();
-        String path = "org/sejda/sambox/resources/glyphlist/";
+        String path = "/org/sejda/sambox/resources/glyphlist/";
         try
         {
-            return new GlyphList(loader.getResourceAsStream(path + filename), numberOfEntries);
+            return new GlyphList(GlyphList.class.getResourceAsStream(path + filename),
+                    numberOfEntries);
         }
         catch (IOException e)
         {

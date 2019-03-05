@@ -446,6 +446,18 @@ class AppearanceGeneratorHelper
                 .orElseGet(() -> defaultAppearance.getFont());
 
         requireNotNullArg(font, "font is null, check whether /DA entry is incomplete or incorrect");
+        if (font.getName().contains("+"))
+        {
+            LOG.warn("Font '" + defaultAppearance.getFontName().getName() + "' of field '"
+                    + field.getFullyQualifiedName() + "' contains subsetted font '" + font.getName()
+                    + "'");
+            LOG.warn("This may bring trouble with PDField.setValue(), PDAcroForm.flatten() or "
+                    + "PDAcroForm.refreshAppearances()");
+            LOG.warn("You should replace this font with a non-subsetted font:");
+            LOG.warn("PDFont font = PDType0Font.load(doc, new FileInputStream(fontfile), false);");
+            LOG.warn("acroForm.getDefaultResources().put(COSName.getPDFName(\""
+                    + defaultAppearance.getFontName().getName() + "\", font);");
+        }
 
         float fontSize = defaultAppearance.getFontSize();
 

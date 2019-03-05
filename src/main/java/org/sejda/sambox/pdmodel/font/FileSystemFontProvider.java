@@ -137,7 +137,7 @@ final class FileSystemFontProvider extends FontProvider
             default:
                 throw new RuntimeException("can't happen");
             }
-            if(font != null)
+            if (font != null)
             {
                 parent.cache.addFont(this, font);
             }
@@ -209,7 +209,8 @@ final class FileSystemFontProvider extends FontProvider
 
     private synchronized void initializeIfRequired()
     {
-        if(!this.initialized) {
+        if (!this.initialized)
+        {
             initialize();
             this.initialized = true;
         }
@@ -277,10 +278,10 @@ final class FileSystemFontProvider extends FontProvider
     private File getDiskCacheFile()
     {
         String path = System.getProperty("org.sambox.fontcache");
-        if (path == null)
+        if (path == null || !new File(path).isDirectory() || !new File(path).canWrite())
         {
             path = System.getProperty("user.home");
-            if (path == null)
+            if (path == null || !new File(path).isDirectory() || !new File(path).canWrite())
             {
                 path = System.getProperty("java.io.tmpdir");
             }
@@ -306,9 +307,9 @@ final class FileSystemFontProvider extends FontProvider
                     writer.write(FONT_CACHE_SEPARATOR);
                     if (fontInfo.cidSystemInfo != null)
                     {
-                        writer.write(
-                                fontInfo.cidSystemInfo.getRegistry() + '-' + fontInfo.cidSystemInfo.getOrdering() + '-'
-                                        + fontInfo.cidSystemInfo.getSupplement());
+                        writer.write(fontInfo.cidSystemInfo.getRegistry() + '-'
+                                + fontInfo.cidSystemInfo.getOrdering() + '-'
+                                + fontInfo.cidSystemInfo.getSupplement());
                     }
                     writer.write(FONT_CACHE_SEPARATOR);
                     if (fontInfo.usWeightClass > -1)
@@ -436,7 +437,7 @@ final class FileSystemFontProvider extends FontProvider
                     }
                     fontFile = new File(parts[9]);
 
-                    if(fontFile.exists())
+                    if (fontFile.exists())
                     {
 
                         FSFontInfo info = new FSFontInfo(fontFile, format, postScriptName,

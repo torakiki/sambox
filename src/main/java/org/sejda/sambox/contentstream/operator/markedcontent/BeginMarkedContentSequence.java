@@ -22,7 +22,6 @@ import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.contentstream.operator.OperatorProcessor;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.text.PDFMarkedContentExtractor;
 
 /**
  * BMC : Begins a marked-content sequence.
@@ -42,10 +41,7 @@ public class BeginMarkedContentSequence extends OperatorProcessor
                 tag = (COSName) argument;
             }
         }
-        if (this.getContext() instanceof PDFMarkedContentExtractor)
-        {
-            ((PDFMarkedContentExtractor) this.getContext()).beginMarkedContentSequence(tag, null);
-        }
+        this.getContext().beginMarkedContentSequence(tag, null);
     }
 
     @Override

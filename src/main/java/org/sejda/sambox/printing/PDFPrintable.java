@@ -21,6 +21,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.print.PageFormat;
@@ -33,6 +34,7 @@ import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.PDPage;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.rendering.PDFRenderer;
+import org.sejda.sambox.rendering.RenderDestination;
 
 /**
  * Prints pages from a PDF document using any page size or scaling mode.
@@ -48,6 +50,8 @@ public final class PDFPrintable implements Printable
     private final Scaling scaling;
     private final float dpi;
     private final boolean center;
+    private boolean subsamplingAllowed = false;
+    private RenderingHints renderingHints = null;
 
     /**
      * Creates a new PDFPrintable.
@@ -115,6 +119,55 @@ public final class PDFPrintable implements Printable
         this.showPageBorder = showPageBorder;
         this.dpi = dpi;
         this.center = center;
+    }
+
+    /**
+     * Value indicating if the renderer is allowed to subsample images before drawing, according to image dimensions and
+     * requested scale.
+     *
+     * Subsampling may be faster and less memory-intensive in some cases, but it may also lead to loss of quality,
+     * especially in images with high spatial frequency.
+     *
+     * @return true if subsampling of images is allowed, false otherwise.
+     */
+    public boolean isSubsamplingAllowed()
+    {
+        return subsamplingAllowed;
+    }
+
+    /**
+     * Sets a value instructing the renderer whether it is allowed to subsample images before drawing. The subsampling
+     * frequency is determined according to image size and requested scale.
+     *
+     * Subsampling may be faster and less memory-intensive in some cases, but it may also lead to loss of quality,
+     * especially in images with high spatial frequency.
+     *
+     * @param subsamplingAllowed The new value indicating if subsampling is allowed.
+     */
+    public void setSubsamplingAllowed(boolean subsamplingAllowed)
+    {
+        this.subsamplingAllowed = subsamplingAllowed;
+    }
+
+    /**
+     * Get the rendering hints.
+     *
+     * @return the rendering hints or null if none are set.
+     */
+    public RenderingHints getRenderingHints()
+    {
+        return renderingHints;
+    }
+
+    /**
+     * Set the rendering hints. Use this to influence rendering quality and speed. If you don't set them yourself or
+     * pass null, PDFBox will decide <b><u>at runtime</u></b> depending on the destination.
+     *
+     * @param renderingHints
+     */
+    public void setRenderingHints(RenderingHints renderingHints)
+    {
+        this.renderingHints = renderingHints;
     }
 
     @Override
@@ -187,7 +240,10 @@ public final class PDFPrintable implements Printable
             // draw to graphics using PDFRender
             AffineTransform transform = (AffineTransform) graphics2D.getTransform().clone();
             graphics2D.setBackground(Color.WHITE);
-            renderer.renderPageToGraphics(pageIndex, graphics2D, (float) scale);
+            renderer.setSubsamplingAllowed(subsamplingAllowed);
+            renderer.setRenderingHints(renderingHints);
+            renderer.renderPageToGraphics(pageIndex, graphics2D, (float) scale, (float) scale,
+                    RenderDestination.PRINT);
 
             // draw crop box
             if (showPageBorder)
@@ -231,7 +287,10 @@ public final class PDFPrintable implements Printable
             return new PDRectangle(cropBox.getLowerLeftY(), cropBox.getLowerLeftX(),
                     cropBox.getHeight(), cropBox.getWidth());
         }
-        return cropBox;
+        else
+        {
+            return cropBox;
+        }
     }
 
     /**
@@ -248,6 +307,9 @@ public final class PDFPrintable implements Printable
             return new PDRectangle(mediaBox.getLowerLeftY(), mediaBox.getLowerLeftX(),
                     mediaBox.getHeight(), mediaBox.getWidth());
         }
-        return mediaBox;
+        else
+        {
+            return mediaBox;
+        }
     }
 }

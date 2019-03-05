@@ -236,11 +236,11 @@ public class PDPage implements COSObjectable, PDContentStream
     /**
      * This will get the key of this Page in the structural parent tree.
      * 
-     * @return the integer key of the page's entry in the structural parent tree
+     * @return the integer key of the page's entry in the structural parent tree or -1 if there isn't any.
      */
     public int getStructParents()
     {
-        return page.getInt(COSName.STRUCT_PARENTS, 0);
+        return page.getInt(COSName.STRUCT_PARENTS);
     }
 
     /**
@@ -371,7 +371,8 @@ public class PDPage implements COSObjectable, PDContentStream
             if (base instanceof COSArray)
             {
                 COSArray array = (COSArray) base;
-                if(inMediaBoxBounds(new PDRectangle(array))) {
+                if (inMediaBoxBounds(new PDRectangle(array)))
+                {
                     return new PDRectangle((COSArray) base);
                 }
             }
@@ -420,7 +421,7 @@ public class PDPage implements COSObjectable, PDContentStream
             if (base instanceof COSArray)
             {
                 COSArray array = (COSArray) base;
-                if(inMediaBoxBounds(new PDRectangle(array)))
+                if (inMediaBoxBounds(new PDRectangle(array)))
                 {
                     return new PDRectangle(array);
                 }
@@ -470,7 +471,7 @@ public class PDPage implements COSObjectable, PDContentStream
             if (base instanceof COSArray)
             {
                 COSArray array = (COSArray) base;
-                if(inMediaBoxBounds(new PDRectangle(array)))
+                if (inMediaBoxBounds(new PDRectangle(array)))
                 {
                     return new PDRectangle(array);
                 }
@@ -709,8 +710,8 @@ public class PDPage implements COSObjectable, PDContentStream
     /**
      * This will return a list of the annotations for this page.
      *
-     * @return List of the PDAnnotation objects, never null. The returned list is backed by the
-     * annotations COSArray, so any adding or deleting in this list will change the document too.
+     * @return List of the PDAnnotation objects, never null. The returned list is backed by the annotations COSArray, so
+     * any adding or deleting in this list will change the document too.
      *
      */
     public List<PDAnnotation> getAnnotations()
@@ -729,8 +730,8 @@ public class PDPage implements COSObjectable, PDContentStream
      * This will return a list of the annotations for this page.
      *
      * @param annotationFilter the annotation filter provided allowing to filter out specific annotations
-     * @return List of the PDAnnotation objects, never null. The returned list is backed by the
-     * annotations COSArray, so any adding or deleting in this list will change the document too.
+     * @return List of the PDAnnotation objects, never null. The returned list is backed by the annotations COSArray, so
+     * any adding or deleting in this list will change the document too.
      *
      */
     public List<PDAnnotation> getAnnotations(AnnotationFilter annotationFilter)

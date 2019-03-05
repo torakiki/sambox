@@ -17,12 +17,13 @@
 
 package org.sejda.sambox.rendering;
 
+import java.awt.RenderingHints;
+
 import org.sejda.sambox.pdmodel.PDPage;
 
 /**
- * Parameters for a PageDrawer. This class ensures allows PDFRenderer and PageDrawer to share
- * private implementation data in a future-proof manner, while still allowing end-users to create
- * their own subclasses of PageDrawer.
+ * Parameters for a PageDrawer. This class ensures allows PDFRenderer and PageDrawer to share private implementation
+ * data in a future-proof manner, while still allowing end-users to create their own subclasses of PageDrawer.
  * 
  * @author John Hewson
  */
@@ -30,14 +31,21 @@ public final class PageDrawerParameters
 {
     private final PDFRenderer renderer;
     private final PDPage page;
+    private final boolean subsamplingAllowed;
+    private final RenderDestination destination;
+    private final RenderingHints renderingHints;
 
     /**
      * Package-private constructor.
      */
-    PageDrawerParameters(PDFRenderer renderer, PDPage page)
+    PageDrawerParameters(PDFRenderer renderer, PDPage page, boolean subsamplingAllowed,
+            RenderDestination destination, RenderingHints renderingHints)
     {
         this.renderer = renderer;
         this.page = page;
+        this.subsamplingAllowed = subsamplingAllowed;
+        this.destination = destination;
+        this.renderingHints = renderingHints;
     }
 
     /**
@@ -47,12 +55,36 @@ public final class PageDrawerParameters
     {
         return page;
     }
-    
+
     /**
      * Returns the renderer.
      */
     PDFRenderer getRenderer()
     {
         return renderer;
+    }
+
+    /**
+     * Returns whether to allow subsampling of images.
+     */
+    public boolean isSubsamplingAllowed()
+    {
+        return subsamplingAllowed;
+    }
+
+    /**
+     * @return the destination
+     */
+    public RenderDestination getDestination()
+    {
+        return this.destination;
+    }
+
+    /**
+     * @return the rendering hints.
+     */
+    public RenderingHints getRenderingHints()
+    {
+        return renderingHints;
     }
 }
