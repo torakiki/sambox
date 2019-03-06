@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
  * @author Stephan Gerhard
  * @author Ben Litchfield
  */
-class AppearanceGeneratorHelper
+public class AppearanceGeneratorHelper
 {
     private static final Logger LOG = LoggerFactory.getLogger(AppearanceGeneratorHelper.class);
 
@@ -101,7 +101,7 @@ class AppearanceGeneratorHelper
      * @param field the field which you wish to control the appearance of
      * @throws IOException
      */
-    AppearanceGeneratorHelper(PDVariableText field) throws IOException
+    public AppearanceGeneratorHelper(PDVariableText field) throws IOException
     {
         this.field = field;
         validateAndEnsureAcroFormResources();
