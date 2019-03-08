@@ -95,7 +95,15 @@ public final class PDFontFactory
             // assuming Type 1 font (see PDFBOX-1988) because it seems that Adobe Reader does this
             // however, we may need more sophisticated logic perhaps looking at the FontFile
             LOG.warn("Invalid font subtype '" + subType + "'");
-            return new PDType1Font(dictionary);
+
+            try
+            {
+                return new PDType1Font(dictionary);
+            }
+            catch (FontFileMismatchException iae)
+            {
+                return new PDType1CFont(dictionary);
+            }
         }
     }
 
