@@ -19,7 +19,9 @@ package org.sejda.sambox.cos;
 import static org.sejda.util.RequireUtils.requireArg;
 import static org.sejda.util.RequireUtils.requireNotNullArg;
 
+import java.awt.*;
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 /**
  * This class represents an abstract number in a PDF document.
@@ -49,6 +51,8 @@ public abstract class COSNumber extends COSBase
      */
     public abstract long longValue();
 
+    private static Pattern NUMBER = Pattern.compile("(E|e|\\+|\\-|\\.|\\d)+");
+
     /**
      * This factory method will get the appropriate number object.
      *
@@ -59,7 +63,7 @@ public abstract class COSNumber extends COSBase
     public static COSNumber get(String number) throws IOException
     {
         requireNotNullArg(number, "Number cannot be null");
-        requireArg(number.matches("(E|e|\\+|\\-|\\.|\\d)+"), "Invalid number " + number);
+        requireArg(NUMBER.matcher(number).matches(), "Invalid number " + number);
         if (number.length() == 1)
         {
             char digit = number.charAt(0);
