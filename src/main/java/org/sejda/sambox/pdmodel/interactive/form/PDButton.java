@@ -431,8 +431,9 @@ public abstract class PDButton extends PDTerminalField
     {
         List<PDAnnotationWidget> widgets = getWidgets();
         List<String> options = getExportValues();
+        Set<String> uniqueOptions = new HashSet<>(options);
 
-        if (widgets.size() != options.size())
+        if (widgets.size() != options.size() && uniqueOptions.size() > 1)
         {
             throw new IllegalArgumentException(
                     "The number of options doesn't match the number of widgets");

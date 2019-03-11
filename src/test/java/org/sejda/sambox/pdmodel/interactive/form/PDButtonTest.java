@@ -198,7 +198,7 @@ public class PDButtonTest
     }
 
     @Test
-    public void testCheckboxWithExportValuesMoreThanWidgets() throws IOException
+    public void testCheckboxWithExportValuesMoreThanWidgetsButSameExportValue() throws IOException
     {
         try (PDDocument document = PDFParser.parse(
                 SeekableSources.inMemorySeekableSourceFrom(this.getClass().getResourceAsStream(
@@ -207,19 +207,8 @@ public class PDButtonTest
 
             PDCheckBox checkbox = (PDCheckBox) document.getDocumentCatalog().getAcroForm()
                     .getField("Check Box3");
-            try
-            {
-                checkbox.check();
-                fail("Expecting exception, since this will use the first export value");
-                // TODO: fix getOnValue to return the first normal appearance value?
-            }
-            catch (IllegalArgumentException ex)
-            {
-                assertThat(ex.getMessage(), containsString(
-                        "The number of options doesn't match the number of widgets"));
-            }
 
-            checkbox.setValue("0");
+            checkbox.check();
             assertEquals(checkbox.getValue(), "0");
         }
     }
