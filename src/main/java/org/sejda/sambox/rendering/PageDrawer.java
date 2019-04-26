@@ -163,6 +163,8 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         }
     };
 
+    private boolean textContentRendered = true;
+
     /**
      * Constructor.
      *
@@ -469,7 +471,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
                 graphics.setComposite(state.getNonStrokingJavaComposite());
                 graphics.setPaint(getNonStrokingPaint());
                 setClip();
-                if (isContentRendered())
+                if (isContentRendered() && isTextContentRendered())
                 {
                     graphics.fill(glyph);
                 }
@@ -481,7 +483,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
                 graphics.setPaint(getStrokingPaint());
                 graphics.setStroke(getStroke());
                 setClip();
-                if (isContentRendered())
+                if (isContentRendered() && isTextContentRendered())
                 {
                     graphics.draw(glyph);
                 }
@@ -1865,5 +1867,13 @@ public class PageDrawer extends PDFGraphicsStreamEngine
             }
         }
         return false;
+    }
+
+    public boolean isTextContentRendered() {
+        return textContentRendered;
+    }
+
+    public void setTextContentRendered(boolean textContentRendered) {
+        this.textContentRendered = textContentRendered;
     }
 }
