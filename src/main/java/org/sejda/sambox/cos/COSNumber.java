@@ -19,7 +19,6 @@ package org.sejda.sambox.cos;
 import static org.sejda.util.RequireUtils.requireArg;
 import static org.sejda.util.RequireUtils.requireNotNullArg;
 
-import java.awt.*;
 import java.io.IOException;
 import java.util.regex.Pattern;
 
