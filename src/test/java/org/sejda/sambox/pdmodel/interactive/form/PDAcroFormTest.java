@@ -161,6 +161,32 @@ public class PDAcroFormTest
     }
 
     /**
+     * callinf flatten() removes all the fields, also non terminal in case of a hierarchy
+     * 
+     * @throws IOException
+     */
+    @Test
+    public void testFlattenAllRemovesFields() throws IOException
+    {
+        FastByteArrayOutputStream out = new FastByteArrayOutputStream();
+        try (PDDocument doc = PDFParser
+                .parse(SeekableSources.inMemorySeekableSourceFrom(getClass().getResourceAsStream(
+                        "/org/sejda/sambox/pdmodel/interactive/form/flatten_fields_hierarchy.pdf"))))
+        {
+            PDAcroForm acroForm = doc.getDocumentCatalog().getAcroForm();
+            acroForm.flatten();
+            doc.writeTo(out);
+        }
+        try (PDDocument doc = PDFParser
+                .parse(SeekableSources.inMemorySeekableSourceFrom(out.toByteArray())))
+        {
+            PDAcroForm acroForm = doc.getDocumentCatalog().getAcroForm();
+            assertNotNull(acroForm);
+            assertTrue(acroForm.getFields().isEmpty());
+        }
+    }
+
+    /**
      * PDFBOX_3941 and PDFBOX-3809
      * 
      * @throws IOException
@@ -168,7 +194,7 @@ public class PDAcroFormTest
     @Test
     public void testFlattenOnySomeFields() throws IOException
     {
-        flattenOnlySome("/org/sejda/sambox/pdmodel/interactive/form/flatten_fields_hierarchy.pdf");
+        flattenOnlySome("/org/sejda/sambox/pdmodel/interactive/form/flatten_fields.pdf");
     }
 
     /**
@@ -179,7 +205,7 @@ public class PDAcroFormTest
     @Test
     public void testFlattenOnySomeFieldsWithHierarchy() throws IOException
     {
-        flattenOnlySome("/org/sejda/sambox/pdmodel/interactive/form/flatten_fields.pdf");
+        flattenOnlySome("/org/sejda/sambox/pdmodel/interactive/form/flatten_fields_hierarchy.pdf");
 
     }
 

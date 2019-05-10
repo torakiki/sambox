@@ -699,22 +699,20 @@ public final class PDAcroForm extends PDDictionaryWrapper
     {
         for (PDField current : fields)
         {
-            if (current.isTerminal())
+            if (nonNull(current.getParent()))
             {
-                if (nonNull(current.getParent()))
-                {
-                    current.getParent().removeChild(current);
-                }
-                else
-                {
-                    // it's a root field
-                    removeField(current);
-                }
+                current.getParent().removeChild(current);
             }
             else
             {
-                LOG.warn("Unable to remove non terminal field {}", current.getFullyQualifiedName());
+                // it's a root field
+                if (isNull(removeField(current)))
+                {
+                    LOG.warn("Unable to remove root field {}, not found",
+                            current.getFullyQualifiedName());
+                }
             }
+
         }
     }
 }
