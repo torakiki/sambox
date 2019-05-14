@@ -161,7 +161,7 @@ public class PDAcroFormTest
     }
 
     /**
-     * callinf flatten() removes all the fields, also non terminal in case of a hierarchy
+     * calling flatten() removes all the fields, also non terminal in case of a hierarchy
      * 
      * @throws IOException
      */
