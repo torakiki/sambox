@@ -35,8 +35,8 @@ import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.common.PDStream;
 
 /**
- * An Indexed colour space specifies that an area is to be painted using a colour table
- * of arbitrary colours from another color space.
+ * An Indexed colour space specifies that an area is to be painted using a colour table of arbitrary colours from
+ * another color space.
  * 
  * @author John Hewson
  * @author Ben Litchfield
@@ -54,8 +54,7 @@ public final class PDIndexed extends PDSpecialColorSpace
     private int[][] rgbColorTable;
 
     /**
-     * Creates a new Indexed color space.
-     * Default DeviceRGB, hival 255.
+     * Creates a new Indexed color space. Default DeviceRGB, hival 255.
      */
     public PDIndexed()
     {
@@ -68,6 +67,7 @@ public final class PDIndexed extends PDSpecialColorSpace
 
     /**
      * Creates a new indexed color space from the given PDF array.
+     * 
      * @param indexedArray the array containing the indexed parameters
      * @throws java.io.IOException
      */
@@ -78,6 +78,7 @@ public final class PDIndexed extends PDSpecialColorSpace
 
     /**
      * Creates a new indexed color space from the given PDF array.
+     * 
      * @param indexedArray the array containing the indexed parameters
      * @param resources the resources, can be null. Allows to use its cache for the colorspace.
      * @throws java.io.IOException
@@ -107,7 +108,7 @@ public final class PDIndexed extends PDSpecialColorSpace
     @Override
     public float[] getDefaultDecode(int bitsPerComponent)
     {
-        return new float[] { 0, (float)Math.pow(2, bitsPerComponent) - 1 };
+        return new float[] { 0, (float) Math.pow(2, bitsPerComponent) - 1 };
     }
 
     @Override
@@ -125,15 +126,24 @@ public final class PDIndexed extends PDSpecialColorSpace
 
         // convert the color table into a 1-row BufferedImage in the base color space,
         // using a writable raster for high performance
-        WritableRaster baseRaster = Raster.createBandedRaster(DataBuffer.TYPE_BYTE,
-                actualMaxIndex + 1, 1, numBaseComponents, new Point(0, 0));
+        WritableRaster baseRaster;
+        try
+        {
+            baseRaster = Raster.createBandedRaster(DataBuffer.TYPE_BYTE, actualMaxIndex + 1, 1,
+                    numBaseComponents, new Point(0, 0));
+        }
+        catch (IllegalArgumentException ex)
+        {
+            // PDFBOX-4503: when stream is empty or null
+            throw new IOException(ex);
+        }
 
         int[] base = new int[numBaseComponents];
         for (int i = 0, n = actualMaxIndex; i <= n; i++)
         {
             for (int c = 0; c < numBaseComponents; c++)
             {
-                base[c] = (int)(colorTable[i][c] * 255f);
+                base[c] = (int) (colorTable[i][c] * 255f);
             }
             baseRaster.setPixel(i, 0, base);
         }
@@ -162,7 +172,7 @@ public final class PDIndexed extends PDSpecialColorSpace
         {
             throw new IllegalArgumentException("Indexed color spaces must have one color value");
         }
-        
+
         // scale and clamp input value
         int index = Math.round(value[0]);
         index = Math.max(index, 0);
@@ -204,6 +214,7 @@ public final class PDIndexed extends PDSpecialColorSpace
 
     /**
      * Returns the base color space.
+     * 
      * @return the base color space.
      */
     public PDColorSpace getBaseColorSpace()
@@ -229,7 +240,7 @@ public final class PDIndexed extends PDSpecialColorSpace
             }
             else if (lookupTable instanceof COSStream)
             {
-                lookupData = new PDStream((COSStream)lookupTable).toByteArray();
+                lookupData = new PDStream((COSStream) lookupTable).toByteArray();
             }
             else if (lookupTable == null)
             {
@@ -257,7 +268,7 @@ public final class PDIndexed extends PDSpecialColorSpace
         {
             maxIndex = lookupData.length / numComponents - 1;
         }
-        actualMaxIndex = maxIndex;  // TODO "actual" is ugly, tidy this up
+        actualMaxIndex = maxIndex; // TODO "actual" is ugly, tidy this up
 
         colorTable = new float[maxIndex + 1][numComponents];
         for (int i = 0, offset = 0; i <= maxIndex; i++)
@@ -272,6 +283,7 @@ public final class PDIndexed extends PDSpecialColorSpace
 
     /**
      * Sets the base color space.
+     * 
      * @param base the base color space
      */
     public void setBaseColorSpace(PDColorSpace base)
@@ -282,6 +294,7 @@ public final class PDIndexed extends PDSpecialColorSpace
 
     /**
      * Sets the highest value that is allowed. This cannot be higher than 255.
+     * 
      * @param high the highest value for the lookup table
      */
     public void setHighValue(int high)
@@ -292,8 +305,7 @@ public final class PDIndexed extends PDSpecialColorSpace
     @Override
     public String toString()
     {
-        return "Indexed{base:" + baseColorSpace + " " +
-                "hival:" + getHival() + " " +
-                "lookup:(" + colorTable.length + " entries)}";
+        return "Indexed{base:" + baseColorSpace + " " + "hival:" + getHival() + " " + "lookup:("
+                + colorTable.length + " entries)}";
     }
 }

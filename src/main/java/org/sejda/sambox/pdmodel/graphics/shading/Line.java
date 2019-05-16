@@ -20,8 +20,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * This class describes a rasterized line. This was done as part of GSoC2014,
- * Tilman Hausherr is the mentor.
+ * This class describes a rasterized line. This was done as part of GSoC2014, Tilman Hausherr is the mentor.
  *
  * @author Shaola Ren
  */
@@ -53,9 +52,7 @@ class Line
 
     /**
      * Calculate the points of a line with Bresenham's line algorithm
-     * <a
-     * href="http://en.wikipedia.org/wiki/Bresenham's_line_algorithm">Bresenham's
-     * line algorithm</a>
+     * <a href="http://en.wikipedia.org/wiki/Bresenham's_line_algorithm">Bresenham's line algorithm</a>
      *
      * @param x0 coordinate
      * @param y0 coordinate
@@ -73,7 +70,7 @@ class Line
         int err = dx - dy;
         while (true)
         {
-            points.add(new Point(x0, y0));
+            points.add(new IntPoint(x0, y0));
             if (x0 == x1 && y0 == y1)
             {
                 break;
@@ -94,8 +91,7 @@ class Line
     }
 
     /**
-     * Calculate the color of a point on a rasterized line by linear
-     * interpolation.
+     * Calculate the color of a point on a rasterized line by linear interpolation.
      *
      * @param p target point, p should always be contained in linePoints
      * @return color
@@ -113,8 +109,7 @@ class Line
             float l = point1.y - point0.y;
             for (int i = 0; i < numberOfColorComponents; i++)
             {
-                pc[i] = (color0[i] * (point1.y - p.y) / l
-                        + color1[i] * (p.y - point0.y) / l);
+                pc[i] = (color0[i] * (point1.y - p.y) / l + color1[i] * (p.y - point0.y) / l);
             }
         }
         else
@@ -122,8 +117,7 @@ class Line
             float l = point1.x - point0.x;
             for (int i = 0; i < numberOfColorComponents; i++)
             {
-                pc[i] = (color0[i] * (point1.x - p.x) / l
-                        + color1[i] * (p.x - point0.x) / l);
+                pc[i] = (color0[i] * (point1.x - p.x) / l + color1[i] * (p.x - point0.x) / l);
             }
         }
         return pc;

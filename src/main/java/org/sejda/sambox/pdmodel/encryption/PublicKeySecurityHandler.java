@@ -113,13 +113,12 @@ public final class PublicKeySecurityHandler extends SecurityHandler
             byte[] envelopedData = null;
 
             // the bytes of each recipient in the recipients array
-            COSArray array = (COSArray) encryption.getCOSDictionary().getItem(COSName.RECIPIENTS);
+            COSArray array = encryption.getCOSObject().getDictionaryObject(COSName.RECIPIENTS,
+                    COSArray.class);
             if (array == null)
             {
-                PDCryptFilterDictionary defaultCryptFilterDictionary = encryption
-                        .getDefaultCryptFilterDictionary();
-                array = (COSArray) defaultCryptFilterDictionary.getCOSDictionary()
-                        .getItem(COSName.RECIPIENTS);
+                array = encryption.getDefaultCryptFilterDictionary().getCOSObject()
+                        .getDictionaryObject(COSName.RECIPIENTS, COSArray.class);
             }
             byte[][] recipientFieldsBytes = new byte[array.size()][];
             // TODO encryption.getRecipientsLength() and getRecipientStringAt() should be deprecated

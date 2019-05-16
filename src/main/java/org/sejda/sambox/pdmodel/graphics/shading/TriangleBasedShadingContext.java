@@ -31,8 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Intermediate class extended by the shading types 4,5,6 and 7 that contains the common methods
- * used by these classes.
+ * Intermediate class extended by the shading types 4,5,6 and 7 that contains the common methods used by these classes.
  *
  * @author Shaola Ren
  * @author Tilman Hausherr
@@ -44,7 +43,7 @@ abstract class TriangleBasedShadingContext extends ShadingContext implements Pai
     protected int bitsPerCoordinate;
     protected int bitsPerColorComponent;
     protected int numberOfColorComponents;
-    
+
     private final boolean hasFunction;
 
     // map of pixels within triangles to their RGB color
@@ -60,7 +59,7 @@ abstract class TriangleBasedShadingContext extends ShadingContext implements Pai
      * @throws IOException if there is an error getting the color space or doing background color conversion.
      */
     TriangleBasedShadingContext(PDShading shading, ColorModel cm, AffineTransform xform,
-                                       Matrix matrix) throws IOException
+            Matrix matrix) throws IOException
     {
         super(shading, cm, xform, matrix);
         PDTriangleBasedShadingType triangleBasedShadingType = (PDTriangleBasedShadingType) shading;
@@ -116,20 +115,20 @@ abstract class TriangleBasedShadingContext extends ShadingContext implements Pai
                 {
                     for (int y = boundary[2]; y <= boundary[3]; y++)
                     {
-                        Point p = new Point(x, y);
+                        Point p = new IntPoint(x, y);
                         if (tri.contains(p))
                         {
                             map.put(p, evalFunctionAndConvertToRGB(tri.calcColor(p)));
                         }
                     }
-                }         
+                }
             }
         }
     }
 
     /**
-     * Convert color to RGB color value, using function if required, then convert from the shading
-     * color space to an RGB value, which is encoded into an integer.
+     * Convert color to RGB color value, using function if required, then convert from the shading color space to an RGB
+     * value, which is encoded into an integer.
      */
     private int evalFunctionAndConvertToRGB(float[] values) throws IOException
     {
@@ -168,7 +167,7 @@ abstract class TriangleBasedShadingContext extends ShadingContext implements Pai
             {
                 for (int col = 0; col < w; col++)
                 {
-                    Point p = new Point(x + col, y + row);
+                    Point p = new IntPoint(x + col, y + row);
                     int value;
                     Integer v = pixelTable.get(p);
                     if (v != null)

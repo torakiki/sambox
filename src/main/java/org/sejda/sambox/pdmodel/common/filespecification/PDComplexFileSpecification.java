@@ -115,7 +115,8 @@ public class PDComplexFileSpecification implements PDFileSpecification
     }
 
     /**
-     * This will set unicode file name.
+     * This will set the unicode file name. If you call this, then do not forget to also call
+     * {@link #setFile(java.lang.String) setFile(String)} or the attachment will not be visible on some viewers.
      *
      * @param file The name of the file.
      */
@@ -130,6 +131,12 @@ public class PDComplexFileSpecification implements PDFileSpecification
         return fileSpecificationDictionary.getString(COSName.F);
     }
 
+    /**
+     * This will set the file name. You should also call {@link #setFileUnicode(java.lang.String)
+     * setFileUnicode(String)} for cross-platform and cross-language compatibility.
+     *
+     * @param file The name of the file.
+     */
     @Override
     public void setFile(String file)
     {
@@ -150,7 +157,9 @@ public class PDComplexFileSpecification implements PDFileSpecification
      * This will set name representing a dos file.
      *
      * @param file The name of the file.
+     * @deprecated This method is obsolescent and should not be used by conforming writers.
      */
+    @Deprecated
     public void setFileDos(String file)
     {
         fileSpecificationDictionary.setString(COSName.DOS, file);
@@ -170,7 +179,9 @@ public class PDComplexFileSpecification implements PDFileSpecification
      * This will set name representing a Mac file.
      *
      * @param file The name of the file.
+     * @deprecated This method is obsolescent and should not be used by conforming writers.
      */
+    @Deprecated
     public void setFileMac(String file)
     {
         fileSpecificationDictionary.setString(COSName.MAC, file);
@@ -190,7 +201,9 @@ public class PDComplexFileSpecification implements PDFileSpecification
      * This will set name representing a Unix file.
      *
      * @param file The name of the file.
+     * @deprecated This method is obsolescent and should not be used by conforming writers.
      */
+    @Deprecated
     public void setFileUnix(String file)
     {
         fileSpecificationDictionary.setString(COSName.UNIX, file);
@@ -227,7 +240,8 @@ public class PDComplexFileSpecification implements PDFileSpecification
     }
 
     /**
-     * Set the embedded file for this spec.
+     * Set the embedded file for this spec. You should also call {@link #setEmbeddedFileUnicode(PDEmbeddedFile)} for
+     * cross-platform and cross-language compatibility.
      *
      * @param file The file to be embedded.
      */
@@ -259,7 +273,9 @@ public class PDComplexFileSpecification implements PDFileSpecification
      * Set the embedded dos file for this spec.
      *
      * @param file The dos file to be embedded.
+     * @deprecated This method is obsolescent and should not be used by conforming writers.
      */
+    @Deprecated
     public void setEmbeddedFileDos(PDEmbeddedFile file)
     {
         COSDictionary ef = getEFDictionary();
@@ -288,7 +304,9 @@ public class PDComplexFileSpecification implements PDFileSpecification
      * Set the embedded Mac file for this spec.
      *
      * @param file The Mac file to be embedded.
+     * @deprecated This method is obsolescent and should not be used by conforming writers.
      */
+    @Deprecated
     public void setEmbeddedFileMac(PDEmbeddedFile file)
     {
         COSDictionary ef = getEFDictionary();
@@ -317,7 +335,9 @@ public class PDComplexFileSpecification implements PDFileSpecification
      * Set the embedded Unix file for this spec.
      *
      * @param file The Unix file to be embedded.
+     * @deprecated This method is obsolescent and should not be used by conforming writers.
      */
+    @Deprecated
     public void setEmbeddedFileUnix(PDEmbeddedFile file)
     {
         COSDictionary ef = getEFDictionary();
@@ -349,7 +369,8 @@ public class PDComplexFileSpecification implements PDFileSpecification
     }
 
     /**
-     * Set the embedded Unicode file for this spec.
+     * Set the embedded Unicode file for this spec. If you call this, then do not forget to also call
+     * {@link #setEmbeddedFile(PDEmbeddedFile)} or the attachment will not be visible on some viewers.
      *
      * @param file The Unicode file to be embedded.
      */
