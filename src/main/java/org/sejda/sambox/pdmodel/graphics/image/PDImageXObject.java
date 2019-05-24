@@ -180,7 +180,9 @@ public final class PDImageXObject extends PDXObject implements PDImage
         }
         // last resort, let's see if ImageIO can read it
         BufferedImage image = ImageIO.read(file);
-        requireNotNullArg(image, "Image type " + fileType + " not supported " + file.getName());
+        if(image == null) {
+            throw new UnsupportedImageFormatException(fileType, file.getName());
+        }
         return LosslessFactory.createFromImage(image);
     }
 
