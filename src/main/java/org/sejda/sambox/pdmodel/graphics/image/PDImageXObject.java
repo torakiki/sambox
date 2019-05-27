@@ -179,9 +179,17 @@ public final class PDImageXObject extends PDXObject implements PDImage
             }
         }
         // last resort, let's see if ImageIO can read it
-        BufferedImage image = ImageIO.read(file);
+        BufferedImage image;
+        try {
+            image = ImageIO.read(file);
+        } catch (Exception e) {
+            LOG.warn(String.format("An error occurred while reading image: %s type: %s", file.getName(), fileType), e);
+            throw new UnsupportedImageFormatException(fileType, file.getName(), e);
+        }
+
         if(image == null) {
-            throw new UnsupportedImageFormatException(fileType, file.getName());
+            LOG.warn(String.format("Could not read image format: %s type: %s", file.getName(), fileType));
+            throw new UnsupportedImageFormatException(fileType, file.getName(), null);
         }
         return LosslessFactory.createFromImage(image);
     }

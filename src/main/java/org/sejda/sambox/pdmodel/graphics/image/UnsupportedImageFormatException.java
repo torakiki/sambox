@@ -23,8 +23,8 @@ public class UnsupportedImageFormatException extends IllegalArgumentException
     private final FileType fileType;
     private final String filename;
 
-    public UnsupportedImageFormatException(FileType fileType, String filename) {
-        super("Image type " + fileType + " not supported " + filename);
+    public UnsupportedImageFormatException(FileType fileType, String filename, Throwable cause) {
+        super("Image type " + fileType + " not supported " + filename, cause);
         this.filename = filename;
         this.fileType = fileType;
     }
