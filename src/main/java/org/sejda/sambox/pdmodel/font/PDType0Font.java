@@ -66,7 +66,9 @@ public class PDType0Font extends PDFont implements PDVectorFont
      */
     public static PDType0Font load(PDDocument doc, File file) throws IOException
     {
-        return new PDType0Font(doc, new TTFParser().parse(file), true, true, false);
+        TrueTypeFont ttf = new TTFParser().parse(file);
+        boolean embedSubset = FontUtils.isSubsettingPermitted(ttf);
+        return new PDType0Font(doc, ttf, embedSubset, true, false);
     }
 
     /**
@@ -79,7 +81,9 @@ public class PDType0Font extends PDFont implements PDVectorFont
      */
     public static PDType0Font load(PDDocument doc, InputStream input) throws IOException
     {
-        return new PDType0Font(doc, new TTFParser().parse(input), true, true, false);
+        TrueTypeFont ttf = new TTFParser().parse(input);
+        boolean embedSubset = FontUtils.isSubsettingPermitted(ttf);
+        return new PDType0Font(doc, ttf, embedSubset, true, false);
     }
 
     /**
