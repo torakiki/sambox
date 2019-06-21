@@ -343,7 +343,14 @@ public final class PDICCBased extends PDCIEBasedColorSpace
     {
         if (awtColorSpace != null)
         {
-            return toRGBImageAWT(raster, awtColorSpace);
+            try
+            {
+                return toRGBImageAWT(raster, awtColorSpace);
+            }
+            catch (CMMException e)
+            {
+                LOG.error("Failure using embedded ICC profile ({}), using alternate color space: {}", e.getMessage(), alternateColorSpace);
+            }
         }
         return alternateColorSpace.toRGBImage(raster);
     }
