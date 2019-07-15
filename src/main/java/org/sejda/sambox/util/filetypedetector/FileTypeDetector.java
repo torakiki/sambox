@@ -20,21 +20,18 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 
 /**
  * @author Drew Noakes
  *
  * code taken from https://github.com/drewnoakes/metadata-extractor
- *
- * 2016-01-04
- *
- * latest commit number 73f1a48
- *
  * Examines the a file's first bytes and estimates the file's type.
  */
 public final class FileTypeDetector
 {
     private static final ByteTrie<FileType> ROOT;
+    private static final HashMap<String, FileType> FTYP_MAP;
 
     static
     {
@@ -79,6 +76,17 @@ public final class FileTypeDetector
         ROOT.addPath(FileType.RAF, "FUJIFILMCCD-RAW".getBytes(StandardCharsets.ISO_8859_1));
         ROOT.addPath(FileType.RW2, "II".getBytes(StandardCharsets.ISO_8859_1),
                 new byte[] { 0x55, 0x00 });
+
+        FTYP_MAP = new HashMap<>();
+
+        // http://www.ftyps.com
+        // HEIF
+        FTYP_MAP.put("ftypmif1", FileType.HEIF);
+        FTYP_MAP.put("ftypmsf1", FileType.HEIF);
+        FTYP_MAP.put("ftypheic", FileType.HEIF);
+        FTYP_MAP.put("ftypheix", FileType.HEIF);
+        FTYP_MAP.put("ftyphevc", FileType.HEIF);
+        FTYP_MAP.put("ftyphevx", FileType.HEIF);
     }
 
     private FileTypeDetector()
@@ -100,6 +108,27 @@ public final class FileTypeDetector
         {
             fin.read(firstBytes);
         }
-        return ROOT.find(firstBytes);
+        FileType fileType = ROOT.find(firstBytes);
+
+        if (fileType == FileType.UNKNOWN)
+        {
+            String eightCC = new String(firstBytes, 4, 8);
+            // Test at offset 4 for Base Media Format (i.e. QuickTime, MP4, etc...) identifier "ftyp" plus four identifying characters
+            FileType t = FTYP_MAP.get(eightCC);
+            if (t != null)
+            {
+                return t;
+            }
+        }
+        else if (fileType == FileType.RIFF)
+        {
+            String fourCC = new String(firstBytes, 8, 4);
+            if (fourCC.equals("WEBP"))
+            {
+                return FileType.WEBP;
+            }
+        }
+
+        return fileType;
     }
 }
