@@ -52,7 +52,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.javadoc.failOnError>false</maven.javadoc.failOnError>
-		<bouncycastle.version>1.60</bouncycastle.version>
+		<bouncycastle.version>1.61</bouncycastle.version>
 	</properties>
 
 	<repositories>
@@ -809,7 +809,7 @@
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<version>1.2.2</version>
+			<version>1.2.3</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
