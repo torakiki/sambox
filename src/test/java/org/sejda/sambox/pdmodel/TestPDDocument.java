@@ -16,6 +16,10 @@
  */
 package org.sejda.sambox.pdmodel;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,25 +29,20 @@ import java.util.Arrays;
 import java.util.Locale;
 
 import org.apache.commons.io.IOUtils;
+import org.junit.Before;
 import org.junit.Test;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.input.PDFParser;
+import org.sejda.sambox.pdmodel.PDDocument.OnClose;
 import org.sejda.sambox.util.SpecVersionUtils;
 
-import junit.framework.TestCase;
-
-/**
- * Testcase introduced with PDFBOX-1581.
- * 
- */
-public class TestPDDocument extends TestCase
+public class TestPDDocument
 {
     private File testResultsDir = new File("target/test-output");
 
-    @Override
-    protected void setUp() throws Exception
+    @Before
+    public void setUp()
     {
-        super.setUp();
         testResultsDir.mkdirs();
     }
 
@@ -52,6 +51,7 @@ public class TestPDDocument extends TestCase
      * 
      * @throws IOException if something went wrong
      */
+    @Test
     public void testSaveLoadStream() throws IOException
     {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -81,6 +81,7 @@ public class TestPDDocument extends TestCase
      * 
      * @throws IOException if something went wrong
      */
+    @Test
     public void testSaveLoadFile() throws IOException
     {
         File targetFile = new File(testResultsDir, "pddocument-saveloadfile.pdf");
@@ -111,6 +112,7 @@ public class TestPDDocument extends TestCase
     /**
      * PDFBOX-3481: Test whether XRef generation results in unusable PDFs if Arab numbering is default.
      */
+    @Test
     public void testSaveArabicLocale() throws IOException
     {
         Locale defaultLocale = Locale.getDefault();
@@ -194,5 +196,28 @@ public class TestPDDocument extends TestCase
     public void requiredNotBlankVersion()
     {
         new PDDocument().getDocument().setHeaderVersion(" ");
+    }
+
+    @Test
+    public void closeOnce() throws IOException
+    {
+
+        OnClose onClose = new OnClose()
+        {
+            private int count = 0;
+
+            @Override
+            public void onClose() throws IOException
+            {
+                assertTrue(++count <= 1);
+            }
+        };
+
+        try (PDDocument document = new PDDocument())
+        {
+            document.setOnCloseAction(onClose);
+            document.addPage(new PDPage());
+            document.writeTo(new ByteArrayOutputStream());
+        }
     }
 }

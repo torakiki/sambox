@@ -613,17 +613,20 @@ public class PDDocument implements Closeable
     }
 
     /**
-     * Closes the {@link PDDocument} executing an onClose action is set. Once closed the document is pretty much
-     * unusable since most of the mothods requires an open document.
+     * Closes the {@link PDDocument} executing the set onClose action. Once closed the document is pretty much unusable
+     * since most of the methods requires an open document.
      * 
      * @see PDDocument#setOnCloseAction(OnClose)
      */
     @Override
     public void close() throws IOException
     {
-        onClose.onClose();
-        this.resourceCache.clear();
-        this.open = false;
+        if (isOpen())
+        {
+            onClose.onClose();
+            this.resourceCache.clear();
+            this.open = false;
+        }
     }
 
     /**
