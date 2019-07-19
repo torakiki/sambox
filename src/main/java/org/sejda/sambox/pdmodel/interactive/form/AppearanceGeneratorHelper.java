@@ -504,6 +504,9 @@ public class AppearanceGeneratorHelper
                 // calculate the position based on the content rectangle
                 y = clipRect.getLowerLeftY() + (clipRect.getHeight() - fontCapAtSize) / 2;
 
+                // shift up slightly, so it does not cover any form field line underneath
+                y += 1;
+
                 // check to ensure that ascents and descents fit
                 if (y - clipRect.getLowerLeftY() < -fontDescentAtSize)
                 {
