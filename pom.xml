@@ -8,7 +8,7 @@
 	<packaging>jar</packaging>
 	<name>sambox</name>
 	<version>2.0.0.M1-SNAPSHOT</version>
-
+ 
 	<description>An Apache PDFBox fork intended to be used as PDF processor for Sejda and PDFsam related projects</description>
 	<url>http://www.sejda.org</url>
 

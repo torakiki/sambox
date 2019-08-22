@@ -30,7 +30,7 @@ import java.util.Locale;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.sejda.commons.util.IOUtils;
+import org.sejda.commons.util.IOUtils; 
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.PDDocument.OnClose;

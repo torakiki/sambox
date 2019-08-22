@@ -16,14 +16,18 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.PDDocument;
+import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.*;
 
 /**
  * Test for the PDSignatureField class.
@@ -67,4 +71,15 @@ public class PDTextFieldTest
         assertEquals(widget.getCOSObject(), textField.getCOSObject());
     }
 
+    @Test
+    public void textValueNotCropped_Width() throws IOException {
+        PDTextField textField = new PDTextField(acroForm);
+        PDAnnotationWidget widget = textField.getWidgets().get(0);
+        widget.setRectangle(new PDRectangle(0, 0, 100, 20));
+        textField.setValue("This is a long text field value that could get cropped");
+
+        byte[] bytes = widget.getAppearance().getNormalAppearance().getAppearanceStream().getContentStream().toByteArray();
+        String appearanceString = new String(bytes, StandardCharsets.UTF_8);
+        assertThat(appearanceString, containsString("/Helvetica 4.2228 Tf"));
+    }
 }
