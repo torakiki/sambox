@@ -16,7 +16,7 @@
  */
 package org.sejda.sambox.output;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
@@ -60,7 +60,7 @@ public class AsyncPDFBodyObjectsWriterTest
     @Test(expected = IOException.class)
     public void asyncExceptionIsProcessed() throws IOException
     {
-        doThrow(Exception.class).when(writer).writeObjectIfNotWritten(any());
+        doThrow(RuntimeException.class).when(writer).writeObjectIfNotWritten(any());
         victim.writeObject(mock(IndirectCOSObjectReference.class));
         victim.onWriteCompletion();
     }
