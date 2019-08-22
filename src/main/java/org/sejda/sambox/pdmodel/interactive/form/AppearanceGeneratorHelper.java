@@ -461,9 +461,18 @@ public class AppearanceGeneratorHelper
 
         float fontSize = defaultAppearance.getFontSize();
 
-        if (fontSize == 0)
+        // calculate the fontSize (because 0 = autosize)
+        boolean recalculateFontSize = fontSize == 0;
+
+        // always re-calculate the fontSize for text fields
+        // because sometimes the field value changes to a longer string, which won't fit the field anymore when drawn using the previous font size
+        if (field instanceof PDTextField)
         {
-            // calculate the fontSize (because 0 = autosize)
+            recalculateFontSize = true;
+        }
+
+        if(recalculateFontSize)
+        {
             fontSize = calculateFontSize(font, contentRect);
         }
 
