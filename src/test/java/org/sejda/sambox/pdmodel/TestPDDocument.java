@@ -187,7 +187,7 @@ public class TestPDDocument
         {
             document.setVersion(SpecVersionUtils.V1_5);
             assertEquals(SpecVersionUtils.V1_5, document.getVersion());
-            assertEquals(SpecVersionUtils.V1_4, document.getDocument().getHeaderVersion());
+            assertEquals(SpecVersionUtils.V1_5, document.getDocument().getHeaderVersion());
             assertEquals(SpecVersionUtils.V1_5, document.getDocumentCatalog().getVersion());
         }
     }
