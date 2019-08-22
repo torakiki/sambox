@@ -87,7 +87,7 @@ public class ObjectsStreamTest
         assertEquals(2, victim.getInt(COSName.N));
         assertEquals(8, victim.getInt(COSName.FIRST));
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        victim.getFilteredStream().transferTo(new InflaterOutputStream(out));
+        IOUtils.copy(victim.getFilteredStream(), new InflaterOutputStream(out));
         byte[] data = new byte[] { 49, 32, 48, 32, 50, 32, 50, 32, 48, 32, 51, 32 };
         assertArrayEquals(data, out.toByteArray());
     }

@@ -1,22 +1,25 @@
 package org.sejda.sambox.pdmodel.graphics.image;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-
-import org.apache.commons.io.FilenameUtils;
-import org.junit.Test;
-import org.sejda.commons.util.IOUtils;
-import org.sejda.sambox.util.filetypedetector.FileType;
-
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.sejda.sambox.util.filetypedetector.FileType;
+
 public class PDImageXObjectTest
 {
+    @Rule
+    public TemporaryFolder folder = new TemporaryFolder();
+
     @Test
     public void testJpegWithPngExtension() throws IOException
     {
@@ -28,11 +31,14 @@ public class PDImageXObjectTest
     public void testBrokenImage() throws IOException
     {
         File outFile = tempFileFromResource("/org/sejda/sambox/resources/images/broken.png");
-        try {
+        try
+        {
             PDImageXObject.createFromFile(outFile.getPath());
             fail("Expected an exception");
-        } catch (UnsupportedImageFormatException e) {
-            assertThat(e.getFilename(), is("broken.png"));
+        }
+        catch (UnsupportedImageFormatException e)
+        {
+            assertThat(e.getFilename(), is(outFile.getName()));
             assertThat(e.getFileType(), is(FileType.UNKNOWN));
         }
     }
@@ -41,31 +47,25 @@ public class PDImageXObjectTest
     public void testImageFormatWithoutImageIOSupport() throws IOException
     {
         File outFile = tempFileFromResource("/org/sejda/sambox/resources/images/sample.psd");
-        try {
+        try
+        {
             PDImageXObject.createFromFile(outFile.getPath());
             fail("Expected an exception");
-        } catch (UnsupportedImageFormatException e) {
-            assertThat(e.getFilename(), is("sample.psd"));
+        }
+        catch (UnsupportedImageFormatException e)
+        {
+            assertThat(e.getFilename(), is(outFile.getName()));
             assertThat(e.getFileType(), is(FileType.PSD));
         }
     }
 
-    private File tempFileFromResource(String name) throws IOException {
-        InputStream in = getClass().getResourceAsStream(name);
-        String filename = FilenameUtils.getName(name);
-
-        File outDir = Files.createTempDirectory("test" + getClass().getName()).toFile();
-        File outFile = new File(outDir, filename);
-
-        outFile.deleteOnExit();
-        outDir.deleteOnExit();
-
-        FileOutputStream out = new FileOutputStream(outFile);
-        in.transferTo(out);
-        IOUtils.closeQuietly(in);
-        IOUtils.closeQuietly(out);
-        System.out.println(outFile);
-
+    private File tempFileFromResource(String name) throws IOException
+    {
+        File outFile = folder.newFile();
+        try (InputStream input = getClass().getResourceAsStream(name))
+        {
+            Files.copy(input, outFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        }
         return outFile;
     }
 

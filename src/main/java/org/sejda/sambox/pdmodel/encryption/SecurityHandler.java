@@ -304,7 +304,7 @@ public abstract class SecurityHandler
         cipher.init(false, new ParametersWithIV(new KeyParameter(encryptionKey), iv));
         try (CipherInputStream cis = new CipherInputStream(data, cipher))
         {
-            cis.transferTo(output);
+            IOUtils.copy(cis, output);
         }
     }
 

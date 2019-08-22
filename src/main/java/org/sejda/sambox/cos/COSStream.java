@@ -457,7 +457,7 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
                     this.unfiltered = bytes;
                 }))
                 {
-                    in.transferTo(out);
+                    IOUtils.copy(in, out);
                 }
 
             }

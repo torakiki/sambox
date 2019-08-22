@@ -27,7 +27,6 @@ import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.Arrays;
 
 import org.sejda.sambox.cos.COSName;
 
@@ -87,9 +86,8 @@ public class PDDeviceCMYK extends PDDeviceColorSpace
         String name = "/org/sejda/sambox/resources/icc/ISOcoated_v2_300_bas.icc";
         try (InputStream is = PDDeviceCMYK.class.getResourceAsStream(name))
         {
-            requireIOCondition(nonNull(is),
-                    "Error loading " + name);
-            return ICC_Profile.getInstance(input);
+            requireIOCondition(nonNull(is), "Error loading " + name);
+            return ICC_Profile.getInstance(is);
         }
     }
 

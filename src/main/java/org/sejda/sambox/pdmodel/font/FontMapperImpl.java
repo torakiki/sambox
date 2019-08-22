@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.pdmodel.font;
 
+import static java.util.Optional.ofNullable;
 import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
 
 import java.io.IOException;

@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import org.sejda.commons.util.IOUtils;
 import org.sejda.sambox.cos.COSDictionary;
 
 /**
@@ -34,7 +35,7 @@ final class IdentityFilter extends Filter
     public DecodeResult decode(InputStream encoded, OutputStream decoded, COSDictionary parameters,
             int index) throws IOException
     {
-        encoded.transferTo(decoded);
+        IOUtils.copy(encoded, decoded);
         decoded.flush();
         return new DecodeResult(parameters);
     }
@@ -43,7 +44,7 @@ final class IdentityFilter extends Filter
     public void encode(InputStream input, OutputStream encoded, COSDictionary parameters)
             throws IOException
     {
-        input.transferTo(encoded);
+        IOUtils.copy(input, encoded);
         encoded.flush();
     }
 }

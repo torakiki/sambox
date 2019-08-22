@@ -18,7 +18,7 @@ package org.sejda.sambox.pdmodel.graphics.image;
 
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
-import static org.sejda.util.RequireUtils.requireNotNullArg;
+import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
 
 import java.awt.Graphics2D;
 import java.awt.Paint;
@@ -35,7 +35,7 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
-import org.apache.commons.io.IOUtils;
+import org.sejda.commons.util.IOUtils;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSName;
@@ -180,15 +180,21 @@ public final class PDImageXObject extends PDXObject implements PDImage
         }
         // last resort, let's see if ImageIO can read it
         BufferedImage image;
-        try {
+        try
+        {
             image = ImageIO.read(file);
-        } catch (Exception e) {
-            LOG.warn(String.format("An error occurred while reading image: %s type: %s", file.getName(), fileType), e);
+        }
+        catch (Exception e)
+        {
+            LOG.warn(String.format("An error occurred while reading image: %s type: %s",
+                    file.getName(), fileType), e);
             throw new UnsupportedImageFormatException(fileType, file.getName(), e);
         }
 
-        if(image == null) {
-            LOG.warn(String.format("Could not read image format: %s type: %s", file.getName(), fileType));
+        if (image == null)
+        {
+            LOG.warn(String.format("Could not read image format: %s type: %s", file.getName(),
+                    fileType));
             throw new UnsupportedImageFormatException(fileType, file.getName(), null);
         }
         return LosslessFactory.createFromImage(image);

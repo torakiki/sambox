@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import org.sejda.commons.util.IOUtils;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 
@@ -133,7 +134,7 @@ final class CCITTFaxFilter extends Filter
     {
         int cols = parameters.getInt(COSName.COLUMNS);
         int rows = parameters.getInt(COSName.ROWS);
-        input.transferTo(
+        IOUtils.copy(input,
                 new CCITTFaxEncoderStream(encoded, cols, rows, TIFFExtension.FILL_LEFT_TO_RIGHT));
         input.close();
     }

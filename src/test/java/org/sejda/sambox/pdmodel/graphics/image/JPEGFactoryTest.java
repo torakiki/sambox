@@ -25,7 +25,6 @@ import static org.sejda.sambox.pdmodel.graphics.image.ValidateXImage.validate;
 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,6 +37,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.sejda.commons.util.IOUtils;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.input.PDFParser;
@@ -213,13 +213,9 @@ public class JPEGFactoryTest
             PDImageXObject img = (PDImageXObject) doc.getPage(0).getResources()
                     .getXObject(COSName.getPDFName("Im1"));
             InputStream dctStream = img.getCOSObject().getFilteredStream();
-            ByteArrayOutputStream baos1 = new ByteArrayOutputStream();
-            ByteArrayOutputStream baos2 = new ByteArrayOutputStream();
-            resourceStream.transferTo(baos1);
-            dctStream.transferTo(baos2);
+            assertArrayEquals(IOUtils.toByteArray(resourceStream), IOUtils.toByteArray(dctStream));
             resourceStream.close();
             dctStream.close();
-            assertArrayEquals(baos1.toByteArray(), baos2.toByteArray());
         }
     }
 }

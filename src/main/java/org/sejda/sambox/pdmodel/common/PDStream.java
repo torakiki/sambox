@@ -114,7 +114,7 @@ public class PDStream implements COSObjectable
         stream = new COSStream();
         try (OutputStream output = stream.createFilteredStream(filter))
         {
-            input.transferTo(output);
+            IOUtils.copy(input, output);
         }
         finally
         {
@@ -364,7 +364,7 @@ public class PDStream implements COSObjectable
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         try (InputStream is = createInputStream())
         {
-            is.transferTo(output);
+            IOUtils.copy(is, output);
         }
         return output.toByteArray();
     }
