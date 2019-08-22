@@ -19,6 +19,7 @@ package org.sejda.sambox.util;
 import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
 
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +46,7 @@ public class SpecVersionUtils
     public static final String V1_7 = "1.7";
     public static final String V2_0 = "2.0";
 
-    private static final String VERSION_PATTERN = "^(\\d)\\.(\\d)$";
+    private static final Pattern VERSION_PATTERN = Pattern.compile("^(\\d)\\.(\\d)$");
 
     private SpecVersionUtils()
     {
@@ -64,7 +65,7 @@ public class SpecVersionUtils
     {
         String version = sanitizeVersion(
                 header.substring(EXPECTED_HEADER_LENGTH - 3, EXPECTED_HEADER_LENGTH));
-        if (!version.matches(VERSION_PATTERN))
+        if (!VERSION_PATTERN.matcher(version).matches())
         {
             // it seems Acrobat doesn't choke on invalid version but it does sometime warn the user
             LOG.warn("Invalid header version {}, falling back to {}", version, V1_6);

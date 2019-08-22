@@ -26,7 +26,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
+import java.util.Arrays;
 import java.util.Arrays;
 
 import org.sejda.sambox.cos.COSName;
@@ -84,13 +84,11 @@ public class PDDeviceCMYK extends PDDeviceColorSpace
         // Instead, the "ISO Coated v2 300% (basICColor)" is used, which
         // is an open alternative to the "ISO Coated v2 300% (ECI)" profile.
 
-        URL url = PDDeviceCMYK.class
-                .getResource("/org/sejda/sambox/resources/icc/ISOcoated_v2_300_bas.icc");
-        requireIOCondition(nonNull(url),
-                "Error loading org/sejda/sambox/resources/icc/ISOcoated_v2_300_bas.icc");
-
-        try (InputStream input = url.openStream())
+        String name = "/org/sejda/sambox/resources/icc/ISOcoated_v2_300_bas.icc";
+        try (InputStream is = PDDeviceCMYK.class.getResourceAsStream(name))
         {
+            requireIOCondition(nonNull(is),
+                    "Error loading " + name);
             return ICC_Profile.getInstance(input);
         }
     }

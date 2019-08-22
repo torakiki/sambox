@@ -27,13 +27,13 @@ public enum PageLayout
     /** Display one page at a time. */
     SINGLE_PAGE("SinglePage"),
 
-    /**  Display the pages in one column. */
+    /** Display the pages in one column. */
     ONE_COLUMN("OneColumn"),
 
     /** Display the pages in two columns), with odd numbered pages on the left. */
     TWO_COLUMN_LEFT("TwoColumnLeft"),
 
-    /** Display the pages in two columns), with odd numbered pages on the right.  */
+    /** Display the pages in two columns), with odd numbered pages on the right. */
     TWO_COLUMN_RIGHT("TwoColumnRight"),
 
     /** Display the pages two at a time), with odd-numbered pages on the left. */
@@ -44,28 +44,12 @@ public enum PageLayout
 
     public static PageLayout fromString(String value)
     {
-        if (value.equals("SinglePage"))
+        for (PageLayout instance : PageLayout.values())
         {
-            return SINGLE_PAGE;
-        }
-        else if (value.equals("OneColumn"))
-        {
-            return ONE_COLUMN;
-        }
-        else if (value.equals("TwoColumnLeft"))
-        {
-            return TWO_COLUMN_LEFT;
-        } else if(value.equals("TwoColumnRight"))
-        {
-            return TWO_COLUMN_RIGHT;
-        }
-        else if (value.equals("TwoPageLeft"))
-        {
-            return TWO_PAGE_LEFT;
-        }
-        else if (value.equals("TwoPageRight"))
-        {
-            return TWO_PAGE_RIGHT;
+            if (instance.value.equals(value))
+            {
+                return instance;
+            }
         }
         throw new IllegalArgumentException(value);
     }

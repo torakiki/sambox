@@ -53,6 +53,9 @@ import org.sejda.sambox.contentstream.operator.graphics.LineTo;
 import org.sejda.sambox.contentstream.operator.graphics.MoveTo;
 import org.sejda.sambox.contentstream.operator.graphics.ShadingFill;
 import org.sejda.sambox.contentstream.operator.graphics.StrokePath;
+import org.sejda.sambox.contentstream.operator.markedcontent.BeginMarkedContentSequence;
+import org.sejda.sambox.contentstream.operator.markedcontent.BeginMarkedContentSequenceWithProperties;
+import org.sejda.sambox.contentstream.operator.markedcontent.EndMarkedContentSequence;
 import org.sejda.sambox.contentstream.operator.state.Concatenate;
 import org.sejda.sambox.contentstream.operator.state.Restore;
 import org.sejda.sambox.contentstream.operator.state.Save;
@@ -86,8 +89,8 @@ import org.sejda.sambox.pdmodel.PDPage;
 import org.sejda.sambox.pdmodel.graphics.image.PDImage;
 
 /**
- * PDFStreamEngine subclass for advanced processing of graphics.
- * This class should be subclasses by end users looking to hook into graphics operations.
+ * PDFStreamEngine subclass for advanced processing of graphics. This class should be subclassed by end users looking to
+ * hook into graphics operations.
  *
  * @author John Hewson
  */
@@ -165,10 +168,15 @@ public abstract class PDFGraphicsStreamEngine extends PDFStreamEngine
         addOperator(new CurveToReplicateFinalPoint());
         addOperator(new ShowTextLine());
         addOperator(new ShowTextLineAndSpace());
+        addOperator(new BeginMarkedContentSequence());
+        addOperator(new BeginMarkedContentSequenceWithProperties());
+        addOperator(new EndMarkedContentSequence());
     }
 
     /**
-     * Returns the page.
+     * 
+     * @return the page.
+     * 
      */
     protected final PDPage getPage()
     {
@@ -177,20 +185,29 @@ public abstract class PDFGraphicsStreamEngine extends PDFStreamEngine
 
     /**
      * Append a rectangle to the current path.
+     * 
+     * @param p0 point P0 of the rectangle.
+     * @param p1 point P1 of the rectangle.
+     * @param p2 point P2 of the rectangle.
+     * @param p3 point P3 of the rectangle.
+     * 
+     * @throws IOException if something went wrong.
      */
-    public abstract void appendRectangle(Point2D p0, Point2D p1,
-                                         Point2D p2, Point2D p3) throws IOException;
+    public abstract void appendRectangle(Point2D p0, Point2D p1, Point2D p2, Point2D p3)
+            throws IOException;
 
     /**
      * Draw the image.
      *
      * @param pdImage The image to draw.
+     * 
+     * @throws IOException if something went wrong.
      */
     public abstract void drawImage(PDImage pdImage) throws IOException;
 
     /**
-     * Modify the current clipping path by intersecting it with the current path.
-     * The clipping path will not be updated until the succeeding painting operator is called.
+     * Modify the current clipping path by intersecting it with the current path. The clipping path will not be updated
+     * until the succeeding painting operator is called.
      *
      * @param windingRule The winding rule which will be used for clipping.
      */
@@ -209,9 +226,8 @@ public abstract class PDFGraphicsStreamEngine extends PDFStreamEngine
     /**
      * Draws a curve from the current point to (x3,y3) using (x1,y1) and (x2,y2) as control points.
      */
-    public abstract void curveTo(float x1, float y1,
-                                 float x2, float y2,
-                                 float x3, float y3) throws IOException;
+    public abstract void curveTo(float x1, float y1, float x2, float y2, float x3, float y3)
+            throws IOException;
 
     /**
      * Returns the current point of the current path.

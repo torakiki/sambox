@@ -21,6 +21,7 @@ import static java.util.Objects.nonNull;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.Arrays;
 
 import org.apache.fontbox.util.BoundingBox;
 import org.sejda.sambox.cos.COSArray;
@@ -124,7 +125,7 @@ public class PDRectangle implements COSObjectable
      */
     public PDRectangle(COSArray array)
     {
-        float[] values = array.trimToSize(4).toFloatArray();
+        float[] values = Arrays.copyOf(array.toFloatArray(), 4);
         // we have to start with the lower left corner
         rectArray.add(new COSFloat(Math.min(values[0], values[2])));
         rectArray.add(new COSFloat(Math.min(values[1], values[3])));

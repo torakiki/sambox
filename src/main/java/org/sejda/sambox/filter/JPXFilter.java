@@ -16,11 +16,8 @@
  */
 package org.sejda.sambox.filter;
 
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBuffer;
-import java.awt.image.DataBufferByte;
-import java.awt.image.DataBufferUShort;
-import java.awt.image.WritableRaster;
+import java.awt.color.ColorSpace;
+import java.awt.image.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -31,6 +28,7 @@ import javax.imageio.stream.MemoryCacheImageInputStream;
 
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.pdmodel.graphics.color.PDJPXColorSpace;
 
 /**
  * Decompress data encoded using the wavelet-based JPEG 2000 standard, reproducing the original data.
@@ -47,6 +45,9 @@ import org.sejda.sambox.cos.COSName;
  */
 public final class JPXFilter extends Filter
 {
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public DecodeResult decode(InputStream encoded, OutputStream decoded, COSDictionary parameters,
             int index) throws IOException
@@ -55,7 +56,7 @@ public final class JPXFilter extends Filter
         result.getParameters().addAll(parameters);
         BufferedImage image = readJPX(encoded, result);
 
-        WritableRaster raster = image.getRaster();
+        Raster raster = image.getRaster();
         switch (raster.getDataBuffer().getDataType())
         {
         case DataBuffer.TYPE_BYTE:
@@ -69,6 +70,23 @@ public final class JPXFilter extends Filter
             {
                 decoded.write(w >> 8);
                 decoded.write(w);
+            }
+            return result;
+
+        case DataBuffer.TYPE_INT:
+            // not yet used (as of October 2018) but works as fallback
+            // if we decide to convert to BufferedImage.TYPE_INT_RGB
+            int[] ar = new int[raster.getNumBands()];
+            for (int y = 0; y < image.getHeight(); ++y)
+            {
+                for (int x = 0; x < image.getWidth(); ++x)
+                {
+                    raster.getPixel(x, y, ar);
+                    for (int i = 0; i < ar.length; ++i)
+                    {
+                        decoded.write(ar[i]);
+                    }
+                }
             }
             return result;
 
@@ -124,7 +142,21 @@ public final class JPXFilter extends Filter
             // extract embedded color space
             if (!parameters.containsKey(COSName.COLORSPACE))
             {
-                // result.setColorSpace(new PDJPXColorSpace(image.getColorModel().getColorSpace()));
+                if (image.getSampleModel() instanceof MultiPixelPackedSampleModel &&
+                        image.getColorModel().getPixelSize() == 1 &&
+                        image.getRaster().getNumBands() == 1 &&
+                        image.getColorModel() instanceof IndexColorModel)
+                {
+                    // PDFBOX-4326:
+                    // force CS_GRAY colorspace because colorspace in IndexColorModel
+                    // has 3 colors despite that there is only 1 color per pixel
+                    // in raster
+                    result.setColorSpace(new PDJPXColorSpace(ColorSpace.getInstance(ColorSpace.CS_GRAY)));
+                }
+                else
+                {
+                    result.setColorSpace(new PDJPXColorSpace(image.getColorModel().getColorSpace()));
+                }
             }
 
             return image;
@@ -139,6 +171,9 @@ public final class JPXFilter extends Filter
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void encode(InputStream input, OutputStream encoded, COSDictionary parameters)
     {

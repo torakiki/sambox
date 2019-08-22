@@ -27,34 +27,33 @@ public class PDExportFormatAttributeObject extends PDLayoutAttributeObject
 {
 
     /**
-     *  standard attribute owner: XML-1.00
+     * standard attribute owner: XML-1.00
      */
     public static final String OWNER_XML_1_00 = "XML-1.00";
     /**
-     *  standard attribute owner: HTML-3.2
+     * standard attribute owner: HTML-3.2
      */
     public static final String OWNER_HTML_3_20 = "HTML-3.2";
     /**
-     *  standard attribute owner: HTML-4.01
+     * standard attribute owner: HTML-4.01
      */
     public static final String OWNER_HTML_4_01 = "HTML-4.01";
     /**
-     *  standard attribute owner: OEB-1.00
+     * standard attribute owner: OEB-1.00
      */
     public static final String OWNER_OEB_1_00 = "OEB-1.00";
     /**
-     *  standard attribute owner: RTF-1.05
+     * standard attribute owner: RTF-1.05
      */
     public static final String OWNER_RTF_1_05 = "RTF-1.05";
     /**
-     *  standard attribute owner: CSS-1.00
+     * standard attribute owner: CSS-1.00
      */
     public static final String OWNER_CSS_1_00 = "CSS-1.00";
     /**
-     *  standard attribute owner: CSS-2.00
+     * standard attribute owner: CSS-2.00
      */
     public static final String OWNER_CSS_2_00 = "CSS-2.00";
-
 
     /**
      * Default constructor.
@@ -74,32 +73,29 @@ public class PDExportFormatAttributeObject extends PDLayoutAttributeObject
         super(dictionary);
     }
 
-
     /**
-     * Gets the list numbering (ListNumbering). The default value is
-     * {@link PDListAttributeObject#LIST_NUMBERING_NONE}.
+     * Gets the list numbering (ListNumbering). The default value is {@link PDListAttributeObject#LIST_NUMBERING_NONE}.
      * 
      * @return the list numbering
      */
     public String getListNumbering()
     {
         return this.getName(PDListAttributeObject.LIST_NUMBERING,
-            PDListAttributeObject.LIST_NUMBERING_NONE);
+                PDListAttributeObject.LIST_NUMBERING_NONE);
     }
 
     /**
-     * Sets the list numbering (ListNumbering). The value shall be one of the
-     * following:
+     * Sets the list numbering (ListNumbering). The value shall be one of the following:
      * <ul>
-     *   <li>{@link PDListAttributeObject#LIST_NUMBERING_NONE},</li>
-     *   <li>{@link PDListAttributeObject#LIST_NUMBERING_DISC},</li>
-     *   <li>{@link PDListAttributeObject#LIST_NUMBERING_CIRCLE},</li>
-     *   <li>{@link PDListAttributeObject#LIST_NUMBERING_SQUARE},</li>
-     *   <li>{@link PDListAttributeObject#LIST_NUMBERING_DECIMAL},</li>
-     *   <li>{@link PDListAttributeObject#LIST_NUMBERING_UPPER_ROMAN},</li>
-     *   <li>{@link PDListAttributeObject#LIST_NUMBERING_LOWER_ROMAN},</li>
-     *   <li>{@link PDListAttributeObject#LIST_NUMBERING_UPPER_ALPHA},</li>
-     *   <li>{@link PDListAttributeObject#LIST_NUMBERING_LOWER_ALPHA}.</li>
+     * <li>{@link PDListAttributeObject#LIST_NUMBERING_NONE},</li>
+     * <li>{@link PDListAttributeObject#LIST_NUMBERING_DISC},</li>
+     * <li>{@link PDListAttributeObject#LIST_NUMBERING_CIRCLE},</li>
+     * <li>{@link PDListAttributeObject#LIST_NUMBERING_SQUARE},</li>
+     * <li>{@link PDListAttributeObject#LIST_NUMBERING_DECIMAL},</li>
+     * <li>{@link PDListAttributeObject#LIST_NUMBERING_UPPER_ROMAN},</li>
+     * <li>{@link PDListAttributeObject#LIST_NUMBERING_LOWER_ROMAN},</li>
+     * <li>{@link PDListAttributeObject#LIST_NUMBERING_UPPER_ALPHA},</li>
+     * <li>{@link PDListAttributeObject#LIST_NUMBERING_LOWER_ALPHA}.</li>
      * </ul>
      * 
      * @param listNumbering the list numbering
@@ -110,8 +106,8 @@ public class PDExportFormatAttributeObject extends PDLayoutAttributeObject
     }
 
     /**
-     * Gets the number of rows in the enclosing table that shall be spanned by
-     * the cell (RowSpan). The default value is 1.
+     * Gets the number of rows in the enclosing table that shall be spanned by the cell (RowSpan). The default value is
+     * 1.
      * 
      * @return the row span
      */
@@ -121,8 +117,7 @@ public class PDExportFormatAttributeObject extends PDLayoutAttributeObject
     }
 
     /**
-     * Sets the number of rows in the enclosing table that shall be spanned by
-     * the cell (RowSpan).
+     * Sets the number of rows in the enclosing table that shall be spanned by the cell (RowSpan).
      * 
      * @param rowSpan the row span
      */
@@ -132,8 +127,8 @@ public class PDExportFormatAttributeObject extends PDLayoutAttributeObject
     }
 
     /**
-     * Gets the number of columns in the enclosing table that shall be spanned
-     * by the cell (ColSpan). The default value is 1.
+     * Gets the number of columns in the enclosing table that shall be spanned by the cell (ColSpan). The default value
+     * is 1.
      * 
      * @return the column span
      */
@@ -143,8 +138,7 @@ public class PDExportFormatAttributeObject extends PDLayoutAttributeObject
     }
 
     /**
-     * Sets the number of columns in the enclosing table that shall be spanned
-     * by the cell (ColSpan).
+     * Sets the number of columns in the enclosing table that shall be spanned by the cell (ColSpan).
      * 
      * @param colSpan the column span
      */
@@ -154,10 +148,9 @@ public class PDExportFormatAttributeObject extends PDLayoutAttributeObject
     }
 
     /**
-     * Gets the headers (Headers). An array of byte strings, where each string
-     * shall be the element identifier (see the
-     * {@link org.apache.pdfbox.pdmodel.documentinterchange.logicalstructure.PDStructureElement#getElementIdentifier()}) for a TH structure
-     * element that shall be used as a header associated with this cell.
+     * Gets the headers (Headers). An array of byte strings, where each string shall be the element identifier (see the
+     * {@link org.sejda.sambox.pdmodel.documentinterchange.logicalstructure.PDStructureElement#getElementIdentifier()})
+     * for a TH structure element that shall be used as a header associated with this cell.
      * 
      * @return the headers.
      */
@@ -167,10 +160,9 @@ public class PDExportFormatAttributeObject extends PDLayoutAttributeObject
     }
 
     /**
-     * Sets the headers (Headers). An array of byte strings, where each string
-     * shall be the element identifier (see the
-     * {@link org.apache.pdfbox.pdmodel.documentinterchange.logicalstructure.PDStructureElement#getElementIdentifier()}) for a TH structure
-     * element that shall be used as a header associated with this cell.
+     * Sets the headers (Headers). An array of byte strings, where each string shall be the element identifier (see the
+     * {@link org.sejda.sambox.pdmodel.documentinterchange.logicalstructure.PDStructureElement#getElementIdentifier()})
+     * for a TH structure element that shall be used as a header associated with this cell.
      * 
      * @param headers the headers
      */
@@ -180,9 +172,8 @@ public class PDExportFormatAttributeObject extends PDLayoutAttributeObject
     }
 
     /**
-     * Gets the scope (Scope). It shall reflect whether the header cell applies
-     * to the rest of the cells in the row that contains it, the column that
-     * contains it, or both the row and the column that contain it.
+     * Gets the scope (Scope). It shall reflect whether the header cell applies to the rest of the cells in the row that
+     * contains it, the column that contains it, or both the row and the column that contain it.
      * 
      * @return the scope
      */
@@ -192,14 +183,13 @@ public class PDExportFormatAttributeObject extends PDLayoutAttributeObject
     }
 
     /**
-     * Sets the scope (Scope). It shall reflect whether the header cell applies
-     * to the rest of the cells in the row that contains it, the column that
-     * contains it, or both the row and the column that contain it. The value
-     * shall be one of the following:
+     * Sets the scope (Scope). It shall reflect whether the header cell applies to the rest of the cells in the row that
+     * contains it, the column that contains it, or both the row and the column that contain it. The value shall be one
+     * of the following:
      * <ul>
-     *   <li>{@link PDTableAttributeObject#SCOPE_ROW},</li>
-     *   <li>{@link PDTableAttributeObject#SCOPE_COLUMN}, or</li>
-     *   <li>{@link PDTableAttributeObject#SCOPE_BOTH}.</li>
+     * <li>{@link PDTableAttributeObject#SCOPE_ROW},</li>
+     * <li>{@link PDTableAttributeObject#SCOPE_COLUMN}, or</li>
+     * <li>{@link PDTableAttributeObject#SCOPE_BOTH}.</li>
      * </ul>
      * 
      * @param scope the scope
@@ -228,7 +218,6 @@ public class PDExportFormatAttributeObject extends PDLayoutAttributeObject
     {
         this.setString(PDTableAttributeObject.SUMMARY, summary);
     }
-
 
     @Override
     public String toString()

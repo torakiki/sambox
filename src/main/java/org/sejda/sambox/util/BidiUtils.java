@@ -48,7 +48,7 @@ public final class BidiUtils
     {
         InputStream stream = BidiUtils.class
                 .getResourceAsStream("/org/sejda/sambox/resources/text/BidiMirroring.txt");
-
+ 
         if (nonNull(stream))
         {
             parseBidiFile(stream);

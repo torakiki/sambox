@@ -17,6 +17,7 @@
 package org.sejda.sambox.pdmodel.interactive.form;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -41,6 +42,8 @@ import org.sejda.sambox.pdmodel.PDDocumentCatalog;
 import org.sejda.sambox.pdmodel.PDPage;
 import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
+import org.sejda.sambox.pdmodel.font.PDFont;
+import org.sejda.sambox.pdmodel.font.PDType1Font;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotation;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
 
@@ -158,6 +161,32 @@ public class PDAcroFormTest
     }
 
     /**
+     * calling flatten() removes all the fields, also non terminal in case of a hierarchy
+     * 
+     * @throws IOException
+     */
+    @Test
+    public void testFlattenAllRemovesFields() throws IOException
+    {
+        FastByteArrayOutputStream out = new FastByteArrayOutputStream();
+        try (PDDocument doc = PDFParser
+                .parse(SeekableSources.inMemorySeekableSourceFrom(getClass().getResourceAsStream(
+                        "/org/sejda/sambox/pdmodel/interactive/form/flatten_fields_hierarchy.pdf"))))
+        {
+            PDAcroForm acroForm = doc.getDocumentCatalog().getAcroForm();
+            acroForm.flatten();
+            doc.writeTo(out);
+        }
+        try (PDDocument doc = PDFParser
+                .parse(SeekableSources.inMemorySeekableSourceFrom(out.toByteArray())))
+        {
+            PDAcroForm acroForm = doc.getDocumentCatalog().getAcroForm();
+            assertNotNull(acroForm);
+            assertTrue(acroForm.getFields().isEmpty());
+        }
+    }
+
+    /**
      * PDFBOX_3941 and PDFBOX-3809
      * 
      * @throws IOException
@@ -165,7 +194,7 @@ public class PDAcroFormTest
     @Test
     public void testFlattenOnySomeFields() throws IOException
     {
-        flattenOnlySome("/org/sejda/sambox/pdmodel/interactive/form/flatten_fields_hierarchy.pdf");
+        flattenOnlySome("/org/sejda/sambox/pdmodel/interactive/form/flatten_fields.pdf");
     }
 
     /**
@@ -176,7 +205,7 @@ public class PDAcroFormTest
     @Test
     public void testFlattenOnySomeFieldsWithHierarchy() throws IOException
     {
-        flattenOnlySome("/org/sejda/sambox/pdmodel/interactive/form/flatten_fields.pdf");
+        flattenOnlySome("/org/sejda/sambox/pdmodel/interactive/form/flatten_fields_hierarchy.pdf");
 
     }
 
@@ -351,6 +380,59 @@ public class PDAcroFormTest
             assertEquals("ZapfDingbats",
                     acroFormResources.getFont(COSName.getPDFName("ZaDb")).getName());
 
+        }
+    }
+
+    /**
+     * PDFBOX-3732, PDFBOX-4303, PDFBOX-4393: Test whether /Helv and /ZaDb get added, but only if they don't exist.
+     */
+    @Test
+    public void testAcroFormDefaultFonts() throws IOException
+    {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        try (PDDocument document = new PDDocument())
+        {
+
+            PDPage page = new PDPage(PDRectangle.A4);
+            document.addPage(page);
+            PDAcroForm acroForm2 = new PDAcroForm(document);
+            document.getDocumentCatalog().setAcroForm(acroForm2);
+            PDResources defaultResources = acroForm2.getDefaultResources();
+            assertNull(defaultResources);
+            defaultResources = new PDResources();
+            acroForm2.setDefaultResources(defaultResources);
+            assertNull(defaultResources.getFont(COSName.HELV));
+            assertNull(defaultResources.getFont(COSName.ZA_DB));
+
+            // getting AcroForm sets the two fonts
+            acroForm2 = document.getDocumentCatalog().getAcroForm();
+            defaultResources = acroForm2.getDefaultResources();
+            assertNotNull(defaultResources.getFont(COSName.HELV));
+            assertNotNull(defaultResources.getFont(COSName.ZA_DB));
+
+            // repeat with a new AcroForm (to delete AcroForm cache) and thus missing /DR
+            document.getDocumentCatalog().setAcroForm(new PDAcroForm(document));
+            acroForm2 = document.getDocumentCatalog().getAcroForm();
+            defaultResources = acroForm2.getDefaultResources();
+            PDFont helv = defaultResources.getFont(COSName.HELV);
+            PDFont zadb = defaultResources.getFont(COSName.ZA_DB);
+            assertNotNull(helv);
+            assertNotNull(zadb);
+            document.writeTo(baos); // this is a working PDF
+        }
+        try (PDDocument doc = PDFParser
+                .parse(SeekableSources.inMemorySeekableSourceFrom(baos.toByteArray())))
+        {
+            PDAcroForm acroForm2 = doc.getDocumentCatalog().getAcroForm();
+            PDResources defaultResources = acroForm2.getDefaultResources();
+            PDFont helv = defaultResources.getFont(COSName.HELV);
+            PDFont zadb = defaultResources.getFont(COSName.ZA_DB);
+            assertNotNull(helv);
+            assertNotNull(zadb);
+            // make sure that font wasn't overwritten
+            assertNotEquals(PDType1Font.HELVETICA, helv);
+            assertNotEquals(PDType1Font.ZAPF_DINGBATS, zadb);
         }
     }
 

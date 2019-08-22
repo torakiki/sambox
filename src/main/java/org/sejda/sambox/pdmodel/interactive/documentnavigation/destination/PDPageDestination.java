@@ -113,7 +113,7 @@ public abstract class PDPageDestination extends PDDestination
      * Returns the page number for this destination, regardless of whether this is a page number or a reference to a
      * page.
      *
-     * @see org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline.PDOutlineItem
+     * @see org.sejda.sambox.pdmodel.interactive.documentnavigation.outline.PDOutlineItem
      * @return the 0-based page number, or -1 if the destination type is unknown.
      */
     public int retrievePageNumber()
@@ -128,19 +128,27 @@ public abstract class PDPageDestination extends PDDestination
             }
             else if (page instanceof COSDictionary)
             {
-                COSBase parent = page;
-                while (((COSDictionary) parent).getDictionaryObject(COSName.PARENT,
-                        COSName.P) != null)
-                {
-                    parent = ((COSDictionary) parent).getDictionaryObject(COSName.PARENT,
-                            COSName.P);
-                }
-                // now parent is the pages node
-                PDPageTree pages = new PDPageTree((COSDictionary) parent);
-                return pages.indexOf(new PDPage((COSDictionary) page));
+                return indexOfPageTree((COSDictionary) page);
             }
         }
         return retval;
+    }
+
+    // climb up the page tree up to the top to be able to call PageTree.indexOf for a page dictionary
+    private int indexOfPageTree(COSDictionary pageDict)
+    {
+        COSDictionary parent = pageDict;
+        while (parent.getDictionaryObject(COSName.PARENT, COSName.P) instanceof COSDictionary)
+        {
+            parent = (COSDictionary) parent.getDictionaryObject(COSName.PARENT, COSName.P);
+        }
+        if (parent.containsKey(COSName.KIDS) && COSName.PAGES.equals(parent.getItem(COSName.TYPE)))
+        {
+            // now parent is the highest pages node
+            PDPageTree pages = new PDPageTree(parent);
+            return pages.indexOf(new PDPage(pageDict));
+        }
+        return -1;
     }
 
     /**

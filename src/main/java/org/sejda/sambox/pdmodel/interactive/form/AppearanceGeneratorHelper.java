@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
  * @author Stephan Gerhard
  * @author Ben Litchfield
  */
-class AppearanceGeneratorHelper
+public class AppearanceGeneratorHelper
 {
     private static final Logger LOG = LoggerFactory.getLogger(AppearanceGeneratorHelper.class);
 
@@ -101,7 +101,7 @@ class AppearanceGeneratorHelper
      * @param field the field which you wish to control the appearance of
      * @throws IOException
      */
-    AppearanceGeneratorHelper(PDVariableText field) throws IOException
+    public AppearanceGeneratorHelper(PDVariableText field) throws IOException
     {
         this.field = field;
         validateAndEnsureAcroFormResources();
@@ -272,7 +272,9 @@ class AppearanceGeneratorHelper
         }
         catch (IOException ex)
         {
-            LOG.warn("Failed to process default appearance string for widget {}, will use fallback default appearance", widget);
+            LOG.warn(
+                    "Failed to process default appearance string for widget {}, will use fallback default appearance",
+                    widget);
             return new PDDefaultAppearanceString();
         }
     }
@@ -444,6 +446,18 @@ class AppearanceGeneratorHelper
                 .orElseGet(() -> defaultAppearance.getFont());
 
         requireNotNullArg(font, "font is null, check whether /DA entry is incomplete or incorrect");
+        if (font.getName().contains("+"))
+        {
+            LOG.warn("Font '" + defaultAppearance.getFontName().getName() + "' of field '"
+                    + field.getFullyQualifiedName() + "' contains subsetted font '" + font.getName()
+                    + "'");
+            LOG.warn("This may bring trouble with PDField.setValue(), PDAcroForm.flatten() or "
+                    + "PDAcroForm.refreshAppearances()");
+            LOG.warn("You should replace this font with a non-subsetted font:");
+            LOG.warn("PDFont font = PDType0Font.load(doc, new FileInputStream(fontfile), false);");
+            LOG.warn("acroForm.getDefaultResources().put(COSName.getPDFName(\""
+                    + defaultAppearance.getFontName().getName() + "\", font);");
+        }
 
         float fontSize = defaultAppearance.getFontSize();
 
@@ -457,7 +471,7 @@ class AppearanceGeneratorHelper
         // options
         if (field instanceof PDListBox)
         {
-            insertGeneratedSelectionHighlight(contents, appearanceStream, font, fontSize);
+            insertGeneratedListboxSelectionHighlight(contents, appearanceStream, font, fontSize);
         }
 
         // start the text output
@@ -489,6 +503,9 @@ class AppearanceGeneratorHelper
             {
                 // calculate the position based on the content rectangle
                 y = clipRect.getLowerLeftY() + (clipRect.getHeight() - fontCapAtSize) / 2;
+
+                // shift up slightly, so it does not cover any form field line underneath
+                y += 1;
 
                 // check to ensure that ascents and descents fit
                 if (y - clipRect.getLowerLeftY() < -fontDescentAtSize)
@@ -638,7 +655,7 @@ class AppearanceGeneratorHelper
         contents.restoreGraphicsState();
     }
 
-    private void insertGeneratedSelectionHighlight(PDPageContentStream contents,
+    private void insertGeneratedListboxSelectionHighlight(PDPageContentStream contents,
             PDAppearanceStream appearanceStream, PDFont font, float fontSize) throws IOException
     {
         List<Integer> indexEntries = ((PDListBox) field).getSelectedOptionsIndex();
@@ -727,7 +744,7 @@ class AppearanceGeneratorHelper
             contents.newLineAtOffset(contentRect.getLowerLeftX(), yTextPos);
             contents.showText(options.get(i));
 
-            if (i - topIndex != (numOptions - 1))
+            if (i != (numOptions - 1))
             {
                 contents.endText();
             }
@@ -774,7 +791,8 @@ class AppearanceGeneratorHelper
             float lineHeight = calculateLineHeight(font, font.getFontMatrix().getScaleY());
             float scaledContentHeight = contentRect.getHeight() * yScalingFactor;
 
-            boolean looksLikeFauxMultiline = calculateLineHeight(font, DEFAULT_FONT_SIZE / FONTSCALE) > scaledContentHeight;
+            boolean looksLikeFauxMultiline = calculateLineHeight(font,
+                    DEFAULT_FONT_SIZE / FONTSCALE) > scaledContentHeight;
             boolean userTypedMultipleLines = new PlainText(value).getParagraphs().size() > 1;
 
             if (looksLikeFauxMultiline && !userTypedMultipleLines)

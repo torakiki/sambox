@@ -23,7 +23,6 @@ import org.sejda.sambox.contentstream.operator.OperatorProcessor;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.text.PDFMarkedContentExtractor;
 
 /**
  * BDC : Begins a marked-content sequence with property list.
@@ -48,11 +47,7 @@ public class BeginMarkedContentSequenceWithProperties extends OperatorProcessor
                 properties = (COSDictionary) argument;
             }
         }
-        if (this.getContext() instanceof PDFMarkedContentExtractor)
-        {
-            ((PDFMarkedContentExtractor) this.getContext()).beginMarkedContentSequence(tag,
-                    properties);
-        }
+        this.getContext().beginMarkedContentSequence(tag, properties);
     }
 
     @Override

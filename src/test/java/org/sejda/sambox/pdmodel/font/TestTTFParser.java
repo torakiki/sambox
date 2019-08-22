@@ -42,8 +42,8 @@ public class TestTTFParser
     @Test
     public void testPostTable() throws IOException
     {
-        InputStream input = PDFont.class.getClassLoader()
-                .getResourceAsStream("org/sejda/sambox/resources/ttf/LiberationSans-Regular.ttf");
+        InputStream input = PDFont.class
+                .getResourceAsStream("/org/sejda/sambox/resources/ttf/LiberationSans-Regular.ttf");
         Assert.assertNotNull(input);
 
         TTFParser parser = new TTFParser();

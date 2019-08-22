@@ -42,6 +42,7 @@ import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSFloat;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSStream;
+import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.common.PDRange;
 import org.sejda.sambox.pdmodel.common.PDStream;
 import org.slf4j.Logger;
@@ -65,6 +66,19 @@ public final class PDICCBased extends PDCIEBasedColorSpace
     private ICC_ColorSpace awtColorSpace;
     private PDColor initialColor;
     private boolean isRGB = false;
+    // allows to force using alternate color space instead of ICC color space for performance
+    // reasons with LittleCMS (LCMS), see PDFBOX-4309
+    // WARNING: do not activate this in a conforming reader
+    private boolean useOnlyAlternateColorSpace = Boolean
+            .getBoolean("org.sejda.sambox.rendering.UseAlternateInsteadOfICCColorSpace");
+
+    private static final boolean IS_KCMS;
+
+    static
+    {
+        String cmmProperty = System.getProperty("sun.java2d.cmm");
+        IS_KCMS = "sun.java2d.cmm.kcms.KcmsServiceProvider".equals(cmmProperty);
+    }
 
     /**
      * Creates a new ICC color space with an empty stream.
@@ -82,7 +96,11 @@ public final class PDICCBased extends PDCIEBasedColorSpace
      *
      * @param iccArray the ICC stream object
      * @throws IOException if there is an error reading the ICC profile or if the parameter is invalid
+     * @deprecated This will be private in 3.0. Please use
+     * {@link PDICCBased#create(org.apache.pdfbox.cos.COSArray, org.apache.pdfbox.pdmodel.PDResources)} instead, which
+     * supports caching.
      */
+    @Deprecated
     public PDICCBased(COSArray iccArray) throws IOException
     {
         requireIOCondition(iccArray.size() >= 2,
@@ -92,6 +110,42 @@ public final class PDICCBased extends PDCIEBasedColorSpace
         array = iccArray;
         stream = new PDStream((COSStream) iccArray.getObject(1));
         loadICCProfile();
+    }
+
+    /**
+     * Creates a new ICC color space using the PDF array, optionally using a resource cache.
+     *
+     * @param iccArray the ICC stream object.
+     * @param resources resources to use as cache, or null for no caching.
+     * @return an ICC color space.
+     * @throws IOException if there is an error reading the ICC profile or if the parameter is invalid.
+     */
+    public static PDICCBased create(COSArray iccArray, PDResources resources) throws IOException
+    {
+        requireIOCondition(iccArray.size() >= 2,
+                "ICCBased colorspace array must have two elements");
+        requireIOCondition(iccArray.getObject(1) instanceof COSStream,
+                "ICCBased colorspace array must have a stream as second element");
+
+        COSBase base = iccArray.get(1);
+        boolean canCache = base.hasId() && resources != null
+                && resources.getResourceCache() != null;
+
+        if (canCache)
+        {
+            PDColorSpace space = resources.getResourceCache()
+                    .getColorSpace(base.id().objectIdentifier);
+            if (space != null && space instanceof PDICCBased)
+            {
+                return (PDICCBased) space;
+            }
+        }
+        PDICCBased space = new PDICCBased(iccArray);
+        if (canCache)
+        {
+            resources.getResourceCache().put(base.id().objectIdentifier, space);
+        }
+        return space;
     }
 
     @Override
@@ -115,6 +169,18 @@ public final class PDICCBased extends PDCIEBasedColorSpace
      */
     private void loadICCProfile() throws IOException
     {
+        if (useOnlyAlternateColorSpace)
+        {
+            try
+            {
+                fallbackToAlternateColorSpace(null);
+                return;
+            }
+            catch (IOException e)
+            {
+                LOG.warn("Error initializing alternate color space: " + e.getLocalizedMessage());
+            }
+        }
         InputStream input = null;
         try
         {
@@ -147,15 +213,20 @@ public final class PDICCBased extends PDCIEBasedColorSpace
                 }
                 initialColor = new PDColor(initial, this);
 
-                // do things that trigger a ProfileDataException
-                // or CMMException due to invalid profiles, see PDFBOX-1295 and PDFBOX-1740
-                // or ArrayIndexOutOfBoundsException, see PDFBOX-3610
-                awtColorSpace.toRGB(new float[awtColorSpace.getNumComponents()]);
-                // this one triggers an exception for PDFBOX-3549 with KCMS
-                new Color(awtColorSpace, new float[getNumberOfComponents()], 1f);
-                // PDFBOX-4015: this one triggers "CMMException: LCMS error 13" with LCMS
-                new ComponentColorModel(awtColorSpace, false, false, Transparency.OPAQUE,
-                        DataBuffer.TYPE_BYTE);
+                if (IS_KCMS)
+                {
+                    // do things that trigger a ProfileDataException
+                    // or CMMException due to invalid profiles, see PDFBOX-1295 and PDFBOX-1740 (ü-file)
+                    // or ArrayIndexOutOfBoundsException, see PDFBOX-3610
+                    // also triggers a ProfileDataException for PDFBOX-3549 with KCMS
+                    new Color(awtColorSpace, new float[getNumberOfComponents()], 1f);
+                }
+                else
+                {
+                    // PDFBOX-4015: this one triggers "CMMException: LCMS error 13" with LCMS
+                    new ComponentColorModel(awtColorSpace, false, false, Transparency.OPAQUE,
+                            DataBuffer.TYPE_BYTE);
+                }
             }
         }
         catch (ProfileDataException e)
@@ -192,8 +263,11 @@ public final class PDICCBased extends PDCIEBasedColorSpace
         {
             isRGB = true;
         }
-        LOG.warn("Can't read embedded ICC profile (" + e.getLocalizedMessage()
-                + "), using alternate color space: " + alternateColorSpace.getName());
+        if (e != null)
+        {
+            LOG.warn("Can't read embedded ICC profile (" + e.getLocalizedMessage()
+                    + "), using alternate color space: " + alternateColorSpace.getName());
+        }
         initialColor = alternateColorSpace.getInitialColor();
     }
 
@@ -218,7 +292,7 @@ public final class PDICCBased extends PDCIEBasedColorSpace
 
             if (profileData[ICC_Profile.icHdrRenderingIntent] == ICC_Profile.icPerceptual)
             {
-                LOG.warn("ICC profile is Perceptual, ignoring, treating as Display class");
+                LOG.debug("ICC profile is Perceptual, ignoring, treating as Display class");
                 intToBigEndian(ICC_Profile.icSigDisplayClass, profileData,
                         ICC_Profile.icHdrDeviceClass);
                 return ICC_Profile.getInstance(profileData);
@@ -269,7 +343,14 @@ public final class PDICCBased extends PDCIEBasedColorSpace
     {
         if (awtColorSpace != null)
         {
-            return toRGBImageAWT(raster, awtColorSpace);
+            try
+            {
+                return toRGBImageAWT(raster, awtColorSpace);
+            }
+            catch (CMMException e)
+            {
+                LOG.error("Failure using embedded ICC profile ({}), using alternate color space: {}", e.getMessage(), alternateColorSpace);
+            }
         }
         return alternateColorSpace.toRGBImage(raster);
     }

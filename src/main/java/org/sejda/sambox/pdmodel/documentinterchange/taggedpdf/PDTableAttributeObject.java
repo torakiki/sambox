@@ -27,20 +27,20 @@ public class PDTableAttributeObject extends PDStandardAttributeObject
 {
 
     /**
-     *  standard attribute owner: Table
+     * standard attribute owner: Table
      */
     public static final String OWNER_TABLE = "Table";
 
     protected static final String ROW_SPAN = "RowSpan";
     protected static final String COL_SPAN = "ColSpan";
-    protected static final String HEADERS  = "Headers";
-    protected static final String SCOPE    = "Scope";
-    protected static final String SUMMARY  = "Summary";
+    protected static final String HEADERS = "Headers";
+    protected static final String SCOPE = "Scope";
+    protected static final String SUMMARY = "Summary";
 
     /**
      * Scope: Both
      */
-    public static final String SCOPE_BOTH   = "Both";
+    public static final String SCOPE_BOTH = "Both";
     /**
      * Scope: Column
      */
@@ -48,8 +48,7 @@ public class PDTableAttributeObject extends PDStandardAttributeObject
     /**
      * Scope: Row
      */
-    public static final String SCOPE_ROW    = "Row";
-
+    public static final String SCOPE_ROW = "Row";
 
     /**
      * Default constructor.
@@ -69,10 +68,9 @@ public class PDTableAttributeObject extends PDStandardAttributeObject
         super(dictionary);
     }
 
-
     /**
-     * Gets the number of rows in the enclosing table that shall be spanned by
-     * the cell (RowSpan). The default value is 1.
+     * Gets the number of rows in the enclosing table that shall be spanned by the cell (RowSpan). The default value is
+     * 1.
      * 
      * @return the row span
      */
@@ -82,8 +80,7 @@ public class PDTableAttributeObject extends PDStandardAttributeObject
     }
 
     /**
-     * Sets the number of rows in the enclosing table that shall be spanned by
-     * the cell (RowSpan).
+     * Sets the number of rows in the enclosing table that shall be spanned by the cell (RowSpan).
      * 
      * @param rowSpan the row span
      */
@@ -93,8 +90,8 @@ public class PDTableAttributeObject extends PDStandardAttributeObject
     }
 
     /**
-     * Gets the number of columns in the enclosing table that shall be spanned
-     * by the cell (ColSpan). The default value is 1.
+     * Gets the number of columns in the enclosing table that shall be spanned by the cell (ColSpan). The default value
+     * is 1.
      * 
      * @return the column span
      */
@@ -104,8 +101,7 @@ public class PDTableAttributeObject extends PDStandardAttributeObject
     }
 
     /**
-     * Sets the number of columns in the enclosing table that shall be spanned
-     * by the cell (ColSpan).
+     * Sets the number of columns in the enclosing table that shall be spanned by the cell (ColSpan).
      * 
      * @param colSpan the column span
      */
@@ -115,10 +111,9 @@ public class PDTableAttributeObject extends PDStandardAttributeObject
     }
 
     /**
-     * Gets the headers (Headers). An array of byte strings, where each string
-     * shall be the element identifier (see the
-     * {@link org.apache.pdfbox.pdmodel.documentinterchange.logicalstructure.PDStructureElement#getElementIdentifier()}) for a TH structure
-     * element that shall be used as a header associated with this cell.
+     * Gets the headers (Headers). An array of byte strings, where each string shall be the element identifier (see the
+     * {@link org.sejda.sambox.pdmodel.documentinterchange.logicalstructure.PDStructureElement#getElementIdentifier()})
+     * for a TH structure element that shall be used as a header associated with this cell.
      * 
      * @return the headers.
      */
@@ -128,10 +123,9 @@ public class PDTableAttributeObject extends PDStandardAttributeObject
     }
 
     /**
-     * Sets the headers (Headers). An array of byte strings, where each string
-     * shall be the element identifier (see the
-     * {@link org.apache.pdfbox.pdmodel.documentinterchange.logicalstructure.PDStructureElement#getElementIdentifier()}) for a TH structure
-     * element that shall be used as a header associated with this cell.
+     * Sets the headers (Headers). An array of byte strings, where each string shall be the element identifier (see the
+     * {@link org.sejda.sambox.pdmodel.documentinterchange.logicalstructure.PDStructureElement#getElementIdentifier()})
+     * for a TH structure element that shall be used as a header associated with this cell.
      * 
      * @param headers the headers
      */
@@ -141,9 +135,8 @@ public class PDTableAttributeObject extends PDStandardAttributeObject
     }
 
     /**
-     * Gets the scope (Scope). It shall reflect whether the header cell applies
-     * to the rest of the cells in the row that contains it, the column that
-     * contains it, or both the row and the column that contain it.
+     * Gets the scope (Scope). It shall reflect whether the header cell applies to the rest of the cells in the row that
+     * contains it, the column that contains it, or both the row and the column that contain it.
      * 
      * @return the scope
      */
@@ -153,14 +146,13 @@ public class PDTableAttributeObject extends PDStandardAttributeObject
     }
 
     /**
-     * Sets the scope (Scope). It shall reflect whether the header cell applies
-     * to the rest of the cells in the row that contains it, the column that
-     * contains it, or both the row and the column that contain it. The value
-     * shall be one of the following:
+     * Sets the scope (Scope). It shall reflect whether the header cell applies to the rest of the cells in the row that
+     * contains it, the column that contains it, or both the row and the column that contain it. The value shall be one
+     * of the following:
      * <ul>
-     *   <li>{@link #SCOPE_ROW},</li>
-     *   <li>{@link #SCOPE_COLUMN}, or</li>
-     *   <li>{@link #SCOPE_BOTH}.</li>
+     * <li>{@link #SCOPE_ROW},</li>
+     * <li>{@link #SCOPE_COLUMN}, or</li>
+     * <li>{@link #SCOPE_BOTH}.</li>
      * </ul>
      * 
      * @param scope the scope

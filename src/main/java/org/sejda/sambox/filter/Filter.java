@@ -49,7 +49,7 @@ public abstract class Filter
      * used to compress /Flate streams. The default value is -1 which is {@link Deflater#DEFAULT_COMPRESSION}. To set
      * maximum compression, use {@code System.setProperty(Filter.SYSPROP_DEFLATELEVEL, "9");}
      */
-    public static final String SYSPROP_DEFLATELEVEL = "org.apache.pdfbox.filter.deflatelevel";
+    public static final String SYSPROP_DEFLATELEVEL = "org.sejda.sambox.filter.deflatelevel";
 
     protected Filter()
     {
@@ -149,4 +149,21 @@ public abstract class Filter
         return reader;
     }
 
+    /**
+     * @return the ZIP compression level configured for PDFBox
+     */
+    public static int getCompressionLevel()
+    {
+        int compressionLevel = Deflater.DEFAULT_COMPRESSION;
+        try
+        {
+            compressionLevel = Integer
+                    .parseInt(System.getProperty(Filter.SYSPROP_DEFLATELEVEL, "-1"));
+        }
+        catch (NumberFormatException ex)
+        {
+            LOG.warn(ex.getMessage(), ex);
+        }
+        return Math.max(-1, Math.min(Deflater.BEST_COMPRESSION, compressionLevel));
+    }
 }

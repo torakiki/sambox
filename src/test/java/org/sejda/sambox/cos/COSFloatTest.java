@@ -134,6 +134,13 @@ public class COSFloatTest
     }
 
     @Test
+    public void testDoubleNegative() throws IOException
+    {
+        // PDFBOX-4289
+        assertEquals(-16.33f, COSFloat.get("--16.33").floatValue(), 0);
+    }
+
+    @Test
     public void multipleDots() throws IOException
     {
         assertEquals(415.750795f, COSFloat.get("415.75.795").floatValue(), 0);

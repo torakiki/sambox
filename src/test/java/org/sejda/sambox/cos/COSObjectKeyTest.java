@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.cos;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
@@ -30,5 +31,33 @@ public class COSObjectKeyTest
     public void equalsContract()
     {
         EqualsVerifier.forClass(COSObjectKey.class).verify();
+    }
+
+    @Test
+    public void compareToInputNotNullOutputZero()
+    {
+        // Arrange
+        final COSObjectKey objectUnderTest = new COSObjectKey(0L, 0);
+        final COSObjectKey other = new COSObjectKey(0L, 0);
+
+        // Act
+        final int retval = objectUnderTest.compareTo(other);
+
+        // Assert result
+        Assert.assertEquals(0, retval);
+    }
+
+    @Test
+    public void compareToInputNotNullOutputPositive()
+    {
+        // Arrange
+        final COSObjectKey objectUnderTest = new COSObjectKey(0L, 0);
+        final COSObjectKey other = new COSObjectKey(-9223372036854775808L, 0);
+
+        // Act
+        final int retval = objectUnderTest.compareTo(other);
+
+        // Assert result
+        Assert.assertEquals(1, retval);
     }
 }

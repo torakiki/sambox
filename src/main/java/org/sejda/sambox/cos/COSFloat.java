@@ -20,6 +20,7 @@ import static org.sejda.commons.util.RequireUtils.requireIOCondition;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.regex.Pattern;
 
 /**
  * This class represents a floating point number in a PDF document.
@@ -30,6 +31,13 @@ import java.math.BigDecimal;
 public class COSFloat extends COSNumber
 {
     private BigDecimal value;
+    private static final Pattern DOTS = Pattern.compile("\\.");
+    private static final Pattern EXP_END = Pattern.compile("[e|E]$");
+    private static final Pattern NUM1 = Pattern.compile("^(-)([-|+]+)\\d+\\.\\d+");
+    private static final Pattern NUM2 = Pattern.compile("^(-)([\\-|\\+]+)");
+    private static final Pattern NUM3 = Pattern.compile("^0\\.0*\\-\\d+");
+    private static final Pattern ZERO = Pattern.compile("^0\\-(\\.|\\d+)*");
+    private static final Pattern MINUS = Pattern.compile("\\-");
 
     /**
      * @param aFloat The primitive float object that this object wraps.
@@ -54,10 +62,11 @@ public class COSFloat extends COSNumber
             {
                 // 415.75.795 we replace additional dots with 0
                 aFloat = aFloat.substring(0, dot + 1)
-                        + aFloat.substring(dot + 1).replaceAll("\\.", "0");
+                        + DOTS.matcher(aFloat.substring(dot + 1)).replaceAll("0");
 
+                ;
             }
-            aFloat = aFloat.replaceAll("[e|E]$", "");
+            aFloat = EXP_END.matcher(aFloat).replaceAll("");
             value = new BigDecimal(aFloat);
             checkMinMaxValues();
         }
@@ -65,12 +74,12 @@ public class COSFloat extends COSNumber
         {
             try
             {
-                if (aFloat.matches("^(-)([-|+]+)\\d+\\.\\d+"))
+                if (NUM1.matcher(aFloat).matches())
                 {
                     // PDFBOX-3589 --242.0
-                    value = new BigDecimal(aFloat.replaceFirst("^(-)([\\-|\\+]+)", "-"));
+                    value = new BigDecimal(NUM2.matcher(aFloat).replaceFirst("-"));
                 }
-                else if (aFloat.matches("^0\\-(\\.|\\d+)*"))
+                else if (ZERO.matcher(aFloat).matches())
                 {
                     // SAMBox 75
                     value = BigDecimal.ZERO;
@@ -80,9 +89,9 @@ public class COSFloat extends COSNumber
                     // PDFBOX-2990 has 0.00000-33917698
                     // PDFBOX-3369 has 0.00-35095424
                     // PDFBOX-3500 has 0.-262
-                    requireIOCondition(aFloat.matches("^0\\.0*\\-\\d+"),
+                    requireIOCondition(NUM3.matcher(aFloat).matches(),
                             "Expected floating point number but found '" + aFloat + "'");
-                    value = new BigDecimal("-" + aFloat.replaceFirst("\\-", ""));
+                    value = new BigDecimal("-" + MINUS.matcher(aFloat).replaceFirst(""));
                 }
                 checkMinMaxValues();
             }

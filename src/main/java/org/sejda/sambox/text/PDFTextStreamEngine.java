@@ -66,7 +66,7 @@ import org.slf4j.LoggerFactory;
 /**
  * PDFStreamEngine subclass for advanced processing of text via TextPosition.
  *
- * @see org.apache.pdfbox.text.TextPosition
+ * @see org.sejda.sambox.text.TextPosition
  * @author Ben Litchfield
  * @author John Hewson
  */
@@ -171,9 +171,19 @@ public class PDFTextStreamEngine extends PDFStreamEngine
         if (fontDescriptor != null)
         {
             float capHeight = fontDescriptor.getCapHeight();
-            if (capHeight != 0 && (capHeight < glyphHeight || glyphHeight == 0))
+            if (Float.compare(capHeight, 0) != 0
+                    && (capHeight < glyphHeight || Float.compare(glyphHeight, 0) == 0))
             {
                 glyphHeight = capHeight;
+            }
+            // PDFBOX-3464, PDFBOX-448:
+            // sometimes even CapHeight has very high value, but Ascent and Descent are ok
+            float ascent = fontDescriptor.getAscent();
+            float descent = fontDescriptor.getDescent();
+            if (ascent > 0 && descent < 0
+                    && ((ascent - descent) / 2 < glyphHeight || Float.compare(glyphHeight, 0) == 0))
+            {
+                glyphHeight = (ascent - descent) / 2;
             }
         }
 
@@ -309,10 +319,9 @@ public class PDFTextStreamEngine extends PDFStreamEngine
             nextX -= cropBox.getLowerLeftX();
             nextY -= cropBox.getLowerLeftY();
         }
-        processTextPosition(new TextPosition(pageRotation, cropBox.getWidth(),
-                cropBox.getHeight(), translatedTextRenderingMatrix, nextX, nextY,
-                Math.abs(dyDisplay), dxDisplay, Math.abs(spaceWidthDisplay), unicode,
-                new int[] { code }, font, fontSize,
+        processTextPosition(new TextPosition(pageRotation, cropBox.getWidth(), cropBox.getHeight(),
+                translatedTextRenderingMatrix, nextX, nextY, Math.abs(dyDisplay), dxDisplay,
+                Math.abs(spaceWidthDisplay), unicode, new int[] { code }, font, fontSize,
                 (int) (fontSize * textMatrix.getScalingFactorX())));
     }
 

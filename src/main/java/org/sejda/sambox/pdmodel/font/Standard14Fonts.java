@@ -22,7 +22,6 @@ import static org.sejda.commons.util.RequireUtils.requireIOCondition;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -120,10 +119,9 @@ final class Standard14Fonts
         }
 
         String resourceName = "/org/sejda/sambox/resources/afm/" + afmName + ".afm";
-        URL url = PDType1Font.class.getResource(resourceName);
-        requireIOCondition(nonNull(url), "Unable to load " + resourceName);
-        try (InputStream afmStream = url.openStream())
+        try (InputStream afmStream = PDType1Font.class.getResourceAsStream(resourceName))
         {
+            requireIOCondition(nonNull(afmStream), "Unable to load " + resourceName);
             AFMParser parser = new AFMParser(afmStream);
             FontMetrics metric = parser.parse(true);
             STANDARD14_AFM_MAP.put(fontName, metric);

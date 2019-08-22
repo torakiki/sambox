@@ -495,13 +495,15 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
         if (toUnicodeCMap != null)
         {
             if (toUnicodeCMap.getName() != null && toUnicodeCMap.getName().startsWith("Identity-")
-                    && dict.getDictionaryObject(COSName.TO_UNICODE) instanceof COSName)
+                    && (dict.getDictionaryObject(COSName.TO_UNICODE) instanceof COSName
+                            || !toUnicodeCMap.hasUnicodeMappings()))
             {
                 // handle the undocumented case of using Identity-H/V as a ToUnicode CMap, this
                 // isn't actually valid as the Identity-x CMaps are code->CID maps, not
                 // code->Unicode maps. See sample_fonts_solidconvertor.pdf for an example.
                 // PDFBOX-3123: do this only if the /ToUnicode entry is a name
-                return new String(new char[] { (char) code });
+                // PDFBOX-4322: identity streams are OK too
+                return new String(new char[]{(char) code});
             }
             // proceed as normal
             return toUnicodeCMap.toUnicode(code);

@@ -16,7 +16,9 @@
  */
 package org.sejda.sambox.pdmodel.graphics.image;
 
-import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
+import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
+import static org.sejda.util.RequireUtils.requireNotNullArg;
 
 import java.awt.Graphics2D;
 import java.awt.Paint;
@@ -33,6 +35,7 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
+import org.apache.commons.io.IOUtils;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSName;
@@ -120,7 +123,7 @@ public final class PDImageXObject extends PDXObject implements PDImage
         COSStream stream = new COSStream();
         try (OutputStream output = stream.createFilteredStream())
         {
-            rawInput.transferTo(output);
+            IOUtils.copy(rawInput, output);
         }
         return stream;
     }
@@ -176,8 +179,18 @@ public final class PDImageXObject extends PDXObject implements PDImage
             }
         }
         // last resort, let's see if ImageIO can read it
-        BufferedImage image = ImageIO.read(file);
-        requireNotNullArg(image, "Image type " + fileType + " not supported " + file.getName());
+        BufferedImage image;
+        try {
+            image = ImageIO.read(file);
+        } catch (Exception e) {
+            LOG.warn(String.format("An error occurred while reading image: %s type: %s", file.getName(), fileType), e);
+            throw new UnsupportedImageFormatException(fileType, file.getName(), e);
+        }
+
+        if(image == null) {
+            LOG.warn(String.format("Could not read image format: %s type: %s", file.getName(), fileType));
+            throw new UnsupportedImageFormatException(fileType, file.getName(), null);
+        }
         return LosslessFactory.createFromImage(image);
     }
 
@@ -213,7 +226,7 @@ public final class PDImageXObject extends PDXObject implements PDImage
      */
     public int getStructParent()
     {
-        return getCOSObject().getInt(COSName.STRUCT_PARENT, 0);
+        return getCOSObject().getInt(COSName.STRUCT_PARENT);
     }
 
     /**
@@ -248,7 +261,8 @@ public final class PDImageXObject extends PDXObject implements PDImage
         PDImageXObject softMask = getSoftMask();
         if (softMask != null)
         {
-            image = applyMask(image, softMask.getOpaqueImage(), true);
+            float[] matte = extractMatte(softMask);
+            image = applyMask(image, softMask.getOpaqueImage(), true, matte);
         }
         else
         {
@@ -256,12 +270,26 @@ public final class PDImageXObject extends PDXObject implements PDImage
             PDImageXObject mask = getMask();
             if (mask != null && mask.isStencil())
             {
-                image = applyMask(image, mask.getOpaqueImage(), false);
+                image = applyMask(image, mask.getOpaqueImage(), false, null);
             }
         }
 
         cachedImage = new SoftReference<>(image);
         return image;
+    }
+
+    private float[] extractMatte(PDImageXObject softMask) throws IOException
+    {
+        float[] matte = ofNullable(
+                softMask.getCOSObject().getDictionaryObject(COSName.MATTE, COSArray.class))
+                        .map(COSArray::toFloatArray).orElse(null);
+        if (nonNull(matte))
+        {
+            // PDFBOX-4267: process /Matte
+            // convert to RGB
+            return getColorSpace().toRGB(matte);
+        }
+        return null;
     }
 
     /**
@@ -301,7 +329,8 @@ public final class PDImageXObject extends PDXObject implements PDImage
 
     // explicit mask: RGB + Binary -> ARGB
     // soft mask: RGB + Gray -> ARGB
-    private BufferedImage applyMask(BufferedImage image, BufferedImage mask, boolean isSoft)
+    private BufferedImage applyMask(BufferedImage image, BufferedImage mask, boolean isSoft,
+            float[] matte)
     {
         if (mask == null)
         {
@@ -320,6 +349,11 @@ public final class PDImageXObject extends PDXObject implements PDImage
         {
             width = mask.getWidth();
             height = mask.getHeight();
+            image = scaleImage(image, width, height);
+        }
+        else if (image.getRaster().getPixel(0, 0, (int[]) null).length < 3)
+        {
+            // PDFBOX-4470 bitonal image has only one element => copy into RGB
             image = scaleImage(image, width, height);
         }
 
@@ -346,6 +380,18 @@ public final class PDImageXObject extends PDXObject implements PDImage
                 if (isSoft)
                 {
                     rgba[3] = alphaPixel[0];
+                    if (matte != null && Float.compare(alphaPixel[0], 0) != 0)
+                    {
+                        rgba[0] = clampColor(
+                                ((rgba[0] / 255 - matte[0]) / (alphaPixel[0] / 255) + matte[0])
+                                        * 255);
+                        rgba[1] = clampColor(
+                                ((rgba[1] / 255 - matte[1]) / (alphaPixel[0] / 255) + matte[1])
+                                        * 255);
+                        rgba[2] = clampColor(
+                                ((rgba[2] / 255 - matte[2]) / (alphaPixel[0] / 255) + matte[2])
+                                        * 255);
+                    }
                 }
                 else
                 {
@@ -357,6 +403,11 @@ public final class PDImageXObject extends PDXObject implements PDImage
         }
 
         return masked;
+    }
+
+    private static float clampColor(float color)
+    {
+        return color < 0 ? 0 : (color > 255 ? 255 : color);
     }
 
     /**

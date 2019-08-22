@@ -640,14 +640,8 @@ public class PDFTextStripper extends PDFTextStreamEngine
                 float expectedStartOfNextWordX = EXPECTED_START_OF_NEXT_WORD_X_RESET_VALUE;
                 if (endOfLastTextX != END_OF_LAST_TEXT_X_RESET_VALUE)
                 {
-                    if (deltaCharWidth > deltaSpace)
-                    {
-                        expectedStartOfNextWordX = endOfLastTextX + deltaSpace;
-                    }
-                    else
-                    {
-                        expectedStartOfNextWordX = endOfLastTextX + deltaCharWidth;
-                    }
+                    expectedStartOfNextWordX = endOfLastTextX
+                            + Math.min(deltaSpace, deltaCharWidth);
                 }
 
                 if (lastPosition != null)
@@ -1837,8 +1831,7 @@ public class PDFTextStripper extends PDFTextStreamEngine
     {
         if (item.isWordSeparator())
         {
-            normalized.add(
-                    createWord(lineBuilder.toString(), new ArrayList<>(wordPositions)));
+            normalized.add(createWord(lineBuilder.toString(), new ArrayList<>(wordPositions)));
             lineBuilder = new StringBuilder();
             wordPositions.clear();
         }

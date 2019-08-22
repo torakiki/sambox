@@ -80,7 +80,7 @@ import junit.framework.TestSuite;
  *
  * SINGLE FILE VALIDATION
  *
- * To further research individual failures, the org.apache.pdfbox.util.TextStripper.file system property may be set with
+ * To further research individual failures, the org.sejda.sambox.util.TextStripper.file system property may be set with
  * the name of a single file in the "test/input" directory. In this mode, testAll() will evaluate only that file, and
  * will do so with DEBUG level logging.
  *
@@ -118,7 +118,7 @@ public class TestTextStripper extends TestCase
         // If you want to test a single file using DEBUG logging, from an IDE,
         // you can do something like this:
         //
-        // System.setProperty("org.apache.pdfbox.util.TextStripper.file", "FVS318Ref.pdf");
+        // System.setProperty("org.sejda.samboxutil.TextStripper.file", "FVS318Ref.pdf");
     }
 
     /**
@@ -318,8 +318,8 @@ public class TestTextStripper extends TestCase
                     LOG.error("FAILURE: Line mismatch for file " + inFile.getName() + " (sort = "
                             + bSort + ")" + " at expected line: " + expectedReader.getLineNumber()
                             + " at actual line: " + actualReader.getLineNumber()
-                            + "\nexpected line was: \"" + expectedLine + "\""
-                            + "\nactual line was:   \"" + actualLine + "\"" + "\n");
+                            + "\nexpected line was: \"" + expectedLine + "\" \"" + asUnicodes(expectedLine) + "\""
+                            + "\nactual line was:   \"" + actualLine + "\" \"" + asUnicodes(actualLine) + "\" \n");
 
                     // lets report all lines, even though this might produce some verbose logging
                     // break;
@@ -506,6 +506,7 @@ public class TestTextStripper extends TestCase
 
     /**
      * Process each file in the specified directory.
+     * 
      * @param inDir Input directory search for PDF files in.
      * @param outDir Output directory where the temp files will be created.
      */
@@ -542,20 +543,20 @@ public class TestTextStripper extends TestCase
         File outDirExt = new File("target/test-output-ext");
 
         if ((filename == null) || (filename.length() == 0))
-            {
+        {
             doTestDir(inDir, outDir);
             if (inDirExt.exists())
             {
                 doTestDir(inDirExt, outDirExt);
             }
-            }
+        }
         else
-            {
+        {
             // Test without sorting
             doTestFile(new File(inDir, filename), outDir, true, false);
             // Test with sorting
             doTestFile(new File(inDir, filename), outDir, true, true);
-            }
+        }
 
         if (this.bFail)
         {
@@ -582,5 +583,18 @@ public class TestTextStripper extends TestCase
     {
         String[] arg = { TestTextStripper.class.getName() };
         junit.textui.TestRunner.main(arg);
+    }
+
+    // Useful to debug weird strings
+    public static String asUnicodes(String in) {
+        if(in == null) return null;
+
+        StringBuilder result = new StringBuilder();
+        for (int offset = 0; offset < in.length(); ) {
+            int codepoint = in.codePointAt(offset);
+            result.append("\\U+").append(Integer.toHexString(codepoint).toUpperCase());
+            offset += Character.charCount(codepoint);
+        }
+        return result.toString();
     }
 }

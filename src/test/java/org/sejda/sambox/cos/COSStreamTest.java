@@ -212,6 +212,27 @@ public class COSStreamTest
         }
     }
 
+    /**
+     * Tests tests that encoding is done correctly even if the the stream is closed twice. Closeable.close() allows
+     * streams to be closed multiple times. The second and subsequent close() calls should have no effect.
+     *
+     * @throws IOException
+     */
+    @Test
+    public void testCompressedStreamDoubleClose() throws IOException
+    {
+        byte[] testString = "This is a test string to be used as input for TestCOSStream"
+                .getBytes("ASCII");
+        byte[] testStringEncoded = encodeData(testString, COSName.FLATE_DECODE);
+        COSStream stream = new COSStream();
+        OutputStream output = stream.createFilteredStream();
+        output.write(testStringEncoded);
+        stream.setItem(COSName.FILTER, COSName.FLATE_DECODE);
+        output.close();
+        output.close();
+        validateEncoded(stream, testStringEncoded);
+    }
+
     private static byte[] encodeData(byte[] original, COSName filter) throws IOException
     {
         Filter encodingFilter = FilterFactory.INSTANCE.getFilter(filter);

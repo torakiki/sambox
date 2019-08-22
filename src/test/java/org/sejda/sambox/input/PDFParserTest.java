@@ -31,6 +31,7 @@ import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.PDDocumentInformation;
 import org.sejda.sambox.rendering.PDFRenderer;
+import org.sejda.sambox.text.PDFTextStripper;
 import org.sejda.sambox.util.DateConverter;
 import org.sejda.sambox.util.SpecVersionUtils;
 
@@ -392,6 +393,19 @@ public class PDFParserTest
                 getClass().getResourceAsStream("/sambox/self_indirect_ref.pdf"))))
         {
             doc.writeTo(new DevNullWritableByteChannel());
+            doc.close();
+        }
+    }
+
+    @Test
+    public void testPDFBOX4372() throws IOException {
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/org/sejda/sambox/input/PDFBOX-4372-2DAYCLVOFG3FTVO4RMAJJL3VTPNYDFRO-p4_reduced.pdf"))))
+        {
+
+            PDFTextStripper textStripper = new PDFTextStripper();
+            textStripper.getText(doc);
+
             doc.close();
         }
     }

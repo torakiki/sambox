@@ -21,46 +21,24 @@ import java.io.IOException;
 
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.pdmodel.common.PDDictionaryWrapper;
 
 /**
- * This class is a specialized view of the crypt filter dictionary of a PDF document.
- * It contains a low level dictionary (COSDictionary) and provides the methods to
- * manage its fields.
+ * This class is a specialized view of the crypt filter dictionary of a PDF document. It contains a low level dictionary
+ * (COSDictionary) and provides the methods to manage its fields.
  *
  */
-public class PDCryptFilterDictionary
+public class PDCryptFilterDictionary extends PDDictionaryWrapper
 {
 
-    /**
-     * COS crypt filter dictionary.
-     */
-    protected COSDictionary cryptFilterDictionary = null;
-
-    /**
-     * creates a new empty crypt filter dictionary.
-     */
     public PDCryptFilterDictionary()
     {
-        cryptFilterDictionary = new COSDictionary();
+        super();
     }
 
-    /**
-     * creates a new crypt filter dictionary from the low level dictionary provided.
-     * @param d the low level dictionary that will be managed by the newly created object
-     */
-    public PDCryptFilterDictionary(COSDictionary d)
+    public PDCryptFilterDictionary(COSDictionary dictionary)
     {
-        cryptFilterDictionary = d;
-    }
-
-    /**
-     * This will get the dictionary associated with this crypt filter dictionary.
-     *
-     * @return The COS dictionary that this object wraps.
-     */
-    public COSDictionary getCOSDictionary()
-    {
-        return cryptFilterDictionary;
+        super(dictionary);
     }
 
     /**
@@ -70,23 +48,23 @@ public class PDCryptFilterDictionary
      */
     public void setLength(int length)
     {
-        cryptFilterDictionary.setInt(COSName.LENGTH, length);
+        getCOSObject().setInt(COSName.LENGTH, length);
     }
 
     /**
-     * This will return the Length entry of the crypt filter dictionary.<br /><br />
+     * This will return the Length entry of the crypt filter dictionary.<br />
+     * <br />
      * The length in <b>bits</b> for the crypt filter algorithm. This will return a multiple of 8.
      *
      * @return The length in bits for the encryption algorithm
      */
     public int getLength()
     {
-        return cryptFilterDictionary.getInt( COSName.LENGTH, 40 );
+        return getCOSObject().getInt(COSName.LENGTH, 40);
     }
 
-     /**
-     * This will set the crypt filter method. 
-     * Allowed values are: NONE, V2, AESV2, AESV3
+    /**
+     * This will set the crypt filter method. Allowed values are: NONE, V2, AESV2, AESV3
      *
      * @param cfm name of the crypt filter method.
      *
@@ -94,12 +72,11 @@ public class PDCryptFilterDictionary
      */
     public void setCryptFilterMethod(COSName cfm)
     {
-        cryptFilterDictionary.setItem( COSName.CFM, cfm );
+        getCOSObject().setItem(COSName.CFM, cfm);
     }
 
     /**
-     * This will return the crypt filter method. 
-     * Allowed values are: NONE, V2, AESV2, AESV3
+     * This will return the crypt filter method. Allowed values are: NONE, V2, AESV2, AESV3
      *
      * @return the name of the crypt filter method.
      *
@@ -107,7 +84,7 @@ public class PDCryptFilterDictionary
      */
     public COSName getCryptFilterMethod()
     {
-        return (COSName)cryptFilterDictionary.getDictionaryObject( COSName.CFM );
+        return getCOSObject().getDictionaryObject(COSName.CFM, COSName.class);
     }
 
 }

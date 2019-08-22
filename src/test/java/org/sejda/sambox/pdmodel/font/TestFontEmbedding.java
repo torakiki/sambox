@@ -20,6 +20,8 @@ package org.sejda.sambox.pdmodel.font;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSArray;
@@ -172,6 +174,47 @@ public class TestFontEmbedding extends TestCase
         // Check text extraction
         String extracted = getUnicodeText(pdf);
         assertEquals(expectedExtractedtext, extracted.replaceAll("\r", "").trim());
+    }
+
+    /**
+     * Test corner case of PDFBOX-4302.
+     *
+     * @throws java.io.IOException
+     */
+    public void testMaxEntries() throws IOException
+    {
+        File file;
+        String text;
+        text = "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん"
+                + "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン" + "１２３４５６７８";
+
+        // The test must have MAX_ENTRIES_PER_OPERATOR unique characters
+        Set<Character> set = new HashSet<>(ToUnicodeWriter.MAX_ENTRIES_PER_OPERATOR);
+        for (int i = 0; i < text.length(); ++i)
+        {
+            set.add(text.charAt(i));
+        }
+        assertEquals(ToUnicodeWriter.MAX_ENTRIES_PER_OPERATOR, set.size());
+
+        PDDocument document = new PDDocument();
+        PDPage page = new PDPage(PDRectangle.A0);
+        document.addPage(page);
+        File ipafont = new File("target/fonts/ipag00303", "ipag.ttf");
+        PDType0Font font = PDType0Font.load(document, ipafont);
+        PDPageContentStream contentStream = new PDPageContentStream(document, page);
+        contentStream.beginText();
+        contentStream.setFont(font, 20);
+        contentStream.newLineAtOffset(50, 3000);
+        contentStream.showText(text);
+        contentStream.endText();
+        contentStream.close();
+        file = new File(OUT_DIR, "PDFBOX-4302-test.pdf");
+        document.writeTo(file);
+        document.close();
+
+        // check that the extracted text matches what we wrote
+        String extracted = getUnicodeText(file);
+        assertEquals(text, extracted.trim());
     }
 
     private void validateCIDFontType2(boolean useSubset) throws Exception

@@ -17,7 +17,6 @@
 package org.sejda.sambox.pdmodel.graphics.shading;
 
 import java.awt.Color;
-import java.awt.Paint;
 import java.awt.PaintContext;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
@@ -33,12 +32,9 @@ import org.slf4j.LoggerFactory;
 /**
  * AWT PaintContext for Gouraud Triangle Mesh (Type 4) shading.
  */
-class Type4ShadingPaint implements Paint
+class Type4ShadingPaint extends ShadingPaint<PDShadingType4>
 {
     private static final Logger LOG = LoggerFactory.getLogger(Type4ShadingPaint.class);
-
-    private final PDShadingType4 shading;
-    private final Matrix matrix;
 
     /**
      * Constructor.
@@ -48,8 +44,7 @@ class Type4ShadingPaint implements Paint
      */
     Type4ShadingPaint(PDShadingType4 shading, Matrix matrix)
     {
-        this.shading = shading;
-        this.matrix = matrix;
+        super(shading, matrix);
     }
 
     @Override

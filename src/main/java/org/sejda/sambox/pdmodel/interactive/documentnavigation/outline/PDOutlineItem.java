@@ -299,7 +299,7 @@ public final class PDOutlineItem extends PDOutlineNode
     public PDStructureElement getStructureElement()
     {
         PDStructureElement se = null;
-        COSDictionary dic = (COSDictionary) getCOSObject().getDictionaryObject(COSName.SE);
+        COSDictionary dic = getCOSObject().getDictionaryObject(COSName.SE, COSDictionary.class);
         if (dic != null)
         {
             se = new PDStructureElement(dic);
@@ -324,7 +324,7 @@ public final class PDOutlineItem extends PDOutlineNode
      */
     public PDColor getTextColor()
     {
-        COSArray csValues = (COSArray) getCOSObject().getDictionaryObject(COSName.C);
+        COSArray csValues = getCOSObject().getDictionaryObject(COSName.C, COSArray.class);
         if (csValues == null)
         {
             csValues = new COSArray();

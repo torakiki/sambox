@@ -21,7 +21,6 @@ import java.util.List;
 import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.contentstream.operator.OperatorProcessor;
 import org.sejda.sambox.cos.COSBase;
-import org.sejda.sambox.text.PDFMarkedContentExtractor;
 
 /**
  * EMC : Ends a marked-content sequence begun by BMC or BDC.
@@ -33,10 +32,7 @@ public class EndMarkedContentSequence extends OperatorProcessor
     @Override
     public void process(Operator operator, List<COSBase> arguments)
     {
-        if (this.getContext() instanceof PDFMarkedContentExtractor)
-        {
-            ((PDFMarkedContentExtractor) this.getContext()).endMarkedContentSequence();
-        }
+        this.getContext().endMarkedContentSequence();
     }
 
     @Override

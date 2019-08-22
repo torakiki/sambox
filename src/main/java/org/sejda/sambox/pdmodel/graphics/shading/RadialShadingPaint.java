@@ -17,7 +17,6 @@
 package org.sejda.sambox.pdmodel.graphics.shading;
 
 import java.awt.Color;
-import java.awt.Paint;
 import java.awt.PaintContext;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
@@ -34,12 +33,9 @@ import org.slf4j.LoggerFactory;
  * AWT Paint for radial shading.
  *
  */
-public class RadialShadingPaint implements Paint
+public class RadialShadingPaint extends ShadingPaint<PDShadingType3>
 {
     private static final Logger LOG = LoggerFactory.getLogger(RadialShadingPaint.class);
-
-    private final PDShadingType3 shading;
-    private final Matrix matrix;
 
     /**
      * Constructor.
@@ -49,8 +45,7 @@ public class RadialShadingPaint implements Paint
      */
     RadialShadingPaint(PDShadingType3 shading, Matrix matrix)
     {
-        this.shading = shading;
-        this.matrix = matrix;
+        super(shading, matrix);
     }
 
     @Override
@@ -61,7 +56,7 @@ public class RadialShadingPaint implements Paint
 
     @Override
     public PaintContext createContext(ColorModel cm, Rectangle deviceBounds, Rectangle2D userBounds,
-                                      AffineTransform xform, RenderingHints hints)
+            AffineTransform xform, RenderingHints hints)
     {
         try
         {

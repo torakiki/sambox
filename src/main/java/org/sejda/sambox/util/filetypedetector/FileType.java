@@ -39,6 +39,8 @@ public enum FileType
     ICO,
     PCX,
     RIFF,
+    HEIF,
+    WEBP,
 
     /** Sony camera raw. */
     ARW,

@@ -185,6 +185,33 @@ public class PDFontTest extends TestCase
         doc.close();
     }
 
+    /**
+     * Test whether bug from PDFBOX-4318 is fixed, which had the wrong cache key.
+     * 
+     * @throws java.io.IOException
+     */
+    @Test
+    public void testPDFox4318() throws IOException
+    {
+        try
+        {
+            PDType1Font.HELVETICA_BOLD.encode("\u0080");
+            Assert.fail("should have thrown IllegalArgumentException");
+        }
+        catch (IllegalArgumentException ex)
+        {
+        }
+        PDType1Font.HELVETICA_BOLD.encode("€");
+        try
+        {
+            PDType1Font.HELVETICA_BOLD.encode("\u0080");
+            Assert.fail("should have thrown IllegalArgumentException");
+        }
+        catch (IllegalArgumentException ex)
+        {
+        }
+    }
+
     private void testPDFBox3826checkFonts(byte[] byteArray, File fontFile) throws IOException
     {
         try (PDDocument doc = PDFParser

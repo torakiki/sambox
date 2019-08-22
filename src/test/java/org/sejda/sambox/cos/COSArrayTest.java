@@ -96,4 +96,15 @@ public class COSArrayTest
         assertEquals(list.size(), 1);
         assertEquals(list.get(0), COSName.ANNOT);
     }
+
+    @Test
+    public void toFloat()
+    {
+        COSArray victim = new COSArray(COSInteger.ONE, new COSFloat(2.2f), COSName.AC);
+        float[] array = victim.toFloatArray();
+        assertEquals(array.length, 3);
+        assertEquals(1f, array[0], 0);
+        assertEquals(2.2f, array[1], 0);
+        assertEquals(0f, array[2], 0);
+    }
 }

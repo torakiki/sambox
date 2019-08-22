@@ -37,22 +37,22 @@ public final class GlyphList
     private static final Logger LOG = LoggerFactory.getLogger(GlyphList.class);
 
     // Adobe Glyph List (AGL)
-    private static final GlyphList DEFAULT = load(
-            "/org/sejda/sambox/resources/glyphlist/glyphlist.txt", 4281);
+    private static final GlyphList DEFAULT = load("glyphlist.txt", 4281);
 
     // Zapf Dingbats has its own glyph list
-    private static final GlyphList ZAPF_DINGBATS = load(
-            "/org/sejda/sambox/resources/glyphlist/zapfdingbats.txt", 201);
+    private static final GlyphList ZAPF_DINGBATS = load("zapfdingbats.txt", 201);
 
     /**
      * Loads a glyph list from disk.
      */
-    private static GlyphList load(String resource, int numberOfEntries)
+    private static GlyphList load(String filename, int numberOfEntries)
     {
 
+        String path = "/org/sejda/sambox/resources/glyphlist/";
         try
         {
-            return new GlyphList(GlyphList.class.getResourceAsStream(resource), numberOfEntries);
+            return new GlyphList(GlyphList.class.getResourceAsStream(path + filename),
+                    numberOfEntries);
         }
         catch (IOException e)
         {

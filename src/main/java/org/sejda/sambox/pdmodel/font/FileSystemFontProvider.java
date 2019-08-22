@@ -137,7 +137,7 @@ final class FileSystemFontProvider extends FontProvider
             default:
                 throw new RuntimeException("can't happen");
             }
-            if(font != null)
+            if (font != null)
             {
                 parent.cache.addFont(this, font);
             }
@@ -209,7 +209,8 @@ final class FileSystemFontProvider extends FontProvider
 
     private synchronized void initializeIfRequired()
     {
-        if(!this.initialized) {
+        if (!this.initialized)
+        {
             initialize();
             this.initialized = true;
         }
@@ -257,19 +258,26 @@ final class FileSystemFontProvider extends FontProvider
     {
         for (File file : files)
         {
-            if (file.getPath().toLowerCase().endsWith(".ttf")
-                    || file.getPath().toLowerCase().endsWith(".otf"))
+            try
             {
-                addTrueTypeFont(file);
+                if (file.getPath().toLowerCase().endsWith(".ttf")
+                        || file.getPath().toLowerCase().endsWith(".otf"))
+                {
+                    addTrueTypeFont(file);
+                }
+                else if (file.getPath().toLowerCase().endsWith(".ttc")
+                        || file.getPath().toLowerCase().endsWith(".otc"))
+                {
+                    addTrueTypeCollection(file);
+                }
+                else if (file.getPath().toLowerCase().endsWith(".pfb"))
+                {
+                    addType1Font(file);
+                }
             }
-            else if (file.getPath().toLowerCase().endsWith(".ttc")
-                    || file.getPath().toLowerCase().endsWith(".otc"))
+            catch (Exception e) // TTF parser is buggy
             {
-                addTrueTypeCollection(file);
-            }
-            else if (file.getPath().toLowerCase().endsWith(".pfb"))
-            {
-                addType1Font(file);
+                LOG.error("Unable to load font file: " + file, e);
             }
         }
     }
@@ -277,10 +285,10 @@ final class FileSystemFontProvider extends FontProvider
     private File getDiskCacheFile()
     {
         String path = System.getProperty("org.sambox.fontcache");
-        if (path == null)
+        if (path == null || !new File(path).isDirectory() || !new File(path).canWrite())
         {
             path = System.getProperty("user.home");
-            if (path == null)
+            if (path == null || !new File(path).isDirectory() || !new File(path).canWrite())
             {
                 path = System.getProperty("java.io.tmpdir");
             }
@@ -306,9 +314,9 @@ final class FileSystemFontProvider extends FontProvider
                     writer.write(FONT_CACHE_SEPARATOR);
                     if (fontInfo.cidSystemInfo != null)
                     {
-                        writer.write(
-                                fontInfo.cidSystemInfo.getRegistry() + '-' + fontInfo.cidSystemInfo.getOrdering() + '-'
-                                        + fontInfo.cidSystemInfo.getSupplement());
+                        writer.write(fontInfo.cidSystemInfo.getRegistry() + '-'
+                                + fontInfo.cidSystemInfo.getOrdering() + '-'
+                                + fontInfo.cidSystemInfo.getSupplement());
                     }
                     writer.write(FONT_CACHE_SEPARATOR);
                     if (fontInfo.usWeightClass > -1)
@@ -436,7 +444,7 @@ final class FileSystemFontProvider extends FontProvider
                     }
                     fontFile = new File(parts[9]);
 
-                    if(fontFile.exists())
+                    if (fontFile.exists())
                     {
 
                         FSFontInfo info = new FSFontInfo(fontFile, format, postScriptName,
@@ -470,8 +478,10 @@ final class FileSystemFontProvider extends FontProvider
 
     /**
      * Adds a TTC or OTC to the file cache. To reduce memory, the parsed font is not cached.
+     * 
+     * @throws IOException
      */
-    private void addTrueTypeCollection(final File ttcFile)
+    private void addTrueTypeCollection(final File ttcFile) throws IOException
     {
         try (TrueTypeCollection ttc = new TrueTypeCollection(ttcFile))
         {
@@ -484,43 +494,26 @@ final class FileSystemFontProvider extends FontProvider
                 }
             });
         }
-        catch (NullPointerException e) // TTF parser is buggy
-        {
-            LOG.error("Could not load font file: " + ttcFile, e);
-        }
-        catch (IOException e)
-        {
-            LOG.error("Could not load font file: " + ttcFile, e);
-        }
     }
 
     /**
      * Adds an OTF or TTF font to the file cache. To reduce memory, the parsed font is not cached.
+     * 
+     * @throws IOException
      */
-    private void addTrueTypeFont(File ttfFile)
+    private void addTrueTypeFont(File ttfFile) throws IOException
     {
-        try
+        if (ttfFile.getPath().endsWith(".otf"))
         {
-            if (ttfFile.getPath().endsWith(".otf"))
-            {
-                OTFParser parser = new OTFParser(false, true);
-                OpenTypeFont otf = parser.parse(ttfFile);
-                addTrueTypeFontImpl(otf, ttfFile);
-            }
-            else
-            {
-                TTFParser parser = new TTFParser(false, true);
-                TrueTypeFont ttf = parser.parse(ttfFile);
-                addTrueTypeFontImpl(ttf, ttfFile);
-            }
+            OTFParser parser = new OTFParser(false, true);
+            OpenTypeFont otf = parser.parse(ttfFile);
+            addTrueTypeFontImpl(otf, ttfFile);
         }
-        catch (NullPointerException e) // TTF parser is buggy
+        else
         {
-            LOG.error("Could not load font file: " + ttfFile, e);
-        }
-        catch (IOException e)
-        {
-            LOG.error("Could not load font file: " + ttfFile, e);
+            TTFParser parser = new TTFParser(false, true);
+            TrueTypeFont ttf = parser.parse(ttfFile);
+            addTrueTypeFontImpl(ttf, ttfFile);
         }
     }
 
@@ -626,8 +619,10 @@ final class FileSystemFontProvider extends FontProvider
 
     /**
      * Adds a Type 1 font to the file cache. To reduce memory, the parsed font is not cached.
+     * 
+     * @throws IOException
      */
-    private void addType1Font(File pfbFile)
+    private void addType1Font(File pfbFile) throws IOException
     {
         try (InputStream input = new FileInputStream(pfbFile))
         {
@@ -640,10 +635,6 @@ final class FileSystemFontProvider extends FontProvider
                 LOG.trace("PFB: '" + type1.getName() + "' / '" + type1.getFamilyName() + "' / '"
                         + type1.getWeight() + "'");
             }
-        }
-        catch (IOException e)
-        {
-            LOG.error("Could not load font file: " + pfbFile, e);
         }
     }
 

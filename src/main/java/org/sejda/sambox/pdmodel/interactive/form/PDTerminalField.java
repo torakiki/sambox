@@ -167,7 +167,7 @@ public abstract class PDTerminalField extends PDField
      * 
      * @throws IOException if the appearance couldn't be generated
      */
-    protected final void applyChange() throws IOException
+    public final void applyChange() throws IOException
     {
         constructAppearances();
         // if we supported JavaScript we would raise a field changed event here

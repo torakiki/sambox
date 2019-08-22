@@ -221,7 +221,7 @@ public class PDType1Font extends PDSimpleFont
             PDStream fontFile3 = fd.getFontFile3();
             if (fontFile3 != null)
             {
-                throw new IllegalArgumentException("Use PDType1CFont for FontFile3");
+                throw new FontFileMismatchException("Use PDType1CFont for FontFile3");
             }
 
             // or it may contain a PFB
@@ -442,7 +442,7 @@ public class PDType1Font extends PDSimpleFont
         Map<String, Integer> inverted = encoding.getNameToCodeMap();
         int code = inverted.get(name);
         bytes = new byte[] { (byte) code };
-        codeToBytesMap.put(code, bytes);
+        codeToBytesMap.put(unicode, bytes);
         return bytes;
     }
 

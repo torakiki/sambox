@@ -36,8 +36,13 @@ import org.sejda.sambox.util.Hex;
  */
 final class ToUnicodeWriter
 {
-    private final Map<Integer, String> cidToUnicode = new TreeMap<Integer, String>();
+    private final Map<Integer, String> cidToUnicode = new TreeMap<>();
     private int wMode;
+
+    /**
+     * To test corner case of PDFBOX-4302.
+     */
+    static final int MAX_ENTRIES_PER_OPERATOR = 100;
 
     /**
      * Creates a new ToUnicode CMap writer.
@@ -127,10 +132,10 @@ final class ToUnicodeWriter
             int cid = entry.getKey();
             String text = entry.getValue();
 
-            if (cid == srcPrev + 1 &&                                 // CID must be last CID + 1
-                dstPrev.codePointCount(0, dstPrev.length()) == 1 &&   // no UTF-16 surrogates
-                text.codePointAt(0) == dstPrev.codePointAt(0) + 1 &&  // dstString must be prev + 1
-                dstPrev.codePointAt(0) + 1 <= 255 - (cid - srcCode1)) // increment last byte only
+            if (cid == srcPrev + 1 && // CID must be last CID + 1
+                    dstPrev.codePointCount(0, dstPrev.length()) == 1 && // no UTF-16 surrogates
+                    text.codePointAt(0) == dstPrev.codePointAt(0) + 1 && // dstString must be prev + 1
+                    dstPrev.codePointAt(0) + 1 <= 255 - (cid - srcCode1)) // increment last byte only
             {
                 // extend range
                 srcTo.set(srcTo.size() - 1, cid);
@@ -147,15 +152,16 @@ final class ToUnicodeWriter
             dstPrev = text;
         }
 
-        // limit of 100 entries per operator
-        int batchCount = (int)Math.ceil(srcFrom.size() / 100.0);
+        // limit entries per operator
+        int batchCount = (int) Math.ceil(srcFrom.size() / (double) MAX_ENTRIES_PER_OPERATOR);
         for (int batch = 0; batch < batchCount; batch++)
         {
-            int count = batch == batchCount - 1 ? srcFrom.size() % 100 : 100;
+            int count = batch == batchCount - 1 ? srcFrom.size() - MAX_ENTRIES_PER_OPERATOR * batch
+                    : MAX_ENTRIES_PER_OPERATOR;
             writer.write(count + " beginbfrange\n");
             for (int j = 0; j < count; j++)
             {
-                int index = batch * 100 + j;
+                int index = batch * MAX_ENTRIES_PER_OPERATOR + j;
                 writer.write('<');
                 writer.write(Hex.getChars(srcFrom.get(index).shortValue()));
                 writer.write("> ");

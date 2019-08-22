@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
 class TilingPaint implements Paint
 {
     private static final Logger LOG = LoggerFactory.getLogger(TilingPaint.class);
-    private final TexturePaint paint;
+    private final Paint paint;
     private final Matrix patternMatrix;
     private static final int MAXEDGE;
     private static final String DEFAULTMAXEDGE = "3000";

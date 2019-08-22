@@ -25,7 +25,11 @@ import java.awt.image.ComponentColorModel;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
 
-import org.sejda.sambox.cos.*;
+import org.sejda.sambox.cos.COSArray;
+import org.sejda.sambox.cos.COSBase;
+import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.cos.COSObjectable;
 import org.sejda.sambox.pdmodel.MissingResourceException;
 import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.ResourceCache;
@@ -69,12 +73,18 @@ public abstract class PDColorSpace implements COSObjectable
         return create(colorSpace, resources, false);
     }
 
-    public static PDColorSpace create(COSBase colorSpace, PDResources resources, boolean wasDefault) throws IOException {
-        boolean canCache = colorSpace.hasId() && resources != null && resources.getResourceCache() != null;
-        if(canCache) {
+    public static PDColorSpace create(COSBase colorSpace, PDResources resources, boolean wasDefault)
+            throws IOException
+    {
+        boolean canCache = colorSpace.hasId() && resources != null
+                && resources.getResourceCache() != null;
+
+        if (canCache)
+        {
             ResourceCache cache = resources.getResourceCache();
             PDColorSpace existing = cache.getColorSpace(colorSpace.id().objectIdentifier);
-            if(existing != null) {
+            if (existing != null)
+            {
                 LOG.debug("Using cached color space for {}", colorSpace.id().objectIdentifier);
                 return existing;
             }
@@ -82,14 +92,32 @@ public abstract class PDColorSpace implements COSObjectable
 
         PDColorSpace result = createUncached(colorSpace, resources, wasDefault);
 
-        if(colorSpace.hasId() && resources != null) {
+        if (colorSpace.hasId() && resources != null)
+        {
             ResourceCache cache = resources.getResourceCache();
-            if(cache != null) {
-                cache.put(colorSpace.id().objectIdentifier, result);
+            if (cache != null)
+            {
+                if (isAllowedCache(result))
+                {
+                    cache.put(colorSpace.id().objectIdentifier, result);
+                }
             }
         }
 
         return result;
+    }
+
+    public static boolean isAllowedCache(PDColorSpace colorSpace)
+    {
+        if (colorSpace instanceof PDPattern)
+        {
+            // cannot cache PDPattern color spaces in a global cache, they carry page resources
+            return false;
+        }
+        else
+        {
+            return true;
+        }
     }
 
     /**
@@ -104,8 +132,8 @@ public abstract class PDColorSpace implements COSObjectable
      * @throws MissingResourceException if the color space is missing in the resources dictionary
      * @throws IOException if the color space is unknown or cannot be created.
      */
-    private static PDColorSpace createUncached(COSBase colorSpace, PDResources resources, boolean wasDefault)
-            throws IOException
+    private static PDColorSpace createUncached(COSBase colorSpace, PDResources resources,
+            boolean wasDefault) throws IOException
     {
         colorSpace = colorSpace.getCOSObject();
         if (colorSpace instanceof COSName)
@@ -206,7 +234,7 @@ public abstract class PDColorSpace implements COSObjectable
             }
             else if (name == COSName.ICCBASED)
             {
-                return new PDICCBased(array);
+                return PDICCBased.create(array, resources);
             }
             else if (name == COSName.LAB)
             {

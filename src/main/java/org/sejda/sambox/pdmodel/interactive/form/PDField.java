@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
+import static java.util.Optional.ofNullable;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -215,12 +217,8 @@ public abstract class PDField extends PDDictionaryWrapper
      */
     public PDFormFieldAdditionalActions getActions()
     {
-        COSDictionary aa = (COSDictionary) getCOSObject().getDictionaryObject(COSName.AA);
-        if (aa != null)
-        {
-            return new PDFormFieldAdditionalActions(aa);
-        }
-        return null;
+        return ofNullable(getCOSObject().getDictionaryObject(COSName.AA, COSDictionary.class))
+                .map(PDFormFieldAdditionalActions::new).orElse(null);
     }
 
     /**

@@ -31,6 +31,7 @@ import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.COSObjectable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -138,10 +139,10 @@ public class PDNumberTreeNode implements COSObjectable
      */
     public Object getValue(Integer index) throws IOException
     {
-        Map<Integer, COSObjectable> names = getNumbers();
-        if (nonNull(names))
+        Map<Integer, COSObjectable> numbers = getNumbers();
+        if (nonNull(numbers))
         {
-            return names.get(index);
+            return numbers.get(index);
         }
         Object retval = null;
         List<PDNumberTreeNode> kids = getKids();
@@ -175,13 +176,13 @@ public class PDNumberTreeNode implements COSObjectable
     public Map<Integer, COSObjectable> getNumbers() throws IOException
     {
         Map<Integer, COSObjectable> indices = null;
-        COSArray namesArray = node.getDictionaryObject(COSName.NUMS, COSArray.class);
-        if (nonNull(namesArray))
+        COSArray numbersArray = node.getDictionaryObject(COSName.NUMS, COSArray.class);
+        if (nonNull(numbersArray))
         {
             indices = new HashMap<>();
-            for (int i = 0; i < namesArray.size(); i += 2)
+            for (int i = 0; i < numbersArray.size(); i += 2)
             {
-                COSBase base = namesArray.getObject(i);
+                COSBase base = numbersArray.getObject(i);
                 if (!(base instanceof COSInteger))
                 {
                     LOG.error("page labels ignored, index {} should be a number, but is {}", i,
@@ -189,9 +190,8 @@ public class PDNumberTreeNode implements COSObjectable
                     return null;
                 }
                 COSInteger key = (COSInteger) base;
-                COSBase cosValue = namesArray.getObject(i + 1);
-                COSObjectable pdValue = convertCOSToPD(cosValue);
-                indices.put(key.intValue(), pdValue);
+                COSBase cosValue = numbersArray.getObject(i + 1);
+                indices.put(key.intValue(), cosValue == null ? null : convertCOSToPD(cosValue));
             }
             indices = Collections.unmodifiableMap(indices);
         }
@@ -251,7 +251,7 @@ public class PDNumberTreeNode implements COSObjectable
             {
                 array.add(COSInteger.get(key));
                 COSObjectable obj = numbers.get(key);
-                array.add(obj);
+                array.add(obj == null ? COSNull.NULL : obj);
             }
             Integer lower = null;
             Integer upper = null;

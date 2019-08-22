@@ -76,7 +76,7 @@ public class PDAppearanceEntry implements COSObjectable
     {
         if (!isStream())
         {
-            throw new IllegalStateException();
+            throw new IllegalStateException("Expecting a stream, but got: " + this.entry);
         }
         return new PDAppearanceStream((COSStream) entry);
     }
@@ -90,7 +90,7 @@ public class PDAppearanceEntry implements COSObjectable
     {
         if (!isSubDictionary())
         {
-            throw new IllegalStateException("Expecting a sub-dictionary (COSStream), but got: " + this.entry);
+            throw new IllegalStateException("Expecting a sub-dictionary, but got: " + this.entry);
         }
 
         COSDictionary dict = (COSDictionary) entry;

@@ -198,7 +198,7 @@ public class PDButtonTest
     }
 
     @Test
-    public void testCheckboxWithExportValuesMoreThanWidgets() throws IOException
+    public void testCheckboxWithExportValuesMoreThanWidgetsButSameExportValue() throws IOException
     {
         try (PDDocument document = PDFParser.parse(
                 SeekableSources.inMemorySeekableSourceFrom(this.getClass().getResourceAsStream(
@@ -207,20 +207,24 @@ public class PDButtonTest
 
             PDCheckBox checkbox = (PDCheckBox) document.getDocumentCatalog().getAcroForm()
                     .getField("Check Box3");
-            try
-            {
-                checkbox.check();
-                fail("Expecting exception, since this will use the first export value");
-                // TODO: fix getOnValue to return the first normal appearance value?
-            }
-            catch (IllegalArgumentException ex)
-            {
-                assertThat(ex.getMessage(), containsString(
-                        "The number of options doesn't match the number of widgets"));
-            }
 
-            checkbox.setValue("0");
+            checkbox.check();
             assertEquals(checkbox.getValue(), "0");
+        }
+    }
+
+    @Test
+    public void testMalformedCheckboxNormalAppearances() throws IOException
+    {
+        try (PDDocument document = PDFParser.parse(
+                SeekableSources.inMemorySeekableSourceFrom(this.getClass().getResourceAsStream(
+                        "/sambox/forms-malformed-checkbox-normal-appearances.pdf"))))
+        {
+
+            PDCheckBox checkbox = (PDCheckBox) document.getDocumentCatalog().getAcroForm()
+                    .getField("English IELTS");
+
+            assertEquals(checkbox.getOnValues().size(), 0);
         }
     }
 
@@ -274,7 +278,7 @@ public class PDButtonTest
     public void testAcrobatCheckBoxProperties() throws IOException
     {
         PDCheckBox checkbox = (PDCheckBox) acrobatAcroForm.getField("Checkbox");
-        assertEquals(checkbox.getValue(), "");
+        assertEquals(checkbox.getValue(), "Off");
         assertEquals(checkbox.isChecked(), false);
 
         checkbox.check();
@@ -344,7 +348,7 @@ public class PDButtonTest
     public void testAcrobatCheckBoxGroupProperties() throws IOException
     {
         PDCheckBox checkbox = (PDCheckBox) acrobatAcroForm.getField("CheckboxGroup");
-        assertEquals(checkbox.getValue(), "");
+        assertEquals(checkbox.getValue(), "Off");
         assertEquals(checkbox.isChecked(), false);
 
         checkbox.check();
@@ -528,13 +532,15 @@ public class PDButtonTest
         checkBox.check();
 
         assertTrue(checkBox.isChecked());
-        assertEquals(checkBox.getWidgets().get(0).getCOSObject().getCOSName(COSName.AS), COSName.YES);
+        assertEquals(checkBox.getWidgets().get(0).getCOSObject().getCOSName(COSName.AS),
+                COSName.YES);
 
         checkBox.unCheck();
 
         assertFalse(checkBox.isChecked());
 
-        assertEquals(checkBox.getWidgets().get(0).getCOSObject().getCOSName(COSName.AS), COSName.Off);
+        assertEquals(checkBox.getWidgets().get(0).getCOSObject().getCOSName(COSName.AS),
+                COSName.Off);
     }
 
     @After

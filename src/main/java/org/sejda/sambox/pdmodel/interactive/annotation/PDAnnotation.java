@@ -574,7 +574,7 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
      */
     public int getStructParent()
     {
-        return getCOSObject().getInt(COSName.STRUCT_PARENT, 0);
+        return getCOSObject().getInt(COSName.STRUCT_PARENT);
     }
 
     /**

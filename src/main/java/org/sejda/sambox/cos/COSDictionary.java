@@ -134,6 +134,26 @@ public class COSDictionary extends COSBase
     }
 
     /**
+     * 
+     * @param firstKey
+     * @param secondKey
+     * @param clazz
+     * @return
+     * @see #getDictionaryObject(COSName, COSName)
+     */
+    public <T extends COSBase> T getDictionaryObject(COSName firstKey, COSName secondKey,
+            Class<T> clazz)
+    {
+        return ofNullable(getDictionaryObject(firstKey, clazz)).orElseGet(() -> {
+            if (nonNull(secondKey))
+            {
+                return getDictionaryObject(secondKey, clazz);
+            }
+            return null;
+        });
+    }
+
+    /**
      * Get an object from this dictionary. If the object is a reference then it will dereference it. If the object is
      * COSNull then null will be returned.
      *
@@ -542,6 +562,23 @@ public class COSDictionary extends COSBase
     public COSName getCOSName(COSName key)
     {
         return getCOSName(key, null);
+    }
+
+    /**
+     * This is a convenience method that will get the dictionary object that is expected to be a COSArray. Null is
+     * returned if the entry does not exist in the dictionary.
+     *
+     * @param key The key to the item in the dictionary.
+     * @return The COSArray.
+     */
+    public COSArray getCOSArray(COSName key)
+    {
+        COSBase array = getDictionaryObject(key);
+        if (array instanceof COSArray)
+        {
+            return (COSArray) array;
+        }
+        return null;
     }
 
     /**
@@ -1163,9 +1200,9 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * This is a special case of getItem that takes multiple keys, it will handle the situation
-     * where multiple keys could get the same value, ie if either CS or ColorSpace is used to get
-     * the colorspace. This will get an object from this dictionary.
+     * This is a special case of getItem that takes multiple keys, it will handle the situation where multiple keys
+     * could get the same value, ie if either CS or ColorSpace is used to get the colorspace. This will get an object
+     * from this dictionary.
      *
      * @param firstKey The first key to try.
      * @param secondKey The second key to try.

@@ -499,7 +499,7 @@ final class FontMapperImpl implements FontMapper
                     {
                         return new CIDFontMapping((OpenTypeFont) font, null, true);
                     }
-                    else if(font != null)
+                    else if (font != null)
                     {
                         return new CIDFontMapping(null, font, true);
                     }
@@ -539,6 +539,14 @@ final class FontMapperImpl implements FontMapper
                 PDPanoseClassification panose = fontDescriptor.getPanose().getPanose();
                 if (panose.getFamilyKind() == info.getPanose().getFamilyKind())
                 {
+                    if (panose.getFamilyKind() == 0
+                            && (info.getPostScriptName().toLowerCase().contains("barcode")
+                                    || info.getPostScriptName().startsWith("Code"))
+                            && !probablyBarcodeFont(fontDescriptor))
+                    {
+                        // PDFBOX-4268: ignore barcode font if we aren't searching for one.
+                        continue;
+                    }
                     // serifs
                     if (panose.getSerifStyle() == info.getPanose().getSerifStyle())
                     {
@@ -601,6 +609,14 @@ final class FontMapperImpl implements FontMapper
             queue.add(match);
         }
         return queue;
+    }
+
+    private static boolean probablyBarcodeFont(PDFontDescriptor fontDescriptor)
+    {
+        String ff = ofNullable(fontDescriptor.getFontFamily()).orElse("");
+        String fn = ofNullable(fontDescriptor.getFontName()).orElse("");
+        return ff.startsWith("Code") || ff.toLowerCase().contains("barcode")
+                || fn.startsWith("Code") || fn.toLowerCase().contains("barcode");
     }
 
     /**
