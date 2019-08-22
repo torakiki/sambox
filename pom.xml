@@ -281,6 +281,11 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>3.0.0-M3</version>
+				<configuration>
+					<excludes>
+						<exclude>org/sejda/sambox/rendering/TestPDFToImage.java</exclude>
+					</excludes>
+				</configuration>
 			</plugin>
 			<!-- PDFBOX-3974: download test files from JIRA and keep them in repository 
 				cache -->
