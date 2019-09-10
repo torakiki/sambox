@@ -105,6 +105,13 @@ public class PDAppearanceEntry implements COSObjectable
             {
                 map.put(name, new PDAppearanceStream((COSStream) value));
             }
+            // form fields with NeedsAppearances = true  might have an empty dictionary here instead of a stream
+            // in order to define the field valid values for example
+            // so adding an entry without a stream
+            else
+            {
+                map.put(name, null);
+            }
         }
 
         return new COSDictionaryMap<COSName, PDAppearanceStream>(map, dict);
