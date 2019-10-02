@@ -16,9 +16,12 @@
  */
 package org.sejda.sambox.util.filetypedetector;
 
+import org.sejda.io.SeekableSource;
+import org.sejda.io.SeekableSources;
+
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
@@ -102,9 +105,14 @@ public final class FileTypeDetector
      */
     public static FileType detectFileType(File file) throws IOException
     {
+        return detectFileType(SeekableSources.seekableSourceFrom(file));
+    }
+
+    public static FileType detectFileType(SeekableSource source) throws IOException
+    {
         byte[] firstBytes = new byte[ROOT.getMaxDepth()];
 
-        try (FileInputStream fin = new FileInputStream(file))
+        try (InputStream fin = source.asNewInputStream())
         {
             fin.read(firstBytes);
         }

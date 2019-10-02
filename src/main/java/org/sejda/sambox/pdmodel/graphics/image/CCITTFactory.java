@@ -135,6 +135,15 @@ public final class CCITTFactory
         return createFromRandomAccessImpl(seekableSourceFrom(file), number);
     }
 
+    public static PDImageXObject createFromSeekableSource(SeekableSource source) throws IOException
+    {
+        return createFromRandomAccessImpl(source, 0);
+    }
+    public static PDImageXObject createFromSeekableSource(SeekableSource source, int number) throws IOException
+    {
+        return createFromRandomAccessImpl(source, number);
+    }
+
     /**
      * Creates a new CCITT Fax compressed Image XObject from a TIFF file.
      * 

@@ -36,6 +36,8 @@ import java.util.List;
 import javax.imageio.ImageIO;
 
 import org.sejda.commons.util.IOUtils;
+import org.sejda.io.SeekableSource;
+import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSName;
@@ -157,18 +159,23 @@ public final class PDImageXObject extends PDXObject implements PDImage
     public static PDImageXObject createFromFile(File file) throws IOException
     {
         requireNotNullArg(file, "Cannot create image from a null file");
+        return createFromSeekableSource(SeekableSources.seekableSourceFrom(file), file.getName());
+    }
+
+    public static PDImageXObject createFromSeekableSource(SeekableSource source, String filename) throws IOException
+    {
         // we first try to match the first bytes to some known pattern, so we don't rely on the extension first
-        FileType fileType = FileTypeDetector.detectFileType(file);
+        FileType fileType = FileTypeDetector.detectFileType(source);
 
         if (fileType.equals(FileType.JPEG))
         {
-            return JPEGFactory.createFromFile(file);
+            return JPEGFactory.createFromSeekableSource(source);
         }
         if (fileType.equals(FileType.TIFF))
         {
             try
             {
-                return CCITTFactory.createFromFile(file);
+                return CCITTFactory.createFromSeekableSource(source);
             }
             catch (IOException ex)
             {
@@ -180,22 +187,16 @@ public final class PDImageXObject extends PDXObject implements PDImage
         }
         // last resort, let's see if ImageIO can read it
         BufferedImage image;
-        try
-        {
-            image = ImageIO.read(file);
-        }
-        catch (Exception e)
-        {
-            LOG.warn(String.format("An error occurred while reading image: %s type: %s",
-                    file.getName(), fileType), e);
-            throw new UnsupportedImageFormatException(fileType, file.getName(), e);
+        try {
+            image = ImageIO.read(source.asNewInputStream());
+        } catch (Exception e) {
+            LOG.warn(String.format("An error occurred while reading image: %s type: %s", filename, fileType), e);
+            throw new UnsupportedImageFormatException(fileType, filename, e);
         }
 
-        if (image == null)
-        {
-            LOG.warn(String.format("Could not read image format: %s type: %s", file.getName(),
-                    fileType));
-            throw new UnsupportedImageFormatException(fileType, file.getName(), null);
+        if(image == null) {
+            LOG.warn(String.format("Could not read image format: %s type: %s", filename, fileType));
+            throw new UnsupportedImageFormatException(fileType, filename, null);
         }
         return LosslessFactory.createFromImage(image);
     }

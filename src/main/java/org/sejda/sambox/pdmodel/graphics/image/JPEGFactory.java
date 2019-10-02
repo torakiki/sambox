@@ -31,7 +31,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.file.Files;
 import java.util.Iterator;
 
 import javax.imageio.IIOImage;
@@ -45,6 +44,8 @@ import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
 
 import org.sejda.commons.util.IOUtils;
+import org.sejda.io.SeekableSource;
+import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceCMYK;
@@ -75,13 +76,17 @@ public final class JPEGFactory
      */
     public static PDImageXObject createFromFile(File file) throws IOException
     {
+        return createFromSeekableSource(SeekableSources.seekableSourceFrom(file));
+    }
 
+    public static PDImageXObject createFromSeekableSource(SeekableSource source) throws IOException
+    {
         // read image
-        BufferedImage awtImage = readJpegFile(file);
+        BufferedImage awtImage = readJpeg(source.asNewInputStream());
 
         // create Image XObject from stream
         PDImageXObject pdImage = new PDImageXObject(
-                new BufferedInputStream(Files.newInputStream(file.toPath())), COSName.DCT_DECODE,
+                new BufferedInputStream(source.asNewInputStream()), COSName.DCT_DECODE,
                 awtImage.getWidth(), awtImage.getHeight(),
                 awtImage.getColorModel().getComponentSize(0), getColorSpaceFromAWT(awtImage));
 

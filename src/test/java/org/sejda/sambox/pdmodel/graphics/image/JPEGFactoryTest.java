@@ -202,6 +202,20 @@ public class JPEGFactoryTest
         doWritePDF(document, ximage, testResultsDir, "jpeg-4bargb.pdf");
     }
 
+    @Test
+    public void testCreateFromSeekableSource() throws IOException
+    {
+        try (InputStream stream = JPEGFactoryTest.class.getResourceAsStream("jpeg.jpg"))
+        {
+            PDImageXObject ximage = JPEGFactory.createFromSeekableSource(SeekableSources.onTempFileSeekableSourceFrom(stream));
+            validate(ximage, 8, 344, 287, "jpg", PDDeviceRGB.INSTANCE.getName());
+
+            doWritePDF(new PDDocument(), ximage, testResultsDir, "jpegrgbstream.pdf");
+            checkJpegStream(testResultsDir, "jpegrgbstream.pdf",
+                    JPEGFactoryTest.class.getResourceAsStream("jpeg.jpg"));
+        }
+    }
+
     // check whether it is possible to extract the jpeg stream exactly
     // as it was passed to createFromStream
     private void checkJpegStream(File testResultsDir, String filename, InputStream resourceStream)
