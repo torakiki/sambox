@@ -35,7 +35,7 @@ public class AppearanceGeneratorHelperTest {
         PDRectangle content = new PDRectangle(2, 2, 517, 10);
 
         float fontSize = helper.calculateFontSize(PDType1Font.HELVETICA, content);
-        assertEquals(2.16, fontSize, 0.1);
+        assertEquals(5.40, fontSize, 0.1);
     }
 
     @Test

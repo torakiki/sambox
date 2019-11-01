@@ -88,8 +88,6 @@ public class AppearanceGeneratorHelper
      */
     private static final float DEFAULT_FONT_SIZE = 12;
 
-    private static final int MINIMUM_LINES_TO_FIT_IN_A_MULTILINE_FIELD = 5;
-
     /**
      * The default padding applied by Acrobat to the fields bbox.
      */
@@ -802,7 +800,8 @@ public class AppearanceGeneratorHelper
 
             boolean looksLikeFauxMultiline = calculateLineHeight(font,
                     DEFAULT_FONT_SIZE / FONTSCALE) > scaledContentHeight;
-            boolean userTypedMultipleLines = new PlainText(value).getParagraphs().size() > 1;
+            int userTypedLinesCount = new PlainText(value).getParagraphs().size();
+            boolean userTypedMultipleLines = userTypedLinesCount > 1;
 
             if (looksLikeFauxMultiline && !userTypedMultipleLines)
             {
@@ -815,8 +814,8 @@ public class AppearanceGeneratorHelper
             else
             {
                 // calculate a font size which fits at least x lines
-                float fontSize = scaledContentHeight
-                        / (MINIMUM_LINES_TO_FIT_IN_A_MULTILINE_FIELD * lineHeight);
+                int minimumLinesToFitInAMultilineField = Math.max(2, userTypedLinesCount);
+                float fontSize = scaledContentHeight / (minimumLinesToFitInAMultilineField * lineHeight);
                 // don't return a font size larger than the default
                 return Math.min(fontSize, DEFAULT_FONT_SIZE);
             }
