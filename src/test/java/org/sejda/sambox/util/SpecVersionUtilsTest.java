@@ -42,6 +42,12 @@ public class SpecVersionUtilsTest
     }
 
     @Test
+    public void parseHeaderStringWithoutVersion()
+    {
+        assertEquals("1.6", SpecVersionUtils.parseHeaderString("%PDF-"));
+    }
+
+    @Test
     public void parseCommaHeaderString()
     {
         assertEquals("1.7", SpecVersionUtils.parseHeaderString("%PDF-1,7"));

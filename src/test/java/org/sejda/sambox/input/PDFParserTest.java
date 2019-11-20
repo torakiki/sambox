@@ -145,11 +145,17 @@ public class PDFParserTest
         }
     }
 
-    @Test(expected = IOException.class)
-    public void trunkatedHeader() throws IOException
+    @Test
+    public void truncatedHeader() throws IOException
     {
-        PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
-                getClass().getResourceAsStream("/sambox/trunkated_header.pdf")));
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/trunkated_header.pdf"))))
+        {
+            assertNotNull(doc);
+            assertFalse(doc.isEncrypted());
+            assertTrue(doc.isOpen());
+            assertEquals(SpecVersionUtils.V1_6, doc.getVersion());
+        }
     }
 
     @Test(expected = IOException.class)
@@ -169,6 +175,19 @@ public class PDFParserTest
             assertFalse(doc.isEncrypted());
             assertTrue(doc.isOpen());
             assertEquals(SpecVersionUtils.V1_4, doc.getVersion());
+        }
+    }
+
+    @Test
+    public void noVersionNumberHeader() throws IOException
+    {
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/no_version_header.pdf"))))
+        {
+            assertNotNull(doc);
+            assertFalse(doc.isEncrypted());
+            assertTrue(doc.isOpen());
+            assertEquals(SpecVersionUtils.V1_6, doc.getVersion());
         }
     }
 

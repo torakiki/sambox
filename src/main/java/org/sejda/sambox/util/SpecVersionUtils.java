@@ -33,7 +33,6 @@ public class SpecVersionUtils
 {
     private static final Logger LOG = LoggerFactory.getLogger(SpecVersionUtils.class);
 
-    public static final int EXPECTED_HEADER_LENGTH = 8;
     public static final String PDF_HEADER = "%PDF-";
 
     public static final String V1_0 = "1.0";
@@ -63,8 +62,13 @@ public class SpecVersionUtils
      */
     public static String parseHeaderString(String header)
     {
-        String version = sanitizeVersion(
-                header.substring(EXPECTED_HEADER_LENGTH - 3, EXPECTED_HEADER_LENGTH));
+        String versionNumberPart = header.toUpperCase().replaceAll(Pattern.quote(PDF_HEADER), "").trim();
+        if(versionNumberPart.length() > 3) {
+            // expecting 'a.b'
+            // if the version is '1.41bla', take the first 3 chars
+            versionNumberPart = versionNumberPart.substring(0, 3);
+        }
+        String version = sanitizeVersion(versionNumberPart);
         if (!VERSION_PATTERN.matcher(version).matches())
         {
             // it seems Acrobat doesn't choke on invalid version but it does sometime warn the user

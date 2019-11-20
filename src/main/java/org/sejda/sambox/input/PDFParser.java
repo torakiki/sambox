@@ -18,7 +18,6 @@ package org.sejda.sambox.input;
 
 import static java.util.Objects.requireNonNull;
 import static org.sejda.commons.util.RequireUtils.requireIOCondition;
-import static org.sejda.sambox.util.SpecVersionUtils.EXPECTED_HEADER_LENGTH;
 import static org.sejda.sambox.util.SpecVersionUtils.PDF_HEADER;
 import static org.sejda.sambox.util.SpecVersionUtils.parseHeaderString;
 
@@ -177,8 +176,9 @@ public class PDFParser
 
         final String trimmedLeftHeader = header.substring(headerIndex, header.length())
                 .replaceAll("\\s", "");
-        requireIOCondition(trimmedLeftHeader.length() >= EXPECTED_HEADER_LENGTH,
-                "Unable to find expected header '%PDF-n.n'");
+
+        // some documents have the header without the version: '%PDF-'
+
         LOG.debug("Found header " + trimmedLeftHeader);
         return parseHeaderString(trimmedLeftHeader);
     }
