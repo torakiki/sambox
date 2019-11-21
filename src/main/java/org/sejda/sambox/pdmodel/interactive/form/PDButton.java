@@ -169,6 +169,14 @@ public abstract class PDButton extends PDTerminalField
         applyChange();
     }
 
+    public void setValueIgnoreExportOptions(String value) throws IOException
+    {
+        checkValue(value);
+        updateByValue(value);
+
+        applyChange();
+    }
+
     /**
      * Returns the default value, if any.
      *
