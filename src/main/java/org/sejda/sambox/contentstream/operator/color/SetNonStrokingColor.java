@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.contentstream.operator.color;
 
+import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.pdmodel.graphics.color.PDColor;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
 
@@ -28,6 +29,7 @@ public class SetNonStrokingColor extends SetColor
 {
     /**
      * Returns the non-stroking color.
+     * 
      * @return The non-stroking color.
      */
     @Override
@@ -38,6 +40,7 @@ public class SetNonStrokingColor extends SetColor
 
     /**
      * Sets the non-stroking color.
+     * 
      * @param color The new non-stroking color.
      */
     @Override
@@ -48,6 +51,7 @@ public class SetNonStrokingColor extends SetColor
 
     /**
      * Returns the non-stroking color space.
+     * 
      * @return The non-stroking color space.
      */
     @Override
@@ -59,6 +63,6 @@ public class SetNonStrokingColor extends SetColor
     @Override
     public String getName()
     {
-        return "sc";
+        return OperatorName.NON_STROKING_COLOR;
     }
 }

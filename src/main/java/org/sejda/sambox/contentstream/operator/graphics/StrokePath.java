@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.sejda.sambox.contentstream.operator.Operator;
+import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.cos.COSBase;
 
 /**
@@ -38,6 +39,6 @@ public final class StrokePath extends GraphicsOperatorProcessor
     @Override
     public String getName()
     {
-        return "S";
+        return OperatorName.STROKE_PATH;
     }
 }

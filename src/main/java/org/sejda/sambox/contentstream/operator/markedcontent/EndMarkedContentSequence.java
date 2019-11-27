@@ -19,6 +19,7 @@ package org.sejda.sambox.contentstream.operator.markedcontent;
 import java.util.List;
 
 import org.sejda.sambox.contentstream.operator.Operator;
+import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.contentstream.operator.OperatorProcessor;
 import org.sejda.sambox.cos.COSBase;
 
@@ -32,12 +33,12 @@ public class EndMarkedContentSequence extends OperatorProcessor
     @Override
     public void process(Operator operator, List<COSBase> arguments)
     {
-        this.getContext().endMarkedContentSequence();
+        getContext().endMarkedContentSequence();
     }
 
     @Override
     public String getName()
     {
-        return "EMC";
+        return OperatorName.END_MARKED_CONTENT;
     }
 }

@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.sejda.sambox.contentstream.operator.Operator;
+import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.cos.COSBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +48,6 @@ public final class ClosePath extends GraphicsOperatorProcessor
     @Override
     public String getName()
     {
-        return "h";
+        return OperatorName.CLOSE_PATH;
     }
 }

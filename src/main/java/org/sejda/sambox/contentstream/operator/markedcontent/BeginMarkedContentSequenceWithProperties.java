@@ -19,6 +19,7 @@ package org.sejda.sambox.contentstream.operator.markedcontent;
 import java.util.List;
 
 import org.sejda.sambox.contentstream.operator.Operator;
+import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.contentstream.operator.OperatorProcessor;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
@@ -47,12 +48,12 @@ public class BeginMarkedContentSequenceWithProperties extends OperatorProcessor
                 properties = (COSDictionary) argument;
             }
         }
-        this.getContext().beginMarkedContentSequence(tag, properties);
+        getContext().beginMarkedContentSequence(tag, properties);
     }
 
     @Override
     public String getName()
     {
-        return "BDC";
+        return OperatorName.BEGIN_MARKED_CONTENT_SEQ;
     }
 }

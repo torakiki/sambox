@@ -20,13 +20,13 @@ import java.io.IOException;
 import java.util.List;
 
 import org.sejda.sambox.contentstream.operator.Operator;
+import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
 
 /**
- * rg: Set the non-stroking colour space to DeviceRGB and set the colour to
- * use for non-stroking operations.
+ * rg: Set the non-stroking colour space to DeviceRGB and set the colour to use for non-stroking operations.
  *
  * @author John Hewson
  */
@@ -43,6 +43,6 @@ public class SetNonStrokingDeviceRGBColor extends SetNonStrokingColor
     @Override
     public String getName()
     {
-        return "rg";
+        return OperatorName.NON_STROKING_RGB;
     }
 }

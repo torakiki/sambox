@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.sejda.sambox.contentstream.operator.MissingOperandException;
 import org.sejda.sambox.contentstream.operator.Operator;
+import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSName;
 
@@ -34,7 +35,7 @@ public final class ShadingFill extends GraphicsOperatorProcessor
     @Override
     public void process(Operator operator, List<COSBase> operands) throws IOException
     {
-        if (operands.size() < 1)
+        if (operands.isEmpty())
         {
             throw new MissingOperandException(operator, operands);
         }
@@ -44,6 +45,6 @@ public final class ShadingFill extends GraphicsOperatorProcessor
     @Override
     public String getName()
     {
-        return "sh";
+        return OperatorName.SHADING_FILL;
     }
 }

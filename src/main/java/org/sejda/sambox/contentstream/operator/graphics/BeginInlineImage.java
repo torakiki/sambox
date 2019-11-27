@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.sejda.sambox.contentstream.operator.Operator;
+import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.pdmodel.graphics.image.PDImage;
 import org.sejda.sambox.pdmodel.graphics.image.PDInlineImage;
@@ -47,6 +48,6 @@ public final class BeginInlineImage extends GraphicsOperatorProcessor
     @Override
     public String getName()
     {
-        return "BI";
+        return OperatorName.BEGIN_INLINE_IMAGE;
     }
 }

@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.contentstream.operator.color;
 
+import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.pdmodel.graphics.color.PDColor;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
 
@@ -28,6 +29,7 @@ public class SetStrokingColor extends SetColor
 {
     /**
      * Returns the stroking color.
+     * 
      * @return The stroking color.
      */
     @Override
@@ -38,6 +40,7 @@ public class SetStrokingColor extends SetColor
 
     /**
      * Sets the stroking color.
+     * 
      * @param color The new stroking color.
      */
     @Override
@@ -48,6 +51,7 @@ public class SetStrokingColor extends SetColor
 
     /**
      * Returns the stroking color space.
+     * 
      * @return The stroking color space.
      */
     @Override
@@ -59,6 +63,6 @@ public class SetStrokingColor extends SetColor
     @Override
     public String getName()
     {
-        return "SC";
+        return OperatorName.STROKING_COLOR;
     }
 }

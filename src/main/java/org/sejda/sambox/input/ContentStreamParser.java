@@ -16,8 +16,6 @@
  */
 package org.sejda.sambox.input;
 
-import static org.sejda.sambox.contentstream.operator.Operator.BI_OPERATOR;
-import static org.sejda.sambox.contentstream.operator.Operator.ID_OPERATOR;
 import static org.sejda.sambox.util.CharUtils.ASCII_SPACE;
 import static org.sejda.sambox.util.CharUtils.isEOF;
 import static org.sejda.sambox.util.CharUtils.isEOL;
@@ -37,6 +35,7 @@ import org.sejda.io.SeekableSource;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.contentstream.PDContentStream;
 import org.sejda.sambox.contentstream.operator.Operator;
+import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
@@ -99,7 +98,7 @@ public class ContentStreamParser extends SourceReader
         if ('B' == (char) source().peek())
         {
             Operator operator = Operator.getOperator(readToken());
-            if (BI_OPERATOR.equals(operator.getName()))
+            if (OperatorName.BEGIN_INLINE_IMAGE.equals(operator.getName()))
             {
                 nextInlineImage(operator);
             }
@@ -134,7 +133,7 @@ public class ContentStreamParser extends SourceReader
     private byte[] nextImageData() throws IOException
     {
         skipSpaces();
-        skipExpected(ID_OPERATOR);
+        skipExpected(OperatorName.BEGIN_INLINE_IMAGE_DATA);
         if (!isWhitespace(source().read()))
         {
             source().back();

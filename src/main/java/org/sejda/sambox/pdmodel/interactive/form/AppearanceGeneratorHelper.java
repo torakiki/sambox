@@ -19,8 +19,8 @@ package org.sejda.sambox.pdmodel.interactive.form;
 import static java.util.Arrays.asList;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
-import static org.sejda.io.CountingWritableByteChannel.from;
 import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
+import static org.sejda.io.CountingWritableByteChannel.from;
 
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
@@ -221,24 +221,7 @@ public class AppearanceGeneratorHelper
                 }
                 else
                 {
-                    appearanceStream = new PDAppearanceStream();
-
-                    // Calculate the entries for the bounding box and the transformation matrix
-                    // settings for the appearance stream
-                    int rotation = resolveRotation(widget);
-                    Matrix matrix = Matrix.getRotateInstance(Math.toRadians(rotation), 0, 0);
-                    Point2D.Float point2D = matrix.transformPoint(rect.getWidth(),
-                            rect.getHeight());
-
-                    PDRectangle bbox = new PDRectangle(Math.abs((float) point2D.getX()),
-                            Math.abs((float) point2D.getY()));
-                    appearanceStream.setBBox(bbox);
-
-                    appearanceStream.setMatrix(calculateMatrix(bbox, rotation));
-                    appearanceStream.setFormType(1);
-
-                    appearanceStream.setResources(new PDResources());
-
+                    appearanceStream = prepareNormalAppearanceStream(widget);
                     appearanceDict.setNormalAppearance(appearanceStream);
                     // TODO support appearances other than "normal"
                 }
@@ -257,6 +240,31 @@ public class AppearanceGeneratorHelper
             // restore the field level appearance;
             defaultAppearance = acroFormAppearance;
         }
+    }
+
+    private PDAppearanceStream prepareNormalAppearanceStream(PDAnnotationWidget widget)
+    {
+        PDAppearanceStream appearanceStream = new PDAppearanceStream();
+
+        // Calculate the entries for the bounding box and the transformation matrix
+        // settings for the appearance stream
+        int rotation = resolveRotation(widget);
+        PDRectangle rect = widget.getRectangle();
+        Matrix matrix = Matrix.getRotateInstance(Math.toRadians(rotation), 0, 0);
+        Point2D.Float point2D = matrix.transformPoint(rect.getWidth(), rect.getHeight());
+
+        PDRectangle bbox = new PDRectangle(Math.abs((float) point2D.getX()),
+                Math.abs((float) point2D.getY()));
+        appearanceStream.setBBox(bbox);
+
+        AffineTransform at = calculateMatrix(bbox, rotation);
+        if (!at.isIdentity())
+        {
+            appearanceStream.setMatrix(at);
+        }
+        appearanceStream.setFormType(1);
+        appearanceStream.setResources(new PDResources());
+        return appearanceStream;
     }
 
     private PDDefaultAppearanceString getWidgetDefaultAppearanceString(PDAnnotationWidget widget)
@@ -463,13 +471,14 @@ public class AppearanceGeneratorHelper
         boolean recalculateFontSize = fontSize == 0;
 
         // always re-calculate the fontSize for text fields
-        // because sometimes the field value changes to a longer string, which won't fit the field anymore when drawn using the previous font size
+        // because sometimes the field value changes to a longer string, which won't fit the field anymore when drawn
+        // using the previous font size
         if (field instanceof PDTextField)
         {
             recalculateFontSize = true;
         }
 
-        if(recalculateFontSize)
+        if (recalculateFontSize)
         {
             fontSize = calculateFontSize(font, contentRect);
         }
@@ -815,7 +824,8 @@ public class AppearanceGeneratorHelper
             {
                 // calculate a font size which fits at least x lines
                 int minimumLinesToFitInAMultilineField = Math.max(2, userTypedLinesCount);
-                float fontSize = scaledContentHeight / (minimumLinesToFitInAMultilineField * lineHeight);
+                float fontSize = scaledContentHeight
+                        / (minimumLinesToFitInAMultilineField * lineHeight);
                 // don't return a font size larger than the default
                 return Math.min(fontSize, DEFAULT_FONT_SIZE);
             }

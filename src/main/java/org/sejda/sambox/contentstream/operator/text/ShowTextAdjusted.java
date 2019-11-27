@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.sejda.sambox.contentstream.operator.Operator;
+import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.contentstream.operator.OperatorProcessor;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
@@ -49,6 +50,6 @@ public class ShowTextAdjusted extends OperatorProcessor
     @Override
     public String getName()
     {
-        return "TJ";
+        return OperatorName.SHOW_TEXT_ADJUSTED;
     }
 }

@@ -106,46 +106,58 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
 
         // standard 14 fonts use an AFM
         afmStandard14 = Standard14Fonts.getAFM(getName()); // may be null (it usually is)
+        fontDescriptor = loadFontDescriptor();
+        toUnicodeCMap = loadUnicodeCmap();
+    }
 
-        // font descriptor
-        COSDictionary fd = (COSDictionary) dict.getDictionaryObject(COSName.FONT_DESC);
-        if (fd != null)
+    private PDFontDescriptor loadFontDescriptor()
+    {
+        COSDictionary fd = dict.getDictionaryObject(COSName.FONT_DESC, COSDictionary.class);
+        if (nonNull(fd))
         {
-            fontDescriptor = new PDFontDescriptor(fd);
+            return new PDFontDescriptor(fd);
         }
         else if (afmStandard14 != null)
         {
             // build font descriptor from the AFM
-            fontDescriptor = PDType1FontEmbedder.buildFontDescriptor(afmStandard14);
+            return PDType1FontEmbedder.buildFontDescriptor(afmStandard14);
         }
-        else
+        return null;
+    }
+
+    private CMap loadUnicodeCmap()
+    {
+        COSBase toUnicode = dict.getDictionaryObject(COSName.TO_UNICODE);
+        if (toUnicode == null)
         {
-            fontDescriptor = null;
+            return null;
         }
 
-        // ToUnicode CMap
-        COSBase toUnicode = dict.getDictionaryObject(COSName.TO_UNICODE);
-        if (toUnicode != null)
+        CMap cmap = null;
+        try
         {
-            CMap cmap = null;
-            try
+            cmap = readCMap(toUnicode);
+            if (cmap != null && !cmap.hasUnicodeMappings())
             {
-                cmap = readCMap(toUnicode);
-                if (cmap != null && !cmap.hasUnicodeMappings())
+                LOG.warn("Invalid ToUnicode CMap in font " + getName());
+                String cmapName = cmap.getName() != null ? cmap.getName() : "";
+                String ordering = cmap.getOrdering() != null ? cmap.getOrdering() : "";
+                COSBase encoding = dict.getDictionaryObject(COSName.ENCODING);
+                if (cmapName.contains("Identity") //
+                        || ordering.contains("Identity") //
+                        || COSName.IDENTITY_H.equals(encoding) //
+                        || COSName.IDENTITY_V.equals(encoding))
                 {
-                    LOG.warn("Invalid ToUnicode CMap in font " + getName());
+                    // assume that if encoding is identity, then the reverse is also true
+                    cmap = CMapManager.getPredefinedCMap(COSName.IDENTITY_H.getName());
                 }
             }
-            catch (IOException ex)
-            {
-                LOG.error("Could not read ToUnicode CMap in font " + getName(), ex);
-            }
-            toUnicodeCMap = cmap;
         }
-        else
+        catch (IOException ex)
         {
-            toUnicodeCMap = null;
+            LOG.error("Could not read ToUnicode CMap in font " + getName(), ex);
         }
+        return cmap;
     }
 
     /**
@@ -503,7 +515,7 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
                 // code->Unicode maps. See sample_fonts_solidconvertor.pdf for an example.
                 // PDFBOX-3123: do this only if the /ToUnicode entry is a name
                 // PDFBOX-4322: identity streams are OK too
-                return new String(new char[]{(char) code});
+                return new String(new char[] { (char) code });
             }
             // proceed as normal
             return toUnicodeCMap.toUnicode(code);

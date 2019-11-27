@@ -20,10 +20,11 @@ import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSObjectable;
 import org.sejda.sambox.pdmodel.graphics.optionalcontent.PDOptionalContentGroup;
+import org.sejda.sambox.pdmodel.graphics.optionalcontent.PDOptionalContentMembershipDictionary;
 
 /**
- * A property list is a dictionary containing private information meaningful to the conforming
- * writer creating the marked content.
+ * A property list is a dictionary containing private information meaningful to the conforming writer creating the
+ * marked content.
  */
 public class PDPropertyList implements COSObjectable
 {
@@ -31,6 +32,7 @@ public class PDPropertyList implements COSObjectable
 
     /**
      * Creates a property list from the given dictionary.
+     * 
      * @param dict COS dictionary
      */
     public static PDPropertyList create(COSDictionary dict)
@@ -39,11 +41,12 @@ public class PDPropertyList implements COSObjectable
         {
             return new PDOptionalContentGroup(dict);
         }
-        else
+        else if (COSName.OCMD.equals(dict.getItem(COSName.TYPE)))
         {
-            // todo: more types
-            return new PDPropertyList(dict);
+            return new PDOptionalContentMembershipDictionary(dict);
         }
+        // todo: more types
+        return new PDPropertyList(dict);
     }
 
     /**

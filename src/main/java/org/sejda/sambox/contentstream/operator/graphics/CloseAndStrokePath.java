@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.sejda.sambox.contentstream.operator.Operator;
+import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.cos.COSBase;
 
 /**
@@ -32,13 +33,13 @@ public class CloseAndStrokePath extends GraphicsOperatorProcessor
     @Override
     public void process(Operator operator, List<COSBase> arguments) throws IOException
     {
-        getContext().processOperator("h", arguments);
-        getContext().processOperator("S", arguments);
+        getContext().processOperator(OperatorName.CLOSE_PATH, arguments);
+        getContext().processOperator(OperatorName.STROKE_PATH, arguments);
     }
 
     @Override
     public String getName()
     {
-        return "s";
+        return OperatorName.CLOSE_AND_STROKE;
     }
 }

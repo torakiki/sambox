@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.sejda.sambox.contentstream.operator.MissingOperandException;
 import org.sejda.sambox.contentstream.operator.Operator;
+import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.contentstream.operator.OperatorProcessor;
 import org.sejda.sambox.cos.COSBase;
 
@@ -38,14 +39,14 @@ public class ShowTextLineAndSpace extends OperatorProcessor
         {
             throw new MissingOperandException(operator, arguments);
         }
-        getContext().processOperator("Tw", arguments.subList(0, 1));
-        getContext().processOperator("Tc", arguments.subList(1, 2));
-        getContext().processOperator("'", arguments.subList(2, 3));
+        getContext().processOperator(OperatorName.SET_WORD_SPACING, arguments.subList(0, 1));
+        getContext().processOperator(OperatorName.SET_CHAR_SPACING, arguments.subList(1, 2));
+        getContext().processOperator(OperatorName.SHOW_TEXT_LINE, arguments.subList(2, 3));
     }
 
     @Override
     public String getName()
     {
-        return "\"";
+        return OperatorName.SHOW_TEXT_LINE_AND_SPACE;
     }
 }

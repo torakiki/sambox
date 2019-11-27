@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.sejda.sambox.contentstream.operator.MissingOperandException;
 import org.sejda.sambox.contentstream.operator.Operator;
+import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.contentstream.operator.OperatorProcessor;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSNumber;
@@ -35,7 +36,7 @@ public class SetFlatness extends OperatorProcessor
     @Override
     public void process(Operator operator, List<COSBase> operands) throws MissingOperandException
     {
-        if (operands.size() < 1)
+        if (operands.isEmpty())
         {
             throw new MissingOperandException(operator, operands);
         }
@@ -50,6 +51,6 @@ public class SetFlatness extends OperatorProcessor
     @Override
     public String getName()
     {
-        return "i";
+        return OperatorName.SET_FLATNESS;
     }
 }

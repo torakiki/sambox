@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.sejda.sambox.contentstream.operator.Operator;
+import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.contentstream.operator.OperatorProcessor;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSName;
@@ -48,6 +49,6 @@ public class SetStrokingColorSpace extends OperatorProcessor
     @Override
     public String getName()
     {
-        return "CS";
+        return OperatorName.STROKING_COLORSPACE;
     }
 }

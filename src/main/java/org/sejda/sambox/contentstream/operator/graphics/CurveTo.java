@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.sejda.sambox.contentstream.operator.MissingOperandException;
 import org.sejda.sambox.contentstream.operator.Operator;
+import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSNumber;
 import org.slf4j.Logger;
@@ -72,6 +73,6 @@ public class CurveTo extends GraphicsOperatorProcessor
     @Override
     public String getName()
     {
-        return "c";
+        return OperatorName.CURVE_TO;
     }
 }

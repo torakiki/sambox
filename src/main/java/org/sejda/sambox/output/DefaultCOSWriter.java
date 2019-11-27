@@ -56,6 +56,7 @@ class DefaultCOSWriter implements COSWriter
     private static final byte SOLIDUS = 0x2F;
     private static final byte REVERSE_SOLIDUS = 0x5C;
     private static final byte NUMBER_SIGN = 0x23;
+    protected static final byte PERCENT_SIGN = 0x25;
     private static final byte LESS_THEN = 0x3C;
     private static final byte GREATER_THEN = 0x3E;
     private static final byte LEFT_PARENTHESIS = 0x28;

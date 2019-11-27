@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.sejda.sambox.contentstream.operator.MissingOperandException;
 import org.sejda.sambox.contentstream.operator.Operator;
+import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSNumber;
 
@@ -58,6 +59,6 @@ public final class MoveTo extends GraphicsOperatorProcessor
     @Override
     public String getName()
     {
-        return "m";
+        return OperatorName.MOVE_TO;
     }
 }

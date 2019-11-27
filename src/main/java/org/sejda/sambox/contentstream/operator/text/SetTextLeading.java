@@ -19,6 +19,7 @@ package org.sejda.sambox.contentstream.operator.text;
 import java.util.List;
 
 import org.sejda.sambox.contentstream.operator.Operator;
+import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.contentstream.operator.OperatorProcessor;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSNumber;
@@ -40,6 +41,6 @@ public class SetTextLeading extends OperatorProcessor
     @Override
     public String getName()
     {
-        return "TL";
+        return OperatorName.SET_TEXT_LEADING;
     }
 }

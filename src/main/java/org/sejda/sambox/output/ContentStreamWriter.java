@@ -16,18 +16,16 @@
  */
 package org.sejda.sambox.output;
 
-import static org.sejda.sambox.contentstream.operator.Operator.BI_OPERATOR;
-import static org.sejda.sambox.contentstream.operator.Operator.EI_OPERATOR;
-import static org.sejda.sambox.contentstream.operator.Operator.ID_OPERATOR;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.fontbox.util.Charsets;
 import org.sejda.io.BufferedCountingChannelWriter;
 import org.sejda.io.CountingWritableByteChannel;
 import org.sejda.sambox.contentstream.operator.Operator;
+import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
@@ -111,10 +109,17 @@ public class ContentStreamWriter extends DefaultCOSWriter
         writer().write(SPACE);
     }
 
+    public void writeComment(String comment) throws IOException
+    {
+        writer().write(PERCENT_SIGN);
+        writeContent(comment.getBytes(Charsets.US_ASCII));
+        writeEOL();
+    }
+
     private void writeOperator(Operator token) throws IOException
     {
         writer().write(token.getName().getBytes(StandardCharsets.ISO_8859_1));
-        if (token.getName().equals(BI_OPERATOR))
+        if (token.getName().equals(OperatorName.BEGIN_INLINE_IMAGE))
         {
             writeEOL();
             COSDictionary imageParams = Optional.ofNullable(token.getImageParameters())
@@ -124,16 +129,18 @@ public class ContentStreamWriter extends DefaultCOSWriter
                 key.accept(this);
                 writeSpace();
                 COSBase imageParamsDictionaryObject = imageParams.getDictionaryObject(key);
-                if(imageParamsDictionaryObject != null) {
+                if (imageParamsDictionaryObject != null)
+                {
                     imageParamsDictionaryObject.accept(this);
                 }
                 writeEOL();
             }
-            writer().write(ID_OPERATOR.getBytes(StandardCharsets.US_ASCII));
+            writer().write(
+                    OperatorName.BEGIN_INLINE_IMAGE_DATA.getBytes(StandardCharsets.US_ASCII));
             writeEOL();
             writer().write(token.getImageData());
             writeEOL();
-            writer().write(EI_OPERATOR.getBytes(StandardCharsets.US_ASCII));
+            writer().write(OperatorName.END_INLINE_IMAGE.getBytes(StandardCharsets.US_ASCII));
         }
         writeEOL();
     }

@@ -19,14 +19,13 @@ package org.sejda.sambox.pdmodel.graphics;
 import java.util.Arrays;
 
 import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSArrayList;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSObjectable;
 
 /**
- * A line dash pattern for stroking paths.
- * Instances of PDLineDashPattern are immutable.
+ * A line dash pattern for stroking paths. Instances of PDLineDashPattern are immutable.
+ * 
  * @author Ben Litchfield
  * @author John Hewson
  */
@@ -40,12 +39,13 @@ public final class PDLineDashPattern implements COSObjectable
      */
     public PDLineDashPattern()
     {
-        array = new float[] { };
+        array = new float[] {};
         phase = 0;
     }
 
     /**
      * Creates a new line dash pattern from a dash array and phase.
+     * 
      * @param array the dash array
      * @param phase the phase
      */
@@ -59,14 +59,16 @@ public final class PDLineDashPattern implements COSObjectable
     public COSBase getCOSObject()
     {
         COSArray cos = new COSArray();
-        cos.add(COSArrayList.converterToCOSArray(Arrays.asList(array)));
+        COSArray patternArray = new COSArray();
+        patternArray.setFloatArray(array);
+        cos.add(patternArray);
         cos.add(COSInteger.get(phase));
         return cos;
     }
 
     /**
-     * Returns the dash phase.
-     * This specifies the distance into the dash pattern at which to start the dash.
+     * Returns the dash phase. This specifies the distance into the dash pattern at which to start the dash.
+     * 
      * @return the dash phase
      */
     public int getPhase()
@@ -76,10 +78,17 @@ public final class PDLineDashPattern implements COSObjectable
 
     /**
      * Returns the dash array.
+     * 
      * @return the dash array
      */
     public float[] getDashArray()
     {
         return array.clone();
+    }
+
+    @Override
+    public String toString()
+    {
+        return "PDLineDashPattern{array=" + Arrays.toString(array) + ", phase=" + phase + "}";
     }
 }

@@ -19,6 +19,7 @@ package org.sejda.sambox.contentstream.operator.state;
 import java.util.List;
 
 import org.sejda.sambox.contentstream.operator.Operator;
+import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.contentstream.operator.OperatorProcessor;
 import org.sejda.sambox.cos.COSBase;
 
@@ -38,6 +39,6 @@ public class Save extends OperatorProcessor
     @Override
     public String getName()
     {
-        return "q";
+        return OperatorName.SAVE;
     }
 }

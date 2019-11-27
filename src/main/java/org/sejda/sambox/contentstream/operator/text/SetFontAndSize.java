@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.sejda.sambox.contentstream.operator.MissingOperandException;
 import org.sejda.sambox.contentstream.operator.Operator;
+import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.contentstream.operator.OperatorProcessor;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSName;
@@ -63,6 +64,6 @@ public class SetFontAndSize extends OperatorProcessor
     @Override
     public String getName()
     {
-        return "Tf";
+        return OperatorName.SET_FONT_AND_SIZE;
     }
 }

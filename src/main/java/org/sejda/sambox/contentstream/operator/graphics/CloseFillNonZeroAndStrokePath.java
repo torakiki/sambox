@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.sejda.sambox.contentstream.operator.Operator;
+import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.cos.COSBase;
 
 /**
@@ -32,13 +33,13 @@ public final class CloseFillNonZeroAndStrokePath extends GraphicsOperatorProcess
     @Override
     public void process(Operator operator, List<COSBase> operands) throws IOException
     {
-        getContext().processOperator("h", operands); // ClosePath
-        getContext().processOperator("B", operands); // FillNonZeroAndStroke
+        getContext().processOperator(OperatorName.CLOSE_PATH, operands);
+        getContext().processOperator(OperatorName.FILL_NON_ZERO_AND_STROKE, operands);
     }
 
     @Override
     public String getName()
     {
-        return "b";
+        return OperatorName.CLOSE_FILL_NON_ZERO_AND_STROKE;
     }
 }

@@ -31,6 +31,7 @@ import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.pdmodel.PDResources;
+import org.sejda.sambox.pdmodel.ResourceCache;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.font.encoding.DictionaryEncoding;
 import org.sejda.sambox.pdmodel.font.encoding.Encoding;
@@ -53,10 +54,17 @@ public class PDType3Font extends PDSimpleFont
     private COSDictionary charProcs;
     private Matrix fontMatrix;
     private BoundingBox fontBBox;
+    private final ResourceCache resourceCache;
 
     public PDType3Font(COSDictionary fontDictionary) throws IOException
     {
+        this(fontDictionary, null);
+    }
+
+    public PDType3Font(COSDictionary fontDictionary, ResourceCache resourceCache) throws IOException
+    {
         super(fontDictionary);
+        this.resourceCache = resourceCache;
         readEncoding();
     }
 
@@ -147,8 +155,8 @@ public class PDType3Font extends PDSimpleFont
     public float getWidthFromFont(int code) throws IOException
     {
         PDType3CharProc charProc = getCharProc(code);
-        if (charProc == null || charProc.getContentStream() == null ||
-                charProc.getContentStream().getLength() == 0)
+        if (charProc == null || charProc.getContentStream() == null
+                || charProc.getContentStream().getLength() == 0)
         {
             return 0;
         }
@@ -247,7 +255,7 @@ public class PDType3Font extends PDSimpleFont
                     COSDictionary.class);
             if (resourcesDict != null)
             {
-                this.resources = new PDResources(resourcesDict);
+                this.resources = new PDResources(resourcesDict, resourceCache);
             }
         }
         return resources;

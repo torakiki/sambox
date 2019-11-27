@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.sejda.sambox.contentstream.operator.Operator;
+import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.cos.COSBase;
 
 /**
@@ -39,6 +40,6 @@ public final class ClipEvenOddRule extends GraphicsOperatorProcessor
     @Override
     public String getName()
     {
-        return "W*";
+        return OperatorName.CLIP_EVEN_ODD;
     }
 }

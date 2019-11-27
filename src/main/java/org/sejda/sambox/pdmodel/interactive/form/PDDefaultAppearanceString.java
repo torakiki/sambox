@@ -92,7 +92,8 @@ class PDDefaultAppearanceString
         processAppearanceStringOperators(defaultAppearance.getBytes());
     }
 
-    PDDefaultAppearanceString() throws IOException {
+    PDDefaultAppearanceString() throws IOException
+    {
         this(null, null);
     }
 
@@ -314,7 +315,7 @@ class PDDefaultAppearanceString
             fontSize = zeroFontSize;
         }
 
-        if(getFont() != null)
+        if (getFont() != null)
         {
             contents.setFont(getFont(), fontSize);
         }
@@ -339,7 +340,7 @@ class PDDefaultAppearanceString
             appearanceStream.setResources(streamResources);
         }
 
-        if (streamResources.getFont(getFontName()) == null)
+        if (streamResources.getFont(fontName) == null)
         {
             streamResources.put(fontName, getFont());
         }

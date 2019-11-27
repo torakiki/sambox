@@ -26,7 +26,6 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Shape;
-import java.awt.Stroke;
 import java.awt.TexturePaint;
 import java.awt.Transparency;
 import java.awt.color.ColorSpace;
@@ -58,7 +57,6 @@ import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.cos.COSNumber;
 import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.common.function.PDFunction;
@@ -70,6 +68,7 @@ import org.sejda.sambox.pdmodel.font.PDTrueTypeFont;
 import org.sejda.sambox.pdmodel.font.PDType0Font;
 import org.sejda.sambox.pdmodel.font.PDType1CFont;
 import org.sejda.sambox.pdmodel.font.PDType1Font;
+import org.sejda.sambox.pdmodel.font.PDType3Font;
 import org.sejda.sambox.pdmodel.graphics.PDLineDashPattern;
 import org.sejda.sambox.pdmodel.graphics.PDXObject;
 import org.sejda.sambox.pdmodel.graphics.blend.BlendMode;
@@ -83,6 +82,7 @@ import org.sejda.sambox.pdmodel.graphics.form.PDTransparencyGroup;
 import org.sejda.sambox.pdmodel.graphics.image.PDImage;
 import org.sejda.sambox.pdmodel.graphics.optionalcontent.PDOptionalContentGroup;
 import org.sejda.sambox.pdmodel.graphics.optionalcontent.PDOptionalContentGroup.RenderState;
+import org.sejda.sambox.pdmodel.graphics.optionalcontent.PDOptionalContentMembershipDictionary;
 import org.sejda.sambox.pdmodel.graphics.pattern.PDAbstractPattern;
 import org.sejda.sambox.pdmodel.graphics.pattern.PDShadingPattern;
 import org.sejda.sambox.pdmodel.graphics.pattern.PDTilingPattern;
@@ -93,10 +93,8 @@ import org.sejda.sambox.pdmodel.graphics.state.PDSoftMask;
 import org.sejda.sambox.pdmodel.graphics.state.RenderingMode;
 import org.sejda.sambox.pdmodel.interactive.annotation.AnnotationFilter;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotation;
-import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationLink;
-import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationMarkup;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationUnknown;
-import org.sejda.sambox.pdmodel.interactive.annotation.PDBorderStyleDictionary;
+import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceDictionary;
 import org.sejda.sambox.util.Matrix;
 import org.sejda.sambox.util.Vector;
 import org.slf4j.Logger;
@@ -500,6 +498,18 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         }
     }
 
+    @Override
+    protected void showType3Glyph(Matrix textRenderingMatrix, PDType3Font font, int code,
+            String unicode, Vector displacement) throws IOException
+    {
+        PDGraphicsState state = getGraphicsState();
+        RenderingMode renderingMode = state.getTextState().getRenderingMode();
+        if (!RenderingMode.NEITHER.equals(renderingMode))
+        {
+            super.showType3Glyph(textRenderingMatrix, font, code, unicode, displacement);
+        }
+    }
+
     /**
      * Provide a Glyph2D for the given font.
      * 
@@ -591,7 +601,8 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         if (COSName.LUMINOSITY.equals(softMask.getSubType()))
         {
             COSArray backdropColorArray = softMask.getBackdropColor();
-            PDColorSpace colorSpace = softMask.getGroup().getGroup().getColorSpace();
+            PDTransparencyGroup form = softMask.getGroup();
+            PDColorSpace colorSpace = form.getGroup().getColorSpace(form.getResources());
             if (colorSpace != null && backdropColorArray != null)
             {
                 backdropColor = new PDColor(backdropColorArray, colorSpace);
@@ -720,8 +731,10 @@ public class PageDrawer extends PDFGraphicsStreamEngine
                 }
             }
         }
-        return new BasicStroke(lineWidth, state.getLineCap(), state.getLineJoin(),
-                state.getMiterLimit(), dashArray, phaseStart);
+        int lineCap = Math.min(2, Math.max(0, state.getLineCap()));
+        int lineJoin = Math.min(2, Math.max(0, state.getLineJoin()));
+        return new BasicStroke(lineWidth, lineCap, lineJoin, state.getMiterLimit(), dashArray,
+                phaseStart);
     }
 
     private float[] getDashArray(PDLineDashPattern dashPattern)
@@ -1280,176 +1293,28 @@ public class PageDrawer extends PDFGraphicsStreamEngine
             return;
         }
 
-        super.showAnnotation(annotation);
-
-        if (annotation.getAppearance() == null)
+        PDAppearanceDictionary appearance = annotation.getAppearance();
+        if (appearance == null || appearance.getNormalAppearance() == null)
         {
-            if (annotation instanceof PDAnnotationLink)
-            {
-                drawAnnotationLinkBorder((PDAnnotationLink) annotation);
-            }
-
-            if (annotation instanceof PDAnnotationMarkup
-                    && annotation.getSubtype().equals(PDAnnotationMarkup.SUB_TYPE_INK))
-            {
-                drawAnnotationInk((PDAnnotationMarkup) annotation);
-            }
+            // TODO: Improve memory consumption by passing a ScratchFile
+            annotation.constructAppearances();
         }
-    }
 
-    private static class AnnotationBorder
-    {
-        private float[] dashArray = null;
-        private boolean underline = false;
-        private float width = 0;
-        private PDColor color;
-    }
-
-    // return border info. BorderStyle must be provided as parameter because
-    // method is not available in the base class
-    private AnnotationBorder getAnnotationBorder(PDAnnotation annotation,
-            PDBorderStyleDictionary borderStyle)
-    {
-        AnnotationBorder ab = new AnnotationBorder();
-        COSArray border = annotation.getBorder();
-        if (borderStyle == null)
+        if (annotation.isNoRotate() && getCurrentPage().getRotation() != 0)
         {
-            if (border.getObject(2) instanceof COSNumber)
-            {
-                ab.width = ((COSNumber) border.getObject(2)).floatValue();
-            }
-            if (border.size() > 3)
-            {
-                COSBase base3 = border.getObject(3);
-                if (base3 instanceof COSArray)
-                {
-                    ab.dashArray = ((COSArray) base3).toFloatArray();
-                }
-            }
+            PDRectangle rect = annotation.getRectangle();
+            AffineTransform savedTransform = graphics.getTransform();
+            // "The upper-left corner of the annotation remains at the same point in
+            // default user space; the annotation pivots around that point."
+            graphics.rotate(Math.toRadians(getCurrentPage().getRotation()), rect.getLowerLeftX(),
+                    rect.getUpperRightY());
+            super.showAnnotation(annotation);
+            graphics.setTransform(savedTransform);
         }
         else
         {
-            ab.width = borderStyle.getWidth();
-            if (borderStyle.getStyle().equals(PDBorderStyleDictionary.STYLE_DASHED))
-            {
-                ab.dashArray = borderStyle.getDashStyle().getDashArray();
-            }
-            if (borderStyle.getStyle().equals(PDBorderStyleDictionary.STYLE_UNDERLINE))
-            {
-                ab.underline = true;
-            }
+            super.showAnnotation(annotation);
         }
-        ab.color = annotation.getColor();
-        if (ab.color == null)
-        {
-            // spec is unclear, but black seems to be the right thing to do
-            ab.color = new PDColor(new float[] { 0 }, PDDeviceGray.INSTANCE);
-        }
-        if (ab.dashArray != null)
-        {
-            boolean allZero = true;
-            for (float f : ab.dashArray)
-            {
-                if (f != 0)
-                {
-                    allZero = false;
-                    break;
-                }
-            }
-            if (allZero)
-            {
-                ab.dashArray = null;
-            }
-        }
-        return ab;
-    }
-
-    private void drawAnnotationLinkBorder(PDAnnotationLink link) throws IOException
-    {
-        AnnotationBorder ab = getAnnotationBorder(link, link.getBorderStyle());
-        if (ab.width == 0 || ab.color.getComponents().length == 0)
-        {
-            return;
-        }
-        PDRectangle rectangle = link.getRectangle();
-        Stroke oldStroke = graphics.getStroke();
-        graphics.setPaint(getPaint(ab.color));
-        BasicStroke stroke = new BasicStroke(ab.width, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER,
-                10, ab.dashArray, 0);
-        graphics.setStroke(stroke);
-        graphics.setClip(null);
-        if (ab.underline)
-        {
-            graphics.drawLine((int) rectangle.getLowerLeftX(), (int) rectangle.getLowerLeftY(),
-                    (int) (rectangle.getLowerLeftX() + rectangle.getWidth()),
-                    (int) rectangle.getLowerLeftY());
-        }
-        else
-        {
-            graphics.drawRect((int) rectangle.getLowerLeftX(), (int) rectangle.getLowerLeftY(),
-                    (int) rectangle.getWidth(), (int) rectangle.getHeight());
-        }
-        graphics.setStroke(oldStroke);
-    }
-
-    private void drawAnnotationInk(PDAnnotationMarkup inkAnnotation) throws IOException
-    {
-        if (!inkAnnotation.getCOSObject().containsKey(COSName.INKLIST))
-        {
-            return;
-        }
-        // TODO there should be an InkAnnotation class with a getInkList method
-        COSBase base = inkAnnotation.getCOSObject().getDictionaryObject(COSName.INKLIST);
-        if (!(base instanceof COSArray))
-        {
-            return;
-        }
-        // PDF spec does not mention /Border for ink annotations, but it is used if /BS is not available
-        AnnotationBorder ab = getAnnotationBorder(inkAnnotation, inkAnnotation.getBorderStyle());
-        if (ab.width == 0 || ab.color.getComponents().length == 0)
-        {
-            return;
-        }
-        graphics.setPaint(getPaint(ab.color));
-        Stroke oldStroke = graphics.getStroke();
-        BasicStroke stroke = new BasicStroke(ab.width, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER,
-                10, ab.dashArray, 0);
-        graphics.setStroke(stroke);
-        graphics.setClip(null);
-        COSArray pathsArray = (COSArray) base;
-        for (COSBase baseElement : pathsArray.toList())
-        {
-            if (!(baseElement instanceof COSArray))
-            {
-                continue;
-            }
-            COSArray pathArray = (COSArray) baseElement;
-            int nPoints = pathArray.size() / 2;
-
-            // "When drawn, the points shall be connected by straight lines or curves
-            // in an implementation-dependent way" - we do lines.
-            GeneralPath path = new GeneralPath();
-            for (int i = 0; i < nPoints; ++i)
-            {
-                COSBase bx = pathArray.getObject(i * 2);
-                COSBase by = pathArray.getObject(i * 2 + 1);
-                if (bx instanceof COSNumber && by instanceof COSNumber)
-                {
-                    float x = ((COSNumber) bx).floatValue();
-                    float y = ((COSNumber) by).floatValue();
-                    if (i == 0)
-                    {
-                        path.moveTo(x, y);
-                    }
-                    else
-                    {
-                        path.lineTo(x, y);
-                    }
-                }
-            }
-            graphics.draw(path);
-        }
-        graphics.setStroke(oldStroke);
     }
 
     /**
@@ -1609,7 +1474,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
             height = maxY - minY;
 
             // FIXME - color space
-            if (isGray(form.getGroup().getColorSpace()))
+            if (isGray(form.getGroup().getColorSpace(form.getResources())))
             {
                 image = create2ByteGrayAlphaImage(width, height);
             }
@@ -1896,7 +1761,68 @@ public class PageDrawer extends PDFGraphicsStreamEngine
                 return true;
             }
         }
+        else if (propertyList instanceof PDOptionalContentMembershipDictionary)
+        {
+            return isHiddenOCMD((PDOptionalContentMembershipDictionary) propertyList);
+        }
         return false;
+    }
+
+    private boolean isHiddenOCMD(PDOptionalContentMembershipDictionary ocmd)
+    {
+        if (ocmd.getCOSObject().getCOSArray(COSName.VE) != null)
+        {
+            // support seems to be optional, and is approximated by /P and /OCGS
+            LOG.info("/VE entry ignored in Optional Content Membership Dictionary");
+        }
+        List<Boolean> visibles = new ArrayList<>();
+        for (PDPropertyList prop : ocmd.getOCGs())
+        {
+            visibles.add(!isHiddenOCG(prop));
+        }
+        COSName visibilityPolicy = ocmd.getVisibilityPolicy();
+        if (COSName.ANY_OFF.equals(visibilityPolicy))
+        {
+            for (boolean visible : visibles)
+            {
+                if (!visible)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        if (COSName.ALL_ON.equals(visibilityPolicy))
+        {
+            for (boolean visible : visibles)
+            {
+                if (!visible)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        if (COSName.ALL_OFF.equals(visibilityPolicy))
+        {
+            for (boolean visible : visibles)
+            {
+                if (visible)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+        // AnyOn is default
+        for (boolean visible : visibles)
+        {
+            if (visible)
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static int getJavaVersion()

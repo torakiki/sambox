@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.sejda.sambox.contentstream.operator.Operator;
+import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.cos.COSBase;
 
 /**
@@ -38,6 +39,6 @@ public final class FillEvenOddAndStrokePath extends GraphicsOperatorProcessor
     @Override
     public String getName()
     {
-        return "B*";
+        return OperatorName.FILL_EVEN_ODD_AND_STROKE;
     }
 }

@@ -21,6 +21,7 @@ import java.io.IOException;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.common.PDDictionaryWrapper;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
 
@@ -47,20 +48,25 @@ public final class PDTransparencyGroupAttributes extends PDDictionaryWrapper
         super(dictionary);
     }
 
+    public PDColorSpace getColorSpace() throws IOException
+    {
+        return getColorSpace(null);
+    }
+
     /**
      * Returns the group color space or null if it isn't defined.
      * 
      * @return the group color space.
      * @throws IOException
      */
-    public PDColorSpace getColorSpace() throws IOException
+    public PDColorSpace getColorSpace(PDResources resources) throws IOException
     {
         if (colorSpace == null && getCOSObject().containsKey(COSName.CS))
         {
             COSBase dictionaryObject = getCOSObject().getDictionaryObject(COSName.CS);
-            if(dictionaryObject != null)
+            if (dictionaryObject != null)
             {
-                colorSpace = PDColorSpace.create(dictionaryObject);
+                colorSpace = PDColorSpace.create(dictionaryObject, resources);
             }
         }
         return colorSpace;

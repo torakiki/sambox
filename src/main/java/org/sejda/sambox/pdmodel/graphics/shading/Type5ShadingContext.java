@@ -76,8 +76,8 @@ class Type5ShadingContext extends GouraudShadingContext
         }
         PDRange rangeX = latticeTriangleShadingType.getDecodeForParameter(0);
         PDRange rangeY = latticeTriangleShadingType.getDecodeForParameter(1);
-        if (Float.compare(rangeX.getMin(), rangeX.getMax()) == 0 ||
-                Float.compare(rangeY.getMin(), rangeY.getMax()) == 0)
+        if (Float.compare(rangeX.getMin(), rangeX.getMax()) == 0
+                || Float.compare(rangeY.getMin(), rangeY.getMax()) == 0)
         {
             return Collections.emptyList();
         }
@@ -111,9 +111,9 @@ class Type5ShadingContext extends GouraudShadingContext
                 }
             }
         }
-        int sz = vlist.size(), rowNum = sz / numPerRow;
+        int rowNum = vlist.size() / numPerRow;
         Vertex[][] latticeArray = new Vertex[rowNum][numPerRow];
-        List<ShadedTriangle> list = new ArrayList<ShadedTriangle>();
+        List<ShadedTriangle> list = new ArrayList<>();
         if (rowNum < 2)
         {
             // must have at least two rows; if not, return empty list

@@ -46,12 +46,16 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName AF = newCommonInstance("AF");
     public static final COSName AFTER = newCommonInstance("After");
     public static final COSName AIS = newCommonInstance("AIS");
+    public static final COSName ALL_OFF = newCommonInstance("AllOff");
+    public static final COSName ALL_ON = newCommonInstance("AllOn");
     public static final COSName ALT = newCommonInstance("Alt");
     public static final COSName ALPHA = newCommonInstance("Alpha");
     public static final COSName ALTERNATE = newCommonInstance("Alternate");
     public static final COSName ANNOT = newCommonInstance("Annot");
     public static final COSName ANNOTS = newCommonInstance("Annots");
     public static final COSName ANTI_ALIAS = newCommonInstance("AntiAlias");
+    public static final COSName ANY_OFF = newCommonInstance("AnyOff");
+    public static final COSName ANY_ON = newCommonInstance("AnyOn");
     public static final COSName AP = newCommonInstance("AP");
     public static final COSName AP_REF = newCommonInstance("APRef");
     public static final COSName APP = newCommonInstance("App");
@@ -372,6 +376,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName OC = newCommonInstance("OC");
     public static final COSName OCG = newCommonInstance("OCG");
     public static final COSName OCGS = newCommonInstance("OCGs");
+    public static final COSName OCMD = newCommonInstance("OCMD");
     public static final COSName OCPROPERTIES = newCommonInstance("OCProperties");
     public static final COSName OE = newCommonInstance("OE");
     public static final COSName OFF = newCommonInstance("OFF");
@@ -406,6 +411,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName PARENT = newCommonInstance("Parent");
     public static final COSName PARENT_TREE = newCommonInstance("ParentTree");
     public static final COSName PARENT_TREE_NEXT_KEY = newCommonInstance("ParentTreeNextKey");
+    public static final COSName PATH = newCommonInstance("Path");
     public static final COSName PATTERN = newCommonInstance("Pattern");
     public static final COSName PATTERN_TYPE = newCommonInstance("PatternType");
     public static final COSName PDF_DOC_ENCODING = newCommonInstance("PDFDocEncoding");
@@ -532,6 +538,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     // V
     public static final COSName V = newCommonInstance("V");
     public static final COSName V2 = newCommonInstance("V2");
+    public static final COSName VE = newCommonInstance("VE");
     public static final COSName VERISIGN_PPKVS = newCommonInstance("VeriSign.PPKVS");
     public static final COSName VERSION = newCommonInstance("Version");
     public static final COSName VERTICES = newCommonInstance("Vertices");

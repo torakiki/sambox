@@ -17,6 +17,8 @@
 
 package org.sejda.sambox.contentstream.operator.graphics;
 
+import org.sejda.sambox.contentstream.operator.OperatorName;
+
 /**
  * F Fill path using non zero winding rule. Included only for compatibility with Acrobat.
  *
@@ -27,6 +29,6 @@ public final class LegacyFillNonZeroRule extends FillNonZeroRule
     @Override
     public String getName()
     {
-        return "F";
+        return OperatorName.LEGACY_FILL_NON_ZERO;
     }
 }

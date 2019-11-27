@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.sejda.sambox.contentstream.operator.Operator;
+import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.cos.COSBase;
 
 /**
@@ -39,6 +40,6 @@ public class FillNonZeroRule extends GraphicsOperatorProcessor
     @Override
     public String getName()
     {
-        return "f";
+        return OperatorName.FILL_NON_ZERO;
     }
 }

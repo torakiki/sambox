@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.sejda.sambox.contentstream.operator.Operator;
+import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
@@ -32,13 +33,13 @@ import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
 public class SetStrokingDeviceRGBColor extends SetStrokingColor
 {
     /**
-     * RG Set the stroking colour space to DeviceRGB and set the colour to
-     * use for stroking operations.
+     * RG Set the stroking colour space to DeviceRGB and set the colour to use for stroking operations.
      *
      * @param operator The operator that is being executed.
      * @param arguments List
      * @throws IOException If the color space cannot be read.
      */
+    @Override
     public void process(Operator operator, List<COSBase> arguments) throws IOException
     {
         PDColorSpace cs = getContext().getResources().getColorSpace(COSName.DEVICERGB);
@@ -49,6 +50,6 @@ public class SetStrokingDeviceRGBColor extends SetStrokingColor
     @Override
     public String getName()
     {
-        return "RG";
+        return OperatorName.STROKING_COLOR_RGB;
     }
 }

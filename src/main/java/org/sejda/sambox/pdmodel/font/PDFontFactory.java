@@ -21,11 +21,13 @@ import java.io.IOException;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.pdmodel.ResourceCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Creates the appropriate font subtype based on information in the dictionary.
+ * 
  * @author Ben Litchfield
  */
 public final class PDFontFactory
@@ -44,6 +46,20 @@ public final class PDFontFactory
      * @throws IOException if something goes wrong
      */
     public static PDFont createFont(COSDictionary dictionary) throws IOException
+    {
+        return createFont(dictionary, null);
+    }
+
+    /**
+     * Creates a new PDFont instance with the appropriate subclass.
+     *
+     * @param dictionary a font dictionary
+     * @param resourceCache resource cache, only useful for type 3 fonts, can be null
+     * @return a PDFont instance, based on the SubType entry of the dictionary
+     * @throws IOException if something goes wrong
+     */
+    public static PDFont createFont(COSDictionary dictionary, ResourceCache resourceCache)
+            throws IOException
     {
         COSName type = dictionary.getCOSName(COSName.TYPE, COSName.FONT);
         if (!COSName.FONT.equals(type))
@@ -76,7 +92,7 @@ public final class PDFontFactory
         }
         else if (COSName.TYPE3.equals(subType))
         {
-            return new PDType3Font(dictionary);
+            return new PDType3Font(dictionary, resourceCache);
         }
         else if (COSName.TYPE0.equals(subType))
         {
@@ -120,7 +136,8 @@ public final class PDFontFactory
         COSName type = dictionary.getCOSName(COSName.TYPE, COSName.FONT);
         if (!COSName.FONT.equals(type))
         {
-            throw new IllegalArgumentException("Expected 'Font' dictionary but found '" + type.getName() + "'");
+            throw new IllegalArgumentException(
+                    "Expected 'Font' dictionary but found '" + type.getName() + "'");
         }
 
         COSName subType = dictionary.getCOSName(COSName.SUBTYPE);

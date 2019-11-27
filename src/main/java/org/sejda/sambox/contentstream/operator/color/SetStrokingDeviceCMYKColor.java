@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.sejda.sambox.contentstream.operator.Operator;
+import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
@@ -42,6 +43,6 @@ public class SetStrokingDeviceCMYKColor extends SetStrokingColor
     @Override
     public String getName()
     {
-        return "K";
+        return OperatorName.STROKING_COLOR_CMYK;
     }
 }

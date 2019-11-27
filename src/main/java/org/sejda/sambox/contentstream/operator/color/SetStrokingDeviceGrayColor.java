@@ -20,18 +20,19 @@ import java.io.IOException;
 import java.util.List;
 
 import org.sejda.sambox.contentstream.operator.Operator;
+import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
 
 /**
- * G: Set the stroking colour space to DeviceGray and set the gray level to use for stroking
- * operations.
+ * G: Set the stroking colour space to DeviceGray and set the gray level to use for stroking operations.
  *
  * @author John Hewson
  */
 public class SetStrokingDeviceGrayColor extends SetStrokingColor
 {
+    @Override
     public void process(Operator operator, List<COSBase> arguments) throws IOException
     {
         PDColorSpace cs = getContext().getResources().getColorSpace(COSName.DEVICEGRAY);
@@ -42,6 +43,6 @@ public class SetStrokingDeviceGrayColor extends SetStrokingColor
     @Override
     public String getName()
     {
-        return "G";
+        return OperatorName.STROKING_COLOR_GRAY;
     }
 }

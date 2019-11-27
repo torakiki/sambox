@@ -27,6 +27,8 @@ import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.interactive.action.PDAction;
 import org.sejda.sambox.pdmodel.interactive.action.PDActionFactory;
 import org.sejda.sambox.pdmodel.interactive.action.PDActionURI;
+import org.sejda.sambox.pdmodel.interactive.annotation.handlers.PDAppearanceHandler;
+import org.sejda.sambox.pdmodel.interactive.annotation.handlers.PDLinkAppearanceHandler;
 import org.sejda.sambox.pdmodel.interactive.documentnavigation.destination.PDDestination;
 
 /**
@@ -37,6 +39,7 @@ import org.sejda.sambox.pdmodel.interactive.documentnavigation.destination.PDDes
  */
 public class PDAnnotationLink extends PDAnnotation
 {
+    private PDAppearanceHandler customAppearanceHandler;
 
     /**
      * Constant values of the Text as defined in the PDF 1.6 reference Table 8.19.
@@ -124,7 +127,7 @@ public class PDAnnotationLink extends PDAnnotation
         {
             return new PDBorderStyleDictionary((COSDictionary) bs);
         }
-            return null;
+        return null;
     }
 
     /**
@@ -216,5 +219,29 @@ public class PDAnnotationLink extends PDAnnotation
     {
         return ofNullable(getCOSObject().getDictionaryObject(COSName.QUADPOINTS, COSArray.class))
                 .map(COSArray::toFloatArray).orElse(null);
+    }
+
+    /**
+     * Set a custom appearance handler for generating the annotations appearance streams.
+     * 
+     * @param appearanceHandler
+     */
+    public void setCustomAppearanceHandler(PDAppearanceHandler appearanceHandler)
+    {
+        customAppearanceHandler = appearanceHandler;
+    }
+
+    @Override
+    public void constructAppearances()
+    {
+        if (customAppearanceHandler == null)
+        {
+            PDLinkAppearanceHandler appearanceHandler = new PDLinkAppearanceHandler(this);
+            appearanceHandler.generateAppearanceStreams();
+        }
+        else
+        {
+            customAppearanceHandler.generateAppearanceStreams();
+        }
     }
 }

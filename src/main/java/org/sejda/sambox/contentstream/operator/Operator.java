@@ -28,14 +28,13 @@ import org.sejda.sambox.cos.COSDictionary;
  */
 public final class Operator
 {
-    public static final String BI_OPERATOR = "BI";
-    public static final String ID_OPERATOR = "ID";
-    public static final String EI_OPERATOR = "EI";
     private final String theOperator;
     private byte[] imageData;
     private COSDictionary imageParameters;
 
-    /** map for singleton operator objects; use {@link ConcurrentHashMap} for better scalability with multiple threads */
+    /**
+     * map for singleton operator objects; use {@link ConcurrentHashMap} for better scalability with multiple threads
+     */
     private static final ConcurrentMap<String, Operator> operators = new ConcurrentHashMap<>();
 
     /**
@@ -48,8 +47,8 @@ public final class Operator
         theOperator = aOperator;
         if (aOperator.startsWith("/"))
         {
-            throw new RuntimeException("Operators are not allowed to start with / '" + aOperator
-                    + "'");
+            throw new RuntimeException(
+                    "Operators are not allowed to start with / '" + aOperator + "'");
         }
     }
 
@@ -63,7 +62,8 @@ public final class Operator
     public static Operator getOperator(String operator)
     {
         Operator operation;
-        if (ID_OPERATOR.equals(operator) || BI_OPERATOR.equals(operator))
+        if (OperatorName.BEGIN_INLINE_IMAGE_DATA.equals(operator)
+                || OperatorName.BEGIN_INLINE_IMAGE.equals(operator))
         {
             // we can't cache the ID operators.
             operation = new Operator(operator);

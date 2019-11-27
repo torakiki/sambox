@@ -16,7 +16,7 @@
  */
 package org.sejda.sambox.output;
 
-import static org.mockito.Matchers.anyByte;
+import static org.mockito.ArgumentMatchers.anyByte;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -33,6 +33,7 @@ import org.junit.Test;
 import org.sejda.io.BufferedCountingChannelWriter;
 import org.sejda.io.CountingWritableByteChannel;
 import org.sejda.sambox.contentstream.operator.Operator;
+import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSInteger;
@@ -133,14 +134,15 @@ public class ContentStreamWriterTest
     public void writeTokens() throws Exception
     {
         List<Object> tokens = new ArrayList<>();
-        tokens.add(Operator.getOperator(Operator.BI_OPERATOR));
+        tokens.add(Operator.getOperator(OperatorName.BEGIN_INLINE_IMAGE));
         COSArray array = mock(COSArray.class);
         tokens.add(array);
         victim.writeTokens(tokens);
         verify(array).accept(victim);
-        verify(writer).write(Operator.BI_OPERATOR.getBytes(StandardCharsets.ISO_8859_1));
-        verify(writer).write(Operator.ID_OPERATOR.getBytes(StandardCharsets.US_ASCII));
-        verify(writer).write(Operator.EI_OPERATOR.getBytes(StandardCharsets.US_ASCII));
+        verify(writer).write(OperatorName.BEGIN_INLINE_IMAGE.getBytes(StandardCharsets.ISO_8859_1));
+        verify(writer)
+                .write(OperatorName.BEGIN_INLINE_IMAGE_DATA.getBytes(StandardCharsets.US_ASCII));
+        verify(writer).write(OperatorName.END_INLINE_IMAGE.getBytes(StandardCharsets.US_ASCII));
         verify(writer, times(4)).writeEOL();
     }
 
@@ -150,13 +152,14 @@ public class ContentStreamWriterTest
         byte[] imageDataArray = new byte[] { (byte) 0x41, (byte) 0x42, (byte) 0x43 };
         COSDictionary imageDictionary = new COSDictionary();
         imageDictionary.setBoolean(COSName.A, false);
-        Operator image = Operator.getOperator(Operator.BI_OPERATOR);
+        Operator image = Operator.getOperator(OperatorName.BEGIN_INLINE_IMAGE);
         image.setImageData(imageDataArray);
         image.setImageParameters(imageDictionary);
         victim.writeTokens(image);
-        verify(writer).write(Operator.BI_OPERATOR.getBytes(StandardCharsets.ISO_8859_1));
-        verify(writer).write(Operator.ID_OPERATOR.getBytes(StandardCharsets.US_ASCII));
-        verify(writer).write(Operator.EI_OPERATOR.getBytes(StandardCharsets.US_ASCII));
+        verify(writer).write(OperatorName.BEGIN_INLINE_IMAGE.getBytes(StandardCharsets.ISO_8859_1));
+        verify(writer)
+                .write(OperatorName.BEGIN_INLINE_IMAGE_DATA.getBytes(StandardCharsets.US_ASCII));
+        verify(writer).write(OperatorName.END_INLINE_IMAGE.getBytes(StandardCharsets.US_ASCII));
         verify(writer).write(imageDataArray);
         verify(writer, times(5)).writeEOL();
     }

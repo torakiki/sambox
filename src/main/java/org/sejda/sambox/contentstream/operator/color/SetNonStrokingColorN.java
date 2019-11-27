@@ -17,9 +17,11 @@
 
 package org.sejda.sambox.contentstream.operator.color;
 
+import org.sejda.sambox.contentstream.operator.OperatorName;
+
 /**
- * scn: Sets the colour to use for stroking non-stroking operations.
- * Supports Pattern, Separation, DeviceN and ICCBased colour spaces.
+ * scn: Sets the colour to use for stroking non-stroking operations. Supports Pattern, Separation, DeviceN and ICCBased
+ * colour spaces.
  *
  * @author John Hewson
  */
@@ -28,6 +30,6 @@ public class SetNonStrokingColorN extends SetNonStrokingColor
     @Override
     public String getName()
     {
-        return "scn";
+        return OperatorName.NON_STROKING_COLOR_N;
     }
 }

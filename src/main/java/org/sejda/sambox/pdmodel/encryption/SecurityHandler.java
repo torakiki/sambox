@@ -18,7 +18,6 @@
 package org.sejda.sambox.pdmodel.encryption;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -47,6 +46,7 @@ import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
+import org.sejda.commons.FastByteArrayOutputStream;
 import org.sejda.commons.util.IOUtils;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
@@ -102,6 +102,16 @@ public abstract class SecurityHandler
     private AccessPermission currentAccessPermission = null;
 
     /**
+     * The stream filter name.
+     */
+    private COSName streamFilterName;
+
+    /**
+     * The string filter name.
+     */
+    private COSName stringFilterName;
+
+    /**
      * Set wether to decrypt meta data.
      *
      * @param decryptMetadata true if meta data has to be decrypted.
@@ -109,6 +119,26 @@ public abstract class SecurityHandler
     protected void setDecryptMetadata(boolean decryptMetadata)
     {
         this.decryptMetadata = decryptMetadata;
+    }
+
+    /**
+     * Set the string filter name.
+     * 
+     * @param stringFilterName the string filter name.
+     */
+    protected void setStringFilterName(COSName stringFilterName)
+    {
+        this.stringFilterName = stringFilterName;
+    }
+
+    /**
+     * Set the stream filter name.
+     * 
+     * @param streamFilterName the stream filter name.
+     */
+    protected void setStreamFilterName(COSName streamFilterName)
+    {
+        this.streamFilterName = streamFilterName;
     }
 
     /**
@@ -363,37 +393,40 @@ public abstract class SecurityHandler
      */
     public void decryptStream(COSStream stream, long objNum, long genNum) throws IOException
     {
-        COSBase type = stream.getCOSName(COSName.TYPE);
-        if (!decryptMetadata && COSName.METADATA.equals(type))
+        if (!COSName.IDENTITY.equals(streamFilterName))
         {
-            return;
-        }
-        // "The cross-reference stream shall not be encrypted"
-        if (COSName.XREF.equals(type))
-        {
-            return;
-        }
-        if (COSName.METADATA.equals(type))
-        {
-            byte buf[] = new byte[10];
-            // PDFBOX-3229 check case where metadata is not encrypted despite /EncryptMetadata missing
-            try (InputStream is = stream.getUnfilteredStream())
+            COSBase type = stream.getCOSName(COSName.TYPE);
+            if (!decryptMetadata && COSName.METADATA.equals(type))
             {
-                is.read(buf);
-            }
-            if (Arrays.equals(buf, "<?xpacket ".getBytes(StandardCharsets.ISO_8859_1)))
-            {
-                LOG.warn("Metadata is not encrypted, but was expected to be");
-                LOG.warn("Read PDF specification about EncryptMetadata (default value: true)");
                 return;
             }
-        }
-        decryptDictionary(stream, objNum, genNum);
-        byte[] encrypted = IOUtils.toByteArray(stream.getFilteredStream());
-        ByteArrayInputStream encryptedStream = new ByteArrayInputStream(encrypted);
-        try (OutputStream output = stream.createFilteredStream())
-        {
-            decryptData(objNum, genNum, encryptedStream, output);
+            // "The cross-reference stream shall not be encrypted"
+            if (COSName.XREF.equals(type))
+            {
+                return;
+            }
+            if (COSName.METADATA.equals(type))
+            {
+                byte buf[] = new byte[10];
+                // PDFBOX-3229 check case where metadata is not encrypted despite /EncryptMetadata missing
+                try (InputStream is = stream.getUnfilteredStream())
+                {
+                    is.read(buf);
+                }
+                if (Arrays.equals(buf, "<?xpacket ".getBytes(StandardCharsets.ISO_8859_1)))
+                {
+                    LOG.warn("Metadata is not encrypted, but was expected to be");
+                    LOG.warn("Read PDF specification about EncryptMetadata (default value: true)");
+                    return;
+                }
+            }
+            decryptDictionary(stream, objNum, genNum);
+            byte[] encrypted = IOUtils.toByteArray(stream.getFilteredStream());
+            ByteArrayInputStream encryptedStream = new ByteArrayInputStream(encrypted);
+            try (OutputStream output = stream.createFilteredStream())
+            {
+                decryptData(objNum, genNum, encryptedStream, output);
+            }
         }
     }
 
@@ -448,17 +481,20 @@ public abstract class SecurityHandler
      */
     private void decryptString(COSString string, long objNum, long genNum) throws IOException
     {
-        ByteArrayInputStream data = new ByteArrayInputStream(string.getBytes());
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        try
+        if (!COSName.IDENTITY.equals(stringFilterName))
         {
-            decryptData(objNum, genNum, data, outputStream);
-            string.setValue(outputStream.toByteArray());
-        }
-        catch (IOException ex)
-        {
-            LOG.error("Failed to decrypt COSString of length " + string.getBytes().length
-                    + " in object " + objNum + ": " + ex.getMessage());
+            ByteArrayInputStream data = new ByteArrayInputStream(string.getBytes());
+            FastByteArrayOutputStream outputStream = new FastByteArrayOutputStream();
+            try
+            {
+                decryptData(objNum, genNum, data, outputStream);
+                string.setValue(outputStream.toByteArray());
+            }
+            catch (IOException ex)
+            {
+                LOG.error("Failed to decrypt COSString of length " + string.getBytes().length
+                        + " in object " + objNum + ": " + ex.getMessage());
+            }
         }
     }
 

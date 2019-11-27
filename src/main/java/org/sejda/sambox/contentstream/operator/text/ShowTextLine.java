@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.sejda.sambox.contentstream.operator.Operator;
+import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.contentstream.operator.OperatorProcessor;
 import org.sejda.sambox.cos.COSBase;
 
@@ -33,13 +34,13 @@ public class ShowTextLine extends OperatorProcessor
     @Override
     public void process(Operator operator, List<COSBase> arguments) throws IOException
     {
-        getContext().processOperator("T*", null);
-        getContext().processOperator("Tj", arguments);
+        getContext().processOperator(OperatorName.NEXT_LINE, null);
+        getContext().processOperator(OperatorName.SHOW_TEXT, arguments);
     }
 
     @Override
     public String getName()
     {
-        return "'";
+        return OperatorName.SHOW_TEXT_LINE;
     }
 }

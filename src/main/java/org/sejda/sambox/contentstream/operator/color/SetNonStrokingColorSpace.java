@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.sejda.sambox.contentstream.operator.Operator;
+import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.contentstream.operator.OperatorProcessor;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSName;
@@ -36,7 +37,7 @@ public class SetNonStrokingColorSpace extends OperatorProcessor
     @Override
     public void process(Operator operator, List<COSBase> arguments) throws IOException
     {
-        COSName name = (COSName)arguments.get(0);
+        COSName name = (COSName) arguments.get(0);
 
         PDColorSpace cs = getContext().getResources().getColorSpace(name);
         getContext().getGraphicsState().setNonStrokingColorSpace(cs);
@@ -46,6 +47,6 @@ public class SetNonStrokingColorSpace extends OperatorProcessor
     @Override
     public String getName()
     {
-        return "cs";
+        return OperatorName.NON_STROKING_COLORSPACE;
     }
 }

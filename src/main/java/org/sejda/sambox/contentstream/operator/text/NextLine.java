@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.sejda.sambox.contentstream.operator.Operator;
+import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.contentstream.operator.OperatorProcessor;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSFloat;
@@ -42,12 +43,12 @@ public class NextLine extends OperatorProcessor
         // specification (p.369) the acrobat reader seems to implement it the same way
         args.add(new COSFloat(-1 * getContext().getGraphicsState().getTextState().getLeading()));
         // use Td instead of repeating code
-        getContext().processOperator("Td", args);
+        getContext().processOperator(OperatorName.MOVE_TEXT, args);
     }
 
     @Override
     public String getName()
     {
-        return "T*";
+        return OperatorName.NEXT_LINE;
     }
 }

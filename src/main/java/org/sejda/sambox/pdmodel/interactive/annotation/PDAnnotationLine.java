@@ -24,6 +24,8 @@ import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSFloat;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.graphics.color.PDColor;
+import org.sejda.sambox.pdmodel.interactive.annotation.handlers.PDAppearanceHandler;
+import org.sejda.sambox.pdmodel.interactive.annotation.handlers.PDLineAppearanceHandler;
 
 /**
  * This is the class that represents a line annotation. Introduced in PDF 1.3 specification
@@ -32,6 +34,7 @@ import org.sejda.sambox.pdmodel.graphics.color.PDColor;
  */
 public class PDAnnotationLine extends PDAnnotationMarkup
 {
+    private PDAppearanceHandler customAppearanceHandler;
 
     /*
      * The various values for intent (get/setIT, see the PDF 1.6 reference Table 8.22
@@ -449,4 +452,27 @@ public class PDAnnotationLine extends PDAnnotationMarkup
         return 0.f;
     }
 
+    /**
+     * Set a custom appearance handler for generating the annotations appearance streams.
+     * 
+     * @param appearanceHandler
+     */
+    public void setCustomAppearanceHandler(PDAppearanceHandler appearanceHandler)
+    {
+        customAppearanceHandler = appearanceHandler;
+    }
+
+    @Override
+    public void constructAppearances()
+    {
+        if (customAppearanceHandler == null)
+        {
+            PDLineAppearanceHandler appearanceHandler = new PDLineAppearanceHandler(this);
+            appearanceHandler.generateAppearanceStreams();
+        }
+        else
+        {
+            customAppearanceHandler.generateAppearanceStreams();
+        }
+    }
 }

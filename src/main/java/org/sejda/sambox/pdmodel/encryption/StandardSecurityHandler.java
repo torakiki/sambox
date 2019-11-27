@@ -117,6 +117,14 @@ public final class StandardSecurityHandler extends SecurityHandler
         {
             throw new IOException("Decryption material is not compatible with the document");
         }
+
+        // This is only used with security version 4 and 5.
+        if (encryption.getVersion() >= 4)
+        {
+            setStreamFilterName(encryption.getStreamFilterName());
+            setStringFilterName(encryption.getStreamFilterName());
+        }
+
         setDecryptMetadata(encryption.isEncryptMetaData());
         StandardDecryptionMaterial material = (StandardDecryptionMaterial) decryptionMaterial;
 
@@ -145,6 +153,11 @@ public final class StandardSecurityHandler extends SecurityHandler
             passwordCharset = StandardCharsets.UTF_8;
             ue = encryption.getUserEncryptionKey();
             oe = encryption.getOwnerEncryptionKey();
+        }
+
+        if (dicRevision == 6)
+        {
+            password = SaslPrep.saslPrepQuery(password); // PDFBOX-4155
         }
 
         AccessPermission currentAccessPermission;
@@ -708,14 +721,12 @@ public final class StandardSecurityHandler extends SecurityHandler
         if (encRevision == 6 || encRevision == 5)
         {
             return isUserPassword(password.getBytes(StandardCharsets.UTF_8), user, owner,
-                    permissions, id,
-                    encRevision, length, encryptMetadata);
+                    permissions, id, encRevision, length, encryptMetadata);
         }
         else
         {
             return isUserPassword(password.getBytes(StandardCharsets.ISO_8859_1), user, owner,
-                    permissions,
-                    id, encRevision, length, encryptMetadata);
+                    permissions, id, encRevision, length, encryptMetadata);
         }
     }
 
@@ -739,8 +750,7 @@ public final class StandardSecurityHandler extends SecurityHandler
             byte[] id, int encRevision, int length, boolean encryptMetadata) throws IOException
     {
         return isOwnerPassword(password.getBytes(StandardCharsets.ISO_8859_1), user, owner,
-                permissions, id,
-                encRevision, length, encryptMetadata);
+                permissions, id, encRevision, length, encryptMetadata);
     }
 
     // Algorithm 2.A from ISO 32000-1
