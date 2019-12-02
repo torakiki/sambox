@@ -97,55 +97,7 @@ public class PDFunctionType0 extends PDFunction
     }
 
     /**
-     * Get all sample values of this function.
-     * 
-     * @return an array with all samples.
-     */
-    public int[][] getSamples()
-    {
-        if (samples == null)
-        {
-            int arraySize = 1;
-            int numberOfInputValues = getNumberOfInputParameters();
-            int numberOfOutputValues = getNumberOfOutputParameters();
-            COSArray sizes = getSize();
-            for (int i = 0; i < numberOfInputValues; i++)
-            {
-                arraySize *= sizes.getInt(i);
-            }
-            samples = new int[arraySize][numberOfOutputValues];
-            int bitsPerSample = getBitsPerSample();
-            int index = 0;
-            try
-            {
-                // PDF spec 1.7 p.171:
-                // Each sample value is represented as a sequence of BitsPerSample bits.
-                // Successive values are adjacent in the bit stream;
-                // there is no padding at byte boundaries.
-                ImageInputStream mciis = new MemoryCacheImageInputStream(
-                        getPDStream().createInputStream());
-                for (int i = 0; i < arraySize; i++)
-                {
-                    for (int k = 0; k < numberOfOutputValues; k++)
-                    {
-                        // TODO will this cast work properly for 32 bitsPerSample or should we use long[]?
-                        samples[index][k] = (int) mciis.readBits(bitsPerSample);
-                    }
-                    index++;
-                }
-                mciis.close();
-            }
-            catch (IOException exception)
-            {
-                LOG.error("IOException while reading the sample values of this function.",
-                        exception);
-            }
-        }
-        return samples;
-    }
-
-    /**
-     * Get the number of bits that the output value will take up.
+     * Get the number of bits that the output value will take up.  
      * 
      * Valid values are 1,2,4,8,12,16,24,32.
      *
@@ -281,51 +233,25 @@ public class PDFunctionType0 extends PDFunction
     }
 
     /**
-     * calculate array index (structure described in p.171 PDF spec 1.7) in multiple dimensions.
-     *
-     * @param vector with coordinates
-     * @return index in flat array
+     * Inner class do to an interpolation in the Nth dimension by comparing the
+     * content size of N-1 dimensional objects. This is done with the help of
+     * recursive calls. To understand the algorithm without recursion, here is a
+     * <a
+     * href="http://harmoniccode.blogspot.de/2011/04/bilinear-color-interpolation.html">bilinear
+     * interpolation</a> and here's a <a
+     * href="https://en.wikipedia.org/wiki/Trilinear_interpolation">trilinear
+     * interpolation</a> (external links).
      */
-    private int calcSampleIndex(int[] vector)
-    {
-        // inspiration: http://stackoverflow.com/a/12113479/535646
-        // but used in reverse
-        float[] sizeValues = getSize().toFloatArray();
-        int index = 0;
-        int sizeProduct = 1;
-        int dimension = vector.length;
-        for (int i = dimension - 2; i >= 0; --i)
-        {
-            sizeProduct *= sizeValues[i];
-        }
-        for (int i = dimension - 1; i >= 0; --i)
-        {
-            index += sizeProduct * vector[i];
-            if (i - 1 >= 0)
-            {
-                sizeProduct /= sizeValues[i - 1];
-            }
-        }
-        return index;
-    }
-
-    /**
-     * Inner class do to an interpolation in the Nth dimension by comparing the content size of N-1 dimensional objects.
-     * This is done with the help of recursive calls. To understand the algorithm without recursion, here is a
-     * <a href="http://harmoniccode.blogspot.de/2011/04/bilinear-color-interpolation.html">bilinear interpolation</a>
-     * and here's a <a href="https://en.wikipedia.org/wiki/Trilinear_interpolation">trilinear interpolation</a>
-     * (external links).
-     */
-    class Rinterpol
+    private class Rinterpol
     {
         // coordinate that is to be interpolated
-        final float[] in;
+        private final float[] in;
         // coordinate of the "ceil" point
-        final int[] inPrev;
+        private final int[] inPrev;
         // coordinate of the "floor" point
-        final int[] inNext;
-        final int numberOfInputValues;
-        final int numberOfOutputValues = getNumberOfOutputParameters();
+        private final int[] inNext;
+        private final int numberOfInputValues;
+        private final int numberOfOutputValues = getNumberOfOutputParameters();
 
         /**
          * Constructor.
@@ -348,7 +274,7 @@ public class PDFunctionType0 extends PDFunction
          *
          * @return interpolated result sample
          */
-        public float[] rinterpolate()
+        float[] rinterpolate()
         {
             return rinterpol(new int[numberOfInputValues], 0);
         }
@@ -410,6 +336,80 @@ public class PDFunctionType0 extends PDFunction
                 return resultSample;
             }
         }
+
+        /**
+         * calculate array index (structure described in p.171 PDF spec 1.7) in multiple dimensions.
+         *
+         * @param vector with coordinates
+         * @return index in flat array
+         */
+        private int calcSampleIndex(int[] vector)
+        {
+            // inspiration: http://stackoverflow.com/a/12113479/535646
+            // but used in reverse
+            float[] sizeValues = getSize().toFloatArray();
+            int index = 0;
+            int sizeProduct = 1;
+            int dimension = vector.length;
+            for (int i = dimension - 2; i >= 0; --i)
+            {
+                sizeProduct *= sizeValues[i];
+            }
+            for (int i = dimension - 1; i >= 0; --i)
+            {
+                index += sizeProduct * vector[i];
+                if (i - 1 >= 0)
+                {
+                    sizeProduct /= sizeValues[i - 1];
+                }
+            }
+            return index;
+        }
+
+        /**
+         * Get all sample values of this function.
+         *
+         * @return an array with all samples.
+         */
+        private int[][] getSamples()
+        {
+            if (samples == null)
+            {
+                int arraySize = 1;
+                int nIn = getNumberOfInputParameters();
+                int nOut = getNumberOfOutputParameters();
+                COSArray sizes = getSize();
+                for (int i = 0; i < nIn; i++)
+                {
+                    arraySize *= sizes.getInt(i);
+                }
+                samples = new int[arraySize][nOut];
+                int bitsPerSample = getBitsPerSample();
+                int index = 0;
+                try
+                {
+                    // PDF spec 1.7 p.171:
+                    // Each sample value is represented as a sequence of BitsPerSample bits. 
+                    // Successive values are adjacent in the bit stream; there is no padding at byte boundaries.
+                    ImageInputStream mciis = new MemoryCacheImageInputStream(getPDStream().createInputStream());
+                    for (int i = 0; i < arraySize; i++)
+                    {
+                        for (int k = 0; k < nOut; k++)
+                        {
+                            // TODO will this cast work properly for 32 bitsPerSample or should we use long[]?
+                            samples[index][k] = (int) mciis.readBits(bitsPerSample);
+                        }
+                        index++;
+                    }
+                    mciis.close();
+                }
+                catch (IOException exception)
+                {
+                    LOG.error("IOException while reading the sample values of this function.", exception);
+                }
+            }
+            return samples;
+        }
     }
 
     @Override
@@ -439,61 +439,7 @@ public class PDFunctionType0 extends PDFunction
             inputPrev[i] = (int) Math.floor(input[i]);
             inputNext[i] = (int) Math.ceil(input[i]);
         }
-
-        // old code for N=1 and N=2, don't delete in case one uses this for optimization
-        //
-        // if (numberOfInputValues == 1)
-        // {
-        // int[] sample1 = getSamples()[calcSampleIndex(new int[]
-        // {
-        // inputPrev[0]
-        // })];
-        // int[] sample2 = getSamples()[calcSampleIndex(new int[]
-        // {
-        // inputNext[0]
-        // })];
-        // for (int i = 0; i < numberOfOutputValues; ++i)
-        // {
-        // outputValues[i] = inputPrev[0] == inputNext[0] ? sample1[i] : interpolate(input[0], inputPrev[0],
-        // inputNext[0], sample1[i], sample2[i]);
-        // }
-        // //TODO optimize so that sample is collected only when needed
-        // }
-        // if (numberOfInputValues == 2)
-        // {
-        // int[] sample1 = getSamples()[calcSampleIndex(new int[]
-        // {
-        // inputPrev[0], inputPrev[1]
-        // })];
-        // int[] sample2 = getSamples()[calcSampleIndex(new int[]
-        // {
-        // inputPrev[0], inputNext[1]
-        // })];
-        // int[] sample3 = getSamples()[calcSampleIndex(new int[]
-        // {
-        // inputNext[0], inputPrev[1]
-        // })];
-        // int[] sample4 = getSamples()[calcSampleIndex(new int[]
-        // {
-        // inputNext[0], inputNext[1]
-        // })];
-        //
-        // for (int i = 0; i < numberOfOutputValues; ++i)
-        // {
-        // // bilinear color interpolation, see e.g.
-        // // http://harmoniccode.blogspot.de/2011/04/bilinear-color-interpolation.html
-        // // interpolate the color at top and bottom edges (x-axis)
-        // // then interpolate the color between these two results (y-axis)
-        // double lowerVal = inputPrev[0] == inputNext[0] ? sample1[i] : interpolate(input[0], inputPrev[0],
-        // inputNext[0], sample1[i], sample3[i]);
-        // double upperVal = inputPrev[0] == inputNext[0] ? sample2[i] : interpolate(input[0], inputPrev[0],
-        // inputNext[0], sample2[i], sample4[i]);
-        // outputValues[i] = (float) (inputPrev[1] == inputNext[1] ? lowerVal : interpolate(input[1], inputPrev[1],
-        // inputNext[1], (float) lowerVal, (float) upperVal));
-        // //TODO optimize so that sample is collected only when needed
-        // }
-        // }
-        //
+        
         float[] outputValues = new Rinterpol(input, inputPrev, inputNext).rinterpolate();
 
         for (int i = 0; i < numberOfOutputValues; i++)

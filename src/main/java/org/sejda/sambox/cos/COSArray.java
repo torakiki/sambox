@@ -394,7 +394,7 @@ public class COSArray extends COSBase implements List<COSBase>
     {
         for (int i = 0; i < this.size(); i++)
         {
-            if (this.get(i).getCOSObject().equals(object))
+            if (this.get(i).equals(object) || this.get(i).getCOSObject().equals(object))
             {
                 return i;
             }

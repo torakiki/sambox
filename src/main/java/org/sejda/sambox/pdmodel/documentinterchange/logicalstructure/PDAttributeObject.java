@@ -34,6 +34,19 @@ import org.sejda.sambox.pdmodel.documentinterchange.taggedpdf.PDTableAttributeOb
  */
 public abstract class PDAttributeObject extends PDDictionaryWrapper
 {
+    public PDAttributeObject()
+    {
+    }
+
+    /**
+     * Creates a new attribute object with a given dictionary.
+     * 
+     * @param dictionary the dictionary
+     */
+    public PDAttributeObject(COSDictionary dictionary)
+    {
+        super(dictionary);
+    }
 
     /**
      * Creates an attribute object.
@@ -65,12 +78,12 @@ public abstract class PDAttributeObject extends PDDictionaryWrapper
             return new PDLayoutAttributeObject(dictionary);
         }
         else if (PDExportFormatAttributeObject.OWNER_XML_1_00.equals(owner)
-            || PDExportFormatAttributeObject.OWNER_HTML_3_20.equals(owner)
-            || PDExportFormatAttributeObject.OWNER_HTML_4_01.equals(owner)
-            || PDExportFormatAttributeObject.OWNER_OEB_1_00.equals(owner)
-            || PDExportFormatAttributeObject.OWNER_RTF_1_05.equals(owner)
-            || PDExportFormatAttributeObject.OWNER_CSS_1_00.equals(owner)
-            || PDExportFormatAttributeObject.OWNER_CSS_2_00.equals(owner))
+                || PDExportFormatAttributeObject.OWNER_HTML_3_20.equals(owner)
+                || PDExportFormatAttributeObject.OWNER_HTML_4_01.equals(owner)
+                || PDExportFormatAttributeObject.OWNER_OEB_1_00.equals(owner)
+                || PDExportFormatAttributeObject.OWNER_RTF_1_05.equals(owner)
+                || PDExportFormatAttributeObject.OWNER_CSS_1_00.equals(owner)
+                || PDExportFormatAttributeObject.OWNER_CSS_2_00.equals(owner))
         {
             return new PDExportFormatAttributeObject(dictionary);
         }
@@ -99,25 +112,6 @@ public abstract class PDAttributeObject extends PDDictionaryWrapper
         this.structureElement = structureElement;
     }
 
-
-    /**
-     * Default constructor.
-     */
-    public PDAttributeObject()
-    {
-    }
-
-    /**
-     * Creates a new attribute object with a given dictionary.
-     * 
-     * @param dictionary the dictionary
-     */
-    public PDAttributeObject(COSDictionary dictionary)
-    {
-        super(dictionary);
-    }
-
-
     /**
      * Returns the owner of the attributes.
      * 
@@ -141,15 +135,13 @@ public abstract class PDAttributeObject extends PDDictionaryWrapper
     /**
      * Detects whether there are no properties in the attribute object.
      * 
-     * @return <code>true</code> if the attribute object is empty,
-     *  <code>false</code> otherwise
+     * @return <code>true</code> if the attribute object is empty, <code>false</code> otherwise
      */
     public boolean isEmpty()
     {
         // only entry is the owner?
         return (this.getCOSObject().size() == 1) && (this.getOwner() != null);
     }
-
 
     /**
      * Notifies the attribute object change listeners if the attribute is changed.
@@ -170,8 +162,7 @@ public abstract class PDAttributeObject extends PDDictionaryWrapper
      * 
      * @param oldValue old value
      * @param newValue new value
-     * @return <code>true</code> if the value is changed, <code>false</code>
-     * otherwise
+     * @return <code>true</code> if the value is changed, <code>false</code> otherwise
      */
     private boolean isValueChanged(COSBase oldValue, COSBase newValue)
     {
@@ -183,8 +174,7 @@ public abstract class PDAttributeObject extends PDDictionaryWrapper
     }
 
     /**
-     * Notifies the attribute object change listeners about a change in this
-     * attribute object.
+     * Notifies the attribute object change listeners about a change in this attribute object.
      */
     protected void notifyChanged()
     {

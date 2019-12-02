@@ -136,12 +136,12 @@ public class PDFTextStripperByArea extends PDFTextStripper
     @Override
     protected void processTextPosition(TextPosition text)
     {
-        for (String region : regionArea.keySet())
+        for (Map.Entry<String, Rectangle2D> regionAreaEntry : regionArea.entrySet())
         {
-            Rectangle2D rect = regionArea.get(region);
+            Rectangle2D rect = regionAreaEntry.getValue();
             if (rect.contains(text.getX(), text.getY()))
             {
-                charactersByArticle = regionCharacterList.get(region);
+                charactersByArticle = regionCharacterList.get(regionAreaEntry.getKey());
                 super.processTextPosition(text);
             }
         }

@@ -159,7 +159,6 @@ public abstract class PDAbstractAppearanceHandler implements PDAppearanceHandler
 
         if (downAppearanceEntry.isSubDictionary())
         {
-            // TODO replace with "document.getDocument().createCOSStream()"
             downAppearanceEntry = new PDAppearanceEntry(new COSStream());
             appearanceDictionary.setDownAppearance(downAppearanceEntry);
         }
@@ -183,7 +182,6 @@ public abstract class PDAbstractAppearanceHandler implements PDAppearanceHandler
 
         if (rolloverAppearanceEntry.isSubDictionary())
         {
-            // TODO replace with "document.getDocument().createCOSStream()"
             rolloverAppearanceEntry = new PDAppearanceEntry(new COSStream());
             appearanceDictionary.setRolloverAppearance(rolloverAppearanceEntry);
         }
@@ -470,7 +468,6 @@ public abstract class PDAbstractAppearanceHandler implements PDAppearanceHandler
 
         if (normalAppearanceEntry == null || normalAppearanceEntry.isSubDictionary())
         {
-            // TODO replace with "document.getDocument().createCOSStream()"
             normalAppearanceEntry = new PDAppearanceEntry(new COSStream());
             appearanceDictionary.setNormalAppearance(normalAppearanceEntry);
         }

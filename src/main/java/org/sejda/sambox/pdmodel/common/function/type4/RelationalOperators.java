@@ -24,11 +24,16 @@ import java.util.Stack;
  */
 class RelationalOperators
 {
+    private RelationalOperators()
+    {
+        // Private constructor.
+    }
 
     /** Implements the "eq" operator. */
     static class Eq implements Operator
     {
 
+        @Override
         public void execute(ExecutionContext context)
         {
             Stack<Object> stack = context.getStack();
@@ -43,8 +48,8 @@ class RelationalOperators
             boolean result = false;
             if (op1 instanceof Number && op2 instanceof Number)
             {
-                Number num1 = (Number)op1;
-                Number num2 = (Number)op2;
+                Number num1 = (Number) op1;
+                Number num2 = (Number) op2;
                 result = num1.floatValue() == num2.floatValue();
             }
             else
@@ -60,13 +65,14 @@ class RelationalOperators
     private abstract static class AbstractNumberComparisonOperator implements Operator
     {
 
+        @Override
         public void execute(ExecutionContext context)
         {
             Stack<Object> stack = context.getStack();
             Object op2 = stack.pop();
             Object op1 = stack.pop();
-            Number num1 = (Number)op1;
-            Number num2 = (Number)op2;
+            Number num1 = (Number) op1;
+            Number num2 = (Number) op2;
             boolean result = compare(num1, num2);
             stack.push(result);
         }

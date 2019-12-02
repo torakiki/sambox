@@ -17,7 +17,7 @@
 package org.sejda.sambox.pdmodel.interactive.form;
 
 import static java.util.Arrays.asList;
-import static java.util.Objects.nonNull;
+import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
 import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
 import static org.sejda.io.CountingWritableByteChannel.from;
@@ -103,7 +103,17 @@ public class AppearanceGeneratorHelper
     {
         this.field = field;
         validateAndEnsureAcroFormResources();
-        this.defaultAppearance = field.getDefaultAppearanceString();
+        try
+        {
+            this.defaultAppearance = field.getDefaultAppearanceString();
+        }
+        catch (IOException ex)
+        {
+            throw new IOException(
+                    "Could not process default appearance string '" + field.getDefaultAppearance()
+                            + "' for field '" + field.getFullyQualifiedName() + "'",
+                    ex);
+        }
     }
 
     /*
@@ -215,7 +225,7 @@ public class AppearanceGeneratorHelper
                 // TODO support appearances other than "normal"
 
                 PDAppearanceStream appearanceStream;
-                if (nonNull(appearance) && appearance.isStream())
+                if (isValidAppearanceStream(appearance))
                 {
                     appearanceStream = appearance.getAppearanceStream();
                 }
@@ -240,6 +250,20 @@ public class AppearanceGeneratorHelper
             // restore the field level appearance;
             defaultAppearance = acroFormAppearance;
         }
+    }
+
+    private static boolean isValidAppearanceStream(PDAppearanceEntry appearance)
+    {
+        if (isNull(appearance) || !appearance.isStream())
+        {
+            return false;
+        }
+        PDRectangle bbox = appearance.getAppearanceStream().getBBox();
+        if (bbox == null)
+        {
+            return false;
+        }
+        return Math.abs(bbox.getWidth()) > 0 && Math.abs(bbox.getHeight()) > 0;
     }
 
     private PDAppearanceStream prepareNormalAppearanceStream(PDAnnotationWidget widget)

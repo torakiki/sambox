@@ -24,16 +24,21 @@ import java.util.Stack;
  */
 class ConditionalOperators
 {
+    private ConditionalOperators()
+    {
+        // Private constructor.
+    }
 
     /** Implements the "if" operator. */
     static class If implements Operator
     {
 
+        @Override
         public void execute(ExecutionContext context)
         {
             Stack<Object> stack = context.getStack();
-            InstructionSequence proc = (InstructionSequence)stack.pop();
-            Boolean condition = (Boolean)stack.pop();
+            InstructionSequence proc = (InstructionSequence) stack.pop();
+            Boolean condition = (Boolean) stack.pop();
             if (condition)
             {
                 proc.execute(context);
@@ -46,12 +51,13 @@ class ConditionalOperators
     static class IfElse implements Operator
     {
 
+        @Override
         public void execute(ExecutionContext context)
         {
             Stack<Object> stack = context.getStack();
-            InstructionSequence proc2 = (InstructionSequence)stack.pop();
-            InstructionSequence proc1 = (InstructionSequence)stack.pop();
-            Boolean condition = (Boolean)stack.pop();
+            InstructionSequence proc2 = (InstructionSequence) stack.pop();
+            InstructionSequence proc1 = (InstructionSequence) stack.pop();
+            Boolean condition = (Boolean) stack.pop();
             if (condition)
             {
                 proc1.execute(context);

@@ -21,10 +21,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * This is an assistant class for accomplishing type 4, 5, 6 and 7 shading. It
- * describes a triangle actually, which is used to compose a patch. It contains
- * the degenerated cases, a triangle degenerates to a line or to a point. This
- * was done as part of GSoC2014, Tilman Hausherr is the mentor.
+ * This is an assistant class for accomplishing type 4, 5, 6 and 7 shading. It describes a triangle actually, which is
+ * used to compose a patch. It contains the degenerated cases, a triangle degenerates to a line or to a point. This was
+ * done as part of GSoC2014, Tilman Hausherr is the mentor.
  *
  * @author Shaola Ren
  */
@@ -35,9 +34,8 @@ class ShadedTriangle
     private final double area; // area of the triangle
 
     /*
-     degree = 3 describes a normal triangle, 
-     degree = 2 when a triangle degenerates to a line,
-     degree = 1 when a triangle degenerates to a point
+     * degree = 3 describes a normal triangle, degree = 2 when a triangle degenerates to a line, degree = 1 when a
+     * triangle degenerates to a point
      */
     private final int degree;
 
@@ -95,15 +93,15 @@ class ShadedTriangle
      * Calculate the degree value of a triangle.
      *
      * @param p 3 vertices coordinates
-     * @return number of unique points in the 3 vertices of a triangle, 3, 2 or
-     * 1
+     * @return number of unique points in the 3 vertices of a triangle, 3, 2 or 1
      */
     private int calcDeg(Point2D[] p)
     {
         Set<Point> set = new HashSet<Point>();
         for (Point2D itp : p)
         {
-            Point np = new Point((int) Math.round(itp.getX() * 1000), (int) Math.round(itp.getY() * 1000));
+            Point np = new Point((int) Math.round(itp.getX() * 1000),
+                    (int) Math.round(itp.getY() * 1000));
             set.add(np);
         }
         return set.size();
@@ -157,7 +155,7 @@ class ShadedTriangle
     {
         if (degree == 1)
         {
-            return overlaps(corner[0], p) | overlaps(corner[1], p) | overlaps(corner[2], p);
+            return overlaps(corner[0], p) || overlaps(corner[1], p) || overlaps(corner[2], p);
         }
         else if (degree == 2)
         {
@@ -166,13 +164,13 @@ class ShadedTriangle
         }
 
         /*
-         the following code judges whether a point is contained in a normal triangle, 
-         taking the on edge case as contained
+         * the following code judges whether a point is contained in a normal triangle, taking the on edge case as
+         * contained
          */
         double pv0 = edgeEquationValue(p, corner[1], corner[2]);
         /*
-         if corner[0] and point p are on different sides of line from corner[1] to corner[2], 
-         p is outside of the triangle
+         * if corner[0] and point p are on different sides of line from corner[1] to corner[2], p is outside of the
+         * triangle
          */
         if (pv0 * v0 < 0)
         {
@@ -180,8 +178,8 @@ class ShadedTriangle
         }
         double pv1 = edgeEquationValue(p, corner[2], corner[0]);
         /*
-         if vertex corner[1] and point p are on different sides of line from corner[2] to corner[0], 
-         p is outside of the triangle
+         * if vertex corner[1] and point p are on different sides of line from corner[2] to corner[0], p is outside of
+         * the triangle
          */
         if (pv1 * v1 < 0)
         {
@@ -189,16 +187,15 @@ class ShadedTriangle
         }
         double pv2 = edgeEquationValue(p, corner[0], corner[1]);
         /*
-         only left one case:
-         if corner[1] and point p are on different sides of line from corner[2] to corner[0], 
-         p is outside of the triangle, otherwise p is contained in the triangle
+         * only left one case: if corner[1] and point p are on different sides of line from corner[2] to corner[0], p is
+         * outside of the triangle, otherwise p is contained in the triangle
          */
         return pv2 * v2 >= 0; // !(pv2 * v2 < 0)
     }
 
     /*
-     check whether two points overlaps each other, as points' coordinates are 
-     of type double, the coordinates' accuracy used here is 0.001
+     * check whether two points overlaps each other, as points' coordinates are of type double, the coordinates'
+     * accuracy used here is 0.001
      */
     private boolean overlaps(Point2D p0, Point2D p1)
     {
@@ -206,9 +203,8 @@ class ShadedTriangle
     }
 
     /*
-     two points can define a line equation, adjust the form of the equation to 
-     let the rhs equals 0, calculate the lhs value by plugging the coordinate 
-     of p in the lhs expression
+     * two points can define a line equation, adjust the form of the equation to let the rhs equals 0, calculate the lhs
+     * value by plugging the coordinate of p in the lhs expression
      */
     private double edgeEquationValue(Point2D p, Point2D p1, Point2D p2)
     {

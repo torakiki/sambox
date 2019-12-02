@@ -24,73 +24,69 @@ import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.common.COSDictionaryMap;
+import org.sejda.sambox.pdmodel.common.PDDictionaryWrapper;
 
 /**
- * Contains additional information about the components of colour space.
- * Instead of using the alternate color space and tint transform, conforming readers may use custom
- * blending algorithms, along with other information provided in the attributes dictionary.
+ * Contains additional information about the components of colour space. Instead of using the alternate color space and
+ * tint transform, conforming readers may use custom blending algorithms, along with other information provided in the
+ * attributes dictionary.
  *
  * @author Ben Litchfield
  */
-public final class PDDeviceNAttributes
+public final class PDDeviceNAttributes extends PDDictionaryWrapper
 {
-    private final COSDictionary dictionary;
 
     /**
      * Creates a new DeviceN colour space attributes dictionary.
      */
     public PDDeviceNAttributes()
     {
-        dictionary = new COSDictionary();
+        super();
     }
 
     /**
      * Creates a new DeviceN colour space attributes dictionary from the given dictionary.
+     * 
      * @param attributes a dictionary that has all of the attributes
      */
     public PDDeviceNAttributes(COSDictionary attributes)
     {
-        dictionary = attributes;
-    }
-
-    /**
-     * Returns the underlying COS dictionary.
-     * @return the dictionary that this object wraps
-     */
-    public COSDictionary getCOSDictionary()
-    {
-        return dictionary;
+        super(attributes);
     }
 
     /**
      * Returns a map of colorants and their associated Separation color space.
+     * 
      * @return map of colorants to color spaces
      * @throws IOException If there is an error reading a color space
      */
     public Map<String, PDSeparation> getColorants() throws IOException
     {
-        Map<String,PDSeparation> actuals = new HashMap<String, PDSeparation>();
-        COSDictionary colorants = (COSDictionary)dictionary.getDictionaryObject(COSName.COLORANTS);
-        if(colorants == null)
+        Map<String, PDSeparation> actuals = new HashMap<>();
+        COSDictionary colorants = getCOSObject().getDictionaryObject(COSName.COLORANTS,
+                COSDictionary.class);
+        if (colorants == null)
         {
             colorants = new COSDictionary();
-            dictionary.setItem(COSName.COLORANTS, colorants);
+            getCOSObject().setItem(COSName.COLORANTS, colorants);
         }
-        for(COSName name : colorants.keySet())
+        for (COSName name : colorants.keySet())
         {
             COSBase value = colorants.getDictionaryObject(name);
-            actuals.put(name.getName(), (PDSeparation)PDColorSpace.create(value));
+            actuals.put(name.getName(), (PDSeparation) PDColorSpace.create(value));
         }
         return new COSDictionaryMap<String, PDSeparation>(actuals, colorants);
     }
 
     /**
      * Returns the DeviceN Process Dictionary, or null if it is missing.
+     * 
      * @return the DeviceN Process Dictionary, or null if it is missing.
      */
     public PDDeviceNProcess getProcess()
     {
-        COSDictionary process = (COSDictionary)dictionary.getDictionaryObject(COSName.PROCESS);
+        COSDictionary process = getCOSObject().getDictionaryObject(COSName.PROCESS,
+                COSDictionary.class);
         if (process == null)
         {
             return null;
@@ -100,31 +96,33 @@ public final class PDDeviceNAttributes
 
     /**
      * Returns true if this is an NChannel (PDF 1.6) color space.
+     * 
      * @return true if this is an NChannel color space.
      */
     public boolean isNChannel()
     {
-        return "NChannel".equals(dictionary.getNameAsString(COSName.SUBTYPE));
+        return "NChannel".equals(getCOSObject().getNameAsString(COSName.SUBTYPE));
     }
 
     /**
      * Sets the colorant map.
+     * 
      * @param colorants the map of colorants
      */
     public void setColorants(Map<String, PDColorSpace> colorants)
     {
         COSDictionary colorantDict = null;
-        if(colorants != null)
+        if (colorants != null)
         {
             colorantDict = COSDictionaryMap.convert(colorants);
         }
-        dictionary.setItem(COSName.COLORANTS, colorantDict);
+        getCOSObject().setItem(COSName.COLORANTS, colorantDict);
     }
 
     @Override
     public String toString()
     {
-        StringBuilder sb = new StringBuilder(dictionary.getNameAsString(COSName.SUBTYPE));
+        StringBuilder sb = new StringBuilder(getCOSObject().getNameAsString(COSName.SUBTYPE));
         sb.append('{');
         PDDeviceNProcess process = getProcess();
         if (process != null)

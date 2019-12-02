@@ -22,7 +22,9 @@ import java.awt.geom.GeneralPath;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.fontbox.cff.Type2CharString;
 import org.apache.fontbox.cmap.CMap;
@@ -57,6 +59,7 @@ public class PDCIDFontType2 extends PDCIDFont
     private final CmapLookup cmap; // may be null
     private Matrix fontMatrix;
     private BoundingBox fontBBox;
+    private final Set<Integer> noMapping = new HashSet<Integer>();
 
     /**
      * Constructor.
@@ -127,18 +130,8 @@ public class PDCIDFontType2 extends PDCIDFont
                                 "Found CFF/OTF but expected embedded TTF font " + fd.getFontName());
                     }
 
-                    if (otf.hasLayoutTables())
-                    {
-                        LOG.info("OpenType Layout tables used in font " + getBaseFont()
-                                + " are not implemented in SAMBox and will be ignored");
-                    }
                 }
-                catch (NullPointerException e) // TTF parser is buggy
-                {
-                    fontIsDamaged = true;
-                    LOG.warn("Could not read embedded OTF for font " + getBaseFont(), e);
-                }
-                catch (IOException e)
+                catch (NullPointerException | IOException e) // TTF parser is buggy
                 {
                     fontIsDamaged = true;
                     LOG.warn("Could not read embedded OTF for font " + getBaseFont(), e);
@@ -155,11 +148,13 @@ public class PDCIDFontType2 extends PDCIDFont
         }
         cmap = ttf.getUnicodeCmapLookup(false);
         cid2gid = readCIDToGIDMap();
-        if(cid2gid != null) {
+        if (cid2gid != null)
+        {
             for (int cid = 0; cid < cid2gid.length; cid++)
             {
                 int gid = cid2gid[cid];
-                if(gid != 0) {
+                if (gid != 0)
+                {
                     gid2cid.put(gid, cid);
                 }
             }
@@ -214,12 +209,12 @@ public class PDCIDFontType2 extends PDCIDFont
         if (getFontDescriptor() != null)
         {
             PDRectangle bbox = getFontDescriptor().getFontBoundingBox();
-            if(nonNull(bbox))
+            if (nonNull(bbox))
             {
-                if ((Float.compare(bbox.getLowerLeftX(), 0) != 0 ||
-                        Float.compare(bbox.getLowerLeftY(), 0) != 0 ||
-                        Float.compare(bbox.getUpperRightX(), 0) != 0 ||
-                        Float.compare(bbox.getUpperRightY(), 0) != 0))
+                if ((Float.compare(bbox.getLowerLeftX(), 0) != 0
+                        || Float.compare(bbox.getLowerLeftY(), 0) != 0
+                        || Float.compare(bbox.getUpperRightX(), 0) != 0
+                        || Float.compare(bbox.getUpperRightY(), 0) != 0))
                 {
                     return new BoundingBox(bbox.getLowerLeftX(), bbox.getLowerLeftY(),
                             bbox.getUpperRightX(), bbox.getUpperRightY());
@@ -273,7 +268,12 @@ public class PDCIDFontType2 extends PDCIDFont
             String unicode = parent.toUnicode(code);
             if (unicode == null)
             {
-                LOG.warn("Failed to find a character mapping for " + code + " in " + getName());
+                if (!noMapping.contains(code))
+                {
+                    // we keep track of which warnings have been issued, so we don't log multiple times
+                    noMapping.add(code);
+                    LOG.warn("Failed to find a character mapping for " + code + " in " + getName());
+                }
                 // Acrobat is willing to use the CID as a GID, even when the font isn't embedded
                 // see PDFBOX-2599
                 return codeToCID(code);
@@ -379,8 +379,8 @@ public class PDCIDFontType2 extends PDCIDFont
 
         if (cid == 0)
         {
-            throw new IllegalArgumentException(
-                    String.format("No glyph for U+%04X in font %s", unicode, getName()));
+            throw new IllegalArgumentException(String.format("No glyph for U+%04X (%c) in font %s",
+                    unicode, (char) unicode, getName()));
         }
 
         // CID is always 2-bytes (16-bit) for TrueType

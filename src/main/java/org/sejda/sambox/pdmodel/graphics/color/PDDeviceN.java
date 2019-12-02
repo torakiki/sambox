@@ -37,10 +37,10 @@ import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.pdmodel.common.function.PDFunction;
 
 /**
- * DeviceN colour spaces may contain an arbitrary number of colour components.
- * DeviceN represents a colour space containing multiple components that correspond to colorants
- * of some target device. As with Separation colour spaces, readers are able to approximate the
- * colorants if they are not available on the current output device, such as a display
+ * DeviceN colour spaces may contain an arbitrary number of colour components. DeviceN represents a colour space
+ * containing multiple components that correspond to colorants of some target device. As with Separation colour spaces,
+ * readers are able to approximate the colorants if they are not available on the current output device, such as a
+ * display
  *
  * @author John Hewson
  * @author Ben Litchfield
@@ -81,6 +81,7 @@ public class PDDeviceN extends PDSpecialColorSpace
 
     /**
      * Creates a new DeviceN color space from the given COS array.
+     * 
      * @param deviceN an array containing the color space information
      */
     public PDDeviceN(COSArray deviceN) throws IOException
@@ -91,7 +92,8 @@ public class PDDeviceN extends PDSpecialColorSpace
 
         if (array.size() > DEVICEN_ATTRIBUTES)
         {
-            attributes = new PDDeviceNAttributes((COSDictionary)array.getObject(DEVICEN_ATTRIBUTES));
+            attributes = new PDDeviceNAttributes(
+                    (COSDictionary) array.getObject(DEVICEN_ATTRIBUTES));
         }
         initColorConversionCache();
 
@@ -222,8 +224,8 @@ public class PDDeviceN extends PDSpecialColorSpace
             }
 
             // copy single-component to its own raster in the component color space
-            WritableRaster componentRaster = Raster.createBandedRaster(DataBuffer.TYPE_BYTE,
-                width, height, componentColorSpace.getNumberOfComponents(), new Point(0, 0));
+            WritableRaster componentRaster = Raster.createBandedRaster(DataBuffer.TYPE_BYTE, width,
+                    height, componentColorSpace.getNumberOfComponents(), new Point(0, 0));
 
             int[] samples = new int[numColorants];
             int[] componentSamples = new int[componentColorSpace.getNumberOfComponents()];
@@ -320,10 +322,10 @@ public class PDDeviceN extends PDSpecialColorSpace
 
                 // convert to alternate color space via tint transform
                 float[] result = tintTransform.eval(src);
-                
+
                 // convert from alternate color space to RGB
                 float[] rgbFloat = alternateColorSpace.toRGB(result);
-                
+
                 for (int s = 0; s < 3; s++)
                 {
                     // scale to 0..255
@@ -419,6 +421,7 @@ public class PDDeviceN extends PDSpecialColorSpace
 
     /**
      * Returns true if this color space has the NChannel subtype.
+     * 
      * @return true if subtype is NChannel
      */
     public boolean isNChannel()
@@ -458,16 +461,18 @@ public class PDDeviceN extends PDSpecialColorSpace
 
     /**
      * Returns the list of colorants.
+     * 
      * @return the list of colorants
      */
     public List<String> getColorantNames()
     {
-        COSArray names = (COSArray)array.getObject(COLORANT_NAMES);
+        COSArray names = (COSArray) array.getObject(COLORANT_NAMES);
         return COSArrayList.convertCOSNameCOSArrayToList(names);
     }
 
     /**
      * Returns the attributes associated with the DeviceN color space.
+     * 
      * @return the DeviceN attributes
      */
     public PDDeviceNAttributes getAttributes()
@@ -477,6 +482,7 @@ public class PDDeviceN extends PDSpecialColorSpace
 
     /**
      * Sets the list of colorants
+     * 
      * @param names the list of colorants
      */
     public void setColorantNames(List<String> names)
@@ -486,8 +492,8 @@ public class PDDeviceN extends PDSpecialColorSpace
     }
 
     /**
-     * Sets the color space attributes.
-     * If null is passed in then all attribute will be removed.
+     * Sets the color space attributes. If null is passed in then all attribute will be removed.
+     * 
      * @param attributes the color space attributes, or null
      */
     public void setAttributes(PDDeviceNAttributes attributes)
@@ -504,17 +510,16 @@ public class PDDeviceN extends PDSpecialColorSpace
             {
                 array.add(COSNull.NULL);
             }
-            array.set(DEVICEN_ATTRIBUTES, attributes.getCOSDictionary());
+            array.set(DEVICEN_ATTRIBUTES, attributes.getCOSObject());
         }
     }
- 
+
     /**
      * This will get the alternate color space for this separation.
      *
      * @return The alternate color space.
      *
-     * @throws IOException If there is an error getting the alternate color
-     * space.
+     * @throws IOException If there is an error getting the alternate color space.
      */
     public PDColorSpace getAlternateColorSpace() throws IOException
     {
@@ -567,7 +572,6 @@ public class PDDeviceN extends PDSpecialColorSpace
         tintTransform = tint;
         array.set(TINT_TRANSFORM, tint);
     }
-
 
     @Override
     public String toString()

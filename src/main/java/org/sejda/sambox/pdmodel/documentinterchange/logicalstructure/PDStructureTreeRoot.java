@@ -17,7 +17,7 @@
 package org.sejda.sambox.pdmodel.documentinterchange.logicalstructure;
 
 import java.io.IOException;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.sejda.sambox.cos.COSArray;
@@ -41,17 +41,10 @@ import org.slf4j.LoggerFactory;
 public class PDStructureTreeRoot extends PDStructureNode
 {
 
-    /**
-     * Log instance.
-     */
     private static final Logger LOG = LoggerFactory.getLogger(PDStructureTreeRoot.class);
 
     private static final String TYPE = "StructTreeRoot";
 
-    /**
-     * Default Constructor.
-     * 
-     */
     public PDStructureTreeRoot()
     {
         super(TYPE);
@@ -203,7 +196,7 @@ public class PDStructureTreeRoot extends PDStructureNode
                 LOG.error(e.getMessage(), e);
             }
         }
-        return new Hashtable<>();
+        return new HashMap<>();
     }
 
     /**

@@ -75,7 +75,7 @@ final class FileSystemFontProvider extends FontProvider
         private final int macStyle;
         private final PDPanoseClassification panose;
         private final File file;
-        private transient FileSystemFontProvider parent;
+        private final FileSystemFontProvider parent;
 
         private FSFontInfo(File file, FontFormat format, String postScriptName,
                 CIDSystemInfo cidSystemInfo, int usWeightClass, int sFamilyClass,
@@ -126,13 +126,13 @@ final class FileSystemFontProvider extends FontProvider
             switch (format)
             {
             case PFB:
-                font = parent.getType1Font(file);
+                font = getType1Font(postScriptName, file);
                 break;
             case TTF:
-                font = parent.getTrueTypeFont(postScriptName, file);
+                font = getTrueTypeFont(postScriptName, file);
                 break;
             case OTF:
-                font = parent.getOTFFont(file);
+                font = getOTFFont(postScriptName, file);
                 break;
             default:
                 throw new RuntimeException("can't happen");
@@ -185,6 +185,74 @@ final class FileSystemFontProvider extends FontProvider
         {
             return super.toString() + " " + file;
         }
+
+        private TrueTypeFont getTrueTypeFont(String postScriptName, File file)
+        {
+            try
+            {
+                TrueTypeFont ttf = readTrueTypeFont(postScriptName, file);
+                LOG.debug("Loaded {} from {}", postScriptName, file);
+                return ttf;
+            }
+            catch (NullPointerException | IOException e) // TTF parser is buggy
+            {
+                LOG.error("Could not load font file: " + file, e);
+            }
+            return null;
+        }
+
+        private TrueTypeFont readTrueTypeFont(String postScriptName, File file) throws IOException
+        {
+            if (file.getName().toLowerCase().endsWith(".ttc"))
+            {
+                @SuppressWarnings("squid:S2095")
+                // ttc not closed here because it is needed later when ttf is accessed,
+                // e.g. rendering PDF with non-embedded font which is in ttc file in our font directory
+                TrueTypeCollection ttc = new TrueTypeCollection(file);
+                TrueTypeFont ttf = ttc.getFontByName(postScriptName);
+                if (ttf == null)
+                {
+                    ttc.close();
+                    throw new IOException("Font " + postScriptName + " not found in " + file);
+                }
+                return ttf;
+            }
+            TTFParser ttfParser = new TTFParser(false, true);
+            return ttfParser.parse(file);
+        }
+
+        private static OpenTypeFont getOTFFont(String postScriptName, File file)
+        {
+            try
+            {
+                // todo JH: we don't yet support loading CFF fonts from OTC collections
+                OTFParser parser = new OTFParser(false, true);
+                OpenTypeFont otf = parser.parse(file);
+                LOG.debug("Loaded {} from {}", postScriptName, file);
+                return otf;
+            }
+            catch (IOException e)
+            {
+                LOG.error("Could not load font file: " + file, e);
+            }
+            return null;
+        }
+
+        private static Type1Font getType1Font(String postScriptName, File file)
+        {
+            try (InputStream input = new FileInputStream(file))
+            {
+                Type1Font type1 = Type1Font.createWithPFB(input);
+                LOG.debug("Loaded {} from {}", postScriptName, file);
+                return type1;
+            }
+            catch (IOException e)
+            {
+                LOG.error("Could not load font file " + file, e);
+            }
+            return null;
+        }
+
     }
 
     /**
@@ -196,6 +264,7 @@ final class FileSystemFontProvider extends FontProvider
         {
             super(file, format, postScriptName, null, 0, 0, 0, 0, 0, null, null);
         }
+
     }
 
     /**
@@ -580,7 +649,7 @@ final class FileSystemFontProvider extends FontProvider
                         String registryName = reg.substring(0, reg.indexOf('\0'));
                         String ord = new String(bytes, 76, 64, StandardCharsets.US_ASCII);
                         String orderName = ord.substring(0, ord.indexOf('\0'));
-                        int supplementVersion = bytes[140] << 8 & bytes[141];
+                        int supplementVersion = bytes[140] << 8 & (bytes[141] & 0xFF);
                         ros = new CIDSystemInfo(registryName, orderName, supplementVersion);
                     }
 
@@ -636,63 +705,6 @@ final class FileSystemFontProvider extends FontProvider
                         + type1.getWeight() + "'");
             }
         }
-    }
-
-    private TrueTypeFont getTrueTypeFont(String postScriptName, File file)
-    {
-        try
-        {
-            return readTrueTypeFont(postScriptName, file);
-        }
-        catch (NullPointerException | IOException e) // TTF parser is buggy
-        {
-            LOG.error("Could not load font file: " + file, e);
-        }
-
-        return null;
-    }
-
-    private TrueTypeFont readTrueTypeFont(String postScriptName, File file) throws IOException
-    {
-        if (file.getName().toLowerCase().endsWith(".ttc"))
-        {
-            TrueTypeCollection ttc = new TrueTypeCollection(file);
-            TrueTypeFont ttf = ttc.getFontByName(postScriptName);
-            if (ttf == null)
-            {
-                ttc.close();
-                throw new IOException("Font " + postScriptName + " not found in " + file);
-            }
-            return ttf;
-        }
-        return new TTFParser(false, true).parse(file);
-    }
-
-    private OpenTypeFont getOTFFont(File file)
-    {
-        try
-        {
-            // todo JH: we don't yet support loading CFF fonts from OTC collections
-            return new OTFParser(false, true).parse(file);
-        }
-        catch (IOException e)
-        {
-            LOG.error("Could not load font file: " + file, e);
-        }
-        return null;
-    }
-
-    private Type1Font getType1Font(File file)
-    {
-        try (InputStream input = new FileInputStream(file))
-        {
-            return Type1Font.createWithPFB(input);
-        }
-        catch (IOException e)
-        {
-            LOG.error("Could not load font file: " + file, e);
-        }
-        return null;
     }
 
     @Override

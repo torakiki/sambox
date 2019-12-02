@@ -26,9 +26,11 @@ import java.util.regex.Pattern;
  */
 public final class InstructionSequenceBuilder extends Parser.AbstractSyntaxHandler
 {
+    private static final Pattern INTEGER_PATTERN = Pattern.compile("[\\+\\-]?\\d+");
+    private static final Pattern REAL_PATTERN = Pattern.compile("[\\-]?\\d*\\.\\d*([Ee]\\-?\\d+)?");
 
     private final InstructionSequence mainSequence = new InstructionSequence();
-    private final Stack<InstructionSequence> seqStack = new Stack<InstructionSequence>();
+    private final Stack<InstructionSequence> seqStack = new Stack<>();
 
     private InstructionSequenceBuilder()
     {
@@ -37,6 +39,7 @@ public final class InstructionSequenceBuilder extends Parser.AbstractSyntaxHandl
 
     /**
      * Returns the instruction sequence that has been build from the syntactic elements.
+     * 
      * @return the instruction sequence
      */
     public InstructionSequence getInstructionSequence()
@@ -45,8 +48,8 @@ public final class InstructionSequenceBuilder extends Parser.AbstractSyntaxHandl
     }
 
     /**
-     * Parses the given text into an instruction sequence representing a Type 4 function
-     * that can be executed.
+     * Parses the given text into an instruction sequence representing a Type 4 function that can be executed.
+     * 
      * @param text the Type 4 function text
      * @return the instruction sequence
      */
@@ -62,10 +65,6 @@ public final class InstructionSequenceBuilder extends Parser.AbstractSyntaxHandl
         return this.seqStack.peek();
     }
 
-    private static final Pattern INTEGER_PATTERN = Pattern.compile("[\\+\\-]?\\d+");
-    private static final Pattern REAL_PATTERN = Pattern.compile("[\\-]?\\d*\\.\\d*([Ee]\\-?\\d+)?");
-
-    /** {@inheritDoc} */
     @Override
     public void token(CharSequence text)
     {
@@ -101,7 +100,7 @@ public final class InstructionSequenceBuilder extends Parser.AbstractSyntaxHandl
                 return;
             }
 
-            //TODO Maybe implement radix numbers, such as 8#1777 or 16#FFFE
+            // TODO Maybe implement radix numbers, such as 8#1777 or 16#FFFE
 
             getCurrentSequence().addName(token);
         }
@@ -109,17 +108,19 @@ public final class InstructionSequenceBuilder extends Parser.AbstractSyntaxHandl
 
     /**
      * Parses a value of type "int".
+     * 
      * @param token the token to be parsed
      * @return the parsed value
      */
     public static int parseInt(String token)
     {
-        //TODO Beginning with JDK7 Integer.parseInt accepts leading +'s
+        // TODO Beginning with JDK7 Integer.parseInt accepts leading +'s
         return Integer.parseInt(token.startsWith("+") ? token.substring(1) : token);
     }
 
     /**
      * Parses a value of type "real".
+     * 
      * @param token the token to be parsed
      * @return the parsed value
      */

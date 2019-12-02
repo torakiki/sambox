@@ -25,10 +25,16 @@ import java.util.Stack;
 class ArithmeticOperators
 {
 
+    private ArithmeticOperators()
+    {
+        // Private constructor.
+    }
+
     /** Implements the "abs" operator. */
     static class Abs implements Operator
     {
 
+        @Override
         public void execute(ExecutionContext context)
         {
             Number num = context.popNumber();
@@ -48,6 +54,7 @@ class ArithmeticOperators
     static class Add implements Operator
     {
 
+        @Override
         public void execute(ExecutionContext context)
         {
             Number num2 = context.popNumber();
@@ -61,7 +68,7 @@ class ArithmeticOperators
                 }
                 else
                 {
-                    context.getStack().push((int)sum);
+                    context.getStack().push((int) sum);
                 }
             }
             else
@@ -77,12 +84,13 @@ class ArithmeticOperators
     static class Atan implements Operator
     {
 
+        @Override
         public void execute(ExecutionContext context)
         {
             float den = context.popReal();
             float num = context.popReal();
-            float atan = (float)Math.atan2(num, den);
-            atan = (float)Math.toDegrees(atan) % 360;
+            float atan = (float) Math.atan2(num, den);
+            atan = (float) Math.toDegrees(atan) % 360;
             if (atan < 0)
             {
                 atan = atan + 360;
@@ -96,6 +104,7 @@ class ArithmeticOperators
     static class Ceiling implements Operator
     {
 
+        @Override
         public void execute(ExecutionContext context)
         {
             Number num = context.popNumber();
@@ -105,7 +114,7 @@ class ArithmeticOperators
             }
             else
             {
-                context.getStack().push((float)Math.ceil(num.doubleValue()));
+                context.getStack().push((float) Math.ceil(num.doubleValue()));
             }
         }
 
@@ -115,10 +124,11 @@ class ArithmeticOperators
     static class Cos implements Operator
     {
 
+        @Override
         public void execute(ExecutionContext context)
         {
             float angle = context.popReal();
-            float cos = (float)Math.cos(Math.toRadians(angle));
+            float cos = (float) Math.cos(Math.toRadians(angle));
             context.getStack().push(cos);
         }
 
@@ -128,6 +138,7 @@ class ArithmeticOperators
     static class Cvi implements Operator
     {
 
+        @Override
         public void execute(ExecutionContext context)
         {
             Number num = context.popNumber();
@@ -140,6 +151,7 @@ class ArithmeticOperators
     static class Cvr implements Operator
     {
 
+        @Override
         public void execute(ExecutionContext context)
         {
             Number num = context.popNumber();
@@ -152,6 +164,7 @@ class ArithmeticOperators
     static class Div implements Operator
     {
 
+        @Override
         public void execute(ExecutionContext context)
         {
             Number num2 = context.popNumber();
@@ -165,12 +178,13 @@ class ArithmeticOperators
     static class Exp implements Operator
     {
 
+        @Override
         public void execute(ExecutionContext context)
         {
             Number exp = context.popNumber();
             Number base = context.popNumber();
             double value = Math.pow(base.doubleValue(), exp.doubleValue());
-            context.getStack().push((float)value);
+            context.getStack().push((float) value);
         }
 
     }
@@ -179,6 +193,7 @@ class ArithmeticOperators
     static class Floor implements Operator
     {
 
+        @Override
         public void execute(ExecutionContext context)
         {
             Number num = context.popNumber();
@@ -188,7 +203,7 @@ class ArithmeticOperators
             }
             else
             {
-                context.getStack().push((float)Math.floor(num.doubleValue()));
+                context.getStack().push((float) Math.floor(num.doubleValue()));
             }
         }
 
@@ -198,6 +213,7 @@ class ArithmeticOperators
     static class IDiv implements Operator
     {
 
+        @Override
         public void execute(ExecutionContext context)
         {
             int num2 = context.popInt();
@@ -211,10 +227,11 @@ class ArithmeticOperators
     static class Ln implements Operator
     {
 
+        @Override
         public void execute(ExecutionContext context)
         {
             Number num = context.popNumber();
-            context.getStack().push((float)Math.log(num.doubleValue()));
+            context.getStack().push((float) Math.log(num.doubleValue()));
         }
 
     }
@@ -223,10 +240,11 @@ class ArithmeticOperators
     static class Log implements Operator
     {
 
+        @Override
         public void execute(ExecutionContext context)
         {
             Number num = context.popNumber();
-            context.getStack().push((float)Math.log10(num.doubleValue()));
+            context.getStack().push((float) Math.log10(num.doubleValue()));
         }
 
     }
@@ -235,6 +253,7 @@ class ArithmeticOperators
     static class Mod implements Operator
     {
 
+        @Override
         public void execute(ExecutionContext context)
         {
             int int2 = context.popInt();
@@ -248,6 +267,7 @@ class ArithmeticOperators
     static class Mul implements Operator
     {
 
+        @Override
         public void execute(ExecutionContext context)
         {
             Number num2 = context.popNumber();
@@ -257,17 +277,17 @@ class ArithmeticOperators
                 long result = num1.longValue() * num2.longValue();
                 if (result >= Integer.MIN_VALUE && result <= Integer.MAX_VALUE)
                 {
-                    context.getStack().push((int)result);
+                    context.getStack().push((int) result);
                 }
                 else
                 {
-                    context.getStack().push((float)result);
+                    context.getStack().push((float) result);
                 }
             }
             else
             {
                 double result = num1.doubleValue() * num2.doubleValue();
-                context.getStack().push((float)result);
+                context.getStack().push((float) result);
             }
         }
 
@@ -277,6 +297,7 @@ class ArithmeticOperators
     static class Neg implements Operator
     {
 
+        @Override
         public void execute(ExecutionContext context)
         {
             Number num = context.popNumber();
@@ -304,6 +325,7 @@ class ArithmeticOperators
     static class Round implements Operator
     {
 
+        @Override
         public void execute(ExecutionContext context)
         {
             Number num = context.popNumber();
@@ -313,7 +335,7 @@ class ArithmeticOperators
             }
             else
             {
-                context.getStack().push((float)Math.round(num.doubleValue()));
+                context.getStack().push((float) Math.round(num.doubleValue()));
             }
         }
 
@@ -323,10 +345,11 @@ class ArithmeticOperators
     static class Sin implements Operator
     {
 
+        @Override
         public void execute(ExecutionContext context)
         {
             float angle = context.popReal();
-            float sin = (float)Math.sin(Math.toRadians(angle));
+            float sin = (float) Math.sin(Math.toRadians(angle));
             context.getStack().push(sin);
         }
 
@@ -336,6 +359,7 @@ class ArithmeticOperators
     static class Sqrt implements Operator
     {
 
+        @Override
         public void execute(ExecutionContext context)
         {
             float num = context.popReal();
@@ -343,7 +367,7 @@ class ArithmeticOperators
             {
                 throw new IllegalArgumentException("argument must be nonnegative");
             }
-            context.getStack().push((float)Math.sqrt(num));
+            context.getStack().push((float) Math.sqrt(num));
         }
 
     }
@@ -352,6 +376,7 @@ class ArithmeticOperators
     static class Sub implements Operator
     {
 
+        @Override
         public void execute(ExecutionContext context)
         {
             Stack<Object> stack = context.getStack();
@@ -366,7 +391,7 @@ class ArithmeticOperators
                 }
                 else
                 {
-                    stack.push((int)result);
+                    stack.push((int) result);
                 }
             }
             else
@@ -382,6 +407,7 @@ class ArithmeticOperators
     static class Truncate implements Operator
     {
 
+        @Override
         public void execute(ExecutionContext context)
         {
             Number num = context.popNumber();
@@ -391,7 +417,7 @@ class ArithmeticOperators
             }
             else
             {
-                context.getStack().push((float)(int)(num.floatValue()));
+                context.getStack().push((float) (int) (num.floatValue()));
             }
         }
 

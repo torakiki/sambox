@@ -237,19 +237,12 @@ public final class PDAcroForm extends PDDictionaryWrapper
                     annotations.add(annotation);
                 }
                 else if (!annotation.isInvisible() && !annotation.isHidden()
-                        && nonNull(annotation.getNormalAppearanceStream()))
+                        && nonNull(annotation.getNormalAppearanceStream())
+                        && nonNull(annotation.getNormalAppearanceStream().getBBox()))
                 {
-                    if (!isContentStreamWrapped)
-                    {
-                        contentStream = new PDPageContentStream(document, page, AppendMode.APPEND,
-                                true, true);
-                        isContentStreamWrapped = true;
-                    }
-                    else
-                    {
-                        contentStream = new PDPageContentStream(document, page, AppendMode.APPEND,
-                                true);
-                    }
+                    contentStream = new PDPageContentStream(document, page, AppendMode.APPEND, true,
+                            !isContentStreamWrapped);
+                    isContentStreamWrapped = true;
 
                     PDAppearanceStream appearanceStream = annotation.getNormalAppearanceStream();
 
@@ -263,7 +256,7 @@ public final class PDAcroForm extends PDDictionaryWrapper
 
                     // scale the appearance stream - mainly needed for images
                     // in buttons and signatures
-                    boolean needsScaling = resolveNeedsScaling(appearanceStream);
+                    boolean needsScaling = resolveNeedsScaling(annotation, page.getRotation());
 
                     Matrix transformationMatrix = new Matrix();
                     boolean transformed = false;
@@ -280,15 +273,21 @@ public final class PDAcroForm extends PDDictionaryWrapper
                         PDRectangle bbox = appearanceStream.getBBox();
                         PDRectangle fieldRect = annotation.getRectangle();
 
-                        if (bbox.getWidth() - fieldRect.getWidth() != 0
-                                && bbox.getHeight() - fieldRect.getHeight() != 0)
+                        float xScale;
+                        float yScale;
+                        if (page.getRotation() == 90 || page.getRotation() == 270)
                         {
-                            float xScale = fieldRect.getWidth() / bbox.getWidth();
-                            float yScale = fieldRect.getHeight() / bbox.getHeight();
-                            Matrix scalingMatrix = Matrix.getScaleInstance(xScale, yScale);
-                            transformationMatrix.concatenate(scalingMatrix);
-                            transformed = true;
+                            xScale = fieldRect.getWidth() / bbox.getHeight();
+                            yScale = fieldRect.getHeight() / bbox.getWidth();
                         }
+                        else
+                        {
+                            xScale = fieldRect.getWidth() / bbox.getWidth();
+                            yScale = fieldRect.getHeight() / bbox.getHeight();
+                        }
+                        Matrix scalingMatrix = Matrix.getScaleInstance(xScale, yScale);
+                        transformationMatrix.concatenate(scalingMatrix);
+                        transformed = true;
                     }
 
                     if (transformed)
@@ -681,11 +680,24 @@ public final class PDAcroForm extends PDDictionaryWrapper
      * @param appearanceStream
      * @return the need for a scaling transformation.
      */
-    private boolean resolveNeedsScaling(PDAppearanceStream appearanceStream)
+    private boolean resolveNeedsScaling(PDAnnotation annotation, int rotation)
     {
+        PDAppearanceStream appearanceStream = annotation.getNormalAppearanceStream();
         // Check if there is a transformation within the XObjects content
         PDResources resources = appearanceStream.getResources();
-        return resources != null && resources.getXObjectNames().iterator().hasNext();
+        if (resources != null && resources.getXObjectNames().iterator().hasNext())
+        {
+            return true;
+        }
+        PDRectangle bbox = appearanceStream.getBBox();
+        PDRectangle fieldRect = annotation.getRectangle();
+        if (rotation == 90 || rotation == 270)
+        {
+            return Float.compare(bbox.getWidth(), fieldRect.getHeight()) != 0
+                    || Float.compare(bbox.getHeight(), fieldRect.getWidth()) != 0;
+        }
+        return Float.compare(bbox.getWidth(), fieldRect.getWidth()) != 0
+                || Float.compare(bbox.getHeight(), fieldRect.getHeight()) != 0;
     }
 
     private Map<COSDictionary, PDAnnotationWidget> widgets(List<PDField> fields)

@@ -26,10 +26,11 @@ public class ExecutionContext
 {
 
     private final Operators operators;
-    private final Stack<Object> stack = new Stack<Object>();
+    private final Stack<Object> stack = new Stack<>();
 
     /**
      * Creates a new execution context.
+     * 
      * @param operatorSet the operator set
      */
     public ExecutionContext(Operators operatorSet)
@@ -39,6 +40,7 @@ public class ExecutionContext
 
     /**
      * Returns the stack used by this execution context.
+     * 
      * @return the stack
      */
     public Stack<Object> getStack()
@@ -48,6 +50,7 @@ public class ExecutionContext
 
     /**
      * Returns the operator set used by this execution context.
+     * 
      * @return the operator set
      */
     public Operators getOperators()
@@ -56,33 +59,34 @@ public class ExecutionContext
     }
 
     /**
-     * Pops a number (int or real) from the stack. If it's neither data type, a
-     * ClassCastException is thrown.
+     * Pops a number (int or real) from the stack. If it's neither data type, a ClassCastException is thrown.
+     * 
      * @return the number
      */
     public Number popNumber()
     {
-        return (Number)stack.pop();
+        return (Number) stack.pop();
     }
 
     /**
-     * Pops a value of type int from the stack. If the value is not of type int, a
-     * ClassCastException is thrown.
+     * Pops a value of type int from the stack. If the value is not of type int, a ClassCastException is thrown.
+     * 
      * @return the int value
      */
     public int popInt()
     {
-        return ((Integer)stack.pop());
+        return (Integer) stack.pop();
     }
 
     /**
-     * Pops a number from the stack and returns it as a real value. If the value is not of a
-     * numeric type, a ClassCastException is thrown.
+     * Pops a number from the stack and returns it as a real value. If the value is not of a numeric type, a
+     * ClassCastException is thrown.
+     * 
      * @return the real value
      */
     public float popReal()
     {
-        return ((Number)stack.pop()).floatValue();
+        return ((Number) stack.pop()).floatValue();
     }
 
 }

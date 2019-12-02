@@ -26,21 +26,25 @@ import java.util.Stack;
  */
 class StackOperators
 {
+    private StackOperators()
+    {
+        // Private constructor.
+    }
 
     /** Implements the "copy" operator. */
     static class Copy implements Operator
     {
 
+        @Override
         public void execute(ExecutionContext context)
         {
             Stack<Object> stack = context.getStack();
-            int n = ((Number)stack.pop()).intValue();
+            int n = ((Number) stack.pop()).intValue();
             if (n > 0)
             {
                 int size = stack.size();
-                //Need to copy to a new list to avoid ConcurrentModificationException
-                List<Object> copy = new java.util.ArrayList<Object>(
-                        stack.subList(size - n, size));
+                // Need to copy to a new list to avoid ConcurrentModificationException
+                List<Object> copy = new java.util.ArrayList<Object>(stack.subList(size - n, size));
                 stack.addAll(copy);
             }
         }
@@ -51,6 +55,7 @@ class StackOperators
     static class Dup implements Operator
     {
 
+        @Override
         public void execute(ExecutionContext context)
         {
             Stack<Object> stack = context.getStack();
@@ -63,6 +68,7 @@ class StackOperators
     static class Exch implements Operator
     {
 
+        @Override
         public void execute(ExecutionContext context)
         {
             Stack<Object> stack = context.getStack();
@@ -78,10 +84,11 @@ class StackOperators
     static class Index implements Operator
     {
 
+        @Override
         public void execute(ExecutionContext context)
         {
             Stack<Object> stack = context.getStack();
-            int n = ((Number)stack.pop()).intValue();
+            int n = ((Number) stack.pop()).intValue();
             if (n < 0)
             {
                 throw new IllegalArgumentException("rangecheck: " + n);
@@ -96,6 +103,7 @@ class StackOperators
     static class Pop implements Operator
     {
 
+        @Override
         public void execute(ExecutionContext context)
         {
             Stack<Object> stack = context.getStack();
@@ -108,14 +116,15 @@ class StackOperators
     static class Roll implements Operator
     {
 
+        @Override
         public void execute(ExecutionContext context)
         {
             Stack<Object> stack = context.getStack();
-            int j = ((Number)stack.pop()).intValue();
-            int n = ((Number)stack.pop()).intValue();
+            int j = ((Number) stack.pop()).intValue();
+            int n = ((Number) stack.pop()).intValue();
             if (j == 0)
             {
-                return; //Nothing to do
+                return; // Nothing to do
             }
             if (n < 0)
             {
@@ -126,7 +135,7 @@ class StackOperators
             LinkedList<Object> moved = new LinkedList<Object>();
             if (j < 0)
             {
-                //negative roll
+                // negative roll
                 int n1 = n + j;
                 for (int i = 0; i < n1; i++)
                 {
@@ -141,7 +150,7 @@ class StackOperators
             }
             else
             {
-                //positive roll
+                // positive roll
                 int n1 = n - j;
                 for (int i = j; i > 0; i--)
                 {

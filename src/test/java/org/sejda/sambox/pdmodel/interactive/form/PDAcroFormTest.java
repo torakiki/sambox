@@ -129,6 +129,8 @@ public class PDAcroFormTest
                 }
             }
             doc.getDocumentCatalog().getAcroForm().flatten();
+            // 36 non widget annotations shall not be flattened
+            assertEquals(36, doc.getPage(0).getAnnotations().size());
             assertTrue(doc.getDocumentCatalog().getAcroForm().getFields().isEmpty());
         }
     }

@@ -43,13 +43,14 @@ import java.awt.image.DataBufferByte;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
 import java.util.StringTokenizer;
 
 import org.sejda.sambox.contentstream.PDFGraphicsStreamEngine;
@@ -136,6 +137,9 @@ public class PageDrawer extends PDFGraphicsStreamEngine
     // last clipping path
     private Area lastClip;
 
+    // clip when drawPage() is called, can be null, must be intersected when clipping
+    private Shape initialClip;
+
     // shapes of glyphs being drawn to be used for clipping
     private List<Shape> textClippings;
 
@@ -144,7 +148,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
 
     private final TilingPaintFactory tilingPaintFactory = new TilingPaintFactory(this);
 
-    private final Stack<TransparencyGroup> transparencyGroupStack = new Stack<>();
+    private final Deque<TransparencyGroup> transparencyGroupStack = new ArrayDeque<>();
     // if greater zero the content is hidden and wil not be rendered
     private int nestedHiddenOCGCount;
 
@@ -280,28 +284,31 @@ public class PageDrawer extends PDFGraphicsStreamEngine
     void drawTilingPattern(Graphics2D g, PDTilingPattern pattern, PDColorSpace colorSpace,
             PDColor color, Matrix patternMatrix) throws IOException
     {
-        Graphics2D oldGraphics = graphics;
+        Graphics2D savedGraphics = graphics;
         graphics = g;
 
-        GeneralPath oldLinePath = linePath;
+        GeneralPath savedLinePath = linePath;
         linePath = new GeneralPath();
-        int oldClipWindingRule = clipWindingRule;
+        int savedClipWindingRule = clipWindingRule;
         clipWindingRule = -1;
 
-        Area oldLastClip = lastClip;
+        Area savedLastClip = lastClip;
         lastClip = null;
+        Shape savedInitialClip = initialClip;
+        initialClip = null;
 
-        boolean oldFlipTG = flipTG;
+        boolean savedFlipTG = flipTG;
         flipTG = true;
 
         setRenderingHints();
         processTilingPattern(pattern, color, colorSpace, patternMatrix);
 
-        flipTG = oldFlipTG;
-        graphics = oldGraphics;
-        linePath = oldLinePath;
-        lastClip = oldLastClip;
-        clipWindingRule = oldClipWindingRule;
+        flipTG = savedFlipTG;
+        graphics = savedGraphics;
+        linePath = savedLinePath;
+        lastClip = savedLastClip;
+        initialClip = savedInitialClip;
+        clipWindingRule = savedClipWindingRule;
     }
 
     private float clampColor(float color)
@@ -367,6 +374,11 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         if (clippingPath != lastClip)
         {
             graphics.setClip(clippingPath);
+            if (initialClip != null)
+            {
+                // apply the remembered initial clip, but transform it first
+                // TODO see PDFBOX-4583
+            }
             lastClip = clippingPath;
         }
     }
@@ -903,6 +915,8 @@ public class PageDrawer extends PDFGraphicsStreamEngine
 
             case PathIterator.SEG_CLOSE:
                 break;
+            default:
+                break;
             }
             iter.next();
         }
@@ -1351,7 +1365,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         // both the DPI xform and the CTM were already applied to the group, so all we do
         // here is draw it directly onto the Graphics2D device at the appropriate position
         PDRectangle bbox = group.getBBox();
-        AffineTransform prev = graphics.getTransform();
+        AffineTransform savedTransform = graphics.getTransform();
 
         Matrix m = new Matrix(xform);
         float xScale = Math.abs(m.getScalingFactorX());
@@ -1396,7 +1410,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
             }
         }
 
-        graphics.setTransform(prev);
+        graphics.setTransform(savedTransform);
     }
 
     /**
@@ -1430,8 +1444,9 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         private TransparencyGroup(PDTransparencyGroup form, boolean isSoftMask, Matrix ctm,
                 PDColor backdropColor) throws IOException
         {
-            Graphics2D g2dOriginal = graphics;
-            Area lastClipOriginal = lastClip;
+            Graphics2D savedGraphics = graphics;
+            Area savedLastClip = lastClip;
+            Shape savedInitialClip = initialClip;
 
             // get the CTM x Form Matrix transform
             Matrix transform = Matrix.concatenate(ctm, form.getMatrix());
@@ -1528,7 +1543,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
             g.translate(0, image.getHeight());
             g.scale(1, -1);
 
-            boolean oldFlipTG = flipTG;
+            boolean savedFlipTG = flipTG;
             flipTG = false;
 
             // apply device transform (DPI)
@@ -1568,10 +1583,11 @@ public class PageDrawer extends PDFGraphicsStreamEngine
             }
             finally
             {
-                flipTG = oldFlipTG;
-                lastClip = lastClipOriginal;
+                flipTG = savedFlipTG;
+                lastClip = savedLastClip;
                 graphics.dispose();
-                graphics = g2dOriginal;
+                graphics = savedGraphics;
+                initialClip = savedInitialClip;
                 clipWindingRule = clipWindingRuleOriginal;
                 linePath = linePathOriginal;
                 pageSize = pageSizeOriginal;

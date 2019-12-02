@@ -22,7 +22,7 @@ import java.util.List;
 /**
  * 
  * @author Johannes Koch
-
+ * 
  * @param <T> the type of object to store the revision numbers with
  */
 public class Revisions<T>
@@ -34,7 +34,7 @@ public class Revisions<T>
     {
         if (this.objects == null)
         {
-            this.objects = new ArrayList<T>();
+            this.objects = new ArrayList<>();
         }
         return this.objects;
     }
@@ -46,13 +46,6 @@ public class Revisions<T>
             this.revisionNumbers = new ArrayList<Integer>();
         }
         return this.revisionNumbers;
-    }
-
-    /**
-     * 
-     */
-    public Revisions()
-    {
     }
 
     /**
@@ -129,8 +122,8 @@ public class Revisions<T>
             {
                 sb.append("; ");
             }
-            sb.append("object=").append(this.getObjects().get(i))
-                .append(", revisionNumber=").append(this.getRevisionNumber(i));
+            sb.append("object=").append(this.getObjects().get(i)).append(", revisionNumber=")
+                    .append(this.getRevisionNumber(i));
         }
         return sb.toString();
     }

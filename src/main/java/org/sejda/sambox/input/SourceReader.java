@@ -371,7 +371,7 @@ class SourceReader implements Closeable
                 //
                 if (isHexDigit((char) ch1) && isHexDigit((char) ch2))
                 {
-                    String hex = "" + (char) ch1 + (char) ch2;
+                    String hex = Character.toString((char) ch1) + (char) ch2;
                     i = Integer.parseInt(hex, 16);
                 }
                 else

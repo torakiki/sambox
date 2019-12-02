@@ -31,7 +31,17 @@ public class PDMarkedContentReference implements COSObjectable
     public static final String TYPE = "MCR";
 
     private final COSDictionary dictionary;
-    
+
+    /**
+     * Constructor for an existing marked content reference.
+     * 
+     * @param dictionary the page dictionary
+     */
+    public PDMarkedContentReference(COSDictionary dictionary)
+    {
+        this.dictionary = dictionary;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -48,16 +58,6 @@ public class PDMarkedContentReference implements COSObjectable
     {
         this.dictionary = new COSDictionary();
         this.dictionary.setName(COSName.TYPE, TYPE);
-    }
-
-    /**
-     * Constructor for an existing marked content reference.
-     * 
-     * @param dictionary the page dictionary
-     */
-    public PDMarkedContentReference(COSDictionary dictionary)
-    {
-        this.dictionary = dictionary;
     }
 
     /**
@@ -104,7 +104,6 @@ public class PDMarkedContentReference implements COSObjectable
     {
         this.getCOSObject().setInt(COSName.MCID, mcid);
     }
-
 
     @Override
     public String toString()

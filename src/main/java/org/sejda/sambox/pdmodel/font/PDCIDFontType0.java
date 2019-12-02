@@ -33,7 +33,6 @@ import org.apache.fontbox.cff.CFFParser;
 import org.apache.fontbox.cff.CFFType1Font;
 import org.apache.fontbox.cff.Type2CharString;
 import org.apache.fontbox.util.BoundingBox;
-import org.sejda.commons.util.IOUtils;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.common.PDStream;
@@ -81,7 +80,7 @@ public class PDCIDFontType0 extends PDCIDFont
             PDStream ff3Stream = fd.getFontFile3();
             if (ff3Stream != null)
             {
-                bytes = IOUtils.toByteArray(ff3Stream.createInputStream());
+                bytes = ff3Stream.toByteArray();
             }
         }
 
@@ -98,7 +97,7 @@ public class PDCIDFontType0 extends PDCIDFont
             CFFParser cffParser = new CFFParser();
             try
             {
-                cffFont = cffParser.parse(bytes, new ByteSource()).get(0);
+                cffFont = cffParser.parse(bytes, new FF3ByteSource()).get(0);
             }
             catch (IOException e)
             {
@@ -203,13 +202,12 @@ public class PDCIDFontType0 extends PDCIDFont
         return fontMatrix;
     }
 
-    private class ByteSource implements CFFParser.ByteSource
+    private class FF3ByteSource implements CFFParser.ByteSource
     {
         @Override
         public byte[] getBytes() throws IOException
         {
-            PDStream ff3Stream = getFontDescriptor().getFontFile3();
-            return IOUtils.toByteArray(ff3Stream.createInputStream());
+            return getFontDescriptor().getFontFile3().toByteArray();
         }
     }
 
@@ -228,10 +226,11 @@ public class PDCIDFontType0 extends PDCIDFont
         if (getFontDescriptor() != null)
         {
             PDRectangle bbox = getFontDescriptor().getFontBoundingBox();
-            if(bbox != null)
+            if (bbox != null)
             {
-                if (bbox.getLowerLeftX() != 0 || bbox.getLowerLeftY() != 0 || bbox.getUpperRightX() != 0
-                        || bbox.getUpperRightY() != 0) {
+                if (bbox.getLowerLeftX() != 0 || bbox.getLowerLeftY() != 0
+                        || bbox.getUpperRightX() != 0 || bbox.getUpperRightY() != 0)
+                {
                     return new BoundingBox(bbox.getLowerLeftX(), bbox.getLowerLeftY(),
                             bbox.getUpperRightX(), bbox.getUpperRightY());
                 }
@@ -381,11 +380,8 @@ public class PDCIDFontType0 extends PDCIDFont
             // charset table in the CFF program
             return cidFont.getCharset().getGIDForCID(cid);
         }
-        else
-        {
-            // The CIDs shall be used directly as GID values
-            return cid;
-        }
+        // The CIDs shall be used directly as GID values
+        return cid;
     }
 
     @Override
@@ -436,11 +432,15 @@ public class PDCIDFontType0 extends PDCIDFont
     {
         int cid = codeToCID(code);
 
-        float height = 0;
+        float height;
         if (!glyphHeights.containsKey(cid))
         {
             height = (float) getType2CharString(cid).getBounds().getHeight();
             glyphHeights.put(cid, height);
+        }
+        else
+        {
+            height = glyphHeights.get(cid);
         }
         return height;
     }

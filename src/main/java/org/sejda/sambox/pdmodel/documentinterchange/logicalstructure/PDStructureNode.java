@@ -37,6 +37,29 @@ import org.sejda.sambox.cos.COSObjectable;
 public abstract class PDStructureNode implements COSObjectable
 {
 
+    private final COSDictionary dictionary;
+
+    /**
+     * Constructor.
+     *
+     * @param type the type
+     */
+    protected PDStructureNode(String type)
+    {
+        this.dictionary = new COSDictionary();
+        this.dictionary.setName(COSName.TYPE, type);
+    }
+
+    /**
+     * Constructor for an existing structure node.
+     *
+     * @param dictionary The existing dictionary.
+     */
+    protected PDStructureNode(COSDictionary dictionary)
+    {
+        this.dictionary = dictionary;
+    }
+
     /**
      * Creates a node in the structure tree. Can be either a structure tree root, or a structure element.
      * 
@@ -58,33 +81,10 @@ public abstract class PDStructureNode implements COSObjectable
                 "Dictionary must not include a Type entry with a value that is neither StructTreeRoot nor StructElem.");
     }
 
-    private final COSDictionary dictionary;
-
     @Override
     public COSDictionary getCOSObject()
     {
         return dictionary;
-    }
-
-    /**
-     * Constructor.
-     *
-     * @param type the type
-     */
-    protected PDStructureNode(String type)
-    {
-        this.dictionary = new COSDictionary();
-        this.dictionary.setName(COSName.TYPE, type);
-    }
-
-    /**
-     * Constructor for an existing structure node.
-     *
-     * @param dictionary The existing dictionary.
-     */
-    protected PDStructureNode(COSDictionary dictionary)
-    {
-        this.dictionary = dictionary;
     }
 
     /**

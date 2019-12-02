@@ -195,9 +195,17 @@ public class TextPosition
     }
 
     /**
-     * Return the direction/orientation of the string in this object based on its text matrix.
+     * Return the direction/orientation of the string in this object based on its text matrix. Only angles of 0, 90,
+     * 180, or 270 are supported. To get other angles, use this code:
      * 
-     * @return The direction of the text (0, 90, 180, or 270)
+     * <pre>
+     * TextPosition text = ...
+     * Matrix m = text.getTextMatrix().clone();
+     * m.concatenate(text.getFont().getFontMatrix());
+     * int angle = (int) Math.round(Math.toDegrees(Math.atan2(m.getShearY(), m.getScaleY())));
+     * </pre>
+     *
+     * @return The direction of the text (0, 90, 180, or 270).
      */
     public float getDir()
     {
@@ -270,7 +278,9 @@ public class TextPosition
 
     /**
      * This will get the page rotation adjusted x position of the character. This is adjusted based on page rotation so
-     * that the upper left is 0,0.
+     * that the upper left is 0,0 which is unlike PDF coordinates, which start at the bottom left. See also
+     * <a href="https://stackoverflow.com/questions/57067372/">this answer by Michael Klink</a> for further details and
+     * <a href="https://issues.apache.org/jira/browse/PDFBOX-4597">PDFBOX-4597</a> for a sample file.
      *
      * @return The x coordinate of the character.
      */
@@ -281,8 +291,12 @@ public class TextPosition
 
     /**
      * This will get the text direction adjusted x position of the character. This is adjusted based on text direction
-     * so that the first character in that direction is in the upper left at 0,0.
-     *
+     * so that the first character in that direction is in the upper left at 0,0. This method ignores the page rotation
+     * but takes the text rotation (see {@link #getDir() getDir()}) and adjusts the coordinates to awt. This is useful
+     * when doing text extraction, to compare the glyph positions when imagining these to be horizontal. See also
+     * <a href="https://stackoverflow.com/questions/57067372/">this answer by Michael Klink</a> for further details and
+     * <a href="https://issues.apache.org/jira/browse/PDFBOX-4597">PDFBOX-4597</a> for a sample file.
+     * 
      * @return The x coordinate of the text.
      */
     public float getXDirAdj()
@@ -320,8 +334,11 @@ public class TextPosition
 
     /**
      * This will get the y position of the text, adjusted so that 0,0 is upper left and it is adjusted based on the page
-     * rotation.
-     *
+     * rotation. This method ignores the page rotation but takes the text rotation and adjusts the coordinates to awt.
+     * This is useful when doing text extraction, to compare the glyph positions when imagining these to be horizontal.
+     * See also <a href="https://stackoverflow.com/questions/57067372/">this answer by Michael Klink</a> for further
+     * details and <a href="https://issues.apache.org/jira/browse/PDFBOX-4597">PDFBOX-4597</a> for a sample file.
+     * 
      * @return The adjusted y coordinate of the character.
      */
     public float getY()
@@ -590,20 +607,20 @@ public class TextPosition
             }
             // diacritic completely covers this character and therefore we assume that this is the
             // character the diacritic belongs to
-            else if (diacXStart < currCharXStart && diacXEnd > currCharXEnd)
+            else if (diacXStart < currCharXStart)
             {
                 insertDiacritic(i, diacritic);
                 wasAdded = true;
             }
             // otherwise, The diacritic modifies this character because its completely
             // contained by the character width
-            else if (diacXStart >= currCharXStart && diacXEnd <= currCharXEnd)
+            else if (diacXEnd <= currCharXEnd)
             {
                 insertDiacritic(i, diacritic);
                 wasAdded = true;
             }
             // last character in the TextPosition so we add diacritic to the end
-            else if (diacXStart >= currCharXStart && diacXEnd > currCharXEnd && i == strLen - 1)
+            else if (i == strLen - 1)
             {
                 insertDiacritic(i, diacritic);
                 wasAdded = true;
@@ -693,7 +710,8 @@ public class TextPosition
     public boolean isVisible()
     {
         Rectangle2D.Float rectangle = new Rectangle2D.Float(0, 0, pageWidth, pageHeight);
-        if(this.rotation == 90 || this.rotation == 270) {
+        if (this.rotation == 90 || this.rotation == 270)
+        {
             // flip width and height
             rectangle = new Rectangle2D.Float(0, 0, pageHeight, pageWidth);
         }

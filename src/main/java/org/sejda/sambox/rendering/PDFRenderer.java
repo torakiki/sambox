@@ -372,11 +372,23 @@ public class PDFRenderer
 
     /**
      * Renders a given page to an AWT Graphics2D instance.
+     * <p>
+     * Known problems:
+     * <ul>
+     * <li>rendering of PDF files with transparencies is not supported on Ubuntu, see
+     * <a href="https://issues.apache.org/jira/browse/PDFBOX-4581">PDFBOX-4581</a> and
+     * <a href="https://bugs.openjdk.java.net/browse/JDK-6689349">JDK-6689349</a>. Rendering will not abort, but the
+     * pages will be rendered incorrectly.</li>
+     * <li>Clipping the Graphics2D will not work properly, see
+     * <a href="https://issues.apache.org/jira/browse/PDFBOX-4583">PDFBOX-4583</a>.</li>
+     * </ul>
+     * If you encounter these problems, then you should render into an image by using the {@link #renderImage(int)
+     * renderImage} methods.
      * 
      * @param pageIndex the zero-based index of the page to be converted
      * @param graphics the Graphics2D on which to draw the page
-     * @param scaleX the scale to draw the page at for the x-axis
-     * @param scaleY the scale to draw the page at for the y-axis
+     * @param scaleX the scale to draw the page at for the x-axis, where 1 = 72 DPI
+     * @param scaleY the scale to draw the page at for the y-axis, where 1 = 72 DPI
      * @param destination controlling visibility of optional content groups
      * @throws IOException if the PDF cannot be read
      */
