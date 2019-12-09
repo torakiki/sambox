@@ -24,7 +24,7 @@ import java.util.Properties;
 import org.sejda.sambox.SAMBox;
 
 /**
- * Exposes PDFBox version.
+ * Exposes SAMBox version.
  */
 public final class Version
 {
@@ -35,12 +35,11 @@ public final class Version
     }
 
     /**
-     * @return the version of PDFBox.
+     * @return the version of SAMBox.
      */
     public static String getVersion()
     {
-        try (InputStream stream = Version.class.getClassLoader().getResourceAsStream(
-                SAMBox.SAMBOX_PROPERTIES))
+        try (InputStream stream = Version.class.getResourceAsStream(SAMBox.SAMBOX_PROPERTIES))
         {
             if (stream != null)
             {
