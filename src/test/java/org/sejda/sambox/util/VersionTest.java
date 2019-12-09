@@ -15,7 +15,8 @@
  */
 package org.sejda.sambox.util;
 
-import static org.junit.Assert.assertNotNull;
+import static java.util.Objects.nonNull;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -29,7 +30,7 @@ public class VersionTest
     @Test
     public void testGetVersion()
     {
-        assertNotNull(Version.getVersion());
+        assertTrue(nonNull(Version.getVersion()) && Version.getVersion().length() > 0);
     }
 
 }

@@ -52,6 +52,6 @@ public final class Version
         {
             // nothing
         }
-        return null;
+        return "";
     }
 }
