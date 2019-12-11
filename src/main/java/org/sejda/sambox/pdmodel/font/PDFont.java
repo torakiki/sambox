@@ -357,7 +357,7 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
             }
             catch (IllegalArgumentException e)
             {
-                if (e.getMessage().contains("No glyph"))
+                if (e.getMessage().contains("No glyph") || e.getMessage().contains("is not available in this"))
                 {
                     bytes = new byte[] { (byte) codePoint };
                 }

@@ -295,4 +295,19 @@ public class PDFontTest extends TestCase
         }
         return baos.toByteArray();
     }
+
+    @Test
+    public void testEncodeLeniently() throws IOException
+    {
+        String unsupported = "ł";
+
+        try {
+            PDType1Font.HELVETICA.encode(unsupported);
+            fail("Exception expected");
+        } catch (IllegalArgumentException ex) {
+            // expected
+        }
+
+        PDType1Font.HELVETICA.encodeLeniently(unsupported);
+    }
 }
