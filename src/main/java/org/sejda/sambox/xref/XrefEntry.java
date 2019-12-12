@@ -40,8 +40,6 @@ public class XrefEntry
 
     XrefEntry(XrefType type, long objectNumber, long byteOffset, int generationNumber)
     {
-        requireArg(objectNumber >= 0 && generationNumber >= 0,
-                "Object number and generation number cannot be negative");
         this.type = type;
         this.key = new COSObjectKey(objectNumber, generationNumber);
         this.byteOffset = byteOffset;

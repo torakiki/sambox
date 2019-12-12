@@ -35,13 +35,13 @@ import org.sejda.sambox.cos.COSObjectKey;
 public class XrefEntryTest
 {
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void negativeObjectNumber()
     {
         inUseEntry(-10, 10, 0);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void negativeGenerationNumber()
     {
         inUseEntry(10, 10, -10);
