@@ -232,7 +232,7 @@ public class AbstractXrefTableParserTest
         assertEquals(3, found.size());
     }
 
-    @Test(expected = IOException.class)
+    @Test
     public void parseNegativeGeneration() throws IOException
     {
         Set<XrefEntry> found = new HashSet<>();
