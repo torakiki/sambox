@@ -276,7 +276,7 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
             }
             else
             {
-                throw new IOException("Unknown filter type:" + filters);
+                LOG.warn("Unknown filter type:" + filters);
             }
         }
     }
