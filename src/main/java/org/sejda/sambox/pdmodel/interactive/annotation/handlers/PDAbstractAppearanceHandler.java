@@ -495,6 +495,11 @@ public abstract class PDAbstractAppearanceHandler implements PDAppearanceHandler
     private void setTransformationMatrix(PDAppearanceStream appearanceStream)
     {
         PDRectangle bbox = getRectangle();
+        if(bbox == null)
+        {
+            return;
+        }
+
         appearanceStream.setBBox(bbox);
         AffineTransform transform = AffineTransform.getTranslateInstance(-bbox.getLowerLeftX(),
                 -bbox.getLowerLeftY());
