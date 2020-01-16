@@ -73,11 +73,7 @@ import org.sejda.sambox.pdmodel.font.PDType3Font;
 import org.sejda.sambox.pdmodel.graphics.PDLineDashPattern;
 import org.sejda.sambox.pdmodel.graphics.PDXObject;
 import org.sejda.sambox.pdmodel.graphics.blend.BlendMode;
-import org.sejda.sambox.pdmodel.graphics.color.PDColor;
-import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
-import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
-import org.sejda.sambox.pdmodel.graphics.color.PDICCBased;
-import org.sejda.sambox.pdmodel.graphics.color.PDPattern;
+import org.sejda.sambox.pdmodel.graphics.color.*;
 import org.sejda.sambox.pdmodel.graphics.form.PDFormXObject;
 import org.sejda.sambox.pdmodel.graphics.form.PDTransparencyGroup;
 import org.sejda.sambox.pdmodel.graphics.image.PDImage;
@@ -103,13 +99,13 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Paints a page in a PDF document to a Graphics context. May be subclassed to provide custom rendering.
- * 
+ *
  * <p>
  * If you want to do custom graphics processing rather than Graphics2D rendering, then you should subclass
  * {@link PDFGraphicsStreamEngine} instead. Subclassing PageDrawer is only suitable for cases where the goal is to
  * render onto a {@link Graphics2D} surface. In that case you'll also have to subclass {@link PDFRenderer} and modify
  * {@link PDFRenderer#createPageDrawer(PageDrawerParameters)}.
- * 
+ *
  * @author Ben Litchfield
  */
 public class PageDrawer extends PDFGraphicsStreamEngine
@@ -242,7 +238,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
 
     /**
      * Draws the page to the requested context.
-     * 
+     *
      * @param g The graphics context to draw onto.
      * @param pageSize The size of the page to draw.
      * @throws IOException If there is an IO error while drawing the page.
@@ -318,13 +314,18 @@ public class PageDrawer extends PDFGraphicsStreamEngine
 
     /**
      * Returns an AWT paint for the given PDColor.
-     * 
+     *
      * @param color The color to get a paint for. This can be an actual color or a pattern.
      * @throws IOException
      */
     protected Paint getPaint(PDColor color) throws IOException
     {
         PDColorSpace colorSpace = color.getColorSpace();
+        if(colorSpace == null)
+        {
+            colorSpace = PDDeviceRGB.INSTANCE;
+        }
+
         if (!(colorSpace instanceof PDPattern))
         {
             float[] rgb = colorSpace.toRGB(color.getComponents());
@@ -445,7 +446,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
 
     /**
      * Render the font using the Glyph2D interface.
-     * 
+     *
      * @param glyph2D the Glyph2D implementation provided a GeneralPath for each glyph
      * @param font the font
      * @param code character code
@@ -524,7 +525,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
 
     /**
      * Provide a Glyph2D for the given font.
-     * 
+     *
      * @param font the font
      * @return the implementation of the Glyph2D interface for the given font
      * @throws IOException if something went wrong
