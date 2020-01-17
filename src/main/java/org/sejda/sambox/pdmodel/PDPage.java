@@ -18,6 +18,14 @@ package org.sejda.sambox.pdmodel;
 
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toList;
+import static org.sejda.sambox.cos.COSName.DECODE_PARMS;
+import static org.sejda.sambox.cos.COSName.DL;
+import static org.sejda.sambox.cos.COSName.F;
+import static org.sejda.sambox.cos.COSName.FILTER;
+import static org.sejda.sambox.cos.COSName.F_DECODE_PARMS;
+import static org.sejda.sambox.cos.COSName.F_FILTER;
+import static org.sejda.sambox.cos.COSName.LENGTH;
 
 import java.awt.Point;
 import java.awt.geom.Point2D;
@@ -26,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.SequenceInputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -61,6 +70,8 @@ import org.slf4j.LoggerFactory;
 public class PDPage implements COSObjectable, PDContentStream
 {
     private static final Logger LOG = LoggerFactory.getLogger(PDPage.class);
+    private static final List<COSName> VALID_STREAM_KEYS = Arrays.asList(LENGTH, FILTER,
+            DECODE_PARMS, F, F_FILTER, F_DECODE_PARMS, DL);
 
     private final COSDictionary page;
     private PDResources pageResources;
@@ -834,7 +845,7 @@ public class PDPage implements COSObjectable, PDContentStream
             return null;
         }
         COSArray array = (COSArray) base;
-        List<PDViewportDictionary> viewports = new ArrayList<PDViewportDictionary>();
+        List<PDViewportDictionary> viewports = new ArrayList<>();
         for (int i = 0; i < array.size(); ++i)
         {
             COSBase base2 = array.getObject(i);
@@ -869,4 +880,20 @@ public class PDPage implements COSObjectable, PDContentStream
         }
         page.setItem(COSName.VP, array);
     }
+
+    /**
+     * Removes from the page dictionary all non spec compliant keys.
+     * 
+     * @see https://github.com/torakiki/pdfsam/issues/383
+     */
+    public void sanitizeDictionary()
+    {
+        getContentStreams().forEachRemaining(s -> {
+            COSStream stream = s.getCOSObject();
+            List<COSName> invalid = stream.keySet().stream()
+                    .filter(k -> !VALID_STREAM_KEYS.contains(k)).collect(toList());
+            invalid.forEach(stream::removeItem);
+        });
+    }
+
 }

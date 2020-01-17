@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.pdmodel;
 
+import static java.util.Objects.nonNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -31,7 +32,9 @@ import org.sejda.sambox.cos.COSFloat;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.COSNumber;
+import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
+import org.sejda.sambox.pdmodel.font.PDType0Font;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationLink;
 
 /**
@@ -134,6 +137,37 @@ public class PDPageTest
         assertEquals(new Point(12, 804), page.cropBoxCoordinatesToDraw(new Point2D.Float(6, 10)));
     }
 
+    @Test
+    public void sanitize() throws IOException
+    {
+        try (PDDocument doc = new PDDocument())
+        {
+            PDPage page = new PDPage();
+            PDType0Font font = PDType0Font.load(doc,
+                    PDType0Font.class.getClassLoader().getResourceAsStream(
+                            "org/sejda/sambox/resources/ttf/LiberationSans-Regular.ttf"));
+
+            try (PDPageContentStream formContents = new PDPageContentStream(doc, page))
+            {
+                formContents.beginText();
+                formContents.setFont(font, 22);
+                formContents.newLineAtOffset(100, 100);
+                formContents.showText("Chuck Norris");
+                formContents.endText();
+            }
+            COSStream stream = page.getCOSObject().getDictionaryObject(COSName.CONTENTS,
+                    COSStream.class);
+            stream.setItem(COSName.ANNOTS, new COSDictionary());
+            assertTrue(nonNull(
+                    page.getCOSObject().getDictionaryObject(COSName.CONTENTS, COSStream.class)
+                            .getItem(COSName.ANNOTS)));
+            page.sanitizeDictionary();
+            assertFalse(nonNull(
+                    page.getCOSObject().getDictionaryObject(COSName.CONTENTS, COSStream.class)
+                            .getItem(COSName.ANNOTS)));
+        }
+    }
+
     COSArray toArray(float n1, float n2, float n3, float n4)
     {
         COSArray result = new COSArray();
@@ -143,4 +177,5 @@ public class PDPageTest
         result.add(new COSFloat(n4));
         return result;
     }
+
 }
