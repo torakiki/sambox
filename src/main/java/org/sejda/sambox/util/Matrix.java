@@ -32,11 +32,10 @@ import org.sejda.sambox.cos.COSNumber;
  */
 public final class Matrix implements Cloneable
 {
-    static final float[] DEFAULT_SINGLE =
-    {
-        1,0,0,  //  a  b  0     sx hy 0    note: hx and hy are reversed vs. the PDF spec as we use
-        0,1,0,  //  c  d  0  =  hx sy 0          AffineTransform's definition x and y shear
-        0,0,1   //  tx ty 1     tx ty 1
+    static final float[] DEFAULT_SINGLE = { 1, 0, 0, // a b 0 sx hy 0 note: hx and hy are reversed vs. the PDF spec as
+                                                     // we use
+            0, 1, 0, // c d 0 = hx sy 0 AffineTransform's definition x and y shear
+            0, 0, 1 // tx ty 1 tx ty 1
     };
 
     private final float[] single;
@@ -56,12 +55,12 @@ public final class Matrix implements Cloneable
     public Matrix(COSArray array)
     {
         single = new float[DEFAULT_SINGLE.length];
-        single[0] = ((COSNumber)array.getObject(0)).floatValue();
-        single[1] = ((COSNumber)array.getObject(1)).floatValue();
-        single[3] = ((COSNumber)array.getObject(2)).floatValue();
-        single[4] = ((COSNumber)array.getObject(3)).floatValue();
-        single[6] = ((COSNumber)array.getObject(4)).floatValue();
-        single[7] = ((COSNumber)array.getObject(5)).floatValue();
+        single[0] = ((COSNumber) array.getObject(0)).floatValue();
+        single[1] = ((COSNumber) array.getObject(1)).floatValue();
+        single[3] = ((COSNumber) array.getObject(2)).floatValue();
+        single[4] = ((COSNumber) array.getObject(3)).floatValue();
+        single[6] = ((COSNumber) array.getObject(4)).floatValue();
+        single[7] = ((COSNumber) array.getObject(5)).floatValue();
         single[8] = 1;
     }
 
@@ -87,18 +86,18 @@ public final class Matrix implements Cloneable
     {
         single = new float[DEFAULT_SINGLE.length];
         System.arraycopy(DEFAULT_SINGLE, 0, single, 0, DEFAULT_SINGLE.length);
-        single[0] = (float)at.getScaleX();
-        single[1] = (float)at.getShearY();
-        single[3] = (float)at.getShearX();
-        single[4] = (float)at.getScaleY();
-        single[6] = (float)at.getTranslateX();
-        single[7] = (float)at.getTranslateY();
+        single[0] = (float) at.getScaleX();
+        single[1] = (float) at.getShearY();
+        single[3] = (float) at.getShearX();
+        single[4] = (float) at.getScaleY();
+        single[6] = (float) at.getTranslateX();
+        single[7] = (float) at.getTranslateY();
     }
 
     /**
-     * Convenience method to be used when creating a matrix from unverified data. If the parameter
-     * is a COSArray with at least six numbers, a Matrix object is created from the first six
-     * numbers and returned. If not, then the identity Matrix is returned.
+     * Convenience method to be used when creating a matrix from unverified data. If the parameter is a COSArray with at
+     * least six numbers, a Matrix object is created from the first six numbers and returned. If not, then the identity
+     * Matrix is returned.
      *
      * @param base a COS object, preferably a COSArray with six numbers.
      *
@@ -126,8 +125,8 @@ public final class Matrix implements Cloneable
     }
 
     /**
-     * This method resets the numbers in this Matrix to the original values, which are
-     * the values that a newly constructed Matrix would have.
+     * This method resets the numbers in this Matrix to the original values, which are the values that a newly
+     * constructed Matrix would have.
      *
      * @deprecated This method will be removed.
      */
@@ -144,10 +143,9 @@ public final class Matrix implements Cloneable
      */
     public AffineTransform createAffineTransform()
     {
-        return new AffineTransform(
-            single[0], single[1],   // m00 m10 = scaleX shearY
-            single[3], single[4],   // m01 m11 = shearX scaleY
-            single[6], single[7] ); // m02 m12 = tx ty
+        return new AffineTransform(single[0], single[1], // m00 m10 = scaleX shearY
+                single[3], single[4], // m01 m11 = shearX scaleY
+                single[6], single[7]); // m02 m12 = tx ty
     }
 
     /**
@@ -157,14 +155,14 @@ public final class Matrix implements Cloneable
      * @deprecated Use the {@link #Matrix(AffineTransform)} constructor instead.
      */
     @Deprecated
-    public void setFromAffineTransform( AffineTransform af )
+    public void setFromAffineTransform(AffineTransform af)
     {
-        single[0] = (float)af.getScaleX();
-        single[1] = (float)af.getShearY();
-        single[3] = (float)af.getShearX();
-        single[4] = (float)af.getScaleY();
-        single[6] = (float)af.getTranslateX();
-        single[7] = (float)af.getTranslateY();
+        single[0] = (float) af.getScaleX();
+        single[1] = (float) af.getShearY();
+        single[3] = (float) af.getShearX();
+        single[4] = (float) af.getScaleY();
+        single[6] = (float) af.getTranslateX();
+        single[7] = (float) af.getTranslateY();
     }
 
     /**
@@ -175,9 +173,9 @@ public final class Matrix implements Cloneable
      *
      * @return The value at the row/column position.
      */
-    public float getValue( int row, int column )
+    public float getValue(int row, int column)
     {
-        return single[row*3+column];
+        return single[row * 3 + column];
     }
 
     /**
@@ -187,9 +185,9 @@ public final class Matrix implements Cloneable
      * @param column the column to set the value at.
      * @param value The value to set at the position.
      */
-    public void setValue( int row, int column, float value )
+    public void setValue(int row, int column, float value)
     {
-        single[row*3+column] = value;
+        single[row * 3 + column] = value;
     }
 
     /**
@@ -297,25 +295,25 @@ public final class Matrix implements Cloneable
      *
      * @return The result of the two multiplied matrices.
      */
-    public Matrix multiply( Matrix b )
+    public Matrix multiply(Matrix b)
     {
         return this.multiply(b, new Matrix());
     }
 
     /**
-     * This method multiplies this Matrix with the specified other Matrix, storing the product in the specified
-     * result Matrix. By reusing Matrix instances like this, multiplication chains can be executed without having
-     * to create many temporary Matrix objects.
+     * This method multiplies this Matrix with the specified other Matrix, storing the product in the specified result
+     * Matrix. By reusing Matrix instances like this, multiplication chains can be executed without having to create
+     * many temporary Matrix objects.
      * <p/>
-     * It is allowed to have (other == this) or (result == this) or indeed (other == result) but if this is done,
-     * the backing float[] matrix values may be copied in order to ensure a correct product.
+     * It is allowed to have (other == this) or (result == this) or indeed (other == result) but if this is done, the
+     * backing float[] matrix values may be copied in order to ensure a correct product.
      *
      * @param other the second operand Matrix in the multiplication
      * @param result the Matrix instance into which the result should be stored. If result is null, a new Matrix
-     *               instance is created.
+     * instance is created.
      * @return the product of the two matrices.
      */
-    public Matrix multiply( Matrix other, Matrix result )
+    public Matrix multiply(Matrix other, Matrix result)
     {
         if (result == null)
         {
@@ -351,33 +349,24 @@ public final class Matrix implements Cloneable
                 otherOperand = otherOrigVals;
             }
 
-            result.single[0] = thisOperand[0] * otherOperand[0]
-                             + thisOperand[1] * otherOperand[3]
-                             + thisOperand[2] * otherOperand[6];
-            result.single[1] = thisOperand[0] * otherOperand[1]
-                             + thisOperand[1] * otherOperand[4]
-                             + thisOperand[2] * otherOperand[7];
-            result.single[2] = thisOperand[0] * otherOperand[2]
-                             + thisOperand[1] * otherOperand[5]
-                             + thisOperand[2] * otherOperand[8];
-            result.single[3] = thisOperand[3] * otherOperand[0]
-                             + thisOperand[4] * otherOperand[3]
-                             + thisOperand[5] * otherOperand[6];
-            result.single[4] = thisOperand[3] * otherOperand[1]
-                             + thisOperand[4] * otherOperand[4]
-                             + thisOperand[5] * otherOperand[7];
-            result.single[5] = thisOperand[3] * otherOperand[2]
-                             + thisOperand[4] * otherOperand[5]
-                             + thisOperand[5] * otherOperand[8];
-            result.single[6] = thisOperand[6] * otherOperand[0]
-                             + thisOperand[7] * otherOperand[3]
-                             + thisOperand[8] * otherOperand[6];
-            result.single[7] = thisOperand[6] * otherOperand[1]
-                             + thisOperand[7] * otherOperand[4]
-                             + thisOperand[8] * otherOperand[7];
-            result.single[8] = thisOperand[6] * otherOperand[2]
-                             + thisOperand[7] * otherOperand[5]
-                             + thisOperand[8] * otherOperand[8];
+            result.single[0] = thisOperand[0] * otherOperand[0] + thisOperand[1] * otherOperand[3]
+                    + thisOperand[2] * otherOperand[6];
+            result.single[1] = thisOperand[0] * otherOperand[1] + thisOperand[1] * otherOperand[4]
+                    + thisOperand[2] * otherOperand[7];
+            result.single[2] = thisOperand[0] * otherOperand[2] + thisOperand[1] * otherOperand[5]
+                    + thisOperand[2] * otherOperand[8];
+            result.single[3] = thisOperand[3] * otherOperand[0] + thisOperand[4] * otherOperand[3]
+                    + thisOperand[5] * otherOperand[6];
+            result.single[4] = thisOperand[3] * otherOperand[1] + thisOperand[4] * otherOperand[4]
+                    + thisOperand[5] * otherOperand[7];
+            result.single[5] = thisOperand[3] * otherOperand[2] + thisOperand[4] * otherOperand[5]
+                    + thisOperand[5] * otherOperand[8];
+            result.single[6] = thisOperand[6] * otherOperand[0] + thisOperand[7] * otherOperand[3]
+                    + thisOperand[8] * otherOperand[6];
+            result.single[7] = thisOperand[6] * otherOperand[1] + thisOperand[7] * otherOperand[4]
+                    + thisOperand[8] * otherOperand[7];
+            result.single[8] = thisOperand[6] * otherOperand[2] + thisOperand[7] * otherOperand[5]
+                    + thisOperand[8] * otherOperand[8];
         }
 
         return result;
@@ -390,8 +379,8 @@ public final class Matrix implements Cloneable
      */
     public void transform(Point2D point)
     {
-        float x = (float)point.getX();
-        float y = (float)point.getY();
+        float x = (float) point.getX();
+        float y = (float) point.getY();
         float a = single[0];
         float b = single[1];
         float c = single[3];
@@ -520,8 +509,8 @@ public final class Matrix implements Cloneable
      */
     public static Matrix getRotateInstance(double theta, float tx, float ty)
     {
-        float cosTheta = (float)Math.cos(theta);
-        float sinTheta = (float)Math.sin(theta);
+        float cosTheta = (float) Math.cos(theta);
+        float sinTheta = (float) Math.sin(theta);
 
         Matrix matrix = new Matrix();
         matrix.single[0] = cosTheta;
@@ -548,13 +537,14 @@ public final class Matrix implements Cloneable
 
     /**
      * Clones this object.
+     * 
      * @return cloned matrix as an object.
      */
     @Override
     public Matrix clone()
     {
         Matrix clone = new Matrix();
-        System.arraycopy( single, 0, clone.single, 0, 9 );
+        System.arraycopy(single, 0, clone.single, 0, 9);
         return clone;
     }
 
@@ -570,24 +560,18 @@ public final class Matrix implements Cloneable
         /**
          * BM: if the trm is rotated, the calculation is a little more complicated
          *
-         * The rotation matrix multiplied with the scaling matrix is:
-         * (   x   0   0)    ( cos  sin  0)    ( x*cos x*sin   0)
-         * (   0   y   0) *  (-sin  cos  0)  = (-y*sin y*cos   0)
-         * (   0   0   1)    (   0    0  1)    (     0     0   1)
+         * The rotation matrix multiplied with the scaling matrix is: ( x 0 0) ( cos sin 0) ( x*cos x*sin 0) ( 0 y 0) *
+         * (-sin cos 0) = (-y*sin y*cos 0) ( 0 0 1) ( 0 0 1) ( 0 0 1)
          *
-         * So, if you want to deduce x from the matrix you take
-         * M(0,0) = x*cos and M(0,1) = x*sin and use the theorem of Pythagoras
+         * So, if you want to deduce x from the matrix you take M(0,0) = x*cos and M(0,1) = x*sin and use the theorem of
+         * Pythagoras
          *
-         * sqrt(M(0,0)^2+M(0,1)^2) =
-         * sqrt(x2*cos2+x2*sin2) =
-         * sqrt(x2*(cos2+sin2)) = <- here is the trick cos2+sin2 is one
-         * sqrt(x2) =
-         * abs(x)
+         * sqrt(M(0,0)^2+M(0,1)^2) = sqrt(x2*cos2+x2*sin2) = sqrt(x2*(cos2+sin2)) = <- here is the trick cos2+sin2 is
+         * one sqrt(x2) = abs(x)
          */
-        if( !(single[1]==0.0f && single[3]==0.0f) )
+        if (!(single[1] == 0.0f && single[3] == 0.0f))
         {
-            xScale = (float)Math.sqrt(Math.pow(single[0], 2)+
-                                      Math.pow(single[1], 2));
+            xScale = (float) Math.sqrt(Math.pow(single[0], 2) + Math.pow(single[1], 2));
         }
         return xScale;
     }
@@ -600,10 +584,9 @@ public final class Matrix implements Cloneable
     public float getScalingFactorY()
     {
         float yScale = single[4];
-        if( !(single[1]==0.0f && single[3]==0.0f) )
+        if (!(single[1] == 0.0f && single[3] == 0.0f))
         {
-            yScale = (float)Math.sqrt(Math.pow(single[3], 2)+
-                                      Math.pow(single[4], 2));
+            yScale = (float) Math.sqrt(Math.pow(single[3], 2) + Math.pow(single[4], 2));
         }
         return yScale;
     }
@@ -681,7 +664,8 @@ public final class Matrix implements Cloneable
     }
 
     /**
-     * Returns a COS array which represents this matrix.
+     * Returns a COS array which represent the geometric relevant components of the matrix. The last column of the
+     * matrix is ignored, only the first two columns are returned. This is analog to the Matrix(COSArray) constructor.
      */
     public COSArray toCOSArray()
     {
@@ -698,7 +682,7 @@ public final class Matrix implements Cloneable
     @Override
     public String toString()
     {
-        StringBuffer sb = new StringBuffer( "" );
+        StringBuffer sb = new StringBuffer("");
         sb.append("[");
         sb.append(single[0] + ",");
         sb.append(single[1] + ",");

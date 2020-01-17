@@ -20,6 +20,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
 import java.awt.Paint;
 import java.awt.Point;
@@ -73,7 +74,12 @@ import org.sejda.sambox.pdmodel.font.PDType3Font;
 import org.sejda.sambox.pdmodel.graphics.PDLineDashPattern;
 import org.sejda.sambox.pdmodel.graphics.PDXObject;
 import org.sejda.sambox.pdmodel.graphics.blend.BlendMode;
-import org.sejda.sambox.pdmodel.graphics.color.*;
+import org.sejda.sambox.pdmodel.graphics.color.PDColor;
+import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
+import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
+import org.sejda.sambox.pdmodel.graphics.color.PDDeviceRGB;
+import org.sejda.sambox.pdmodel.graphics.color.PDICCBased;
+import org.sejda.sambox.pdmodel.graphics.color.PDPattern;
 import org.sejda.sambox.pdmodel.graphics.form.PDFormXObject;
 import org.sejda.sambox.pdmodel.graphics.form.PDTransparencyGroup;
 import org.sejda.sambox.pdmodel.graphics.image.PDImage;
@@ -321,7 +327,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
     protected Paint getPaint(PDColor color) throws IOException
     {
         PDColorSpace colorSpace = color.getColorSpace();
-        if(colorSpace == null)
+        if (colorSpace == null)
         {
             colorSpace = PDDeviceRGB.INSTANCE;
         }
@@ -748,12 +754,12 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         int lineJoin = Math.min(2, Math.max(0, state.getLineJoin()));
 
         float miterLimit = state.getMiterLimit();
-        if(miterLimit < 1) {
+        if (miterLimit < 1)
+        {
             // avoid java.lang.IllegalArgumentException: miter limit < 1
             miterLimit = 1;
         }
-        return new BasicStroke(lineWidth, lineCap, lineJoin, miterLimit, dashArray,
-                phaseStart);
+        return new BasicStroke(lineWidth, lineCap, lineJoin, miterLimit, dashArray, phaseStart);
     }
 
     private float[] getDashArray(PDLineDashPattern dashPattern)
@@ -1018,8 +1024,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
 
             // if the image is scaled down, we use smooth interpolation, eg PDFBOX-2364
             // only when scaled up do we use nearest neighbour, eg PDFBOX-2302 / mori-cvpr01.pdf
-            // stencils are excluded from this rule (see survey.pdf)
-            if (isScaledUp || pdImage.isStencil())
+            if (isScaledUp)
             {
                 graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
                         RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
@@ -1044,8 +1049,22 @@ public class PageDrawer extends PDFGraphicsStreamEngine
                 Paint paint = getNonStrokingPaint();
                 Rectangle2D unitRect = new Rectangle2D.Float(0, 0, 1, 1);
                 Rectangle2D bounds = at.createTransformedShape(unitRect).getBounds2D();
-                BufferedImage renderedPaint = new BufferedImage((int) Math.ceil(bounds.getWidth()),
-                        (int) Math.ceil(bounds.getHeight()), BufferedImage.TYPE_INT_ARGB);
+                GraphicsConfiguration deviceConfiguration = graphics.getDeviceConfiguration();
+                int w;
+                int h;
+                if (deviceConfiguration != null && deviceConfiguration.getBounds() != null)
+                {
+                    // PDFBOX-4690: bounds doesn't need to be larger than device bounds (OOM risk)
+                    Rectangle deviceBounds = deviceConfiguration.getBounds();
+                    w = (int) Math.ceil(Math.min(bounds.getWidth(), deviceBounds.getWidth()));
+                    h = (int) Math.ceil(Math.min(bounds.getHeight(), deviceBounds.getHeight()));
+                }
+                else
+                {
+                    w = (int) Math.ceil(bounds.getWidth());
+                    h = (int) Math.ceil(bounds.getHeight());
+                }
+                BufferedImage renderedPaint = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
                 Graphics2D g = (Graphics2D) renderedPaint.getGraphics();
                 g.translate(-bounds.getMinX(), -bounds.getMinY());
                 g.setPaint(paint);
@@ -1054,8 +1073,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
 
                 // draw the mask
                 BufferedImage mask = pdImage.getImage();
-                BufferedImage renderedMask = new BufferedImage((int) Math.ceil(bounds.getWidth()),
-                        (int) Math.ceil(bounds.getHeight()), BufferedImage.TYPE_INT_RGB);
+                BufferedImage renderedMask = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
                 g = (Graphics2D) renderedMask.getGraphics();
                 g.translate(-bounds.getMinX(), -bounds.getMinY());
                 AffineTransform imageTransform = new AffineTransform(at);
@@ -1069,8 +1087,6 @@ public class PageDrawer extends PDFGraphicsStreamEngine
                 int[] alphaPixel = null;
                 WritableRaster raster = renderedPaint.getRaster();
                 WritableRaster alpha = renderedMask.getRaster();
-                int h = renderedMask.getRaster().getHeight();
-                int w = renderedMask.getRaster().getWidth();
                 for (int y = 0; y < h; y++)
                 {
                     for (int x = 0; x < w; x++)

@@ -16,7 +16,7 @@
  */
 package org.sejda.sambox.contentstream.operator.graphics;
 
-import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
 import java.io.IOException;
 import java.util.List;
 
@@ -25,8 +25,7 @@ import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.cos.COSBase;
 
 /**
- * B Fill and then stroke the path, using the nonzero winding number rule to determine the region
- * to fill.
+ * B Fill and then stroke the path, using the nonzero winding number rule to determine the region to fill.
  *
  * @author Ben Litchfield
  */
@@ -35,7 +34,7 @@ public class FillNonZeroAndStrokePath extends GraphicsOperatorProcessor
     @Override
     public void process(Operator operator, List<COSBase> operands) throws IOException
     {
-        getContext().fillAndStrokePath(GeneralPath.WIND_NON_ZERO);
+        getContext().fillAndStrokePath(Path2D.WIND_NON_ZERO);
     }
 
     @Override

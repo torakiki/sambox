@@ -27,7 +27,6 @@ import java.awt.image.ColorConvertOp;
 import java.awt.image.WritableRaster;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -37,12 +36,13 @@ import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.ImageTypeSpecifier;
+import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
 import javax.imageio.metadata.IIOMetadata;
-import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
 
+import org.sejda.commons.FastByteArrayOutputStream;
 import org.sejda.commons.util.IOUtils;
 import org.sejda.io.SeekableSource;
 import org.sejda.io.SeekableSources;
@@ -76,7 +76,10 @@ public final class JPEGFactory
      */
     public static PDImageXObject createFromFile(File file) throws IOException
     {
-        return createFromSeekableSource(SeekableSources.seekableSourceFrom(file));
+        try (SeekableSource source = SeekableSources.seekableSourceFrom(file))
+        {
+            return createFromSeekableSource(source);
+        }
     }
 
     public static PDImageXObject createFromSeekableSource(SeekableSource source) throws IOException
@@ -204,13 +207,12 @@ public final class JPEGFactory
         BufferedImage awtAlphaImage = getAlphaImage(image);
 
         // create XObject
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        FastByteArrayOutputStream baos = new FastByteArrayOutputStream();
         encodeImageToJPEGStream(awtColorImage, quality, dpi, baos);
         ByteArrayInputStream byteStream = new ByteArrayInputStream(baos.toByteArray());
 
         PDImageXObject pdImage = new PDImageXObject(byteStream, COSName.DCT_DECODE,
-                awtColorImage.getWidth(), awtColorImage.getHeight(),
-                awtColorImage.getColorModel().getComponentSize(0),
+                awtColorImage.getWidth(), awtColorImage.getHeight(), 8,
                 getColorSpaceFromAWT(awtColorImage));
 
         // alpha -> soft mask
@@ -237,9 +239,8 @@ public final class JPEGFactory
             imageWriter.setOutput(ios);
 
             // add compression
-            JPEGImageWriteParam jpegParam = (JPEGImageWriteParam) imageWriter
-                    .getDefaultWriteParam();
-            jpegParam.setCompressionMode(JPEGImageWriteParam.MODE_EXPLICIT);
+            ImageWriteParam jpegParam = imageWriter.getDefaultWriteParam();
+            jpegParam.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
             jpegParam.setCompressionQuality(quality);
 
             // add metadata

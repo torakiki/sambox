@@ -16,8 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.graphics.image;
 
-import static org.sejda.io.SeekableSources.seekableSourceFrom;
-
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -28,6 +26,7 @@ import javax.imageio.stream.MemoryCacheImageOutputStream;
 
 import org.sejda.commons.FastByteArrayOutputStream;
 import org.sejda.io.SeekableSource;
+import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.filter.Filter;
@@ -119,7 +118,7 @@ public final class CCITTFactory
      */
     public static PDImageXObject createFromFile(File file) throws IOException
     {
-        return createFromRandomAccessImpl(seekableSourceFrom(file), 0);
+        return createFromFile(file, 0);
     }
 
     /**
@@ -132,14 +131,19 @@ public final class CCITTFactory
      */
     public static PDImageXObject createFromFile(File file, int number) throws IOException
     {
-        return createFromRandomAccessImpl(seekableSourceFrom(file), number);
+        try (SeekableSource source = SeekableSources.seekableSourceFrom(file))
+        {
+            return createFromRandomAccessImpl(source, number);
+        }
     }
 
     public static PDImageXObject createFromSeekableSource(SeekableSource source) throws IOException
     {
         return createFromRandomAccessImpl(source, 0);
     }
-    public static PDImageXObject createFromSeekableSource(SeekableSource source, int number) throws IOException
+
+    public static PDImageXObject createFromSeekableSource(SeekableSource source, int number)
+            throws IOException
     {
         return createFromRandomAccessImpl(source, number);
     }
@@ -244,22 +248,22 @@ public final class CCITTFactory
 
             switch (type)
             {
-                case 1: // byte value
-                    val = source.read();
-                    source.read();
-                    source.read();
-                    source.read();
-                    break;
+            case 1: // byte value
+                val = source.read();
+                source.read();
+                source.read();
+                source.read();
+                break;
 
-                case 3: // short value
-                    val = readshort(endianess, source);
-                    source.read();
-                    source.read();
-                    break;
+            case 3: // short value
+                val = readshort(endianess, source);
+                source.read();
+                source.read();
+                break;
 
-                default: // long and other types
-                    val = readlong(endianess, source);
-                    break;
+            default: // long and other types
+                val = readlong(endianess, source);
+                break;
             }
             switch (tag)
             {

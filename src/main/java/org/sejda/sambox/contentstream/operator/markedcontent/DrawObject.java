@@ -29,6 +29,8 @@ import org.sejda.sambox.pdmodel.graphics.PDXObject;
 import org.sejda.sambox.pdmodel.graphics.form.PDFormXObject;
 import org.sejda.sambox.pdmodel.graphics.form.PDTransparencyGroup;
 import org.sejda.sambox.text.PDFMarkedContentExtractor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Do: Draws an XObject.
@@ -38,6 +40,8 @@ import org.sejda.sambox.text.PDFMarkedContentExtractor;
  */
 public class DrawObject extends OperatorProcessor
 {
+    private static final Logger LOG = LoggerFactory.getLogger(DrawObject.class);
+
     @Override
     public void process(Operator operator, List<COSBase> arguments) throws IOException
     {
@@ -54,14 +58,30 @@ public class DrawObject extends OperatorProcessor
         PDXObject xobject = getContext().getResources().getXObject(name);
         ((PDFMarkedContentExtractor) getContext()).xobject(xobject);
 
-        if (xobject instanceof PDTransparencyGroup)
+        if (xobject instanceof PDFormXObject)
         {
-            getContext().showTransparencyGroup((PDTransparencyGroup) xobject);
-        }
-        else if (xobject instanceof PDFormXObject)
-        {
-            PDFormXObject form = (PDFormXObject) xobject;
-            getContext().showForm(form);
+            try
+            {
+                getContext().increaseLevel();
+                if (getContext().getLevel() > 25)
+                {
+                    LOG.error("recursion is too deep, skipping form XObject");
+                    return;
+                }
+                PDFormXObject form = (PDFormXObject) xobject;
+                if (form instanceof PDTransparencyGroup)
+                {
+                    getContext().showTransparencyGroup((PDTransparencyGroup) form);
+                }
+                else
+                {
+                    getContext().showForm(form);
+                }
+            }
+            finally
+            {
+                getContext().decreaseLevel();
+            }
         }
     }
 

@@ -29,6 +29,8 @@ import org.sejda.sambox.pdmodel.graphics.PDXObject;
 import org.sejda.sambox.pdmodel.graphics.form.PDFormXObject;
 import org.sejda.sambox.pdmodel.graphics.form.PDTransparencyGroup;
 import org.sejda.sambox.pdmodel.graphics.image.PDImageXObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Do: Draws an XObject.
@@ -38,6 +40,8 @@ import org.sejda.sambox.pdmodel.graphics.image.PDImageXObject;
  */
 public final class DrawObject extends GraphicsOperatorProcessor
 {
+    private static final Logger LOG = LoggerFactory.getLogger(DrawObject.class);
+
     @Override
     public void process(Operator operator, List<COSBase> operands) throws IOException
     {
@@ -57,18 +61,35 @@ public final class DrawObject extends GraphicsOperatorProcessor
         {
             throw new MissingResourceException("Missing XObject: " + objectName.getName());
         }
-        else if (xobject instanceof PDImageXObject)
+        if (xobject instanceof PDImageXObject)
         {
             PDImageXObject image = (PDImageXObject) xobject;
             getContext().drawImage(image);
         }
-        else if (xobject instanceof PDTransparencyGroup)
-        {
-            getContext().showTransparencyGroup((PDTransparencyGroup) xobject);
-        }
         else if (xobject instanceof PDFormXObject)
         {
-            getContext().showForm((PDFormXObject) xobject);
+            try
+            {
+                getContext().increaseLevel();
+                if (getContext().getLevel() > 25)
+                {
+                    LOG.error("recursion is too deep, skipping form XObject");
+                    return;
+                }
+                PDFormXObject form = (PDFormXObject) xobject;
+                if (form instanceof PDTransparencyGroup)
+                {
+                    getContext().showTransparencyGroup((PDTransparencyGroup) form);
+                }
+                else
+                {
+                    getContext().showForm(form);
+                }
+            }
+            finally
+            {
+                getContext().decreaseLevel();
+            }
         }
     }
 

@@ -48,18 +48,15 @@ import org.slf4j.LoggerFactory;
  *
  * FILE SET VALIDATION
  *
- * This test suite is designed to test PDFToImage using a set of PDF files and known good output for
- * each. The default mode of testAll() is to process each *.pdf file in
- * "src/test/resources/input/rendering". An output file is created in "target/test-output/rendering"
- * with the same name as the PDF file, plus an additional page number and ".png" suffix.
+ * This test suite is designed to test PDFToImage using a set of PDF files and known good output for each. The default
+ * mode of testAll() is to process each *.pdf file in "src/test/resources/input/rendering". An output file is created in
+ * "target/test-output/rendering" with the same name as the PDF file, plus an additional page number and ".png" suffix.
  *
- * The output file is then tested against a known good result file from the input directory (again,
- * with the same name as the tested PDF file, but with the additional page number and ".png"
- * suffix).
+ * The output file is then tested against a known good result file from the input directory (again, with the same name
+ * as the tested PDF file, but with the additional page number and ".png" suffix).
  *
- * If the two aren't identical, a graphical .diff.png file is created. If they are identical, the
- * output .png file is deleted. If a "good result" file doesn't exist, the output .png file is left
- * there for human inspection.
+ * If the two aren't identical, a graphical .diff.png file is created. If they are identical, the output .png file is
+ * deleted. If a "good result" file doesn't exist, the output .png file is left there for human inspection.
  *
  * Errors are flagged by creating empty files with appropriate names in the target directory.
  *
@@ -93,7 +90,7 @@ public class TestPDFToImage
             }
         });
 
-        List<Object[]> params = new ArrayList<Object[]>();
+        List<Object[]> params = new ArrayList<>();
         for (File file : testFiles)
         {
             params.add(new Object[] { file.getName() });
@@ -130,8 +127,7 @@ public class TestPDFToImage
     }
 
     /**
-     * Create an image; the part between the smaller and the larger image is painted black, the rest
-     * in white
+     * Create an image; the part between the smaller and the larger image is painted black, the rest in white
      *
      * @param minWidth width of the smaller image
      * @param minHeight width of the smaller image
@@ -140,7 +136,8 @@ public class TestPDFToImage
      *
      * @return
      */
-    private BufferedImage createEmptyDiffImage(int minWidth, int minHeight, int maxWidth, int maxHeight)
+    private BufferedImage createEmptyDiffImage(int minWidth, int minHeight, int maxWidth,
+            int maxHeight)
     {
         BufferedImage bim3 = new BufferedImage(maxWidth, maxHeight, BufferedImage.TYPE_INT_RGB);
         Graphics graphics = bim3.getGraphics();
@@ -156,14 +153,13 @@ public class TestPDFToImage
     }
 
     /**
-     * Get the difference between two images, identical colors are set to white, differences are
-     * xored, the highest bit of each color is reset to avoid colors that are too light
+     * Get the difference between two images, identical colors are set to white, differences are xored, the highest bit
+     * of each color is reset to avoid colors that are too light
      *
      * @param bim1
      * @param bim2
-     * @return If the images are different, the function returns a diff image If the images are
-     * identical, the function returns null If the size is different, a black border on the botton
-     * and the right is created
+     * @return If the images are different, the function returns a diff image If the images are identical, the function
+     * returns null If the size is different, a black border on the botton and the right is created
      *
      * @throws IOException
      */
@@ -217,8 +213,7 @@ public class TestPDFToImage
      * @param file The file to validate
      * @param inDir Name of the input directory
      * @param outDir Name of the output directory
-     * @return false if the test failed (not identical or other problem), true if the test succeeded
-     * (all identical)
+     * @return false if the test failed (not identical or other problem), true if the test succeeded (all identical)
      * @throws IOException when there is an exception
      */
     public boolean doTestFile(final File file, String inDir, String outDir) throws IOException
@@ -282,7 +277,7 @@ public class TestPDFToImage
 
         LOG.info("Comparing: " + file.getName());
 
-        //Now check the resulting files ... did we get identical PNG(s)?
+        // Now check the resulting files ... did we get identical PNG(s)?
         try
         {
             new File(outDir + file.getName() + ".cmperror").delete();
@@ -292,8 +287,7 @@ public class TestPDFToImage
                 @Override
                 public boolean accept(File dir, String name)
                 {
-                    return (name.endsWith(".png")
-                            && name.startsWith(file.getName(), 0))
+                    return (name.endsWith(".png") && name.startsWith(file.getName(), 0))
                             && !name.endsWith(".png-diff.png");
                 }
             });
@@ -319,8 +313,10 @@ public class TestPDFToImage
                     if (bim3 != null)
                     {
                         failed = true;
-                        LOG.warn("*** TEST FAILURE *** Input and output not identical for file: " + inFile.getName());
-                        ImageIO.write(bim3, "png", new File(outFile.getAbsolutePath() + "-diff.png"));
+                        LOG.warn("*** TEST FAILURE *** Input and output not identical for file: "
+                                + inFile.getName());
+                        ImageIO.write(bim3, "png",
+                                new File(outFile.getAbsolutePath() + "-diff.png"));
                         System.err.println("Files differ: " + inFile.getAbsolutePath() + "\n"
                                 + "              " + outFile.getAbsolutePath());
                     }
@@ -351,14 +347,12 @@ public class TestPDFToImage
 
     private boolean filesAreIdentical(File left, File right) throws IOException
     {
-        //http://forum.java.sun.com/thread.jspa?threadID=688105&messageID=4003259
-        //http://web.archive.org/web/20060515173719/http://forum.java.sun.com/thread.jspa?threadID=688105&messageID=4003259
+        // http://forum.java.sun.com/thread.jspa?threadID=688105&messageID=4003259
+        // http://web.archive.org/web/20060515173719/http://forum.java.sun.com/thread.jspa?threadID=688105&messageID=4003259
 
-        /* -- I reworked ASSERT's into IF statement -- dwilson
-         assert left != null;
-         assert right != null;
-         assert left.exists();
-         assert right.exists();
+        /*
+         * -- I reworked ASSERT's into IF statement -- dwilson assert left != null; assert right != null; assert
+         * left.exists(); assert right.exists();
          */
         if (left != null && right != null && left.exists() && right.exists())
         {

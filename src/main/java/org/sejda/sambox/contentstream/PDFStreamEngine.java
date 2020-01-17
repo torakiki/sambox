@@ -49,7 +49,7 @@ import org.sejda.sambox.pdmodel.PDPage;
 import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.font.PDFont;
-import org.sejda.sambox.pdmodel.font.PDFontFactory;
+import org.sejda.sambox.pdmodel.font.PDType1Font;
 import org.sejda.sambox.pdmodel.font.PDType3CharProc;
 import org.sejda.sambox.pdmodel.font.PDType3Font;
 import org.sejda.sambox.pdmodel.graphics.PDLineDashPattern;
@@ -89,6 +89,9 @@ public abstract class PDFStreamEngine
     private PDPage currentPage;
     private boolean isProcessingPage;
     private Matrix initialMatrix;
+
+    // used to monitor potentially recursive operations.
+    private int level = 0;
 
     /**
      * Creates a new PDFStreamEngine.
@@ -659,7 +662,7 @@ public abstract class PDFStreamEngine
         if (font == null)
         {
             LOG.warn("No current font, will use default");
-            font = PDFontFactory.createDefaultFont();
+            font = PDType1Font.HELVETICA;
         }
 
         float fontSize = textState.getFontSize();
@@ -1041,5 +1044,38 @@ public abstract class PDFStreamEngine
         float x = ctm.getScaleX() + ctm.getShearX();
         float y = ctm.getScaleY() + ctm.getShearY();
         return width * (float) Math.sqrt((x * x + y * y) * 0.5);
+    }
+
+    /**
+     * Get the current level. This can be used to decide whether a recursion has done too deep and an operation should
+     * be skipped to avoid a stack overflow.
+     *
+     * @return the current level.
+     */
+    public int getLevel()
+    {
+        return level;
+    }
+
+    /**
+     * Increase the level. Call this before running a potentially recursive operation.
+     */
+    public void increaseLevel()
+    {
+        ++level;
+    }
+
+    /**
+     * Decrease the level. Call this after running a potentially recursive operation. A log message is shown if the
+     * level is below 0. This can happen if the level is not decreased after an operation is done, e.g. by using a
+     * "finally" block.
+     */
+    public void decreaseLevel()
+    {
+        --level;
+        if (level < 0)
+        {
+            LOG.error("level is " + level);
+        }
     }
 }

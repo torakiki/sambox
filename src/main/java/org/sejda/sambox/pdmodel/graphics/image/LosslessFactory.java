@@ -78,13 +78,12 @@ public final class LosslessFactory
      */
     public static PDImageXObject createFromImage(BufferedImage image) throws IOException
     {
-        if ((image.getType() == BufferedImage.TYPE_BYTE_GRAY
-                && image.getColorModel().getPixelSize() <= 8)
-                || (image.getType() == BufferedImage.TYPE_BYTE_BINARY
-                        && image.getColorModel().getPixelSize() == 1))
+        if (isGrayImage(image))
         {
             return createFromGrayImage(image);
         }
+
+        // We try to encode the image with predictor
         if (usePredictorEncoder)
         {
             PDImageXObject pdImageXObject = new PredictorEncoder(image).encode();
@@ -110,6 +109,25 @@ public final class LosslessFactory
 
         // Fallback: We export the image as 8-bit sRGB and might loose color information
         return createFromRGBImage(image);
+    }
+
+    private static boolean isGrayImage(BufferedImage image)
+    {
+        if (image.getTransparency() != Transparency.OPAQUE)
+        {
+            return false;
+        }
+        if (image.getType() == BufferedImage.TYPE_BYTE_GRAY
+                && image.getColorModel().getPixelSize() <= 8)
+        {
+            return true;
+        }
+        if (image.getType() == BufferedImage.TYPE_BYTE_BINARY
+                && image.getColorModel().getPixelSize() == 1)
+        {
+            return true;
+        }
+        return false;
     }
 
     // grayscale images need one color per sample
@@ -225,7 +243,7 @@ public final class LosslessFactory
      * @return the newly created PDImageXObject with the data compressed.
      * @throws IOException
      */
-    private static PDImageXObject prepareImageXObject(byte[] byteArray, int width, int height,
+    static PDImageXObject prepareImageXObject(byte[] byteArray, int width, int height,
             int bitsPerComponent, PDColorSpace initColorSpace) throws IOException
     {
         FastByteArrayOutputStream baos = new FastByteArrayOutputStream();

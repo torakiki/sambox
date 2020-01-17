@@ -68,15 +68,6 @@ public abstract class PDAbstractAppearanceHandler implements PDAppearanceHandler
         this.annotation = annotation;
     }
 
-    @Override
-    public abstract void generateNormalAppearance();
-
-    @Override
-    public abstract void generateRolloverAppearance();
-
-    @Override
-    public abstract void generateDownAppearance();
-
     PDAnnotation getAnnotation()
     {
         return annotation;
@@ -495,7 +486,7 @@ public abstract class PDAbstractAppearanceHandler implements PDAppearanceHandler
     private void setTransformationMatrix(PDAppearanceStream appearanceStream)
     {
         PDRectangle bbox = getRectangle();
-        if(bbox == null)
+        if (bbox == null)
         {
             return;
         }

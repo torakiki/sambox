@@ -22,8 +22,8 @@ import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.util.Matrix;
 
 /**
- * A CalRGB colour space is a CIE-based colour space with one transformation stage instead of two.
- * In this type of space, A, B, and C represent calibrated red, green, and blue colour values.
+ * A CalRGB colour space is a CIE-based colour space with one transformation stage instead of two. In this type of
+ * space, A, B, and C represent calibrated red, green, and blue colour values.
  *
  * @author Ben Litchfield
  * @author John Hewson
@@ -42,6 +42,7 @@ public class PDCalRGB extends PDCIEDictionaryBasedColorSpace
 
     /**
      * Creates a new CalRGB color space using the given COS array.
+     * 
      * @param rgb the cos array which represents this color space
      */
     public PDCalRGB(COSArray rgb)
@@ -83,9 +84,9 @@ public class PDCalRGB extends PDCIEDictionaryBasedColorSpace
             float c = value[2];
 
             PDGamma gamma = getGamma();
-            float powAR = (float)Math.pow(a, gamma.getR());
-            float powBG = (float)Math.pow(b, gamma.getG());
-            float powCB = (float)Math.pow(c, gamma.getB());
+            float powAR = (float) Math.pow(a, gamma.getR());
+            float powBG = (float) Math.pow(b, gamma.getG());
+            float powCB = (float) Math.pow(c, gamma.getB());
 
             float[] matrix = getMatrix();
             float mXA = matrix[0];
@@ -103,18 +104,15 @@ public class PDCalRGB extends PDCIEDictionaryBasedColorSpace
             float z = mZA * powAR + mZB * powBG + mZC * powCB;
             return convXYZtoRGB(x, y, z);
         }
-        else
-        {
-            // this is a hack, we simply skip CIE calibration of the RGB value
-            // this works only with whitepoint D65 (0.9505 1.0 1.089)
-            // see PDFBOX-2553
-            return new float[] { value[0], value[1], value[2] };
-        }
+        // this is a hack, we simply skip CIE calibration of the RGB value
+        // this works only with whitepoint D65 (0.9505 1.0 1.089)
+        // see PDFBOX-2553
+        return new float[] { value[0], value[1], value[2] };
     }
 
     /**
-     * Returns the gamma value.
-     * If none is present then the default of 1,1,1 will be returned.
+     * Returns the gamma value. If none is present then the default of 1,1,1 will be returned.
+     * 
      * @return the gamma value
      */
     public final PDGamma getGamma()
@@ -132,31 +130,30 @@ public class PDCalRGB extends PDCIEDictionaryBasedColorSpace
     }
 
     /**
-     * Returns the linear interpretation matrix, which is an array of nine numbers.
-     * If the underlying dictionary contains null then the identity matrix will be returned.
+     * Returns the linear interpretation matrix, which is an array of nine numbers. If the underlying dictionary
+     * contains null then the identity matrix will be returned.
+     * 
      * @return the linear interpretation matrix
      */
     public final float[] getMatrix()
     {
-        COSArray matrix = (COSArray)dictionary.getDictionaryObject(COSName.MATRIX);
+        COSArray matrix = (COSArray) dictionary.getDictionaryObject(COSName.MATRIX);
         if (matrix == null)
         {
-            return new float[] {  1, 0, 0, 0, 1, 0, 0, 0, 1 };
+            return new float[] { 1, 0, 0, 0, 1, 0, 0, 0, 1 };
         }
-        else
-        {
-           return matrix.toFloatArray();
-        }
+        return matrix.toFloatArray();
     }
 
     /**
      * Sets the gamma value.
+     * 
      * @param gamma the new gamma value
      */
     public final void setGamma(PDGamma gamma)
     {
         COSArray gammaArray = null;
-        if(gamma != null)
+        if (gamma != null)
         {
             gammaArray = gamma.getCOSArray();
         }
@@ -164,16 +161,27 @@ public class PDCalRGB extends PDCIEDictionaryBasedColorSpace
     }
 
     /**
-     * Sets the linear interpretation matrix.
-     * Passing in null will clear the matrix.
+     * Sets the linear interpretation matrix. Passing in null will clear the matrix.
+     * 
      * @param matrix the new linear interpretation matrix, or null
      */
     public final void setMatrix(Matrix matrix)
     {
         COSArray matrixArray = null;
-        if(matrix != null)
+        if (matrix != null)
         {
-            matrixArray = matrix.toCOSArray();
+            // We can't use matrix.toCOSArray(), as it only returns a subset of the matrix
+            float[][] values = matrix.getValues();
+            matrixArray = new COSArray();
+            matrixArray.add(new COSFloat(values[0][0]));
+            matrixArray.add(new COSFloat(values[0][1]));
+            matrixArray.add(new COSFloat(values[0][2]));
+            matrixArray.add(new COSFloat(values[1][0]));
+            matrixArray.add(new COSFloat(values[1][1]));
+            matrixArray.add(new COSFloat(values[1][2]));
+            matrixArray.add(new COSFloat(values[2][0]));
+            matrixArray.add(new COSFloat(values[2][1]));
+            matrixArray.add(new COSFloat(values[2][2]));
         }
         dictionary.setItem(COSName.MATRIX, matrixArray);
     }

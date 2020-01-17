@@ -16,8 +16,6 @@
  */
 package org.sejda.sambox.xref;
 
-import static org.sejda.commons.util.RequireUtils.requireArg;
-
 import java.util.Locale;
 
 import org.sejda.sambox.cos.COSObjectKey;
@@ -107,12 +105,10 @@ public class XrefEntry
         {
         case IN_USE:
             return String.format(Locale.US, XREFTABLE_ENTRY_FORMAT, getByteOffset(),
-                    getGenerationNumber(),
-                    'n');
+                    getGenerationNumber(), 'n');
         case FREE:
             return String.format(Locale.US, XREFTABLE_ENTRY_FORMAT, getObjectNumber(),
-                    getGenerationNumber(),
-                    'f');
+                    getGenerationNumber(), 'f');
         default:
             throw new IllegalArgumentException(
                     "Only in_use and free entries can be written to an xref table");

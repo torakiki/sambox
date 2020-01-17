@@ -76,7 +76,7 @@ public class COSArrayList<E> implements List<E>
     {
         array = new COSArray();
         array.add(item);
-        actual = new ArrayList<E>();
+        actual = new ArrayList<>();
         actual.add(actualObject);
 
         parentDict = dictionary;
@@ -190,11 +190,13 @@ public class COSArrayList<E> implements List<E>
     public boolean remove(Object o)
     {
         boolean retval = true;
-        int index = actual.indexOf(o);
-        if (index >= 0)
+        if (actual.indexOf(o) >= 0)
         {
-            actual.remove(index);
-            array.remove(index);
+            retval = actual.remove(o);
+            if (o instanceof COSObjectable)
+            {
+                retval = array.remove(((COSObjectable) o).getCOSObject());
+            }
         }
         else
         {
@@ -564,8 +566,9 @@ public class COSArrayList<E> implements List<E>
     @Override
     public E remove(int index)
     {
-        array.remove(index);
-        return actual.remove(index);
+        E toBeRemoved = actual.get(index);
+        remove(toBeRemoved);
+        return toBeRemoved;
     }
 
     /**
@@ -583,7 +586,7 @@ public class COSArrayList<E> implements List<E>
     @Override
     public int lastIndexOf(Object o)
     {
-        return actual.indexOf(o);
+        return actual.lastIndexOf(o);
 
     }
 
@@ -624,13 +627,12 @@ public class COSArrayList<E> implements List<E>
     }
 
     /**
-     * This will return then underlying COSArray.
+     * This will return the underlying COSArray.
      * 
      * @return the COSArray
      */
-    public COSArray toList()
+    public COSArray getCOSArray()
     {
         return array;
     }
-
 }

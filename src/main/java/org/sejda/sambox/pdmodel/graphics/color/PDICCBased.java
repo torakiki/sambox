@@ -34,6 +34,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
+import java.util.StringTokenizer;
 
 import org.sejda.commons.util.IOUtils;
 import org.sejda.sambox.cos.COSArray;
@@ -77,7 +78,26 @@ public final class PDICCBased extends PDCIEBasedColorSpace
     static
     {
         String cmmProperty = System.getProperty("sun.java2d.cmm");
-        IS_KCMS = "sun.java2d.cmm.kcms.KcmsServiceProvider".equals(cmmProperty);
+        boolean result = false;
+        if (!isMinJdk8())
+        {
+            // always KCMS but class has different name
+            result = true;
+        }
+        else if ("sun.java2d.cmm.kcms.KcmsServiceProvider".equals(cmmProperty))
+        {
+            try
+            {
+                Class.forName("sun.java2d.cmm.kcms.KcmsServiceProvider");
+                result = true;
+            }
+            catch (ClassNotFoundException e)
+            {
+                // KCMS not available
+            }
+        }
+        // else maybe KCMS was available, but not wished
+        IS_KCMS = result;
     }
 
     /**
@@ -349,7 +369,9 @@ public final class PDICCBased extends PDCIEBasedColorSpace
             }
             catch (CMMException e)
             {
-                LOG.error("Failure using embedded ICC profile ({}), using alternate color space: {}", e.getMessage(), alternateColorSpace);
+                LOG.error(
+                        "Failure using embedded ICC profile ({}), using alternate color space: {}",
+                        e.getMessage(), alternateColorSpace);
             }
         }
         return alternateColorSpace.toRGBImage(raster);
@@ -487,11 +509,11 @@ public final class PDICCBased extends PDCIEBasedColorSpace
         switch (alternateColorSpace.getNumberOfComponents())
         {
         case 1:
-            return ICC_ColorSpace.TYPE_GRAY;
+            return ColorSpace.TYPE_GRAY;
         case 3:
-            return ICC_ColorSpace.TYPE_RGB;
+            return ColorSpace.TYPE_RGB;
         case 4:
-            return ICC_ColorSpace.TYPE_CMYK;
+            return ColorSpace.TYPE_CMYK;
         default:
             // should not happen as all ICC color spaces in PDF must have 1,3, or 4 components
             return -1;
@@ -564,5 +586,27 @@ public final class PDICCBased extends PDCIEBasedColorSpace
     public String toString()
     {
         return getName() + "{numberOfComponents: " + getNumberOfComponents() + "}";
+    }
+
+    private static boolean isMinJdk8()
+    {
+        // strategy from lucene-solr/lucene/core/src/java/org/apache/lucene/util/Constants.java
+        String version = System.getProperty("java.specification.version");
+        final StringTokenizer st = new StringTokenizer(version, ".");
+        try
+        {
+            int major = Integer.parseInt(st.nextToken());
+            int minor = 0;
+            if (st.hasMoreTokens())
+            {
+                minor = Integer.parseInt(st.nextToken());
+            }
+            return major > 1 || (major == 1 && minor >= 8);
+        }
+        catch (NumberFormatException nfe)
+        {
+            // maybe some new numbering scheme in the 22nd century
+            return true;
+        }
     }
 }

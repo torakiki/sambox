@@ -34,6 +34,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     // A
     public static final COSName A = newCommonInstance("A");
     public static final COSName AA = newCommonInstance("AA");
+    public static final COSName ABSOLUTE_COLORIMETRIC = newCommonInstance("AbsoluteColorimetric");
     public static final COSName AC = newCommonInstance("AC");
     public static final COSName ACRO_FORM = newCommonInstance("AcroForm");
     public static final COSName ACTUAL_TEXT = newCommonInstance("ActualText");
@@ -291,6 +292,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName INDEXED = newCommonInstance("Indexed");
     public static final COSName INFO = newCommonInstance("Info");
     public static final COSName INKLIST = newCommonInstance("InkList");
+    public static final COSName INTENT = newCommonInstance("Intent");
     public static final COSName INTERPOLATE = newCommonInstance("Interpolate");
     public static final COSName IT = newCommonInstance("IT");
     public static final COSName ITALIC_ANGLE = newCommonInstance("ItalicAngle");
@@ -416,6 +418,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName PATTERN_TYPE = newCommonInstance("PatternType");
     public static final COSName PDF_DOC_ENCODING = newCommonInstance("PDFDocEncoding");
     public static final COSName PERMS = newCommonInstance("Perms");
+    public static final COSName PERCEPTUAL = newCommonInstance("Perceptual");
     public static final COSName PG = newCommonInstance("Pg");
     public static final COSName PIECE_INFO = newCommonInstance("PieceInfo");
     public static final COSName PMD = newCommonInstance("PMD");
@@ -443,6 +446,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName RD = newCommonInstance("RD");
     public static final COSName REASON = newCommonInstance("Reason");
     public static final COSName REASONS = newCommonInstance("Reasons");
+    public static final COSName RELATIVE_COLORIMETRIC = newCommonInstance("RelativeColorimetric");
     public static final COSName RECIPIENTS = newCommonInstance("Recipients");
     public static final COSName RECT = newCommonInstance("Rect");
     public static final COSName REGISTRY = newCommonInstance("Registry");
@@ -535,6 +539,8 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName UNIX = newCommonInstance("Unix");
     public static final COSName URI = newCommonInstance("URI");
     public static final COSName URL = newCommonInstance("URL");
+    public static final COSName URL_TYPE = newCommonInstance("URLType");
+    public static final COSName USER_UNIT = newCommonInstance("UserUnit");
     // V
     public static final COSName V = newCommonInstance("V");
     public static final COSName V2 = newCommonInstance("V2");

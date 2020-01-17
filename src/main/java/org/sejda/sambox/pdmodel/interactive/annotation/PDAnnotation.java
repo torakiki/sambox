@@ -89,6 +89,12 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
      * An annotation flag.
      */
     public static final int FLAG_TOGGLE_NO_VIEW = 1 << 8;
+    /**
+     * An annotation flag.
+     * 
+     * @see #setLockedContents(boolean)
+     */
+    private static final int FLAG_LOCKED_CONTENTS = 1 << 9;
 
     /**
      * Create the annotation of the expected type from the given dictionary.
@@ -490,6 +496,34 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
     public void setToggleNoView(boolean toggleNoView)
     {
         getCOSObject().setFlag(COSName.F, FLAG_TOGGLE_NO_VIEW, toggleNoView);
+    }
+
+    /**
+     * Get the LockedContents flag.
+     *
+     * @return The LockedContents flag.
+     * @see #setLockedContents(boolean)
+     */
+    public boolean isLockedContents()
+    {
+        return getCOSObject().getFlag(COSName.F, FLAG_LOCKED_CONTENTS);
+    }
+
+    /**
+     * Set the LockedContents flag. If set, do not allow the contents of the annotation to be modified by the user. This
+     * flag does not restrict deletion of the annotation or changes to other annotation properties, such as position and
+     * size.
+     *
+     * @param lockedContents The new LockedContents flag value.
+     * @see <a href="https://www.adobe.com/content/dam/acom/en/devnet/acrobat/pdfs/PDF32000_2008.pdf#page=393">PDF
+     * 32000-1:2008 12.5.3, Table 165</a>
+     * @see #isLockedContents()
+     * @see #FLAG_LOCKED_CONTENTS
+     * @since PDF 1.7
+     */
+    public void setLockedContents(boolean lockedContents)
+    {
+        getCOSObject().setFlag(COSName.F, FLAG_LOCKED_CONTENTS, lockedContents);
     }
 
     /**

@@ -16,7 +16,7 @@
  */
 package org.sejda.sambox.contentstream.operator.graphics;
 
-import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
 import java.io.IOException;
 import java.util.List;
 
@@ -34,7 +34,7 @@ public class FillNonZeroRule extends GraphicsOperatorProcessor
     @Override
     public final void process(Operator operator, List<COSBase> operands) throws IOException
     {
-        getContext().fillPath(GeneralPath.WIND_NON_ZERO);
+        getContext().fillPath(Path2D.WIND_NON_ZERO);
     }
 
     @Override

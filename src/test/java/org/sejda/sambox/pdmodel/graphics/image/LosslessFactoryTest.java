@@ -18,6 +18,7 @@ package org.sejda.sambox.pdmodel.graphics.image;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.sejda.sambox.pdmodel.graphics.image.ValidateXImage.checkIdent;
 import static org.sejda.sambox.pdmodel.graphics.image.ValidateXImage.colorCount;
@@ -258,6 +259,44 @@ public class LosslessFactoryTest
     }
 
     /**
+     * Tests USHORT_555_RGB LosslessFactoryTest#createFromImage(PDDocument document, BufferedImage image). This should
+     * create an 8-bit-image; prevent the problems from PDFBOX-4674 in case image creation is modified in the future.
+     *
+     * @throws java.io.IOException
+     */
+    public void testCreateLosslessFromImageUSHORT_555_RGB() throws IOException
+    {
+        PDDocument document = new PDDocument();
+        BufferedImage image = ImageIO.read(this.getClass().getResourceAsStream("png.png"));
+
+        // create an USHORT_555_RGB image
+        int w = image.getWidth();
+        int h = image.getHeight();
+        BufferedImage rgbImage = new BufferedImage(w, h, BufferedImage.TYPE_USHORT_555_RGB);
+        Graphics ag = rgbImage.getGraphics();
+        ag.drawImage(image, 0, 0, null);
+        ag.dispose();
+
+        for (int x = 0; x < rgbImage.getWidth(); ++x)
+        {
+            for (int y = 0; y < rgbImage.getHeight(); ++y)
+            {
+                rgbImage.setRGB(x, y, (rgbImage.getRGB(x, y) & 0xFFFFFF) | ((y / 10 * 10) << 24));
+            }
+        }
+
+        PDImageXObject ximage = LosslessFactory.createFromImage(rgbImage);
+
+        validate(ximage, 8, w, h, "png", PDDeviceRGB.INSTANCE.getName());
+        checkIdent(rgbImage, ximage.getImage());
+        checkIdentRGB(rgbImage, ximage.getOpaqueImage());
+
+        assertNull(ximage.getSoftMask());
+
+        doWritePDF(document, ximage, testResultsDir, "ushort555rgb.pdf");
+    }
+
+    /**
      * Tests LosslessFactoryTest#createFromImage(PDDocument document, BufferedImage image) with transparent GIF
      *
      * @throws java.io.IOException
@@ -283,6 +322,36 @@ public class LosslessFactoryTest
         assertEquals(2, colorCount(ximage.getSoftMask().getImage()));
 
         doWritePDF(document, ximage, testResultsDir, "gif.pdf");
+    }
+
+    /**
+     * Tests LosslessFactoryTest#createFromImage(PDDocument document, BufferedImage image) with a transparent 1 bit GIF.
+     * (PDFBOX-4672) This ends up as RGB because the 1 bit fast path doesn't support transparency.
+     *
+     * @throws java.io.IOException
+     */
+    public void testCreateLosslessFromTransparent1BitGIF() throws IOException
+    {
+        PDDocument document = new PDDocument();
+        BufferedImage image = ImageIO
+                .read(this.getClass().getResourceAsStream("gif-1bit-transparent.gif"));
+
+        assertEquals(Transparency.BITMASK, image.getColorModel().getTransparency());
+        assertEquals(BufferedImage.TYPE_BYTE_BINARY, image.getType());
+
+        PDImageXObject ximage = LosslessFactory.createFromImage(image);
+
+        int w = image.getWidth();
+        int h = image.getHeight();
+        validate(ximage, 8, w, h, "png", PDDeviceRGB.INSTANCE.getName());
+        checkIdent(image, ximage.getImage());
+        checkIdentRGB(image, ximage.getOpaqueImage());
+
+        assertNotNull(ximage.getSoftMask());
+        validate(ximage.getSoftMask(), 1, w, h, "png", PDDeviceGray.INSTANCE.getName());
+        assertEquals(2, colorCount(ximage.getSoftMask().getImage()));
+
+        doWritePDF(document, ximage, testResultsDir, "gif-1bit-transparent.pdf");
     }
 
     /**

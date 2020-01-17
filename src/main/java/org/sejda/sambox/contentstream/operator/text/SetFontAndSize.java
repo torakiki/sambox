@@ -17,6 +17,8 @@
 
 package org.sejda.sambox.contentstream.operator.text;
 
+import static java.util.Objects.isNull;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -28,6 +30,8 @@ import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSNumber;
 import org.sejda.sambox.pdmodel.font.PDFont;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Tf: Set text font and size.
@@ -36,6 +40,8 @@ import org.sejda.sambox.pdmodel.font.PDFont;
  */
 public class SetFontAndSize extends OperatorProcessor
 {
+    private static final Logger LOG = LoggerFactory.getLogger(SetFontAndSize.class);
+
     @Override
     public void process(Operator operator, List<COSBase> arguments) throws IOException
     {
@@ -58,6 +64,10 @@ public class SetFontAndSize extends OperatorProcessor
         float fontSize = ((COSNumber) base1).floatValue();
         getContext().getGraphicsState().getTextState().setFontSize(fontSize);
         PDFont font = getContext().getResources().getFont(fontName);
+        if (isNull(font))
+        {
+            LOG.warn("font '{}' not found in resources", fontName.getName());
+        }
         getContext().getGraphicsState().getTextState().setFont(font);
     }
 

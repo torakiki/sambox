@@ -28,7 +28,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.fontbox.ttf.*;
+import org.apache.fontbox.ttf.GlyphData;
+import org.apache.fontbox.ttf.GlyphTable;
+import org.apache.fontbox.ttf.HorizontalMetricsTable;
+import org.apache.fontbox.ttf.TrueTypeFont;
+import org.apache.fontbox.ttf.VerticalHeaderTable;
+import org.apache.fontbox.ttf.VerticalMetricsTable;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSInteger;
@@ -219,7 +224,7 @@ final class PDCIDFontType2Embedder extends TrueTypeEmbedder
         return cidFont;
     }
 
-    private void addNameTag(String tag) throws IOException
+    private void addNameTag(String tag)
     {
         String name = fontDescriptor.getFontName();
         String newName = tag + name;
@@ -434,7 +439,7 @@ final class PDCIDFontType2Embedder extends TrueTypeEmbedder
 
         for (int i = 2; i < widths.length; i += 2)
         {
-            long cid   = widths[i];
+            long cid = widths[i];
             long value = Math.round(widths[i + 1] * scaling);
 
             switch (state)
@@ -534,7 +539,8 @@ final class PDCIDFontType2Embedder extends TrueTypeEmbedder
                 gidMetrics[cid * 4] = cid;
                 gidMetrics[cid * 4 + 1] = ttf.getVerticalMetrics().getAdvanceHeight(cid);
                 gidMetrics[cid * 4 + 2] = ttf.getHorizontalMetrics().getAdvanceWidth(cid);
-                gidMetrics[cid * 4 + 3] = glyph.getYMaximum() + ttf.getVerticalMetrics().getTopSideBearing(cid);
+                gidMetrics[cid * 4 + 3] = glyph.getYMaximum()
+                        + ttf.getVerticalMetrics().getTopSideBearing(cid);
             }
         }
 
@@ -576,7 +582,8 @@ final class PDCIDFontType2Embedder extends TrueTypeEmbedder
             switch (state)
             {
             case FIRST:
-                if (cid == lastCid + 1 && w1Value == lastW1Value && vxValue == lastVxValue && vyValue == lastVyValue)
+                if (cid == lastCid + 1 && w1Value == lastW1Value && vxValue == lastVxValue
+                        && vyValue == lastVyValue)
                 {
                     state = State.SERIAL;
                 }
@@ -599,7 +606,8 @@ final class PDCIDFontType2Embedder extends TrueTypeEmbedder
                 }
                 break;
             case BRACKET:
-                if (cid == lastCid + 1 && w1Value == lastW1Value && vxValue == lastVxValue && vyValue == lastVyValue)
+                if (cid == lastCid + 1 && w1Value == lastW1Value && vxValue == lastVxValue
+                        && vyValue == lastVyValue)
                 {
                     state = State.SERIAL;
                     outer.add(inner);
@@ -622,7 +630,8 @@ final class PDCIDFontType2Embedder extends TrueTypeEmbedder
                 }
                 break;
             case SERIAL:
-                if (cid != lastCid + 1 || w1Value != lastW1Value || vxValue != lastVxValue || vyValue != lastVyValue)
+                if (cid != lastCid + 1 || w1Value != lastW1Value || vxValue != lastVxValue
+                        || vyValue != lastVyValue)
                 {
                     outer.add(COSInteger.get(lastCid));
                     outer.add(COSInteger.get(lastW1Value));

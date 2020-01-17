@@ -26,6 +26,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.Spliterator;
@@ -207,6 +208,10 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
         @Override
         public PDPage next()
         {
+            if (!hasNext())
+            {
+                throw new NoSuchElementException();
+            }
             COSDictionary next = queue.poll();
 
             sanitizeType(next);
@@ -252,6 +257,10 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
         @Override
         public COSDictionary next()
         {
+            if (!hasNext())
+            {
+                throw new NoSuchElementException();
+            }
             return queue.poll();
         }
 

@@ -95,8 +95,8 @@ class TilingPaint implements Paint
      *
      * @throws java.io.IOException if something goes wrong while drawing the pattern
      */
-    TilingPaint(PageDrawer drawer, PDTilingPattern pattern, PDColorSpace colorSpace,
-                       PDColor color, AffineTransform xform) throws IOException
+    TilingPaint(PageDrawer drawer, PDTilingPattern pattern, PDColorSpace colorSpace, PDColor color,
+            AffineTransform xform) throws IOException
     {
         // pattern space -> user space
         patternMatrix = Matrix.concatenate(drawer.getInitialMatrix(), pattern.getMatrix());
@@ -110,14 +110,14 @@ class TilingPaint implements Paint
      */
     @Override
     public PaintContext createContext(ColorModel cm, Rectangle deviceBounds, Rectangle2D userBounds,
-                                      AffineTransform xform, RenderingHints hints)
+            AffineTransform xform, RenderingHints hints)
     {
-        AffineTransform xformPattern = (AffineTransform)xform.clone();
+        AffineTransform xformPattern = (AffineTransform) xform.clone();
 
         // applies the pattern matrix with scaling removed
         AffineTransform patternNoScale = patternMatrix.createAffineTransform();
         patternNoScale.scale(1 / patternMatrix.getScalingFactorX(),
-                             1 / patternMatrix.getScalingFactorY());
+                1 / patternMatrix.getScalingFactorY());
         xformPattern.concatenate(patternNoScale);
 
         return paint.createContext(cm, deviceBounds, userBounds, xformPattern, hints);
@@ -168,14 +168,12 @@ class TilingPaint implements Paint
         // apply only the scaling from the pattern transform, doing scaling here improves the
         // image quality and prevents large scale-down factors from creating huge tiling cells.
         Matrix newPatternMatrix;
-        newPatternMatrix = Matrix.getScaleInstance(
-                Math.abs(patternMatrix.getScalingFactorX()),
+        newPatternMatrix = Matrix.getScaleInstance(Math.abs(patternMatrix.getScalingFactorX()),
                 Math.abs(patternMatrix.getScalingFactorY()));
 
         // move origin to (0,0)
-        newPatternMatrix.concatenate(
-                Matrix.getTranslateInstance(-pattern.getBBox().getLowerLeftX(),
-                        -pattern.getBBox().getLowerLeftY()));
+        newPatternMatrix.concatenate(Matrix.getTranslateInstance(-pattern.getBBox().getLowerLeftX(),
+                -pattern.getBBox().getLowerLeftY()));
 
         // render using PageDrawer
         drawer.drawTilingPattern(graphics, pattern, colorSpace, color, newPatternMatrix);
@@ -185,12 +183,12 @@ class TilingPaint implements Paint
     }
 
     /**
-     * Returns the closest integer which is larger than the given number.
-     * Uses BigDecimal to avoid floating point error which would cause gaps in the tiling.
+     * Returns the closest integer which is larger than the given number. Uses BigDecimal to avoid floating point error
+     * which would cause gaps in the tiling.
      */
     private static int ceiling(double num)
     {
-        BigDecimal decimal = new BigDecimal(num);
+        BigDecimal decimal = BigDecimal.valueOf(num);
         decimal = decimal.setScale(5, RoundingMode.CEILING); // 5 decimal places of accuracy
         return decimal.intValue();
     }
@@ -240,7 +238,6 @@ class TilingPaint implements Paint
         // returns the anchor rect with scaling applied
         PDRectangle anchor = pattern.getBBox();
         return new Rectangle2D.Float(anchor.getLowerLeftX() * xScale,
-                                     anchor.getLowerLeftY() * yScale,
-                width, height);
+                anchor.getLowerLeftY() * yScale, width, height);
     }
 }

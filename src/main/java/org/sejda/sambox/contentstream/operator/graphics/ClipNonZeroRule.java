@@ -16,7 +16,7 @@
  */
 package org.sejda.sambox.contentstream.operator.graphics;
 
-import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
 import java.io.IOException;
 import java.util.List;
 
@@ -34,7 +34,7 @@ public class ClipNonZeroRule extends GraphicsOperatorProcessor
     @Override
     public void process(Operator operator, List<COSBase> operands) throws IOException
     {
-        getContext().clip(GeneralPath.WIND_NON_ZERO);
+        getContext().clip(Path2D.WIND_NON_ZERO);
     }
 
     @Override

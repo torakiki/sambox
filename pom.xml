@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.sejda</groupId>
 	<artifactId>sambox</artifactId>
 	<packaging>jar</packaging>
 	<name>sambox</name>
 	<version>2.1.9-SNAPSHOT</version>
- 
+
 	<description>An Apache PDFBox fork intended to be used as PDF processor for Sejda and PDFsam related projects</description>
 	<url>http://www.sejda.org</url>
 
@@ -53,7 +55,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.javadoc.failOnError>false</maven.javadoc.failOnError>
 		<bouncycastle.version>1.64</bouncycastle.version>
-		<fontbox.version>2.0.17</fontbox.version>
+		<fontbox.version>2.0.18</fontbox.version>
 		<sejda.commons.version>1.1.3</sejda.commons.version>
 		<sejda.io.version>2.1.1</sejda.io.version>
 		<slf4j.version>1.7.29</slf4j.version>
@@ -788,18 +790,211 @@
 						</configuration>
 					</execution>
 					<execution>
-                        <id>PDFBOX-4517</id>
-                        <phase>generate-test-resources</phase>
-                        <goals>
-                            <goal>wget</goal>
-                        </goals>
-                        <configuration>
-                            <url>https://issues.apache.org/jira/secure/attachment/12966453/cryptfilter.pdf</url>
-                            <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
-                            <outputFileName>PDFBOX-4517-cryptfilter.pdf</outputFileName>
-                            <sha512>ed55a65bad6f91104846d28e9e7dcb18b11efbf980a74781350551428bbaecba375d9e22af02edf0f91263c7f668e93ec7c52d397898b7640c2d60e7dd3ae940</sha512>
-                        </configuration>
-                    </execution>
+						<id>PDFBOX-4517</id>
+						<phase>generate-test-resources</phase>
+						<goals>
+							<goal>wget</goal>
+						</goals>
+						<configuration>
+							<url>https://issues.apache.org/jira/secure/attachment/12966453/cryptfilter.pdf</url>
+							<outputDirectory>${project.build.directory}/pdfs</outputDirectory>
+							<outputFileName>PDFBOX-4517-cryptfilter.pdf</outputFileName>
+							<sha512>ed55a65bad6f91104846d28e9e7dcb18b11efbf980a74781350551428bbaecba375d9e22af02edf0f91263c7f668e93ec7c52d397898b7640c2d60e7dd3ae940</sha512>
+						</configuration>
+					</execution>
+					<execution>
+						<id>PDFBOX-142</id>
+						<phase>generate-test-resources</phase>
+						<goals>
+							<goal>wget</goal>
+						</goals>
+						<configuration>
+							<url>https://issues.apache.org/jira/secure/attachment/12742551/Testformular1.pdf</url>
+							<outputDirectory>${project.build.directory}/pdfs</outputDirectory>
+							<sha512>90a0cd2554850982b2713d89623c48018fd04d8facf7764f016fa56278c17e670b0c33f7879704236b711b613559e2a8b27326d8bb8086eda9504db322306c12</sha512>
+						</configuration>
+					</execution>
+					<execution>
+						<id>PDFBOX-563</id>
+						<phase>generate-test-resources</phase>
+						<goals>
+							<goal>wget</goal>
+						</goals>
+						<configuration>
+							<url>https://issues.apache.org/jira/secure/attachment/12425859/TestFax_56972.pdf</url>
+							<outputDirectory>${project.build.directory}/pdfs</outputDirectory>
+							<sha512>e028e19e8222c20a0b09725a5bedd869094e7456d918cf75d304e7777bfabc1b5e4a7d2aa48ac70b54ce340818ca13287dbbe8a2385bc47f4b05c0f6301cf505</sha512>
+						</configuration>
+					</execution>
+					<execution>
+						<id>PDFBOX-2469</id>
+						<phase>generate-test-resources</phase>
+						<goals>
+							<goal>wget</goal>
+						</goals>
+						<configuration>
+							<url>https://issues.apache.org/jira/secure/attachment/12682897/FormI-9-English.pdf</url>
+							<outputDirectory>${project.build.directory}/pdfs</outputDirectory>
+							<sha512>a5067d67da88dcb3f2b6e63c6387d2fc7170db104d67e81de59d12e9e6b1ad473c0325411fc1cc235e12fbc56a37a67181f85b4e49cb208fbea0c0a01ebe6dd2</sha512>
+						</configuration>
+					</execution>
+					<execution>
+						<id>PDFBOX-2469-2</id>
+						<phase>generate-test-resources</phase>
+						<goals>
+							<goal>wget</goal>
+						</goals>
+						<configuration>
+							<url>https://issues.apache.org/jira/secure/attachment/12678455/testPDF_acroForm.pdf</url>
+							<outputDirectory>${project.build.directory}/pdfs</outputDirectory>
+							<sha512>fdfbce6368aea426a26f11146aa20ee7ee0ca288e11454e09a747b9b6a425ef35f10bdd64bd3f6deec3f2f8b5024c629297c75de747243b5d2aed164c56342eb</sha512>
+						</configuration>
+					</execution>
+					<execution>
+						<id>PDFBOX-2586</id>
+						<phase>generate-test-resources</phase>
+						<goals>
+							<goal>wget</goal>
+						</goals>
+						<configuration>
+							<url>https://issues.apache.org/jira/secure/attachment/12689788/test.pdf</url>
+							<outputDirectory>${project.build.directory}/pdfs</outputDirectory>
+							<sha512>1533fdbc200b54832b7f756b012d39f64205d52e96ff022a921742c7bdf0a07be9c86eb1bf51dcf4df0c3ac9ca098ecf665628f8a0ac1262a1924291df0a554b</sha512>
+							<outputFileName>test-2586.pdf</outputFileName>
+						</configuration>
+					</execution>
+					<execution>
+						<id>PDFBOX-3262</id>
+						<phase>generate-test-resources</phase>
+						<goals>
+							<goal>wget</goal>
+						</goals>
+						<configuration>
+							<url>https://issues.apache.org/jira/secure/attachment/12792007/hidden_fields.pdf</url>
+							<outputDirectory>${project.build.directory}/pdfs</outputDirectory>
+							<sha512>1e40d61d344137b886544530c64cf01e2a7cc9d9d5ba137e492ddc62f8f497487f32b98544fb563b1b5f006a746f868e4650f65c2dece7ff43f1b5505a6d5759</sha512>
+						</configuration>
+					</execution>
+					<execution>
+						<id>PDFBOX-3083</id>
+						<phase>generate-test-resources</phase>
+						<goals>
+							<goal>wget</goal>
+						</goals>
+						<configuration>
+							<url>https://issues.apache.org/jira/secure/attachment/12770263/mypdf.pdf</url>
+							<outputDirectory>${project.build.directory}/pdfs</outputDirectory>
+							<sha512>364baf8ad73adcfce94ad402cba420bd01890426ed56050ef6614cf73679b07a3ed75d548ef1b08d5ff8b27385e05eec37df0654ef85f809cb768c23139787fc</sha512>
+						</configuration>
+					</execution>
+					<execution>
+						<id>PDFBOX-3396</id>
+						<phase>generate-test-resources</phase>
+						<goals>
+							<goal>wget</goal>
+						</goals>
+						<configuration>
+							<url>https://issues.apache.org/jira/secure/attachment/12816014/Signed-Document-1.pdf</url>
+							<outputDirectory>${project.build.directory}/pdfs</outputDirectory>
+							<sha512>464212e20c9c18f67b3c03bd4e2d4738413182e6cae480560986b5b3a7957822d9f65b6a602076ce025a8bafc7c9150cf717656c9b1c100bacf0045ff974c8d0</sha512>
+						</configuration>
+					</execution>
+					<execution>
+						<id>PDFBOX-3396-2</id>
+						<phase>generate-test-resources</phase>
+						<goals>
+							<goal>wget</goal>
+						</goals>
+						<configuration>
+							<url>https://issues.apache.org/jira/secure/attachment/12816016/Signed-Document-2.pdf</url>
+							<outputDirectory>${project.build.directory}/pdfs</outputDirectory>
+							<sha512>ba70962d3d3008c77d1ad0b047bbfb757ff430bf0bff50b743977e839e01eda9528dbb138aae13dda74ca6917e7984071d5ce0796278e99b6cfe18d7782894d4</sha512>
+						</configuration>
+					</execution>
+					<execution>
+						<id>PDFBOX-3396-3</id>
+						<phase>generate-test-resources</phase>
+						<goals>
+							<goal>wget</goal>
+						</goals>
+						<configuration>
+							<url>https://issues.apache.org/jira/secure/attachment/12821307/Signed-Document-3.pdf</url>
+							<outputDirectory>${project.build.directory}/pdfs</outputDirectory>
+							<sha512>e12174bfdb7cf72aff5127935a19fa8858aecfdf94320cbff595b465e0696077b9654a237c52b9209a5220c1b89e6dcff0a994556790ea8bbe27f14d6ee5ba0f</sha512>
+						</configuration>
+					</execution>
+					<execution>
+						<id>PDFBOX-3396-4</id>
+						<phase>generate-test-resources</phase>
+						<goals>
+							<goal>wget</goal>
+						</goals>
+						<configuration>
+							<url>https://issues.apache.org/jira/secure/attachment/12821308/Signed-Document-4.pdf</url>
+							<outputDirectory>${project.build.directory}/pdfs</outputDirectory>
+							<sha512>f5ee2636798487c9197e7edd3c18ac2452ac34af54e1ea93e28f42f4d7bd4f6905a73e61207271694ef34d50158823446681d3bfc4651e101e842031da1491a3</sha512>
+						</configuration>
+					</execution>
+					<execution>
+						<id>PDFBOX-3587</id>
+						<phase>generate-test-resources</phase>
+						<goals>
+							<goal>wget</goal>
+						</goals>
+						<configuration>
+							<url>https://issues.apache.org/jira/secure/attachment/12839977/OpenOfficeForm.pdf</url>
+							<outputDirectory>${project.build.directory}/pdfs</outputDirectory>
+							<sha512>f19b330fa0df09b6cae7cb63a8678ba7f81507fca3865070b774f841f20a5419dbe183ccfa9492cc09086e0481d8f2cfcb892f3a4b9a2e126f1324ac54693b5d</sha512>
+						</configuration>
+					</execution>
+					<execution>
+						<id>PDFBOX-3587-2</id>
+						<phase>generate-test-resources</phase>
+						<goals>
+							<goal>wget</goal>
+						</goals>
+						<configuration>
+							<url>https://issues.apache.org/jira/secure/attachment/12840280/OpenOfficeForm_filled.pdf</url>
+							<outputDirectory>${project.build.directory}/pdfs</outputDirectory>
+							<sha512>e13e08b6324a078aea6569e182233790402a93eeddab8832e07547a520f3bbd5caa0fc4c551910ddfe9eda738d75aac02bea5a396b51da109cbd4b545d771d97</sha512>
+						</configuration>
+					</execution>
+					<execution>
+						<id>PDFBOX-4172</id>
+						<phase>generate-test-resources</phase>
+						<goals>
+							<goal>wget</goal>
+						</goals>
+						<configuration>
+							<url>https://issues.apache.org/jira/secure/attachment/12976553/PDFBOX-4157-filled.pdf</url>
+							<outputDirectory>${project.build.directory}/pdfs</outputDirectory>
+							<sha512>7e32709cfbe2c8930090a8d399718b178423a7e6db0c1ac9bcce3c8318e47d65f05206277d8be71dce8c5172154f5fa299bc0d07bda72779466bebc483afcad0</sha512>
+						</configuration>
+					</execution>
+					<execution>
+						<id>PDFBOX-4615</id>
+						<phase>generate-test-resources</phase>
+						<goals>
+							<goal>wget</goal>
+						</goals>
+						<configuration>
+							<url>https://issues.apache.org/jira/secure/attachment/12976452/resetboundingbox-filled.pdf</url>
+							<outputDirectory>${project.build.directory}/pdfs</outputDirectory>
+							<sha512>c2d73d0469c2f8cb96f657eadde9cd2b5add0009acb628972a00c11bff29abe082dc16687f42b336044d5fbbf087c1cfd210cef2b178ec2dcc8f53b5f104f98b</sha512>
+						</configuration>
+					</execution>
+					<execution>
+						<id>PDFBOX-4693</id>
+						<phase>generate-test-resources</phase>
+						<goals>
+							<goal>wget</goal>
+						</goals>
+						<configuration>
+							<url>https://issues.apache.org/jira/secure/attachment/12986337/stenotypeTest-3_rotate_no_flatten.pdf</url>
+							<outputDirectory>${project.build.directory}/pdfs</outputDirectory>
+							<sha512>a0aa8c2c3c5da83ba6ff45ce9052f492f850cc6d7921f5dc4c8d3d7e58d94c42c45f39713b79256335bb68afb047a3b7ef7a35120f2f22551951009dfc979b22</sha512>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 		</plugins>

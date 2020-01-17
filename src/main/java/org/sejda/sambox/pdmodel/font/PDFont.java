@@ -29,7 +29,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.fontbox.afm.FontMetrics;
 import org.apache.fontbox.cmap.CMap;
-import org.apache.fontbox.util.BoundingBox;
 import org.sejda.commons.FastByteArrayOutputStream;
 import org.sejda.commons.util.IOUtils;
 import org.sejda.sambox.cos.COSArray;
@@ -306,15 +305,6 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
      */
     protected abstract float getStandard14Width(int code);
 
-    @Override
-    public abstract float getWidthFromFont(int code) throws IOException;
-
-    @Override
-    public abstract boolean isEmbedded();
-
-    @Override
-    public abstract float getHeight(int code) throws IOException;
-
     /**
      * Encodes the given string for use in a PDF content stream.
      *
@@ -357,7 +347,8 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
             }
             catch (IllegalArgumentException e)
             {
-                if (e.getMessage().contains("No glyph") || e.getMessage().contains("is not available in this"))
+                if (e.getMessage().contains("No glyph")
+                        || e.getMessage().contains("is not available in this"))
                 {
                     bytes = new byte[] { (byte) codePoint };
                 }
@@ -544,12 +535,6 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
         return dict.getNameAsString(COSName.SUBTYPE);
     }
 
-    @Override
-    public abstract String getName();
-
-    @Override
-    public abstract BoundingBox getBoundingBox() throws IOException;
-
     /**
      * The widths of the characters. This will be null for the standard 14 fonts.
      *
@@ -644,9 +629,6 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
         // if the name matches, this is a Standard 14 font
         return Standard14Fonts.containsName(getName());
     }
-
-    @Override
-    public abstract boolean isDamaged();
 
     @Override
     public boolean equals(Object other)

@@ -149,11 +149,10 @@ public final class DateConverter
         }
         String offset = formatTZoffset(cal.get(Calendar.ZONE_OFFSET) + cal.get(Calendar.DST_OFFSET),
                 "'");
-        return String.format(Locale.US,
-                "D:" + "%1$4tY%1$2tm%1$2td" // yyyyMMdd
-                        + "%1$2tH%1$2tM%1$2tS" // HHmmss
-                        + "%2$s" // time zone
-                        + "'", // trailing apostrophe
+        return String.format(Locale.US, "D:" + "%1$4tY%1$2tm%1$2td" // yyyyMMdd
+                + "%1$2tH%1$2tM%1$2tS" // HHmmss
+                + "%2$s" // time zone
+                + "'", // trailing apostrophe
                 cal, offset);
     }
 
@@ -168,13 +167,12 @@ public final class DateConverter
     {
         String offset = formatTZoffset(cal.get(Calendar.ZONE_OFFSET) + cal.get(Calendar.DST_OFFSET),
                 ":");
-        return String.format(Locale.US,
-                "%1$4tY" // yyyy
-                        + "-%1$2tm" // -mm (%tm adds one to cal month value)
-                        + "-%1$2td" // -dd (%tm adds one to cal month value)
-                        + "T" // T
-                        + "%1$2tH:%1$2tM:%1$2tS" // HHmmss
-                        + "%2$s", // time zone
+        return String.format(Locale.US, "%1$4tY" // yyyy
+                + "-%1$2tm" // -mm (%tm adds one to cal month value)
+                + "-%1$2td" // -dd (%tm adds one to cal month value)
+                + "T" // T
+                + "%1$2tH:%1$2tM:%1$2tS" // HHmmss
+                + "%2$s", // time zone
                 cal, offset);
     }
 
@@ -302,8 +300,9 @@ public final class DateConverter
      */
     private static char skipOptionals(String text, ParsePosition where, String optionals)
     {
-        char retval = ' ', currch;
-        while (text != null && where.getIndex() < text.length()
+        char retval = ' ';
+        char currch;
+        while (where.getIndex() < text.length()
                 && optionals.indexOf((currch = text.charAt(where.getIndex()))) >= 0)
         {
             retval = (currch != ' ') ? currch : retval;

@@ -16,7 +16,7 @@
  */
 package org.sejda.sambox.rendering;
 
-import java.awt.*;
+import java.awt.Paint;
 import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -131,7 +131,8 @@ class TilingPaintFactory
             }
             try
             {
-                if (this.color != other.color && this.color.toRGB() != other.color.toRGB())
+                if (this.color != null && other.color != null && this.color != other.color
+                        && this.color.toRGB() != other.color.toRGB())
                 {
                     return false;
                 }

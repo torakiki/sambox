@@ -159,10 +159,14 @@ public final class PDImageXObject extends PDXObject implements PDImage
     public static PDImageXObject createFromFile(File file) throws IOException
     {
         requireNotNullArg(file, "Cannot create image from a null file");
-        return createFromSeekableSource(SeekableSources.seekableSourceFrom(file), file.getName());
+        try (SeekableSource source = SeekableSources.seekableSourceFrom(file))
+        {
+            return createFromSeekableSource(source, file.getName());
+        }
     }
 
-    public static PDImageXObject createFromSeekableSource(SeekableSource source, String filename) throws IOException
+    public static PDImageXObject createFromSeekableSource(SeekableSource source, String filename)
+            throws IOException
     {
         // we first try to match the first bytes to some known pattern, so we don't rely on the extension first
         FileType fileType = FileTypeDetector.detectFileType(source);
@@ -187,14 +191,19 @@ public final class PDImageXObject extends PDXObject implements PDImage
         }
         // last resort, let's see if ImageIO can read it
         BufferedImage image;
-        try {
+        try
+        {
             image = ImageIO.read(source.asNewInputStream());
-        } catch (Exception e) {
-            LOG.warn(String.format("An error occurred while reading image: %s type: %s", filename, fileType), e);
+        }
+        catch (Exception e)
+        {
+            LOG.warn(String.format("An error occurred while reading image: %s type: %s", filename,
+                    fileType), e);
             throw new UnsupportedImageFormatException(fileType, filename, e);
         }
 
-        if(image == null) {
+        if (image == null)
+        {
             LOG.warn(String.format("Could not read image format: %s type: %s", filename, fileType));
             throw new UnsupportedImageFormatException(fileType, filename, null);
         }
@@ -539,6 +548,8 @@ public final class PDImageXObject extends PDXObject implements PDImage
     public void setColorSpace(PDColorSpace cs)
     {
         getCOSObject().setItem(COSName.COLORSPACE, cs != null ? cs.getCOSObject() : null);
+        colorSpace = null;
+        cachedImage = null;
     }
 
     @Override
