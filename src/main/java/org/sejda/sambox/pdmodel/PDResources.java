@@ -47,7 +47,7 @@ import org.sejda.sambox.pdmodel.graphics.state.PDExtendedGraphicsState;
 
 /**
  * A set of resources available at the page/pages/stream level.
- * 
+ *
  * @author Ben Litchfield
  * @author John Hewson
  */
@@ -160,7 +160,7 @@ public final class PDResources implements COSObjectable
 
     /**
      * Returns the color space resource with the given name, or null if none exists.
-     * 
+     *
      * @param name Name of the color space resource.
      * @throws java.io.IOException if something went wrong.
      */
@@ -287,7 +287,7 @@ public final class PDResources implements COSObjectable
 
     /**
      * Returns the pattern resource with the given name, or null if none exists.
-     * 
+     *
      * @param name Name of the pattern resource.
      * @throws java.io.IOException if something went wrong.
      */
@@ -320,7 +320,7 @@ public final class PDResources implements COSObjectable
 
     /**
      * Returns the property list resource with the given name, or null if none exists.
-     * 
+     *
      * @param name Name of the property list resource.
      */
     public PDPropertyList getProperties(COSName name)
@@ -380,7 +380,7 @@ public final class PDResources implements COSObjectable
 
     /**
      * Returns the XObject resource with the given name, or null if none exists.
-     * 
+     *
      * @param name Name of the XObject resource.
      * @throws java.io.IOException if something went wrong.
      */
@@ -450,7 +450,7 @@ public final class PDResources implements COSObjectable
     /**
      * Returns the resource with the given name and kind as an indirect object, or null.
      */
-    private COSObjectKey getIndirectKey(COSName kind, COSName name)
+    public COSObjectKey getIndirectKey(COSName kind, COSName name)
     {
         COSBase found = Optional
                 .ofNullable(resources.getDictionaryObject(kind, COSDictionary.class))
