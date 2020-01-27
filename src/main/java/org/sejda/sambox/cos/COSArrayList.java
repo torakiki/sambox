@@ -19,11 +19,7 @@ package org.sejda.sambox.cos;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
 
 /**
  * This is an implementation of a List that will sync its contents to a COSArray.
@@ -34,6 +30,10 @@ public class COSArrayList<E> implements List<E>
 {
     private final COSArray array;
     private final List<E> actual;
+
+    // indicates that the list has been filtered
+    // i.e. the number of entries in array and actual differ
+    private boolean isFiltered = false;
 
     private COSDictionary parentDict;
     private COSName dictKey;
@@ -57,6 +57,12 @@ public class COSArrayList<E> implements List<E>
     {
         actual = actualList;
         array = cosArray;
+
+        // if the number of entries differs this may come from a filter being
+        // applied at the PDModel level
+        if (actual.size() != array.size()) {
+            isFiltered = true;
+        }
     }
 
     /**
@@ -189,14 +195,20 @@ public class COSArrayList<E> implements List<E>
     @Override
     public boolean remove(Object o)
     {
+        if (isFiltered) {
+            throw new UnsupportedOperationException("removing entries from a filtered List is not permitted");
+        }
+
+        // the PDFBox approach based on toCOSObjectList(c) is flawed when migrated verbatim to Sambox,
+        // due to how our codebase diverged
+        // an index-based approach to removing works better
+
         boolean retval = true;
-        if (actual.indexOf(o) >= 0)
+        int index = actual.indexOf(o);
+        if(index >= 0)
         {
-            retval = actual.remove(o);
-            if (o instanceof COSObjectable)
-            {
-                retval = array.remove(((COSObjectable) o).getCOSObject());
-            }
+            actual.remove(index);
+            array.remove(index);
         }
         else
         {
@@ -220,17 +232,11 @@ public class COSArrayList<E> implements List<E>
     @Override
     public boolean addAll(Collection<? extends E> c)
     {
-        // when adding if there is a parentDict then change the item
-        // in the dictionary from a single item to an array.
-        if (parentDict != null && c.size() > 0)
-        {
-            parentDict.setItem(dictKey, array);
-            // clear the parent dict so it doesn't happen again, there might be
-            // a usecase for keeping the parentDict around but not now.
-            parentDict = null;
-        }
-        array.addAll(toCOSObjectList(c));
-        return actual.addAll(c);
+        // the PDFBox approach based on toCOSObjectList(c) is flawed when migrated verbatim to Sambox,
+        // due to how our codebase diverged
+
+        // add this back if needed/used
+        throw new RuntimeException("Unsupported");
     }
 
     /**
@@ -239,18 +245,11 @@ public class COSArrayList<E> implements List<E>
     @Override
     public boolean addAll(int index, Collection<? extends E> c)
     {
-        // when adding if there is a parentDict then change the item
-        // in the dictionary from a single item to an array.
-        if (parentDict != null && c.size() > 0)
-        {
-            parentDict.setItem(dictKey, array);
-            // clear the parent dict so it doesn't happen again, there might be
-            // a usecase for keeping the parentDict around but not now.
-            parentDict = null;
-        }
+        // the PDFBox approach based on toCOSObjectList(c) is flawed when migrated verbatim to Sambox,
+        // due to how our codebase diverged
 
-        array.addAll(index, toCOSObjectList(c));
-        return actual.addAll(index, c);
+        // add this back if needed/used
+        throw new RuntimeException("Unsupported operation");
     }
 
     /**
@@ -426,32 +425,49 @@ public class COSArrayList<E> implements List<E>
         return null;
     }
 
-    private List<COSBase> toCOSObjectList(Collection<?> list)
-    {
-        List<COSBase> cosObjects = new ArrayList<>();
-        for (Object next : list)
-        {
-            if (next instanceof String)
-            {
-                cosObjects.add(COSString.parseLiteral((String) next));
-            }
-            else
-            {
-                COSObjectable cos = (COSObjectable) next;
-                cosObjects.add(cos.getCOSObject());
-            }
-        }
-        return cosObjects;
-    }
-
     /**
      * {@inheritDoc}
      */
     @Override
     public boolean removeAll(Collection<?> c)
     {
-        array.removeAll(toCOSObjectList(c));
-        return actual.removeAll(c);
+        // the PDFBox approach based on toCOSObjectList(c) is flawed when migrated verbatim to Sambox,
+        // due to how our codebase diverged:
+
+        // in the case of Annotations, page.getAnnotations(), the array is filled with ExistingCOSIndirectObject entries
+        // while actual contains PDAnnotation entries
+        // toCOSObjectList(PDAnnotation) does not return a ExistingCOSIndirectObject so
+        // they are out of sync and all remove/removeAll operations silently and subtly fail by
+        // causing the 2 arrays to go out of sync
+
+        // annotations = page.getAnnotations();
+        // annotations.size == 3
+
+        // annotations.remove(annotations.get(0)) // only removes from actual, not array
+        // annotations.array.size() == 3
+        // annotations.actual.size == 2
+
+        // page.setAnnotations(annotations)
+        // page.getAnnotations().size() == 3 (! expected 2)
+
+        // another issue is page.getAnnotations(filter) accepts a filter that can
+        // make actual and array be out of sync from the start
+        // operations that mutate the COSArrayList should not be allowed in this case
+
+        //array.removeAll(toCOSObjectList(c));
+        //return actual.removeAll(c);
+
+        if (isFiltered)
+        {
+            throw new UnsupportedOperationException("removing entries from a filtered List is not permitted");
+        }
+
+        boolean retval = false;
+        for(Object o: c)
+        {
+            retval =  retval || remove(o);
+        }
+        return retval;
     }
 
     /**
@@ -460,8 +476,22 @@ public class COSArrayList<E> implements List<E>
     @Override
     public boolean retainAll(Collection<?> c)
     {
-        array.retainAll(toCOSObjectList(c));
-        return actual.retainAll(c);
+        if (isFiltered)
+        {
+            throw new UnsupportedOperationException("removing entries from a filtered List is not permitted");
+        }
+
+        List<E> toRemove = new LinkedList<>();
+        for(E o: actual)
+        {
+            if (!c.contains(o))
+            {
+                // remove element
+                toRemove.add(o);
+            }
+        }
+
+        return removeAll(toRemove);
     }
 
     /**
@@ -566,9 +596,12 @@ public class COSArrayList<E> implements List<E>
     @Override
     public E remove(int index)
     {
-        E toBeRemoved = actual.get(index);
-        remove(toBeRemoved);
-        return toBeRemoved;
+        if (isFiltered) {
+            throw new UnsupportedOperationException("removing entries from a filtered List is not permitted");
+        }
+
+        array.remove(index);
+        return actual.remove(index);
     }
 
     /**
@@ -628,7 +661,7 @@ public class COSArrayList<E> implements List<E>
 
     /**
      * This will return the underlying COSArray.
-     * 
+     *
      * @return the COSArray
      */
     public COSArray getCOSArray()
