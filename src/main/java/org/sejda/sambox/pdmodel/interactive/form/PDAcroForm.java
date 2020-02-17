@@ -24,6 +24,7 @@ import static java.util.stream.Collectors.toMap;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -384,7 +385,7 @@ public final class PDAcroForm extends PDDictionaryWrapper
      * 
      * @param fields
      */
-    public void addFields(List<PDField> toAdd)
+    public void addFields(Collection<PDField> toAdd)
     {
         COSArray fields = ofNullable(
                 getCOSObject().getDictionaryObject(COSName.FIELDS, COSArray.class))
