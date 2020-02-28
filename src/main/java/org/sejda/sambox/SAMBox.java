@@ -16,10 +16,12 @@
  */
 package org.sejda.sambox;
 
+import org.sejda.sambox.util.Version;
+
 /**
  * Holder for configurable system properties. This is supposed to give developers a single place where they can find out
  * what's configurable in SAMBox.
- * 
+ *
  * @author Andrea Vacondio
  */
 public final class SAMBox
@@ -34,4 +36,6 @@ public final class SAMBox
     public static final String OBJECTS_STREAM_SIZE_PROPERTY = "org.sejda.sambox.objects.stream.size";
 
     public static final String SAMBOX_PROPERTIES = "/org/sejda/sambox/resources/version.properties";
+
+    public static String PRODUCER = "SAMBox " + Version.getVersion();
 }

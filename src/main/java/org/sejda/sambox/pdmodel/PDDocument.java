@@ -44,6 +44,7 @@ import org.sejda.commons.util.IOUtils;
 import org.apache.fontbox.ttf.TrueTypeFont;
 import org.sejda.io.CountingWritableByteChannel;
 import org.sejda.io.SeekableSources;
+import org.sejda.sambox.SAMBox;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
@@ -583,7 +584,8 @@ public class PDDocument implements Closeable
             WriteOption... options) throws IOException
     {
         requireOpen();
-        getDocumentInformation().setProducer("SAMBox " + Version.getVersion());
+
+        getDocumentInformation().setProducer(SAMBox.PRODUCER);
         getDocumentInformation().setModificationDate(Calendar.getInstance());
         for (Subsettable font : fontsToSubset)
         {
