@@ -71,7 +71,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This is the in-memory representation of the PDF document.
- * 
+ *
  * @author Ben Litchfield
  */
 public class PDDocument implements Closeable
@@ -127,7 +127,7 @@ public class PDDocument implements Closeable
 
     /**
      * Constructor that uses an existing document. The COSDocument that is passed in must be valid.
-     * 
+     *
      * @param document The COSDocument that this document wraps.
      */
     public PDDocument(COSDocument document)
@@ -137,7 +137,7 @@ public class PDDocument implements Closeable
 
     /**
      * Constructor that uses an existing document. The COSDocument that is passed in must be valid.
-     * 
+     *
      * @param document The COSDocument that this document wraps.
      * @param securityHandler
      */
@@ -150,7 +150,7 @@ public class PDDocument implements Closeable
     /**
      * This will add a page to the document. This is a convenience method, that will add the page to the root of the
      * hierarchy and set the parent of the page to the root.
-     * 
+     *
      * @param page The page to add to the document.
      */
     public void addPage(PDPage page)
@@ -161,7 +161,7 @@ public class PDDocument implements Closeable
 
     /**
      * Remove the page from the document.
-     * 
+     *
      * @param page The page to remove from the document.
      */
     public void removePage(PDPage page)
@@ -172,7 +172,7 @@ public class PDDocument implements Closeable
 
     /**
      * Remove the page from the document.
-     * 
+     *
      * @param pageNumber 0 based index to page number.
      */
     public void removePage(int pageNumber)
@@ -186,10 +186,10 @@ public class PDDocument implements Closeable
      * file. The scratch file is associated with the document. If you are adding a page to this document from another
      * document and want to copy the contents to this document's scratch file then use this method otherwise just use
      * the addPage method.
-     * 
+     *
      * @param page The page to import.
      * @return The page that was imported.
-     * 
+     *
      */
     public PDPage importPage(PDPage page)
     {
@@ -224,7 +224,7 @@ public class PDDocument implements Closeable
 
     /**
      * This will get the document info dictionary. This is guaranteed to not return null.
-     * 
+     *
      * @return The documents /Info dictionary
      */
     public PDDocumentInformation getDocumentInformation()
@@ -241,7 +241,7 @@ public class PDDocument implements Closeable
 
     /**
      * This will set the document information for this document.
-     * 
+     *
      * @param info The updated document information.
      */
     public void setDocumentInformation(PDDocumentInformation documentInformation)
@@ -253,7 +253,7 @@ public class PDDocument implements Closeable
 
     /**
      * This will get the document CATALOG. This is guaranteed to not return null.
-     * 
+     *
      * @return The documents /Root dictionary
      */
     public PDDocumentCatalog getDocumentCatalog()
@@ -334,7 +334,7 @@ public class PDDocument implements Closeable
      * method returns the access permission for a document owner (ie can do everything). The returned object is in read
      * only mode so that permissions cannot be changed. Methods providing access to content should rely on this object
      * to verify if the current user is allowed to proceed.
-     * 
+     *
      * @return the access permissions for the current user on the document.
      */
     public AccessPermission getCurrentAccessPermission()
@@ -368,7 +368,7 @@ public class PDDocument implements Closeable
      * not allowed.
      *
      * @param newVersion the new PDF version
-     * 
+     *
      */
     public void setVersion(String newVersion)
     {
@@ -392,7 +392,7 @@ public class PDDocument implements Closeable
     /**
      * If the document is not at the given version or above, it sets the version of the PDF specification to which the
      * document conforms.
-     * 
+     *
      * @param version
      */
     public void requireMinVersion(String version)
@@ -406,7 +406,7 @@ public class PDDocument implements Closeable
 
     /**
      * Sets an action to be performed right before this {@link PDDocument} is closed.
-     * 
+     *
      * @param onClose
      */
     public void setOnCloseAction(OnClose onClose)
@@ -426,7 +426,7 @@ public class PDDocument implements Closeable
     /**
      * Generates file identifier as defined in the chap 14.4 PDF 32000-1:2008 and sets it as first and second value for
      * the ID array in the document trailer.
-     * 
+     *
      * @param md5Update
      * @param encContext
      */
@@ -440,7 +440,7 @@ public class PDDocument implements Closeable
     }
 
     /**
-     * 
+     *
      * @param md5Update
      * @return a newly generated ID based on the input bytes, current timestamp and some other information, to be used
      * as value of the ID array in the document trailer.
@@ -465,7 +465,7 @@ public class PDDocument implements Closeable
 
     /**
      * Writes the document to the given {@link File}. The document is closed once written.
-     * 
+     *
      * @see PDDocument#close()
      * @param file
      * @param options
@@ -478,7 +478,7 @@ public class PDDocument implements Closeable
 
     /**
      * Writes the document to the file corresponding the given file name. The document is closed once written.
-     * 
+     *
      * @see PDDocument#close()
      * @param filename
      * @param options
@@ -491,7 +491,7 @@ public class PDDocument implements Closeable
 
     /**
      * Writes the document to the given {@link WritableByteChannel}. The document is closed once written.
-     * 
+     *
      * @see PDDocument#close()
      * @param channel
      * @param options
@@ -504,7 +504,7 @@ public class PDDocument implements Closeable
 
     /**
      * Writes the document to the given {@link OutputStream}. The document is closed once written.
-     * 
+     *
      * @see PDDocument#close()
      * @param out
      * @param options
@@ -518,7 +518,7 @@ public class PDDocument implements Closeable
     /**
      * Writes the document to the given {@link File} encrypting it using the given security. The document is closed once
      * written.
-     * 
+     *
      * @see PDDocument#close()
      * @param file
      * @param security
@@ -534,7 +534,7 @@ public class PDDocument implements Closeable
     /**
      * Writes the document to the file corresponding the given file name encrypting it using the given security. The
      * document is closed once written.
-     * 
+     *
      * @see PDDocument#close()
      * @param filename
      * @param security
@@ -550,7 +550,7 @@ public class PDDocument implements Closeable
     /**
      * Writes the document to the given {@link WritableByteChannel} encrypting it using the given security. The document
      * is closed once written.
-     * 
+     *
      * @see PDDocument#close()
      * @param channel
      * @param security
@@ -566,7 +566,7 @@ public class PDDocument implements Closeable
     /**
      * Writes the document to the given {@link OutputStream} encrypting it using the given security. The document is
      * closed once written.
-     * 
+     *
      * @see PDDocument#close()
      * @param out
      * @param security
@@ -583,7 +583,7 @@ public class PDDocument implements Closeable
             WriteOption... options) throws IOException
     {
         requireOpen();
-        getDocumentInformation().setProducer("SAMBox " + Version.getVersion() + " (www.sejda.org)");
+        getDocumentInformation().setProducer("SAMBox " + Version.getVersion());
         getDocumentInformation().setModificationDate(Calendar.getInstance());
         for (Subsettable font : fontsToSubset)
         {
@@ -615,7 +615,7 @@ public class PDDocument implements Closeable
     /**
      * Closes the {@link PDDocument} executing the set onClose action. Once closed the document is pretty much unusable
      * since most of the methods requires an open document.
-     * 
+     *
      * @see PDDocument#setOnCloseAction(OnClose)
      */
     @Override
@@ -631,7 +631,7 @@ public class PDDocument implements Closeable
 
     /**
      * Action to be performed before the {@link PDDocument} is close
-     * 
+     *
      * @author Andrea Vacondio
      */
     @FunctionalInterface
@@ -639,7 +639,7 @@ public class PDDocument implements Closeable
     {
         /**
          * Sets an action to be performed right before this {@link PDDocument} is closed.
-         * 
+         *
          * @param onClose
          */
         void onClose() throws IOException;
