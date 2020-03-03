@@ -80,11 +80,13 @@ public class PDFontTest extends TestCase
      * random order.
      *
      * @throws IOException
+     * @throws URISyntaxException
      */
     @Test
-    public void testPDFBox3747() throws IOException
+    public void testPDFBox3747() throws IOException, URISyntaxException
     {
-        File file = new File("target/fonts", "PDFBOX-3747-calibri.ttf");
+        URL url = PDFont.class.getResource("/org/sejda/sambox/PDFBOX-3747-calibri.ttf");
+        File file = new File(url.toURI());
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (PDDocument doc = new PDDocument())
         {
@@ -301,10 +303,13 @@ public class PDFontTest extends TestCase
     {
         String unsupported = "ł";
 
-        try {
+        try
+        {
             PDType1Font.HELVETICA.encode(unsupported);
             fail("Exception expected");
-        } catch (IllegalArgumentException ex) {
+        }
+        catch (IllegalArgumentException ex)
+        {
             // expected
         }
 

@@ -434,19 +434,6 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>PDFBOX-3747</id>
-						<phase>generate-test-resources</phase>
-						<goals>
-							<goal>wget</goal>
-						</goals>
-						<configuration>
-							<url>https://github.com/jondot/dotfiles/blob/master/.fonts/calibri.ttf?raw=true</url>
-							<outputDirectory>${project.build.directory}/fonts</outputDirectory>
-							<outputFileName>PDFBOX-3747-calibri.ttf</outputFileName>
-							<sha512>b7eb8e6f2a4549eb68280d0d8834b2a14f711f2d15ffe1420fde654f05dd939181c617bf51e11c44aededaa729966b49288b0a07a35b79aa73a08b8c48b72de0</sha512>
-						</configuration>
-					</execution>
-					<execution>
 						<id>PDFBOX-3940</id>
 						<phase>generate-test-resources</phase>
 						<goals>
