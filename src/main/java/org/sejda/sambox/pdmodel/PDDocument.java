@@ -40,8 +40,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import org.sejda.commons.util.IOUtils;
 import org.apache.fontbox.ttf.TrueTypeFont;
+import org.sejda.commons.util.IOUtils;
 import org.sejda.io.CountingWritableByteChannel;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.SAMBox;
@@ -66,7 +66,6 @@ import org.sejda.sambox.pdmodel.encryption.PDEncryption;
 import org.sejda.sambox.pdmodel.encryption.SecurityHandler;
 import org.sejda.sambox.pdmodel.font.Subsettable;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceRGB;
-import org.sejda.sambox.util.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
