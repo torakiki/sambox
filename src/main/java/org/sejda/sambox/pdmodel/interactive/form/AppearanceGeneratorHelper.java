@@ -294,7 +294,7 @@ public class AppearanceGeneratorHelper
     private PDDefaultAppearanceString getWidgetDefaultAppearanceString(PDAnnotationWidget widget)
             throws IOException
     {
-        COSString da = (COSString) widget.getCOSObject().getDictionaryObject(COSName.DA);
+        COSString da = DefaultAppearanceHelper.getDefaultAppearance(widget.getCOSObject().getDictionaryObject(COSName.DA));
         PDResources dr = field.getAcroForm().getDefaultResources();
         try
         {
@@ -892,7 +892,7 @@ public class AppearanceGeneratorHelper
 
     /**
      * Apply padding to a box.
-     * 
+     *
      * @param box box
      * @return the padded box.
      */

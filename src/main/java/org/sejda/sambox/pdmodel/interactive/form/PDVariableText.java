@@ -53,7 +53,7 @@ public abstract class PDVariableText extends PDTerminalField
 
     /**
      * Constructor.
-     * 
+     *
      * @param acroForm The form that this field is part of.
      * @param field the PDF object to represent as a field.
      * @param parent the parent node of the node
@@ -65,18 +65,21 @@ public abstract class PDVariableText extends PDTerminalField
 
     /**
      * Get the default appearance.
-     * 
+     *
      * This is an inheritable attribute.
-     * 
+     *
      * The default appearance contains a set of default graphics and text operators to define the field’s text size and
      * color.
-     * 
+     *
      * @return the DA element of the dictionary object
      */
     public String getDefaultAppearance()
     {
-        COSString defaultAppearance = (COSString) getInheritableAttribute(COSName.DA);
-        return defaultAppearance.getString();
+        try {
+            return DefaultAppearanceHelper.getDefaultAppearance(this).getString();
+        } catch (IOException e) {
+            return null;
+        }
     }
 
     /**
@@ -93,7 +96,7 @@ public abstract class PDVariableText extends PDTerminalField
     {
         try
         {
-            COSString da = (COSString) getInheritableAttribute(COSName.DA);
+            COSString da = DefaultAppearanceHelper.getDefaultAppearance(this);
             PDResources dr = getAcroForm().getDefaultResources();
             return new PDDefaultAppearanceString(da, dr);
         }
@@ -105,10 +108,10 @@ public abstract class PDVariableText extends PDTerminalField
 
     /**
      * Set the default appearance.
-     * 
+     *
      * This will set the local default appearance for the variable text field only, not affecting a default appearance
      * in the parent hierarchy.
-     * 
+     *
      * Providing null as the value will remove the local default appearance.
      * <p>
      * This method can also be used to change the font of a field, by replacing the font name from this string with
@@ -129,9 +132,9 @@ public abstract class PDVariableText extends PDTerminalField
 
     /**
      * Get the default style string.
-     * 
+     *
      * The default style string defines the default style for rich text fields.
-     * 
+     *
      * @return the DS element of the dictionary object
      */
     public String getDefaultStyleString()
@@ -142,9 +145,9 @@ public abstract class PDVariableText extends PDTerminalField
 
     /**
      * Set the default style string.
-     * 
+     *
      * Providing null as the value will remove the default style string.
-     * 
+     *
      * @param defaultStyleString a string describing the default style.
      */
     public void setDefaultStyleString(String defaultStyleString)
@@ -161,9 +164,9 @@ public abstract class PDVariableText extends PDTerminalField
 
     /**
      * This will get the 'quadding' or justification of the text to be displayed.
-     * 
+     *
      * This is an inheritable attribute.
-     * 
+     *
      * 0 - Left(default)<br/>
      * 1 - Centered<br />
      * 2 - Right<br />
@@ -196,7 +199,7 @@ public abstract class PDVariableText extends PDTerminalField
 
     /**
      * Get the fields rich text value.
-     * 
+     *
      * @return the rich text value string
      */
     public String getRichTextValue()
@@ -206,15 +209,15 @@ public abstract class PDVariableText extends PDTerminalField
 
     /**
      * Set the fields rich text value.
-     * 
+     *
      * <p>
      * Setting the rich text value will not generate the appearance for the field. <br/>
      * You can set {@link PDAcroForm#setNeedAppearances(Boolean)} to signal a conforming reader to generate the
      * appearance stream.
      * </p>
-     * 
+     *
      * Providing null as the value will remove the default style string.
-     * 
+     *
      * @param richTextValue a rich text string
      */
     public void setRichTextValue(String richTextValue)

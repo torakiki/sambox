@@ -26,6 +26,7 @@ import java.nio.charset.StandardCharsets;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.sejda.sambox.cos.COSFloat;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
@@ -86,5 +87,26 @@ public class PDTextFieldTest
                 .getContentStream().toByteArray();
         String appearanceString = new String(bytes, StandardCharsets.UTF_8);
         assertThat(appearanceString, containsString("/Helvetica 4.222"));
+    }
+
+    @Test
+    public void textFieldWithDefaultAppearanceAsCName() throws IOException
+    {
+        PDTextField textField = new PDTextField(acroForm);
+        textField.setValue("Bla");
+        textField.getCOSObject().setName(COSName.DA, "/Helv 12.345 Tf 0 g");
+
+
+        assertEquals(12.345f, textField.getDefaultAppearanceString().getFontSize(), 0.01);
+    }
+
+    @Test
+    public void textFieldWithDefaultAppearanceAsUnexpectedCOSFloat() throws IOException
+    {
+        PDTextField textField = new PDTextField(acroForm);
+        textField.setValue("Bla");
+        textField.getCOSObject().setItem(COSName.DA, COSFloat.get("12.345"));
+
+        assertEquals(0, textField.getDefaultAppearanceString().getFontSize(), 0.01);
     }
 }
