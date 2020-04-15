@@ -342,10 +342,21 @@ public class PDCIDFontType2 extends PDCIDFont
                 if (cmap != null)
                 {
                     int gid = cmap.getGlyphId(unicode);
+                    
                     // SAMBOX specific here
                     // if there's a gid to cid mapping, use it.
-                    // otherwise fallback to the old behaviour, which is to assume cid = gid
-                    cid = gid2cid.getOrDefault(gid, gid);
+                    // otherwise fallback to the old behaviour
+                    if(gid != 0) 
+                    {
+                        // cmap returns gid = 0 when not found, 
+                        // but we use here locally cid = -1 to keep looking
+                        cid = gid2cid.getOrDefault(gid, -1);
+                        
+                        if(cid == -1)
+                        {
+                            cid = gid;
+                        }
+                    }
                 }
             }
             else
