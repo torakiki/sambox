@@ -443,6 +443,12 @@ public final class PDImageXObject extends PDXObject implements PDImage
         g.dispose();
         return image2;
     }
+    
+    public boolean hasMask()
+    {
+        COSStream cosStream = getCOSObject().getDictionaryObject(COSName.MASK, COSStream.class);
+        return cosStream != null;
+    }
 
     /**
      * Returns the Mask Image XObject associated with this image, or null if there is none.
@@ -468,6 +474,12 @@ public final class PDImageXObject extends PDXObject implements PDImage
     public COSArray getColorKeyMask()
     {
         return getCOSObject().getDictionaryObject(COSName.MASK, COSArray.class);
+    }
+    
+    public boolean hasSoftMask()
+    {
+        COSStream cosStream = getCOSObject().getDictionaryObject(COSName.SMASK, COSStream.class);
+        return cosStream != null;
     }
 
     /**
