@@ -23,6 +23,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.sejda.sambox.pdmodel.font.PDFont;
+import org.sejda.sambox.pdmodel.graphics.color.PDColor;
+import org.sejda.sambox.pdmodel.graphics.state.RenderingMode;
 import org.sejda.sambox.util.Matrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,6 +61,9 @@ public class TextPosition
     private final PDFont font;
     private final float fontSize;
     private final int fontSizePt;
+    
+    private final PDColor color;
+    private final RenderingMode renderingMode;
 
     // mutable
     private float[] widths;
@@ -84,8 +89,9 @@ public class TextPosition
      * @param fontSizeInPt The font size in pt units (see {@link #getFontSizeInPt()} for details).
      */
     public TextPosition(int pageRotation, float pageWidth, float pageHeight, Matrix textMatrix,
-            float endX, float endY, float maxHeight, float individualWidth, float spaceWidth,
-            String unicode, int[] charCodes, PDFont font, float fontSize, int fontSizeInPt)
+                        float endX, float endY, float maxHeight, float individualWidth, float spaceWidth,
+                        String unicode, int[] charCodes, PDFont font, float fontSize, int fontSizeInPt,
+                        PDColor color, RenderingMode renderingMode)
     {
         this.textMatrix = textMatrix;
 
@@ -106,6 +112,8 @@ public class TextPosition
         this.font = font;
         this.fontSize = fontSize;
         this.fontSizePt = fontSizeInPt;
+        this.color = color;
+        this.renderingMode = renderingMode;
 
         x = getXRot(rotationAngle);
         if (rotationAngle == 0 || rotationAngle == 180)
@@ -783,6 +791,14 @@ public class TextPosition
         return pageWidth;
     }
 
+    public PDColor getColor() {
+        return color;
+    }
+
+    public RenderingMode getRenderingMode() {
+        return renderingMode;
+    }
+
     @Override
     public boolean equals(Object o)
     {
@@ -849,6 +865,14 @@ public class TextPosition
         {
             return false;
         }
+        if (renderingMode != null ? !renderingMode.equals(that.renderingMode) : that.renderingMode != null)
+        {
+            return false;
+        }
+        if (color != null ? !color.equals(that.color) : that.color != null)
+        {
+            return false;
+        }
         return font != null ? font.equals(that.font) : that.font == null;
 
         // If changing this method, do not compare mutable fields (PDFBOX-4701)
@@ -872,6 +896,8 @@ public class TextPosition
         result = 31 * result + (font != null ? font.hashCode() : 0);
         result = 31 * result + Float.floatToIntBits(fontSize);
         result = 31 * result + fontSizePt;
+        result = 31 * result + (color != null ? color.hashCode() : 0);
+        result = 31 * result + (renderingMode != null ? renderingMode.hashCode() : 0);
         return result;
     }
 }

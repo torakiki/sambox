@@ -25,6 +25,7 @@ import org.apache.fontbox.ttf.TrueTypeFont;
 import org.apache.fontbox.util.BoundingBox;
 import org.sejda.sambox.contentstream.PDFStreamEngine;
 import org.sejda.sambox.contentstream.operator.DrawObject;
+import org.sejda.sambox.contentstream.operator.color.*;
 import org.sejda.sambox.contentstream.operator.state.Concatenate;
 import org.sejda.sambox.contentstream.operator.state.Restore;
 import org.sejda.sambox.contentstream.operator.state.Save;
@@ -57,7 +58,9 @@ import org.sejda.sambox.pdmodel.font.PDTrueTypeFont;
 import org.sejda.sambox.pdmodel.font.PDType0Font;
 import org.sejda.sambox.pdmodel.font.PDType3Font;
 import org.sejda.sambox.pdmodel.font.encoding.GlyphList;
+import org.sejda.sambox.pdmodel.graphics.color.PDColor;
 import org.sejda.sambox.pdmodel.graphics.state.PDGraphicsState;
+import org.sejda.sambox.pdmodel.graphics.state.RenderingMode;
 import org.sejda.sambox.util.Matrix;
 import org.sejda.sambox.util.Vector;
 import org.slf4j.Logger;
@@ -106,6 +109,22 @@ public class PDFTextStreamEngine extends PDFStreamEngine
         addOperator(new SetTextHorizontalScaling());
         addOperator(new ShowTextLine());
         addOperator(new ShowTextLineAndSpace());
+
+        addOperator(new SetStrokingColorSpace());
+        addOperator(new SetNonStrokingColorSpace());
+        addOperator(new SetGraphicsStateParameters());
+
+        addOperator(new SetStrokingColor());
+        addOperator(new SetStrokingDeviceRGBColor());
+        addOperator(new SetStrokingDeviceCMYKColor());
+        addOperator(new SetStrokingDeviceGrayColor());
+        addOperator(new SetStrokingColorN());
+
+        addOperator(new SetNonStrokingColor());
+        addOperator(new SetNonStrokingDeviceRGBColor());
+        addOperator(new SetNonStrokingDeviceCMYKColor());
+        addOperator(new SetNonStrokingDeviceGrayColor());
+        addOperator(new SetNonStrokingColorN());
 
         // load additional glyph list for Unicode mapping
         InputStream input = GlyphList.class
@@ -319,10 +338,19 @@ public class PDFTextStreamEngine extends PDFStreamEngine
             nextX -= cropBox.getLowerLeftX();
             nextY -= cropBox.getLowerLeftY();
         }
+
+        PDColor color = null;
+        RenderingMode renderingMode = state.getTextState().getRenderingMode();
+        if (renderingMode.isFill()) {
+            color = state.getNonStrokingColor();
+        } else if(renderingMode.isStroke()) {
+            color = state.getStrokingColor();
+        }
+        
         processTextPosition(new TextPosition(pageRotation, cropBox.getWidth(), cropBox.getHeight(),
                 translatedTextRenderingMatrix, nextX, nextY, Math.abs(dyDisplay), dxDisplay,
                 Math.abs(spaceWidthDisplay), unicode, new int[] { code }, font, fontSize,
-                (int) (fontSize * textMatrix.getScalingFactorX())));
+                (int) (fontSize * textMatrix.getScalingFactorX()), color, renderingMode));
     }
 
     /**
