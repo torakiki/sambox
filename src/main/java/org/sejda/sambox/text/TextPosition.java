@@ -70,6 +70,13 @@ public class TextPosition
     private String unicode;
     private float direction = -1;
 
+    public TextPosition(int pageRotation, float pageWidth, float pageHeight, Matrix textMatrix,
+                        float endX, float endY, float maxHeight, float individualWidth, float spaceWidth,
+                        String unicode, int[] charCodes, PDFont font, float fontSize, int fontSizeInPt) {
+        this(pageRotation, pageWidth, pageHeight, textMatrix, endX, endY, maxHeight, individualWidth, spaceWidth, 
+                unicode, charCodes, font, fontSize, fontSizeInPt, null, null);
+    }
+
     /**
      * Constructor.
      *
