@@ -287,14 +287,28 @@ final class SampledImageReader
         final int height = pdImage.getHeight();
         final int numComponents = pdImage.getColorSpace().getNumberOfComponents();
         int max = width * height;
+        
+        boolean warnedAboutIndexOutOfBounds = false;
 
         for (int c = 0; c < numComponents; c++)
         {
             int sourceOffset = c;
             for (int i = 0; i < max; i++)
             {
-                banks[c][i] = source.get(sourceOffset);
-                sourceOffset += numComponents;
+                if(sourceOffset < source.limit()) 
+                {
+                    banks[c][i] = source.get(sourceOffset);
+                    sourceOffset += numComponents;
+                }
+                else
+                {
+                    if(!warnedAboutIndexOutOfBounds) 
+                    {
+                        LOG.warn("Tried reading: " + sourceOffset + " but only: " + source.limit() + " available (component: " + c + ")");
+                        warnedAboutIndexOutOfBounds = true;
+                    }
+                    banks[c][i] = -1;
+                }
             }
         }
 
