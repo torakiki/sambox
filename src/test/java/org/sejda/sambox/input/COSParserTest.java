@@ -428,14 +428,17 @@ public class COSParserTest
         }
     }
 
-    @Test(expected = IOException.class)
+    @Test
     public void nextStreamInvalidLength() throws IOException
     {
         victim = new COSParser(inMemorySeekableSourceFrom(
                 getClass().getResourceAsStream("/sambox/stream_cr_alone.txt")));
         COSDictionary streamDictionary = new COSDictionary();
-        streamDictionary.setBoolean(COSName.LENGTH, false);
-        victim.nextStream(streamDictionary);
+        streamDictionary.setItem(COSName.LENGTH, COSNull.NULL);
+        try (COSStream result = victim.nextStream(streamDictionary))
+        {
+            assertEquals(63, result.getFilteredLength());
+        }
     }
 
     @Test

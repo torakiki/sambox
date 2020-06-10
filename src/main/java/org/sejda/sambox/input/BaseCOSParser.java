@@ -383,8 +383,9 @@ abstract class BaseCOSParser extends SourceReader
         COSBase retVal = lengthBaseObj.getCOSObject();
         if (!(retVal instanceof COSNumber))
         {
-            throw new IOException("Invalid stream length. Expected number instance but was "
+            LOG.warn("Invalid stream length. Expected number instance but was "
                     + retVal.getClass().getSimpleName());
+            return -1;
         }
         long length = ((COSNumber) retVal).longValue();
         long endStreamOffset = startingOffset + length;
