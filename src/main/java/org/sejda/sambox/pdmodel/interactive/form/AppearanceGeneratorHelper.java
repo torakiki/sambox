@@ -782,6 +782,7 @@ public class AppearanceGeneratorHelper
             }
 
             contents.newLineAtOffset(contentRect.getLowerLeftX(), yTextPos);
+            contents.setFont(font, fontSize);
             contents.showText(options.get(i));
 
             if (i != (numOptions - 1))
