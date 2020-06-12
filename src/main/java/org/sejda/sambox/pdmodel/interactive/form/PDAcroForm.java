@@ -23,12 +23,7 @@ import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.sejda.sambox.cos.COSArray;
@@ -709,9 +704,16 @@ public final class PDAcroForm extends PDDictionaryWrapper
 
     private Map<COSDictionary, PDAnnotationWidget> widgets(List<PDField> fields)
     {
-        return fields.stream().flatMap(f -> f.getWidgets().stream())
-                .collect(toMap(w -> w.getCOSObject(), identity()));
-
+        Map<COSDictionary, PDAnnotationWidget> widgetMap = new HashMap<>();
+        for(PDField field: fields) 
+        {
+            for(PDAnnotationWidget widget: field.getWidgets())
+            {
+                widgetMap.put(widget.getCOSObject(), widget);
+            }
+        }
+        
+        return widgetMap;
     }
 
     private void removeFields(List<PDField> fields)
