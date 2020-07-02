@@ -34,6 +34,7 @@ public final class SAMBox
      * The number of objects to include in a single ObjectsStream.
      */
     public static final String OBJECTS_STREAM_SIZE_PROPERTY = "org.sejda.sambox.objects.stream.size";
+    public static final String FONT_PROVIDER_PROPERTY = "org.sejda.sambox.font.provider";
 
     public static final String SAMBOX_PROPERTIES = "/org/sejda/sambox/resources/version.properties";
 

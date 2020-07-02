@@ -37,6 +37,7 @@ import org.apache.fontbox.ttf.OpenTypeFont;
 import org.apache.fontbox.ttf.TTFParser;
 import org.apache.fontbox.ttf.TrueTypeFont;
 import org.apache.fontbox.type1.Type1Font;
+import org.sejda.sambox.SAMBox;
 
 /**
  * Font mapper, locates non-embedded fonts via a pluggable FontProvider.
@@ -115,10 +116,22 @@ final class FontMapperImpl implements FontMapper
         }
     }
 
+    public TrueTypeFont getLastResortFont() {
+        return lastResortFont;
+    }
+
     // lazy thread safe singleton
     private static class DefaultFontProvider
     {
-        private static final FontProvider INSTANCE = new FileSystemFontProvider(fontCache);
+        private static final FontProvider INSTANCE = initializeFontProvider();
+        
+        private static FontProvider initializeFontProvider() {
+            if("noop".equalsIgnoreCase(System.getProperty(SAMBox.FONT_PROVIDER_PROPERTY))) {
+                return new NoopFontProvider();
+            } else {
+                return new FileSystemFontProvider(fontCache);
+            }
+        }
     }
 
     /**
