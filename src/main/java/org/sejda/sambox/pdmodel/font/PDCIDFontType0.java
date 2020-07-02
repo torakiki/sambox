@@ -56,6 +56,8 @@ public class PDCIDFontType0 extends PDCIDFont
     private final Map<Integer, Float> glyphHeights = new HashMap<>();
     private final boolean isEmbedded;
     private final boolean isDamaged;
+    private boolean isOriginalEmbeddedMissing = false;
+    private boolean isMappingFallbackUsed = false;
 
     private Float avgWidth = null;
     private Matrix fontMatrix;
@@ -125,6 +127,7 @@ public class PDCIDFontType0 extends PDCIDFont
         }
         else
         {
+            this.isOriginalEmbeddedMissing = true;
             // find font or substitute
             CIDFontMapping mapping = FontMappers.instance().getCIDFont(getBaseFont(),
                     getFontDescriptor(), getCIDSystemInfo());
@@ -158,6 +161,7 @@ public class PDCIDFontType0 extends PDCIDFont
             {
                 LOG.warn("Using fallback " + font.getName() + " for CID-keyed font "
                         + getBaseFont());
+                isMappingFallbackUsed = true;
             }
             isEmbedded = false;
             isDamaged = fontIsDamaged;
@@ -460,5 +464,15 @@ public class PDCIDFontType0 extends PDCIDFont
     {
         // todo: not implemented, highly suspect
         return 500;
+    }
+
+    @Override
+    public boolean isOriginalEmbeddedMissing() {
+        return isOriginalEmbeddedMissing;
+    }
+
+    @Override
+    public boolean isMappingFallbackUsed() {
+        return isMappingFallbackUsed;
     }
 }

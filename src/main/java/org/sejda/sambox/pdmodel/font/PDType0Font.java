@@ -555,6 +555,16 @@ public class PDType0Font extends PDFont implements PDVectorFont
     }
 
     @Override
+    public boolean isOriginalEmbeddedMissing() {
+        return descendantFont.isOriginalEmbeddedMissing();
+    }
+
+    @Override
+    public boolean isMappingFallbackUsed() {
+        return descendantFont.isMappingFallbackUsed();
+    }
+
+    @Override
     public String toString()
     {
         String descendant = null;
@@ -577,4 +587,6 @@ public class PDType0Font extends PDFont implements PDVectorFont
     {
         return descendantFont.hasGlyph(code);
     }
+
+    
 }

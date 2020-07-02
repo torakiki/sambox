@@ -99,6 +99,8 @@ public class PDType1Font extends PDSimpleFont
     private final FontBoxFont genericFont; // embedded or system font for rendering
     private final boolean isEmbedded;
     private final boolean isDamaged;
+    private boolean isOriginalEmbeddedMissing = false;
+    private boolean isMappingFallbackUsed = false;
     private Matrix fontMatrix;
     private final AffineTransform fontMatrixTransform;
     private BoundingBox fontBBox;
@@ -153,6 +155,7 @@ public class PDType1Font extends PDSimpleFont
                 fontName = "?";
             }
             LOG.warn("Using fallback font " + fontName + " for base font " + getBaseFont());
+            this.isMappingFallbackUsed = true;
         }
         isEmbedded = false;
         isDamaged = false;
@@ -280,6 +283,7 @@ public class PDType1Font extends PDSimpleFont
         }
         else
         {
+            this.isOriginalEmbeddedMissing = true;
             FontMapping<FontBoxFont> mapping = FontMappers.instance().getFontBoxFont(getBaseFont(),
                     fd);
             genericFont = mapping.getFont();
@@ -287,6 +291,7 @@ public class PDType1Font extends PDSimpleFont
             if (mapping.isFallback())
             {
                 LOG.warn("Using fallback font " + genericFont.getName() + " for " + getBaseFont());
+                this.isMappingFallbackUsed = true;
             }
         }
         readEncoding();
@@ -659,5 +664,15 @@ public class PDType1Font extends PDSimpleFont
     public boolean isDamaged()
     {
         return isDamaged;
+    }
+
+    @Override
+    public boolean isOriginalEmbeddedMissing() {
+        return isOriginalEmbeddedMissing;
+    }
+
+    @Override
+    public boolean isMappingFallbackUsed() {
+        return isMappingFallbackUsed;
     }
 }

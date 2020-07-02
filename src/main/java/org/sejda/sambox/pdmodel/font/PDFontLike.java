@@ -117,6 +117,17 @@ public interface PDFontLike
     boolean isDamaged();
 
     /**
+     * Returns true if the font file that was supposed to be embedded in the PDF is missing.
+     */
+    boolean isOriginalEmbeddedMissing();
+
+    /**
+     * Returns true if a substitute font was searched via font mappings, but an exact match was not found, and
+     * a fallback was used
+     */
+    boolean isMappingFallbackUsed();
+
+    /**
      * This will get the average font width for all characters.
      *
      * @return The width is in 1000 unit of text space, ie 333 or 777

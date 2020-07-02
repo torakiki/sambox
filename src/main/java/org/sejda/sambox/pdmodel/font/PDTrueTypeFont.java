@@ -139,6 +139,8 @@ public class PDTrueTypeFont extends PDSimpleFont implements PDVectorFont
     private final TrueTypeFont ttf;
     private final boolean isEmbedded;
     private final boolean isDamaged;
+    private boolean isOriginalEmbeddedMissing = false;
+    private boolean isMappingFallbackUsed = false;
     private BoundingBox fontBBox;
 
     /**
@@ -182,6 +184,7 @@ public class PDTrueTypeFont extends PDSimpleFont implements PDVectorFont
         // substitute
         if (ttfFont == null)
         {
+            this.isOriginalEmbeddedMissing = true;
             FontMapping<TrueTypeFont> mapping = FontMappers.instance()
                     .getTrueTypeFont(getBaseFont(), getFontDescriptor());
             ttfFont = mapping.getFont();
@@ -189,6 +192,7 @@ public class PDTrueTypeFont extends PDSimpleFont implements PDVectorFont
             if (mapping.isFallback())
             {
                 LOG.warn("Using fallback font '" + ttfFont + "' for '" + getBaseFont() + "'");
+                this.isMappingFallbackUsed = true;
             }
         }
         ttf = ttfFont;
@@ -633,5 +637,15 @@ public class PDTrueTypeFont extends PDSimpleFont implements PDVectorFont
             }
         }
         cmapInitialized = true;
+    }
+
+    @Override
+    public boolean isOriginalEmbeddedMissing() {
+        return isOriginalEmbeddedMissing;
+    }
+
+    @Override
+    public boolean isMappingFallbackUsed() {
+        return isMappingFallbackUsed;
     }
 }

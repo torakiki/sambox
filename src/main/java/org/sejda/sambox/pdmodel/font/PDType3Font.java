@@ -348,4 +348,14 @@ public class PDType3Font extends PDSimpleFont
                 getCharProcs().getDictionaryObject(COSName.getPDFName(name), COSStream.class))
                         .map((s) -> new PDType3CharProc(this, s)).orElse(null);
     }
+
+    @Override
+    public boolean isOriginalEmbeddedMissing() {
+        return false;
+    }
+
+    @Override
+    public boolean isMappingFallbackUsed() {
+        return false;
+    }
 }

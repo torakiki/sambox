@@ -56,6 +56,8 @@ public class PDCIDFontType2 extends PDCIDFont
     private final HashMap<Integer, Integer> gid2cid = new HashMap<>();
     private final boolean isEmbedded;
     private final boolean isDamaged;
+    private boolean isOriginalEmbeddedMissing = false;
+    private boolean isMappingFallbackUsed = false;
     private final CmapLookup cmap; // may be null
     private Matrix fontMatrix;
     private BoundingBox fontBBox;
@@ -142,6 +144,7 @@ public class PDCIDFontType2 extends PDCIDFont
 
             if (ttfFont == null)
             {
+                this.isOriginalEmbeddedMissing = true;
                 ttfFont = findFontOrSubstitute();
             }
             ttf = ttfFont;
@@ -179,6 +182,7 @@ public class PDCIDFontType2 extends PDCIDFont
         {
             LOG.warn("Using fallback font " + ttfFont.getName() + " for CID-keyed TrueType font "
                     + getBaseFont());
+            this.isMappingFallbackUsed = true;
         }
         return ttfFont;
     }
@@ -494,5 +498,15 @@ public class PDCIDFontType2 extends PDCIDFont
     public boolean hasGlyph(int code) throws IOException
     {
         return codeToGID(code) != 0;
+    }
+
+    @Override
+    public boolean isOriginalEmbeddedMissing() {
+        return isOriginalEmbeddedMissing;
+    }
+
+    @Override
+    public boolean isMappingFallbackUsed() {
+        return isMappingFallbackUsed;
     }
 }
