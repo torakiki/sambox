@@ -847,8 +847,11 @@ public final class PDFontDescriptor implements COSObjectable
         if (style != null)
         {
             COSString panose = (COSString) style.getDictionaryObject(COSName.PANOSE);
-            byte[] bytes = panose.getBytes();
-            return new PDPanose(bytes);
+            if(panose != null) 
+            {
+                byte[] bytes = panose.getBytes();
+                return new PDPanose(bytes);
+            }
         }
         return null;
     }
