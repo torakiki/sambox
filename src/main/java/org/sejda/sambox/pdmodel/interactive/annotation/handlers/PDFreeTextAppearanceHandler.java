@@ -19,6 +19,7 @@ import static org.sejda.io.SeekableSources.inMemorySeekableSourceFrom;
 import static org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationLine.LE_NONE;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -300,8 +301,9 @@ public class PDFreeTextAppearanceHandler extends PDAbstractAppearanceHandler
             AppearanceStyle appearanceStyle = new AppearanceStyle();
             appearanceStyle.setFont(font);
             appearanceStyle.setFontSize(fontSize);
+            String textContents = Optional.ofNullable(annotation.getContents()).orElse("");
             PlainTextFormatter formatter = new PlainTextFormatter.Builder(cs).style(appearanceStyle)
-                    .text(new PlainText(annotation.getContents())).width(width - ab.width * 4)
+                    .text(new PlainText(textContents)).width(width - ab.width * 4)
                     .wrapLines(true).initialOffset(xOffset, yOffset)
                     // Adobe ignores the /Q
                     // .textAlign(annotation.getQ())
