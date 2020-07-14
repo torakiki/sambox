@@ -507,6 +507,11 @@ public abstract class PDAbstractAppearanceHandler implements PDAppearanceHandler
         // be set to be the line width and the /Rect is enlarged by the /RD amount
         PDRectangle borderBox;
         float[] rectDifferences = annotation.getRectDifferences();
+        if(getRectangle() == null)
+        {
+            return null;
+        }
+        
         if (rectDifferences.length == 0)
         {
             borderBox = getPaddedRectangle(getRectangle(), lineWidth / 2);

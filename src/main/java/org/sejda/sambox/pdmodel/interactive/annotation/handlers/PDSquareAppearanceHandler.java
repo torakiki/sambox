@@ -87,9 +87,12 @@ public class PDSquareAppearanceHandler extends PDAbstractAppearanceHandler
             else
             {
                 PDRectangle borderBox = handleBorderBox(annotation, lineWidth);
+                if(borderBox != null) 
+                {
 
-                contentStream.addRect(borderBox.getLowerLeftX(), borderBox.getLowerLeftY(),
-                        borderBox.getWidth(), borderBox.getHeight());
+                    contentStream.addRect(borderBox.getLowerLeftX(), borderBox.getLowerLeftY(),
+                            borderBox.getWidth(), borderBox.getHeight());
+                }
             }
 
             contentStream.drawShape(lineWidth, hasStroke, hasBackground);
