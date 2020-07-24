@@ -70,6 +70,19 @@ public class PDAcroFormFlattenTest
         flattenAndCompare("Testformular1.pdf");
     }
 
+    @Test
+    public void testNbspaceFormFieldValue() throws IOException
+    {
+        PDDocument doc = PDFParser.parse(SeekableSources.seekableSourceFrom(new File(TARGETPDFDIR, "Testformular1.pdf")));
+        PDField field = doc.getDocumentCatalog().getAcroForm().getField("Vorname");
+        field.setValue("nbspace\u00A0");
+        
+        doc.writeTo(new File(TARGETPDFDIR, "Testformular1-filled-out-nbspace.pdf"));
+        doc.close();
+        
+        flattenAndCompare("Testformular1-filled-out-nbspace.pdf");
+    }
+
     /*
      * PDFBOX-563 Filled template.
      */

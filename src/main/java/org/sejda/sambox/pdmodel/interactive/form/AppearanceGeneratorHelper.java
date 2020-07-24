@@ -174,6 +174,13 @@ public class AppearanceGeneratorHelper
     public void setAppearanceValue(String apValue) throws IOException
     {
         value = apValue;
+        
+        if(field instanceof PDTextField)
+        {
+            // avoid java.lang.IllegalArgumentException: U+00A0 ('nbspace') is not available in this font XYZ
+            // TODO: generic way of handling any character which is not supported by the font?
+            value = value.replaceAll("\\u00A0", " ");
+        }
 
         // Treat multiline field values in single lines as single lime values.
         // This is in line with how Adobe Reader behaves when enetring text
@@ -183,7 +190,7 @@ public class AppearanceGeneratorHelper
         // see PDFBOX-3911
         if (field instanceof PDTextField && !((PDTextField) field).isMultiline())
         {
-            value = apValue.replaceAll(
+            value = value.replaceAll(
                     "\\u000D\\u000A|[\\u000A\\u000B\\u000C\\u000D\\u0085\\u2028\\u2029]", " ");
         }
 
