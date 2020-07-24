@@ -958,7 +958,7 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>PDFBOX-4172</id>
+						<id>PDFBOX-4157</id>
 						<phase>generate-test-resources</phase>
 						<goals>
 							<goal>wget</goal>
@@ -979,6 +979,30 @@
 							<url>https://issues.apache.org/jira/secure/attachment/12976452/resetboundingbox-filled.pdf</url>
 							<outputDirectory>${project.build.directory}/pdfs</outputDirectory>
 							<sha512>c2d73d0469c2f8cb96f657eadde9cd2b5add0009acb628972a00c11bff29abe082dc16687f42b336044d5fbbf087c1cfd210cef2b178ec2dcc8f53b5f104f98b</sha512>
+						</configuration>
+					</execution>
+					<execution>
+						<id>PDFBOX-4172</id>
+						<phase>generate-test-resources</phase>
+						<goals>
+							<goal>wget</goal>
+						</goals>
+						<configuration>
+							<url>https://issues.apache.org/jira/secure/attachment/12976552/PDFBOX-4172-filled.pdf</url>
+							<outputDirectory>${project.build.directory}/pdfs</outputDirectory>
+							<sha512>e584f56a20947f99684ac035a7488e8555f11b3f908c1cf34e707042e1397bdee8d1b6c3e560bc43da69288386cf1b68921802cf23fef0ad8c05f377c07ba2e0</sha512>
+						</configuration>
+					</execution>
+					<execution>
+						<id>PDFBOX-4788</id>
+						<phase>generate-test-resources</phase>
+						<goals>
+							<goal>wget</goal>
+						</goals>
+						<configuration>
+							<url>https://issues.apache.org/jira/secure/attachment/12994791/flatten.pdf</url>
+							<outputDirectory>${project.build.directory}/pdfs</outputDirectory>
+							<sha512>d3d3b52df545c09e675f58e9b3c95aed99a46365e90a24bcfbe653d7b2754fc12725e433e0caee543ced0857dc4e9d0b1c09023c3265e40520aadb8a76a25e61</sha512>
 						</configuration>
 					</execution>
 					<execution>

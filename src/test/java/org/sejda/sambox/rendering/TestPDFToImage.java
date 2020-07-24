@@ -174,17 +174,22 @@ public class TestPDFToImage
         {
             bim3 = createEmptyDiffImage(minWidth, minHeight, maxWidth, maxHeight);
         }
+        
+        long difference = 0;
         for (int x = 0; x < minWidth; ++x)
         {
             for (int y = 0; y < minHeight; ++y)
             {
                 int rgb1 = bim1.getRGB(x, y);
                 int rgb2 = bim2.getRGB(x, y);
-                if (rgb1 != rgb2
-                        // don't bother about small differences
-                        && (Math.abs((rgb1 & 0xFF) - (rgb2 & 0xFF)) > 3
-                                || Math.abs(((rgb1 >> 8) & 0xFF) - ((rgb2 >> 8) & 0xFF)) > 3
-                                || Math.abs(((rgb1 >> 16) & 0xFF) - ((rgb2 >> 16) & 0xFF)) > 3))
+                int threshold = 3;
+                int diffR = Math.abs((rgb1 & 0xFF) - (rgb2 & 0xFF));
+                int diffG = Math.abs(((rgb1 >> 8) & 0xFF) - ((rgb2 >> 8) & 0xFF));
+                int diffB = Math.abs(((rgb1 >> 16) & 0xFF) - ((rgb2 >> 16) & 0xFF));
+                
+                difference = difference + diffR + diffG + diffB;
+                
+                if (rgb1 != rgb2 && (diffR > threshold || diffG > threshold || diffB > threshold))
                 {
                     if (bim3 == null)
                     {
@@ -204,7 +209,32 @@ public class TestPDFToImage
                 }
             }
         }
-        return bim3;
+
+        // Total number of red pixels = width * height 
+        // Total number of blue pixels = width * height 
+        // Total number of green pixels = width * height 
+        // So total number of pixels = width * height * 3 
+        double totalPixels = bim1.getWidth() * bim1.getHeight() * 3d;
+
+        // Normalizing the value of different pixels 
+        // for accuracy(average pixels per color 
+        // component) 
+        double avgDifferentPixels = difference / totalPixels;
+
+        // There are 255 values of pixels in total 
+        double percentage = 100 - (avgDifferentPixels / 255) * 100d;
+
+        if(percentage < 99.5d) {
+            LOG.warn("Similarity percentage: " + percentage + "%");
+            return bim3;    
+        } else {
+            LOG.info("Similarity percentage: " + percentage + "%");
+            return null;
+        }
+    }
+
+    public boolean doTestFile(final File file, File inDir, File outDir) throws IOException {
+        return doTestFile(file, inDir.getAbsolutePath(), outDir.getAbsolutePath());
     }
 
     /**
@@ -224,18 +254,13 @@ public class TestPDFToImage
         LOG.info("Opening: " + file.getName());
         try
         {
-            new FileOutputStream(new File(outDir, file.getName() + ".parseerror")).close();
             document = PDFParser.parse(SeekableSources.seekableSourceFrom(file));
-            String outputPrefix = outDir + '/' + file.getName() + "-";
+            String outputPrefix = file.getName() + "-";
             int numPages = document.getNumberOfPages();
             if (numPages < 1)
             {
                 failed = true;
                 LOG.error("file " + file.getName() + " has < 1 page");
-            }
-            else
-            {
-                new File(outDir, file.getName() + ".parseerror").delete();
             }
 
             LOG.info("Rendering: " + file.getName());
@@ -243,25 +268,17 @@ public class TestPDFToImage
             for (int i = 0; i < numPages; i++)
             {
                 String fileName = outputPrefix + (i + 1) + ".png";
-                new FileOutputStream(new File(fileName + ".rendererror")).close();
                 BufferedImage image = renderer.renderImageWithDPI(i, 96); // Windows native DPI
-                new File(fileName + ".rendererror").delete();
                 LOG.info("Writing: " + fileName);
-                new FileOutputStream(new File(fileName + ".writeerror")).close();
-                ImageIO.write(image, "PNG", new File(fileName));
-                new File(fileName + ".writeerror").delete();
+                ImageIO.write(image, "PNG", new File(outDir, fileName));
             }
 
             // test to see whether file is destroyed in pdfbox
-            new FileOutputStream(new File(outDir, file.getName() + ".saveerror")).close();
             File tmpFile = File.createTempFile("pdfbox", ".pdf");
             document.writeTo(tmpFile);
-            new File(outDir, file.getName() + ".saveerror").delete();
-            new FileOutputStream(new File(outDir, file.getName() + ".reloaderror")).close();
             try (PDDocument doc = PDFParser.parse(SeekableSources.seekableSourceFrom(tmpFile)))
             {
             }
-            new File(outDir, file.getName() + ".reloaderror").delete();
             tmpFile.delete();
         }
         catch (IOException e)
@@ -280,8 +297,6 @@ public class TestPDFToImage
         // Now check the resulting files ... did we get identical PNG(s)?
         try
         {
-            new File(outDir + file.getName() + ".cmperror").delete();
-
             File[] outFiles = new File(outDir).listFiles(new FilenameFilter()
             {
                 @Override
@@ -298,12 +313,11 @@ public class TestPDFToImage
             }
             for (File outFile : outFiles)
             {
-                new File(outFile.getAbsolutePath() + "-diff.png").delete(); // delete diff file from a previous run
-                File inFile = new File(inDir + '/' + outFile.getName());
+                File inFile = new File(inDir, outFile.getName());
                 if (!inFile.exists())
                 {
                     failed = true;
-                    LOG.warn("*** TEST FAILURE *** Input missing for file: " + inFile.getName());
+                    LOG.warn("*** TEST FAILURE *** Input missing for file: " + inFile.getName() + " " + inFile.getAbsolutePath());
                 }
                 else if (!filesAreIdentical(outFile, inFile))
                 {
@@ -317,7 +331,7 @@ public class TestPDFToImage
                                 + inFile.getName());
                         ImageIO.write(bim3, "png",
                                 new File(outFile.getAbsolutePath() + "-diff.png"));
-                        System.err.println("Files differ: " + inFile.getAbsolutePath() + "\n"
+                        LOG.error("Files differ: " + inFile.getAbsolutePath() + "\n"
                                 + "              " + outFile.getAbsolutePath());
                     }
                     else
@@ -337,7 +351,6 @@ public class TestPDFToImage
         }
         catch (Exception e)
         {
-            new FileOutputStream(new File(outDir, file.getName() + ".cmperror")).close();
             failed = true;
             LOG.error("Error comparing file output for " + file.getName(), e);
         }
