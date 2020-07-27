@@ -126,11 +126,12 @@ public class IncrementablePDDocumentWriter implements Closeable
 
     private PDFBodyObjectsWriter objectsWriter()
     {
-        if (context.hasWriteOption(WriteOption.SYNC_BODY_WRITE))
+        if (context.hasWriteOption(WriteOption.ASYNC_BODY_WRITE))
         {
-            return new SyncPDFBodyObjectsWriter(writer.writer());
+            return new AsyncPDFBodyObjectsWriter(writer.writer());    
         }
-        return new AsyncPDFBodyObjectsWriter(writer.writer());
+        return new SyncPDFBodyObjectsWriter(writer.writer());
+        
     }
 
     private PDFBodyObjectsWriter objectStreamWriter(PDFBodyObjectsWriter wrapped)

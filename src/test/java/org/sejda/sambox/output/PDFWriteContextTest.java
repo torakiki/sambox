@@ -64,7 +64,7 @@ public class PDFWriteContextTest
     {
         PDFWriteContext context = new PDFWriteContext(null, WriteOption.OBJECT_STREAMS);
         assertTrue(context.hasWriteOption(WriteOption.OBJECT_STREAMS));
-        assertFalse(context.hasWriteOption(WriteOption.SYNC_BODY_WRITE));
+        assertFalse(context.hasWriteOption(WriteOption.ASYNC_BODY_WRITE));
     }
 
     @Test

@@ -109,11 +109,11 @@ public class ShakeDownTest
     }
 
     @Test
-    public void writeSync() throws IOException
+    public void writeAsync() throws IOException
     {
-        doTest(WriteOption.SYNC_BODY_WRITE);
-        doIncrementalTest(WriteOption.SYNC_BODY_WRITE);
-        doTestEncrypted(WriteOption.SYNC_BODY_WRITE);
+        doTest(WriteOption.ASYNC_BODY_WRITE);
+        doIncrementalTest(WriteOption.ASYNC_BODY_WRITE);
+        doTestEncrypted(WriteOption.ASYNC_BODY_WRITE);
     }
 
     @Test

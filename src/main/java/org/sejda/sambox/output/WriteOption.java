@@ -28,9 +28,9 @@ public enum WriteOption
      */
     XREF_STREAM,
     /**
-     * Writes the document using the synchronous writer as opposed to the default async one
+     * Writes the document using the asynchronous writer as opposed to the default sync one
      */
-    SYNC_BODY_WRITE,
+    ASYNC_BODY_WRITE,
     /**
      * Writes pdf objects using objects stream
      */
