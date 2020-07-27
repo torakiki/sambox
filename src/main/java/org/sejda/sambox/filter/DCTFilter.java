@@ -20,9 +20,8 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
+import java.nio.file.Files;
 
 import javax.imageio.IIOException;
 import javax.imageio.ImageIO;
@@ -31,6 +30,7 @@ import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.metadata.IIOMetadataNode;
 import javax.imageio.stream.ImageInputStream;
 
+import org.sejda.commons.util.IOUtils;
 import org.sejda.sambox.cos.COSDictionary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -150,7 +150,45 @@ final class DCTFilter extends Filter
                 }
 
                 DataBufferByte dataBuffer = (DataBufferByte) raster.getDataBuffer();
-                decoded.write(dataBuffer.getData());
+                byte[] bytes = dataBuffer.getData();
+                
+                // optimization for lower memory footprint starts here
+                // if we are dealing with more than 100Mb of data then
+                // instead of copying the data in memory from one array to another, 
+                // we write/read to file, using half the memory 
+                if(bytes.length > 100000000) 
+                {
+                    File tmpFile = Files.createTempFile("rasterdatabuffer", ".tmp").toFile();
+                    OutputStream fout = new BufferedOutputStream(new FileOutputStream(tmpFile));
+                    try 
+                    {
+                        fout.write(bytes);
+                    } 
+                    finally 
+                    {
+                        IOUtils.closeQuietly(fout);
+                    }
+
+                    // deallocate memory
+                    raster = null;
+                    dataBuffer = null;
+
+                    FileInputStream fin = new FileInputStream(tmpFile);
+                    try 
+                    {
+                        IOUtils.copy(fin, decoded);
+                    } 
+                    finally 
+                    {
+                        IOUtils.closeQuietly(fin);
+                        tmpFile.delete();
+                    }
+                } 
+                else 
+                {
+                    decoded.write(bytes);
+                }
+                
             }
             finally
             {
