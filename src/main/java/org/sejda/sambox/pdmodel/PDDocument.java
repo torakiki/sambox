@@ -109,6 +109,7 @@ public class PDDocument implements Closeable
     private SecurityHandler securityHandler;
     private boolean open = true;
     private OnClose onClose = () -> LOG.debug("Closing document");
+    private OnBeforeWrite onBeforeWrite = () -> LOG.trace("About to write document");
     private ResourceCache resourceCache = new DefaultResourceCache();
 
     // fonts to subset before saving
@@ -242,7 +243,7 @@ public class PDDocument implements Closeable
     /**
      * This will set the document information for this document.
      *
-     * @param info The updated document information.
+     * @param documentInformation The updated document information.
      */
     public void setDocumentInformation(PDDocumentInformation documentInformation)
     {
@@ -413,6 +414,12 @@ public class PDDocument implements Closeable
     {
         requireOpen();
         this.onClose = onClose.andThen(this.onClose);
+    }
+    
+    public void setOnBeforeWriteAction(OnBeforeWrite onBeforeWrite)
+    {
+        requireOpen();
+        this.onBeforeWrite = onBeforeWrite.andThen(this.onBeforeWrite);
     }
 
     private void requireOpen() throws IllegalStateException
@@ -597,6 +604,7 @@ public class PDDocument implements Closeable
                 encryptionContext);
         try (PDDocumentWriter writer = new PDDocumentWriter(output, encryptionContext, options))
         {
+            onBeforeWrite.onBeforeWrite();
             writer.write(this);
         }
         finally
@@ -640,8 +648,6 @@ public class PDDocument implements Closeable
     {
         /**
          * Sets an action to be performed right before this {@link PDDocument} is closed.
-         *
-         * @param onClose
          */
         void onClose() throws IOException;
 
@@ -651,6 +657,24 @@ public class PDDocument implements Closeable
             return () -> {
                 onClose();
                 after.onClose();
+            };
+        }
+    }
+
+    /**
+     * Action to be performed right before this {@link PDDocument} is written to a file.
+     */
+    @FunctionalInterface
+    public static interface OnBeforeWrite
+    {
+        void onBeforeWrite() throws IOException;
+
+        default OnBeforeWrite andThen(OnBeforeWrite after)
+        {
+            Objects.requireNonNull(after);
+            return () -> {
+                onBeforeWrite();
+                after.onBeforeWrite();
             };
         }
     }
