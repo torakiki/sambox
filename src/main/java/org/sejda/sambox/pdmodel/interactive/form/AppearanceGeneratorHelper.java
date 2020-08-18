@@ -511,7 +511,12 @@ public class AppearanceGeneratorHelper
 
         if (recalculateFontSize)
         {
-            fontSize = calculateFontSize(font, contentRect);
+            float newFontSize = calculateFontSize(font, contentRect);
+            // avoid increasing the font size, if one was already specified
+            if(newFontSize < fontSize || fontSize == 0) 
+            {
+                fontSize = newFontSize;
+            }
         }
 
         // for a listbox generate the highlight rectangle for the selected
