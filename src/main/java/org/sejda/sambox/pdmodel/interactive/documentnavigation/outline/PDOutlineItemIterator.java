@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.pdmodel.interactive.documentnavigation.outline;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -29,6 +30,7 @@ class PDOutlineItemIterator implements Iterator<PDOutlineItem>
 {
     private PDOutlineItem currentItem;
     private final PDOutlineItem startingItem;
+    private final HashSet<PDOutlineItem> visited = new HashSet<>();
 
     PDOutlineItemIterator(PDOutlineItem startingItem)
     {
@@ -38,8 +40,31 @@ class PDOutlineItemIterator implements Iterator<PDOutlineItem>
     @Override
     public boolean hasNext()
     {
-        return startingItem != null && (currentItem == null || (currentItem.getNextSibling() != null
-                && !startingItem.equals(currentItem.getNextSibling())));
+        if (startingItem == null)
+        {
+            return false;
+        }
+        
+        if(currentItem == null)
+        {
+            return true;
+        }
+        
+        PDOutlineItem next = currentItem.getNextSibling();
+        if (next != null)
+        {
+           if (startingItem.equals(currentItem.getNextSibling()) || visited.contains(next))
+           {
+               // infinite loop detected
+               return false;
+           } 
+           else 
+           {
+               return true;
+           }
+        }
+        
+        return false;
     }
 
     @Override
@@ -57,6 +82,13 @@ class PDOutlineItemIterator implements Iterator<PDOutlineItem>
         {
             currentItem = currentItem.getNextSibling();
         }
+        
+        if(visited.contains(currentItem))
+        {
+            throw new NoSuchElementException();
+        }
+        
+        visited.add(currentItem);
         return currentItem;
     }
 

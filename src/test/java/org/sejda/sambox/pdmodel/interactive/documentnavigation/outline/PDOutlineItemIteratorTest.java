@@ -21,6 +21,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+import org.sejda.io.SeekableSources;
+import org.sejda.sambox.input.PDFParser;
+import org.sejda.sambox.pdmodel.PDDocument;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 
 /**
  * @author Andrea Vacondio
@@ -51,6 +58,47 @@ public class PDOutlineItemIteratorTest
         assertTrue(iterator.hasNext());
         assertEquals(second, iterator.next());
         assertFalse(iterator.hasNext());
+    }
+
+    @Test
+    public void infiniteLoop() throws IOException {
+        PDOutlineItem item1 = new PDOutlineItem();
+        item1.setTitle("Item1");
+        PDOutlineItem item1copy = new PDOutlineItem();
+        item1copy.setTitle("Item1");
+        PDOutlineItem item2 = new PDOutlineItem();
+        item2.setTitle("Item2");
+        PDOutlineItem item3 = new PDOutlineItem();
+        item3.setTitle("Item3");
+        
+        item1.setNextSibling(item2);
+        item1.setNextSibling(item1copy);
+        item1copy.setNextSibling(item2);
+        item2.setNextSibling(item3);
+        item3.setNextSibling(item2);
+        
+        PDDocumentOutline outline = new PDDocumentOutline();
+        outline.setFirstChild(item1);
+
+        PDDocument document = new PDDocument();
+        document.getDocumentCatalog().setDocumentOutline(outline);
+        
+        File tempFile = Files.createTempFile("outline_infinite", ".pdf").toFile();
+        document.writeTo(tempFile);
+        document.close();
+
+        PDDocument loadedDoc = PDFParser.parse(SeekableSources.seekableSourceFrom(tempFile));
+        
+        int counter = 0;
+        for (PDOutlineItem child: loadedDoc.getDocumentCatalog().getDocumentOutline().children()) {
+            counter++;
+            
+            if(counter > 50) {
+                break;
+            }
+        }
+        
+        assertEquals(counter, 4);
     }
 
     @Test(expected = UnsupportedOperationException.class)
