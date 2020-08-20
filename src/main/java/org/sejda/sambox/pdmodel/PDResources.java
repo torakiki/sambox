@@ -239,7 +239,14 @@ public final class PDResources implements COSObjectable
 
         // get the instance
         PDExtendedGraphicsState extGState = null;
-        COSDictionary dict = (COSDictionary) get(COSName.EXT_G_STATE, name);
+        COSBase base = get(COSName.EXT_G_STATE, name);
+        COSDictionary dict = null;
+        
+        if (base instanceof COSDictionary)
+        {
+            dict = (COSDictionary) base;    
+        }
+        
         if (dict != null)
         {
             extGState = new PDExtendedGraphicsState(dict);
