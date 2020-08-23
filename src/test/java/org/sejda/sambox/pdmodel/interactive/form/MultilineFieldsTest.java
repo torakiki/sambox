@@ -26,7 +26,6 @@ import org.junit.Test;
 import org.sejda.commons.util.IOUtils;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.input.PDFParser;
-import org.sejda.sambox.output.WriteOption;
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.rendering.TestPDFToImage;
 
@@ -36,18 +35,17 @@ public class MultilineFieldsTest
     private static final File IN_DIR = new File(
             "src/test/resources/org/sejda/sambox/pdmodel/interactive/form");
     private static final String NAME_OF_PDF = "MultilineFields.pdf";
-    private static final String TEST_VALUE = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, " +
-            "sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam";
+    private static final String TEST_VALUE = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, "
+            + "sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam";
 
-    
     private PDDocument document;
     private PDAcroForm acroForm;
 
     @Before
     public void setUp() throws IOException
     {
-        document = PDFParser.parse(SeekableSources
-                .seekableSourceFrom(new File(IN_DIR, NAME_OF_PDF)));
+        document = PDFParser
+                .parse(SeekableSources.seekableSourceFrom(new File(IN_DIR, NAME_OF_PDF)));
         acroForm = document.getDocumentCatalog().getAcroForm();
         OUT_DIR.mkdirs();
     }
@@ -90,7 +88,7 @@ public class MultilineFieldsTest
 
         field = (PDTextField) acroForm.getField("AlignRight-Border_Wide");
         field.setValue(TEST_VALUE);
-        
+
         // compare rendering
         File file = new File(OUT_DIR, NAME_OF_PDF);
         document.writeTo(file);
@@ -98,14 +96,16 @@ public class MultilineFieldsTest
         if (!testPDFToImage.doTestFile(file, IN_DIR.getAbsolutePath(), OUT_DIR.getAbsolutePath()))
         {
             // don't fail, rendering is different on different systems, result must be viewed manually
-            System.err.println ("Rendering of " + file + " failed or is not identical to expected rendering in " + IN_DIR + " directory");
-        }       
+            System.err.println(
+                    "Rendering of " + file + " failed or is not identical to expected rendering in "
+                            + IN_DIR + " directory");
+        }
     }
-    
+
     @After
     public void tearDown() throws IOException
     {
         IOUtils.close(document);
     }
-    
+
 }

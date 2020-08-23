@@ -19,11 +19,15 @@ package org.sejda.sambox.pdmodel.interactive.form;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
-import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toMap;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.sejda.sambox.cos.COSArray;
@@ -705,14 +709,14 @@ public final class PDAcroForm extends PDDictionaryWrapper
     private Map<COSDictionary, PDAnnotationWidget> widgets(List<PDField> fields)
     {
         Map<COSDictionary, PDAnnotationWidget> widgetMap = new HashMap<>();
-        for(PDField field: fields) 
+        for (PDField field : fields)
         {
-            for(PDAnnotationWidget widget: field.getWidgets())
+            for (PDAnnotationWidget widget : field.getWidgets())
             {
                 widgetMap.put(widget.getCOSObject(), widget);
             }
         }
-        
+
         return widgetMap;
     }
 

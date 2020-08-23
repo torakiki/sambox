@@ -16,6 +16,15 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.sejda.io.SeekableSources;
@@ -23,15 +32,6 @@ import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.rendering.PDFRenderer;
 import org.sejda.sambox.rendering.TestPDFToImage;
-
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Test flatten different forms and compare with rendering of original (before-flatten) document.
@@ -44,23 +44,25 @@ public class PDAcroFormFlattenTest
 {
 
     private static final File TARGETPDFDIR = new File("target/pdfs");
-    
+
     private static final File IN_DIR = new File("target/test-output/flatten/in");
     private static final File OUT_DIR = new File("target/test-output/flatten/out");
-    
+
     @BeforeClass
-    public static void beforeAll() {
+    public static void beforeAll()
+    {
         IN_DIR.mkdirs();
-        for(File file: IN_DIR.listFiles()){
+        for (File file : IN_DIR.listFiles())
+        {
             file.delete();
         }
         OUT_DIR.mkdirs();
-        for(File file: OUT_DIR.listFiles()){
+        for (File file : OUT_DIR.listFiles())
+        {
             file.delete();
         }
     }
-    
-    
+
     /*
      * PDFBOX-142 Filled template.
      */
@@ -73,13 +75,14 @@ public class PDAcroFormFlattenTest
     @Test
     public void testNbspaceFormFieldValue() throws IOException
     {
-        PDDocument doc = PDFParser.parse(SeekableSources.seekableSourceFrom(new File(TARGETPDFDIR, "Testformular1.pdf")));
+        PDDocument doc = PDFParser.parse(
+                SeekableSources.seekableSourceFrom(new File(TARGETPDFDIR, "Testformular1.pdf")));
         PDField field = doc.getDocumentCatalog().getAcroForm().getField("Vorname");
         field.setValue("nbspace\u00A0");
-        
+
         doc.writeTo(new File(TARGETPDFDIR, "Testformular1-filled-out-nbspace.pdf"));
         doc.close();
-        
+
         flattenAndCompare("Testformular1-filled-out-nbspace.pdf");
     }
 
@@ -229,11 +232,11 @@ public class PDAcroFormFlattenTest
     }
 
     /**
-     * PDFBOX-4788: non-widget annotations are not to be removed on a page that has no widget
-     * annotations.
+     * PDFBOX-4788: non-widget annotations are not to be removed on a page that has no widget annotations.
      */
     @Test
-    public void testFlattenPDFBox4788() throws IOException {
+    public void testFlattenPDFBox4788() throws IOException
+    {
         flattenAndCompare("flatten.pdf");
     }
 
@@ -244,7 +247,7 @@ public class PDAcroFormFlattenTest
     {
         File inputFile = new File(TARGETPDFDIR, fileName);
         File outputFile = new File(OUT_DIR, fileName);
-        
+
         generateScreenshotsBefore(inputFile, IN_DIR);
 
         try (PDDocument doc = PDFParser.parse(SeekableSources.seekableSourceFrom(inputFile)))
@@ -260,14 +263,15 @@ public class PDAcroFormFlattenTest
         {
             // don't fail, rendering is different on different systems, result must be viewed manually
             System.out.println("Rendering of " + outputFile
-                    + " failed or is not identical to expected rendering in " + inputFile.getParent()
-                    + " directory;");
-            
+                    + " failed or is not identical to expected rendering in "
+                    + inputFile.getParent() + " directory;");
+
             fail("Test failed");
         }
     }
 
-    private void generateScreenshotsBefore(File inputFile, File destinationFolder) throws IOException
+    private void generateScreenshotsBefore(File inputFile, File destinationFolder)
+            throws IOException
     {
         PDDocument document = PDDocument.load(inputFile);
         String outputPrefix = inputFile.getName() + "-";
@@ -280,7 +284,7 @@ public class PDAcroFormFlattenTest
             BufferedImage image = renderer.renderImageWithDPI(i, 96); // Windows native DPI
             ImageIO.write(image, "PNG", new File(destinationFolder, fileName));
         }
-        
+
         document.close();
     }
 }
