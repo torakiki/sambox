@@ -23,9 +23,12 @@ import static org.junit.Assert.assertTrue;
 
 import java.awt.Point;
 import java.awt.geom.Point2D;
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 
 import org.junit.Test;
+import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSFloat;
@@ -33,6 +36,7 @@ import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.COSNumber;
 import org.sejda.sambox.cos.COSStream;
+import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.font.PDType0Font;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationLink;
@@ -176,6 +180,21 @@ public class PDPageTest
         result.add(new COSFloat(n3));
         result.add(new COSFloat(n4));
         return result;
+    }
+
+    @Test
+    public void invalidDocument() throws IOException {
+        PDDocument document = new PDDocument();
+        PDPage page = new PDPage();
+        document.addPage(page);
+        
+        page.getCOSObject().setItem(COSName.CONTENTS, new COSArray(COSName.TYPE));
+        
+        File tempFile = Files.createTempFile("invalid-document", ".pdf").toFile();
+        document.writeTo(tempFile);
+        
+        PDDocument read = PDFParser.parse(SeekableSources.seekableSourceFrom(tempFile));
+        assertFalse("", read.getPage(0).getContentStreams().hasNext());
     }
 
 }

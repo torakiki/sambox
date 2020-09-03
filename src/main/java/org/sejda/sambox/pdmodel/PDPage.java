@@ -148,10 +148,18 @@ public class PDPage implements COSObjectable, PDContentStream
             COSArray array = (COSArray) base;
             for (int i = 0; i < array.size(); i++)
             {
-                COSStream stream = (COSStream) array.getObject(i);
-                if (nonNull(stream))
+                COSBase baseObject = array.getObject(i);
+                if(baseObject instanceof COSStream) 
                 {
-                    streams.add(new PDStream(stream));
+                    COSStream stream = (COSStream) baseObject;
+                    if (nonNull(stream))
+                    {
+                        streams.add(new PDStream(stream));
+                    }    
+                }
+                else
+                {
+                    LOG.warn("Page has contents object that is not a stream: " + baseObject);
                 }
             }
         }
