@@ -95,9 +95,6 @@ final class PDCIDFontType2Embedder extends TrueTypeEmbedder
             // build GID -> Unicode map
             buildToUnicodeCMap(null);
         }
-
-        // ToUnicode CMap
-        buildToUnicodeCMap(null);
     }
 
     /**
