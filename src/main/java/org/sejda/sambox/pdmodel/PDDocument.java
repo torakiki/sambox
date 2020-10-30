@@ -595,7 +595,11 @@ public class PDDocument implements Closeable
         getDocumentInformation().setModificationDate(Calendar.getInstance());
         for (Subsettable font : fontsToSubset)
         {
-            font.subset();
+            try {
+                font.subset();
+            } catch (Exception e) {
+                LOG.warn("Exception occurred while subsetting font: " + font, e);
+            }
         }
         fontsToSubset.clear();
         Optional<EncryptionContext> encryptionContext = ofNullable(
