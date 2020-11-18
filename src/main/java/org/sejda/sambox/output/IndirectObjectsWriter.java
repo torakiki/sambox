@@ -101,7 +101,7 @@ class IndirectObjectsWriter implements Closeable
     protected void onWritten(IndirectCOSObjectReference ref)
     {
         ref.releaseCOSObject();
-        LOG.trace("Released " + ref);
+        LOG.trace("Released {}", ref);
     }
 
     private void doWriteObject(IndirectCOSObjectReference object) throws IOException

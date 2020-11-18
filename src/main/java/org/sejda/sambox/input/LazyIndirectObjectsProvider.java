@@ -123,7 +123,7 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
         return this;
     }
 
-    private void parseObject(COSObjectKey key)
+    private synchronized void parseObject(COSObjectKey key)
     {
         XrefEntry xrefEntry = xref.get(key);
         if (nonNull(xrefEntry))
@@ -208,14 +208,14 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
             LOG.warn("Missing 'endobj' token for {}", xrefEntry);
         }
 
-        if(found instanceof ExistingIndirectCOSObject)
+        if (found instanceof ExistingIndirectCOSObject)
         {
-            ExistingIndirectCOSObject existingIndirectCOSObject = (ExistingIndirectCOSObject)found;
+            ExistingIndirectCOSObject existingIndirectCOSObject = (ExistingIndirectCOSObject) found;
             // does this point to itself? it would cause a StackOverflowError. Example:
             // 9 0 obj
             // 9 0 R
             // endobj
-            if(existingIndirectCOSObject.id().objectIdentifier.equals(xrefEntry.key()))
+            if (existingIndirectCOSObject.id().objectIdentifier.equals(xrefEntry.key()))
             {
                 LOG.warn("Found indirect object definition pointing to itself, for {}", xrefEntry);
                 found = COSNull.NULL;
