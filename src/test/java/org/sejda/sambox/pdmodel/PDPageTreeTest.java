@@ -218,6 +218,34 @@ public class PDPageTreeTest
             e.printStackTrace();
         }
     }
+
+    private void createTestFile_BrokenPageTreeDocumentSameAttributesWhenInherited()
+    {
+        try (PDDocument doc = parse(SeekableSources.inMemorySeekableSourceFrom(
+                PDPageTreeTest.class.getResourceAsStream("page_tree_multiple_levels.pdf"))))
+        {
+            // break the structure
+            PDPage page1 = doc.getPage(0);
+            COSDictionary actualParent = page1.getCOSObject().getDictionaryObject(COSName.PARENT, COSDictionary.class);
+            actualParent.setItem(COSName.ROTATE, COSInteger.get(90));
+
+            COSDictionary fakeParent = new COSDictionary();
+            fakeParent.setItem(COSName.KIDS, actualParent.getItem(COSName.KIDS));
+            fakeParent.setItem(COSName.COUNT, actualParent.getItem(COSName.COUNT));
+            // same inheritable attr compared to parent, when inherited
+            COSDictionary fakeParentParent = new COSDictionary();
+            fakeParentParent.setItem(COSName.ROTATE, COSInteger.get(90));
+            
+            fakeParent.setItem(COSName.PARENT, fakeParentParent);
+
+            // break the page
+            page1.getCOSObject().setItem(COSName.PARENT, fakeParent);
+
+            doc.writeTo(new File("/tmp/page_tree_broken_different_parent_same_inherited_attrs.pdf"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     
     @Test
     public void addPagesToDocumentWithInconsistentPageParents() throws IOException {
@@ -244,6 +272,21 @@ public class PDPageTreeTest
         } catch (RuntimeException e) {
             e.printStackTrace();
             assertEquals("Page has inconsistent PARENT attribute and different inheritable attributes", e.getMessage());
+        }
+    }
+
+    @Test
+    public void addPagesToDocumentWithInconsistentPageParentsSameInheritableAttrs() throws IOException {
+        try (PDDocument doc = parse(SeekableSources.inMemorySeekableSourceFrom(
+                PDPageTreeTest.class.getResourceAsStream("page_tree_broken_different_parent_same_inherited_attrs.pdf"))))
+        {
+            int numPages = doc.getNumberOfPages();
+
+            addBlankPageAfter(doc, 1);
+            assertEquals(doc.getNumberOfPages(), numPages + 1);
+
+            addBlankPageAfter(doc, 2);
+            assertEquals(doc.getNumberOfPages(), numPages + 2);
         }
     }
 }

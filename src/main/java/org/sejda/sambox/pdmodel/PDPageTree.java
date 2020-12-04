@@ -624,8 +624,8 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
                 COSName.RESOURCES);
         for(COSName attr : inheritablePageAttributes)
         {
-            COSBase value1 = node1.getItem(attr);
-            COSBase value2 = node2.getItem(attr);
+            COSBase value1 = PDPageTree.getInheritableAttribute(node1, attr);
+            COSBase value2 = PDPageTree.getInheritableAttribute(node2, attr);
             if(!Objects.equals(value1, value2))
             {
                 return true;
