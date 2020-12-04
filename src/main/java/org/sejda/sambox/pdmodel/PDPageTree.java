@@ -22,15 +22,7 @@ import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Objects;
-import java.util.Queue;
-import java.util.Spliterator;
-import java.util.Spliterators;
+import java.util.*;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -55,6 +47,8 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
 
     private final COSDictionary root;
     private final PDDocument document;
+
+    private final Map<COSDictionary, COSDictionary> pagesWithInconsistentParent = new HashMap<>();
 
     /**
      * Constructor for embedding.
@@ -278,7 +272,7 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
      */
     public PDPage get(int index)
     {
-        COSDictionary dict = get(index + 1, root, 0);
+        COSDictionary dict = get(index + 1, root, 0, null);
 
         sanitizeType(dict);
 
@@ -307,9 +301,10 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
      * @param pageNum 1-based page number
      * @param node page tree node to search
      * @param encountered number of pages encountered so far
+     * @param pageTreeParent the parent node, as determined traversing the page tree top -> down
      * @return COS dictionary of the Page object
      */
-    private COSDictionary get(int pageNum, COSDictionary node, int encountered)
+    private COSDictionary get(int pageNum, COSDictionary node, int encountered, COSDictionary pageTreeParent)
     {
         if (pageNum < 0)
         {
@@ -333,7 +328,7 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
                         if (pageNum <= encountered + kidCount)
                         {
                             // it's this kid
-                            return get(pageNum, kid, encountered);
+                            return get(pageNum, kid, encountered, node);
                         }
                         encountered += kidCount;
                     }
@@ -344,7 +339,7 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
                         if (pageNum == encountered)
                         {
                             // it's this page
-                            return get(pageNum, kid, encountered);
+                            return get(pageNum, kid, encountered, node);
                         }
                     }
                 }
@@ -359,6 +354,12 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
         }
         if (encountered == pageNum)
         {
+            // check here for inconsistencies
+            COSDictionary nodeParent = node.getDictionaryObject(COSName.PARENT, COSName.P, COSDictionary.class);
+            if (nodeParent != pageTreeParent) {
+                LOG.warn("Detected inconsistent page, has PARENT attribute pointing to a different node than actual parent determined when traversing the page tree.");
+                pagesWithInconsistentParent.put(node, pageTreeParent);
+            }
             return node;
         }
 
@@ -457,7 +458,7 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
      */
     public void remove(int index)
     {
-        COSDictionary node = get(index + 1, root, 0);
+        COSDictionary node = get(index + 1, root, 0, null);
         remove(node);
     }
 
@@ -532,6 +533,7 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
     public void insertBefore(PDPage newPage, PDPage nextPage)
     {
         COSDictionary nextPageDict = nextPage.getCOSObject();
+        fixInconsistentPageNodeParentIfRequired(nextPageDict);
         COSDictionary parentDict = nextPageDict.getDictionaryObject(COSName.PARENT,
                 COSDictionary.class);
         COSArray kids = parentDict.getDictionaryObject(COSName.KIDS, COSArray.class);
@@ -564,6 +566,7 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
     public void insertAfter(PDPage newPage, PDPage prevPage)
     {
         COSDictionary prevPageDict = prevPage.getCOSObject();
+        fixInconsistentPageNodeParentIfRequired(prevPageDict);
         COSDictionary parentDict = prevPageDict.getDictionaryObject(COSName.PARENT,
                 COSDictionary.class);
         COSArray kids = parentDict.getDictionaryObject(COSName.KIDS, COSArray.class);
@@ -594,5 +597,41 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
             parentDict.setInt(COSName.COUNT, cnt + 1);
             parentDict = (COSDictionary) parentDict.getDictionaryObject(COSName.PARENT);
         } while (parentDict != null);
+    }
+
+    private void fixInconsistentPageNodeParentIfRequired(COSDictionary node)
+    {
+        if(pagesWithInconsistentParent.containsKey(node))
+        {
+            COSDictionary pageTreeParent = pagesWithInconsistentParent.get(node);
+            COSDictionary parent = node.getDictionaryObject(COSName.PARENT, COSDictionary.class);
+            if(pageTreeParent != null && pageTreeParent != parent)
+            {
+                if(haveDifferentInheritableAttributes(pageTreeParent, parent))
+                {
+                    throw new RuntimeException("Page has inconsistent PARENT attribute and different inheritable attributes");
+                }
+
+                LOG.warn("Fixing PARENT reference on page node: " + node);
+                node.setItem(COSName.PARENT, pageTreeParent);
+            }
+        }
+    }
+
+    private boolean haveDifferentInheritableAttributes(COSDictionary node1, COSDictionary node2)
+    {
+        List<COSName> inheritablePageAttributes = Arrays.asList(COSName.ROTATE, COSName.MEDIA_BOX, COSName.CROP_BOX,
+                COSName.RESOURCES);
+        for(COSName attr : inheritablePageAttributes)
+        {
+            COSBase value1 = node1.getItem(attr);
+            COSBase value2 = node2.getItem(attr);
+            if(!Objects.equals(value1, value2))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

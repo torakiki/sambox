@@ -63,6 +63,7 @@ public class PDDocumentCatalog implements COSObjectable
     private final COSDictionary root;
     private final PDDocument document;
     private PDAcroForm cachedAcroForm;
+    private PDPageTree pageTree;
 
     /**
      * Constructor. AcroForm.
@@ -131,8 +132,12 @@ public class PDDocumentCatalog implements COSObjectable
      */
     public PDPageTree getPages()
     {
-        // TODO cache this since it's probably going to be called often and we want to reduce GC
-        return new PDPageTree((COSDictionary) root.getDictionaryObject(COSName.PAGES), document);
+        if(this.pageTree == null) 
+        {
+            this.pageTree = new PDPageTree((COSDictionary) root.getDictionaryObject(COSName.PAGES), document);
+        }
+        
+        return this.pageTree;
     }
 
     /**

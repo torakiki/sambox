@@ -16,18 +16,20 @@
  */
 package org.sejda.sambox.pdmodel;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.endsWith;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import static org.sejda.sambox.input.PDFParser.parse;
 
 import java.io.File;
 import java.io.IOException;
 
 import org.junit.Test;
 import org.sejda.io.SeekableSources;
+import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.interactive.documentnavigation.outline.PDDocumentOutline;
@@ -43,7 +45,7 @@ public class PDPageTreeTest
     @Test
     public void indexOfPageFromOutlineDestination() throws IOException
     {
-        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+        try (PDDocument doc = parse(SeekableSources.inMemorySeekableSourceFrom(
                 PDPageTreeTest.class.getResourceAsStream("with_outline.pdf"))))
         {
             PDDocumentOutline outline = doc.getDocumentCatalog().getDocumentOutline();
@@ -61,7 +63,7 @@ public class PDPageTreeTest
     @Test
     public void positiveSingleLevel() throws IOException
     {
-        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+        try (PDDocument doc = parse(SeekableSources.inMemorySeekableSourceFrom(
                 PDPageTreeTest.class.getResourceAsStream("with_outline.pdf"))))
         {
             for (int i = 0; i < doc.getNumberOfPages(); i++)
@@ -74,7 +76,7 @@ public class PDPageTreeTest
     @Test
     public void positiveMultipleLevel() throws IOException
     {
-        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+        try (PDDocument doc = parse(SeekableSources.inMemorySeekableSourceFrom(
                 PDPageTreeTest.class.getResourceAsStream("page_tree_multiple_levels.pdf"))))
         {
             for (int i = 0; i < doc.getNumberOfPages(); i++)
@@ -87,8 +89,7 @@ public class PDPageTreeTest
     @Test
     public void wrongMultipleLevel() throws IOException
     {
-        try (PDDocument doc = PDFParser
-                .parse(SeekableSources.inMemorySeekableSourceFrom(PDPageTreeTest.class
+        try (PDDocument doc = parse(SeekableSources.inMemorySeekableSourceFrom(PDPageTreeTest.class
                         .getResourceAsStream("page_tree_multiple_levels_wrong_kid_type.pdf"))))
         {
             for (PDPage page : doc.getPages())
@@ -101,7 +102,7 @@ public class PDPageTreeTest
     @Test
     public void negative() throws IOException
     {
-        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+        try (PDDocument doc = parse(SeekableSources.inMemorySeekableSourceFrom(
                 PDPageTreeTest.class.getResourceAsStream("with_outline.pdf"))))
         {
             assertEquals(-1, doc.getPages().indexOf(new PDPage()));
@@ -111,7 +112,7 @@ public class PDPageTreeTest
     @Test
     public void pagesAsStream() throws IOException
     {
-        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+        try (PDDocument doc = parse(SeekableSources.inMemorySeekableSourceFrom(
                 PDPageTreeTest.class.getResourceAsStream("with_outline.pdf"))))
         {
             assertEquals(6, doc.getPages().stream().count());
@@ -121,7 +122,7 @@ public class PDPageTreeTest
     @Test
     public void pagesAsStreamOrder() throws IOException
     {
-        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+        try (PDDocument doc = parse(SeekableSources.inMemorySeekableSourceFrom(
                 PDPageTreeTest.class.getResourceAsStream("with_outline.pdf"))))
         {
             assertEquals(doc.getPage(0), doc.getPages().stream().findFirst().get());
@@ -136,7 +137,7 @@ public class PDPageTreeTest
     @Test
     public void pageTypeIsSanitized() throws IOException
     {
-        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+        try (PDDocument doc = parse(SeekableSources.inMemorySeekableSourceFrom(
                 PDPageTreeTest.class.getResourceAsStream("with_outline.pdf"))))
         {
             PDPage page = doc.getPage(0);
@@ -151,7 +152,7 @@ public class PDPageTreeTest
     @Test
     public void pageNotFoundIncludesSourcePathAndPageNumber() throws IOException
     {
-        try (PDDocument doc = PDFParser.parse(SeekableSources.onTempFileSeekableSourceFrom(
+        try (PDDocument doc = parse(SeekableSources.onTempFileSeekableSourceFrom(
                 PDPageTreeTest.class.getResourceAsStream("with_outline.pdf"))))
         {
             try {
@@ -162,6 +163,87 @@ public class PDPageTreeTest
                 assertThat(ex.getSourcePath(), containsString(File.separator + "SejdaIO"));
                 assertThat(ex.getSourcePath(), endsWith(".tmp"));
             }
+        }
+    }
+
+    public PDPage addBlankPageAfter(PDDocument document, int pageNumber) {
+        PDPage target = document.getPage(pageNumber - 1);
+        PDPage result = new PDPage(target.getMediaBox().rotate(target.getRotation()));
+        document.getPages().insertAfter(result, target);
+        return result;
+    }
+    
+    private void createTestFile_BrokenPageTreeDocument() 
+    {
+        try (PDDocument doc = parse(SeekableSources.inMemorySeekableSourceFrom(
+                PDPageTreeTest.class.getResourceAsStream("page_tree_multiple_levels.pdf"))))
+        {
+            // break the structure
+            PDPage page1 = doc.getPage(0);
+            COSDictionary actualParent = page1.getCOSObject().getDictionaryObject(COSName.PARENT, COSDictionary.class);
+
+            COSDictionary fakeParent = new COSDictionary();
+            fakeParent.setItem(COSName.KIDS, actualParent.getItem(COSName.KIDS));
+            fakeParent.setItem(COSName.COUNT, actualParent.getItem(COSName.COUNT));
+
+            // break the page
+            page1.getCOSObject().setItem(COSName.PARENT, fakeParent);
+
+            doc.writeTo(new File("/tmp/page_tree_broken_different_parent.pdf"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void createTestFile_BrokenPageTreeDocumentDifferentAttributes()
+    {
+        try (PDDocument doc = parse(SeekableSources.inMemorySeekableSourceFrom(
+                PDPageTreeTest.class.getResourceAsStream("page_tree_multiple_levels.pdf"))))
+        {
+            // break the structure
+            PDPage page1 = doc.getPage(0);
+            COSDictionary actualParent = page1.getCOSObject().getDictionaryObject(COSName.PARENT, COSDictionary.class);
+
+            COSDictionary fakeParent = new COSDictionary();
+            fakeParent.setItem(COSName.KIDS, actualParent.getItem(COSName.KIDS));
+            fakeParent.setItem(COSName.COUNT, actualParent.getItem(COSName.COUNT));
+            // different inheritable attr compared to parent
+            fakeParent.setItem(COSName.ROTATE, COSInteger.get(90));
+
+            // break the page
+            page1.getCOSObject().setItem(COSName.PARENT, fakeParent);
+
+            doc.writeTo(new File("/tmp/page_tree_broken_different_parent_diff_attrs.pdf"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    @Test
+    public void addPagesToDocumentWithInconsistentPageParents() throws IOException {
+        try (PDDocument doc = parse(SeekableSources.inMemorySeekableSourceFrom(
+                PDPageTreeTest.class.getResourceAsStream("page_tree_broken_different_parent.pdf"))))
+        {
+            int numPages = doc.getNumberOfPages();
+            
+            addBlankPageAfter(doc, 1);
+            assertEquals(doc.getNumberOfPages(), numPages + 1);
+            
+            addBlankPageAfter(doc, 2);
+            assertEquals(doc.getNumberOfPages(), numPages + 2);
+        }
+    }
+
+    @Test
+    public void addPagesToDocumentWithInconsistentPageParentsDifferentInheritableAttrs() throws IOException {
+        try (PDDocument doc = parse(SeekableSources.inMemorySeekableSourceFrom(
+                PDPageTreeTest.class.getResourceAsStream("page_tree_broken_different_parent_diff_attrs.pdf"))))
+        {
+            addBlankPageAfter(doc, 1);
+            fail("Exception was expected");
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            assertEquals("Page has inconsistent PARENT attribute and different inheritable attributes", e.getMessage());
         }
     }
 }
