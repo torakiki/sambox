@@ -48,8 +48,6 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
     private final COSDictionary root;
     private final PDDocument document;
 
-    private final Map<COSDictionary, COSDictionary> pagesWithInconsistentParent = new HashMap<>();
-
     /**
      * Constructor for embedding.
      */
@@ -272,12 +270,13 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
      */
     public PDPage get(int index)
     {
-        COSDictionary dict = get(index + 1, root, 0, null);
+        PageAndPageTreeParent res = get(index + 1, root, 0, null);
+        COSDictionary dict = res.node;
 
         sanitizeType(dict);
 
         ResourceCache resourceCache = document != null ? document.getResourceCache() : null;
-        return new PDPage(dict, resourceCache);
+        return new PDPage(dict, resourceCache, res.parent);
     }
 
     private static void sanitizeType(COSDictionary dictionary)
@@ -304,7 +303,7 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
      * @param pageTreeParent the parent node, as determined traversing the page tree top -> down
      * @return COS dictionary of the Page object
      */
-    private COSDictionary get(int pageNum, COSDictionary node, int encountered, COSDictionary pageTreeParent)
+    private PageAndPageTreeParent get(int pageNum, COSDictionary node, int encountered, COSDictionary pageTreeParent)
     {
         if (pageNum < 0)
         {
@@ -354,13 +353,7 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
         }
         if (encountered == pageNum)
         {
-            // check here for inconsistencies
-            COSDictionary nodeParent = node.getDictionaryObject(COSName.PARENT, COSName.P, COSDictionary.class);
-            if (nodeParent != pageTreeParent) {
-                LOG.warn("Detected inconsistent page, has PARENT attribute pointing to a different node than actual parent determined when traversing the page tree.");
-                pagesWithInconsistentParent.put(node, pageTreeParent);
-            }
-            return node;
+            return new PageAndPageTreeParent(node, pageTreeParent);
         }
 
         throw new PageNotFoundException("Unable to find page " + pageNum + " in " + getSourcePath(),
@@ -458,8 +451,8 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
      */
     public void remove(int index)
     {
-        COSDictionary node = get(index + 1, root, 0, null);
-        remove(node);
+        PageAndPageTreeParent res = get(index + 1, root, 0, null);
+        remove(res.node);
     }
 
     /**
@@ -533,9 +526,12 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
     public void insertBefore(PDPage newPage, PDPage nextPage)
     {
         COSDictionary nextPageDict = nextPage.getCOSObject();
-        fixInconsistentPageNodeParentIfRequired(nextPageDict);
-        COSDictionary parentDict = nextPageDict.getDictionaryObject(COSName.PARENT,
-                COSDictionary.class);
+        COSDictionary parentDict = nextPageDict.getDictionaryObject(COSName.PARENT, COSDictionary.class);
+        if(nextPage.getPageTreeParent() != null)
+        {
+            parentDict = nextPage.getPageTreeParent();
+        }
+        
         COSArray kids = parentDict.getDictionaryObject(COSName.KIDS, COSArray.class);
         boolean found = false;
         for (int i = 0; i < kids.size(); ++i)
@@ -566,9 +562,13 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
     public void insertAfter(PDPage newPage, PDPage prevPage)
     {
         COSDictionary prevPageDict = prevPage.getCOSObject();
-        fixInconsistentPageNodeParentIfRequired(prevPageDict);
         COSDictionary parentDict = prevPageDict.getDictionaryObject(COSName.PARENT,
                 COSDictionary.class);
+        if(prevPage.getPageTreeParent() != null)
+        {
+            parentDict = prevPage.getPageTreeParent();
+        }
+        
         COSArray kids = parentDict.getDictionaryObject(COSName.KIDS, COSArray.class);
         boolean found = false;
         for (int i = 0; i < kids.size(); ++i)
@@ -599,39 +599,18 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
         } while (parentDict != null);
     }
 
-    private void fixInconsistentPageNodeParentIfRequired(COSDictionary node)
-    {
-        if(pagesWithInconsistentParent.containsKey(node))
-        {
-            COSDictionary pageTreeParent = pagesWithInconsistentParent.get(node);
-            COSDictionary parent = node.getDictionaryObject(COSName.PARENT, COSDictionary.class);
-            if(pageTreeParent != null && pageTreeParent != parent)
-            {
-                if(haveDifferentInheritableAttributes(pageTreeParent, parent))
-                {
-                    throw new RuntimeException("Page has inconsistent PARENT attribute and different inheritable attributes");
-                }
+    /**
+     * A tuple of a page and the parent found when traversing the page tree top down.
+     * NOTE: The page tree parent can be different from page.PARENT (for invalid documents)
+     * hence the need for this class when adding new pages and having to increment kids counters in the page tree
+     */
+    public static class PageAndPageTreeParent {
+        public final COSDictionary node; 
+        public final COSDictionary parent;
 
-                LOG.warn("Fixing PARENT reference on page node: " + node);
-                node.setItem(COSName.PARENT, pageTreeParent);
-            }
+        public PageAndPageTreeParent(COSDictionary node, COSDictionary parent) {
+            this.node = node;
+            this.parent = parent;
         }
-    }
-
-    private boolean haveDifferentInheritableAttributes(COSDictionary node1, COSDictionary node2)
-    {
-        List<COSName> inheritablePageAttributes = Arrays.asList(COSName.ROTATE, COSName.MEDIA_BOX, COSName.CROP_BOX,
-                COSName.RESOURCES);
-        for(COSName attr : inheritablePageAttributes)
-        {
-            COSBase value1 = PDPageTree.getInheritableAttribute(node1, attr);
-            COSBase value2 = PDPageTree.getInheritableAttribute(node2, attr);
-            if(!Objects.equals(value1, value2))
-            {
-                return true;
-            }
-        }
-
-        return false;
     }
 }

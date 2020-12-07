@@ -267,11 +267,13 @@ public class PDPageTreeTest
         try (PDDocument doc = parse(SeekableSources.inMemorySeekableSourceFrom(
                 PDPageTreeTest.class.getResourceAsStream("page_tree_broken_different_parent_diff_attrs.pdf"))))
         {
+            int numPages = doc.getNumberOfPages();
+            
             addBlankPageAfter(doc, 1);
-            fail("Exception was expected");
-        } catch (RuntimeException e) {
-            e.printStackTrace();
-            assertEquals("Page has inconsistent PARENT attribute and different inheritable attributes", e.getMessage());
+            assertEquals(doc.getNumberOfPages(), numPages + 1);
+
+            addBlankPageAfter(doc, 2);
+            assertEquals(doc.getNumberOfPages(), numPages + 2);
         }
     }
 

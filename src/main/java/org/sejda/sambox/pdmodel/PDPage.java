@@ -77,6 +77,7 @@ public class PDPage implements COSObjectable, PDContentStream
     private PDResources pageResources;
     private ResourceCache resourceCache;
     private PDRectangle mediaBox;
+    private COSDictionary pageTreeParent;
 
     /**
      * Creates a new PDPage instance for embedding, with a size of U.S. Letter (8.5 x 11 inches).
@@ -117,6 +118,18 @@ public class PDPage implements COSObjectable, PDContentStream
     {
         page = pageDictionary;
         this.resourceCache = resourceCache;
+    }
+
+    /**
+     * Creates a new instance of PDPage for reading.
+     *
+     * @param pageDictionary A page dictionary in a PDF document.
+     */
+    PDPage(COSDictionary pageDictionary, ResourceCache resourceCache, COSDictionary pageTreeParent)
+    {
+        page = pageDictionary;
+        this.resourceCache = resourceCache;
+        this.pageTreeParent = pageTreeParent;
     }
 
     /**
@@ -929,4 +942,7 @@ public class PDPage implements COSObjectable, PDContentStream
         });
     }
 
+    public COSDictionary getPageTreeParent() {
+        return pageTreeParent;
+    }
 }
