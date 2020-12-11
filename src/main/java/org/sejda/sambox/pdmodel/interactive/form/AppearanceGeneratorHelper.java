@@ -504,7 +504,7 @@ public class AppearanceGeneratorHelper
         // always re-calculate the fontSize for text fields
         // because sometimes the field value changes to a longer string, which won't fit the field anymore when drawn
         // using the previous font size
-        if (field instanceof PDTextField)
+        if (field instanceof PDTextField && !((PDTextField) field).isMultiline())
         {
             recalculateFontSize = true;
         }
