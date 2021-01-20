@@ -20,6 +20,7 @@ import static java.util.Objects.nonNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
 
 import java.awt.Point;
 import java.awt.geom.Point2D;
@@ -195,6 +196,15 @@ public class PDPageTest
         
         PDDocument read = PDFParser.parse(SeekableSources.seekableSourceFrom(tempFile));
         assertFalse("", read.getPage(0).getContentStreams().hasNext());
+    }
+
+    @Test
+    public void invalidPageResources()
+    {
+        COSDictionary dictionary = new COSDictionary();
+        dictionary.setItem(COSName.RESOURCES, new COSArray());
+        PDPage page = new PDPage(dictionary);
+        assertNotNull(page.getResources());
     }
 
 }

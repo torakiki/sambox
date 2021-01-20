@@ -233,7 +233,7 @@ public class PDPage implements COSObjectable, PDContentStream
         if (pageResources == null)
         {
             pageResources = new PDResources(ofNullable(
-                    (COSDictionary) PDPageTree.getInheritableAttribute(page, COSName.RESOURCES))
+                    (COSDictionary) PDPageTree.getInheritableAttribute(page, COSName.RESOURCES, COSDictionary.class))
                             .orElseGet(() -> {
                                 COSDictionary emptyRes = new COSDictionary();
                                 // it's illegal for a page to not have resources, either direct or inherited. According

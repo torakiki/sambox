@@ -97,6 +97,24 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
     }
 
     /**
+     * Similar to {@link #getInheritableAttribute(COSDictionary, COSName)} but also checks the returned element 
+     * matches the expected type class
+     * @param node
+     * @param key
+     * @param clazz expected type class
+     * @param <T>
+     * @return
+     */
+    public static <T extends COSBase> COSBase getInheritableAttribute(COSDictionary node, COSName key, Class<T> clazz) {
+        COSBase result = getInheritableAttribute(node, key);
+        if(clazz.isInstance(result)) {
+            return result;
+        } else {
+            return null;
+        }
+    }
+
+    /**
      * Returns the given attribute, inheriting from parent tree nodes if necessary.
      *
      * @param node page object
