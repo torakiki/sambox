@@ -77,7 +77,11 @@ public class PDFunctionType3 extends PDFunction
             functionsArray = new PDFunction[ar.size()];
             for (int i = 0; i < ar.size(); ++i)
             {
-                functionsArray[i] = PDFunction.create(ar.getObject(i));
+                COSBase base = ar.getObject(i);
+                if (base != null) 
+                {
+                    functionsArray[i] = PDFunction.create(base);
+                }
             }
         }
 
