@@ -1,7 +1,4 @@
 language: java
-arch:
-    - AMD64
-    - ppc64le
 sudo: false
 jdk:
   - openjdk8
