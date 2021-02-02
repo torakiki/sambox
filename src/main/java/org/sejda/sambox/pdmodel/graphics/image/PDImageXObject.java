@@ -49,6 +49,8 @@ import org.sejda.sambox.pdmodel.common.PDStream;
 import org.sejda.sambox.pdmodel.graphics.PDXObject;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
+import org.sejda.sambox.pdmodel.graphics.color.PDDeviceRGB;
+import org.sejda.sambox.pdmodel.graphics.color.PDJPXColorSpace;
 import org.sejda.sambox.util.filetypedetector.FileType;
 import org.sejda.sambox.util.filetypedetector.FileTypeDetector;
 import org.slf4j.Logger;
@@ -303,7 +305,12 @@ public final class PDImageXObject extends PDXObject implements PDImage
         {
             // PDFBOX-4267: process /Matte
             // convert to RGB
-            return getColorSpace().toRGB(matte);
+            PDColorSpace colorSpace = getColorSpace();
+            if(colorSpace instanceof PDJPXColorSpace) {
+                // #125 JPX color spaces don't support drawing
+                colorSpace = PDDeviceRGB.INSTANCE; 
+            }
+            return colorSpace.toRGB(matte);
         }
         return null;
     }
