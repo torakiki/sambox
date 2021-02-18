@@ -16,13 +16,19 @@
  */
 package org.sejda.sambox.pdmodel;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import org.junit.Test;
 import org.sejda.io.SeekableSources;
+import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.input.PDFParser;
 
 import junit.framework.TestCase;
+
+import static org.junit.Assert.*;
 
 /**
  * This class tests the extraction of document-level metadata.
@@ -30,9 +36,10 @@ import junit.framework.TestCase;
  * @author Neil McErlean
  * @since 1.3.0
  */
-public class TestPDDocumentInformation extends TestCase
+public class PDDocumentInformationTest
 {
 
+    @Test
     public void testMetadataExtraction() throws Exception
     {
         try (PDDocument doc = PDFParser.parse(SeekableSources
@@ -73,6 +80,7 @@ public class TestPDDocumentInformation extends TestCase
      * 
      * @throws Exception
      */
+    @Test
     public void testPDFBox3068() throws Exception
     {
         try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
@@ -80,6 +88,34 @@ public class TestPDDocumentInformation extends TestCase
         {
             PDDocumentInformation documentInformation = doc.getDocumentInformation();
             assertEquals("Title", documentInformation.getTitle());
+        }
+    }
+    
+    @Test
+    public void removeMetadataField() throws IOException {
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/org/sejda/sambox/pdmodel/PDFBOX-3068.pdf"))))
+        {
+            PDDocumentInformation documentInformation = doc.getDocumentInformation();
+            assertEquals("Title", documentInformation.getTitle());
+            assertEquals("NOTEPAD", documentInformation.getCreator());
+            
+            documentInformation.removeMetadataField(COSName.TITLE.getName());
+            documentInformation.removeMetadataField(COSName.CREATOR.getName());
+            
+            File temp = File.createTempFile("metadata-test", ".pdf");
+            temp.deleteOnExit();
+            
+            doc.writeTo(temp);
+
+            try (PDDocument doc2 = PDFParser.parse(SeekableSources.seekableSourceFrom(temp)))
+            {
+                PDDocumentInformation documentInformation2 = doc2.getDocumentInformation();
+                assertNull(documentInformation2.getTitle());
+                assertNull(documentInformation2.getCreator());
+            }
+
+            temp.delete();
         }
     }
 }

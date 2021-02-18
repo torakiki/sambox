@@ -275,6 +275,11 @@ public class PDDocumentInformation extends PDDictionaryWrapper
     {
         getCOSObject().setString(fieldName, fieldValue);
     }
+    
+    public void removeMetadataField(String fieldName)
+    {
+        getCOSObject().removeItem(COSName.getPDFName(fieldName));
+    }
 
     /**
      * This will set the trapped of the document.  This will be
