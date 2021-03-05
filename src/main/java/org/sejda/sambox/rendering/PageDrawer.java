@@ -743,7 +743,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         {
             for (int i = 0; i < dashArray.length; ++i)
             {
-                if (Float.isInfinite(dashArray[i]) || Float.isNaN(dashArray[i]))
+                if (Float.isInfinite(dashArray[i]) || Float.isNaN(dashArray[i]) || dashArray[i] < 0)
                 {
                     dashArray = null;
                     break;
