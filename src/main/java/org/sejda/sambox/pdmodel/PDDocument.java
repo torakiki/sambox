@@ -39,6 +39,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.Arrays;
 
 import org.apache.fontbox.ttf.TrueTypeFont;
 import org.sejda.commons.util.IOUtils;
@@ -591,8 +592,13 @@ public class PDDocument implements Closeable
     {
         requireOpen();
 
-        getDocumentInformation().setProducer(SAMBox.PRODUCER);
-        getDocumentInformation().setModificationDate(Calendar.getInstance());
+        if( Arrays.stream(options).anyMatch(i -> i == WriteOption.NO_METADATA_PRODUCER_MODIFIED_DATE_UPDATE)) {
+            // does not update producer and last modification date
+        } else {
+            getDocumentInformation().setProducer(SAMBox.PRODUCER);
+            getDocumentInformation().setModificationDate(Calendar.getInstance());    
+        }
+        
         for (Subsettable font : fontsToSubset)
         {
             try {
