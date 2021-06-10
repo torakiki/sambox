@@ -19,6 +19,8 @@ package org.sejda.sambox.contentstream.operator.color;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.contentstream.operator.OperatorProcessor;
@@ -34,14 +36,34 @@ import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
  */
 public class SetNonStrokingColorSpace extends OperatorProcessor
 {
+
+    private static final Log LOGGER = LogFactory.getLog(SetStrokingColorSpace.class);
+    
     @Override
     public void process(Operator operator, List<COSBase> arguments) throws IOException
     {
-        COSName name = (COSName) arguments.get(0);
+        if(arguments == null || arguments.size() == 0)
+        {
+            LOGGER.warn("Ignoring SetNonStrokingColorSpace operator without operands");
+            return;
+        }
+        
+        COSBase base = arguments.get(0);
 
-        PDColorSpace cs = getContext().getResources().getColorSpace(name);
-        getContext().getGraphicsState().setNonStrokingColorSpace(cs);
-        getContext().getGraphicsState().setNonStrokingColor(cs.getInitialColor());
+        if (base instanceof COSName) 
+        {
+            COSName name = (COSName) base;
+            try 
+            {
+                PDColorSpace cs = getContext().getResources().getColorSpace(name);
+                getContext().getGraphicsState().setNonStrokingColorSpace(cs);
+                getContext().getGraphicsState().setNonStrokingColor(cs.getInitialColor());
+            }
+            catch (IOException ex)
+            {
+                LOGGER.warn("Ignoring SetNonStrokingColorSpace operator, parsing colorspace caused an error", ex);
+            }
+        }
     }
 
     @Override
