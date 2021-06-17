@@ -284,6 +284,12 @@ public abstract class PDNameTreeNode<T extends COSObjectable> implements COSObje
             for (int i = 0; i < namesArray.size(); i += 2)
             {
                 COSString key = (COSString) namesArray.getObject(i);
+                if(i + 1 >= namesArray.size())
+                {
+                    // some invalid NAMES arrays have only the key without a value
+                    LOG.warn("Found key without value in NAMES array: " + key.getString() + ", at index: " + i);
+                    continue;
+                }
                 COSBase cosValue = namesArray.getObject(i + 1);
                 names.put(key.getString(), convertCOSToPD(cosValue));
             }

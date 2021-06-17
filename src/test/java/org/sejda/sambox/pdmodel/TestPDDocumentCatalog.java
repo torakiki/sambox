@@ -28,6 +28,7 @@ import org.sejda.commons.util.IOUtils;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.graphics.color.PDOutputIntent;
+import org.sejda.sambox.pdmodel.interactive.documentnavigation.destination.PDNamedDestination;
 
 /**
  * Test PDDocument Catalog functionality.
@@ -100,5 +101,12 @@ public class TestPDDocumentCatalog
         {
             IOUtils.close(colorProfile);
         }
+    }
+    
+    @Test
+    public void testParsingInvalidNamesArray_KeyWithMissingValue() throws IOException {
+        PDDocument broken = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("document_catalog_invalid_names_array.pdf")));
+        broken.getDocumentCatalog().findNamedDestinationPage(new PDNamedDestination("PAGE_1"));
     }
 }
