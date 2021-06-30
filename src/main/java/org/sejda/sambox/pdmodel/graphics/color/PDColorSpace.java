@@ -90,7 +90,7 @@ public abstract class PDColorSpace implements COSObjectable
             }
         }
 
-        PDColorSpace result = createUncached(colorSpace, resources, wasDefault);
+        PDColorSpace result = createUncached(colorSpace, resources, wasDefault, 0);
 
         if (colorSpace.hasId() && resources != null)
         {
@@ -128,13 +128,19 @@ public abstract class PDColorSpace implements COSObjectable
      * @param colorSpace the color space COS object
      * @param resources the current resources.
      * @param wasDefault if current color space was used by a default color space.
+     * @param recursionAccumulator counts the levels of recursion for this method, to avoid going too deep
      * @return a new color space.
      * @throws MissingResourceException if the color space is missing in the resources dictionary
      * @throws IOException if the color space is unknown or cannot be created.
      */
     private static PDColorSpace createUncached(COSBase colorSpace, PDResources resources,
-            boolean wasDefault) throws IOException
+            boolean wasDefault, int recursionAccumulator) throws IOException
     {
+        if(recursionAccumulator > 4) 
+        {
+            throw new IOException("Could not create color space, infinite recursion detected");
+        }
+        
         colorSpace = colorSpace.getCOSObject();
         if (colorSpace instanceof COSName)
         {
@@ -252,7 +258,7 @@ public abstract class PDColorSpace implements COSObjectable
                     || name == COSName.DEVICEGRAY)
             {
                 // not allowed in an array, but we sometimes encounter these regardless
-                return createUncached(name, resources, wasDefault);
+                return createUncached(name, resources, wasDefault, recursionAccumulator + 1);
             }
             else
             {
@@ -266,7 +272,7 @@ public abstract class PDColorSpace implements COSObjectable
             {
                 LOG.warn("Found invalid color space defined as dictionary {}", csAsDic);
                 return createUncached(csAsDic.getDictionaryObject(COSName.COLORSPACE), resources,
-                        wasDefault);
+                        wasDefault, recursionAccumulator + 1);
             }
         }
 
