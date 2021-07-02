@@ -795,13 +795,19 @@ public class AppearanceGeneratorHelper
 
             contents.newLineAtOffset(contentRect.getLowerLeftX(), yTextPos);
             contents.setFont(font, fontSize);
-            contents.showText(options.get(i));
+            contents.showText(replaceTabChars(options.get(i)));
 
             if (i != (numOptions - 1))
             {
                 contents.endText();
             }
         }
+    }
+    
+    private String replaceTabChars(String input)
+    {
+        // avoid java.lang.IllegalArgumentException: U+0009 ('controlHT') is not available in this font XYZ
+        return input.replace("\t", "    ");
     }
 
     private float calculateLineHeight(PDFont font, float fontScaleY) throws IOException
