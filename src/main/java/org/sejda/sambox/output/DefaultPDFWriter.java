@@ -28,7 +28,9 @@ import java.util.Optional;
 
 import org.sejda.commons.util.IOUtils;
 import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.cos.DirectCOSObject;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
 import org.sejda.sambox.xref.XrefEntry;
 import org.slf4j.Logger;
@@ -117,7 +119,8 @@ class DefaultPDFWriter implements Closeable
     {
         LOG.trace("Writing trailer");
         sanitizeTrailer(trailer, prev);
-        trailer.setLong(COSName.SIZE, writer.context().highestObjectNumber() + 1);
+        trailer.setItem(COSName.SIZE, DirectCOSObject
+                .asDirectObject(COSInteger.get(writer.context().highestObjectNumber() + 1)));
         writer.write("trailer".getBytes(StandardCharsets.US_ASCII));
         writer.writeEOL();
         trailer.getCOSObject().accept(writer.writer());
@@ -151,8 +154,8 @@ class DefaultPDFWriter implements Closeable
         long startxref = writer().offset();
         LOG.debug("Writing xref stream at offset " + startxref);
         sanitizeTrailer(trailer, prev);
-        XrefEntry entry = XrefEntry
-                .inUseEntry(writer.context().highestObjectNumber() + 1, startxref, 0);
+        XrefEntry entry = XrefEntry.inUseEntry(writer.context().highestObjectNumber() + 1,
+                startxref, 0);
         writer.context().addWritten(entry);
         writer.writeObject(new IndirectCOSObjectReference(entry.getObjectNumber(),
                 entry.getGenerationNumber(), new XrefStream(trailer, writer.context())));

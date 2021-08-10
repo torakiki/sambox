@@ -26,19 +26,27 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
 import org.sejda.io.BufferedCountingChannelWriter;
+import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
+import org.sejda.sambox.input.ExistingIndirectCOSObject;
+import org.sejda.sambox.input.PDFParser;
+import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.util.SpecVersionUtils;
+import org.sejda.sambox.xref.FileTrailer;
 import org.sejda.sambox.xref.XrefEntry;
 
 public class DefaultPDFWriterTest
@@ -47,6 +55,8 @@ public class DefaultPDFWriterTest
     private IndirectObjectsWriter objectWriter;
     private DefaultPDFWriter victim;
     private PDFWriteContext context;
+    @Rule
+    public TemporaryFolder folder = new TemporaryFolder();
 
     @Before
     public void setUp()
@@ -163,6 +173,24 @@ public class DefaultPDFWriterTest
         inOrder.verify(writer).writeEOL();
         inOrder.verify(writer).write(aryEq("%%EOF".getBytes(StandardCharsets.US_ASCII)));
         inOrder.verify(writer).writeEOL();
+    }
+
+    @Test
+    public void xrefTableSizeIsDirect() throws Exception
+    {
+
+        File temp = folder.newFile();
+        try (PDDocument document = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/trailer_size_matching_indirect.pdf"))))
+        {
+            document.writeTo(temp);
+        }
+        try (PDDocument newDoc = PDFParser.parse(SeekableSources.seekableSourceFrom(temp)))
+        {
+            FileTrailer trailer = newDoc.getDocument().getTrailer();
+            assertFalse(trailer.getCOSObject()
+                    .getItem(COSName.SIZE) instanceof ExistingIndirectCOSObject);
+        }
     }
 
     @Test
