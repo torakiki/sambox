@@ -58,7 +58,8 @@ public final class IndirectCOSObjectIdentifier
     @Override
     public int hashCode()
     {
-        return Long.hashCode(objectIdentifier.hashCode() + ownerIdentifier.hashCode());
+        return Long
+                .hashCode((long) objectIdentifier.hashCode() + (long) ownerIdentifier.hashCode());
     }
 
     @Override

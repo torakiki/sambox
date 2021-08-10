@@ -16,6 +16,11 @@
  */
 package org.sejda.sambox.pdmodel;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -25,10 +30,6 @@ import org.junit.Test;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.input.PDFParser;
-
-import junit.framework.TestCase;
-
-import static org.junit.Assert.*;
 
 /**
  * This class tests the extraction of document-level metadata.
@@ -90,22 +91,23 @@ public class PDDocumentInformationTest
             assertEquals("Title", documentInformation.getTitle());
         }
     }
-    
+
     @Test
-    public void removeMetadataField() throws IOException {
+    public void removeMetadataField() throws IOException
+    {
         try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
                 getClass().getResourceAsStream("/org/sejda/sambox/pdmodel/PDFBOX-3068.pdf"))))
         {
             PDDocumentInformation documentInformation = doc.getDocumentInformation();
             assertEquals("Title", documentInformation.getTitle());
             assertEquals("NOTEPAD", documentInformation.getCreator());
-            
+
             documentInformation.removeMetadataField(COSName.TITLE.getName());
             documentInformation.removeMetadataField(COSName.CREATOR.getName());
-            
+
             File temp = File.createTempFile("metadata-test", ".pdf");
             temp.deleteOnExit();
-            
+
             doc.writeTo(temp);
 
             try (PDDocument doc2 = PDFParser.parse(SeekableSources.seekableSourceFrom(temp)))

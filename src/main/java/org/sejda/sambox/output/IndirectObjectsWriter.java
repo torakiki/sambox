@@ -117,7 +117,7 @@ class IndirectObjectsWriter implements Closeable
         writer.writer().writeEOL();
         writer.writer().write(ENDOBJ);
         writer.writer().writeEOL();
-        LOG.trace("Written object " + object.xrefEntry());
+        LOG.trace("Written object {}", object.xrefEntry());
     }
 
     /**

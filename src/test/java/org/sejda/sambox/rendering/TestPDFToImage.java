@@ -23,7 +23,6 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -174,7 +173,7 @@ public class TestPDFToImage
         {
             bim3 = createEmptyDiffImage(minWidth, minHeight, maxWidth, maxHeight);
         }
-        
+
         long difference = 0;
         for (int x = 0; x < minWidth; ++x)
         {
@@ -186,9 +185,9 @@ public class TestPDFToImage
                 int diffR = Math.abs((rgb1 & 0xFF) - (rgb2 & 0xFF));
                 int diffG = Math.abs(((rgb1 >> 8) & 0xFF) - ((rgb2 >> 8) & 0xFF));
                 int diffB = Math.abs(((rgb1 >> 16) & 0xFF) - ((rgb2 >> 16) & 0xFF));
-                
+
                 difference = difference + diffR + diffG + diffB;
-                
+
                 if (rgb1 != rgb2 && (diffR > threshold || diffG > threshold || diffB > threshold))
                 {
                     if (bim3 == null)
@@ -210,30 +209,34 @@ public class TestPDFToImage
             }
         }
 
-        // Total number of red pixels = width * height 
-        // Total number of blue pixels = width * height 
-        // Total number of green pixels = width * height 
-        // So total number of pixels = width * height * 3 
+        // Total number of red pixels = width * height
+        // Total number of blue pixels = width * height
+        // Total number of green pixels = width * height
+        // So total number of pixels = width * height * 3
         double totalPixels = bim1.getWidth() * bim1.getHeight() * 3d;
 
-        // Normalizing the value of different pixels 
-        // for accuracy(average pixels per color 
-        // component) 
+        // Normalizing the value of different pixels
+        // for accuracy(average pixels per color
+        // component)
         double avgDifferentPixels = difference / totalPixels;
 
-        // There are 255 values of pixels in total 
+        // There are 255 values of pixels in total
         double percentage = 100 - (avgDifferentPixels / 255) * 100d;
 
-        if(percentage < 99.5d) {
+        if (percentage < 99.5d)
+        {
             LOG.warn("Similarity percentage: " + percentage + "%");
-            return bim3;    
-        } else {
+            return bim3;
+        }
+        else
+        {
             LOG.info("Similarity percentage: " + percentage + "%");
             return null;
         }
     }
 
-    public boolean doTestFile(final File file, File inDir, File outDir) throws IOException {
+    public boolean doTestFile(final File file, File inDir, File outDir) throws IOException
+    {
         return doTestFile(file, inDir.getAbsolutePath(), outDir.getAbsolutePath());
     }
 
@@ -317,7 +320,8 @@ public class TestPDFToImage
                 if (!inFile.exists())
                 {
                     failed = true;
-                    LOG.warn("*** TEST FAILURE *** Input missing for file: " + inFile.getName() + " " + inFile.getAbsolutePath());
+                    LOG.warn("*** TEST FAILURE *** Input missing for file: " + inFile.getName()
+                            + " " + inFile.getAbsolutePath());
                 }
                 else if (!filesAreIdentical(outFile, inFile))
                 {
