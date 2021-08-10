@@ -158,22 +158,22 @@ class PDFWriteContext
      */
     IndirectCOSObjectReference getOrCreateIndirectReferenceFor(COSBase item)
     {
-        if (hasIndirectReferenceFor(item))
-        {
-            // I met it already
-            return lookupNewRef.get(item.id());
-        }
-        return createIndirectReferenceFor(item);
+        return ofNullable(getIndirectReferenceFor(item))
+                .orElseGet(() -> createIndirectReferenceFor(item));
     }
 
     /**
      * @param item
      * @return the {@link IndirectCOSObjectReference} for the given item or null if an
-     * {@link IndirectCOSObjectReference} has not been created for the item.
+     * {@link IndirectCOSObjectReference} has not been created for the item or the item has no id.
      */
     IndirectCOSObjectReference getIndirectReferenceFor(COSBase item)
     {
-        return lookupNewRef.get(item.id());
+        if (item.hasId())
+        {
+            return lookupNewRef.get(item.id());
+        }
+        return null;
     }
 
     /**

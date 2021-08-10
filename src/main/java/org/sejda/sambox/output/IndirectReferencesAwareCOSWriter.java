@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.output;
 
+import static java.util.Optional.ofNullable;
+
 import java.io.IOException;
 
 import org.sejda.io.BufferedCountingChannelWriter;
@@ -53,20 +55,7 @@ class IndirectReferencesAwareCOSWriter extends DefaultCOSWriter
     @Override
     void writeValue(COSBase value) throws IOException
     {
-        if (context.hasIndirectReferenceFor(value))
-        {
-            context.getIndirectReferenceFor(value).accept(this);
-        }
-        else
-        {
-            value.accept(this);
-        }
-    }
-
-    @Override
-    public void close() throws IOException
-    {
-        super.close();
+        ofNullable((COSBase) context.getIndirectReferenceFor(value)).orElse(value).accept(this);
     }
 
 }

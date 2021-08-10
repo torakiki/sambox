@@ -19,9 +19,8 @@ package org.sejda.sambox.output;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
@@ -90,7 +89,6 @@ public class PDFBodyWriterTest
         }
         verify(writer, times(9)).writeObject(any());
     }
-
 
     @Test
     public void writeAsyncBodyExistingDocument() throws Exception
@@ -176,7 +174,7 @@ public class PDFBodyWriterTest
         COSDictionary dic = new COSDictionary();
         dic.idIfAbsent(new IndirectCOSObjectIdentifier(new COSObjectKey(20, 0), "ff"));
         victim.createIndirectReferenceIfNeededFor(dic);
-        verify(context).getOrCreateIndirectReferenceFor(dic);
+        verify(context).createIndirectReferenceFor(dic);
     }
 
     @Test
@@ -185,7 +183,8 @@ public class PDFBodyWriterTest
         COSDictionary dic = new COSDictionary();
         dic.idIfAbsent(new IndirectCOSObjectIdentifier(new COSObjectKey(20, 0), "ff"));
         context.createIndirectReferenceFor(dic);
+        verify(context, times(1)).createIndirectReferenceFor(dic);
         victim.createIndirectReferenceIfNeededFor(dic);
-        verify(context, never()).getOrCreateIndirectReferenceFor(dic);
+        verify(context, times(1)).createIndirectReferenceFor(dic);
     }
 }
