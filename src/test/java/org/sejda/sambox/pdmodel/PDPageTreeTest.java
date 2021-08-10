@@ -16,7 +16,8 @@
  */
 package org.sejda.sambox.pdmodel;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.endsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
@@ -31,7 +32,6 @@ import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.interactive.documentnavigation.outline.PDDocumentOutline;
 import org.sejda.sambox.pdmodel.interactive.documentnavigation.outline.PDOutlineItem;
 
@@ -90,7 +90,7 @@ public class PDPageTreeTest
     public void wrongMultipleLevel() throws IOException
     {
         try (PDDocument doc = parse(SeekableSources.inMemorySeekableSourceFrom(PDPageTreeTest.class
-                        .getResourceAsStream("page_tree_multiple_levels_wrong_kid_type.pdf"))))
+                .getResourceAsStream("page_tree_multiple_levels_wrong_kid_type.pdf"))))
         {
             for (PDPage page : doc.getPages())
             {
@@ -155,10 +155,13 @@ public class PDPageTreeTest
         try (PDDocument doc = parse(SeekableSources.onTempFileSeekableSourceFrom(
                 PDPageTreeTest.class.getResourceAsStream("with_outline.pdf"))))
         {
-            try {
+            try
+            {
                 doc.getPage(99 /* 0 based */);
                 fail("Exception expected");
-            } catch (PageNotFoundException ex) {
+            }
+            catch (PageNotFoundException ex)
+            {
                 assertEquals(ex.getPage(), 100 /* 1 based, for humans */);
                 assertThat(ex.getSourcePath(), containsString(File.separator + "SejdaIO"));
                 assertThat(ex.getSourcePath(), endsWith(".tmp"));
@@ -166,21 +169,23 @@ public class PDPageTreeTest
         }
     }
 
-    public PDPage addBlankPageAfter(PDDocument document, int pageNumber) {
+    public PDPage addBlankPageAfter(PDDocument document, int pageNumber)
+    {
         PDPage target = document.getPage(pageNumber - 1);
         PDPage result = new PDPage(target.getMediaBox().rotate(target.getRotation()));
         document.getPages().insertAfter(result, target);
         return result;
     }
-    
-    private void createTestFile_BrokenPageTreeDocument() 
+
+    private void createTestFile_BrokenPageTreeDocument()
     {
         try (PDDocument doc = parse(SeekableSources.inMemorySeekableSourceFrom(
                 PDPageTreeTest.class.getResourceAsStream("page_tree_multiple_levels.pdf"))))
         {
             // break the structure
             PDPage page1 = doc.getPage(0);
-            COSDictionary actualParent = page1.getCOSObject().getDictionaryObject(COSName.PARENT, COSDictionary.class);
+            COSDictionary actualParent = page1.getCOSObject().getDictionaryObject(COSName.PARENT,
+                    COSDictionary.class);
 
             COSDictionary fakeParent = new COSDictionary();
             fakeParent.setItem(COSName.KIDS, actualParent.getItem(COSName.KIDS));
@@ -190,7 +195,9 @@ public class PDPageTreeTest
             page1.getCOSObject().setItem(COSName.PARENT, fakeParent);
 
             doc.writeTo(new File("/tmp/page_tree_broken_different_parent.pdf"));
-        } catch (IOException e) {
+        }
+        catch (IOException e)
+        {
             e.printStackTrace();
         }
     }
@@ -202,7 +209,8 @@ public class PDPageTreeTest
         {
             // break the structure
             PDPage page1 = doc.getPage(0);
-            COSDictionary actualParent = page1.getCOSObject().getDictionaryObject(COSName.PARENT, COSDictionary.class);
+            COSDictionary actualParent = page1.getCOSObject().getDictionaryObject(COSName.PARENT,
+                    COSDictionary.class);
 
             COSDictionary fakeParent = new COSDictionary();
             fakeParent.setItem(COSName.KIDS, actualParent.getItem(COSName.KIDS));
@@ -214,7 +222,9 @@ public class PDPageTreeTest
             page1.getCOSObject().setItem(COSName.PARENT, fakeParent);
 
             doc.writeTo(new File("/tmp/page_tree_broken_different_parent_diff_attrs.pdf"));
-        } catch (IOException e) {
+        }
+        catch (IOException e)
+        {
             e.printStackTrace();
         }
     }
@@ -226,7 +236,8 @@ public class PDPageTreeTest
         {
             // break the structure
             PDPage page1 = doc.getPage(0);
-            COSDictionary actualParent = page1.getCOSObject().getDictionaryObject(COSName.PARENT, COSDictionary.class);
+            COSDictionary actualParent = page1.getCOSObject().getDictionaryObject(COSName.PARENT,
+                    COSDictionary.class);
             actualParent.setItem(COSName.ROTATE, COSInteger.get(90));
 
             COSDictionary fakeParent = new COSDictionary();
@@ -235,40 +246,46 @@ public class PDPageTreeTest
             // same inheritable attr compared to parent, when inherited
             COSDictionary fakeParentParent = new COSDictionary();
             fakeParentParent.setItem(COSName.ROTATE, COSInteger.get(90));
-            
+
             fakeParent.setItem(COSName.PARENT, fakeParentParent);
 
             // break the page
             page1.getCOSObject().setItem(COSName.PARENT, fakeParent);
 
-            doc.writeTo(new File("/tmp/page_tree_broken_different_parent_same_inherited_attrs.pdf"));
-        } catch (IOException e) {
+            doc.writeTo(
+                    new File("/tmp/page_tree_broken_different_parent_same_inherited_attrs.pdf"));
+        }
+        catch (IOException e)
+        {
             e.printStackTrace();
         }
     }
-    
+
     @Test
-    public void addPagesToDocumentWithInconsistentPageParents() throws IOException {
+    public void addPagesToDocumentWithInconsistentPageParents() throws IOException
+    {
         try (PDDocument doc = parse(SeekableSources.inMemorySeekableSourceFrom(
                 PDPageTreeTest.class.getResourceAsStream("page_tree_broken_different_parent.pdf"))))
         {
             int numPages = doc.getNumberOfPages();
-            
+
             addBlankPageAfter(doc, 1);
             assertEquals(doc.getNumberOfPages(), numPages + 1);
-            
+
             addBlankPageAfter(doc, 2);
             assertEquals(doc.getNumberOfPages(), numPages + 2);
         }
     }
 
     @Test
-    public void addPagesToDocumentWithInconsistentPageParentsDifferentInheritableAttrs() throws IOException {
-        try (PDDocument doc = parse(SeekableSources.inMemorySeekableSourceFrom(
-                PDPageTreeTest.class.getResourceAsStream("page_tree_broken_different_parent_diff_attrs.pdf"))))
+    public void addPagesToDocumentWithInconsistentPageParentsDifferentInheritableAttrs()
+            throws IOException
+    {
+        try (PDDocument doc = parse(SeekableSources.inMemorySeekableSourceFrom(PDPageTreeTest.class
+                .getResourceAsStream("page_tree_broken_different_parent_diff_attrs.pdf"))))
         {
             int numPages = doc.getNumberOfPages();
-            
+
             addBlankPageAfter(doc, 1);
             assertEquals(doc.getNumberOfPages(), numPages + 1);
 
@@ -278,9 +295,12 @@ public class PDPageTreeTest
     }
 
     @Test
-    public void addPagesToDocumentWithInconsistentPageParentsSameInheritableAttrs() throws IOException {
-        try (PDDocument doc = parse(SeekableSources.inMemorySeekableSourceFrom(
-                PDPageTreeTest.class.getResourceAsStream("page_tree_broken_different_parent_same_inherited_attrs.pdf"))))
+    public void addPagesToDocumentWithInconsistentPageParentsSameInheritableAttrs()
+            throws IOException
+    {
+        try (PDDocument doc = parse(
+                SeekableSources.inMemorySeekableSourceFrom(PDPageTreeTest.class.getResourceAsStream(
+                        "page_tree_broken_different_parent_same_inherited_attrs.pdf"))))
         {
             int numPages = doc.getNumberOfPages();
 
