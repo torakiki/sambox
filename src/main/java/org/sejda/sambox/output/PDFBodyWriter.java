@@ -196,7 +196,7 @@ class PDFBodyWriter implements COSVisitor, Closeable
     {
         if (!context.hasIndirectReferenceFor(item))
         {
-            stack.add(context.getOrCreateIndirectReferenceFor(item));
+            stack.add(context.createIndirectReferenceFor(item));
         }
     }
 

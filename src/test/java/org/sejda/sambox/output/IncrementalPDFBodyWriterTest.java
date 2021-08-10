@@ -16,7 +16,7 @@
  */
 package org.sejda.sambox.output;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -78,7 +78,7 @@ public class IncrementalPDFBodyWriterTest
     {
         COSDictionary ref = new COSDictionary();
         victim.createIndirectReferenceIfNeededFor(ref);
-        verify(context).getOrCreateIndirectReferenceFor(ref);
+        verify(context).createIndirectReferenceFor(ref);
     }
 
     @Test
