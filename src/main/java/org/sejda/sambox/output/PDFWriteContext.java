@@ -120,18 +120,17 @@ class PDFWriteContext
     private IndirectCOSObjectReference createNewReference(COSBase item,
             Function<COSBase, IndirectCOSObjectReference> supplier)
     {
+        IndirectCOSObjectReference newRef = supplier.apply(item);
+        LOG.trace("Created new indirect reference {} for {}", newRef, item.id());
         // It's an existing indirect object
         if (item instanceof ExistingIndirectCOSObject)
         {
-            ExistingIndirectCOSObject existingItem = (ExistingIndirectCOSObject) item;
-            IndirectCOSObjectReference newRef = supplier.apply(item);
-            LOG.trace("Created new indirect reference {} replacing the existing one {}", newRef,
-                    existingItem.id());
-            // if a COSName was indirect in the original doc we write it as indirect but we don't as indirect every
-            // occurrence of it, just this
+            // if a COSName was indirect in the original doc we write it as indirect but we don't store it the ref in
+            // the context so we don't look it up if we have to write the same COSName again, it will be written as a
+            // direct object instead
             if (!(item.getCOSObject() instanceof COSName))
             {
-                lookupNewRef.put(existingItem.id(), newRef);
+                lookupNewRef.put(item.id(), newRef);
             }
             return newRef;
 
@@ -139,11 +138,9 @@ class PDFWriteContext
         if (item instanceof COSNull)
         {
             // we don't associate any id or store any lookup for COSNull
-            return supplier.apply(item);
+            return newRef;
         }
         // it's a new COSBase
-        IndirectCOSObjectReference newRef = supplier.apply(item);
-        LOG.trace("Created new indirect reference '{}' ", newRef);
         item.idIfAbsent(new IndirectCOSObjectIdentifier(newRef.xrefEntry().key(), contextId));
         lookupNewRef.put(item.id(), newRef);
         return newRef;
