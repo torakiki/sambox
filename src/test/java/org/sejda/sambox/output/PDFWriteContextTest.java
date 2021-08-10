@@ -153,6 +153,14 @@ public class PDFWriteContextTest
     }
 
     @Test
+    public void getIndirectReferenceForNoIdNoNPE()
+    {
+        COSDictionary dic = new COSDictionary();
+        assertNull(dic.id());
+        assertNull(context.getIndirectReferenceFor(dic));
+    }
+
+    @Test
     public void getIndirectReferenceForNull()
     {
         IndirectCOSObjectReference ref = context.getOrCreateIndirectReferenceFor(COSNull.NULL);
