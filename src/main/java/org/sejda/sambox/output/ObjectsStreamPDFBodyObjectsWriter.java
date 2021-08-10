@@ -62,8 +62,7 @@ public class ObjectsStreamPDFBodyObjectsWriter implements PDFBodyObjectsWriter
         requireNotNullArg(delegate, "Delegate writer cannot be null");
         this.context = context;
         this.delegate = delegate;
-        currentStream = new ObjectsStream(context);
-        context.createIndirectReferenceFor(currentStream);
+        this.currentStream = new ObjectsStream(context);
     }
 
     @Override
@@ -76,31 +75,29 @@ public class ObjectsStreamPDFBodyObjectsWriter implements PDFBodyObjectsWriter
         }
         else
         {
-            IndirectCOSObjectReference streamRef = context.getIndirectReferenceFor(currentStream);
             context.addWritten(
                     CompressedXrefEntry.compressedEntry(ref.xrefEntry().getObjectNumber(),
-                            streamRef.xrefEntry().getObjectNumber(), currentStream.counter));
+                            currentStream.reference().xrefEntry().getObjectNumber(),
+                            currentStream.counter));
             currentStream.addItem(ref);
-            LOG.trace("Added ref {} to object stream {}", ref, streamRef);
+            LOG.trace("Added ref {} to object stream {}", ref, currentStream.reference());
         }
         if (currentStream.isFull())
         {
             doWriteObjectsStream();
             currentStream = new ObjectsStream(context);
-            context.createIndirectReferenceFor(currentStream);
         }
 
     }
 
     private void doWriteObjectsStream() throws IOException
     {
-        IndirectCOSObjectReference ref = context.getIndirectReferenceFor(currentStream);
-        LOG.debug("Writing object stream {}", ref);
+        LOG.debug("Writing object stream {}", currentStream.reference());
         currentStream.prepareForWriting();
         IndirectCOSObjectReference length = context
                 .createNonStorableInObjectStreamIndirectReference();
         currentStream.setItem(COSName.LENGTH, length);
-        delegate.writeObject(ref);
+        delegate.writeObject(currentStream.reference());
         LOG.trace("Writing object stream length {}", length);
         delegate.writeObject(length);
     }
@@ -130,6 +127,7 @@ public class ObjectsStreamPDFBodyObjectsWriter implements PDFBodyObjectsWriter
         private FastByteArrayOutputStream data = new FastByteArrayOutputStream();
         private DefaultCOSWriter dataWriter;
         private InputStream filtered;
+        private IndirectCOSObjectReference reference;
 
         public ObjectsStream(PDFWriteContext context)
         {
@@ -149,6 +147,7 @@ public class ObjectsStreamPDFBodyObjectsWriter implements PDFBodyObjectsWriter
                     // nothing
                 }
             };
+            this.reference = context.createIndirectReferenceFor(this);
         }
 
         public boolean hasItems()
@@ -192,6 +191,11 @@ public class ObjectsStreamPDFBodyObjectsWriter implements PDFBodyObjectsWriter
                             new ByteArrayInputStream(data.toByteArray())));
             this.header = null;
             this.data = null;
+        }
+
+        IndirectCOSObjectReference reference()
+        {
+            return this.reference;
         }
 
         @Override
