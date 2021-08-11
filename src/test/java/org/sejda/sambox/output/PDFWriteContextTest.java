@@ -32,10 +32,13 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.sejda.sambox.cos.COSBoolean;
 import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.COSObjectKey;
+import org.sejda.sambox.cos.IndirectCOSObject;
 import org.sejda.sambox.cos.IndirectCOSObjectIdentifier;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
 import org.sejda.sambox.cos.NonStorableInObjectStreams;
@@ -150,6 +153,7 @@ public class PDFWriteContextTest
         IndirectCOSObjectReference ref = context.getOrCreateIndirectReferenceFor(dic);
         assertEquals(ref, context.getIndirectReferenceFor(dic));
         assertNotNull(dic.id());
+        assertTrue(context.hasIndirectReferenceFor(dic));
     }
 
     @Test
@@ -163,30 +167,98 @@ public class PDFWriteContextTest
     @Test
     public void getIndirectReferenceForNull()
     {
+        // it shouldn't happen that we create indirect refs for COSNull or COSInteger or COSBoolean or COSName
         IndirectCOSObjectReference ref = context.getOrCreateIndirectReferenceFor(COSNull.NULL);
         IndirectCOSObjectReference ref2 = context.getOrCreateIndirectReferenceFor(COSNull.NULL);
         assertNotEquals(ref, ref2);
+        assertFalse(context.hasIndirectReferenceFor(COSNull.NULL));
+    }
+
+    @Test
+    public void getIndirectReferenceForNullAsIndirect()
+    {
+        IndirectCOSObject nullIndirect = IndirectCOSObject.asIndirectObject(COSNull.NULL);
+        IndirectCOSObjectReference ref = context.getOrCreateIndirectReferenceFor(nullIndirect);
+        IndirectCOSObjectReference ref2 = context.getOrCreateIndirectReferenceFor(nullIndirect);
+        assertEquals(ref, ref2);
+        assertFalse(context.hasIndirectReferenceFor(COSNull.NULL));
+        assertTrue(context.hasIndirectReferenceFor(nullIndirect));
+    }
+
+    @Test
+    public void getIndirectReferenceForCOSBoolean()
+    {
+        // it shouldn't happen that we create indirect refs for COSNull or COSInteger or COSBoolean or COSName
+        IndirectCOSObjectReference ref = context.getOrCreateIndirectReferenceFor(COSBoolean.FALSE);
+        IndirectCOSObjectReference ref2 = context.getOrCreateIndirectReferenceFor(COSBoolean.FALSE);
+        assertNotEquals(ref, ref2);
+        assertFalse(context.hasIndirectReferenceFor(COSBoolean.FALSE));
+    }
+
+    @Test
+    public void getIndirectReferenceForCOSBooleanAsIndirect()
+    {
+        IndirectCOSObject nameIndirect = IndirectCOSObject.asIndirectObject(COSBoolean.TRUE);
+        IndirectCOSObjectReference ref = context.getOrCreateIndirectReferenceFor(nameIndirect);
+        IndirectCOSObjectReference ref2 = context.getOrCreateIndirectReferenceFor(nameIndirect);
+        assertEquals(ref, ref2);
+        assertFalse(context.hasIndirectReferenceFor(COSBoolean.TRUE));
+        assertTrue(context.hasIndirectReferenceFor(nameIndirect));
+    }
+
+    @Test
+    public void getIndirectReferenceForCOSInteger()
+    {
+        // it shouldn't happen that we create indirect refs for COSNull or COSInteger or COSBoolean or COSName
+        IndirectCOSObjectReference ref = context.getOrCreateIndirectReferenceFor(COSInteger.ONE);
+        IndirectCOSObjectReference ref2 = context.getOrCreateIndirectReferenceFor(COSInteger.ONE);
+        assertNotEquals(ref, ref2);
+        assertFalse(context.hasIndirectReferenceFor(COSInteger.ONE));
+    }
+
+    @Test
+    public void getIndirectReferenceForCOSIntegerAsIndirect()
+    {
+        IndirectCOSObject nameIndirect = IndirectCOSObject.asIndirectObject(COSInteger.TWO);
+        IndirectCOSObjectReference ref = context.getOrCreateIndirectReferenceFor(nameIndirect);
+        IndirectCOSObjectReference ref2 = context.getOrCreateIndirectReferenceFor(nameIndirect);
+        assertEquals(ref, ref2);
+        assertFalse(context.hasIndirectReferenceFor(COSInteger.TWO));
+        assertTrue(context.hasIndirectReferenceFor(nameIndirect));
+    }
+
+    @Test
+    public void getIndirectReferenceForCOSName()
+    {
+        // it shouldn't happen that we create indirect refs for COSNull or COSInteger or COSBoolean or COSName
+        COSName name = COSName.getPDFName("Chuck");
+        IndirectCOSObjectReference ref = context.getOrCreateIndirectReferenceFor(name);
+        IndirectCOSObjectReference ref2 = context.getOrCreateIndirectReferenceFor(name);
+        assertNotEquals(ref, ref2);
+        assertFalse(context.hasIndirectReferenceFor(name));
+    }
+
+    @Test
+    public void getIndirectReferenceForCOSNameAsIndirect()
+    {
+        IndirectCOSObject nameIndirect = IndirectCOSObject.asIndirectObject(COSName.ANNOT);
+        IndirectCOSObjectReference ref = context.getOrCreateIndirectReferenceFor(nameIndirect);
+        IndirectCOSObjectReference ref2 = context.getOrCreateIndirectReferenceFor(nameIndirect);
+        assertEquals(ref, ref2);
+        assertFalse(context.hasIndirectReferenceFor(COSName.ANNOT));
+        assertTrue(context.hasIndirectReferenceFor(nameIndirect));
     }
 
     @Test
     public void getIndirectReferenceForCOSNameAsExisting()
     {
-        IndirectCOSObjectIdentifier id = new IndirectCOSObjectIdentifier(new COSObjectKey(10, 0),
-                "Source");
-        COSDictionary dic = new COSDictionary();
-        dic.idIfAbsent(id);
-        ExistingIndirectCOSObject existing = mock(ExistingIndirectCOSObject.class);
-        when(existing.id()).thenReturn(id);
-        when(existing.getCOSObject()).thenReturn(dic);
-        context.getOrCreateIndirectReferenceFor(existing);
-        assertTrue(context.hasIndirectReferenceFor(dic));
-
         IndirectCOSObjectIdentifier id2 = new IndirectCOSObjectIdentifier(new COSObjectKey(11, 0),
                 "Source");
         COSName name = COSName.getPDFName("Chuck");
         name.idIfAbsent(id2);
         ExistingIndirectCOSObject existing2 = mock(ExistingIndirectCOSObject.class);
         when(existing2.id()).thenReturn(id2);
+        when(existing2.hasId()).thenReturn(Boolean.TRUE);
         when(existing2.getCOSObject()).thenReturn(name);
         context.getOrCreateIndirectReferenceFor(existing2);
         assertFalse(context.hasIndirectReferenceFor(name));

@@ -46,4 +46,11 @@ public final class COSNull extends COSBase
     {
         return "COSNull";
     }
+
+    @Override
+    public void idIfAbsent(IndirectCOSObjectIdentifier id)
+    {
+        // we don't store id for NULL. We write them as direct objects. Wrap this with an IndirectCOSObject if you
+        // want to write a number as indirect reference
+    }
 }

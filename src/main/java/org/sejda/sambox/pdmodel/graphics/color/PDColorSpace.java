@@ -95,12 +95,9 @@ public abstract class PDColorSpace implements COSObjectable
         if (colorSpace.hasId() && resources != null)
         {
             ResourceCache cache = resources.getResourceCache();
-            if (cache != null)
+            if (cache != null && isAllowedCache(result))
             {
-                if (isAllowedCache(result))
-                {
-                    cache.put(colorSpace.id().objectIdentifier, result);
-                }
+                cache.put(colorSpace.id().objectIdentifier, result);
             }
         }
 
@@ -109,15 +106,8 @@ public abstract class PDColorSpace implements COSObjectable
 
     public static boolean isAllowedCache(PDColorSpace colorSpace)
     {
-        if (colorSpace instanceof PDPattern)
-        {
-            // cannot cache PDPattern color spaces in a global cache, they carry page resources
-            return false;
-        }
-        else
-        {
-            return true;
-        }
+        // cannot cache PDPattern color spaces in a global cache, they carry page resources
+        return !(colorSpace instanceof PDPattern);
     }
 
     /**
@@ -136,11 +126,11 @@ public abstract class PDColorSpace implements COSObjectable
     private static PDColorSpace createUncached(COSBase colorSpace, PDResources resources,
             boolean wasDefault, int recursionAccumulator) throws IOException
     {
-        if(recursionAccumulator > 4) 
+        if (recursionAccumulator > 4)
         {
             throw new IOException("Could not create color space, infinite recursion detected");
         }
-        
+
         colorSpace = colorSpace.getCOSObject();
         if (colorSpace instanceof COSName)
         {
