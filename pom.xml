@@ -62,7 +62,7 @@
 	<repositories>
 		<repository>
 			<id>pdfbox-snapshot</id>
-			<url>http://repository.apache.org/snapshots/</url>
+			<url>https://repository.apache.org/snapshots/</url>
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
