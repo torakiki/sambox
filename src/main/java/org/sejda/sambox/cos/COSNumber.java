@@ -88,4 +88,11 @@ public abstract class COSNumber extends COSBase
 
         return new COSFloat(number);
     }
+
+    @Override
+    public void idIfAbsent(IndirectCOSObjectIdentifier id)
+    {
+        // we don't store id for numbers. We write them as direct objects. Wrap this with an IndirectCOSObject if you
+        // want to write a number as indirect reference
+    }
 }

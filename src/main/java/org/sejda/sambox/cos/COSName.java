@@ -662,4 +662,11 @@ public final class COSName extends COSBase implements Comparable<COSName>
     {
         visitor.visit(this);
     }
+
+    @Override
+    public void idIfAbsent(IndirectCOSObjectIdentifier id)
+    {
+        // we don't store id for names. We write them as direct objects. Wrap this with an IndirectCOSObject if you
+        // want to write a number as indirect reference
+    }
 }

@@ -31,8 +31,6 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.function.Function;
 
 import org.sejda.sambox.cos.COSBase;
-import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.COSObjectKey;
 import org.sejda.sambox.cos.IndirectCOSObjectIdentifier;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
@@ -122,27 +120,18 @@ class PDFWriteContext
     {
         IndirectCOSObjectReference newRef = supplier.apply(item);
         LOG.trace("Created new indirect reference {} for {}", newRef, item.id());
-        // It's an existing indirect object
-        if (item instanceof ExistingIndirectCOSObject)
+        // It's not an existing indirect object
+        if (!(item instanceof ExistingIndirectCOSObject))
         {
-            // if a COSName was indirect in the original doc we write it as indirect but we don't store it the ref in
-            // the context so we don't look it up if we have to write the same COSName again, it will be written as a
-            // direct object instead
-            if (!(item.getCOSObject() instanceof COSName))
-            {
-                lookupNewRef.put(item.id(), newRef);
-            }
-            return newRef;
-
+            // it's a new COSBase
+            item.idIfAbsent(new IndirectCOSObjectIdentifier(newRef.xrefEntry().key(), contextId));
         }
-        if (item instanceof COSNull)
+        // we store the ID if the item reference can be reused. This shouldn't happen since we get here only with
+        // ExistingIndirectCOSObject, COSDictionary or IndirectCOSObject
+        if (item.hasId())
         {
-            // we don't associate any id or store any lookup for COSNull
-            return newRef;
+            lookupNewRef.put(item.id(), newRef);
         }
-        // it's a new COSBase
-        item.idIfAbsent(new IndirectCOSObjectIdentifier(newRef.xrefEntry().key(), contextId));
-        lookupNewRef.put(item.id(), newRef);
         return newRef;
     }
 

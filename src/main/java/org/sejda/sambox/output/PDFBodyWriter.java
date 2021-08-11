@@ -34,6 +34,7 @@ import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.cos.COSVisitor;
+import org.sejda.sambox.cos.IndirectCOSObject;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
 import org.sejda.sambox.input.ExistingIndirectCOSObject;
 import org.sejda.sambox.input.IncrementablePDDocument;
@@ -130,7 +131,7 @@ class PDFBodyWriter implements COSVisitor, Closeable
         for (int i = 0; i < array.size(); i++)
         {
             COSBase item = ofNullable(array.get(i)).orElse(COSNull.NULL);
-            if (item instanceof ExistingIndirectCOSObject || item instanceof COSDictionary)
+            if (shouldBeIndirect(item))
             {
                 onPotentialIndirectObject(item);
             }
@@ -147,8 +148,7 @@ class PDFBodyWriter implements COSVisitor, Closeable
         for (COSName key : value.keySet())
         {
             COSBase item = ofNullable(value.getItem(key)).orElse(COSNull.NULL);
-            if (item instanceof ExistingIndirectCOSObject || item instanceof COSDictionary
-                    || COSName.THREADS.equals(key))
+            if (shouldBeIndirect(item) || COSName.THREADS.equals(key))
             {
                 onPotentialIndirectObject(item);
             }
@@ -178,6 +178,12 @@ class PDFBodyWriter implements COSVisitor, Closeable
         }
         this.visit((COSDictionary) value);
 
+    }
+
+    private boolean shouldBeIndirect(COSBase item)
+    {
+        return (item instanceof ExistingIndirectCOSObject || item instanceof COSDictionary
+                || item instanceof IndirectCOSObject);
     }
 
     /**

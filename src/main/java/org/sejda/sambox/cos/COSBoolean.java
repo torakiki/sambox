@@ -64,4 +64,11 @@ public final class COSBoolean extends COSBase
     {
         visitor.visit(this);
     }
+
+    @Override
+    public void idIfAbsent(IndirectCOSObjectIdentifier id)
+    {
+        // we don't store id for booleans. We write them as direct objects. Wrap this with an IndirectCOSObject if you
+        // want to write a number as indirect reference
+    }
 }
