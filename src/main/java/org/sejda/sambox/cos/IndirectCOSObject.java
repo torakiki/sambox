@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Sober Lemur S.a.s. di Vacondio Andrea and Sejda BV
+ * Copyright 2021 Sober Lemur S.a.s. di Vacondio Andrea and Sejda BV
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,10 @@ import java.io.IOException;
 import java.util.Optional;
 
 /**
+ * A COSBase that will be written as indirect object. This can be used to wrap COSBase (COSName, COSInteger, COSNull,
+ * COSBoolean) that are otherwise written as direct object by the body writer.
+ * 
  * @author Andrea Vacondio
- *
  */
 public class IndirectCOSObject extends COSBase
 {
