@@ -126,11 +126,15 @@ class PDFWriteContext
             // it's a new COSBase
             item.idIfAbsent(new IndirectCOSObjectIdentifier(newRef.xrefEntry().key(), contextId));
         }
-        // we store the ID if the item reference can be reused. This shouldn't happen since we get here only with
-        // ExistingIndirectCOSObject, COSDictionary or IndirectCOSObject
+        // we store the ID if the item reference can be reused. At this point we should always have an id since we get
+        // here only with ExistingIndirectCOSObject, COSDictionary or IndirectCOSObject
         if (item.hasId())
         {
             lookupNewRef.put(item.id(), newRef);
+        }
+        else
+        {
+            LOG.warn("Unexpected indirect reference for {}", item);
         }
         return newRef;
     }
