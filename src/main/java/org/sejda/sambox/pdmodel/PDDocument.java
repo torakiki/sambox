@@ -702,5 +702,10 @@ public class PDDocument implements Closeable
     {
         return PDFParser.parse(SeekableSources.seekableSourceFrom(file));
     }
+    
+    public boolean hasParseErrors()
+    {
+        return this.document.getTrailer().getFallbackScanStatus() != null;
+    }
 
 }

@@ -29,6 +29,7 @@ import org.sejda.sambox.pdmodel.common.PDDictionaryWrapper;
 public class FileTrailer extends PDDictionaryWrapper
 {
     private long xrefOffset = -1;
+    private String fallbackScanStatus = null; 
 
     public FileTrailer()
     {
@@ -56,5 +57,13 @@ public class FileTrailer extends PDDictionaryWrapper
     public boolean isXrefStream()
     {
         return COSName.XREF.equals(getCOSObject().getCOSName(COSName.TYPE));
+    }
+
+    public String getFallbackScanStatus() {
+        return fallbackScanStatus;
+    }
+
+    public void setFallbackScanStatus(String fallbackScanStatus) {
+        this.fallbackScanStatus = fallbackScanStatus;
     }
 }
