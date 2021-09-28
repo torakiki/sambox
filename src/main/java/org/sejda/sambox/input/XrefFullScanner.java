@@ -138,7 +138,7 @@ class XrefFullScanner
 
     private void parseFoundXrefTable(long offset) throws IOException
     {
-        LOG.debug("Found xref table at " + offset);
+        LOG.debug("Found xref table at {}", offset);
         trailer.xrefOffset(offset);
         xrefTableParser.parse(offset);
     }
@@ -157,7 +157,7 @@ class XrefFullScanner
         if (found instanceof COSDictionary
                 && COSName.XREF.equals(((COSDictionary) found).getItem(COSName.TYPE)))
         {
-            LOG.debug("Found xref stream at " + offset);
+            LOG.debug("Found xref stream at {}", offset);
             trailer.xrefOffset(offset);
             parseFoundXrefStream((COSDictionary) found);
         }

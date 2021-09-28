@@ -17,9 +17,9 @@
 package org.sejda.sambox.input;
 
 import static java.util.Objects.nonNull;
+import static org.sejda.commons.util.RequireUtils.requireIOCondition;
 import static org.sejda.sambox.input.AbstractXrefTableParser.TRAILER;
 import static org.sejda.sambox.input.AbstractXrefTableParser.XREF;
-import static org.sejda.commons.util.RequireUtils.requireIOCondition;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -126,7 +126,7 @@ class XrefParser
                         {
                             if (line.startsWith(TRAILER))
                             {
-                                LOG.debug("Parsing trailer at " + offset);
+                                LOG.debug("Parsing trailer at {}", offset);
                                 parser.position(offset);
                                 parser.skipExpected(TRAILER);
                                 parser.skipSpaces();
@@ -139,7 +139,7 @@ class XrefParser
                                 try
                                 {
                                     // we do our best to make sure we have a catalog even in corrupted docs
-                                    LOG.debug("Parsing potential Catalog at " + lastObjectOffset);
+                                    LOG.debug("Parsing potential Catalog at {}", lastObjectOffset);
                                     parser.position(lastObjectOffset);
                                     parser.skipIndirectObjectDefinition();
                                     parser.skipSpaces();
@@ -160,7 +160,7 @@ class XrefParser
                             }
                             else if (line.startsWith(XREF))
                             {
-                                LOG.debug("Found xref at " + offset);
+                                LOG.debug("Found xref at {}", offset);
                                 trailer.xrefOffset(offset);
                             }
                         }
@@ -204,7 +204,7 @@ class XrefParser
             parser.position(startPosition + relativeIndex + STARTXREF.length());
             parser.skipSpaces();
             long xrefOffset = parser.readLong();
-            LOG.debug("Found xref offset at " + xrefOffset);
+            LOG.debug("Found xref offset at {}", xrefOffset);
             return xrefOffset;
         }
         catch (IOException e)
