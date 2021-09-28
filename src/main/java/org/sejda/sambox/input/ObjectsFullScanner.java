@@ -36,7 +36,8 @@ import org.slf4j.LoggerFactory;
 class ObjectsFullScanner
 {
     private static final Logger LOG = LoggerFactory.getLogger(ObjectsFullScanner.class);
-    private static final Pattern OBJECT_DEF_PATTERN = Pattern.compile("^(\\d+)[\\s](\\d+)[\\s]obj");
+    private static final Pattern OBJECT_DEF_PATTERN = Pattern
+            .compile("^(\\d+)[\\s]+(\\d+)[\\s]+obj");
 
     private Xref xref = new Xref();
     private SourceReader reader;

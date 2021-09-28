@@ -175,6 +175,7 @@ class XrefParser
                 // and we consider it more reliable compared to what was found in the somehow broken xrefs
                 objectsFullScanner.entries().values().stream().forEach(parser.provider()::addEntry);
             }
+            trailer.setFallbackScanStatus(xrefScanStatus.name());
         }
     }
 

@@ -125,6 +125,24 @@ public class SourceReaderTest
         assertEquals(8, victim.position());
     }
 
+    @Test
+    public void skipIndirectObjectDefinitionSpaceAfterObjectNumber() throws IOException
+    {
+        victim = new SourceReader(
+                inMemorySeekableSourceFrom("84        0 obj <</key value>>".getBytes()));
+        victim.skipIndirectObjectDefinition();
+        assertEquals(15, victim.position());
+    }
+
+    @Test
+    public void skipIndirectObjectDefinitionSpaceAfterGenerationNumber() throws IOException
+    {
+        victim = new SourceReader(
+                inMemorySeekableSourceFrom("84 0        obj <</key value>>".getBytes()));
+        victim.skipIndirectObjectDefinition();
+        assertEquals(15, victim.position());
+    }
+
     @Test(expected = IOException.class)
     public void skipFailingIndirectObjectDefinition() throws IOException
     {
@@ -138,6 +156,24 @@ public class SourceReaderTest
         victim = new SourceReader(inMemorySeekableSourceFrom("10 0 obj <</key value>>".getBytes()));
         victim.skipExpectedIndirectObjectDefinition(new COSObjectKey(10, 0));
         assertEquals(8, victim.position());
+    }
+
+    @Test
+    public void skipExpectedIndirectObjectDefinitionSpaceAfterObjectNumber() throws IOException
+    {
+        victim = new SourceReader(
+                inMemorySeekableSourceFrom("84        0 obj <</key value>>".getBytes()));
+        victim.skipExpectedIndirectObjectDefinition(new COSObjectKey(84, 0));
+        assertEquals(15, victim.position());
+    }
+
+    @Test
+    public void skipExpectedIndirectObjectDefinitionSpaceAfterGenerationNumber() throws IOException
+    {
+        victim = new SourceReader(
+                inMemorySeekableSourceFrom("84 0        obj <</key value>>".getBytes()));
+        victim.skipExpectedIndirectObjectDefinition(new COSObjectKey(84, 0));
+        assertEquals(15, victim.position());
     }
 
     @Test(expected = IOException.class)
@@ -229,14 +265,16 @@ public class SourceReaderTest
     @Test(expected = IOException.class)
     public void readObjectNumberNegative() throws IOException
     {
-        victim = new SourceReader(inMemorySeekableSourceFrom("-10 0 obj <</key value>>".getBytes()));
+        victim = new SourceReader(
+                inMemorySeekableSourceFrom("-10 0 obj <</key value>>".getBytes()));
         victim.readObjectNumber();
     }
 
     @Test(expected = IOException.class)
     public void readGenerationNumberNegative() throws IOException
     {
-        victim = new SourceReader(inMemorySeekableSourceFrom("10 -2 obj <</key value>>".getBytes()));
+        victim = new SourceReader(
+                inMemorySeekableSourceFrom("10 -2 obj <</key value>>".getBytes()));
         victim.position(2);
         victim.readGenerationNumber();
     }
@@ -285,7 +323,8 @@ public class SourceReaderTest
     @Test
     public void readSignedIntegerNumber() throws IOException
     {
-        victim = new SourceReader(inMemorySeekableSourceFrom("-53 0 obj <</key value>>".getBytes()));
+        victim = new SourceReader(
+                inMemorySeekableSourceFrom("-53 0 obj <</key value>>".getBytes()));
         assertEquals("-53", victim.readIntegerNumber());
     }
 
@@ -369,7 +408,8 @@ public class SourceReaderTest
     @Test
     public void readLineCR() throws IOException
     {
-        victim = new SourceReader(inMemorySeekableSourceFrom("ChuckNorris\rStevenSegal".getBytes()));
+        victim = new SourceReader(
+                inMemorySeekableSourceFrom("ChuckNorris\rStevenSegal".getBytes()));
         assertEquals("ChuckNorris", victim.readLine());
         assertEquals(12, victim.position());
     }
@@ -519,17 +559,16 @@ public class SourceReaderTest
     @Test
     public void readLiteralOctal() throws IOException
     {
-        victim = new SourceReader(
-                inMemorySeekableSourceFrom("(This string contains \\245two octal characters\\307.)"
-                        .getBytes()));
+        victim = new SourceReader(inMemorySeekableSourceFrom(
+                "(This string contains \\245two octal characters\\307.)".getBytes()));
         assertEquals("This string contains ¥two octal charactersÇ.", victim.readLiteralString());
     }
 
     @Test
     public void readLiteralDropUnusedSolidus() throws IOException
     {
-        victim = new SourceReader(
-                inMemorySeekableSourceFrom("(This string contains \\935invalid octal.)".getBytes()));
+        victim = new SourceReader(inMemorySeekableSourceFrom(
+                "(This string contains \\935invalid octal.)".getBytes()));
         assertEquals("This string contains 935invalid octal.", victim.readLiteralString());
     }
 

@@ -227,7 +227,10 @@ public abstract class PDShading implements COSObjectable
         {
             COSBase colorSpaceDictionary = dictionary.getDictionaryObject(COSName.CS,
                     COSName.COLORSPACE);
-            colorSpace = PDColorSpace.create(colorSpaceDictionary);
+            if (colorSpaceDictionary != null) 
+            {
+                colorSpace = PDColorSpace.create(colorSpaceDictionary);
+            }
         }
         return colorSpace;
     }

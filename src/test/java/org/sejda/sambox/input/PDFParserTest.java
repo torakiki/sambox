@@ -47,8 +47,11 @@ public class PDFParserTest
     @Test
     public void positive() throws IOException
     {
-        assertNotNull(PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
-                getClass().getResourceAsStream("/sambox/simple_test.pdf"))));
+        PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/simple_test.pdf")));
+        assertNotNull(doc);
+        assertTrue(doc.isOpen());
+        assertFalse(doc.hasParseErrors());
     }
 
     @Test
@@ -75,6 +78,7 @@ public class PDFParserTest
             assertFalse(doc.isEncrypted());
             assertTrue(doc.isOpen());
             assertEquals(SpecVersionUtils.V1_5, doc.getVersion());
+            assertFalse(doc.hasParseErrors());
         }
     }
 
@@ -90,6 +94,7 @@ public class PDFParserTest
             assertTrue(doc.isEncrypted());
             assertTrue(doc.isOpen());
             assertEquals(SpecVersionUtils.V1_6, doc.getVersion());
+            assertFalse(doc.hasParseErrors());
         }
     }
 
@@ -155,6 +160,7 @@ public class PDFParserTest
             assertFalse(doc.isEncrypted());
             assertTrue(doc.isOpen());
             assertEquals(SpecVersionUtils.V1_6, doc.getVersion());
+            assertTrue(doc.hasParseErrors());
         }
     }
 
@@ -263,6 +269,7 @@ public class PDFParserTest
             assertEquals("892B77DE781B4E71A1BEFB81A51A5ABC_20140326022424.docx", di.getTitle());
             assertEquals(DateConverter.toCalendar("D:20140326142505-02'00'"), di.getCreationDate());
             assertEquals(DateConverter.toCalendar("20140326172513Z"), di.getModificationDate());
+            assertTrue(doc.hasParseErrors());
         }
     }
 
@@ -281,6 +288,7 @@ public class PDFParserTest
             assertEquals("C:REGULA~1IREGSFR_EQ_EM.PDF", di.getTitle());
             assertEquals(DateConverter.toCalendar("Tuesday, July 28, 1998 4:00:09 PM"),
                     di.getCreationDate());
+            assertTrue(doc.hasParseErrors());
         }
     }
 
@@ -297,6 +305,7 @@ public class PDFParserTest
                         "/org/sejda/sambox/input/PDFBOX-3783-72GLBIGUC6LB46ELZFBARRJTLN4RBSQM.pdf"))))
         {
             // noop
+            assertTrue(doc.hasParseErrors());
         }
     }
 

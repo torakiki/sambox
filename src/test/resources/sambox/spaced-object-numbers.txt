@@ -1,0 +1,28 @@
+endobj
+83        0 obj
+<<
+/Type /FontDescriptor
+/Ascent 844
+/CapHeight 0
+/Descent -173
+/Flags 14
+/FontBBox [0 0 0 0]
+/FontName /EX_CFF_Blender_Pro_Book
+/ItalicAngle 0
+/StemV  0
+/FontFile3 84        0 R
+>>
+endobj
+84        0 obj
+<</Filter/FlateDecode/Length 4896
+/Subtype/Type1C>>
+stream
+abcd
+endstream
+endobj
+61 0        obj
+<<
+/Type /Font
+/Subtype /Type1
+>>
+endobj
