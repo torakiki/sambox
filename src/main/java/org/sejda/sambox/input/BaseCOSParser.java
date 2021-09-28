@@ -49,7 +49,6 @@ abstract class BaseCOSParser extends SourceReader
     private static final Logger LOG = LoggerFactory.getLogger(BaseCOSParser.class);
 
     public static final String ENDOBJ = "endobj";
-    public static final String OBJ = "obj";
     public static final String STREAM = "stream";
     public static final String ENDSTREAM = "endstream";
 

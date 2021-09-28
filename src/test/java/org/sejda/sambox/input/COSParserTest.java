@@ -18,9 +18,9 @@ package org.sejda.sambox.input;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
 import static org.sejda.io.SeekableSources.inMemorySeekableSourceFrom;
 
 import java.io.IOException;
@@ -39,6 +39,7 @@ import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.cos.COSString;
+import org.sejda.sambox.cos.IndirectCOSObjectIdentifier;
 
 /**
  * @author Andrea Vacondio
@@ -329,6 +330,28 @@ public class COSParserTest
         victim = new COSParser(inMemorySeekableSourceFrom("10 0 R".getBytes()));
         COSBase result = victim.nextNumberOrIndirectReference();
         assertThat(result, is(instanceOf(ExistingIndirectCOSObject.class)));
+    }
+
+    @Test
+    public void nextNumberOrIndirectReferenceObjSpaceAfterObjectNumber() throws IOException
+    {
+        victim = new COSParser(inMemorySeekableSourceFrom("84        0 R".getBytes()));
+        COSBase result = victim.nextNumberOrIndirectReference();
+        assertThat(result, is(instanceOf(ExistingIndirectCOSObject.class)));
+        IndirectCOSObjectIdentifier id = ((ExistingIndirectCOSObject) result).id();
+        assertEquals(84, id.objectIdentifier.objectNumber());
+        assertEquals(0, id.objectIdentifier.generation());
+    }
+
+    @Test
+    public void nextNumberOrIndirectReferenceObjSpaceAfterGenerationNumber() throws IOException
+    {
+        victim = new COSParser(inMemorySeekableSourceFrom("84 0        R".getBytes()));
+        COSBase result = victim.nextNumberOrIndirectReference();
+        assertThat(result, is(instanceOf(ExistingIndirectCOSObject.class)));
+        IndirectCOSObjectIdentifier id = ((ExistingIndirectCOSObject) result).id();
+        assertEquals(84, id.objectIdentifier.objectNumber());
+        assertEquals(0, id.objectIdentifier.generation());
     }
 
     @Test(expected = IOException.class)

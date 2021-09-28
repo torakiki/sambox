@@ -20,10 +20,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-import org.sejda.commons.util.IOUtils;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSObjectKey;
 import org.sejda.sambox.xref.Xref;
@@ -35,23 +32,6 @@ import org.sejda.sambox.xref.Xref;
 public class ObjectsFullScannerTest
 {
 
-    private SourceReader reader;
-    private ObjectsFullScanner victim;
-
-    @Before
-    public void setUp() throws Exception
-    {
-        reader = new SourceReader(SeekableSources.inMemorySeekableSourceFrom(
-                getClass().getResourceAsStream("/sambox/test_multiple_xref_tables.pdf")));
-        victim = new ObjectsFullScanner(reader);
-    }
-
-    @After
-    public void tearDown() throws IOException
-    {
-        IOUtils.close(reader);
-    }
-
     @Test(expected = IllegalArgumentException.class)
     public void nullArgument()
     {
@@ -61,18 +41,43 @@ public class ObjectsFullScannerTest
     @Test
     public void positionIsRestored() throws IOException
     {
-        reader.position(50);
-        victim.entries();
-        assertEquals(50, reader.position());
+        try (SourceReader reader = new SourceReader(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/test_multiple_xref_tables.pdf"))))
+        {
+            ObjectsFullScanner victim = new ObjectsFullScanner(reader);
+            reader.position(50);
+            victim.entries();
+            assertEquals(50, reader.position());
+        }
     }
 
     @Test
-    public void scan()
+    public void scan() throws IOException
     {
-        Xref xref = victim.entries();
-        assertEquals(7, xref.values().size());
-        assertEquals(317, xref.get(new COSObjectKey(6, 0)).getByteOffset());
-        assertEquals(717, xref.get(new COSObjectKey(3, 0)).getByteOffset());
+        try (SourceReader reader = new SourceReader(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/test_multiple_xref_tables.pdf"))))
+        {
+            ObjectsFullScanner victim = new ObjectsFullScanner(reader);
+            Xref xref = victim.entries();
+            assertEquals(7, xref.values().size());
+            assertEquals(317, xref.get(new COSObjectKey(6, 0)).getByteOffset());
+            assertEquals(717, xref.get(new COSObjectKey(3, 0)).getByteOffset());
+        }
+    }
+
+    @Test
+    public void scanSpacedObjectsNumber() throws IOException
+    {
+        try (SourceReader reader = new SourceReader(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/spaced-object-numbers.txt"))))
+        {
+            ObjectsFullScanner victim = new ObjectsFullScanner(reader);
+            Xref xref = victim.entries();
+            assertEquals(3, xref.values().size());
+            assertEquals(7, xref.get(new COSObjectKey(83, 0)).getByteOffset());
+            assertEquals(212, xref.get(new COSObjectKey(84, 0)).getByteOffset());
+            assertEquals(309, xref.get(new COSObjectKey(61, 0)).getByteOffset());
+        }
     }
 
 }
