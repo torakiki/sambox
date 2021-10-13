@@ -291,7 +291,17 @@ public abstract class PDNameTreeNode<T extends COSObjectable> implements COSObje
                     continue;
                 }
                 COSBase cosValue = namesArray.getObject(i + 1);
-                names.put(key.getString(), convertCOSToPD(cosValue));
+                T pdValue = null;
+                try 
+                {
+                    pdValue = convertCOSToPD(cosValue);
+                } 
+                catch (ClassCastException ex)
+                {
+                    LOG.warn("Skipping, could not convert COS to PD: " + cosValue, ex);
+                }
+
+                names.put(key.getString(), pdValue);
             }
             return Collections.unmodifiableMap(names);
         }
