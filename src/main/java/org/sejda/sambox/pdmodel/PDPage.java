@@ -162,13 +162,13 @@ public class PDPage implements COSObjectable, PDContentStream
             for (int i = 0; i < array.size(); i++)
             {
                 COSBase baseObject = array.getObject(i);
-                if(baseObject instanceof COSStream) 
+                if (baseObject instanceof COSStream)
                 {
                     COSStream stream = (COSStream) baseObject;
                     if (nonNull(stream))
                     {
                         streams.add(new PDStream(stream));
-                    }    
+                    }
                 }
                 else
                 {
@@ -232,9 +232,9 @@ public class PDPage implements COSObjectable, PDContentStream
     {
         if (pageResources == null)
         {
-            pageResources = new PDResources(ofNullable(
-                    (COSDictionary) PDPageTree.getInheritableAttribute(page, COSName.RESOURCES, COSDictionary.class))
-                            .orElseGet(() -> {
+            pageResources = new PDResources(
+                    ofNullable((COSDictionary) PDPageTree.getInheritableAttribute(page,
+                            COSName.RESOURCES, COSDictionary.class)).orElseGet(() -> {
                                 COSDictionary emptyRes = new COSDictionary();
                                 // it's illegal for a page to not have resources, either direct or inherited. According
                                 // to the specs "If the page requires no resources, the value of this entry shall be an
@@ -322,8 +322,12 @@ public class PDPage implements COSObjectable, PDContentStream
 
     public PDRectangle getMediaBoxRaw()
     {
-        return PDRectangle
-                .rectangleFrom(page.getDictionaryObject(COSName.MEDIA_BOX, COSArray.class));
+        COSBase array = PDPageTree.getInheritableAttribute(page, COSName.MEDIA_BOX);
+        if (array instanceof COSArray)
+        {
+            return PDRectangle.rectangleFrom((COSArray) array);
+        }
+        return null;
     }
 
     /**
@@ -368,8 +372,12 @@ public class PDPage implements COSObjectable, PDContentStream
 
     public PDRectangle getCropBoxRaw()
     {
-        return PDRectangle
-                .rectangleFrom(page.getDictionaryObject(COSName.CROP_BOX, COSArray.class));
+        COSBase array = PDPageTree.getInheritableAttribute(page, COSName.CROP_BOX);
+        if (array instanceof COSArray)
+        {
+            return PDRectangle.rectangleFrom((COSArray) array);
+        }
+        return null;
     }
 
     /**
@@ -399,14 +407,10 @@ public class PDPage implements COSObjectable, PDContentStream
     {
         try
         {
-            COSBase base = page.getDictionaryObject(COSName.BLEED_BOX);
-            if (base instanceof COSArray)
+            PDRectangle trimBox = getBleedBoxRaw();
+            if (inMediaBoxBounds(trimBox))
             {
-                COSArray array = (COSArray) base;
-                if (inMediaBoxBounds(new PDRectangle(array)))
-                {
-                    return new PDRectangle((COSArray) base);
-                }
+                return trimBox;
             }
         }
         catch (Exception ex)
@@ -449,14 +453,10 @@ public class PDPage implements COSObjectable, PDContentStream
     {
         try
         {
-            COSBase base = page.getDictionaryObject(COSName.TRIM_BOX);
-            if (base instanceof COSArray)
+            PDRectangle trimBox = getTrimBoxRaw();
+            if (inMediaBoxBounds(trimBox))
             {
-                COSArray array = (COSArray) base;
-                if (inMediaBoxBounds(new PDRectangle(array)))
-                {
-                    return new PDRectangle(array);
-                }
+                return trimBox;
             }
         }
         catch (Exception ex)
@@ -499,14 +499,10 @@ public class PDPage implements COSObjectable, PDContentStream
     {
         try
         {
-            COSBase base = page.getDictionaryObject(COSName.ART_BOX);
-            if (base instanceof COSArray)
+            PDRectangle artBox = getArtBoxRaw();
+            if (inMediaBoxBounds(artBox))
             {
-                COSArray array = (COSArray) base;
-                if (inMediaBoxBounds(new PDRectangle(array)))
-                {
-                    return new PDRectangle(array);
-                }
+                return artBox;
             }
         }
         catch (Exception ex)
@@ -558,7 +554,7 @@ public class PDPage implements COSObjectable, PDContentStream
     private boolean inMediaBoxBounds(PDRectangle box)
     {
         PDRectangle mediaBox = getMediaBox();
-        return mediaBox.getLowerLeftX() <= box.getLowerLeftX()
+        return nonNull(box) && mediaBox.getLowerLeftX() <= box.getLowerLeftX()
                 && mediaBox.getLowerLeftY() <= box.getLowerLeftY()
                 && mediaBox.getUpperRightX() >= box.getUpperRightX()
                 && mediaBox.getUpperRightY() >= box.getUpperRightY();
@@ -942,7 +938,8 @@ public class PDPage implements COSObjectable, PDContentStream
         });
     }
 
-    public COSDictionary getPageTreeParent() {
+    public COSDictionary getPageTreeParent()
+    {
         return pageTreeParent;
     }
 }

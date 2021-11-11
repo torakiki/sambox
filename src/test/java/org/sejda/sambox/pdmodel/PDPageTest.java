@@ -19,8 +19,8 @@ package org.sejda.sambox.pdmodel;
 import static java.util.Objects.nonNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.awt.Point;
 import java.awt.geom.Point2D;
@@ -33,6 +33,7 @@ import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSFloat;
+import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.COSNumber;
@@ -184,16 +185,17 @@ public class PDPageTest
     }
 
     @Test
-    public void invalidDocument() throws IOException {
+    public void invalidDocument() throws IOException
+    {
         PDDocument document = new PDDocument();
         PDPage page = new PDPage();
         document.addPage(page);
-        
+
         page.getCOSObject().setItem(COSName.CONTENTS, new COSArray(COSName.TYPE));
-        
+
         File tempFile = Files.createTempFile("invalid-document", ".pdf").toFile();
         document.writeTo(tempFile);
-        
+
         PDDocument read = PDFParser.parse(SeekableSources.seekableSourceFrom(tempFile));
         assertFalse("", read.getPage(0).getContentStreams().hasNext());
     }
@@ -205,6 +207,48 @@ public class PDPageTest
         dictionary.setItem(COSName.RESOURCES, new COSArray());
         PDPage page = new PDPage(dictionary);
         assertNotNull(page.getResources());
+    }
+
+    @Test
+    public void invalidArtBox()
+    {
+        PDPage page = new PDPage();
+        page.getCOSObject().setItem(COSName.ART_BOX,
+                new COSArray(COSInteger.ZERO, COSInteger.ZERO, COSInteger.get(500)));
+        assertEquals(PDRectangle.LETTER, page.getArtBox());
+
+        page.getCOSObject().setItem(COSName.ART_BOX,
+                new COSArray(COSInteger.ZERO, COSInteger.ZERO, COSInteger.get(500), COSName.AFTER));
+        assertEquals(new PDRectangle(new COSArray(COSInteger.ZERO, COSInteger.ZERO,
+                COSInteger.get(500), COSInteger.ZERO)), page.getArtBox());
+    }
+
+    @Test
+    public void invalidBleedBox()
+    {
+        PDPage page = new PDPage();
+        page.getCOSObject().setItem(COSName.BLEED_BOX,
+                new COSArray(COSInteger.ZERO, COSInteger.ZERO, COSInteger.get(500)));
+        assertEquals(PDRectangle.LETTER, page.getBleedBox());
+
+        page.getCOSObject().setItem(COSName.BLEED_BOX,
+                new COSArray(COSInteger.ZERO, COSInteger.ZERO, COSInteger.get(500), COSName.AFTER));
+        assertEquals(new PDRectangle(new COSArray(COSInteger.ZERO, COSInteger.ZERO,
+                COSInteger.get(500), COSInteger.ZERO)), page.getBleedBox());
+    }
+
+    @Test
+    public void invalidTrimBox()
+    {
+        PDPage page = new PDPage();
+        page.getCOSObject().setItem(COSName.TRIM_BOX,
+                new COSArray(COSInteger.ZERO, COSInteger.ZERO, COSInteger.get(500)));
+        assertEquals(PDRectangle.LETTER, page.getTrimBox());
+
+        page.getCOSObject().setItem(COSName.TRIM_BOX,
+                new COSArray(COSInteger.ZERO, COSInteger.ZERO, COSInteger.get(500), COSName.AFTER));
+        assertEquals(new PDRectangle(new COSArray(COSInteger.ZERO, COSInteger.ZERO,
+                COSInteger.get(500), COSInteger.ZERO)), page.getTrimBox());
     }
 
 }
