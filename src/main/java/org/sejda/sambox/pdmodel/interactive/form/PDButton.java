@@ -441,12 +441,6 @@ public abstract class PDButton extends PDTerminalField
         List<String> options = getExportValues();
         Set<String> uniqueOptions = new HashSet<>(options);
 
-        if (widgets.size() != options.size() && uniqueOptions.size() > 1)
-        {
-            throw new IllegalArgumentException(
-                    "The number of options doesn't match the number of widgets");
-        }
-
         if (value.equals(COSName.Off.getName()))
         {
             updateByValue(value);
@@ -465,7 +459,15 @@ public abstract class PDButton extends PDTerminalField
                 if (onValue != null)
                 {
                     updateByValue(onValue);
+                    return;
                 }
+            }
+
+            // we reach here if update failed
+            if (widgets.size() != options.size() && uniqueOptions.size() > 1)
+            {
+                throw new IllegalArgumentException(
+                        "The number of options doesn't match the number of widgets");
             }
         }
     }

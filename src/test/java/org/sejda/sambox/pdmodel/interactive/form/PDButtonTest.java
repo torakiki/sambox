@@ -25,8 +25,10 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.sejda.io.SeekableSources;
@@ -37,6 +39,7 @@ import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceDictionary;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceEntry;
+import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceStream;
 
 /**
  * Test for the PDButton class.
@@ -538,6 +541,63 @@ public class PDButtonTest
 
         assertEquals(checkBox.getWidgets().get(0).getCOSObject().getCOSName(COSName.AS),
                 COSName.Off);
+    }
+
+    @Test
+    public void radioButtonWithOneWidgetAndMoreExportValues() throws IOException
+    {
+        PDRadioButton radio = new PDRadioButton(acroForm);
+        radio.setExportValues(Arrays.asList("0", "Yes", "Yes"));
+
+        PDAnnotationWidget widget = new PDAnnotationWidget();
+        PDAppearanceDictionary appearance = new PDAppearanceDictionary();
+        
+        COSDictionary normalAppearanceDict = new COSDictionary();
+        normalAppearanceDict.putIfAbsent(COSName.getPDFName("0"), new PDAppearanceStream());
+        PDAppearanceEntry normalAppearance = new PDAppearanceEntry(normalAppearanceDict);
+        
+        appearance.setNormalAppearance(normalAppearance);
+        widget.setAppearance(appearance);
+
+        radio.setWidgets(Arrays.asList(widget));
+
+        assertEquals(radio.getWidgets().size(), 1);
+        assertEquals(radio.getOnValues(), new HashSet<>(Arrays.asList("0", "Yes", "Yes")));
+        assertEquals(radio.getValue(), "Off");
+        
+        radio.setValueIgnoreExportOptions("0");
+        assertEquals(radio.getValue(), "0");
+    }
+
+    @Test
+    public void radioButtonWithOneWidgetAndMoreExportValues_Failure() throws IOException
+    {
+        PDRadioButton radio = new PDRadioButton(acroForm);
+        radio.setExportValues(Arrays.asList("0", "1"));
+
+        PDAnnotationWidget widget = new PDAnnotationWidget();
+        PDAppearanceDictionary appearance = new PDAppearanceDictionary();
+
+        COSDictionary normalAppearanceDict = new COSDictionary();
+        normalAppearanceDict.putIfAbsent(COSName.getPDFName("0"), new PDAppearanceStream());
+        PDAppearanceEntry normalAppearance = new PDAppearanceEntry(normalAppearanceDict);
+
+        appearance.setNormalAppearance(normalAppearance);
+        widget.setAppearance(appearance);
+
+        radio.setWidgets(Arrays.asList(widget));
+
+        assertEquals(radio.getWidgets().size(), 1);
+        assertEquals(radio.getOnValues(), new HashSet<>(Arrays.asList("0", "1")));
+        assertEquals(radio.getValue(), "Off");
+
+        try {
+            radio.setValueIgnoreExportOptions("1");    
+            Assert.fail("Expected failure");
+            
+        } catch (IllegalArgumentException ex) {
+            Assert.assertEquals(ex.getMessage(), "The number of options doesn't match the number of widgets");
+        }
     }
 
     @After
