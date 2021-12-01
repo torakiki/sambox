@@ -309,4 +309,20 @@ public class PDPageTreeTest
             assertEquals(doc.getNumberOfPages(), numPages + 2);
         }
     }
+
+    @Test
+    public void removePageWithoutParentAttribute()
+    {
+        PDDocument doc = new PDDocument();
+        PDPage p1 = new PDPage();
+        doc.addPage(p1);
+
+        PDPage p2 = new PDPage();
+        doc.addPage(p2);
+
+        // page is missing parent attribute
+        p2.getCOSObject().removeItem(COSName.PARENT);
+
+        doc.removePage(1);
+    }
 }

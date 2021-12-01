@@ -470,7 +470,7 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
     public void remove(int index)
     {
         PageAndPageTreeParent res = get(index + 1, root, 0, null);
-        remove(res.node);
+        remove(res.node, res.parent);
     }
 
     /**
@@ -488,9 +488,24 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
      */
     private void remove(COSDictionary node)
     {
+        remove(node, null);
+    }
+
+    /**
+     * Removes the given COS page.
+     */
+    private void remove(COSDictionary node, COSDictionary knownParent)
+    {
         // remove from parent's kids
         COSDictionary parent = node.getDictionaryObject(COSName.PARENT, COSName.P,
                 COSDictionary.class);
+        
+        if(parent == null)
+        {
+            // broken node with missing PARENT, use the one known from traversing the page tree
+            parent = knownParent;
+        }
+        
         COSArray kids = parent.getDictionaryObject(COSName.KIDS, COSArray.class);
         if (kids.removeObject(node))
         {
