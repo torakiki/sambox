@@ -115,6 +115,7 @@ public class AxialShadingContext extends ShadingContext implements PaintContext
         {
             LOG.error(ex.getMessage() + ", matrix: " + matrix, ex);
             LOG.error(ex.getMessage(), ex);
+            rat = new AffineTransform();
         }
 
         // shading space -> device space
