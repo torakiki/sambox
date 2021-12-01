@@ -324,5 +324,6 @@ public class PDPageTreeTest
         p2.getCOSObject().removeItem(COSName.PARENT);
 
         doc.removePage(1);
+        assertEquals(1, doc.getNumberOfPages());
     }
 }

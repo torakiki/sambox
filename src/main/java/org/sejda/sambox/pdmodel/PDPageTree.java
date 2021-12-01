@@ -510,6 +510,9 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
         if (kids.removeObject(node))
         {
             // update ancestor counts
+            parent.setInt(COSName.COUNT, parent.getInt(COSName.COUNT) - 1);
+            node = parent;
+            
             do
             {
                 node = node.getDictionaryObject(COSName.PARENT, COSName.P, COSDictionary.class);
