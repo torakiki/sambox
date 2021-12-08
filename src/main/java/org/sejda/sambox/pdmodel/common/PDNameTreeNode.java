@@ -246,7 +246,7 @@ public abstract class PDNameTreeNode<T extends COSObjectable> implements COSObje
                 return names.get(name);
             }
         }
-        catch (IOException e)
+        catch (IOException | ClassCastException e)
         {
             LOG.warn("NameTreeNode couldn't get the names map", e);
         }
