@@ -1,6 +1,6 @@
 SAMBox PDF processor
 =====================
-[![Build Status](https://travis-ci.org/torakiki/sambox.png)](https://travis-ci.org/torakiki/sambox)
+![Build Status](https://github.com/torakiki/sambox/actions/workflows/build.yml/badge.svg)
 [![License](http://img.shields.io/badge/license-APLv2-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0.html)
 
 An [Apache PDFBox](https://github.com/apache/pdfbox) fork intended to be used as PDF processor for [Sejda](https://github.com/torakiki/sejda) and [PDFsam](https://github.com/torakiki/pdfsam) related projects

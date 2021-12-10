@@ -1,0 +1,22 @@
+name: build
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: ['8', '11', '17']
+    name: JDK ${{ matrix.java }}
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK
+      uses: actions/setup-java@v2
+      with:
+        java-version: ${{ matrix.java }}
+        distribution: 'temurin'
+        cache: 'maven'
+    - name: Build with Maven
+      run: mvn --batch-mode --update-snapshots verify
