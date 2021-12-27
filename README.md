@@ -25,9 +25,9 @@ How do I load a document?
 ---------
 Here is a snippet to load a document from a file and write it back to a newFile. 
 ``` 
-		try(PDDocument document = PDFParser.parse(SeekableSources.seekableSourceFrom(file))){
-            document.writeTo(newFile, WriteOption.XREF_STREAM);
-        }
+    try(PDDocument document = PDFParser.parse(SeekableSources.seekableSourceFrom(file))){
+        document.writeTo(newFile, WriteOption.XREF_STREAM);
+    }
 ``` 
 
 Tuning

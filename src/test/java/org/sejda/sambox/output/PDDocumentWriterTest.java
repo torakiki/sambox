@@ -17,9 +17,9 @@
 package org.sejda.sambox.output;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.eq;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -84,8 +84,7 @@ public class PDDocumentWriterTest
         ArgumentCaptor<PDFBodyWriter> bodyWriter = ArgumentCaptor.forClass(PDFBodyWriter.class);
         victim.write(document);
         verify(cosDoc).accept(bodyWriter.capture());
-        assertThat(bodyWriter.getValue().objectsWriter,
-                instanceOf(SyncPDFBodyObjectsWriter.class));
+        assertThat(bodyWriter.getValue().objectsWriter, instanceOf(SyncPDFBodyObjectsWriter.class));
     }
 
     @Test
@@ -96,7 +95,8 @@ public class PDDocumentWriterTest
         FileTrailer trailer = new FileTrailer();
         when(document.getDocument()).thenReturn(cosDoc);
         when(cosDoc.getTrailer()).thenReturn(trailer);
-        this.victim = new PDDocumentWriter(from(new DevNullWritableByteChannel()), null, WriteOption.OBJECT_STREAMS);
+        this.victim = new PDDocumentWriter(from(new DevNullWritableByteChannel()), null,
+                WriteOption.OBJECT_STREAMS);
         TestUtils.setProperty(victim, "writer", this.writer);
         ArgumentCaptor<PDFBodyWriter> bodyWriter = ArgumentCaptor.forClass(PDFBodyWriter.class);
         victim.write(document);
@@ -113,7 +113,8 @@ public class PDDocumentWriterTest
         FileTrailer trailer = new FileTrailer();
         when(document.getDocument()).thenReturn(cosDoc);
         when(cosDoc.getTrailer()).thenReturn(trailer);
-        this.victim = new PDDocumentWriter(from(new DevNullWritableByteChannel()), null, WriteOption.ASYNC_BODY_WRITE);
+        this.victim = new PDDocumentWriter(from(new DevNullWritableByteChannel()), null,
+                WriteOption.ASYNC_BODY_WRITE);
         TestUtils.setProperty(victim, "writer", this.writer);
         ArgumentCaptor<PDFBodyWriter> bodyWriter = ArgumentCaptor.forClass(PDFBodyWriter.class);
         victim.write(document);

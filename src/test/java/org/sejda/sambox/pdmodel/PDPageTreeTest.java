@@ -18,9 +18,9 @@ package org.sejda.sambox.pdmodel;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.endsWith;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.sejda.sambox.input.PDFParser.parse;
 
@@ -162,7 +162,7 @@ public class PDPageTreeTest
             {
                 assertEquals(ex.getPage(), 100 /* 1 based, for humans */);
                 assertThat(ex.getSourcePath(), containsString(File.separator + "SejdaIO"));
-                assertThat(ex.getSourcePath(), endsWith(".tmp"));
+                assertThat(ex.getSourcePath(), endsWith("SejdaIO"));
             }
         }
     }
@@ -175,89 +175,89 @@ public class PDPageTreeTest
         return result;
     }
 
-//    private void createTestFile_BrokenPageTreeDocument()
-//    {
-//        try (PDDocument doc = parse(SeekableSources.inMemorySeekableSourceFrom(
-//                PDPageTreeTest.class.getResourceAsStream("page_tree_multiple_levels.pdf"))))
-//        {
-//            // break the structure
-//            PDPage page1 = doc.getPage(0);
-//            COSDictionary actualParent = page1.getCOSObject().getDictionaryObject(COSName.PARENT,
-//                    COSDictionary.class);
-//
-//            COSDictionary fakeParent = new COSDictionary();
-//            fakeParent.setItem(COSName.KIDS, actualParent.getItem(COSName.KIDS));
-//            fakeParent.setItem(COSName.COUNT, actualParent.getItem(COSName.COUNT));
-//
-//            // break the page
-//            page1.getCOSObject().setItem(COSName.PARENT, fakeParent);
-//
-//            doc.writeTo(new File("/tmp/page_tree_broken_different_parent.pdf"));
-//        }
-//        catch (IOException e)
-//        {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    private void createTestFile_BrokenPageTreeDocumentDifferentAttributes()
-//    {
-//        try (PDDocument doc = parse(SeekableSources.inMemorySeekableSourceFrom(
-//                PDPageTreeTest.class.getResourceAsStream("page_tree_multiple_levels.pdf"))))
-//        {
-//            // break the structure
-//            PDPage page1 = doc.getPage(0);
-//            COSDictionary actualParent = page1.getCOSObject().getDictionaryObject(COSName.PARENT,
-//                    COSDictionary.class);
-//
-//            COSDictionary fakeParent = new COSDictionary();
-//            fakeParent.setItem(COSName.KIDS, actualParent.getItem(COSName.KIDS));
-//            fakeParent.setItem(COSName.COUNT, actualParent.getItem(COSName.COUNT));
-//            // different inheritable attr compared to parent
-//            fakeParent.setItem(COSName.ROTATE, COSInteger.get(90));
-//
-//            // break the page
-//            page1.getCOSObject().setItem(COSName.PARENT, fakeParent);
-//
-//            doc.writeTo(new File("/tmp/page_tree_broken_different_parent_diff_attrs.pdf"));
-//        }
-//        catch (IOException e)
-//        {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    private void createTestFile_BrokenPageTreeDocumentSameAttributesWhenInherited()
-//    {
-//        try (PDDocument doc = parse(SeekableSources.inMemorySeekableSourceFrom(
-//                PDPageTreeTest.class.getResourceAsStream("page_tree_multiple_levels.pdf"))))
-//        {
-//            // break the structure
-//            PDPage page1 = doc.getPage(0);
-//            COSDictionary actualParent = page1.getCOSObject().getDictionaryObject(COSName.PARENT,
-//                    COSDictionary.class);
-//            actualParent.setItem(COSName.ROTATE, COSInteger.get(90));
-//
-//            COSDictionary fakeParent = new COSDictionary();
-//            fakeParent.setItem(COSName.KIDS, actualParent.getItem(COSName.KIDS));
-//            fakeParent.setItem(COSName.COUNT, actualParent.getItem(COSName.COUNT));
-//            // same inheritable attr compared to parent, when inherited
-//            COSDictionary fakeParentParent = new COSDictionary();
-//            fakeParentParent.setItem(COSName.ROTATE, COSInteger.get(90));
-//
-//            fakeParent.setItem(COSName.PARENT, fakeParentParent);
-//
-//            // break the page
-//            page1.getCOSObject().setItem(COSName.PARENT, fakeParent);
-//
-//            doc.writeTo(
-//                    new File("/tmp/page_tree_broken_different_parent_same_inherited_attrs.pdf"));
-//        }
-//        catch (IOException e)
-//        {
-//            e.printStackTrace();
-//        }
-//    }
+    // private void createTestFile_BrokenPageTreeDocument()
+    // {
+    // try (PDDocument doc = parse(SeekableSources.inMemorySeekableSourceFrom(
+    // PDPageTreeTest.class.getResourceAsStream("page_tree_multiple_levels.pdf"))))
+    // {
+    // // break the structure
+    // PDPage page1 = doc.getPage(0);
+    // COSDictionary actualParent = page1.getCOSObject().getDictionaryObject(COSName.PARENT,
+    // COSDictionary.class);
+    //
+    // COSDictionary fakeParent = new COSDictionary();
+    // fakeParent.setItem(COSName.KIDS, actualParent.getItem(COSName.KIDS));
+    // fakeParent.setItem(COSName.COUNT, actualParent.getItem(COSName.COUNT));
+    //
+    // // break the page
+    // page1.getCOSObject().setItem(COSName.PARENT, fakeParent);
+    //
+    // doc.writeTo(new File("/tmp/page_tree_broken_different_parent.pdf"));
+    // }
+    // catch (IOException e)
+    // {
+    // e.printStackTrace();
+    // }
+    // }
+    //
+    // private void createTestFile_BrokenPageTreeDocumentDifferentAttributes()
+    // {
+    // try (PDDocument doc = parse(SeekableSources.inMemorySeekableSourceFrom(
+    // PDPageTreeTest.class.getResourceAsStream("page_tree_multiple_levels.pdf"))))
+    // {
+    // // break the structure
+    // PDPage page1 = doc.getPage(0);
+    // COSDictionary actualParent = page1.getCOSObject().getDictionaryObject(COSName.PARENT,
+    // COSDictionary.class);
+    //
+    // COSDictionary fakeParent = new COSDictionary();
+    // fakeParent.setItem(COSName.KIDS, actualParent.getItem(COSName.KIDS));
+    // fakeParent.setItem(COSName.COUNT, actualParent.getItem(COSName.COUNT));
+    // // different inheritable attr compared to parent
+    // fakeParent.setItem(COSName.ROTATE, COSInteger.get(90));
+    //
+    // // break the page
+    // page1.getCOSObject().setItem(COSName.PARENT, fakeParent);
+    //
+    // doc.writeTo(new File("/tmp/page_tree_broken_different_parent_diff_attrs.pdf"));
+    // }
+    // catch (IOException e)
+    // {
+    // e.printStackTrace();
+    // }
+    // }
+    //
+    // private void createTestFile_BrokenPageTreeDocumentSameAttributesWhenInherited()
+    // {
+    // try (PDDocument doc = parse(SeekableSources.inMemorySeekableSourceFrom(
+    // PDPageTreeTest.class.getResourceAsStream("page_tree_multiple_levels.pdf"))))
+    // {
+    // // break the structure
+    // PDPage page1 = doc.getPage(0);
+    // COSDictionary actualParent = page1.getCOSObject().getDictionaryObject(COSName.PARENT,
+    // COSDictionary.class);
+    // actualParent.setItem(COSName.ROTATE, COSInteger.get(90));
+    //
+    // COSDictionary fakeParent = new COSDictionary();
+    // fakeParent.setItem(COSName.KIDS, actualParent.getItem(COSName.KIDS));
+    // fakeParent.setItem(COSName.COUNT, actualParent.getItem(COSName.COUNT));
+    // // same inheritable attr compared to parent, when inherited
+    // COSDictionary fakeParentParent = new COSDictionary();
+    // fakeParentParent.setItem(COSName.ROTATE, COSInteger.get(90));
+    //
+    // fakeParent.setItem(COSName.PARENT, fakeParentParent);
+    //
+    // // break the page
+    // page1.getCOSObject().setItem(COSName.PARENT, fakeParent);
+    //
+    // doc.writeTo(
+    // new File("/tmp/page_tree_broken_different_parent_same_inherited_attrs.pdf"));
+    // }
+    // catch (IOException e)
+    // {
+    // e.printStackTrace();
+    // }
+    // }
 
     @Test
     public void addPagesToDocumentWithInconsistentPageParents() throws IOException

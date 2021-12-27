@@ -18,7 +18,7 @@ package org.sejda.sambox.encryption;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.mockito.AdditionalMatchers.aryEq;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
