@@ -1635,6 +1635,10 @@ public final class PDPageContentStream implements Closeable
 
     protected void writeOperand(float real) throws IOException
     {
+        if (Float.isInfinite(real) || Float.isNaN(real))
+        {
+            throw new IllegalArgumentException(real + " is not a finite number");
+        }
         // PDFbox up to 1st Aug has a new fast or fallback way to write things here, which breaks things
         // temporary reverted to old way of doing things, see if new commits fix this
         write(formatDecimal.format(real));

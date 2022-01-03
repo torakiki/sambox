@@ -83,6 +83,7 @@ import org.sejda.sambox.pdmodel.graphics.color.PDPattern;
 import org.sejda.sambox.pdmodel.graphics.form.PDFormXObject;
 import org.sejda.sambox.pdmodel.graphics.form.PDTransparencyGroup;
 import org.sejda.sambox.pdmodel.graphics.image.PDImage;
+import org.sejda.sambox.pdmodel.graphics.image.PDImageXObject;
 import org.sejda.sambox.pdmodel.graphics.optionalcontent.PDOptionalContentGroup;
 import org.sejda.sambox.pdmodel.graphics.optionalcontent.PDOptionalContentGroup.RenderState;
 import org.sejda.sambox.pdmodel.graphics.optionalcontent.PDOptionalContentMembershipDictionary;
@@ -1014,6 +1015,11 @@ public class PageDrawer extends PDFGraphicsStreamEngine
     @Override
     public void drawImage(PDImage pdImage) throws IOException
     {
+        if (pdImage instanceof PDImageXObject &&
+                isHiddenOCG(((PDImageXObject) pdImage).getOptionalContent()))
+        {
+            return;
+        }
         Matrix ctm = getGraphicsState().getCurrentTransformationMatrix();
         AffineTransform at = ctm.createAffineTransform();
 
@@ -1360,6 +1366,10 @@ public class PageDrawer extends PDFGraphicsStreamEngine
     @Override
     public void showForm(PDFormXObject form) throws IOException
     {
+        if (isHiddenOCG(form.getOptionalContent()))
+        {
+            return;
+        }
         if (isContentRendered())
         {
             super.showForm(form);
@@ -1369,6 +1379,10 @@ public class PageDrawer extends PDFGraphicsStreamEngine
     @Override
     public void showTransparencyGroup(PDTransparencyGroup form) throws IOException
     {
+        if (isHiddenOCG(form.getOptionalContent()))
+        {
+            return;
+        }
         if (!isContentRendered())
         {
             return;

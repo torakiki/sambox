@@ -30,6 +30,8 @@ import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.PDDocumentInformation;
+import org.sejda.sambox.pdmodel.interactive.documentnavigation.outline.PDDocumentOutline;
+import org.sejda.sambox.pdmodel.interactive.documentnavigation.outline.PDOutlineItem;
 import org.sejda.sambox.rendering.PDFRenderer;
 import org.sejda.sambox.text.PDFTextStripper;
 import org.sejda.sambox.util.DateConverter;
@@ -323,6 +325,29 @@ public class PDFParserTest
             // noop
         }
     }
+    /**
+     * Test parsing the file from PDFBOX-4338, which brought an
+     * ArrayIndexOutOfBoundsException before the bug was fixed.
+     *
+     * @throws IOException
+     */
+    @Test
+    public void testPDFBox4338() throws IOException
+    {
+        PDDocument.load(new File(TARGETPDFDIR, "PDFBOX-4338.pdf")).close();
+    }
+
+    /**
+     * Test parsing the file from PDFBOX-4339, which brought a
+     * NullPointerException before the bug was fixed.
+     *
+     * @throws IOException
+     */
+    @Test
+    public void testPDFBox4339() throws IOException
+    {
+        PDDocument.load(new File(TARGETPDFDIR, "PDFBOX-4339.pdf")).close();
+    }
 
     /**
      * PDFBOX-3964: test parsing of broken file.
@@ -332,9 +357,10 @@ public class PDFParserTest
     @Test
     public void testPDFBox3964() throws IOException
     {
-        PDDocument doc = PDDocument.load(new File(TARGETPDFDIR, "PDFBOX-3964-c687766d68ac766be3f02aaec5e0d713_2.pdf"));
-        assertEquals(10, doc.getNumberOfPages());
-        doc.close();
+        try(PDDocument doc = PDDocument.load(new File(TARGETPDFDIR, "PDFBOX-3964-c687766d68ac766be3f02aaec5e0d713_2.pdf")))
+        {
+            assertEquals(10, doc.getNumberOfPages());
+        }
     }
 
     /**
@@ -346,10 +372,39 @@ public class PDFParserTest
         try(PDDocument doc = PDDocument.load(new File(TARGETPDFDIR, "PDFBOX-3703-966635-p12.pdf")))
         {
             doc.writeTo(new DevNullWritableByteChannel());
-            doc.close();
         }
     }
 
+    /**
+     * Test parsing the "WXMDXCYRWFDCMOSFQJ5OAJIAFXYRZ5OA.pdf" file, which is susceptible to
+     * regression.
+     *
+     * @throws IOException
+     */
+    @Test
+    public void testPDFBox4153() throws IOException
+    {
+        try(PDDocument doc = PDDocument.load(new File(TARGETPDFDIR, "PDFBOX-4153-WXMDXCYRWFDCMOSFQJ5OAJIAFXYRZ5OA.pdf")))
+        {
+            PDDocumentOutline documentOutline = doc.getDocumentCatalog().getDocumentOutline();
+            PDOutlineItem firstChild = documentOutline.getFirstChild();
+            assertEquals("Main Menu", firstChild.getTitle());
+        }
+    }
+
+    /**
+     * Test that PDFBOX-4490 has 3 pages.
+     *
+     * @throws IOException
+     */
+    @Test
+    public void testPDFBox4490() throws IOException
+    {
+        try(PDDocument doc = PDDocument.load(new File(TARGETPDFDIR, "PDFBOX-4490.pdf")))
+        {
+            assertEquals(3, doc.getNumberOfPages());
+        }
+    }
     /**
      * PDFBOX-3951: test parsing of truncated file.
      *

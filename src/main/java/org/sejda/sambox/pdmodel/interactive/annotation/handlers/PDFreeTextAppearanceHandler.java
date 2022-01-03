@@ -295,28 +295,31 @@ public class PDFreeTextAppearanceHandler extends PDAbstractAppearanceHandler
             cs.addRect(xOffset, clipY, clipWidth, clipHeight);
             cs.clip();
 
-            cs.beginText();
-            cs.setFont(font, fontSize);
-            cs.setNonStrokingColor(textColor.getComponents());
-            AppearanceStyle appearanceStyle = new AppearanceStyle();
-            appearanceStyle.setFont(font);
-            appearanceStyle.setFontSize(fontSize);
-            String textContents = Optional.ofNullable(annotation.getContents()).orElse("");
-            PlainTextFormatter formatter = new PlainTextFormatter.Builder(cs).style(appearanceStyle)
-                    .text(new PlainText(textContents)).width(width - ab.width * 4)
-                    .wrapLines(true).initialOffset(xOffset, yOffset)
-                    // Adobe ignores the /Q
-                    // .textAlign(annotation.getQ())
-                    .build();
-            try
-            {
-                formatter.format();
+            if (annotation.getContents() != null) {
+                cs.beginText();
+                cs.setFont(font, fontSize);
+                cs.setNonStrokingColor(textColor.getComponents());
+                AppearanceStyle appearanceStyle = new AppearanceStyle();
+                appearanceStyle.setFont(font);
+                appearanceStyle.setFontSize(fontSize);
+                String textContents = Optional.ofNullable(annotation.getContents()).orElse("");
+                PlainTextFormatter formatter = new PlainTextFormatter.Builder(cs).style(appearanceStyle)
+                                                                                 .text(new PlainText(textContents)).width(width - ab.width * 4)
+                                                                                 .wrapLines(true).initialOffset(xOffset, yOffset)
+                                                                                 // Adobe ignores the /Q
+                                                                                 // .textAlign(annotation.getQ())
+                        .build();
+                try
+                {
+                    formatter.format();
+                } catch (IllegalArgumentException ex)
+                {
+                    throw new IOException(ex);
+                } finally
+                {
+                    cs.endText();
+                }
             }
-            catch (IllegalArgumentException ex)
-            {
-                throw new IOException(ex);
-            }
-            cs.endText();
 
             if (pathsArray.length > 0)
             {

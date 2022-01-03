@@ -1438,6 +1438,11 @@ abstract class PDAbstractContentStream implements Closeable
      */
     protected void writeOperand(float real) throws IOException
     {
+        if (Float.isInfinite(real) || Float.isNaN(real))
+        {
+            throw new IllegalArgumentException(real + " is not a finite number");
+        }
+
         int byteCount = NumberFormatUtil.formatFloatFast(real,
                 formatDecimal.getMaximumFractionDigits(), formatBuffer);
 

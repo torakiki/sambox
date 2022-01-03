@@ -16,17 +16,17 @@
  */
 package org.sejda.sambox.contentstream.operator.color;
 
-import java.io.IOException;
-import java.util.List;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.contentstream.operator.OperatorProcessor;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.List;
 
 /**
  * CS: Set color space for stroking operations.
@@ -36,14 +36,14 @@ import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
  */
 public class SetStrokingColorSpace extends OperatorProcessor
 {
-    private static final Log LOGGER = LogFactory.getLog(SetStrokingColorSpace.class);
-    
+    private static final Logger LOG = LoggerFactory.getLogger(SetStrokingColorSpace.class);
+
     @Override
     public void process(Operator operator, List<COSBase> arguments) throws IOException
     {
         if(arguments == null || arguments.size() == 0)
         {
-            LOGGER.warn("Ignoring SetStrokingColorSpace operator without operands");
+            LOG.warn("Ignoring SetStrokingColorSpace operator without operands");
             return;
         }
 
@@ -51,15 +51,15 @@ public class SetStrokingColorSpace extends OperatorProcessor
         if (base instanceof COSName)
         {
             COSName name = (COSName) base;
-            try 
+            try
             {
                 PDColorSpace cs = getContext().getResources().getColorSpace(name);
                 getContext().getGraphicsState().setStrokingColorSpace(cs);
                 getContext().getGraphicsState().setStrokingColor(cs.getInitialColor());
-            } 
+            }
             catch (IOException ex)
             {
-                LOGGER.warn("Ignoring SetStrokingColorSpace operator, parsing colorspace caused an error", ex);
+                LOG.warn("Ignoring SetStrokingColorSpace operator, parsing colorspace caused an error", ex);
             }
         }
     }

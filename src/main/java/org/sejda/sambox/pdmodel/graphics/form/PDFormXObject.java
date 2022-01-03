@@ -25,6 +25,7 @@ import java.io.InputStream;
 
 import org.sejda.sambox.contentstream.PDContentStream;
 import org.sejda.sambox.cos.COSArray;
+import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSFloat;
 import org.sejda.sambox.cos.COSName;
@@ -33,6 +34,7 @@ import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.ResourceCache;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.common.PDStream;
+import org.sejda.sambox.pdmodel.documentinterchange.markedcontent.PDPropertyList;
 import org.sejda.sambox.pdmodel.graphics.PDXObject;
 import org.sejda.sambox.util.Matrix;
 
@@ -273,5 +275,22 @@ public class PDFormXObject extends PDXObject implements PDContentStream
     public void setStructParents(int structParent)
     {
         getCOSObject().setInt(COSName.STRUCT_PARENTS, structParent);
+    }
+
+    /**
+     * @return The optional content group or optional content membership dictionary or null if there
+     * is none.
+     */
+    public PDPropertyList getOptionalContent()
+    {
+        return ofNullable(getCOSObject().getDictionaryObject(COSName.OC, COSDictionary.class)).map(PDPropertyList::create).orElse(null);
+    }
+
+    /**
+     * Sets the optional content group or optional content membership dictionary.
+     */
+    public void setOptionalContent(PDPropertyList oc)
+    {
+        getCOSObject().setItem(COSName.OC, oc);
     }
 }

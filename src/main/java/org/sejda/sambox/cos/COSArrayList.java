@@ -203,18 +203,14 @@ public class COSArrayList<E> implements List<E>
         // due to how our codebase diverged
         // an index-based approach to removing works better
 
-        boolean retval = true;
         int index = actual.indexOf(o);
         if(index >= 0)
         {
             actual.remove(index);
             array.remove(index);
+            return true;
         }
-        else
-        {
-            retval = false;
-        }
-        return retval;
+        return false;
     }
 
     /**
