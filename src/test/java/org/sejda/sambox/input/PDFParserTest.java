@@ -23,7 +23,9 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Base64;
 
+import com.tngtech.archunit.thirdparty.com.google.common.io.Files;
 import org.junit.Test;
 import org.sejda.io.DevNullWritableByteChannel;
 import org.sejda.io.SeekableSources;
@@ -296,7 +298,7 @@ public class PDFParserTest
 
     /**
      * PDFBOX-3783: test parsing of file with trash after %%EOF.
-     * 
+     *
      * @throws IOException
      */
     @Test
@@ -313,7 +315,7 @@ public class PDFParserTest
 
     /**
      * Test parsing the "genko_oc_shiryo1.pdf" file, which is susceptible to regression.
-     * 
+     *
      * @throws IOException
      */
     @Test
@@ -476,20 +478,28 @@ public class PDFParserTest
                 getClass().getResourceAsStream("/sambox/self_indirect_ref.pdf"))))
         {
             doc.writeTo(new DevNullWritableByteChannel());
-            doc.close();
         }
     }
 
     @Test
-    public void testPDFBOX4372() throws IOException {
+    public void testPDFBOX4372() throws IOException
+    {
         try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
                 getClass().getResourceAsStream("/org/sejda/sambox/input/PDFBOX-4372-2DAYCLVOFG3FTVO4RMAJJL3VTPNYDFRO-p4_reduced.pdf"))))
         {
 
             PDFTextStripper textStripper = new PDFTextStripper();
             textStripper.getText(doc);
+        }
+    }
 
-            doc.close();
+    //https://lists.apache.org/thread/rmvn7t4bj4d8wsln722kdk39k4fc0ff7
+    @Test
+    public void noLoopOrOOM() throws IOException
+    {
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(Base64.getDecoder().decode("ef//RET/KS8AYgAAtDd0cmFpbGVyPDxmJSkvAGIAALQ3dHJhkWlsZUlyPDxmJVBERi0vIPb2APYlUERGLS8g9vYA9i9UaGlhbW5uO0+tjY2NcmVuZG9vO0RGN0RhWQAAAAAAAAB0YQ=="))))
+        {
+            //nothing to do, just don't blow up
         }
     }
 }
