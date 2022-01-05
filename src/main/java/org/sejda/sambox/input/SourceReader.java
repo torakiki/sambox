@@ -16,6 +16,23 @@
  */
 package org.sejda.sambox.input;
 
+import org.sejda.commons.FastByteArrayOutputStream;
+import org.sejda.commons.Pool;
+import org.sejda.commons.util.IOUtils;
+import org.sejda.io.SeekableSource;
+import org.sejda.sambox.SAMBox;
+import org.sejda.sambox.cos.COSObjectKey;
+import org.sejda.sambox.util.CharUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.Closeable;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+
 import static java.util.Arrays.asList;
 import static org.sejda.commons.util.RequireUtils.requireIOCondition;
 import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
@@ -32,23 +49,6 @@ import static org.sejda.sambox.util.CharUtils.isHexDigit;
 import static org.sejda.sambox.util.CharUtils.isLineFeed;
 import static org.sejda.sambox.util.CharUtils.isOctalDigit;
 import static org.sejda.sambox.util.CharUtils.isWhitespace;
-
-import java.io.Closeable;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.charset.CharacterCodingException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-
-import org.sejda.commons.FastByteArrayOutputStream;
-import org.sejda.commons.Pool;
-import org.sejda.commons.util.IOUtils;
-import org.sejda.io.SeekableSource;
-import org.sejda.sambox.SAMBox;
-import org.sejda.sambox.cos.COSObjectKey;
-import org.sejda.sambox.util.CharUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Component responsible for reading a {@link SeekableSource}. Methods to read expected kind of tokens are available as
@@ -121,7 +121,7 @@ class SourceReader implements Closeable
     /**
      * Skips the expected given String
      *
-     * @param expectedString the String value that is expected.
+     * @param expected the String value that is expected.
      * @throws IOException if the String char is not the expected value or if an I/O error occurs.
      */
     public final void skipExpected(String expected) throws IOException
@@ -264,7 +264,7 @@ class SourceReader implements Closeable
     }
 
     /**
-     * @param valid values for the next token.
+     * @param values values for the next token.
      * @return true if the next token is one of the given values. false otherwise.
      * @throws IOException if there is an error reading from the stream
      */
@@ -438,7 +438,8 @@ class SourceReader implements Closeable
     }
 
     /**
-     * Reads a a token conforming with a PDF Integer object defined in Numeric Objects chap 7.3.3 PDF 32000-1:2008.
+     * Reads a token conforming with a PDF Integer object defined in Numeric Objects chap 7.3.3 PDF
+     * 32000-1:2008.
      *
      * @return the token to parse as {@link Integer} or {@link Long}.
      * @throws IOException If there is an error reading from the stream.

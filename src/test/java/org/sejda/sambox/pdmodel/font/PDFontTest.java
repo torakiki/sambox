@@ -19,18 +19,13 @@
 
 package org.sejda.sambox.pdmodel.font;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-
+import junit.framework.TestCase;
 import org.apache.fontbox.ttf.TTFParser;
 import org.apache.fontbox.ttf.TrueTypeFont;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.sejda.commons.util.IOUtils;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.input.PDFParser;
@@ -41,7 +36,15 @@ import org.sejda.sambox.pdmodel.font.encoding.WinAnsiEncoding;
 import org.sejda.sambox.rendering.PDFRenderer;
 import org.sejda.sambox.text.PDFTextStripper;
 
-import junit.framework.TestCase;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 /**
  * 
@@ -301,13 +304,63 @@ public class PDFontTest extends TestCase
     {
         String unsupported = "ł";
 
-        try {
+        try
+        {
             PDType1Font.HELVETICA.encode(unsupported);
             fail("Exception expected");
-        } catch (IllegalArgumentException ex) {
+        }
+        catch (IllegalArgumentException ex)
+        {
             // expected
         }
 
         PDType1Font.HELVETICA.encodeLeniently(unsupported);
+    }
+
+    /**
+     * Check that font can be deleted after usage.
+     *
+     * @throws IOException
+     */
+    @Test
+    public void testDeleteFont() throws IOException
+    {
+        File tempFontFile = new File(OUT_DIR, "LiberationSans-Regular.ttf");
+        File tempPdfFile = new File(OUT_DIR, "testDeleteFont.pdf");
+        String text = "Test PDFBOX-4823";
+
+        InputStream is = PDFont.class.getResourceAsStream(
+                "/org/sejda/sambox/resources/ttf/LiberationSans-Regular.ttf");
+
+        OutputStream os = new FileOutputStream(tempFontFile);
+        IOUtils.copy(is, os);
+        is.close();
+        os.close();
+
+        try (PDDocument doc = new PDDocument())
+        {
+            PDPage page = new PDPage();
+            doc.addPage(page);
+            PDPageContentStream cs = new PDPageContentStream(doc, page);
+            PDFont font1 = PDType0Font.load(doc, tempFontFile);
+            cs.beginText();
+            cs.setFont(font1, 50);
+            cs.newLineAtOffset(50, 700);
+            cs.showText(text);
+            cs.endText();
+            cs.close();
+            doc.writeTo(tempPdfFile);
+        }
+
+        Assert.assertTrue(tempFontFile.delete());
+
+        try (PDDocument doc = PDDocument.load(tempPdfFile))
+        {
+            PDFTextStripper stripper = new PDFTextStripper();
+            String extractedText = stripper.getText(doc);
+            Assert.assertEquals(text, extractedText.trim());
+        }
+
+        Assert.assertTrue(tempPdfFile.delete());
     }
 }

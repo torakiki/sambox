@@ -16,13 +16,6 @@
  */
 package org.sejda.sambox.text;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
-
 import org.sejda.sambox.contentstream.operator.markedcontent.BeginMarkedContentSequence;
 import org.sejda.sambox.contentstream.operator.markedcontent.BeginMarkedContentSequenceWithProperties;
 import org.sejda.sambox.contentstream.operator.markedcontent.DrawObject;
@@ -31,6 +24,14 @@ import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.documentinterchange.markedcontent.PDMarkedContent;
 import org.sejda.sambox.pdmodel.graphics.PDXObject;
+
+import java.io.IOException;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This is an stream engine to extract the marked content of a pdf.
@@ -41,7 +42,7 @@ public class PDFMarkedContentExtractor extends PDFTextStreamEngine
 {
     private final boolean suppressDuplicateOverlappingText = true;
     private final List<PDMarkedContent> markedContents = new ArrayList<>();
-    private final Stack<PDMarkedContent> currentMarkedContents = new Stack<>();
+    private final Deque<PDMarkedContent> currentMarkedContents = new ArrayDeque<PDMarkedContent>();
     private final Map<String, List<TextPosition>> characterListMapping = new HashMap<>();
 
     /**

@@ -16,44 +16,6 @@
  */
 package org.sejda.sambox.rendering;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.GraphicsConfiguration;
-import java.awt.GraphicsDevice;
-import java.awt.Paint;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.Shape;
-import java.awt.TexturePaint;
-import java.awt.Transparency;
-import java.awt.color.ColorSpace;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Area;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.PathIterator;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
-import java.awt.image.ComponentColorModel;
-import java.awt.image.DataBuffer;
-import java.awt.image.DataBufferByte;
-import java.awt.image.Raster;
-import java.awt.image.WritableRaster;
-import java.io.IOException;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
-
 import org.sejda.sambox.contentstream.PDFGraphicsStreamEngine;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
@@ -103,6 +65,45 @@ import org.sejda.sambox.util.Matrix;
 import org.sejda.sambox.util.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsDevice;
+import java.awt.Image;
+import java.awt.Paint;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
+import java.awt.Shape;
+import java.awt.TexturePaint;
+import java.awt.Transparency;
+import java.awt.color.ColorSpace;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Area;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.PathIterator;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.ComponentColorModel;
+import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferByte;
+import java.awt.image.Raster;
+import java.awt.image.WritableRaster;
+import java.io.IOException;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
 
 /**
  * Paints a page in a PDF document to a Graphics context. May be subclassed to provide custom rendering.
@@ -381,11 +382,20 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         Area clippingPath = getGraphicsState().getCurrentClippingPath();
         if (clippingPath != lastClip)
         {
-            graphics.setClip(clippingPath);
+            if (clippingPath.getPathIterator(null).isDone())
+            {
+                // PDFBOX-4822: avoid bug with java printing that empty clipping path is ignored by
+                // replacing with empty rectangle, works because this is not an empty path
+                graphics.setClip(new Rectangle());
+            }
+            else
+            {
+                graphics.setClip(clippingPath);
+            }
             if (initialClip != null)
             {
                 // apply the remembered initial clip, but transform it first
-                // TODO see PDFBOX-4583
+                //TODO see PDFBOX-4583
             }
             lastClip = clippingPath;
         }
@@ -440,8 +450,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         }
     }
 
-    @Override
-    protected void showFontGlyph(Matrix textRenderingMatrix, PDFont font, int code, String unicode,
+    @Override protected void showFontGlyph(Matrix textRenderingMatrix, PDFont font, int code,
             Vector displacement) throws IOException
     {
         AffineTransform at = textRenderingMatrix.createAffineTransform();
@@ -518,15 +527,14 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         }
     }
 
-    @Override
-    protected void showType3Glyph(Matrix textRenderingMatrix, PDType3Font font, int code,
-            String unicode, Vector displacement) throws IOException
+    @Override protected void showType3Glyph(Matrix textRenderingMatrix, PDType3Font font, int code,
+            Vector displacement) throws IOException
     {
         PDGraphicsState state = getGraphicsState();
         RenderingMode renderingMode = state.getTextState().getRenderingMode();
         if (!RenderingMode.NEITHER.equals(renderingMode))
         {
-            super.showType3Glyph(textRenderingMatrix, font, code, unicode, displacement);
+            super.showType3Glyph(textRenderingMatrix, font, code, displacement);
         }
     }
 
@@ -1015,8 +1023,12 @@ public class PageDrawer extends PDFGraphicsStreamEngine
     @Override
     public void drawImage(PDImage pdImage) throws IOException
     {
-        if (pdImage instanceof PDImageXObject &&
-                isHiddenOCG(((PDImageXObject) pdImage).getOptionalContent()))
+        if (pdImage instanceof PDImageXObject && isHiddenOCG(
+                ((PDImageXObject) pdImage).getOptionalContent()))
+        {
+            return;
+        }
+        if (!isContentRendered())
         {
             return;
         }
@@ -1141,10 +1153,10 @@ public class PageDrawer extends PDFGraphicsStreamEngine
     {
         graphics.setComposite(getGraphicsState().getNonStrokingJavaComposite());
         setClip();
+        AffineTransform imageTransform = new AffineTransform(at);
         PDSoftMask softMask = getGraphicsState().getSoftMask();
         if (softMask != null)
         {
-            AffineTransform imageTransform = new AffineTransform(at);
             imageTransform.scale(1, -1);
             imageTransform.translate(0, -1);
             Paint awtPaint = new TexturePaint(image,
@@ -1154,10 +1166,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
             awtPaint = applySoftMaskToPaint(awtPaint, softMask);
             graphics.setPaint(awtPaint);
             Rectangle2D unitRect = new Rectangle2D.Float(0, 0, 1, 1);
-            if (isContentRendered())
-            {
-                graphics.fill(at.createTransformedShape(unitRect));
-            }
+            graphics.fill(at.createTransformedShape(unitRect));
         }
         else
         {
@@ -1166,15 +1175,54 @@ public class PageDrawer extends PDFGraphicsStreamEngine
             {
                 image = applyTransferFunction(image, transfer);
             }
-            int width = image.getWidth(null);
-            int height = image.getHeight(null);
-            AffineTransform imageTransform = new AffineTransform(at);
+
+            int width = image.getWidth();
+            int height = image.getHeight();
             imageTransform.scale(1.0 / width, -1.0 / height);
             imageTransform.translate(0, -height);
-            if (isContentRendered())
+
+            // PDFBOX-4516, PDFBOX-4527, PDFBOX-4815:
+            // graphics.drawImage() has terrible quality when scaling down, even when
+            // RenderingHints.VALUE_INTERPOLATION_BICUBIC, VALUE_ALPHA_INTERPOLATION_QUALITY,
+            // VALUE_COLOR_RENDER_QUALITY and VALUE_RENDER_QUALITY are all set.
+            // A workaround is to get a pre-scaled image with Image.getScaledInstance()
+            // and then draw that one. To reduce differences in testing
+            // (partly because the method needs integer parameters), only smaller scalings
+            // will trigger the workaround. Because of the slowness we only do it if the user
+            // expects quality rendering and interpolation.
+            Matrix m = new Matrix(imageTransform);
+            float scaleX = Math.abs(m.getScalingFactorX());
+            float scaleY = Math.abs(m.getScalingFactorY());
+            Image imageToDraw = image;
+
+            if ((scaleX < 0.25f || scaleY < 0.25f) && RenderingHints.VALUE_RENDER_QUALITY.equals(
+                    graphics.getRenderingHint(RenderingHints.KEY_RENDERING))
+                    && RenderingHints.VALUE_INTERPOLATION_BICUBIC.equals(
+                    graphics.getRenderingHint(RenderingHints.KEY_INTERPOLATION)))
             {
-                graphics.drawImage(image, imageTransform, null);
+                // PDFBOX-4516, PDFBOX-4527, PDFBOX-4815:
+                // graphics.drawImage() has terrible quality when scaling down, even when
+                // RenderingHints.VALUE_INTERPOLATION_BICUBIC, VALUE_ALPHA_INTERPOLATION_QUALITY,
+                // VALUE_COLOR_RENDER_QUALITY and VALUE_RENDER_QUALITY are all set.
+                // A workaround is to get a pre-scaled image with Image.getScaledInstance()
+                // and then draw that one. To reduce differences in testing
+                // (partly because the method needs integer parameters), only smaller scalings
+                // will trigger the workaround. Because of the slowness we only do it if the user
+                // expects quality rendering and interpolation.
+                int w = Math.round(image.getWidth() * scaleX);
+                int h = Math.round(image.getHeight() * scaleY);
+                if (w < 1)
+                {
+                    w = 1;
+                }
+                if (h < 1)
+                {
+                    h = 1;
+                }
+                imageToDraw = image.getScaledInstance(w, h, Image.SCALE_SMOOTH);
+                imageTransform.scale(1 / scaleX, 1 / scaleY); // remove the scale
             }
+            graphics.drawImage(imageToDraw, imageTransform, null);
         }
     }
 
@@ -1840,10 +1888,10 @@ public class PageDrawer extends PDFGraphicsStreamEngine
             {
                 if (!visible)
                 {
-                    return true;
+                    return false;
                 }
             }
-            return false;
+            return true;
         }
         if (COSName.ALL_ON.equals(visibilityPolicy))
         {
@@ -1862,10 +1910,10 @@ public class PageDrawer extends PDFGraphicsStreamEngine
             {
                 if (visible)
                 {
-                    return false;
+                    return true;
                 }
             }
-            return true;
+            return false;
         }
         // AnyOn is default
         for (boolean visible : visibles)

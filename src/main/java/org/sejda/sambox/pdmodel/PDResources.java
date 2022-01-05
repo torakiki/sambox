@@ -16,15 +16,6 @@
  */
 package org.sejda.sambox.pdmodel;
 
-import static java.util.Optional.ofNullable;
-
-import java.io.IOException;
-import java.lang.ref.SoftReference;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
@@ -44,6 +35,15 @@ import org.sejda.sambox.pdmodel.graphics.optionalcontent.PDOptionalContentGroup;
 import org.sejda.sambox.pdmodel.graphics.pattern.PDAbstractPattern;
 import org.sejda.sambox.pdmodel.graphics.shading.PDShading;
 import org.sejda.sambox.pdmodel.graphics.state.PDExtendedGraphicsState;
+
+import java.io.IOException;
+import java.lang.ref.SoftReference;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
+import static java.util.Optional.ofNullable;
 
 /**
  * A set of resources available at the page/pages/stream level.
@@ -315,7 +315,7 @@ public final class PDResources implements COSObjectable
         COSDictionary dict = (COSDictionary) get(COSName.PATTERN, name);
         if (dict != null)
         {
-            pattern = PDAbstractPattern.create(dict);
+            pattern = PDAbstractPattern.create(dict, getResourceCache());
         }
 
         if (cache != null)

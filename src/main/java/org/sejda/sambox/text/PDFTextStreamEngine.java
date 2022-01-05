@@ -16,16 +16,22 @@
  */
 package org.sejda.sambox.text;
 
-import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
-
-import java.io.IOException;
-import java.io.InputStream;
-
 import org.apache.fontbox.ttf.TrueTypeFont;
 import org.apache.fontbox.util.BoundingBox;
 import org.sejda.sambox.contentstream.PDFStreamEngine;
 import org.sejda.sambox.contentstream.operator.DrawObject;
-import org.sejda.sambox.contentstream.operator.color.*;
+import org.sejda.sambox.contentstream.operator.color.SetNonStrokingColor;
+import org.sejda.sambox.contentstream.operator.color.SetNonStrokingColorN;
+import org.sejda.sambox.contentstream.operator.color.SetNonStrokingColorSpace;
+import org.sejda.sambox.contentstream.operator.color.SetNonStrokingDeviceCMYKColor;
+import org.sejda.sambox.contentstream.operator.color.SetNonStrokingDeviceGrayColor;
+import org.sejda.sambox.contentstream.operator.color.SetNonStrokingDeviceRGBColor;
+import org.sejda.sambox.contentstream.operator.color.SetStrokingColor;
+import org.sejda.sambox.contentstream.operator.color.SetStrokingColorN;
+import org.sejda.sambox.contentstream.operator.color.SetStrokingColorSpace;
+import org.sejda.sambox.contentstream.operator.color.SetStrokingDeviceCMYKColor;
+import org.sejda.sambox.contentstream.operator.color.SetStrokingDeviceGrayColor;
+import org.sejda.sambox.contentstream.operator.color.SetStrokingDeviceRGBColor;
 import org.sejda.sambox.contentstream.operator.state.Concatenate;
 import org.sejda.sambox.contentstream.operator.state.Restore;
 import org.sejda.sambox.contentstream.operator.state.Save;
@@ -65,6 +71,11 @@ import org.sejda.sambox.util.Matrix;
 import org.sejda.sambox.util.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.InputStream;
+
+import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
 
 /**
  * PDFStreamEngine subclass for advanced processing of text via TextPosition.
@@ -162,8 +173,8 @@ public class PDFTextStreamEngine extends PDFStreamEngine
      * This method was originally written by Ben Litchfield for PDFStreamEngine.
      */
     @Override
-    protected void showGlyph(Matrix textRenderingMatrix, PDFont font, int code, String unicode,
-            Vector displacement) throws IOException
+    protected void showGlyph(Matrix textRenderingMatrix, PDFont font, int code, Vector displacement)
+            throws IOException
     {
         //
         // legacy calculations which were previously in PDFStreamEngine
@@ -302,7 +313,7 @@ public class PDFTextStreamEngine extends PDFStreamEngine
         float spaceWidthDisplay = spaceWidthText * textRenderingMatrix.getScalingFactorX();
 
         // use our additional glyph list for Unicode mapping
-        unicode = font.toUnicode(code, glyphList);
+        String unicode = font.toUnicode(code, glyphList);
 
         // when there is no Unicode mapping available, Acrobat simply coerces the character code
         // into Unicode, so we do the same. Subclasses of PDFStreamEngine don't necessarily want

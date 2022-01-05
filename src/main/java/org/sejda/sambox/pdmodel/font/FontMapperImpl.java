@@ -51,7 +51,9 @@ final class FontMapperImpl implements FontMapper
     private Map<String, FontInfo> fontInfoByName;
     private final TrueTypeFont lastResortFont;
 
-    /** Map of PostScript name substitutes, in priority order. */
+    /**
+     * Map of PostScript name substitutes, in priority order.
+     */
     private final Map<String, List<String>> substitutes = new HashMap<>();
 
     FontMapperImpl()
@@ -59,22 +61,29 @@ final class FontMapperImpl implements FontMapper
         // substitutes for standard 14 fonts
         substitutes.put("Courier",
                 Arrays.asList("CourierNew", "CourierNewPSMT", "LiberationMono", "NimbusMonL-Regu"));
-        substitutes.put("Courier-Bold", Arrays.asList("CourierNewPS-BoldMT", "CourierNew-Bold",
-                "LiberationMono-Bold", "NimbusMonL-Bold"));
-        substitutes.put("Courier-Oblique", Arrays.asList("CourierNewPS-ItalicMT",
-                "CourierNew-Italic", "LiberationMono-Italic", "NimbusMonL-ReguObli"));
-        substitutes.put("Courier-BoldOblique", Arrays.asList("CourierNewPS-BoldItalicMT",
-                "CourierNew-BoldItalic", "LiberationMono-BoldItalic", "NimbusMonL-BoldObli"));
+        substitutes.put("Courier-Bold",
+                Arrays.asList("CourierNewPS-BoldMT", "CourierNew-Bold", "LiberationMono-Bold",
+                        "NimbusMonL-Bold"));
+        substitutes.put("Courier-Oblique",
+                Arrays.asList("CourierNewPS-ItalicMT", "CourierNew-Italic", "LiberationMono-Italic",
+                        "NimbusMonL-ReguObli"));
+        substitutes.put("Courier-BoldOblique",
+                Arrays.asList("CourierNewPS-BoldItalicMT", "CourierNew-BoldItalic",
+                        "LiberationMono-BoldItalic", "NimbusMonL-BoldObli"));
         substitutes.put("Helvetica",
                 Arrays.asList("ArialMT", "Arial", "LiberationSans", "NimbusSanL-Regu"));
-        substitutes.put("Helvetica-Bold", Arrays.asList("Arial-BoldMT", "Arial-Bold",
-                "LiberationSans-Bold", "NimbusSanL-Bold"));
-        substitutes.put("Helvetica-Oblique", Arrays.asList("Arial-ItalicMT", "Arial-Italic",
-                "Helvetica-Italic", "LiberationSans-Italic", "NimbusSanL-ReguItal"));
-        substitutes.put("Helvetica-BoldOblique", Arrays.asList("Arial-BoldItalicMT",
-                "Helvetica-BoldItalic", "LiberationSans-BoldItalic", "NimbusSanL-BoldItal"));
-        substitutes.put("Times-Roman", Arrays.asList("TimesNewRomanPSMT", "TimesNewRoman",
-                "TimesNewRomanPS", "LiberationSerif", "NimbusRomNo9L-Regu"));
+        substitutes.put("Helvetica-Bold",
+                Arrays.asList("Arial-BoldMT", "Arial-Bold", "LiberationSans-Bold",
+                        "NimbusSanL-Bold"));
+        substitutes.put("Helvetica-Oblique",
+                Arrays.asList("Arial-ItalicMT", "Arial-Italic", "Helvetica-Italic",
+                        "LiberationSans-Italic", "NimbusSanL-ReguItal"));
+        substitutes.put("Helvetica-BoldOblique",
+                Arrays.asList("Arial-BoldItalicMT", "Helvetica-BoldItalic",
+                        "LiberationSans-BoldItalic", "NimbusSanL-BoldItal"));
+        substitutes.put("Times-Roman",
+                Arrays.asList("TimesNewRomanPSMT", "TimesNewRoman", "TimesNewRomanPS",
+                        "LiberationSerif", "NimbusRomNo9L-Regu"));
         substitutes.put("Times-Bold",
                 Arrays.asList("TimesNewRomanPS-BoldMT", "TimesNewRomanPS-Bold",
                         "TimesNewRoman-Bold", "LiberationSerif-Bold", "NimbusRomNo9L-Medi"));
@@ -116,7 +125,8 @@ final class FontMapperImpl implements FontMapper
         }
     }
 
-    public TrueTypeFont getLastResortFont() {
+    public TrueTypeFont getLastResortFont()
+    {
         return lastResortFont;
     }
 
@@ -124,11 +134,15 @@ final class FontMapperImpl implements FontMapper
     private static class DefaultFontProvider
     {
         private static final FontProvider INSTANCE = initializeFontProvider();
-        
-        private static FontProvider initializeFontProvider() {
-            if("noop".equalsIgnoreCase(System.getProperty(SAMBox.FONT_PROVIDER_PROPERTY))) {
+
+        private static FontProvider initializeFontProvider()
+        {
+            if ("noop".equalsIgnoreCase(System.getProperty(SAMBox.FONT_PROVIDER_PROPERTY)))
+            {
                 return new NoopFontProvider();
-            } else {
+            }
+            else
+            {
                 return new FileSystemFontProvider(fontCache);
             }
         }
@@ -156,7 +170,8 @@ final class FontMapperImpl implements FontMapper
     }
 
     /**
-     * Returns the font cache associated with this FontMapper. This method is needed by FontProvider subclasses.
+     * Returns the font cache associated with this FontMapper. This method is needed by FontProvider
+     * subclasses.
      */
     public FontCache getFontCache()
     {
@@ -203,7 +218,7 @@ final class FontMapperImpl implements FontMapper
     /**
      * Adds a top-priority substitute for the given font.
      *
-     * @param match PostScript name of the font to match
+     * @param match   PostScript name of the font to match
      * @param replace PostScript name of the font to use as a replacement
      */
     public void addSubstitute(String match, String replace)
@@ -242,8 +257,8 @@ final class FontMapperImpl implements FontMapper
             if (name != null)
             {
                 String lower = fontDescriptor.getFontName().toLowerCase();
-                isBold = lower.contains("bold") || lower.contains("black")
-                        || lower.contains("heavy");
+                isBold = lower.contains("bold") || lower.contains("black") || lower.contains(
+                        "heavy");
             }
 
             // font descriptor flags should describe the style
@@ -313,8 +328,7 @@ final class FontMapperImpl implements FontMapper
      *
      * @param fontDescriptor FontDescriptor
      */
-    @Override
-    public FontMapping<TrueTypeFont> getTrueTypeFont(String baseFont,
+    @Override public FontMapping<TrueTypeFont> getTrueTypeFont(String baseFont,
             PDFontDescriptor fontDescriptor)
     {
         TrueTypeFont ttf = (TrueTypeFont) findFont(FontFormat.TTF, baseFont);
@@ -334,13 +348,13 @@ final class FontMapperImpl implements FontMapper
     }
 
     /**
-     * Finds a font with the given PostScript name, or a suitable substitute, or null. This allows any font to be
-     * substituted with a PFB, TTF or OTF.
+     * Finds a font with the given PostScript name, or a suitable substitute, or null. This allows
+     * any font to be substituted with a PFB, TTF or OTF.
      *
      * @param fontDescriptor the FontDescriptor of the font to find
      */
-    @Override
-    public FontMapping<FontBoxFont> getFontBoxFont(String baseFont, PDFontDescriptor fontDescriptor)
+    @Override public FontMapping<FontBoxFont> getFontBoxFont(String baseFont,
+            PDFontDescriptor fontDescriptor)
     {
         FontBoxFont font = findFontBoxFont(baseFont);
         if (font != null)
@@ -468,14 +482,13 @@ final class FontMapperImpl implements FontMapper
     }
 
     /**
-     * Finds a CFF CID-Keyed font with the given PostScript name, or a suitable substitute, or null. This method can
-     * also map CJK fonts via their CIDSystemInfo (ROS).
-     * 
+     * Finds a CFF CID-Keyed font with the given PostScript name, or a suitable substitute, or null.
+     * This method can also map CJK fonts via their CIDSystemInfo (ROS).
+     *
      * @param fontDescriptor FontDescriptor
-     * @param cidSystemInfo the CID system info, e.g. "Adobe-Japan1", if any.
+     * @param cidSystemInfo  the CID system info, e.g. "Adobe-Japan1", if any.
      */
-    @Override
-    public CIDFontMapping getCIDFont(String baseFont, PDFontDescriptor fontDescriptor,
+    @Override public CIDFontMapping getCIDFont(String baseFont, PDFontDescriptor fontDescriptor,
             PDCIDSystemInfo cidSystemInfo)
     {
         // try name match or substitute with OTF
@@ -526,11 +539,11 @@ final class FontMapperImpl implements FontMapper
     }
 
     /**
-     * Returns a list of matching fonts, scored by suitability. Positive scores indicate matches for certain attributes,
-     * while negative scores indicate mismatches. Zero scores are neutral.
-     * 
+     * Returns a list of matching fonts, scored by suitability. Positive scores indicate matches for
+     * certain attributes, while negative scores indicate mismatches. Zero scores are neutral.
+     *
      * @param fontDescriptor FontDescriptor, always present.
-     * @param cidSystemInfo Font's CIDSystemInfo, may be null.
+     * @param cidSystemInfo  Font's CIDSystemInfo, may be null.
      */
     private PriorityQueue<FontMatch> getFontMatches(PDFontDescriptor fontDescriptor,
             PDCIDSystemInfo cidSystemInfo)
@@ -553,8 +566,8 @@ final class FontMapperImpl implements FontMapper
                 PDPanoseClassification panose = fontDescriptor.getPanose().getPanose();
                 if (panose.getFamilyKind() == info.getPanose().getFamilyKind())
                 {
-                    if (panose.getFamilyKind() == 0
-                            && (info.getPostScriptName().toLowerCase().contains("barcode")
+                    if (panose.getFamilyKind() == 0 && (
+                            info.getPostScriptName().toLowerCase().contains("barcode")
                                     || info.getPostScriptName().startsWith("Code"))
                             && !probablyBarcodeFont(fontDescriptor))
                     {
@@ -629,13 +642,13 @@ final class FontMapperImpl implements FontMapper
     {
         String ff = ofNullable(fontDescriptor.getFontFamily()).orElse("");
         String fn = ofNullable(fontDescriptor.getFontName()).orElse("");
-        return ff.startsWith("Code") || ff.toLowerCase().contains("barcode")
-                || fn.startsWith("Code") || fn.toLowerCase().contains("barcode");
+        return ff.startsWith("Code") || ff.toLowerCase().contains("barcode") || fn.startsWith(
+                "Code") || fn.toLowerCase().contains("barcode");
     }
 
     /**
-     * Returns true if the character set described by CIDSystemInfo is present in the given font. Only applies to
-     * Adobe-GB1, Adobe-CNS1, Adobe-Japan1, Adobe-Korea1, as per the PDF spec.
+     * Returns true if the character set described by CIDSystemInfo is present in the given font.
+     * Only applies to Adobe-GB1, Adobe-CNS1, Adobe-Japan1, Adobe-Korea1, as per the PDF spec.
      */
     private boolean isCharSetMatch(PDCIDSystemInfo cidSystemInfo, FontInfo info)
     {
@@ -652,6 +665,11 @@ final class FontMapperImpl implements FontMapper
         long CHINESE_TRADITIONAL = 1 << 20;
         long KOREAN_JOHAB = 1 << 21;
 
+        if ("MalgunGothic-Semilight".equals(info.getPostScriptName()))
+        {
+            // PDFBOX-4793 and PDF.js 10699: This font has only Korean, but has bits 17-21 set.
+            codePageRange &= ~(JIS_JAPAN | CHINESE_SIMPLIFIED | CHINESE_TRADITIONAL);
+        }
         if (cidSystemInfo.getOrdering().equals("GB1")
                 && (codePageRange & CHINESE_SIMPLIFIED) == CHINESE_SIMPLIFIED)
         {
@@ -669,9 +687,9 @@ final class FontMapperImpl implements FontMapper
         }
         else
         {
-            return cidSystemInfo.getOrdering().equals("Korea1")
-                    && (codePageRange & KOREAN_WANSUNG) == KOREAN_WANSUNG
-                    || (codePageRange & KOREAN_JOHAB) == KOREAN_JOHAB;
+            return cidSystemInfo.getOrdering().equals("Korea1") && (
+                    (codePageRange & KOREAN_WANSUNG) == KOREAN_WANSUNG
+                            || (codePageRange & KOREAN_JOHAB) == KOREAN_JOHAB);
         }
     }
 
@@ -688,8 +706,7 @@ final class FontMapperImpl implements FontMapper
             this.info = info;
         }
 
-        @Override
-        public int compareTo(FontMatch match)
+        @Override public int compareTo(FontMatch match)
         {
             return Double.compare(match.score, this.score);
         }

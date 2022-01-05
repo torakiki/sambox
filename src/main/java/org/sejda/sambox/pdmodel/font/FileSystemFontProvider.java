@@ -16,22 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.font;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.security.AccessControlException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.apache.fontbox.FontBoxFont;
 import org.apache.fontbox.cff.CFFCIDFont;
 import org.apache.fontbox.cff.CFFFont;
@@ -47,6 +31,22 @@ import org.apache.fontbox.util.autodetect.FontFileFinder;
 import org.sejda.commons.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.security.AccessControlException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * A FontProvider which searches for fonts on the local filesystem.
@@ -225,7 +225,20 @@ final class FileSystemFontProvider extends FontProvider
         {
             try
             {
-                // todo JH: we don't yet support loading CFF fonts from OTC collections
+                if (file.getName().toLowerCase().endsWith(".ttc"))
+                {
+                    @SuppressWarnings("squid:S2095")
+                    // ttc not closed here because it is needed later when ttf is accessed,
+                    // e.g. rendering PDF with non-embedded font which is in ttc file in our font directory
+                    TrueTypeCollection ttc = new TrueTypeCollection(file);
+                    TrueTypeFont ttf = ttc.getFontByName(postScriptName);
+                    if (ttf == null)
+                    {
+                        ttc.close();
+                        throw new IOException("Font " + postScriptName + " not found in " + file);
+                    }
+                    return (OpenTypeFont) ttf;
+                }
                 OTFParser parser = new OTFParser(false, true);
                 OpenTypeFont otf = parser.parse(file);
                 LOG.debug("Loaded {} from {}", postScriptName, file);

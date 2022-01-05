@@ -16,15 +16,16 @@
  */
 package org.sejda.sambox.pdmodel.graphics.pattern;
 
-import java.awt.geom.AffineTransform;
-import java.io.IOException;
-
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSFloat;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSObjectable;
+import org.sejda.sambox.pdmodel.ResourceCache;
 import org.sejda.sambox.util.Matrix;
+
+import java.awt.geom.AffineTransform;
+import java.io.IOException;
 
 /**
  * A Pattern dictionary from a page's resources.
@@ -34,29 +35,46 @@ public abstract class PDAbstractPattern implements COSObjectable
     /** Tiling pattern type. */
     public static final int TYPE_TILING_PATTERN = 1;
 
-    /** Shading pattern type. */
+    /**
+     * Shading pattern type.
+     */
     public static final int TYPE_SHADING_PATTERN = 2;
 
     /**
      * Create the correct PD Model pattern based on the COS base pattern.
+     *
      * @param resourceDictionary the COS pattern dictionary
      * @return the newly created pattern resources object
      * @throws IOException If we are unable to create the PDPattern object.
      */
     public static PDAbstractPattern create(COSDictionary resourceDictionary) throws IOException
     {
+        return create(resourceDictionary, null);
+    }
+
+    /**
+     * Create the correct PD Model pattern based on the COS base pattern.
+     *
+     * @param resourceDictionary the COS pattern dictionary
+     * @param resourceCache      the resource cache, may be null, useful for tiling patterns.
+     * @return the newly created pattern object
+     * @throws IOException If we are unable to create the PDPattern object.
+     */
+    public static PDAbstractPattern create(COSDictionary resourceDictionary,
+            ResourceCache resourceCache) throws IOException
+    {
         PDAbstractPattern pattern;
         int patternType = resourceDictionary.getInt(COSName.PATTERN_TYPE, 0);
         switch (patternType)
         {
-            case TYPE_TILING_PATTERN:
-                pattern = new PDTilingPattern(resourceDictionary);
-                break;
-            case TYPE_SHADING_PATTERN:
-                pattern = new PDShadingPattern(resourceDictionary);
-                break;
-            default:
-                throw new IOException("Error: Unknown pattern type " + patternType);
+        case TYPE_TILING_PATTERN:
+            pattern = new PDTilingPattern(resourceDictionary, resourceCache);
+            break;
+        case TYPE_SHADING_PATTERN:
+            pattern = new PDShadingPattern(resourceDictionary);
+            break;
+        default:
+            throw new IOException("Error: Unknown pattern type " + patternType);
         }
         return pattern;
     }

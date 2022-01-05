@@ -69,9 +69,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Processes a PDF content stream and executes certain operations. Provides a callback interface for clients that want
- * to do things with the stream.
- * 
+ * Processes a PDF content stream and executes certain operations. Provides a callback interface for
+ * clients that want to do things with the stream.
+ *
  * @author Ben Litchfield
  */
 public abstract class PDFStreamEngine
@@ -112,7 +112,8 @@ public abstract class PDFStreamEngine
     }
 
     /**
-     * Adds an operator processor to the engine if there isn't an operator already associated with the PDF operator.
+     * Adds an operator processor to the engine if there isn't an operator already associated with
+     * the PDF operator.
      *
      * @param op operator processor
      * @return true if the operator is added, false if not (there's already an operator associated)
@@ -194,7 +195,7 @@ public abstract class PDFStreamEngine
 
     /**
      * Processes a soft mask transparency group stream.
-     * 
+     *
      * @param group
      * @throws IOException
      */
@@ -209,7 +210,7 @@ public abstract class PDFStreamEngine
 
     /**
      * Processes a transparency group stream.
-     * 
+     *
      * @param group
      * @throws IOException
      */
@@ -254,7 +255,7 @@ public abstract class PDFStreamEngine
     /**
      * Processes a Type 3 character stream.
      *
-     * @param charProc Type 3 character procedure
+     * @param charProc            Type 3 character procedure
      * @param textRenderingMatrix the Text Rendering Matrix
      */
     protected void processType3Stream(PDType3CharProc charProc, Matrix textRenderingMatrix)
@@ -310,7 +311,8 @@ public abstract class PDFStreamEngine
         Matrix matrix = appearance.getMatrix();
 
         // zero-sized rectangles are not valid
-        if (rect != null && rect.getWidth() > 0 && rect.getHeight() > 0 && bbox != null)
+        if (rect != null && rect.getWidth() > 0 && rect.getHeight() > 0 && bbox != null
+                && bbox.getWidth() > 0 && bbox.getHeight() > 0)
         {
             // transformed appearance box fixme: may be an arbitrary shape
             Rectangle2D transformedBox = bbox.transform(matrix).getBounds2D();
@@ -349,8 +351,8 @@ public abstract class PDFStreamEngine
      * Process the given tiling pattern.
      *
      * @param tilingPattern the tiling pattern
-     * @param color color to use, if this is an uncoloured pattern, otherwise null.
-     * @param colorSpace color space to use, if this is an uncoloured pattern, otherwise null.
+     * @param color         color to use, if this is an uncoloured pattern, otherwise null.
+     * @param colorSpace    color space to use, if this is an uncoloured pattern, otherwise null.
      */
     protected final void processTilingPattern(PDTilingPattern tilingPattern, PDColor color,
             PDColorSpace colorSpace) throws IOException
@@ -359,11 +361,12 @@ public abstract class PDFStreamEngine
     }
 
     /**
-     * Process the given tiling pattern. Allows the pattern matrix to be overridden for custom rendering.
+     * Process the given tiling pattern. Allows the pattern matrix to be overridden for custom
+     * rendering.
      *
      * @param tilingPattern the tiling pattern
-     * @param color color to use, if this is an uncoloured pattern, otherwise null.
-     * @param colorSpace color space to use, if this is an uncoloured pattern, otherwise null.
+     * @param color         color to use, if this is an uncoloured pattern, otherwise null.
+     * @param colorSpace    color space to use, if this is an uncoloured pattern, otherwise null.
      * @param patternMatrix the pattern matrix, may be overridden for custom rendering.
      */
     protected final void processTilingPattern(PDTilingPattern tilingPattern, PDColor color,
@@ -422,8 +425,8 @@ public abstract class PDFStreamEngine
     }
 
     /**
-     * Returns the appearance stream to process for the given annotation. May be used to render a specific appearance
-     * such as "hover".
+     * Returns the appearance stream to process for the given annotation. May be used to render a
+     * specific appearance such as "hover".
      *
      * @param annotation The current annotation.
      * @return The stream to process.
@@ -541,21 +544,22 @@ public abstract class PDFStreamEngine
     }
 
     /**
-     * Transforms the given rectangle using the CTM and then intersects it with the current clipping area.
+     * Transforms the given rectangle using the CTM and then intersects it with the current clipping
+     * area.
      */
     private void clipToRect(PDRectangle rectangle)
     {
         if (rectangle != null)
         {
-            GeneralPath clip = rectangle
-                    .transform(getGraphicsState().getCurrentTransformationMatrix());
+            GeneralPath clip = rectangle.transform(
+                    getGraphicsState().getCurrentTransformationMatrix());
             getGraphicsState().intersectClippingPath(clip);
         }
     }
 
     /**
-     * Called when the BT operator is encountered. This method is for overriding in subclasses, the default
-     * implementation does nothing.
+     * Called when the BT operator is encountered. This method is for overriding in subclasses, the
+     * default implementation does nothing.
      *
      * @throws IOException if there was an error processing the text
      */
@@ -565,8 +569,8 @@ public abstract class PDFStreamEngine
     }
 
     /**
-     * Called when the ET operator is encountered. This method is for overriding in subclasses, the default
-     * implementation does nothing.
+     * Called when the ET operator is encountered. This method is for overriding in subclasses, the
+     * default implementation does nothing.
      *
      * @throws IOException if there was an error processing the text
      */
@@ -646,8 +650,8 @@ public abstract class PDFStreamEngine
     }
 
     /**
-     * Process text from the PDF Stream. You should override this method if you want to perform an action when encoded
-     * text is being processed.
+     * Process text from the PDF Stream. You should override this method if you want to perform an
+     * action when encoded text is being processed.
      *
      * @param string the encoded text
      * @throws IOException if there is an error processing the string
@@ -682,7 +686,6 @@ public abstract class PDFStreamEngine
             int before = in.available();
             int code = font.readCode(in);
             int codeLength = before - in.available();
-            String unicode = font.toUnicode(code);
 
             // Word spacing shall be applied to every occurrence of the single-byte character code
             // 32 in a string when using a simple font or a composite font that defines code 32 as
@@ -715,7 +718,7 @@ public abstract class PDFStreamEngine
             saveGraphicsState();
             Matrix textMatrixOld = textMatrix;
             Matrix textLineMatrixOld = textLineMatrix;
-            showGlyph(textRenderingMatrix, font, code, unicode, w);
+            showGlyph(textRenderingMatrix, font, code, w);
             textMatrix = textMatrixOld;
             textLineMatrix = textLineMatrixOld;
             restoreGraphicsState();
@@ -739,59 +742,58 @@ public abstract class PDFStreamEngine
     }
 
     /**
-     * Called when a glyph is to be processed.This method is intended for overriding in subclasses, the default
+     * Called when a glyph is to be processed. This method is intended for overriding in subclasses,
+     * Called when a glyph is to be processed. This method is intended for overriding in subclasses, the default
+     * the default implementation does nothing.
      * implementation does nothing.
      *
      * @param textRenderingMatrix the current text rendering matrix, T<sub>rm</sub>
      * @param font the current font
      * @param code internal PDF character code for the glyph
-     * @param unicode the Unicode text for this glyph, or null if the PDF does provide it
      * @param displacement the displacement (i.e. advance) of the glyph in text space
      * @throws IOException if the glyph cannot be processed
      */
-    protected void showGlyph(Matrix textRenderingMatrix, PDFont font, int code, String unicode,
-            Vector displacement) throws IOException
+    protected void showGlyph(Matrix textRenderingMatrix, PDFont font, int code, Vector displacement)
+            throws IOException
     {
         if (font instanceof PDType3Font)
         {
-            showType3Glyph(textRenderingMatrix, (PDType3Font) font, code, unicode, displacement);
+            showType3Glyph(textRenderingMatrix, (PDType3Font) font, code,  displacement);
         }
         else
         {
-            showFontGlyph(textRenderingMatrix, font, code, unicode, displacement);
+            showFontGlyph(textRenderingMatrix, font, code,  displacement);
         }
     }
 
     /**
-     * Called when a glyph is to be processed.This method is intended for overriding in subclasses, the default
-     * implementation does nothing.
+     * Called when a glyph is to be processed.This method is intended for overriding in subclasses,
+     * the default implementation does nothing.
      *
      * @param textRenderingMatrix the current text rendering matrix, T<sub>rm</sub>
-     * @param font the current font
-     * @param code internal PDF character code for the glyph
-     * @param unicode the Unicode text for this glyph, or null if the PDF does provide it
-     * @param displacement the displacement (i.e. advance) of the glyph in text space
+     * @param font                the current font
+     * @param code                internal PDF character code for the glyph
+     * @param displacement        the displacement (i.e. advance) of the glyph in text space
      * @throws IOException if the glyph cannot be processed
      */
-    protected void showFontGlyph(Matrix textRenderingMatrix, PDFont font, int code, String unicode,
+    protected void showFontGlyph(Matrix textRenderingMatrix, PDFont font, int code,
             Vector displacement) throws IOException
     {
         // overridden in subclasses
     }
 
     /**
-     * Called when a glyph is to be processed.This method is intended for overriding in subclasses, the default
-     * implementation does nothing.
+     * Called when a glyph is to be processed.This method is intended for overriding in subclasses,
+     * the default implementation does nothing.
      *
      * @param textRenderingMatrix the current text rendering matrix, T<sub>rm</sub>
-     * @param font the current font
-     * @param code internal PDF character code for the glyph
-     * @param unicode the Unicode text for this glyph, or null if the PDF does provide it
-     * @param displacement the displacement (i.e. advance) of the glyph in text space
+     * @param font                the current font
+     * @param code                internal PDF character code for the glyph
+     * @param displacement        the displacement (i.e. advance) of the glyph in text space
      * @throws IOException if the glyph cannot be processed
      */
     protected void showType3Glyph(Matrix textRenderingMatrix, PDType3Font font, int code,
-            String unicode, Vector displacement) throws IOException
+            Vector displacement) throws IOException
     {
         PDType3CharProc charProc = font.getCharProc(code);
         if (charProc != null)
@@ -803,7 +805,7 @@ public abstract class PDFStreamEngine
     /**
      * Called when a marked content group begins
      *
-     * @param tag content tag
+     * @param tag        content tag
      * @param properties optional properties
      */
     public void beginMarkedContentSequence(COSName tag, COSDictionary properties)
@@ -821,7 +823,7 @@ public abstract class PDFStreamEngine
 
     /**
      * This is used to handle an operation.
-     * 
+     *
      * @param operation The operation to perform.
      * @param arguments The list of arguments.
      * @throws IOException If there is an error processing the operation.
@@ -834,7 +836,7 @@ public abstract class PDFStreamEngine
 
     /**
      * This is used to handle an operation.
-     * 
+     *
      * @param operator The operation to perform.
      * @param operands The list of arguments.
      * @throws IOException If there is an error processing the operation.
@@ -1001,7 +1003,8 @@ public abstract class PDFStreamEngine
     }
 
     /**
-     * @return the stream' resources. This is mainly to be used by the {@link OperatorProcessor} classes
+     * @return the stream' resources. This is mainly to be used by the {@link OperatorProcessor}
+     * classes
      */
     public PDResources getResources()
     {
@@ -1047,8 +1050,8 @@ public abstract class PDFStreamEngine
     }
 
     /**
-     * Get the current level. This can be used to decide whether a recursion has done too deep and an operation should
-     * be skipped to avoid a stack overflow.
+     * Get the current level. This can be used to decide whether a recursion has done too deep and
+     * an operation should be skipped to avoid a stack overflow.
      *
      * @return the current level.
      */
@@ -1066,9 +1069,9 @@ public abstract class PDFStreamEngine
     }
 
     /**
-     * Decrease the level. Call this after running a potentially recursive operation. A log message is shown if the
-     * level is below 0. This can happen if the level is not decreased after an operation is done, e.g. by using a
-     * "finally" block.
+     * Decrease the level. Call this after running a potentially recursive operation. A log message
+     * is shown if the level is below 0. This can happen if the level is not decreased after an
+     * operation is done, e.g. by using a "finally" block.
      */
     public void decreaseLevel()
     {

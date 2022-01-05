@@ -16,37 +16,37 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
+import org.sejda.sambox.cos.COSDictionary;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-
-import org.sejda.sambox.cos.COSDictionary;
+import java.util.Set;
 
 /**
- * A pushbutton is a purely interactive control that responds immediately to user
- * input without retaining a permanent value.
+ * A pushbutton is a purely interactive control that responds immediately to user input without
+ * retaining a permanent value.
  *
  * @author sug
  */
 public class PDPushButton extends PDButton
 {
     /**
-     * @see PDField#PDField(PDAcroForm)
-     *
      * @param acroForm The acroform.
+     * @see PDField#PDField(PDAcroForm)
      */
     public PDPushButton(PDAcroForm acroForm)
     {
         super(acroForm);
         setPushButton(true);
     }
-    
+
     /**
      * Constructor.
-     * 
+     *
      * @param acroForm The form that this field is part of.
-     * @param field the PDF object to represent as a field.
-     * @param parent the parent node of the node
+     * @param field    the PDF object to represent as a field.
+     * @param parent   the parent node of the node
      */
     PDPushButton(PDAcroForm acroForm, COSDictionary field, PDNonTerminalField parent)
     {
@@ -58,13 +58,14 @@ public class PDPushButton extends PDButton
     {
         return Collections.emptyList();
     }
-    
+
     @Override
     public void setExportValues(List<String> values)
     {
         if (values != null && !values.isEmpty())
         {
-            throw new IllegalArgumentException("A PDPushButton shall not use the Opt entry in the field dictionary");
+            throw new IllegalArgumentException(
+                    "A PDPushButton shall not use the Opt entry in the field dictionary");
         }
     }
 
@@ -84,6 +85,12 @@ public class PDPushButton extends PDButton
     public String getValueAsString()
     {
         return getValue();
+    }
+
+    @Override
+    public Set<String> getOnValues()
+    {
+        return Collections.emptySet();
     }
 
     @Override

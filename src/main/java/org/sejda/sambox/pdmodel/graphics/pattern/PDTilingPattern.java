@@ -16,38 +16,47 @@
  */
 package org.sejda.sambox.pdmodel.graphics.pattern;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import org.sejda.sambox.contentstream.PDContentStream;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.pdmodel.PDResources;
+import org.sejda.sambox.pdmodel.ResourceCache;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.common.PDStream;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 /**
  * A tiling pattern dictionary.
- *
  */
 public class PDTilingPattern extends PDAbstractPattern implements PDContentStream
 {
     /** paint type 1 = colored tiling pattern. */
     public static final int PAINT_COLORED = 1;
 
-    /** paint type 2 = uncolored tiling pattern. */
+    /**
+     * paint type 2 = uncolored tiling pattern.
+     */
     public static final int PAINT_UNCOLORED = 2;
 
-    /** tiling type 1 = constant spacing. */
+    /**
+     * tiling type 1 = constant spacing.
+     */
     public static final int TILING_CONSTANT_SPACING = 1;
 
-    /** tiling type 2 = no distortion. */
+    /**
+     * tiling type 2 = no distortion.
+     */
     public static final int TILING_NO_DISTORTION = 2;
 
-    /** tiling type 3 = constant spacing and faster tiling. */
+    /**
+     * tiling type 3 = constant spacing and faster tiling.
+     */
     public static final int TILING_CONSTANT_SPACING_FASTER_TILING = 3;
+    private final ResourceCache resourceCache;
 
     /**
      * Creates a new tiling pattern.
@@ -56,16 +65,31 @@ public class PDTilingPattern extends PDAbstractPattern implements PDContentStrea
     {
         super();
         getCOSObject().setInt(COSName.PATTERN_TYPE, PDAbstractPattern.TYPE_TILING_PATTERN);
+        // Resources required per PDF specification; when missing, pattern is not displayed in Adobe Reader
+        setResources(new PDResources());
+        resourceCache = null;
     }
 
     /**
      * Creates a new tiling pattern from the given COS dictionary.
-     * 
+     *
      * @param resourceDictionary The COSDictionary for this pattern resource.
      */
     public PDTilingPattern(COSDictionary resourceDictionary)
     {
-        super(resourceDictionary);
+        this(resourceDictionary, null);
+    }
+
+    /**
+     * Creates a new tiling pattern from the given COS dictionary.
+     *
+     * @param dictionary    The COSDictionary for this pattern.
+     * @param resourceCache The resource cache, may be null
+     */
+    public PDTilingPattern(COSDictionary dictionary, ResourceCache resourceCache)
+    {
+        super(dictionary);
+        this.resourceCache = resourceCache;
     }
 
     @Override
@@ -76,7 +100,7 @@ public class PDTilingPattern extends PDAbstractPattern implements PDContentStrea
 
     /**
      * This will set the paint type.
-     * 
+     *
      * @param paintType The new paint type.
      */
     @Override

@@ -16,13 +16,13 @@
  */
 package org.sejda.sambox.pdmodel;
 
-import java.util.Calendar;
-import java.util.Set;
-import java.util.TreeSet;
-
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.common.PDDictionaryWrapper;
+
+import java.util.Calendar;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * This is the document metadata.  Each getXXX method will return the entry if
@@ -294,8 +294,8 @@ public class PDDocumentInformation extends PDDictionaryWrapper
             !value.equals( "False" ) &&
             !value.equals( "Unknown" ) )
         {
-            throw new RuntimeException( "Valid values for trapped are " +
-                                        "'True', 'False', or 'Unknown'" );
+            throw new IllegalArgumentException(
+                    "Valid values for trapped are " + "'True', 'False', or 'Unknown'");
         }
 
         getCOSObject().setName(COSName.TRAPPED, value);
