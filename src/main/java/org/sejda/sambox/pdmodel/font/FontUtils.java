@@ -16,11 +16,11 @@
  */
 package org.sejda.sambox.pdmodel.font;
 
-import java.io.IOException;
-import java.util.Map;
-
 import org.apache.fontbox.ttf.OS2WindowsMetricsTable;
 import org.apache.fontbox.ttf.TrueTypeFont;
+
+import java.io.IOException;
+import java.util.Map;
 
 /**
  * @author Andrea Vacondio
@@ -42,16 +42,15 @@ public final class FontUtils
         if (ttf.getOS2Windows() != null)
         {
             int fsType = ttf.getOS2Windows().getFsType();
-            int exclusive = fsType & 0x8; // bits 0-3 are a set of exclusive bits
 
-            if ((exclusive
-                    & OS2WindowsMetricsTable.FSTYPE_RESTRICTED) == OS2WindowsMetricsTable.FSTYPE_RESTRICTED)
+            if ((fsType & OS2WindowsMetricsTable.FSTYPE_RESTRICTED)
+                    == OS2WindowsMetricsTable.FSTYPE_RESTRICTED)
             {
                 // restricted License embedding
                 return false;
             }
-            else if ((exclusive
-                    & OS2WindowsMetricsTable.FSTYPE_BITMAP_ONLY) == OS2WindowsMetricsTable.FSTYPE_BITMAP_ONLY)
+            else if ((fsType & OS2WindowsMetricsTable.FSTYPE_BITMAP_ONLY)
+                    == OS2WindowsMetricsTable.FSTYPE_BITMAP_ONLY)
             {
                 // bitmap embedding only
                 return false;

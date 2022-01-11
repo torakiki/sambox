@@ -16,19 +16,17 @@
  */
 package org.sejda.sambox.pdmodel.common;
 
+import junit.framework.TestCase;
+import org.junit.Assert;
+import org.sejda.sambox.cos.COSArrayList;
+import org.sejda.sambox.cos.COSInteger;
+import org.sejda.sambox.cos.COSObjectable;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-
-import org.junit.Assert;
-import org.sejda.sambox.cos.COSArrayList;
-import org.sejda.sambox.cos.COSBase;
-import org.sejda.sambox.cos.COSInteger;
-import org.sejda.sambox.cos.COSObjectable;
-
-import junit.framework.TestCase;
 
 /**
  * A test case for PDNumberTreeNode. Based on TestPDNameTreeNode.
@@ -59,7 +57,7 @@ public class TestPDNumberTreeNode extends TestCase
         }
 
         @Override
-        public COSBase getCOSObject()
+        public COSInteger getCOSObject()
         {
             return COSInteger.get(value);
         }

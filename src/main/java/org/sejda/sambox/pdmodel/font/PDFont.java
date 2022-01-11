@@ -16,17 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.font;
 
-import static java.util.Objects.nonNull;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.fontbox.afm.FontMetrics;
 import org.apache.fontbox.cmap.CMap;
 import org.sejda.commons.FastByteArrayOutputStream;
@@ -44,6 +33,17 @@ import org.sejda.sambox.util.Matrix;
 import org.sejda.sambox.util.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static java.util.Objects.nonNull;
 
 /**
  * This is the base class for all PDF fonts.
@@ -438,7 +438,7 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
         {
             float totalWidth = 0.0f;
             float characterCount = 0.0f;
-            COSArray widths = (COSArray) dict.getDictionaryObject(COSName.WIDTHS);
+            COSArray widths = dict.getDictionaryObject(COSName.WIDTHS, COSArray.class);
             if (widths != null)
             {
                 for (int i = 0; i < widths.size(); i++)
@@ -544,7 +544,7 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
     {
         if (widths == null)
         {
-            COSArray array = (COSArray) dict.getDictionaryObject(COSName.WIDTHS);
+            COSArray array = dict.getDictionaryObject(COSName.WIDTHS, COSArray.class);
             if (array != null)
             {
                 widths = COSArrayList.convertFloatCOSArrayToList(array);

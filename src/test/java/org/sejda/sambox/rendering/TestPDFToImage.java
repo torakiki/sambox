@@ -16,8 +16,18 @@
  */
 package org.sejda.sambox.rendering;
 
-import static org.junit.Assert.fail;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.sejda.commons.util.IOUtils;
+import org.sejda.io.SeekableSources;
+import org.sejda.sambox.ParallelParameterized;
+import org.sejda.sambox.input.PDFParser;
+import org.sejda.sambox.pdmodel.PDDocument;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.imageio.ImageIO;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
@@ -29,18 +39,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.imageio.ImageIO;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.sejda.commons.util.IOUtils;
-import org.sejda.io.SeekableSources;
-import org.sejda.sambox.ParallelParameterized;
-import org.sejda.sambox.input.PDFParser;
-import org.sejda.sambox.pdmodel.PDDocument;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.junit.Assert.fail;
 
 /**
  * Test suite for rendering.
@@ -343,6 +342,7 @@ public class TestPDFToImage
                         LOG.info("*** TEST OK *** for file: " + inFile.getName());
                         LOG.info("Deleting: " + outFile.getName());
                         outFile.delete();
+                        outFile.deleteOnExit();
                     }
                 }
                 else
@@ -350,6 +350,7 @@ public class TestPDFToImage
                     LOG.info("*** TEST OK *** for file: " + inFile.getName());
                     LOG.info("Deleting: " + outFile.getName());
                     outFile.delete();
+                    outFile.deleteOnExit();
                 }
             }
         }

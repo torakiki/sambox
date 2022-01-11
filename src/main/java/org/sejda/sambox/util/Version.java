@@ -17,11 +17,14 @@
 
 package org.sejda.sambox.util;
 
+import org.sejda.sambox.SAMBox;
+
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-import org.sejda.sambox.SAMBox;
+import static java.util.Objects.nonNull;
 
 /**
  * Exposes SAMBox version.
@@ -41,10 +44,10 @@ public final class Version
     {
         try (InputStream stream = Version.class.getResourceAsStream(SAMBox.SAMBOX_PROPERTIES))
         {
-            if (stream != null)
+            if (nonNull(stream))
             {
                 Properties properties = new Properties();
-                properties.load(stream);
+                properties.load(new BufferedInputStream(stream));
                 return properties.getProperty("sambox.version", "");
             }
         }

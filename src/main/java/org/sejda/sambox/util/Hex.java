@@ -17,6 +17,10 @@
 
 package org.sejda.sambox.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -27,18 +31,20 @@ import java.io.OutputStream;
  */
 public final class Hex
 {
+    private static final Logger LOG = LoggerFactory.getLogger(Hex.class);
     /**
      * for hex conversion.
-     * 
+     * <p>
      * https://stackoverflow.com/questions/2817752/java-code-to-convert-byte-to-hexadecimal
-     *
      */
     private static final byte[] HEX_BYTES = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A',
             'B', 'C', 'D', 'E', 'F' };
     private static final char[] HEX_CHARS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A',
             'B', 'C', 'D', 'E', 'F' };
 
-    private Hex() {}
+    private Hex()
+    {
+    }
 
     /**
      * Returns a hex string of the given byte.
@@ -98,11 +104,11 @@ public final class Hex
     }
 
     /**
-     * Takes the characters in the given string, convert it to bytes in UTF16-BE format and build a char array that
-     * corresponds to the ASCII hex encoding of the resulting bytes.
-     *
+     * Takes the characters in the given string, convert it to bytes in UTF16-BE format and build a
+     * char array that corresponds to the ASCII hex encoding of the resulting bytes.
+     * <p>
      * Example:
-     * 
+     *
      * <pre>
      * getCharsUTF16BE("ab") == new char[] { '0', '0', '6', '1', '0', '0', '6', '2' }
      * </pre>
@@ -130,8 +136,8 @@ public final class Hex
 
     /**
      * Writes the given byte as hex value to the given output stream.
-     * 
-     * @param b the byte to be written
+     *
+     * @param b      the byte to be written
      * @param output the output stream to be written to
      * @throws IOException exception if anything went wrong
      */
@@ -143,8 +149,8 @@ public final class Hex
 
     /**
      * Writes the given byte array as hex value to the given output stream.
-     * 
-     * @param bytes the byte array to be written
+     *
+     * @param bytes  the byte array to be written
      * @param output the output stream to be written to
      * @throws IOException exception if anything went wrong
      */
@@ -158,7 +164,7 @@ public final class Hex
 
     /**
      * Get the high nibble of the given byte.
-     * 
+     *
      * @param b the given byte
      * @return the high nibble
      */
@@ -169,12 +175,48 @@ public final class Hex
 
     /**
      * Get the low nibble of the given byte.
-     * 
+     *
      * @param b the given byte
      * @return the low nibble
      */
     private static int getLowNibble(byte b)
     {
         return b & 0x0F;
+    }
+
+    /**
+     * Decodes a hex String into a byte array.
+     *
+     * @param s A String with ASCII hex.
+     * @return decoded byte array.
+     * @throws IOException
+     */
+    public static byte[] decodeHex(String s) throws IOException
+    {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        int i = 0;
+        while (i < s.length() - 1)
+        {
+            if (s.charAt(i) == '\n' || s.charAt(i) == '\r')
+            {
+                ++i;
+            }
+            else
+            {
+                String hexByte = s.substring(i, i + 2);
+                try
+                {
+                    baos.write(
+                            Integer.parseInt(hexByte, 16)); // Byte.parseByte won't work with "9C"
+                }
+                catch (NumberFormatException ex)
+                {
+                    LOG.error("Can't parse " + hexByte + ", aborting decode", ex);
+                    break;
+                }
+                i += 2;
+            }
+        }
+        return baos.toByteArray();
     }
 }

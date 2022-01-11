@@ -16,11 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.common.function;
 
-import java.io.IOException;
-
-import javax.imageio.stream.ImageInputStream;
-import javax.imageio.stream.MemoryCacheImageInputStream;
-
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSInteger;
@@ -28,6 +23,11 @@ import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.common.PDRange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.imageio.stream.ImageInputStream;
+import javax.imageio.stream.MemoryCacheImageInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * This class represents a type 0 function in a PDF document.
@@ -391,17 +391,20 @@ public class PDFunctionType0 extends PDFunction
                     // PDF spec 1.7 p.171:
                     // Each sample value is represented as a sequence of BitsPerSample bits. 
                     // Successive values are adjacent in the bit stream; there is no padding at byte boundaries.
-                    ImageInputStream mciis = new MemoryCacheImageInputStream(getPDStream().createInputStream());
-                    for (int i = 0; i < arraySize; i++)
+                    try (InputStream inputStream = getPDStream().createInputStream())
                     {
-                        for (int k = 0; k < nOut; k++)
+                        ImageInputStream mciis = new MemoryCacheImageInputStream(inputStream);
+                        for (int i = 0; i < arraySize; i++)
                         {
-                            // TODO will this cast work properly for 32 bitsPerSample or should we use long[]?
-                            samples[index][k] = (int) mciis.readBits(bitsPerSample);
+                            for (int k = 0; k < nOut; k++)
+                            {
+                                // TODO will this cast work properly for 32 bitsPerSample or should we use long[]?
+                                samples[index][k] = (int) mciis.readBits(bitsPerSample);
+                            }
+                            index++;
                         }
-                        index++;
+                        mciis.close();
                     }
-                    mciis.close();
                 }
                 catch (IOException exception)
                 {

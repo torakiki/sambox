@@ -17,20 +17,6 @@
 
 package org.sejda.sambox.pdmodel.font;
 
-import static org.sejda.sambox.pdmodel.font.FontUtils.getTag;
-import static org.sejda.sambox.pdmodel.font.FontUtils.isEmbeddingPermitted;
-import static org.sejda.sambox.pdmodel.font.FontUtils.isSubsettingPermitted;
-
-import java.awt.geom.GeneralPath;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.fontbox.ttf.CmapLookup;
 import org.apache.fontbox.ttf.CmapSubtable;
 import org.apache.fontbox.ttf.HeaderTable;
@@ -45,6 +31,22 @@ import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.common.PDStream;
+
+import java.awt.geom.GeneralPath;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import static java.util.Objects.nonNull;
+import static org.sejda.commons.util.RequireUtils.requireIOCondition;
+import static org.sejda.sambox.pdmodel.font.FontUtils.getTag;
+import static org.sejda.sambox.pdmodel.font.FontUtils.isEmbeddingPermitted;
+import static org.sejda.sambox.pdmodel.font.FontUtils.isSubsettingPermitted;
 /**
  * Common functionality for embedding TrueType fonts.
  *
@@ -82,7 +84,26 @@ abstract class TrueTypeEmbedder implements Subsetter
         if (!embedSubset)
         {
             // full embedding
-            PDStream stream = new PDStream(ttf.getOriginalData(), COSName.FLATE_DECODE);
+
+            // TrueType collections are not supported
+            InputStream is = ttf.getOriginalData();
+            byte[] b = new byte[4];
+            is.mark(b.length);
+            if (is.read(b) == b.length && new String(b).equals("ttcf"))
+            {
+                is.close();
+                throw new IOException("Full embedding of TrueType font collections not supported");
+            }
+            if (is.markSupported())
+            {
+                is.reset();
+            }
+            else
+            {
+                is.close();
+                is = ttf.getOriginalData();
+            }
+            PDStream stream = new PDStream(is, COSName.FLATE_DECODE);
             stream.getCOSObject().setLong(COSName.LENGTH1, ttf.getOriginalDataSize());
             fontDescriptor.setFontFile2(stream);
         }
@@ -131,7 +152,9 @@ abstract class TrueTypeEmbedder implements Subsetter
         fd.setFontName(ttf.getName());
 
         OS2WindowsMetricsTable os2 = ttf.getOS2Windows();
+        requireIOCondition(nonNull(os2), "os2 table is missing in font " + ttf.getName());
         PostScriptTable post = ttf.getPostScript();
+        requireIOCondition(nonNull(post), "post table is missing in font " + ttf.getName());
 
         // Flags
         fd.setFixedPitch(

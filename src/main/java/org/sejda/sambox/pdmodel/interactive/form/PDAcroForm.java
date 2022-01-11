@@ -16,20 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
-import static java.util.Optional.ofNullable;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
-
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSArrayList;
 import org.sejda.sambox.cos.COSBase;
@@ -52,6 +38,20 @@ import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceStream;
 import org.sejda.sambox.util.Matrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
 
 /**
  * An interactive form, also known as an AcroForm.
@@ -236,9 +236,7 @@ public final class PDAcroForm extends PDDictionaryWrapper
                 {
                     annotations.add(annotation);
                 }
-                else if (!annotation.isInvisible() && !annotation.isHidden()
-                        && nonNull(annotation.getNormalAppearanceStream())
-                        && nonNull(annotation.getNormalAppearanceStream().getBBox()))
+                else if (isVisibleAnnotation(annotation))
                 {
                     contentStream = new PDPageContentStream(document, page, AppendMode.APPEND, true,
                             !isContentStreamWrapped);
@@ -316,9 +314,25 @@ public final class PDAcroForm extends PDDictionaryWrapper
 
     }
 
+    private boolean isVisibleAnnotation(PDAnnotation annotation)
+    {
+        if (annotation.isInvisible() || annotation.isHidden())
+        {
+            return false;
+        }
+        PDAppearanceStream normalAppearanceStream = annotation.getNormalAppearanceStream();
+        if (normalAppearanceStream == null)
+        {
+            return false;
+        }
+        PDRectangle bbox = normalAppearanceStream.getBBox();
+        return bbox != null && bbox.getWidth() > 0 && bbox.getHeight() > 0;
+    }
+
     /**
-     * Refreshes the appearance streams and appearance dictionaries for the widget annotations of all fields.
-     * 
+     * Refreshes the appearance streams and appearance dictionaries for the widget annotations of
+     * all fields.
+     *
      * @throws IOException
      */
     public void refreshAppearances() throws IOException

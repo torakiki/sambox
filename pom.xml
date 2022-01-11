@@ -1048,9 +1048,29 @@
 							<goal>wget</goal>
 						</goals>
 						<configuration>
-							<url>https://issues.apache.org/jira/secure/attachment/12986337/stenotypeTest-3_rotate_no_flatten.pdf</url>
+							<url>
+								https://issues.apache.org/jira/secure/attachment/12986337/stenotypeTest-3_rotate_no_flatten.pdf
+							</url>
 							<outputDirectory>${project.build.directory}/pdfs</outputDirectory>
-							<sha512>a0aa8c2c3c5da83ba6ff45ce9052f492f850cc6d7921f5dc4c8d3d7e58d94c42c45f39713b79256335bb68afb047a3b7ef7a35120f2f22551951009dfc979b22</sha512>
+							<sha512>
+								a0aa8c2c3c5da83ba6ff45ce9052f492f850cc6d7921f5dc4c8d3d7e58d94c42c45f39713b79256335bb68afb047a3b7ef7a35120f2f22551951009dfc979b22
+							</sha512>
+						</configuration>
+					</execution>
+					<execution>
+						<id>PDFBOX-4889</id>
+						<phase>generate-test-resources</phase>
+						<goals>
+							<goal>wget</goal>
+						</goals>
+						<configuration>
+							<url>
+								https://issues.apache.org/jira/secure/attachment/13005793/f1040sb%20test.pdf
+							</url>
+							<outputDirectory>${project.build.directory}/pdfs</outputDirectory>
+							<sha512>
+								696907d9a975cd711870ec1af0351058346472f19dad5445314d6bbb85e87eafa8c3763ad380f17c46670f9844a807e67137102cc99c5bb3593ddfbecba424dc
+							</sha512>
 						</configuration>
 					</execution>
 				</executions>

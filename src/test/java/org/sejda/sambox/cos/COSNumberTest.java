@@ -16,12 +16,12 @@
  */
 package org.sejda.sambox.cos;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import org.junit.Test;
 
 import java.io.IOException;
 
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Andrea Vacondio
@@ -50,6 +50,9 @@ public class COSNumberTest
         // but obviously there some
         assertNotNull(COSNumber.get("-2e-006"));
         assertNotNull(COSNumber.get("-8e+05"));
+        // PDFBOX-2569: some numbers start with "+"
+        assertEquals(COSNumber.get("1"), COSNumber.get("+1"));
+        assertEquals(COSNumber.get("123"), COSNumber.get("+123"));
     }
 
     @Test(expected = IllegalArgumentException.class)

@@ -16,15 +16,15 @@
  */
 package org.sejda.sambox.pdmodel.graphics.optionalcontent;
 
-import static java.util.Objects.isNull;
-
-import java.util.Collection;
-
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.common.PDDictionaryWrapper;
+
+import java.util.Collection;
+
+import static java.util.Objects.isNull;
 
 /**
  * This class represents the optional content properties dictionary.
@@ -220,6 +220,10 @@ public class PDOptionalContentProperties extends PDDictionaryWrapper
     public String[] getGroupNames()
     {
         COSArray ocgs = getCOSObject().getDictionaryObject(COSName.OCGS, COSArray.class);
+        if (ocgs == null)
+        {
+            return new String[0];
+        }
         int size = ocgs.size();
         String[] groups = new String[size];
         for (int i = 0; i < size; i++)

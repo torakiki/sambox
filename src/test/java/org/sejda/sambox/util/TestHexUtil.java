@@ -15,26 +15,31 @@
  */
 package org.sejda.sambox.util;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.apache.fontbox.util.Charsets;
+import org.junit.Test;
+
+import java.io.IOException;
+import java.util.Locale;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 /**
- *
  * @author Michael Doswald
  */
-public class TestHexUtil extends TestCase
+public class TestHexUtil
 {
-    
+
     /**
      * Test conversion from short to char[]
      */
+    @Test
     public void testGetCharsFromShortWithoutPassingInABuffer()
     {
-        assertArrayEquals(new char[]{'0','0','0','0'}, Hex.getChars((short)0x0000));
-        assertArrayEquals(new char[]{'0','0','0','F'}, Hex.getChars((short)0x000F));
-        assertArrayEquals(new char[]{'A','B','C','D'}, Hex.getChars((short)0xABCD));
-        assertArrayEquals(new char[]{'B','A','B','E'}, Hex.getChars((short)0xCAFEBABE));
+        assertArrayEquals(new char[] { '0', '0', '0', '0' }, Hex.getChars((short) 0x0000));
+        assertArrayEquals(new char[] { '0', '0', '0', 'F' }, Hex.getChars((short) 0x000F));
+        assertArrayEquals(new char[] { 'A', 'B', 'C', 'D' }, Hex.getChars((short) 0xABCD));
+        assertArrayEquals(new char[] { 'B', 'A', 'B', 'E' }, Hex.getChars((short) 0xCAFEBABE));
     }
 
     /**
@@ -42,46 +47,44 @@ public class TestHexUtil extends TestCase
      * bytes of the string as hex digits
      *
      */
+    @Test
     public void testGetCharsUTF16BE()
     {
-        assertArrayEquals(new char[]{'0','0','6','1','0','0','6','2'}, Hex.getCharsUTF16BE("ab"));
-        assertArrayEquals(new char[]{'5','E','2','E','5','2','A','9'}, Hex.getCharsUTF16BE("帮助"));
+        assertArrayEquals(new char[] { '0', '0', '6', '1', '0', '0', '6', '2' },
+                Hex.getCharsUTF16BE("ab"));
+        assertArrayEquals(new char[] { '5', 'E', '2', 'E', '5', '2', 'A', '9' },
+                Hex.getCharsUTF16BE("帮助"));
     }
 
-    private void assertArrayEquals(char[] expected, char[] actual)
+    /**
+     * Test getBytes() and getString() and decodeHex()
+     */
+    @Test
+    public void testMisc() throws IOException
     {
-        assertEquals("Length of char array not equal", expected.length, actual.length);
-        for (int idx = 0; idx < expected.length; idx++)
+        byte[] byteSrcArray = new byte[256];
+        for (int i = 0; i < 256; ++i)
         {
-            if (expected[idx] != actual[idx])
-            {
-                fail(String.format("Character at index %d not equal. Expected '%c' but got '%c'", 
-                        idx, expected[idx], actual[idx]));
-            }
+            byteSrcArray[i] = (byte) i;
+
+            byte[] bytes = Hex.getBytes((byte) i);
+            assertEquals(2, bytes.length);
+            String s2 = String.format(Locale.US, "%02X", i);
+            assertArrayEquals(s2.getBytes(Charsets.US_ASCII), bytes);
+            s2 = Hex.getString((byte) i);
+            assertArrayEquals(s2.getBytes(Charsets.US_ASCII), bytes);
+
+            assertArrayEquals(new byte[] { (byte) i }, Hex.decodeHex(s2));
         }
+        byte[] byteDstArray = Hex.getBytes(byteSrcArray);
+        assertEquals(byteDstArray.length, byteSrcArray.length * 2);
+
+        String dstString = Hex.getString(byteSrcArray);
+        assertEquals(dstString.length(), byteSrcArray.length * 2);
+
+        assertArrayEquals(dstString.getBytes(Charsets.US_ASCII), byteDstArray);
+
+        assertArrayEquals(byteSrcArray, Hex.decodeHex(dstString));
     }
 
-    /**
-     * Set the tests in the suite for this test class.
-     *
-     * @return the Suite.
-     */
-    public static Test suite()
-    {
-        return new TestSuite(TestHexUtil.class);
-    }
-
-    /**
-     * Command line execution.
-     *
-     * @param args Command line arguments.
-     */
-    public static void main(String[] args)
-    {
-        String[] arg =
-        {
-            TestHexUtil.class.getName()
-        };
-        junit.textui.TestRunner.main(arg);
-    }
 }

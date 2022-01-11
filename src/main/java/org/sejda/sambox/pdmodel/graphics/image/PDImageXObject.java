@@ -16,25 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.graphics.image;
 
-import static java.util.Objects.nonNull;
-import static java.util.Optional.ofNullable;
-import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
-
-import java.awt.Graphics2D;
-import java.awt.Paint;
-import java.awt.RenderingHints;
-import java.awt.image.BufferedImage;
-import java.awt.image.WritableRaster;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.lang.ref.SoftReference;
-import java.nio.ByteBuffer;
-import java.util.List;
-
-import javax.imageio.ImageIO;
-
 import org.sejda.commons.util.IOUtils;
 import org.sejda.io.SeekableSource;
 import org.sejda.io.SeekableSources;
@@ -57,6 +38,24 @@ import org.sejda.sambox.util.filetypedetector.FileType;
 import org.sejda.sambox.util.filetypedetector.FileTypeDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.imageio.ImageIO;
+import java.awt.Graphics2D;
+import java.awt.Paint;
+import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
+import java.awt.image.WritableRaster;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.ref.SoftReference;
+import java.nio.ByteBuffer;
+import java.util.List;
+
+import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
+import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
 
 /**
  * An Image XObject.
@@ -273,9 +272,15 @@ public final class PDImageXObject extends PDXObject implements PDImage {
             // PDFBOX-4267: process /Matte
             // convert to RGB
             PDColorSpace colorSpace = getColorSpace();
-            if (colorSpace instanceof PDJPXColorSpace) {
+            if (colorSpace instanceof PDJPXColorSpace)
+            {
                 // #125 JPX color spaces don't support drawing
                 colorSpace = PDDeviceRGB.INSTANCE;
+            }
+            if (matte.length < colorSpace.getNumberOfComponents())
+            {
+                LOG.error("Image /Matte entry not long enough for colorspace, skipped");
+                return null;
             }
             return colorSpace.toRGB(matte);
         }

@@ -16,8 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.common.function;
 
-import java.io.IOException;
-
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
@@ -26,6 +24,8 @@ import org.sejda.sambox.cos.COSObjectable;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.pdmodel.common.PDRange;
 import org.sejda.sambox.pdmodel.common.PDStream;
+
+import java.io.IOException;
 
 /**
  * This class represents a function in a PDF document.
@@ -254,7 +254,7 @@ public abstract class PDFunction implements COSObjectable
     {
         if (range == null)
         {
-            range = (COSArray) getCOSObject().getDictionaryObject(COSName.RANGE);
+            range = getCOSObject().getDictionaryObject(COSName.RANGE, COSArray.class);
         }
         return range;
     }
@@ -268,7 +268,7 @@ public abstract class PDFunction implements COSObjectable
     {
         if (domain == null)
         {
-            domain = (COSArray) getCOSObject().getDictionaryObject(COSName.DOMAIN);
+            domain = getCOSObject().getDictionaryObject(COSName.DOMAIN, COSArray.class);
         }
         return domain;
     }
@@ -283,7 +283,7 @@ public abstract class PDFunction implements COSObjectable
     {
         COSArray rangesArray = getRangeValues();
         float[] result;
-        if (rangesArray != null)
+        if (rangesArray != null && rangesArray.size() > 0)
         {
             float[] rangeValues = rangesArray.toFloatArray();
             int numberOfRanges = rangeValues.length / 2;

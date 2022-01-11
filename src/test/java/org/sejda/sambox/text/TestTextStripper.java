@@ -16,6 +16,26 @@
  */
 package org.sejda.sambox.text;
 
+import difflib.ChangeDelta;
+import difflib.DeleteDelta;
+import difflib.DiffUtils;
+import difflib.InsertDelta;
+import difflib.Patch;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.fontbox.util.BoundingBox;
+import org.junit.Before;
+import org.junit.Test;
+import org.sejda.io.SeekableSources;
+import org.sejda.sambox.input.PDFParser;
+import org.sejda.sambox.pdmodel.PDDocument;
+import org.sejda.sambox.pdmodel.font.PDFont;
+import org.sejda.sambox.pdmodel.font.PDFontDescriptor;
+import org.sejda.sambox.pdmodel.font.PDType3Font;
+import org.sejda.sambox.pdmodel.interactive.documentnavigation.destination.PDPageDestination;
+import org.sejda.sambox.pdmodel.interactive.documentnavigation.outline.PDDocumentOutline;
+import org.sejda.sambox.pdmodel.interactive.documentnavigation.outline.PDOutlineItem;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -29,27 +49,16 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.Writer;
+import java.net.URISyntaxException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.sejda.io.SeekableSources;
-import org.sejda.sambox.input.PDFParser;
-import org.sejda.sambox.pdmodel.PDDocument;
-import org.sejda.sambox.pdmodel.interactive.documentnavigation.destination.PDPageDestination;
-import org.sejda.sambox.pdmodel.interactive.documentnavigation.outline.PDDocumentOutline;
-import org.sejda.sambox.pdmodel.interactive.documentnavigation.outline.PDOutlineItem;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import difflib.ChangeDelta;
-import difflib.DeleteDelta;
-import difflib.DiffUtils;
-import difflib.InsertDelta;
-import difflib.Patch;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Test suite for PDFTextStripper.
@@ -67,7 +76,7 @@ import junit.framework.TestSuite;
  * So for the file "src/test/resources/input/hello.pdf", an output file will be generated named
  * "target/test-output/hello.pdf.txt". Then that file will be compared to the known good file
  * "src/test/resources/input/hello.pdf.txt", if it exists.
- * 
+ *
  * To support testing with files that are not officially distributed with PDFBox, this test will also look in the
  * "target/test-input-ext" directory.
  *
@@ -87,47 +96,34 @@ import junit.framework.TestSuite;
  * @author Robert Dickinson
  * @author Ben Litchfield
  */
-public class TestTextStripper extends TestCase
+public class TestTextStripper
 {
-
-    private static final Logger LOG = LoggerFactory.getLogger(TestTextStripper.class);
+    /**
+     * Logger instance.
+     */
+    private static final Log log = LogFactory.getLog(TestTextStripper.class);
 
     private boolean bFail = false;
     private PDFTextStripper stripper = null;
     private static final String ENCODING = "UTF-8";
 
     /**
-     * Test class constructor.
-     *
-     * @param name The name of the test class.
-     *
-     * @throws IOException If there is an error creating the test.
-     */
-    public TestTextStripper(String name) throws IOException
-    {
-        super(name);
-        stripper = new PDFTextStripper();
-    }
-
-    /**
      * Test suite setup.
      */
-    @Override
-    public void setUp()
+    @Before
+    public void setUp() throws IOException
     {
-        // If you want to test a single file using DEBUG logging, from an IDE,
-        // you can do something like this:
-        //
-        // System.setProperty("org.sejda.samboxutil.TextStripper.file", "FVS318Ref.pdf");
+        stripper = new PDFTextStripper();
+        stripper.setLineSeparator("\n");
     }
 
     /**
      * Determine whether two strings are equal, where two null strings are considered equal.
      *
      * @param expected Expected string
-     * @param actual Actual String
-     * @return <code>true</code> is the strings are both null, or if their contents are the same, otherwise
-     * <code>false</code>.
+     * @param actual   Actual String
+     * @return <code>true</code> is the strings are both null,
+     * or if their contents are the same, otherwise <code>false</code>.
      */
     private boolean stringsEqual(String expected, String actual)
     {
@@ -149,7 +145,7 @@ public class TestTextStripper extends TestCase
                 if (expectedArray[expectedIndex] != actualArray[actualIndex])
                 {
                     equals = false;
-                    LOG.warn("Lines differ at index" + " expected:" + expectedIndex + "-"
+                    log.warn("Lines differ at index" + " expected:" + expectedIndex + "-"
                             + (int) expectedArray[expectedIndex] + " actual:" + actualIndex + "-"
                             + (int) actualArray[actualIndex]);
                     break;
@@ -164,17 +160,18 @@ public class TestTextStripper extends TestCase
                 if (expectedIndex != expectedArray.length)
                 {
                     equals = false;
-                    LOG.warn("Expected line is longer at:" + expectedIndex);
+                    log.warn("Expected line is longer at:" + expectedIndex);
                 }
                 if (actualIndex != actualArray.length)
                 {
                     equals = false;
-                    LOG.warn("Actual line is longer at:" + actualIndex);
+                    log.warn("Actual line is longer at:" + actualIndex);
                 }
                 if (expectedArray.length != actualArray.length)
                 {
                     equals = false;
-                    LOG.warn("Expected lines: " + expectedArray.length + ", actual lines: " + actualArray.length);
+                    log.warn("Expected lines: " + expectedArray.length + ", actual lines: "
+                            + actualArray.length);
                 }
             }
         }
@@ -191,9 +188,9 @@ public class TestTextStripper extends TestCase
      */
     private int skipWhitespace(char[] array, int index)
     {
-        // if we are at a space character then skip all space
-        // characters, but when all done rollback 1 because stringsEqual
-        // will roll forward 1
+        //if we are at a space character then skip all space
+        //characters, but when all done rollback 1 because stringsEqual
+        //will roll forward 1
         if (array[index] == ' ' || array[index] > 256)
         {
             while (index < array.length && (array[index] == ' ' || array[index] > 256))
@@ -219,11 +216,11 @@ public class TestTextStripper extends TestCase
     {
         if (bSort)
         {
-            LOG.info("Preparing to parse " + inFile.getName() + " for sorted test");
+            log.info("Preparing to parse " + inFile.getName() + " for sorted test");
         }
         else
         {
-            LOG.info("Preparing to parse " + inFile.getName() + " for standard test");
+            log.info("Preparing to parse " + inFile.getName() + " for standard test");
         }
 
         if (!outDir.exists())
@@ -234,8 +231,7 @@ public class TestTextStripper extends TestCase
             }
         }
 
-        // System.out.println(" " + inFile + (bSort ? " (sorted)" : ""));
-        try (PDDocument document = PDFParser.parse(SeekableSources.seekableSourceFrom(inFile)))
+        try (PDDocument document = PDDocument.load(inFile))
         {
             File outFile;
             File diffFile;
@@ -257,153 +253,142 @@ public class TestTextStripper extends TestCase
             // delete possible leftover
             diffFile.delete();
 
-            OutputStream os = new FileOutputStream(outFile);
-            try
+            try (OutputStream os = new FileOutputStream(outFile))
             {
                 os.write(0xEF);
                 os.write(0xBB);
                 os.write(0xBF);
 
-                Writer writer = new BufferedWriter(new OutputStreamWriter(os, ENCODING));
-                try
+                try (Writer writer = new BufferedWriter(new OutputStreamWriter(os, ENCODING)))
                 {
-                    // Allows for sorted tests
+                    //Allows for sorted tests
                     stripper.setSortByPosition(bSort);
                     stripper.writeText(document, writer);
                 }
-                finally
-                {
-                    // close the written file before reading it again
-                    writer.close();
-                }
-            }
-            finally
-            {
-                os.close();
             }
 
             if (bLogResult)
             {
-                LOG.info("Text for " + inFile.getName() + ":");
-                LOG.info(stripper.getText(document));
+                log.info("Text for " + inFile.getName() + ":");
+                log.info(stripper.getText(document));
             }
 
             if (!expectedFile.exists())
             {
                 this.bFail = true;
-                LOG.error("FAILURE: Input verification file: " + expectedFile.getAbsolutePath()
+                log.error("FAILURE: Input verification file: " + expectedFile.getAbsolutePath()
                         + " did not exist");
                 return;
             }
 
-            boolean localFail = false;
+            compareResult(expectedFile, outFile, inFile, bSort, diffFile);
+        }
+    }
 
-            LineNumberReader expectedReader = new LineNumberReader(
-                    new InputStreamReader(new FileInputStream(expectedFile), ENCODING));
-            LineNumberReader actualReader = new LineNumberReader(
-                    new InputStreamReader(new FileInputStream(outFile), ENCODING));
+    private void compareResult(File expectedFile, File outFile, File inFile, boolean bSort,
+            File diffFile) throws IOException
+    {
+        boolean localFail = false;
 
-            while (true)
+        LineNumberReader expectedReader = new LineNumberReader(
+                new InputStreamReader(new FileInputStream(expectedFile), ENCODING));
+        LineNumberReader actualReader = new LineNumberReader(
+                new InputStreamReader(new FileInputStream(outFile), ENCODING));
+
+        while (true)
+        {
+            String expectedLine = expectedReader.readLine();
+            while (expectedLine != null && expectedLine.trim().length() == 0)
             {
-                String expectedLine = expectedReader.readLine();
-                while (expectedLine != null && expectedLine.trim().length() == 0)
-                {
-                    expectedLine = expectedReader.readLine();
-                }
-                String actualLine = actualReader.readLine();
-                while (actualLine != null && actualLine.trim().length() == 0)
-                {
-                    actualLine = actualReader.readLine();
-                }
-                if (!stringsEqual(expectedLine, actualLine))
-                {
+                expectedLine = expectedReader.readLine();
+            }
+            String actualLine = actualReader.readLine();
+            while (actualLine != null && actualLine.trim().length() == 0)
+            {
+                actualLine = actualReader.readLine();
+            }
+            if (!stringsEqual(expectedLine, actualLine))
+            {
+                this.bFail = true;
+                localFail = true;
+                log.error(
+                        "FAILURE: Line mismatch for file " + inFile.getName() + " (sort = " + bSort
+                                + ")" + " at expected line: " + expectedReader.getLineNumber()
+                                + " at actual line: " + actualReader.getLineNumber()
+                                + "\nexpected line was: \"" + expectedLine + "\""
+                                + "\nactual line was:   \"" + actualLine + "\"" + "\n");
 
-                    this.bFail = true;
-                    localFail = true;
-                    LOG.error("FAILURE: Line mismatch for file " + inFile.getName() + " (sort = "
-                            + bSort + ")" + " at expected line: " + expectedReader.getLineNumber()
-                            + " at actual line: " + actualReader.getLineNumber()
-                            + "\nexpected line was: \"" + expectedLine + "\" \"" + asUnicodes(expectedLine) + "\""
-                            + "\nactual line was:   \"" + actualLine + "\" \"" + asUnicodes(actualLine) + "\" \n");
+                //lets report all lines, even though this might produce some verbose logging
+                //break;
+            }
 
-                    // lets report all lines, even though this might produce some verbose logging
-                    // break;
-                    throw new RuntimeException();
-                }
+            if (expectedLine == null || actualLine == null)
+            {
+                break;
+            }
+        }
+        expectedReader.close();
+        actualReader.close();
+        if (!localFail)
+        {
+            outFile.delete();
+        }
+        else
+        {
+            // https://code.google.com/p/java-diff-utils/wiki/SampleUsage
+            List<String> original = fileToLines(expectedFile);
+            List<String> revised = fileToLines(outFile);
 
-                if (expectedLine == null || actualLine == null)
+            // Compute diff. Get the Patch object. Patch is the container for computed deltas.
+            Patch patch = DiffUtils.diff(original, revised);
+
+            PrintStream diffPS = new PrintStream(diffFile, ENCODING);
+            for (Object delta : patch.getDeltas())
+            {
+                if (delta instanceof ChangeDelta)
                 {
-                    break;
+                    ChangeDelta cdelta = (ChangeDelta) delta;
+                    diffPS.println("Org: " + cdelta.getOriginal());
+                    diffPS.println("New: " + cdelta.getRevised());
+                    diffPS.println();
+                }
+                else if (delta instanceof DeleteDelta)
+                {
+                    DeleteDelta ddelta = (DeleteDelta) delta;
+                    diffPS.println("Org: " + ddelta.getOriginal());
+                    diffPS.println("New: " + ddelta.getRevised());
+                    diffPS.println();
+                }
+                else if (delta instanceof InsertDelta)
+                {
+                    InsertDelta idelta = (InsertDelta) delta;
+                    diffPS.println("Org: " + idelta.getOriginal());
+                    diffPS.println("New: " + idelta.getRevised());
+                    diffPS.println();
+                }
+                else
+                {
+                    diffPS.println(delta);
                 }
             }
-            expectedReader.close();
-            actualReader.close();
-            if (!localFail)
-            {
-                outFile.delete();
-            }
-            else
-            {
-                // https://code.google.com/p/java-diff-utils/wiki/SampleUsage
-                List<String> original = fileToLines(expectedFile);
-                List<String> revised = fileToLines(outFile);
-
-                // Compute diff. Get the Patch object. Patch is the container for computed deltas.
-                Patch patch = DiffUtils.diff(original, revised);
-
-                PrintStream diffPS = new PrintStream(diffFile, ENCODING);
-                for (Object delta : patch.getDeltas())
-                {
-                    if (delta instanceof ChangeDelta)
-                    {
-                        ChangeDelta cdelta = (ChangeDelta) delta;
-                        diffPS.println("Org: " + cdelta.getOriginal());
-                        diffPS.println("New: " + cdelta.getRevised());
-                        diffPS.println();
-                    }
-                    else if (delta instanceof DeleteDelta)
-                    {
-                        DeleteDelta ddelta = (DeleteDelta) delta;
-                        diffPS.println("Org: " + ddelta.getOriginal());
-                        diffPS.println("New: " + ddelta.getRevised());
-                        diffPS.println();
-                    }
-                    else if (delta instanceof InsertDelta)
-                    {
-                        InsertDelta idelta = (InsertDelta) delta;
-                        diffPS.println("Org: " + idelta.getOriginal());
-                        diffPS.println("New: " + idelta.getRevised());
-                        diffPS.println();
-                    }
-                    else
-                    {
-                        diffPS.println(delta);
-                    }
-                }
-                diffPS.close();
-            }
+            diffPS.close();
         }
     }
 
     // Helper method for get the file content
-    private static List<String> fileToLines(File file)
+    private static List<String> fileToLines(File file) throws IOException
     {
         List<String> lines = new LinkedList<String>();
-        String line = "";
-        try
+        String line;
+
+        BufferedReader in = new BufferedReader(
+                new InputStreamReader(new FileInputStream(file), ENCODING));
+        while ((line = in.readLine()) != null)
         {
-            BufferedReader in = new BufferedReader(
-                    new InputStreamReader(new FileInputStream(file), ENCODING));
-            while ((line = in.readLine()) != null)
-            {
-                lines.add(line);
-            }
-            in.close();
+            lines.add(line);
         }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
+        in.close();
+
         return lines;
     }
 
@@ -420,98 +405,107 @@ public class TestTextStripper extends TestCase
     }
 
     /**
-     * Test whether stripping controlled by outline items works properly. The test file has 4 outline items at the top
-     * level, that point to 0-based pages 0, 2, 3 and 4. We are testing text stripping by outlines pointing to 0-based
-     * pages 2 and 3, and also text stripping of the 0-based page 2. The test makes sure that the output is different to
-     * a complete strip, not empty, different to each other when different bookmark intervals are used, but identical
-     * from bookmark intervals to strips with page intervals. When fed with orphan bookmarks, stripping must be empty.
+     * Test whether stripping controlled by outline items works properly. The test file has 4
+     * outline items at the top level, that point to 0-based pages 0, 2, 3 and 4. We are testing
+     * text stripping by outlines pointing to 0-based pages 2 and 3, and also text stripping of the
+     * 0-based page 2. The test makes sure that the output is different to a complete strip, not
+     * empty, different to each other when different bookmark intervals are used, but identical from
+     * bookmark intervals to strips with page intervals. When fed with orphan bookmarks, stripping
+     * must be empty.
      *
      * @throws IOException
+     * @throws URISyntaxException
      */
-    public void testStripByOutlineItems() throws IOException
+    @Test
+    public void testStripByOutlineItems() throws IOException, URISyntaxException
     {
-        PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
-                getClass().getResourceAsStream("/org/sejda/sambox/pdmodel/with_outline.pdf")));
-        PDDocumentOutline outline = doc.getDocumentCatalog().getDocumentOutline();
-        Iterable<PDOutlineItem> children = outline.children();
-        Iterator<PDOutlineItem> it = children.iterator();
-        PDOutlineItem oi0 = it.next();
-        PDOutlineItem oi2 = it.next();
-        PDOutlineItem oi3 = it.next();
-        PDOutlineItem oi4 = it.next();
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                TestTextStripper.class.getResourceAsStream(
+                        "/org/sejda/sambox/pdmodel/with_outline.pdf"))))
+        {
+            PDDocumentOutline outline = doc.getDocumentCatalog().getDocumentOutline();
+            Iterable<PDOutlineItem> children = outline.children();
+            Iterator<PDOutlineItem> it = children.iterator();
+            PDOutlineItem oi0 = it.next();
+            PDOutlineItem oi2 = it.next();
+            PDOutlineItem oi3 = it.next();
+            PDOutlineItem oi4 = it.next();
 
-        assertEquals(0, findOutlineItemDestPageNum(doc, oi0));
-        assertEquals(2, findOutlineItemDestPageNum(doc, oi2));
-        assertEquals(3, findOutlineItemDestPageNum(doc, oi3));
-        assertEquals(4, findOutlineItemDestPageNum(doc, oi4));
+            assertEquals(0, findOutlineItemDestPageNum(doc, oi0));
+            assertEquals(2, findOutlineItemDestPageNum(doc, oi2));
+            assertEquals(3, findOutlineItemDestPageNum(doc, oi3));
+            assertEquals(4, findOutlineItemDestPageNum(doc, oi4));
 
-        String textFull = stripper.getText(doc);
-        assertFalse(textFull.isEmpty());
+            String textFull = stripper.getText(doc);
+            assertFalse(textFull.isEmpty());
 
-        String expectedTextFull = "First level 1\n" + "First level 2\n" + "Fist level 3\n"
-                + "Some content\n" + "Some other content\n" + "Second at level 1\n"
-                + "Second level 2\n" + "Content\n" + "Third level 1\n" + "Third level 2\n"
-                + "Third level 3\n" + "Content\n" + "Fourth level 1\n" + "Content\n" + "Content\n";
-        assertEquals(expectedTextFull, textFull.replaceAll("\r", ""));
+            String expectedTextFull =
+                    "First level 1\n" + "First level 2\n" + "Fist level 3\n" + "Some content\n"
+                            + "Some other content\n" + "Second at level 1\n" + "Second level 2\n"
+                            + "Content\n" + "Third level 1\n" + "Third level 2\n"
+                            + "Third level 3\n" + "Content\n" + "Fourth level 1\n" + "Content\n"
+                            + "Content\n";
+            assertEquals(expectedTextFull, textFull.replaceAll("\r", ""));
 
-        // this should grab 0-based pages 2 and 3, i.e. 1-based pages 3 and 4
-        // by their bookmarks
-        stripper.setStartBookmark(oi2);
-        stripper.setEndBookmark(oi3);
-        String textoi23 = stripper.getText(doc);
-        assertFalse(textoi23.isEmpty());
-        assertFalse(textoi23.equals(textFull));
+            // this should grab 0-based pages 2 and 3, i.e. 1-based pages 3 and 4
+            // by their bookmarks
+            stripper.setStartBookmark(oi2);
+            stripper.setEndBookmark(oi3);
+            String textoi23 = stripper.getText(doc);
+            assertFalse(textoi23.isEmpty());
+            assertNotEquals(textoi23, textFull);
 
-        String expectedTextoi23 = "Second at level 1\n" + "Second level 2\n" + "Content\n"
-                + "Third level 1\n" + "Third level 2\n" + "Third level 3\n" + "Content\n";
-        assertEquals(expectedTextoi23, textoi23.replaceAll("\r", ""));
+            String expectedTextoi23 =
+                    "Second at level 1\n" + "Second level 2\n" + "Content\n" + "Third level 1\n"
+                            + "Third level 2\n" + "Third level 3\n" + "Content\n";
+            assertEquals(expectedTextoi23, textoi23.replaceAll("\r", ""));
 
-        // this should grab 0-based pages 2 and 3, i.e. 1-based pages 3 and 4
-        // by their page numbers
-        stripper.setStartBookmark(null);
-        stripper.setEndBookmark(null);
-        stripper.setStartPage(3);
-        stripper.setEndPage(4);
-        String textp34 = stripper.getText(doc);
-        assertFalse(textp34.isEmpty());
-        assertFalse(textoi23.equals(textFull));
-        assertTrue(textoi23.equals(textp34));
+            // this should grab 0-based pages 2 and 3, i.e. 1-based pages 3 and 4
+            // by their page numbers
+            stripper.setStartBookmark(null);
+            stripper.setEndBookmark(null);
+            stripper.setStartPage(3);
+            stripper.setEndPage(4);
+            String textp34 = stripper.getText(doc);
+            assertFalse(textp34.isEmpty());
+            assertFalse(textoi23.equals(textFull));
+            assertEquals(textoi23, textp34);
 
-        // this should grab 0-based page 2, i.e. 1-based page 3
-        // by the bookmark
-        stripper.setStartBookmark(oi2);
-        stripper.setEndBookmark(oi2);
-        String textoi2 = stripper.getText(doc);
-        assertFalse(textoi2.isEmpty());
-        assertFalse(textoi2.equals(textoi23));
-        assertFalse(textoi23.equals(textFull));
+            // this should grab 0-based page 2, i.e. 1-based page 3
+            // by the bookmark
+            stripper.setStartBookmark(oi2);
+            stripper.setEndBookmark(oi2);
+            String textoi2 = stripper.getText(doc);
+            assertFalse(textoi2.isEmpty());
+            assertNotEquals(textoi2, textoi23);
+            assertNotEquals(textoi23, textFull);
 
-        String expectedTextoi2 = "Second at level 1\n" + "Second level 2\n" + "Content\n";
-        assertEquals(expectedTextoi2, textoi2.replaceAll("\r", ""));
+            String expectedTextoi2 = "Second at level 1\n" + "Second level 2\n" + "Content\n";
+            assertEquals(expectedTextoi2, textoi2.replaceAll("\r", ""));
 
-        // this should grab 0-based page 2, i.e. 1-based page 3
-        // by the page number
-        stripper.setStartBookmark(null);
-        stripper.setEndBookmark(null);
-        stripper.setStartPage(3);
-        stripper.setEndPage(3);
-        String textp3 = stripper.getText(doc);
-        assertFalse(textp3.isEmpty());
-        assertFalse(textp3.equals(textp34));
-        assertFalse(textoi23.equals(textFull));
-        assertTrue(textoi2.equals(textp3));
+            // this should grab 0-based page 2, i.e. 1-based page 3
+            // by the page number
+            stripper.setStartBookmark(null);
+            stripper.setEndBookmark(null);
+            stripper.setStartPage(3);
+            stripper.setEndPage(3);
+            String textp3 = stripper.getText(doc);
+            assertFalse(textp3.isEmpty());
+            assertNotEquals(textp3, textp34);
+            assertNotEquals(textoi23, textFull);
+            assertEquals(textoi2, textp3);
 
-        // Test with orphan bookmark
-        PDOutlineItem oiOrphan = new PDOutlineItem();
-        stripper.setStartBookmark(oiOrphan);
-        stripper.setEndBookmark(oiOrphan);
-        String textOiOrphan = stripper.getText(doc);
-        assertTrue(textOiOrphan.isEmpty());
+            // Test with orphan bookmark
+            PDOutlineItem oiOrphan = new PDOutlineItem();
+            stripper.setStartBookmark(oiOrphan);
+            stripper.setEndBookmark(oiOrphan);
+            String textOiOrphan = stripper.getText(doc);
+            assertTrue(textOiOrphan.isEmpty());
+        }
     }
 
     /**
      * Process each file in the specified directory.
-     * 
      * @param inDir Input directory search for PDF files in.
      * @param outDir Output directory where the temp files will be created.
      */
@@ -527,9 +521,9 @@ public class TestTextStripper extends TestCase
         });
         for (File testFile : testFiles)
         {
-            // Test without sorting
+            //Test without sorting
             doTestFile(testFile, outDir, false, false);
-            // Test with sorting
+            //Test with sorting
             doTestFile(testFile, outDir, false, true);
         }
     }
@@ -539,6 +533,7 @@ public class TestTextStripper extends TestCase
      *
      * @throws Exception when there is an exception
      */
+    @Test
     public void testExtract() throws Exception
     {
         String filename = System.getProperty("org.sejda.sambox.util.TextStripper.file");
@@ -557,9 +552,9 @@ public class TestTextStripper extends TestCase
         }
         else
         {
-            // Test without sorting
+            //Test without sorting
             doTestFile(new File(inDir, filename), outDir, true, false);
-            // Test with sorting
+            //Test with sorting
             doTestFile(new File(inDir, filename), outDir, true, true);
         }
 
@@ -569,33 +564,97 @@ public class TestTextStripper extends TestCase
         }
     }
 
-    /**
-     * Set the tests in the suite for this test class.
-     *
-     * @return the Suite.
-     */
-    public static Test suite()
+    @Test
+    public void testTabula() throws IOException
     {
-        return new TestSuite(TestTextStripper.class);
+        File pdfFile = new File("src/test/resources/input", "eu-001.pdf");
+        File outFile = new File("target/test-output", "eu-001.pdf-tabula.txt");
+        File expectedOutFile = new File("src/test/resources/input", "eu-001.pdf-tabula.txt");
+        File diffFile = new File("target/test-output", "eu-001.pdf-tabula-diff.txt");
+        PDDocument tabulaDocument = PDDocument.load(pdfFile);
+        PDFTextStripper tabulaStripper = new PDFTabulaTextStripper();
+
+        try (OutputStream os = new FileOutputStream(outFile))
+        {
+            os.write(0xEF);
+            os.write(0xBB);
+            os.write(0xBF);
+
+            try (Writer writer = new BufferedWriter(new OutputStreamWriter(os, ENCODING)))
+            {
+                tabulaStripper.writeText(tabulaDocument, writer);
+            }
+
+        }
+        compareResult(expectedOutFile, outFile, pdfFile, false, diffFile);
+        assertFalse(bFail);
     }
 
-    /**
-     * Command line execution.
-     *
-     * @param args Command line arguments.
-     */
-    public static void main(String[] args)
+    private class PDFTabulaTextStripper extends PDFTextStripper
     {
-        String[] arg = { TestTextStripper.class.getName() };
-        junit.textui.TestRunner.main(arg);
+        PDFTabulaTextStripper() throws IOException
+        {
+            // empty
+        }
+
+        @Override
+        protected float computeFontHeight(PDFont font) throws IOException
+        {
+            BoundingBox bbox = font.getBoundingBox();
+            if (bbox.getLowerLeftY() < Short.MIN_VALUE)
+            {
+                // PDFBOX-2158 and PDFBOX-3130
+                // files by Salmat eSolutions / ClibPDF Library
+                bbox.setLowerLeftY(-(bbox.getLowerLeftY() + 65536));
+            }
+            // 1/2 the bbox is used as the height todo: why?
+            float glyphHeight = bbox.getHeight() / 2;
+
+            // sometimes the bbox has very high values, but CapHeight is OK
+            PDFontDescriptor fontDescriptor = font.getFontDescriptor();
+            if (fontDescriptor != null)
+            {
+                float capHeight = fontDescriptor.getCapHeight();
+                if (Float.compare(capHeight, 0) != 0 && (capHeight < glyphHeight
+                        || Float.compare(glyphHeight, 0) == 0))
+                {
+                    glyphHeight = capHeight;
+                }
+                // PDFBOX-3464, PDFBOX-448:
+                // sometimes even CapHeight has very high value, but Ascent and Descent are ok
+                float ascent = fontDescriptor.getAscent();
+                float descent = fontDescriptor.getDescent();
+                if (ascent > 0 && descent < 0 && ((ascent - descent) / 2 < glyphHeight
+                        || Float.compare(glyphHeight, 0) == 0))
+                {
+                    glyphHeight = (ascent - descent) / 2;
+                }
+            }
+
+            // transformPoint from glyph space -> text space
+            float height;
+            if (font instanceof PDType3Font)
+            {
+                height = font.getFontMatrix().transformPoint(0, glyphHeight).y;
+            }
+            else
+            {
+                height = glyphHeight / 1000;
+            }
+
+            return height;
+        }
     }
 
     // Useful to debug weird strings
-    public static String asUnicodes(String in) {
-        if(in == null) return null;
+    public static String asUnicodes(String in)
+    {
+        if (in == null)
+            return null;
 
         StringBuilder result = new StringBuilder();
-        for (int offset = 0; offset < in.length(); ) {
+        for (int offset = 0; offset < in.length(); )
+        {
             int codepoint = in.codePointAt(offset);
             result.append("\\U+").append(Integer.toHexString(codepoint).toUpperCase());
             offset += Character.charCount(codepoint);

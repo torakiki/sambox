@@ -53,6 +53,7 @@ import org.sejda.sambox.contentstream.operator.text.ShowText;
 import org.sejda.sambox.contentstream.operator.text.ShowTextAdjusted;
 import org.sejda.sambox.contentstream.operator.text.ShowTextLine;
 import org.sejda.sambox.contentstream.operator.text.ShowTextLineAndSpace;
+import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.pdmodel.PDPage;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.font.PDCIDFont;
@@ -74,6 +75,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
 
@@ -92,6 +95,7 @@ public class PDFTextStreamEngine extends PDFStreamEngine
     private PDRectangle cropBox;
     private Matrix translateMatrix;
     private final GlyphList glyphList;
+    private final Map<COSDictionary, Float> fontHeightMap = new WeakHashMap<COSDictionary, Float>();
 
     /**
      * Constructor.
@@ -170,7 +174,8 @@ public class PDFTextStreamEngine extends PDFStreamEngine
     }
 
     /**
-     * This method was originally written by Ben Litchfield for PDFStreamEngine.
+     * Called when a glyph is to be processed. The heuristic calculations here were originally
+     * written by Ben Litchfield for PDFStreamEngine.
      */
     @Override
     protected void showGlyph(Matrix textRenderingMatrix, PDFont font, int code, Vector displacement)
@@ -186,51 +191,9 @@ public class PDFTextStreamEngine extends PDFStreamEngine
         float horizontalScaling = state.getTextState().getHorizontalScaling() / 100f;
         Matrix textMatrix = getTextMatrix();
 
-        BoundingBox bbox = font.getBoundingBox();
-        if (bbox.getLowerLeftY() < Short.MIN_VALUE)
-        {
-            // PDFBOX-2158 and PDFBOX-3130
-            // files by Salmat eSolutions / ClibPDF Library
-            bbox.setLowerLeftY(-(bbox.getLowerLeftY() + 65536));
-        }
-        // 1/2 the bbox is used as the height todo: why?
-        float glyphHeight = bbox.getHeight() / 2;
-
-        // sometimes the bbox has very high values, but CapHeight is OK
-        PDFontDescriptor fontDescriptor = font.getFontDescriptor();
-        if (fontDescriptor != null)
-        {
-            float capHeight = fontDescriptor.getCapHeight();
-            if (Float.compare(capHeight, 0) != 0
-                    && (capHeight < glyphHeight || Float.compare(glyphHeight, 0) == 0))
-            {
-                glyphHeight = capHeight;
-            }
-            // PDFBOX-3464, PDFBOX-4480, PDFBOX-4553:
-            // sometimes even CapHeight has very high value, but Ascent and Descent are ok
-            float ascent = fontDescriptor.getAscent();
-            float descent = fontDescriptor.getDescent();
-            if (capHeight > ascent && ascent > 0 && descent < 0
-                    && ((ascent - descent) / 2 < glyphHeight || Float.compare(glyphHeight, 0) == 0))
-            {
-                glyphHeight = (ascent - descent) / 2;
-            }
-        }
-
-        // transformPoint from glyph space -> text space
-        float height;
-        if (font instanceof PDType3Font)
-        {
-            height = font.getFontMatrix().transformPoint(0, glyphHeight).y;
-        }
-        else
-        {
-            height = glyphHeight / 1000;
-        }
-
         float displacementX = displacement.getX();
         // the sorting algorithm is based on the width of the character. As the displacement
-        // for vertical characters doesn't provide any suitable value for it, we have to
+        // for vertical characters doesn't provide any suitable value for it, we have to 
         // calculate our own
         if (font.isVertical())
         {
@@ -254,6 +217,14 @@ public class PDFTextStreamEngine extends PDFStreamEngine
                 displacementX *= 1000f / ttf.getUnitsPerEm();
             }
         }
+
+        //
+        // legacy calculations which were previously in PDFStreamEngine
+        //
+        //  DO NOT USE THIS CODE UNLESS YOU ARE WORKING WITH PDFTextStripper.
+        //  THIS CODE IS DELIBERATELY INCORRECT
+        //
+
         // (modified) combined displacement, this is calculated *without* taking the character
         // spacing and word spacing into account, due to legacy code in TextStripper
         float tx = displacementX * fontSize * horizontalScaling;
@@ -263,13 +234,20 @@ public class PDFTextStreamEngine extends PDFStreamEngine
         Matrix td = Matrix.getTranslateInstance(tx, ty);
 
         // (modified) text rendering matrix
-        Matrix nextTextRenderingMatrix = td.multiply(textMatrix).multiply(ctm); // text space -> device space
+        Matrix nextTextRenderingMatrix = td.multiply(textMatrix)
+                .multiply(ctm); // text space -> device space
         float nextX = nextTextRenderingMatrix.getTranslateX();
         float nextY = nextTextRenderingMatrix.getTranslateY();
 
         // (modified) width and height calculations
         float dxDisplay = nextX - textRenderingMatrix.getTranslateX();
-        float dyDisplay = height * textRenderingMatrix.getScalingFactorY();
+        Float fontHeight = fontHeightMap.get(font.getCOSObject());
+        if (fontHeight == null)
+        {
+            fontHeight = computeFontHeight(font);
+            fontHeightMap.put(font.getCOSObject(), fontHeight);
+        }
+        float dyDisplay = fontHeight * textRenderingMatrix.getScalingFactorY();
 
         //
         // start of the original method
@@ -354,10 +332,12 @@ public class PDFTextStreamEngine extends PDFStreamEngine
         RenderingMode renderingMode = state.getTextState().getRenderingMode();
         if (renderingMode.isFill()) {
             color = state.getNonStrokingColor();
-        } else if(renderingMode.isStroke()) {
+        }
+        else if (renderingMode.isStroke())
+        {
             color = state.getStrokingColor();
         }
-        
+
         processTextPosition(new TextPosition(pageRotation, cropBox.getWidth(), cropBox.getHeight(),
                 translatedTextRenderingMatrix, nextX, nextY, Math.abs(dyDisplay), dxDisplay,
                 Math.abs(spaceWidthDisplay), unicode, new int[] { code }, font, fontSize,
@@ -365,8 +345,62 @@ public class PDFTextStreamEngine extends PDFStreamEngine
     }
 
     /**
-     * A method provided as an event interface to allow a subclass to perform some specific functionality when text
-     * needs to be processed.
+     * Compute the font height. Override this if you want to use own calculations.
+     *
+     * @param font the font.
+     * @return the font height.
+     * @throws IOException if there is an error while getting the font bounding box.
+     */
+    protected float computeFontHeight(PDFont font) throws IOException
+    {
+        BoundingBox bbox = font.getBoundingBox();
+        if (bbox.getLowerLeftY() < Short.MIN_VALUE)
+        {
+            // PDFBOX-2158 and PDFBOX-3130
+            // files by Salmat eSolutions / ClibPDF Library
+            bbox.setLowerLeftY(-(bbox.getLowerLeftY() + 65536));
+        }
+        // 1/2 the bbox is used as the height todo: why?
+        float glyphHeight = bbox.getHeight() / 2;
+
+        // sometimes the bbox has very high values, but CapHeight is OK
+        PDFontDescriptor fontDescriptor = font.getFontDescriptor();
+        if (fontDescriptor != null)
+        {
+            float capHeight = fontDescriptor.getCapHeight();
+            if (Float.compare(capHeight, 0) != 0 && (capHeight < glyphHeight
+                    || Float.compare(glyphHeight, 0) == 0))
+            {
+                glyphHeight = capHeight;
+            }
+            // PDFBOX-3464, PDFBOX-4480, PDFBOX-4553:
+            // sometimes even CapHeight has very high value, but Ascent and Descent are ok
+            float ascent = fontDescriptor.getAscent();
+            float descent = fontDescriptor.getDescent();
+            if (capHeight > ascent && ascent > 0 && descent < 0 && (
+                    (ascent - descent) / 2 < glyphHeight || Float.compare(glyphHeight, 0) == 0))
+            {
+                glyphHeight = (ascent - descent) / 2;
+            }
+        }
+
+        // transformPoint from glyph space -> text space
+        float height;
+        if (font instanceof PDType3Font)
+        {
+            height = font.getFontMatrix().transformPoint(0, glyphHeight).y;
+        }
+        else
+        {
+            height = glyphHeight / 1000;
+        }
+
+        return height;
+    }
+
+    /**
+     * A method provided as an event interface to allow a subclass to perform some specific
+     * functionality when text needs to be processed.
      *
      * @param text The text to be processed.
      */

@@ -16,23 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.encryption;
 
-import static org.bouncycastle.util.Arrays.copyOf;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.security.GeneralSecurityException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-
-import javax.crypto.Cipher;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-
 import org.bouncycastle.crypto.BufferedBlockCipher;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
@@ -44,6 +27,21 @@ import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
+import java.security.MessageDigest;
+import java.util.Arrays;
+
+import static org.bouncycastle.util.Arrays.copyOf;
 
 /**
  * The standard security handler. This security handler protects document with password.
@@ -787,7 +785,7 @@ public final class StandardSecurityHandler extends SecurityHandler
     {
         try
         {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            MessageDigest md = MessageDigests.getSHA256();
             byte[] k = md.digest(input);
 
             byte[] e = null;
@@ -853,19 +851,11 @@ public final class StandardSecurityHandler extends SecurityHandler
     }
 
     private static byte[] computeSHA256(byte[] input, byte[] password, byte[] userKey)
-            throws IOException
     {
-        try
-        {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            md.update(input);
-            md.update(password);
-            return userKey == null ? md.digest() : md.digest(userKey);
-        }
-        catch (NoSuchAlgorithmException e)
-        {
-            throw new IOException(e);
-        }
+        MessageDigest md = MessageDigests.getSHA256();
+        md.update(input);
+        md.update(password);
+        return userKey == null ? md.digest() : md.digest(userKey);
     }
 
     private static byte[] concat(byte[] a, byte[] b, byte[] c)

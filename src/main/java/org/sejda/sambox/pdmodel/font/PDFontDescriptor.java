@@ -17,7 +17,6 @@
 package org.sejda.sambox.pdmodel.font;
 
 import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSObjectable;
@@ -25,6 +24,8 @@ import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.cos.COSString;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.common.PDStream;
+
+import static java.util.Optional.ofNullable;
 
 /**
  * A font descriptor.
@@ -284,12 +285,8 @@ public final class PDFontDescriptor implements COSObjectable
      */
     public String getFontName()
     {
-        COSBase base = dic.getDictionaryObject(COSName.FONT_NAME);
-        if (base instanceof COSName)
-        {
-            return ((COSName) base).getName();
-        }
-        return null;
+        return ofNullable(dic.getDictionaryObject(COSName.FONT_NAME, COSName.class)).map(
+                COSName::getName).orElse(null);
     }
 
     /**
@@ -314,13 +311,8 @@ public final class PDFontDescriptor implements COSObjectable
      */
     public String getFontFamily()
     {
-        String retval = null;
-        COSString name = (COSString) dic.getDictionaryObject(COSName.FONT_FAMILY);
-        if (name != null)
-        {
-            retval = name.getString();
-        }
-        return retval;
+        return ofNullable(dic.getDictionaryObject(COSName.FONT_FAMILY, COSString.class)).map(
+                COSString::getString).orElse(null);
     }
 
     /**
@@ -368,13 +360,8 @@ public final class PDFontDescriptor implements COSObjectable
      */
     public String getFontStretch()
     {
-        String retval = null;
-        COSName name = (COSName) dic.getDictionaryObject(COSName.FONT_STRETCH);
-        if (name != null)
-        {
-            retval = name.getName();
-        }
-        return retval;
+        return ofNullable(dic.getDictionaryObject(COSName.FONT_STRETCH, COSName.class)).map(
+                COSName::getName).orElse(null);
     }
 
     /**
@@ -424,13 +411,8 @@ public final class PDFontDescriptor implements COSObjectable
      */
     public PDRectangle getFontBoundingBox()
     {
-        COSArray rect = (COSArray) dic.getDictionaryObject(COSName.FONT_BBOX);
-        PDRectangle retval = null;
-        if (rect != null)
-        {
-            retval = new PDRectangle(rect);
-        }
-        return retval;
+        return ofNullable(dic.getDictionaryObject(COSName.FONT_BBOX, COSArray.class)).map(
+                PDRectangle::new).orElse(null);
     }
 
     /**
@@ -709,13 +691,8 @@ public final class PDFontDescriptor implements COSObjectable
      */
     public String getCharSet()
     {
-        String retval = null;
-        COSString name = (COSString) dic.getDictionaryObject(COSName.CHAR_SET);
-        if (name != null)
-        {
-            retval = name.getString();
-        }
-        return retval;
+        return ofNullable(dic.getDictionaryObject(COSName.CHAR_SET, COSString.class)).map(
+                COSString::getString).orElse(null);
     }
 
     /**
@@ -740,13 +717,8 @@ public final class PDFontDescriptor implements COSObjectable
      */
     public PDStream getFontFile()
     {
-        PDStream retval = null;
-        COSBase obj = dic.getDictionaryObject(COSName.FONT_FILE);
-        if (obj instanceof COSStream)
-        {
-            retval = new PDStream((COSStream) obj);
-        }
-        return retval;
+        return ofNullable(dic.getDictionaryObject(COSName.FONT_FILE, COSStream.class)).map(
+                PDStream::new).orElse(null);
     }
 
     /**
@@ -766,13 +738,8 @@ public final class PDFontDescriptor implements COSObjectable
      */
     public PDStream getFontFile2()
     {
-        PDStream retval = null;
-        COSBase obj = dic.getDictionaryObject(COSName.FONT_FILE2);
-        if (obj instanceof COSStream)
-        {
-            retval = new PDStream((COSStream) obj);
-        }
-        return retval;
+        return ofNullable(dic.getDictionaryObject(COSName.FONT_FILE2, COSStream.class)).map(
+                PDStream::new).orElse(null);
     }
 
     /**
@@ -792,13 +759,8 @@ public final class PDFontDescriptor implements COSObjectable
      */
     public PDStream getFontFile3()
     {
-        PDStream retval = null;
-        COSBase obj = dic.getDictionaryObject(COSName.FONT_FILE3);
-        if (obj instanceof COSStream)
-        {
-            retval = new PDStream((COSStream) obj);
-        }
-        return retval;
+        return ofNullable(dic.getDictionaryObject(COSName.FONT_FILE3, COSStream.class)).map(
+                PDStream::new).orElse(null);
     }
 
     /**
@@ -818,12 +780,8 @@ public final class PDFontDescriptor implements COSObjectable
      */
     public PDStream getCIDSet()
     {
-        COSObjectable cidSet = dic.getDictionaryObject(COSName.CID_SET);
-        if (cidSet instanceof COSStream)
-        {
-            return new PDStream((COSStream) cidSet);
-        }
-        return null;
+        return ofNullable(dic.getDictionaryObject(COSName.CID_SET, COSStream.class)).map(
+                PDStream::new).orElse(null);
     }
 
     /**
@@ -843,11 +801,11 @@ public final class PDFontDescriptor implements COSObjectable
      */
     public PDPanose getPanose()
     {
-        COSDictionary style = (COSDictionary) dic.getDictionaryObject(COSName.STYLE);
+        COSDictionary style = dic.getDictionaryObject(COSName.STYLE, COSDictionary.class);
         if (style != null)
         {
-            COSString panose = (COSString) style.getDictionaryObject(COSName.PANOSE);
-            if(panose != null) 
+            COSString panose = style.getDictionaryObject(COSName.PANOSE, COSString.class);
+            if (panose != null)
             {
                 byte[] bytes = panose.getBytes();
                 return new PDPanose(bytes);

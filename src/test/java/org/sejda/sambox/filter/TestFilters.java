@@ -16,20 +16,19 @@
  */
 package org.sejda.sambox.filter;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Random;
-
+import junit.framework.TestCase;
 import org.sejda.commons.util.IOUtils;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.input.PDFParser;
 
-import junit.framework.TestCase;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Random;
 
 /**
  * This will test all of the filters in the PDFBox system.
@@ -130,16 +129,16 @@ public class TestFilters extends TestCase
     }
 
     /**
-     * This will test the LZW filter with the sequence that failed in PDFBOX-1777. To check that the test itself is
-     * legit, revert LZWFilter.java to rev 1571801, which should fail this test.
-     * 
+     * This will test the LZW filter with the sequence that failed in PDFBOX-1977. To check that the
+     * test itself is legit, revert LZWFilter.java to rev 1571801, which should fail this test.
+     *
      * @throws IOException
      */
-    public void testPDFBOX1777() throws IOException
+    public void testPDFBOX1977() throws IOException
     {
         Filter lzwFilter = FilterFactory.INSTANCE.getFilter(COSName.LZW_DECODE);
-        byte[] byteArray = IOUtils
-                .toByteArray(this.getClass().getResourceAsStream("PDFBOX-1777.bin"));
+        byte[] byteArray = IOUtils.toByteArray(
+                this.getClass().getResourceAsStream("PDFBOX-1977.bin"));
         checkEncodeDecode(lzwFilter, byteArray);
     }
 

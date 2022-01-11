@@ -17,17 +17,17 @@
  */
 package org.sejda.sambox.pdmodel.font.encoding;
 
-import static java.util.Objects.nonNull;
-import static java.util.Optional.ofNullable;
-
-import java.util.HashMap;
-import java.util.Map;
-
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSNumber;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
 
 /**
  * This will perform the encoding from a dictionary.
@@ -179,6 +179,11 @@ public class DictionaryEncoding extends Encoding
     @Override
     public String getEncodingName()
     {
+        if (baseEncoding == null)
+        {
+            // In type 3 the /Differences array shall specify the complete character encoding
+            return "differences";
+        }
         return baseEncoding.getEncodingName() + " with differences";
     }
 }

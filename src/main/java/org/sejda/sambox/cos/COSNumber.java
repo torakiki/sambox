@@ -16,11 +16,11 @@
  */
 package org.sejda.sambox.cos;
 
-import static org.sejda.commons.util.RequireUtils.requireArg;
-import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
-
 import java.io.IOException;
 import java.util.regex.Pattern;
+
+import static org.sejda.commons.util.RequireUtils.requireArg;
+import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
 
 /**
  * This class represents an abstract number in a PDF document.
@@ -68,25 +68,38 @@ public abstract class COSNumber extends COSBase
             char digit = number.charAt(0);
             if ('0' <= digit && digit <= '9')
             {
-                return COSInteger.get(digit - '0');
+                return COSInteger.get((long) digit - '0');
             }
             // PDFBOX-592
             return COSInteger.ZERO;
         }
-        else if (number.indexOf('.') == -1 && (number.toLowerCase().indexOf('e') == -1))
+        if (isFloat(number))
         {
-            try
+            return new COSFloat(number);
+        }
+        try
+        {
+            return COSInteger.get(Long.parseLong(number));
+        }
+        catch (NumberFormatException e)
+        {
+            // PDFBOX-3589 --242
+            return COSInteger.ZERO;
+        }
+    }
+
+    private static boolean isFloat(String number)
+    {
+        int length = number.length();
+        for (int i = 0; i < length; i++)
+        {
+            char digit = number.charAt(i);
+            if (digit == '.' || digit == 'e')
             {
-                return COSInteger.get(Long.parseLong(number));
-            }
-            catch (NumberFormatException e)
-            {
-                // PDFBOX-3589 --242
-                return COSInteger.ZERO;
+                return true;
             }
         }
-
-        return new COSFloat(number);
+        return false;
     }
 
     @Override

@@ -16,22 +16,6 @@
  */
 package org.sejda.sambox.contentstream;
 
-import static java.util.Objects.isNull;
-import static java.util.Optional.ofNullable;
-
-import java.awt.geom.GeneralPath;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.sejda.sambox.contentstream.operator.MissingOperandException;
 import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.contentstream.operator.OperatorProcessor;
@@ -67,6 +51,22 @@ import org.sejda.sambox.util.Matrix;
 import org.sejda.sambox.util.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static java.util.Objects.isNull;
+import static java.util.Optional.ofNullable;
 
 /**
  * Processes a PDF content stream and executes certain operations. Provides a callback interface for
@@ -402,7 +402,11 @@ public abstract class PDFStreamEngine
         // clip to bounding box
         clipToRect(tilingPattern.getBBox());
 
+        Matrix textMatrixSave = textMatrix;
+        Matrix textLineMatrixSave = textLineMatrix;
         processStreamOperators(tilingPattern);
+        textMatrix = textMatrixSave;
+        textLineMatrix = textLineMatrixSave;
 
         initialMatrix = parentMatrix;
         restoreGraphicsStack(savedStack);
@@ -715,13 +719,7 @@ public abstract class PDFStreamEngine
             Vector w = font.getDisplacement(code);
 
             // process the decoded glyph
-            saveGraphicsState();
-            Matrix textMatrixOld = textMatrix;
-            Matrix textLineMatrixOld = textLineMatrix;
             showGlyph(textRenderingMatrix, font, code, w);
-            textMatrix = textMatrixOld;
-            textLineMatrix = textLineMatrixOld;
-            restoreGraphicsState();
 
             // calculate the combined displacements
             float tx, ty;

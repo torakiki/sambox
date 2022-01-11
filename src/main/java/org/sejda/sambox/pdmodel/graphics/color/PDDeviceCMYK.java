@@ -16,19 +16,20 @@
  */
 package org.sejda.sambox.pdmodel.graphics.color;
 
-import static java.util.Objects.nonNull;
-import static org.sejda.commons.util.RequireUtils.requireIOCondition;
+import org.sejda.sambox.cos.COSName;
 
 import java.awt.color.ColorSpace;
 import java.awt.color.ICC_ColorSpace;
 import java.awt.color.ICC_Profile;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 
-import org.sejda.sambox.cos.COSName;
+import static java.util.Objects.nonNull;
+import static org.sejda.commons.util.RequireUtils.requireIOCondition;
 
 /**
  * Allows colors to be specified according to the subtractive CMYK (cyan, magenta, yellow, black) model typical of
@@ -87,7 +88,7 @@ public class PDDeviceCMYK extends PDDeviceColorSpace
         try (InputStream is = PDDeviceCMYK.class.getResourceAsStream(name))
         {
             requireIOCondition(nonNull(is), "Error loading " + name);
-            return ICC_Profile.getInstance(is);
+            return ICC_Profile.getInstance(new BufferedInputStream(is));
         }
     }
 

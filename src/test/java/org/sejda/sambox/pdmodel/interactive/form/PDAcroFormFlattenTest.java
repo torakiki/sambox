@@ -16,15 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-
-import javax.imageio.ImageIO;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.sejda.io.SeekableSources;
@@ -33,12 +24,19 @@ import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.rendering.PDFRenderer;
 import org.sejda.sambox.rendering.TestPDFToImage;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 /**
  * Test flatten different forms and compare with rendering of original (before-flatten) document.
- *
- * The tests are currently disabled to not run within the CI environment as the test results need manual inspection.
- * Enable as needed.
- *
+ * <p>
+ * The tests are currently disabled to not run within the CI environment as the test results need
+ * manual inspection. Enable as needed.
  */
 public class PDAcroFormFlattenTest
 {
@@ -232,12 +230,24 @@ public class PDAcroFormFlattenTest
     }
 
     /**
-     * PDFBOX-4788: non-widget annotations are not to be removed on a page that has no widget annotations.
+     * PDFBOX-4788: non-widget annotations are not to be removed on a page that has no widget
+     * annotations.
      */
     @Test
     public void testFlattenPDFBox4788() throws IOException
     {
         flattenAndCompare("flatten.pdf");
+    }
+
+    /**
+     * PDFBOX-4889: appearance streams with empty /BBox.
+     *
+     * @throws IOException
+     */
+    @Test
+    public void testFlattenPDFBox4889() throws IOException
+    {
+        flattenAndCompare("f1040sb%20test.pdf");
     }
 
     /*

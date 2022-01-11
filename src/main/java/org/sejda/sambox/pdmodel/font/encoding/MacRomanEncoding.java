@@ -86,7 +86,7 @@ public class MacRomanEncoding extends Encoding
             { 0137, "underscore" }, { 0166, "v" }, { 0167, "w" }, { 0170, "x" }, { 0171, "y" },
             { 0330, "ydieresis" }, { 0264, "yen" }, { 0172, "z" }, { 060, "zero" },
             // adding an additional mapping as defined in Appendix D of the pdf spec
-            { 0312, "space" } };
+            { 0312, "nbspace" } };
 
     /**
      * Singleton instance of this class.

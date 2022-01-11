@@ -88,7 +88,7 @@ public class WinAnsiEncoding extends Encoding
             { 0171, "y" }, { 0375, "yacute" }, { 0377, "ydieresis" }, { 0245, "yen" },
             { 0172, "z" }, { 0236, "zcaron" }, { 060, "zero" },
             // adding some additional mappings as defined in Appendix D of the pdf spec
-            { 0240, "space" }, { 0255, "hyphen" } };
+            { 0240, "nbspace" }, { 0255, "hyphen" } };
 
     /**
      * Singleton instance of this class.

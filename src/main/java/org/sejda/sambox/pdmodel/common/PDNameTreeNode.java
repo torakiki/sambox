@@ -16,17 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.common;
 
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSArrayList;
 import org.sejda.sambox.cos.COSBase;
@@ -36,6 +25,18 @@ import org.sejda.sambox.cos.COSObjectable;
 import org.sejda.sambox.cos.COSString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
 
 /**
  * This class represents a node in a name tree.
@@ -118,7 +119,7 @@ public abstract class PDNameTreeNode<T extends COSObjectable> implements COSObje
     {
         if (nonNull(node))
         {
-            COSArray kids = (COSArray) node.getDictionaryObject(COSName.KIDS);
+            COSArray kids = node.getDictionaryObject(COSName.KIDS, COSArray.class);
             if (kids != null)
             {
                 List<PDNameTreeNode<T>> pdObjects = new ArrayList<>();
@@ -277,19 +278,20 @@ public abstract class PDNameTreeNode<T extends COSObjectable> implements COSObje
      */
     public Map<String, T> getNames() throws IOException
     {
-        COSArray namesArray = (COSArray) node.getDictionaryObject(COSName.NAMES);
+        COSArray namesArray = node.getDictionaryObject(COSName.NAMES, COSArray.class);
         if (namesArray != null)
         {
             Map<String, T> names = new LinkedHashMap<>();
             for (int i = 0; i < namesArray.size(); i += 2)
             {
-                COSString key = (COSString) namesArray.getObject(i);
+                COSBase base = namesArray.getObject(i);
                 if(i + 1 >= namesArray.size())
                 {
                     // some invalid NAMES arrays have only the key without a value
-                    LOG.warn("Found key without value in NAMES array: " + key.getString() + ", at index: " + i);
+                    LOG.warn("Found key without value in NAMES array: {}, at index: {}", base, i);
                     continue;
                 }
+                COSString key = (COSString) base;
                 COSBase cosValue = namesArray.getObject(i + 1);
                 T pdValue = null;
                 try 
@@ -361,13 +363,8 @@ public abstract class PDNameTreeNode<T extends COSObjectable> implements COSObje
      */
     public String getUpperLimit()
     {
-        String retval = null;
-        COSArray arr = (COSArray) node.getDictionaryObject(COSName.LIMITS);
-        if (arr != null)
-        {
-            retval = arr.getString(1);
-        }
-        return retval;
+        return ofNullable(node.getDictionaryObject(COSName.LIMITS, COSArray.class)).map(
+                a -> a.getString(1)).orElse(null);
     }
 
     /**
@@ -377,12 +374,10 @@ public abstract class PDNameTreeNode<T extends COSObjectable> implements COSObje
      */
     private void setUpperLimit(String upper)
     {
-        COSArray arr = (COSArray) node.getDictionaryObject(COSName.LIMITS);
+        COSArray arr = node.getDictionaryObject(COSName.LIMITS, COSArray.class);
         if (arr == null)
         {
-            arr = new COSArray();
-            arr.add(null);
-            arr.add(null);
+            arr = new COSArray(null, null);
             node.setItem(COSName.LIMITS, arr);
         }
         arr.setString(1, upper);
@@ -395,12 +390,8 @@ public abstract class PDNameTreeNode<T extends COSObjectable> implements COSObje
      */
     public String getLowerLimit()
     {
-        COSArray arr = (COSArray) node.getDictionaryObject(COSName.LIMITS);
-        if (nonNull(arr))
-        {
-            return arr.getString(0);
-        }
-        return null;
+        return ofNullable(node.getDictionaryObject(COSName.LIMITS, COSArray.class)).map(
+                a -> a.getString(0)).orElse(null);
     }
 
     /**
@@ -410,12 +401,10 @@ public abstract class PDNameTreeNode<T extends COSObjectable> implements COSObje
      */
     private void setLowerLimit(String lower)
     {
-        COSArray arr = (COSArray) node.getDictionaryObject(COSName.LIMITS);
+        COSArray arr = node.getDictionaryObject(COSName.LIMITS, COSArray.class);
         if (arr == null)
         {
-            arr = new COSArray();
-            arr.add(null);
-            arr.add(null);
+            arr = new COSArray(null, null);
             node.setItem(COSName.LIMITS, arr);
         }
         arr.setString(0, lower);

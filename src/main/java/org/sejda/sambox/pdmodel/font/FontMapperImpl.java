@@ -16,9 +16,14 @@
  */
 package org.sejda.sambox.pdmodel.font;
 
-import static java.util.Optional.ofNullable;
-import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
+import org.apache.fontbox.FontBoxFont;
+import org.apache.fontbox.ttf.OpenTypeFont;
+import org.apache.fontbox.ttf.TTFParser;
+import org.apache.fontbox.ttf.TrueTypeFont;
+import org.apache.fontbox.type1.Type1Font;
+import org.sejda.sambox.SAMBox;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -32,12 +37,8 @@ import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
 
-import org.apache.fontbox.FontBoxFont;
-import org.apache.fontbox.ttf.OpenTypeFont;
-import org.apache.fontbox.ttf.TTFParser;
-import org.apache.fontbox.ttf.TrueTypeFont;
-import org.apache.fontbox.type1.Type1Font;
-import org.sejda.sambox.SAMBox;
+import static java.util.Optional.ofNullable;
+import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
 
 /**
  * Font mapper, locates non-embedded fonts via a pluggable FontProvider.
@@ -117,7 +118,7 @@ final class FontMapperImpl implements FontMapper
                     "/org/sejda/sambox/resources/ttf/LiberationSans-Regular.ttf");
             requireNotNullArg(stream,
                     "Unable to load org/sejda/sambox/resources/ttf/LiberationSans-Regular.ttf");
-            lastResortFont = new TTFParser().parse(stream);
+            lastResortFont = new TTFParser().parse(new BufferedInputStream(stream));
         }
         catch (IOException e)
         {

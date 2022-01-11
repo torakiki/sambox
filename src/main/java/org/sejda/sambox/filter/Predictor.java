@@ -15,15 +15,13 @@
  */
 package org.sejda.sambox.filter;
 
-import java.io.FilterOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Arrays;
-
-import org.sejda.commons.util.IOUtils;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
+
+import java.io.FilterOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Arrays;
 
 /**
  * Helper class to contain predictor decoding used by Flate and LZW filter. To see the history, look at the FlateFilter
@@ -202,54 +200,6 @@ public final class Predictor
             break;
         default:
             break;
-        }
-    }
-
-    static void decodePredictor(int predictor, int colors, int bitsPerComponent, int columns,
-            InputStream in, OutputStream out) throws IOException
-    {
-        if (predictor == 1)
-        {
-            IOUtils.copy(in, out);
-        }
-        else
-        {
-            // calculate sizes
-            final int rowlength = calculateRowLength(colors, bitsPerComponent, columns);
-            byte[] actline = new byte[rowlength];
-            byte[] lastline = new byte[rowlength];
-
-            int linepredictor = predictor;
-
-            while (in.available() > 0)
-            {
-                // test for PNG predictor; each value >= 10 (not only 15) indicates usage of PNG predictor
-                if (predictor >= 10)
-                {
-                    // PNG predictor; each row starts with predictor type (0, 1, 2, 3, 4)
-                    // read per line predictor
-                    linepredictor = in.read();
-                    if (linepredictor == -1)
-                    {
-                        return;
-                    }
-                    // add 10 to tread value 0 as 10, 1 as 11, ...
-                    linepredictor += 10;
-                }
-
-                // read line
-                int i, offset = 0;
-                while (offset < rowlength
-                        && ((i = in.read(actline, offset, rowlength - offset)) != -1))
-                {
-                    offset += i;
-                }
-
-                decodePredictorRow(linepredictor, colors, bitsPerComponent, columns, actline,
-                        lastline);
-                System.arraycopy(actline, 0, lastline, 0, rowlength);
-                out.write(actline);
-            }
         }
     }
 
