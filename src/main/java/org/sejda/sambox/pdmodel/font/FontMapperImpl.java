@@ -60,44 +60,48 @@ final class FontMapperImpl implements FontMapper
     FontMapperImpl()
     {
         // substitutes for standard 14 fonts
-        substitutes.put("Courier",
-                Arrays.asList("CourierNew", "CourierNewPSMT", "LiberationMono", "NimbusMonL-Regu"));
-        substitutes.put("Courier-Bold",
+        substitutes.put("Courier", new ArrayList<>(
+                Arrays.asList("CourierNew", "CourierNewPSMT", "LiberationMono",
+                        "NimbusMonL-Regu")));
+        substitutes.put("Courier-Bold", new ArrayList<>(
                 Arrays.asList("CourierNewPS-BoldMT", "CourierNew-Bold", "LiberationMono-Bold",
-                        "NimbusMonL-Bold"));
-        substitutes.put("Courier-Oblique",
+                        "NimbusMonL-Bold")));
+        substitutes.put("Courier-Oblique", new ArrayList<>(
                 Arrays.asList("CourierNewPS-ItalicMT", "CourierNew-Italic", "LiberationMono-Italic",
-                        "NimbusMonL-ReguObli"));
-        substitutes.put("Courier-BoldOblique",
+                        "NimbusMonL-ReguObli")));
+        substitutes.put("Courier-BoldOblique", new ArrayList<>(
                 Arrays.asList("CourierNewPS-BoldItalicMT", "CourierNew-BoldItalic",
-                        "LiberationMono-BoldItalic", "NimbusMonL-BoldObli"));
-        substitutes.put("Helvetica",
-                Arrays.asList("ArialMT", "Arial", "LiberationSans", "NimbusSanL-Regu"));
-        substitutes.put("Helvetica-Bold",
+                        "LiberationMono-BoldItalic", "NimbusMonL-BoldObli")));
+        substitutes.put("Helvetica", new ArrayList<>(
+                Arrays.asList("ArialMT", "Arial", "LiberationSans", "NimbusSanL-Regu")));
+        substitutes.put("Helvetica-Bold", new ArrayList<>(
                 Arrays.asList("Arial-BoldMT", "Arial-Bold", "LiberationSans-Bold",
-                        "NimbusSanL-Bold"));
-        substitutes.put("Helvetica-Oblique",
+                        "NimbusSanL-Bold")));
+        substitutes.put("Helvetica-Oblique", new ArrayList<>(
                 Arrays.asList("Arial-ItalicMT", "Arial-Italic", "Helvetica-Italic",
-                        "LiberationSans-Italic", "NimbusSanL-ReguItal"));
-        substitutes.put("Helvetica-BoldOblique",
+                        "LiberationSans-Italic", "NimbusSanL-ReguItal")));
+        substitutes.put("Helvetica-BoldOblique", new ArrayList<>(
                 Arrays.asList("Arial-BoldItalicMT", "Helvetica-BoldItalic",
-                        "LiberationSans-BoldItalic", "NimbusSanL-BoldItal"));
-        substitutes.put("Times-Roman",
+                        "LiberationSans-BoldItalic", "NimbusSanL-BoldItal")));
+        substitutes.put("Times-Roman", new ArrayList<>(
                 Arrays.asList("TimesNewRomanPSMT", "TimesNewRoman", "TimesNewRomanPS",
-                        "LiberationSerif", "NimbusRomNo9L-Regu"));
-        substitutes.put("Times-Bold",
+                        "LiberationSerif", "NimbusRomNo9L-Regu")));
+        substitutes.put("Times-Bold", new ArrayList<>(
                 Arrays.asList("TimesNewRomanPS-BoldMT", "TimesNewRomanPS-Bold",
-                        "TimesNewRoman-Bold", "LiberationSerif-Bold", "NimbusRomNo9L-Medi"));
-        substitutes.put("Times-Italic",
+                        "TimesNewRoman-Bold", "LiberationSerif-Bold", "NimbusRomNo9L-Medi")));
+        substitutes.put("Times-Italic", new ArrayList<>(
                 Arrays.asList("TimesNewRomanPS-ItalicMT", "TimesNewRomanPS-Italic",
                         "TimesNewRoman-Italic", "LiberationSerif-Italic",
-                        "NimbusRomNo9L-ReguItal"));
-        substitutes.put("Times-BoldItalic",
+                        "NimbusRomNo9L-ReguItal")));
+        substitutes.put("Times-BoldItalic", new ArrayList<>(
                 Arrays.asList("TimesNewRomanPS-BoldItalicMT", "TimesNewRomanPS-BoldItalic",
                         "TimesNewRoman-BoldItalic", "LiberationSerif-BoldItalic",
-                        "NimbusRomNo9L-MediItal"));
-        substitutes.put("Symbol", Arrays.asList("Symbol", "SymbolMT", "StandardSymL"));
-        substitutes.put("ZapfDingbats", Arrays.asList("ZapfDingbatsITC", "Dingbats", "MS-Gothic"));
+                        "NimbusRomNo9L-MediItal")));
+        substitutes.put("Symbol",
+                new ArrayList<>(Arrays.asList("Symbol", "SymbolMT", "StandardSymL")));
+        substitutes.put("ZapfDingbats", new ArrayList<>(
+                Arrays.asList("ZapfDingbatsITCbyBT-Regular", "ZapfDingbatsITC", "Dingbats",
+                        "MS-Gothic")));
 
         // Acrobat also uses alternative names for Standard 14 fonts, which we map to those above
         // these include names such as "Arial" and "TimesNewRoman"
@@ -329,7 +333,8 @@ final class FontMapperImpl implements FontMapper
      *
      * @param fontDescriptor FontDescriptor
      */
-    @Override public FontMapping<TrueTypeFont> getTrueTypeFont(String baseFont,
+    @Override
+    public FontMapping<TrueTypeFont> getTrueTypeFont(String baseFont,
             PDFontDescriptor fontDescriptor)
     {
         TrueTypeFont ttf = (TrueTypeFont) findFont(FontFormat.TTF, baseFont);
@@ -354,8 +359,8 @@ final class FontMapperImpl implements FontMapper
      *
      * @param fontDescriptor the FontDescriptor of the font to find
      */
-    @Override public FontMapping<FontBoxFont> getFontBoxFont(String baseFont,
-            PDFontDescriptor fontDescriptor)
+    @Override
+    public FontMapping<FontBoxFont> getFontBoxFont(String baseFont, PDFontDescriptor fontDescriptor)
     {
         FontBoxFont font = findFontBoxFont(baseFont);
         if (font != null)
@@ -489,7 +494,8 @@ final class FontMapperImpl implements FontMapper
      * @param fontDescriptor FontDescriptor
      * @param cidSystemInfo  the CID system info, e.g. "Adobe-Japan1", if any.
      */
-    @Override public CIDFontMapping getCIDFont(String baseFont, PDFontDescriptor fontDescriptor,
+    @Override
+    public CIDFontMapping getCIDFont(String baseFont, PDFontDescriptor fontDescriptor,
             PDCIDSystemInfo cidSystemInfo)
     {
         // try name match or substitute with OTF
@@ -707,7 +713,8 @@ final class FontMapperImpl implements FontMapper
             this.info = info;
         }
 
-        @Override public int compareTo(FontMatch match)
+        @Override
+        public int compareTo(FontMatch match)
         {
             return Double.compare(match.score, this.score);
         }

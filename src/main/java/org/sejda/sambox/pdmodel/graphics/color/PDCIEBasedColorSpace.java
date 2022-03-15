@@ -21,8 +21,8 @@ import java.awt.image.WritableRaster;
 import java.io.IOException;
 
 /**
- * CIE-based colour spaces specify colours in a way that is independent of the characteristics
- * of any particular output device. They are based on an international standard for colour
+ * CIE-based colour spaces specify colours in a way that is independent of the characteristics of
+ * any particular output device. They are based on an international standard for colour
  * specification created by the Commission Internationale de l'Éclairage (CIE).
  *
  * @author John Hewson
@@ -73,8 +73,16 @@ public abstract class PDCIEBasedColorSpace extends PDColorSpace
     }
 
     @Override
+    public BufferedImage toRawImage(WritableRaster raster) throws IOException
+    {
+        // There is no direct equivalent of a CIE colorspace in Java. So we can
+        // not do anything here.
+        return null;
+    }
+
+    @Override
     public String toString()
     {
-        return getName();   // TODO return more info
+        return getName();
     }
 }

@@ -16,13 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSArrayList;
 import org.sejda.sambox.cos.COSBase;
@@ -35,8 +28,16 @@ import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 /**
- * A button field represents an interactive control on the screen that the user can manipulate with the mouse.
+ * A button field represents an interactive control on the screen that the user can manipulate with
+ * the mouse.
  *
  * @author sug
  */
@@ -56,15 +57,14 @@ public abstract class PDButton extends PDTerminalField
     static final int FLAG_PUSHBUTTON = 1 << 16;
 
     /**
-     * A Ff flag. If set, radio buttons individual fields, using the same value for the on state will turn on and off in
-     * unison.
+     * A Ff flag. If set, radio buttons individual fields, using the same value for the on state
+     * will turn on and off in unison.
      */
     static final int FLAG_RADIOS_IN_UNISON = 1 << 25;
 
     /**
-     * @see PDField#PDField(PDAcroForm)
-     *
      * @param acroForm The acroform.
+     * @see PDField#PDField(PDAcroForm)
      */
     public PDButton(PDAcroForm acroForm)
     {
@@ -74,10 +74,10 @@ public abstract class PDButton extends PDTerminalField
 
     /**
      * Constructor.
-     * 
+     *
      * @param acroForm The form that this field is part of.
-     * @param field the PDF object to represent as a field.
-     * @param parent the parent node of the node
+     * @param field    the PDF object to represent as a field.
+     * @param parent   the parent node of the node
      */
     PDButton(PDAcroForm acroForm, COSDictionary field, PDNonTerminalField parent)
     {
@@ -86,7 +86,7 @@ public abstract class PDButton extends PDTerminalField
 
     /**
      * Determines if push button bit is set.
-     * 
+     *
      * @return true if type of button field is a push button.
      */
     public boolean isPushButton()
@@ -106,7 +106,7 @@ public abstract class PDButton extends PDTerminalField
 
     /**
      * Determines if radio button bit is set.
-     * 
+     *
      * @return true if type of button field is a push button.
      */
     public boolean isRadioButton()
@@ -125,8 +125,9 @@ public abstract class PDButton extends PDTerminalField
     }
 
     /**
-     * Returns the selected value. May be empty if NoToggleToOff is set but there is no value selected.
-     * 
+     * Returns the selected value. May be empty if NoToggleToOff is set but there is no value
+     * selected.
+     *
      * @return A non-null string.
      */
     public String getValue()
@@ -134,7 +135,24 @@ public abstract class PDButton extends PDTerminalField
         COSBase value = getInheritableAttribute(COSName.V);
         if (value instanceof COSName)
         {
-            return ((COSName) value).getName();
+            String stringValue = ((COSName) value).getName();
+            List<String> exportValues = getExportValues();
+            if (!exportValues.isEmpty())
+            {
+                try
+                {
+                    int idx = Integer.parseInt(stringValue, 10);
+                    if (idx >= 0 && idx < exportValues.size())
+                    {
+                        return exportValues.get(idx);
+                    }
+                }
+                catch (NumberFormatException nfe)
+                {
+                    return stringValue;
+                }
+            }
+            return stringValue;
         }
         // Off is the default value if there is nothing else set.
         // See PDF Spec.
@@ -143,9 +161,9 @@ public abstract class PDButton extends PDTerminalField
 
     /**
      * Sets the selected option given its name.
-     * 
+     *
      * @param value Name of option to select
-     * @throws IOException if the value could not be set
+     * @throws IOException              if the value could not be set
      * @throws IllegalArgumentException if the value is not a valid option.
      */
     @Override
@@ -165,6 +183,31 @@ public abstract class PDButton extends PDTerminalField
         {
             updateByValue(value);
         }
+
+        applyChange();
+    }
+
+    /**
+     * Set the selected option given its index, and try to update the visual appearance.
+     * <p>
+     * NOTE: this method is only usable if there are export values and used for radio buttons with
+     * FLAG_RADIOS_IN_UNISON not set.
+     *
+     * @param index index of option to be selected
+     * @throws IOException              if the value could not be set
+     * @throws IllegalArgumentException if the index provided is not a valid index.
+     */
+    public void setValue(int index) throws IOException
+    {
+        if (getExportValues().isEmpty() || index < 0 || index >= getExportValues().size())
+        {
+            throw new IllegalArgumentException(
+                    "index '" + index + "' is not a valid index for the field "
+                            + getFullyQualifiedName() + ", valid indizes are from 0 to " + (
+                            getExportValues().size() - 1));
+        }
+
+        updateByValue(String.valueOf(index));
 
         applyChange();
     }
@@ -212,11 +255,11 @@ public abstract class PDButton extends PDTerminalField
 
     /**
      * This will get the export values.
-     * 
+     *
      * <p>
      * The export values are defined in the field dictionaries /Opt key.
      * </p>
-     * 
+     *
      * <p>
      * The option values are used to define the export values for the field to
      * <ul>
@@ -225,8 +268,9 @@ public abstract class PDButton extends PDTerminalField
      * <li>allow radio buttons having the same export value to be handled independently</li>
      * </ul>
      * </p>
-     * 
-     * @return List containing all possible export values. If there is no Opt entry an empty list will be returned.
+     *
+     * @return List containing all possible export values. If there is no Opt entry an empty list
+     * will be returned.
      */
     public List<String> getExportValues()
     {
@@ -246,10 +290,10 @@ public abstract class PDButton extends PDTerminalField
 
     /**
      * This will set the export values.
-     * 
+     *
+     * @param values List containing all possible export values. Supplying null or an empty list
+     *               will remove the Opt entry.
      * @see #getExportValues()
-     * @param values List containing all possible export values. Supplying null or an empty list will remove the Opt
-     * entry.
      */
     public void setExportValues(List<String> values)
     {
@@ -297,12 +341,13 @@ public abstract class PDButton extends PDTerminalField
      * Get the values to set individual buttons within a group to the on state.
      *
      * <p>
-     * The On value could be an arbitrary string as long as it is within the limitations of a PDF name object. The Off
-     * value shall always be 'Off'. If not set or not part of the normal appearance keys 'Off' is the default
+     * The On value could be an arbitrary string as long as it is within the limitations of a PDF
+     * name object. The Off value shall always be 'Off'. If not set or not part of the normal
+     * appearance keys 'Off' is the default
      * </p>
      *
-     * @return the potential values setting the check box to the On state. If an empty Set is returned there is no
-     * appearance definition.
+     * @return the potential values setting the check box to the On state. If an empty Set is
+     * returned there is no appearance definition.
      */
     public Set<String> getOnValues()
     {
@@ -395,9 +440,10 @@ public abstract class PDButton extends PDTerminalField
 
         if (COSName.Off.getName().compareTo(value) != 0 && !onValues.contains(value))
         {
-            throw new IllegalArgumentException("value '" + value
-                    + "' is not a valid option for the field " + getFullyQualifiedName()
-                    + ", valid values are: " + onValues + " and " + COSName.Off.getName());
+            throw new IllegalArgumentException(
+                    "value '" + value + "' is not a valid option for the field "
+                            + getFullyQualifiedName() + ", valid values are: " + onValues + " and "
+                            + COSName.Off.getName());
         }
     }
 

@@ -16,13 +16,14 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
+import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
-import org.sejda.sambox.cos.COSDictionary;
-import org.sejda.sambox.cos.COSName;
 
 /**
  * Radio button fields contain a set of related buttons that can each be on or off.
@@ -33,9 +34,8 @@ public final class PDRadioButton extends PDButton
 {
 
     /**
-     * @see PDField#PDField(PDAcroForm)
-     *
      * @param acroForm The acroform.
+     * @see PDField#PDField(PDAcroForm)
      */
     public PDRadioButton(PDAcroForm acroForm)
     {
@@ -45,10 +45,10 @@ public final class PDRadioButton extends PDButton
 
     /**
      * Constructor.
-     * 
+     *
      * @param acroForm The form that this field is part of.
-     * @param field the PDF object to represent as a field.
-     * @param parent the parent node of the node
+     * @param field    the PDF object to represent as a field.
+     * @param parent   the parent node of the node
      */
     PDRadioButton(PDAcroForm acroForm, COSDictionary field, PDNonTerminalField parent)
     {
@@ -56,10 +56,10 @@ public final class PDRadioButton extends PDButton
     }
 
     /**
-     * From the PDF Spec <br/>
-     * If set, a group of radio buttons within a radio button field that use the same value for the on state will turn
-     * on and off in unison; that is if one is checked, they are all checked. If clear, the buttons are mutually
-     * exclusive (the same behavior as HTML radio buttons).
+     * From the PDF Spec <br/> If set, a group of radio buttons within a radio button field that use
+     * the same value for the on state will turn on and off in unison; that is if one is checked,
+     * they are all checked. If clear, the buttons are mutually exclusive (the same behavior as HTML
+     * radio buttons).
      *
      * @param radiosInUnison The new flag for radiosInUnison.
      */
@@ -69,7 +69,6 @@ public final class PDRadioButton extends PDButton
     }
 
     /**
-     *
      * @return true If the flag is set for radios in unison.
      */
     public boolean isRadiosInUnison()
@@ -78,18 +77,43 @@ public final class PDRadioButton extends PDButton
     }
 
     /**
+     * This will get the selected index.
+     * <p>
+     * A RadioButton might have multiple same value options which are not selected jointly if they
+     * are not set in unison {@link #isRadiosInUnison()}.</p>
+     *
+     * <p>
+     * The method will return the first selected index or -1 if no option is selected.</p>
+     *
+     * @return the first selected index or -1.
+     */
+    public int getSelectedIndex()
+    {
+        int idx = 0;
+        for (PDAnnotationWidget widget : getWidgets())
+        {
+            if (!COSName.Off.equals(widget.getAppearanceState()))
+            {
+                return idx;
+            }
+            idx++;
+        }
+        return -1;
+    }
+
+    /**
      * This will get the selected export values.
      * <p>
-     * A RadioButton might have an export value to allow field values which can not be encoded as PDFDocEncoding or for
-     * the same export value being assigned to multiple RadioButtons in a group.<br/>
-     * To define an export value the RadioButton must define options {@link #setExportValues(List)} which correspond to
-     * the individual items within the RadioButton.
+     * A RadioButton might have an export value to allow field values which can not be encoded as
+     * PDFDocEncoding or for the same export value being assigned to multiple RadioButtons in a
+     * group.<br/> To define an export value the RadioButton must define options {@link
+     * #setExportValues(List)} which correspond to the individual items within the RadioButton.
      * </p>
      * <p>
-     * The method will either return the corresponding values from the options entry or in case there is no such entry
-     * the fields value
+     * The method will either return the corresponding values from the options entry or in case
+     * there is no such entry the fields value
      * </p>
-     * 
+     *
      * @return the export value of the field.
      * @throws IOException in case the fields value can not be retrieved
      */
@@ -111,6 +135,7 @@ public final class PDRadioButton extends PDButton
             {
                 selectedExportValues.add(exportValues.get(idx));
             }
+            ++idx;
         }
         return selectedExportValues;
     }

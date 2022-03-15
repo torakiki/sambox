@@ -16,13 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.font;
 
-import static java.util.Objects.nonNull;
-import static java.util.Optional.ofNullable;
-
-import java.awt.geom.GeneralPath;
-import java.io.IOException;
-import java.io.InputStream;
-
 import org.apache.fontbox.FontBoxFont;
 import org.apache.fontbox.util.BoundingBox;
 import org.sejda.sambox.cos.COSArray;
@@ -40,6 +33,14 @@ import org.sejda.sambox.util.Matrix;
 import org.sejda.sambox.util.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.awt.geom.GeneralPath;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+
+import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
 
 /**
  * A PostScript Type 3 Font.
@@ -139,9 +140,14 @@ public class PDType3Font extends PDSimpleFont
     {
         int firstChar = dict.getInt(COSName.FIRST_CHAR, -1);
         int lastChar = dict.getInt(COSName.LAST_CHAR, -1);
-        if (!getWidths().isEmpty() && code >= firstChar && code <= lastChar)
+        List<Float> widths = getWidths();
+        if (!widths.isEmpty() && code >= firstChar && code <= lastChar)
         {
-            return ofNullable(getWidths().get(code - firstChar)).orElse(0f);
+            if (code - firstChar >= widths.size())
+            {
+                return 0;
+            }
+            return ofNullable(widths.get(code - firstChar)).orElse(0f);
         }
         PDFontDescriptor fd = getFontDescriptor();
         if (nonNull(fd))
@@ -274,8 +280,8 @@ public class PDType3Font extends PDSimpleFont
      */
     public PDRectangle getFontBBox()
     {
-        return ofNullable(dict.getDictionaryObject(COSName.FONT_BBOX, COSArray.class))
-                .map(PDRectangle::new).orElse(null);
+        return ofNullable(dict.getDictionaryObject(COSName.FONT_BBOX, COSArray.class)).map(
+                PDRectangle::new).orElse(null);
     }
 
     @Override
@@ -323,7 +329,7 @@ public class PDType3Font extends PDSimpleFont
 
     /**
      * Returns the dictionary containing all streams to be used to render the glyphs.
-     * 
+     *
      * @return the dictionary containing all glyph streams.
      */
     public COSDictionary getCharProcs()
@@ -337,25 +343,27 @@ public class PDType3Font extends PDSimpleFont
 
     /**
      * Returns the stream of the glyph for the given character code
-     * 
+     *
      * @param code character code
      * @return the stream to be used to render the glyph
      */
     public PDType3CharProc getCharProc(int code)
     {
         String name = getEncoding().getName(code);
-        return ofNullable(
-                getCharProcs().getDictionaryObject(COSName.getPDFName(name), COSStream.class))
-                        .map((s) -> new PDType3CharProc(this, s)).orElse(null);
+        return ofNullable(getCharProcs()).map(
+                        d -> d.getDictionaryObject(COSName.getPDFName(name), COSStream.class))
+                .map(s -> new PDType3CharProc(this, s)).orElse(null);
     }
 
     @Override
-    public boolean isOriginalEmbeddedMissing() {
+    public boolean isOriginalEmbeddedMissing()
+    {
         return false;
     }
 
     @Override
-    public boolean isMappingFallbackUsed() {
+    public boolean isMappingFallbackUsed()
+    {
         return false;
     }
 }

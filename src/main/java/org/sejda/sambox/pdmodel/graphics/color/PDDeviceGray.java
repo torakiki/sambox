@@ -16,11 +16,11 @@
  */
 package org.sejda.sambox.pdmodel.graphics.color;
 
+import org.sejda.sambox.cos.COSName;
+
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
-
-import org.sejda.sambox.cos.COSName;
 
 /**
  * A color space with black, white, and intermediate shades of gray.
@@ -30,9 +30,11 @@ import org.sejda.sambox.cos.COSName;
  */
 public final class PDDeviceGray extends PDDeviceColorSpace
 {
-    /** The single instance of this class. */
+    /**
+     * The single instance of this class.
+     */
     public static final PDDeviceGray INSTANCE = new PDDeviceGray();
-    
+
     private final PDColor initialColor = new PDColor(new float[] { 0 }, this);
 
     private PDDeviceGray()
@@ -67,6 +69,14 @@ public final class PDDeviceGray extends PDDeviceColorSpace
     public float[] toRGB(float[] value)
     {
         return new float[] { value[0], value[0], value[0] };
+    }
+
+    @Override
+    public BufferedImage toRawImage(WritableRaster raster) throws IOException
+    {
+        // DeviceGray is whatever the output device chooses. We have no Java colorspace
+        // for this.
+        return null;
     }
 
     @Override

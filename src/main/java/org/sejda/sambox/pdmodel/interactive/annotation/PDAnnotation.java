@@ -16,14 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.interactive.annotation;
 
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
-import static java.util.Optional.of;
-import static java.util.Optional.ofNullable;
-import static org.sejda.commons.util.RequireUtils.requireArg;
-
-import java.util.Calendar;
-
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
@@ -41,9 +33,17 @@ import org.sejda.sambox.pdmodel.graphics.color.PDDeviceRGB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Calendar;
+
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static java.util.Optional.of;
+import static java.util.Optional.ofNullable;
+import static org.sejda.commons.util.RequireUtils.requireArg;
+
 /**
  * A PDF annotation.
- * 
+ *
  * @author Ben Litchfield
  */
 public abstract class PDAnnotation extends PDDictionaryWrapper
@@ -91,14 +91,14 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
     public static final int FLAG_TOGGLE_NO_VIEW = 1 << 8;
     /**
      * An annotation flag.
-     * 
+     *
      * @see #setLockedContents(boolean)
      */
     private static final int FLAG_LOCKED_CONTENTS = 1 << 9;
 
     /**
      * Create the annotation of the expected type from the given dictionary.
-     * 
+     *
      * @return The correctly typed annotation object.
      */
     public static <T extends PDAnnotation> T createAnnotation(COSDictionary dictionary,
@@ -119,7 +119,7 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
 
     /**
      * Create the correct annotation from the base COS object.
-     * 
+     *
      * @param base The COS object that is the annotation.
      * @return The correctly typed annotation object.
      */
@@ -197,10 +197,11 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
     }
 
     /**
-     * The annotation rectangle, defining the location of the annotation on the page in default user space units. This
-     * is usually required and should not return null on valid PDF documents. But where this is a parent form field with
-     * children, such as radio button collections then the rectangle will be null.
-     * 
+     * The annotation rectangle, defining the location of the annotation on the page in default user
+     * space units. This is usually required and should not return null on valid PDF documents. But
+     * where this is a parent form field with children, such as radio button collections then the
+     * rectangle will be null.
+     *
      * @return The Rect value of this annotation.
      */
     public PDRectangle getRectangle()
@@ -209,9 +210,8 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
         if (rectArray != null)
         {
             if (rectArray.size() == 4 && rectArray.getObject(0) instanceof COSNumber
-                    && rectArray.getObject(1) instanceof COSNumber
-                    && rectArray.getObject(2) instanceof COSNumber
-                    && rectArray.getObject(3) instanceof COSNumber)
+                    && rectArray.getObject(1) instanceof COSNumber && rectArray.getObject(
+                    2) instanceof COSNumber && rectArray.getObject(3) instanceof COSNumber)
             {
                 return new PDRectangle(rectArray);
             }
@@ -222,7 +222,7 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
 
     /**
      * This will set the rectangle for this annotation.
-     * 
+     *
      * @param rectangle The new rectangle values.
      */
     public void setRectangle(PDRectangle rectangle)
@@ -232,7 +232,7 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
 
     /**
      * This will get the flags for this field.
-     * 
+     *
      * @return flags The set of flags.
      */
     public int getAnnotationFlags()
@@ -242,7 +242,7 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
 
     /**
      * This will set the flags for this field.
-     * 
+     *
      * @param flags The new flags.
      */
     public void setAnnotationFlags(int flags)
@@ -251,18 +251,17 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
     }
 
     /**
-     * Returns the annotations appearance state, which selects the applicable appearance stream from an appearance
-     * subdictionary.
+     * Returns the annotations appearance state, which selects the applicable appearance stream from
+     * an appearance subdictionary.
      */
     public COSName getAppearanceState()
     {
-        return ofNullable(getCOSObject().getDictionaryObject(COSName.AS, COSName.class))
-                .orElse(null);
+        return getCOSObject().getDictionaryObject(COSName.AS, COSName.class);
     }
 
     /**
      * This will set the annotations appearance state name.
-     * 
+     *
      * @param as The name of the appearance stream.
      */
     public void setAppearanceState(String as)
@@ -271,19 +270,20 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
     }
 
     /**
-     * This will get the appearance dictionary associated with this annotation. This may return null.
-     * 
+     * This will get the appearance dictionary associated with this annotation. This may return
+     * null.
+     *
      * @return This annotations appearance.
      */
     public PDAppearanceDictionary getAppearance()
     {
-        return ofNullable(getCOSObject().getDictionaryObject(COSName.AP, COSDictionary.class))
-                .map(PDAppearanceDictionary::new).orElse(null);
+        return ofNullable(getCOSObject().getDictionaryObject(COSName.AP, COSDictionary.class)).map(
+                PDAppearanceDictionary::new).orElse(null);
     }
 
     /**
      * This will set the appearance associated with this annotation.
-     * 
+     *
      * @param appearance The appearance dictionary for this annotation.
      */
     public void setAppearance(PDAppearanceDictionary appearance)
@@ -293,8 +293,8 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
     }
 
     /**
-     * Returns the appearance stream for this annotation, if any. The annotation state is taken into account, if
-     * present.
+     * Returns the appearance stream for this annotation, if any. The annotation state is taken into
+     * account, if present.
      */
     public PDAppearanceStream getNormalAppearanceStream()
     {
@@ -320,7 +320,7 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
 
     /**
      * Get the invisible flag.
-     * 
+     *
      * @return The invisible flag.
      */
     public boolean isInvisible()
@@ -330,7 +330,7 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
 
     /**
      * Set the invisible flag.
-     * 
+     *
      * @param invisible The new invisible flag.
      */
     public void setInvisible(boolean invisible)
@@ -340,7 +340,7 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
 
     /**
      * Get the hidden flag.
-     * 
+     *
      * @return The hidden flag.
      */
     public boolean isHidden()
@@ -350,7 +350,7 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
 
     /**
      * Set the hidden flag.
-     * 
+     *
      * @param hidden The new hidden flag.
      */
     public void setHidden(boolean hidden)
@@ -360,7 +360,7 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
 
     /**
      * Get the printed flag.
-     * 
+     *
      * @return The printed flag.
      */
     public boolean isPrinted()
@@ -370,7 +370,7 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
 
     /**
      * Set the printed flag.
-     * 
+     *
      * @param printed The new printed flag.
      */
     public void setPrinted(boolean printed)
@@ -380,7 +380,7 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
 
     /**
      * Get the noZoom flag.
-     * 
+     *
      * @return The noZoom flag.
      */
     public boolean isNoZoom()
@@ -390,7 +390,7 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
 
     /**
      * Set the noZoom flag.
-     * 
+     *
      * @param noZoom The new noZoom flag.
      */
     public void setNoZoom(boolean noZoom)
@@ -400,7 +400,7 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
 
     /**
      * Get the noRotate flag.
-     * 
+     *
      * @return The noRotate flag.
      */
     public boolean isNoRotate()
@@ -410,7 +410,7 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
 
     /**
      * Set the noRotate flag.
-     * 
+     *
      * @param noRotate The new noRotate flag.
      */
     public void setNoRotate(boolean noRotate)
@@ -420,7 +420,7 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
 
     /**
      * Get the noView flag.
-     * 
+     *
      * @return The noView flag.
      */
     public boolean isNoView()
@@ -430,7 +430,7 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
 
     /**
      * Set the noView flag.
-     * 
+     *
      * @param noView The new noView flag.
      */
     public void setNoView(boolean noView)
@@ -440,7 +440,7 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
 
     /**
      * Get the readOnly flag.
-     * 
+     *
      * @return The readOnly flag.
      */
     public boolean isReadOnly()
@@ -450,7 +450,7 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
 
     /**
      * Set the readOnly flag.
-     * 
+     *
      * @param readOnly The new readOnly flag.
      */
     public void setReadOnly(boolean readOnly)
@@ -460,7 +460,7 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
 
     /**
      * Get the locked flag.
-     * 
+     *
      * @return The locked flag.
      */
     public boolean isLocked()
@@ -470,7 +470,7 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
 
     /**
      * Set the locked flag.
-     * 
+     *
      * @param locked The new locked flag.
      */
     public void setLocked(boolean locked)
@@ -480,7 +480,7 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
 
     /**
      * Get the toggleNoView flag.
-     * 
+     *
      * @return The toggleNoView flag.
      */
     public boolean isToggleNoView()
@@ -490,7 +490,7 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
 
     /**
      * Set the toggleNoView flag.
-     * 
+     *
      * @param toggleNoView The new toggleNoView flag.
      */
     public void setToggleNoView(boolean toggleNoView)
@@ -510,9 +510,9 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
     }
 
     /**
-     * Set the LockedContents flag. If set, do not allow the contents of the annotation to be modified by the user. This
-     * flag does not restrict deletion of the annotation or changes to other annotation properties, such as position and
-     * size.
+     * Set the LockedContents flag. If set, do not allow the contents of the annotation to be
+     * modified by the user. This flag does not restrict deletion of the annotation or changes to
+     * other annotation properties, such as position and size.
      *
      * @param lockedContents The new LockedContents flag value.
      * @see <a href="https://www.adobe.com/content/dam/acom/en/devnet/acrobat/pdfs/PDF32000_2008.pdf#page=393">PDF
@@ -528,7 +528,7 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
 
     /**
      * Get the "contents" of the field.
-     * 
+     *
      * @return the value of the contents.
      */
     public String getContents()
@@ -538,7 +538,7 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
 
     /**
      * Set the "contents" of the field.
-     * 
+     *
      * @param value the value of the contents.
      */
     public void setContents(String value)
@@ -548,7 +548,7 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
 
     /**
      * This will retrieve the date and time the annotation was modified.
-     * 
+     *
      * @return the modified date/time (often in date format, but can be an arbitary string).
      */
     public String getModifiedDate()
@@ -559,10 +559,11 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
     /**
      * This will set the date and time the annotation was modified.
      *
-     * @param m the date and time the annotation was created. Date values used in a PDF shall conform to a standard date
-     * format, which closely follows that of the international standard ASN.1 (Abstract Syntax Notation One), defined in
-     * ISO/IEC 8824. A date shall be a text string of the form (D:YYYYMMDDHHmmSSOHH'mm). Alternatively, use
-     * {@link #setModifiedDate(java.util.Calendar)}
+     * @param m the date and time the annotation was created. Date values used in a PDF shall
+     *          conform to a standard date format, which closely follows that of the international
+     *          standard ASN.1 (Abstract Syntax Notation One), defined in ISO/IEC 8824. A date shall
+     *          be a text string of the form (D:YYYYMMDDHHmmSSOHH'mm). Alternatively, use {@link
+     *          #setModifiedDate(java.util.Calendar)}
      */
     public void setModifiedDate(String m)
     {
@@ -580,9 +581,10 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
     }
 
     /**
-     * This will get the name, a string intended to uniquely identify each annotation within a page. Not to be confused
-     * with some annotations Name entry which impact the default image drawn for them.
-     * 
+     * This will get the name, a string intended to uniquely identify each annotation within a page.
+     * Not to be confused with some annotations Name entry which impact the default image drawn for
+     * them.
+     *
      * @return The identifying name for the Annotation.
      */
     public String getAnnotationName()
@@ -591,9 +593,10 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
     }
 
     /**
-     * This will set the name, a string intended to uniquely identify each annotation within a page. Not to be confused
-     * with some annotations Name entry which impact the default image drawn for them.
-     * 
+     * This will set the name, a string intended to uniquely identify each annotation within a page.
+     * Not to be confused with some annotations Name entry which impact the default image drawn for
+     * them.
+     *
      * @param nm The identifying name for the annotation.
      */
     public void setAnnotationName(String nm)
@@ -603,7 +606,7 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
 
     /**
      * This will get the key of this annotation in the structural parent tree.
-     * 
+     *
      * @return the integer key of the annotation's entry in the structural parent tree
      */
     public int getStructParent()
@@ -613,7 +616,7 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
 
     /**
      * This will set the key for this annotation in the structural parent tree.
-     * 
+     *
      * @param structParent The new key for this annotation.
      */
     public void setStructParent(int structParent)
@@ -622,9 +625,11 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
     }
 
     /**
-     * This will get the optional content group or optional content membership dictionary for the annotation.
+     * This will get the optional content group or optional content membership dictionary for the
+     * annotation.
      *
-     * @return The optional content group or optional content membership dictionary or null if there is none.
+     * @return The optional content group or optional content membership dictionary or null if there
+     * is none.
      */
     public PDPropertyList getOptionalContent()
     {
@@ -637,7 +642,8 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
     }
 
     /**
-     * Sets the optional content group or optional content membership dictionary for the annotation.
+     * Sets the optional content group or optional content membership dictionary for the
+     * annotation.
      *
      * @param oc The optional content group or optional content membership dictionary.
      */
@@ -647,10 +653,11 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
     }
 
     /**
-     * This will retrieve the border array. If none is available then it will return the default, which is [0 0 1]. The
-     * array consists of at least three numbers defining the horizontal corner radius, vertical corner radius, and
-     * border width. The array may have a fourth element, an optional dash array defining a pattern of dashes and gaps
-     * that shall be used in drawing the border. If the array has less than three elements, it will be filled with 0.
+     * This will retrieve the border array. If none is available then it will return the default,
+     * which is [0 0 1]. The array consists of at least three numbers defining the horizontal corner
+     * radius, vertical corner radius, and border width. The array may have a fourth element, an
+     * optional dash array defining a pattern of dashes and gaps that shall be used in drawing the
+     * border. If the array has less than three elements, it will be filled with 0.
      *
      * @return the border array.
      */
@@ -667,7 +674,7 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
 
     /**
      * This will set the border array.
-     * 
+     *
      * @param borderArray the border array to set.
      */
     public void setBorder(COSArray borderArray)
@@ -676,13 +683,12 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
     }
 
     /**
-     * This will set the color used in drawing various elements. As of PDF 1.6 these are : Background of icon when
-     * closed Title bar of popup window Border of a link annotation
-     * 
+     * This will set the color used in drawing various elements. As of PDF 1.6 these are :
+     * Background of icon when closed Title bar of popup window Border of a link annotation
+     * <p>
      * Colour is in DeviceRGB colourspace
-     * 
+     *
      * @param c colour in the DeviceRGB colourspace
-     * 
      */
     public void setColor(PDColor c)
     {
@@ -698,7 +704,6 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
      * </ul>
      *
      * @return Color object representing the colour
-     * 
      */
     public PDColor getColor()
     {
@@ -725,7 +730,7 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
 
     /**
      * This will retrieve the subtype of the annotation.
-     * 
+     *
      * @return the subtype
      */
     public String getSubtype()
@@ -735,7 +740,7 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
 
     /**
      * This will set the corresponding page for this annotation.
-     * 
+     *
      * @param page is the corresponding page
      */
     public void setPage(PDPage page)
@@ -745,7 +750,7 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
 
     /**
      * This will retrieve the corresponding page of this annotation.
-     * 
+     *
      * @return the corresponding page
      */
     public PDPage getPage()
@@ -759,9 +764,9 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
     }
 
     /**
-     * Create the appearance entry for this annotation. Not having it may prevent display in some viewers. This method
-     * is for overriding in subclasses, the default implementation does nothing.
-     * 
+     * Create the appearance entry for this annotation. Not having it may prevent display in some
+     * viewers. This method is for overriding in subclasses, the default implementation does
+     * nothing.
      */
     public void constructAppearances()
     {

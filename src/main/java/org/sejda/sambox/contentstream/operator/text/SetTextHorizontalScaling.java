@@ -16,15 +16,15 @@
  */
 package org.sejda.sambox.contentstream.operator.text;
 
-import java.io.IOException;
-import java.util.List;
-
 import org.sejda.sambox.contentstream.operator.MissingOperandException;
 import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.contentstream.operator.OperatorProcessor;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSNumber;
+
+import java.io.IOException;
+import java.util.List;
 
 /**
  * Tz: Set horizontal text scaling.
@@ -40,8 +40,13 @@ public class SetTextHorizontalScaling extends OperatorProcessor
         {
             throw new MissingOperandException(operator, arguments);
         }
-        
-        COSNumber scaling = (COSNumber)arguments.get(0);
+
+        COSBase base = arguments.get(0);
+        if (!(base instanceof COSNumber))
+        {
+            return;
+        }
+        COSNumber scaling = (COSNumber) base;
         getContext().getGraphicsState().getTextState().setHorizontalScaling(scaling.floatValue());
     }
 

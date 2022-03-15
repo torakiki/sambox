@@ -16,20 +16,19 @@
  */
 package org.sejda.sambox.pdmodel.common.filespecification;
 
-import static java.util.Optional.ofNullable;
-
-import java.util.Optional;
-
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSStream;
 
+import java.util.Optional;
+
+import static java.util.Optional.ofNullable;
+
 /**
  * This represents a file specification.
  *
  * @author Ben Litchfield
- * 
  */
 public class PDComplexFileSpecification implements PDFileSpecification
 {
@@ -55,8 +54,8 @@ public class PDComplexFileSpecification implements PDFileSpecification
     {
         if (embeddedFileDictionary == null && fileSpecificationDictionary != null)
         {
-            embeddedFileDictionary = (COSDictionary) fileSpecificationDictionary
-                    .getDictionaryObject(COSName.EF);
+            embeddedFileDictionary = fileSpecificationDictionary.getDictionaryObject(COSName.EF,
+                    COSDictionary.class);
         }
         return embeddedFileDictionary;
     }
@@ -76,8 +75,8 @@ public class PDComplexFileSpecification implements PDFileSpecification
      * Preferred method for getting the filename. It will determinate the recommended file name.
      * </p>
      * <p>
-     * First of all we try to get the unicode filename if it exist. If it doesn't exist we take a look at the DOS, MAC
-     * UNIX filenames. If no one exist the required F entry will be returned.
+     * First of all we try to get the unicode filename if it exist. If it doesn't exist we take a
+     * look at the DOS, MAC UNIX filenames. If no one exist the required F entry will be returned.
      * </p>
      *
      * @return The preferred file name.
@@ -115,8 +114,9 @@ public class PDComplexFileSpecification implements PDFileSpecification
     }
 
     /**
-     * This will set the unicode file name. If you call this, then do not forget to also call
-     * {@link #setFile(java.lang.String) setFile(String)} or the attachment will not be visible on some viewers.
+     * This will set the unicode file name. If you call this, then do not forget to also call {@link
+     * #setFile(java.lang.String) setFile(String)} or the attachment will not be visible on some
+     * viewers.
      *
      * @param file The name of the file.
      */
@@ -210,7 +210,8 @@ public class PDComplexFileSpecification implements PDFileSpecification
     }
 
     /**
-     * Tell if the underlying file is volatile and should not be cached by the reader application. Default: false
+     * Tell if the underlying file is volatile and should not be cached by the reader application.
+     * Default: false
      *
      * @param fileIsVolatile The new value for the volatility of the file.
      */
@@ -240,8 +241,9 @@ public class PDComplexFileSpecification implements PDFileSpecification
     }
 
     /**
-     * Set the embedded file for this spec. You should also call {@link #setEmbeddedFileUnicode(PDEmbeddedFile)} for
-     * cross-platform and cross-language compatibility.
+     * Set the embedded file for this spec. You should also call {@link
+     * #setEmbeddedFileUnicode(PDEmbeddedFile)} for cross-platform and cross-language
+     * compatibility.
      *
      * @param file The file to be embedded.
      */
@@ -369,8 +371,9 @@ public class PDComplexFileSpecification implements PDFileSpecification
     }
 
     /**
-     * Set the embedded Unicode file for this spec. If you call this, then do not forget to also call
-     * {@link #setEmbeddedFile(PDEmbeddedFile)} or the attachment will not be visible on some viewers.
+     * Set the embedded Unicode file for this spec. If you call this, then do not forget to also
+     * call {@link #setEmbeddedFile(PDEmbeddedFile)} or the attachment will not be visible on some
+     * viewers.
      *
      * @param file The Unicode file to be embedded.
      */
@@ -389,7 +392,6 @@ public class PDComplexFileSpecification implements PDFileSpecification
     }
 
     /**
-     * 
      * @return the first/best available alternative of the embedded file
      */
     public PDEmbeddedFile getBestEmbeddedFile()
@@ -407,7 +409,7 @@ public class PDComplexFileSpecification implements PDFileSpecification
 
     /**
      * Set the file description.
-     * 
+     *
      * @param description The file description
      */
     public void setFileDescription(String description)
@@ -427,7 +429,7 @@ public class PDComplexFileSpecification implements PDFileSpecification
 
     /**
      * Set the collection item dictionary
-     * 
+     *
      * @param the collection item dictionary
      */
     public void setCollectionItem(COSDictionary dictionary)

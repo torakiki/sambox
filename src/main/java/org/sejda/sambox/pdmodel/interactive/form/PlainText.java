@@ -23,35 +23,32 @@ import java.text.AttributedCharacterIterator.Attribute;
 import java.text.AttributedString;
 import java.text.BreakIterator;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
  * A block of text.
  * <p>
- * A block of text can contain multiple paragraphs which will be treated individually within the block placement.
+ * A block of text can contain multiple paragraphs which will be treated individually within the
+ * block placement.
  * </p>
- * 
  */
 class PlainText
 {
     private static final float FONTSCALE = 1000f;
 
-    private final List<Paragraph> paragraphs;
+    private final ArrayList<Paragraph> paragraphs = new ArrayList<>();
 
     /**
      * Construct the text block from a single value.
-     * 
-     * Constructs the text block from a single value splitting into individual {@link Paragraph} when a new line
-     * character is encountered.
-     * 
+     * <p>
+     * Constructs the text block from a single value splitting into individual {@link Paragraph}
+     * when a new line character is encountered.
+     *
      * @param textValue the text block string.
      */
     PlainText(String textValue)
     {
-        List<String> parts = Arrays
-                .asList(textValue.replaceAll("\t", " ").split("\\r\\n|\\n|\\r|\\u2028|\\u2029"));
-        paragraphs = new ArrayList<>();
+        String[] parts = textValue.replaceAll("\t", " ").split("\\r\\n|\\n|\\r|\\u2028|\\u2029");
         for (String part : parts)
         {
             // Acrobat prints a space for an empty paragraph
@@ -61,18 +58,22 @@ class PlainText
             }
             paragraphs.add(new Paragraph(part));
         }
+        if (paragraphs.isEmpty())
+        {
+            paragraphs.add(new Paragraph(""));
+        }
     }
 
     /**
      * Construct the text block from a list of values.
-     * 
-     * Constructs the text block from a list of values treating each entry as an individual {@link Paragraph}.
-     * 
+     * <p>
+     * Constructs the text block from a list of values treating each entry as an individual {@link
+     * Paragraph}.
+     *
      * @param listValue the text block string.
      */
     PlainText(List<String> listValue)
     {
-        paragraphs = new ArrayList<Paragraph>();
         for (String part : listValue)
         {
             paragraphs.add(new Paragraph(part));
@@ -81,7 +82,7 @@ class PlainText
 
     /**
      * Get the list of paragraphs.
-     * 
+     *
      * @return the paragraphs.
      */
     List<Paragraph> getParagraphs()
@@ -91,9 +92,9 @@ class PlainText
 
     /**
      * Attribute keys and attribute values used for text handling.
-     * 
-     * This is similar to {@link java.awt.font.TextAttribute} but handled individually as to avoid a dependency on awt.
-     * 
+     * <p>
+     * This is similar to {@link java.awt.font.TextAttribute} but handled individually as to avoid a
+     * dependency on awt.
      */
     static class TextAttribute extends Attribute
     {
@@ -117,9 +118,9 @@ class PlainText
     /**
      * A block of text to be formatted as a whole.
      * <p>
-     * A block of text can contain multiple paragraphs which will be treated individually within the block placement.
+     * A block of text can contain multiple paragraphs which will be treated individually within the
+     * block placement.
      * </p>
-     * 
      */
     static class Paragraph
     {
@@ -132,7 +133,7 @@ class PlainText
 
         /**
          * Get the paragraph text.
-         * 
+         *
          * @return the text.
          */
         String getText()
@@ -142,10 +143,10 @@ class PlainText
 
         /**
          * Break the paragraph into individual lines.
-         * 
-         * @param font the font used for rendering the text.
+         *
+         * @param font     the font used for rendering the text.
          * @param fontSize the fontSize used for rendering the text.
-         * @param width the width of the box holding the content.
+         * @param width    the width of the box holding the content.
          * @return the individual lines.
          * @throws IOException
          */
@@ -199,7 +200,7 @@ class PlainText
                     while (true)
                     {
                         splitOffset--;
-                        String substring = word.trim().substring(0, splitOffset);
+                        String substring = word.substring(0, splitOffset);
                         float substringWidth = font.getStringWidth(substring) * scale;
                         if (substringWidth < width)
                         {
@@ -260,11 +261,11 @@ class PlainText
                 calculatedWidth = calculatedWidth + (Float) word.getAttributes().getIterator()
                         .getAttribute(TextAttribute.WIDTH);
                 String text = word.getText();
-                if (words.indexOf(word) == words.size() - 1
-                        && Character.isWhitespace(text.charAt(text.length() - 1)))
+                if (words.indexOf(word) == words.size() - 1 && Character.isWhitespace(
+                        text.charAt(text.length() - 1)))
                 {
-                    float whitespaceWidth = font.getStringWidth(text.substring(text.length() - 1))
-                            * scale;
+                    float whitespaceWidth =
+                            font.getStringWidth(text.substring(text.length() - 1)) * scale;
                     calculatedWidth = calculatedWidth - whitespaceWidth;
                 }
             }
@@ -289,7 +290,7 @@ class PlainText
 
     /**
      * An individual word.
-     * 
+     * <p>
      * A word is defined as a string which must be kept on the same line.
      */
     static class Word

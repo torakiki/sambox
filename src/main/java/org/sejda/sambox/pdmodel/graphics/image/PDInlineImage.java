@@ -16,14 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.graphics.image;
 
-import java.awt.Paint;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.ByteBuffer;
-import java.util.List;
-
 import org.sejda.commons.FastByteArrayOutputStream;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSArrayList;
@@ -37,9 +29,18 @@ import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
 
+import java.awt.Paint;
+import java.awt.image.BufferedImage;
+import java.awt.image.WritableRaster;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.util.List;
+
 /**
- * An inline image object which uses a special syntax to express the data for a small image directly within the content
- * stream.
+ * An inline image object which uses a special syntax to express the data for a small image directly
+ * within the content stream.
  *
  * @author Ben Litchfield
  * @author John Hewson
@@ -59,8 +60,8 @@ public final class PDInlineImage implements PDImage
      * Creates an inline image from the given parameters and data.
      *
      * @param parameters the image parameters
-     * @param data the image data
-     * @param resources the current resources
+     * @param data       the image data
+     * @param resources  the current resources
      * @throws IOException if the stream cannot be decoded
      */
     public PDInlineImage(COSDictionary parameters, byte[] data, PDResources resources)
@@ -311,6 +312,18 @@ public final class PDInlineImage implements PDImage
     public byte[] getData()
     {
         return decodedData;
+    }
+
+    @Override
+    public WritableRaster getRawRaster() throws IOException
+    {
+        return SampledImageReader.getRawRaster(this);
+    }
+
+    @Override
+    public BufferedImage getRawImage() throws IOException
+    {
+        return getColorSpace().toRawImage(getRawRaster());
     }
 
     @Override

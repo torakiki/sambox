@@ -1,7 +1,11 @@
 package org.sejda.sambox.pdmodel.graphics.image;
 
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.*;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.sejda.io.SeekableSource;
+import org.sejda.io.SeekableSources;
+import org.sejda.sambox.util.filetypedetector.FileType;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,12 +13,10 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.sejda.io.SeekableSource;
-import org.sejda.io.SeekableSources;
-import org.sejda.sambox.util.filetypedetector.FileType;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class PDImageXObjectTest
 {
@@ -31,7 +33,9 @@ public class PDImageXObjectTest
     @Test
     public void testSeekableSource() throws IOException
     {
-        PDImageXObject object = PDImageXObject.createFromSeekableSource(tempSeekableSourceFromResource("/org/sejda/sambox/resources/images/sample.png"), "sample.png");
+        PDImageXObject object = PDImageXObject.createFromSeekableSource(
+                tempSeekableSourceFromResource("/org/sejda/sambox/resources/images/sample.png"),
+                "sample.png");
         assertEquals(object.getHeight(), 395);
     }
 

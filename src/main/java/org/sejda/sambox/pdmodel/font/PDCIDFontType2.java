@@ -16,16 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.font;
 
-import static java.util.Objects.nonNull;
-
-import java.awt.geom.GeneralPath;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.fontbox.cff.Type2CharString;
 import org.apache.fontbox.cmap.CMap;
 import org.apache.fontbox.ttf.CmapLookup;
@@ -41,6 +31,16 @@ import org.sejda.sambox.pdmodel.common.PDStream;
 import org.sejda.sambox.util.Matrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.awt.geom.GeneralPath;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import static java.util.Objects.nonNull;
 
 /**
  * Type 2 CIDFont (TrueType).
@@ -67,7 +67,7 @@ public class PDCIDFontType2 extends PDCIDFont
      * Constructor.
      *
      * @param fontDictionary The font dictionary according to the PDF specification.
-     * @param parent The parent font.
+     * @param parent         The parent font.
      * @throws IOException
      */
     public PDCIDFontType2(COSDictionary fontDictionary, PDType0Font parent) throws IOException
@@ -79,8 +79,8 @@ public class PDCIDFontType2 extends PDCIDFont
      * Constructor.
      *
      * @param fontDictionary The font dictionary according to the PDF specification.
-     * @param parent The parent font.
-     * @param trueTypeFont The true type font used to create the parent font
+     * @param parent         The parent font.
+     * @param trueTypeFont   The true type font used to create the parent font
      * @throws IOException
      */
     public PDCIDFontType2(COSDictionary fontDictionary, PDType0Font parent,
@@ -168,8 +168,8 @@ public class PDCIDFontType2 extends PDCIDFont
     {
         TrueTypeFont ttfFont;
 
-        CIDFontMapping mapping = FontMappers.instance().getCIDFont(getBaseFont(),
-                getFontDescriptor(), getCIDSystemInfo());
+        CIDFontMapping mapping = FontMappers.instance()
+                .getCIDFont(getBaseFont(), getFontDescriptor(), getCIDSystemInfo());
         if (mapping.isCIDFont())
         {
             ttfFont = mapping.getFont();
@@ -237,7 +237,11 @@ public class PDCIDFontType2 extends PDCIDFont
         // Acrobat allows bad PDFs to use Unicode CMaps here instead of CID CMaps, see PDFBOX-1283
         if (!cMap.hasCIDMappings() && cMap.hasUnicodeMappings())
         {
-            return cMap.toUnicode(code).codePointAt(0); // actually: code -> CID
+            String unicode = cMap.toUnicode(code);
+            if (unicode != null)
+            {
+                return unicode.codePointAt(0); // actually: code -> CID
+            }
         }
 
         return cMap.toCID(code);
@@ -266,7 +270,11 @@ public class PDCIDFontType2 extends PDCIDFont
                 // Acrobat allows non-embedded GIDs - todo: can we find a test PDF for this?
                 LOG.warn("Using non-embedded GIDs in font " + getName());
                 int cid = codeToCID(code);
-                return cid2gid[cid];
+                if (cid < cid2gid.length)
+                {
+                    return cid2gid[cid];
+                }
+                return 0;
             }
             // fallback to the ToUnicode CMap, test with PDFBOX-1422 and PDFBOX-2560
             String unicode = parent.toUnicode(code);
@@ -346,17 +354,17 @@ public class PDCIDFontType2 extends PDCIDFont
                 if (cmap != null)
                 {
                     int gid = cmap.getGlyphId(unicode);
-                    
+
                     // SAMBOX specific here
                     // if there's a gid to cid mapping, use it.
                     // otherwise fallback to the old behaviour
-                    if(gid != 0) 
+                    if (gid != 0)
                     {
                         // cmap returns gid = 0 when not found, 
                         // but we use here locally cid = -1 to keep looking
                         cid = gid2cid.getOrDefault(gid, -1);
-                        
-                        if(cid == -1)
+
+                        if (cid == -1)
                         {
                             cid = gid;
                         }
@@ -394,8 +402,9 @@ public class PDCIDFontType2 extends PDCIDFont
 
         if (cid == 0)
         {
-            throw new IllegalArgumentException(String.format("No glyph for U+%04X (%c) in font %s",
-                    unicode, (char) unicode, getName()));
+            throw new IllegalArgumentException(
+                    String.format("No glyph for U+%04X (%c) in font %s", unicode, (char) unicode,
+                            getName()));
         }
 
         // CID is always 2-bytes (16-bit) for TrueType
@@ -415,11 +424,11 @@ public class PDCIDFontType2 extends PDCIDFont
         {
             // fontbox doesn't expose the charToUnicode map via getter
             // use reflection to get access to the underlying data
-            Class clazz = CMap.class;
+            Class<CMap> clazz = CMap.class;
             Field charToUnicodeField = ReflectionUtils.findField(clazz, "charToUnicode");
             ReflectionUtils.makeAccessible(charToUnicodeField);
-            final Map<Integer, String> charToUnicode = (Map<Integer, String>) ReflectionUtils
-                    .getField(charToUnicodeField, cMap);
+            final Map<Integer, String> charToUnicode = (Map<Integer, String>) ReflectionUtils.getField(
+                    charToUnicodeField, cMap);
 
             // if there's an char to unicode map, invert it and use it for lookup
             if (charToUnicode != null)
@@ -466,7 +475,8 @@ public class PDCIDFontType2 extends PDCIDFont
     }
 
     /**
-     * Returns the embedded or substituted TrueType font. May be an OpenType font if the font is not embedded.
+     * Returns the embedded or substituted TrueType font. May be an OpenType font if the font is not
+     * embedded.
      */
     public TrueTypeFont getTrueTypeFont()
     {
@@ -501,12 +511,14 @@ public class PDCIDFontType2 extends PDCIDFont
     }
 
     @Override
-    public boolean isOriginalEmbeddedMissing() {
+    public boolean isOriginalEmbeddedMissing()
+    {
         return isOriginalEmbeddedMissing;
     }
 
     @Override
-    public boolean isMappingFallbackUsed() {
+    public boolean isMappingFallbackUsed()
+    {
         return isMappingFallbackUsed;
     }
 }

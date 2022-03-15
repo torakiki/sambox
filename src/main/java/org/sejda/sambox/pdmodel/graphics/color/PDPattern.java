@@ -16,31 +16,34 @@
  */
 package org.sejda.sambox.pdmodel.graphics.color;
 
-import java.awt.image.BufferedImage;
-import java.awt.image.WritableRaster;
-import java.io.IOException;
-
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.graphics.pattern.PDAbstractPattern;
 
+import java.awt.image.BufferedImage;
+import java.awt.image.WritableRaster;
+import java.io.IOException;
+
 /**
  * A Pattern color space is either a Tiling pattern or a Shading pattern.
+ *
  * @author John Hewson
  * @author Ben Litchfield
  */
 public final class PDPattern extends PDSpecialColorSpace
 {
-    /** A pattern which leaves no marks on the page. */
-    private static PDColor EMPTY_PATTERN = new PDColor(new float[] { }, null);
-    
+    /**
+     * A pattern which leaves no marks on the page.
+     */
+    private static PDColor EMPTY_PATTERN = new PDColor(new float[] {}, null);
+
     private final PDResources resources;
     private PDColorSpace underlyingColorSpace;
 
     /**
      * Creates a new pattern color space.
-     * 
+     *
      * @param resources The current resources.
      */
     public PDPattern(PDResources resources)
@@ -52,8 +55,8 @@ public final class PDPattern extends PDSpecialColorSpace
 
     /**
      * Creates a new uncolored tiling pattern color space.
-     * 
-     * @param resources The current resources.
+     *
+     * @param resources  The current resources.
      * @param colorSpace The underlying color space.
      */
     public PDPattern(PDResources resources, PDColorSpace colorSpace)
@@ -101,9 +104,15 @@ public final class PDPattern extends PDSpecialColorSpace
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public BufferedImage toRawImage(WritableRaster raster) throws IOException
+    {
+        throw new UnsupportedOperationException();
+    }
+
     /**
      * Returns the pattern for the given color.
-     * 
+     *
      * @param color color containing a pattern name
      * @return pattern for the given color
      * @throws java.io.IOException if the pattern name was not found.

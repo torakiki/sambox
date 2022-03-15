@@ -16,15 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.font;
 
-import static java.util.Objects.nonNull;
-
-import java.awt.geom.GeneralPath;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.apache.fontbox.cmap.CMap;
 import org.apache.fontbox.ttf.TTFParser;
 import org.apache.fontbox.ttf.TrueTypeFont;
@@ -38,6 +29,15 @@ import org.sejda.sambox.util.Matrix;
 import org.sejda.sambox.util.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.awt.geom.GeneralPath;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashSet;
+import java.util.Set;
+
+import static java.util.Objects.nonNull;
 
 /**
  * A Composite (Type 0) font.
@@ -57,10 +57,10 @@ public class PDType0Font extends PDFont implements PDVectorFont
     private TrueTypeFont ttf;
 
     /**
-     * Loads a TTF to be embedded and subset into a document as a Type 0 font. If you are loading a font for AcroForm,
-     * then use the 3-parameter constructor instead.
+     * Loads a TTF to be embedded and subset into a document as a Type 0 font. If you are loading a
+     * font for AcroForm, then use the 3-parameter constructor instead.
      *
-     * @param doc The PDF document that will hold the embedded font.
+     * @param doc  The PDF document that will hold the embedded font.
      * @param file A TrueType font.
      * @return A Type0 font with a CIDFontType2 descendant.
      * @throws IOException If there is an error reading the font file.
@@ -73,10 +73,10 @@ public class PDType0Font extends PDFont implements PDVectorFont
     }
 
     /**
-     * Loads a TTF to be embedded and subset into a document as a Type 0 font. If you are loading a font for AcroForm,
-     * then use the 3-parameter constructor instead.
+     * Loads a TTF to be embedded and subset into a document as a Type 0 font. If you are loading a
+     * font for AcroForm, then use the 3-parameter constructor instead.
      *
-     * @param doc The PDF document that will hold the embedded font.
+     * @param doc   The PDF document that will hold the embedded font.
      * @param input An input stream of a TrueType font. It will be closed before returning.
      * @return A Type0 font with a CIDFontType2 descendant.
      * @throws IOException If there is an error reading the font stream.
@@ -91,8 +91,8 @@ public class PDType0Font extends PDFont implements PDVectorFont
     /**
      * Loads a TTF to be embedded into a document as a Type 0 font.
      *
-     * @param doc The PDF document that will hold the embedded font.
-     * @param input A TrueType font.
+     * @param doc         The PDF document that will hold the embedded font.
+     * @param input       A TrueType font.
      * @param embedSubset True if the font will be subset before embedding
      * @return A Type0 font with a CIDFontType2 descendant.
      * @throws IOException If there is an error reading the font stream.
@@ -106,8 +106,8 @@ public class PDType0Font extends PDFont implements PDVectorFont
     /**
      * Loads a TTF to be embedded into a document as a Type 0 font.
      *
-     * @param doc The PDF document that will hold the embedded font.
-     * @param ttf A TrueType font.
+     * @param doc         The PDF document that will hold the embedded font.
+     * @param ttf         A TrueType font.
      * @param embedSubset True if the font will be subset before embedding
      * @return A Type0 font with a CIDFontType2 descendant.
      * @throws IOException If there is an error reading the font stream.
@@ -121,7 +121,7 @@ public class PDType0Font extends PDFont implements PDVectorFont
     /**
      * Loads a TTF to be embedded into a document as a vertical Type 0 font.
      *
-     * @param doc The PDF document that will hold the embedded font.
+     * @param doc  The PDF document that will hold the embedded font.
      * @param file A TrueType font.
      * @return A Type0 font with a CIDFontType2 descendant.
      * @throws IOException If there is an error reading the font file.
@@ -134,7 +134,7 @@ public class PDType0Font extends PDFont implements PDVectorFont
     /**
      * Loads a TTF to be embedded into a document as a vertical Type 0 font.
      *
-     * @param doc The PDF document that will hold the embedded font.
+     * @param doc   The PDF document that will hold the embedded font.
      * @param input A TrueType font.
      * @return A Type0 font with a CIDFontType2 descendant.
      * @throws IOException If there is an error reading the font stream.
@@ -147,8 +147,8 @@ public class PDType0Font extends PDFont implements PDVectorFont
     /**
      * Loads a TTF to be embedded into a document as a vertical Type 0 font.
      *
-     * @param doc The PDF document that will hold the embedded font.
-     * @param input A TrueType font.
+     * @param doc         The PDF document that will hold the embedded font.
+     * @param input       A TrueType font.
      * @param embedSubset True if the font will be subset before embedding
      * @return A Type0 font with a CIDFontType2 descendant.
      * @throws IOException If there is an error reading the font stream.
@@ -162,8 +162,8 @@ public class PDType0Font extends PDFont implements PDVectorFont
     /**
      * Loads a TTF to be embedded into a document as a vertical Type 0 font.
      *
-     * @param doc The PDF document that will hold the embedded font.
-     * @param ttf A TrueType font.
+     * @param doc         The PDF document that will hold the embedded font.
+     * @param ttf         A TrueType font.
      * @param embedSubset True if the font will be subset before embedding
      * @return A Type0 font with a CIDFontType2 descendant.
      * @throws IOException If there is an error reading the font stream.
@@ -176,7 +176,7 @@ public class PDType0Font extends PDFont implements PDVectorFont
 
     /**
      * Constructor for reading a Type0 font from a PDF file.
-     * 
+     *
      * @param fontDictionary The font dictionary according to the PDF specification.
      */
     public PDType0Font(COSDictionary fontDictionary) throws IOException
@@ -204,12 +204,12 @@ public class PDType0Font extends PDFont implements PDVectorFont
     }
 
     /**
-     *
      * @param document
      * @param ttf
      * @param embedSubset
-     * @param closeTTF whether to close the ttf parameter after embedding. Must be true when the ttf parameter was
-     * created in the load() method, false when the ttf parameter was passed to the load() method.
+     * @param closeTTF    whether to close the ttf parameter after embedding. Must be true when the
+     *                    ttf parameter was created in the load() method, false when the ttf
+     *                    parameter was passed to the load() method.
      * @param vertical
      * @throws IOException
      */
@@ -347,9 +347,16 @@ public class PDType0Font extends PDFont implements PDVectorFont
             // try to find the corresponding Unicode (UC2) CMap
             if (strName != null)
             {
-                CMap prdCMap = CMapManager.getPredefinedCMap(strName);
-                String ucs2Name = prdCMap.getRegistry() + "-" + prdCMap.getOrdering() + "-UCS2";
-                cMapUCS2 = CMapManager.getPredefinedCMap(ucs2Name);
+                try
+                {
+                    CMap prdCMap = CMapManager.getPredefinedCMap(strName);
+                    String ucs2Name = prdCMap.getRegistry() + "-" + prdCMap.getOrdering() + "-UCS2";
+                    cMapUCS2 = CMapManager.getPredefinedCMap(ucs2Name);
+                }
+                catch (IOException ex)
+                {
+                    LOG.warn("Could not get {} UC2 map for font {}", strName, getName(), ex);
+                }
             }
         }
     }
@@ -555,12 +562,14 @@ public class PDType0Font extends PDFont implements PDVectorFont
     }
 
     @Override
-    public boolean isOriginalEmbeddedMissing() {
+    public boolean isOriginalEmbeddedMissing()
+    {
         return descendantFont.isOriginalEmbeddedMissing();
     }
 
     @Override
-    public boolean isMappingFallbackUsed() {
+    public boolean isMappingFallbackUsed()
+    {
         return descendantFont.isMappingFallbackUsed();
     }
 
@@ -588,5 +597,4 @@ public class PDType0Font extends PDFont implements PDVectorFont
         return descendantFont.hasGlyph(code);
     }
 
-    
 }

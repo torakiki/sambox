@@ -28,9 +28,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import static java.util.Objects.requireNonNull;
+
 /**
- * The "Standard 14" PDF fonts, also known as the "base 14" fonts. There are 14 font files, but Acrobat uses additional
- * names for compatibility, e.g. Arial.
+ * The "Standard 14" PDF fonts, also known as the "base 14" fonts. There are 14 font files, but
+ * Acrobat uses additional names for compatibility, e.g. Arial.
  *
  * @author John Hewson
  */
@@ -115,7 +117,8 @@ final class Standard14Fonts
     {
         String resourceName = "/org/sejda/sambox/resources/afm/" + fontName + ".afm";
         try (InputStream afmStream = new BufferedInputStream(
-                PDType1Font.class.getResourceAsStream(resourceName)))
+                requireNonNull(Standard14Fonts.class.getResourceAsStream(resourceName),
+                        "Unable to find " + resourceName)))
         {
             AFMParser parser = new AFMParser(afmStream);
             FontMetrics metric = parser.parse(true);

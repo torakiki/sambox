@@ -15,16 +15,19 @@
  */
 package org.sejda.sambox.pdmodel.graphics.image;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.sejda.sambox.pdmodel.graphics.image.ValidateXImage.checkIdent;
-import static org.sejda.sambox.pdmodel.graphics.image.ValidateXImage.colorCount;
-import static org.sejda.sambox.pdmodel.graphics.image.ValidateXImage.doWritePDF;
-import static org.sejda.sambox.pdmodel.graphics.image.ValidateXImage.validate;
+import org.junit.Before;
+import org.junit.Test;
+import org.sejda.io.SeekableSources;
+import org.sejda.sambox.input.PDFParser;
+import org.sejda.sambox.pdmodel.PDDocument;
+import org.sejda.sambox.pdmodel.PDPage;
+import org.sejda.sambox.pdmodel.PDPageContentStream;
+import org.sejda.sambox.pdmodel.PDPageContentStream.AppendMode;
+import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
+import org.sejda.sambox.pdmodel.graphics.color.PDDeviceRGB;
+import org.sejda.sambox.rendering.PDFRenderer;
 
+import javax.imageio.ImageIO;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -46,19 +49,15 @@ import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Random;
 
-import javax.imageio.ImageIO;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.sejda.io.SeekableSources;
-import org.sejda.sambox.input.PDFParser;
-import org.sejda.sambox.pdmodel.PDDocument;
-import org.sejda.sambox.pdmodel.PDPage;
-import org.sejda.sambox.pdmodel.PDPageContentStream;
-import org.sejda.sambox.pdmodel.PDPageContentStream.AppendMode;
-import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
-import org.sejda.sambox.pdmodel.graphics.color.PDDeviceRGB;
-import org.sejda.sambox.rendering.PDFRenderer;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.sejda.sambox.pdmodel.graphics.image.ValidateXImage.checkIdent;
+import static org.sejda.sambox.pdmodel.graphics.image.ValidateXImage.colorCount;
+import static org.sejda.sambox.pdmodel.graphics.image.ValidateXImage.doWritePDF;
+import static org.sejda.sambox.pdmodel.graphics.image.ValidateXImage.validate;
 
 /**
  * Unit tests for LosslessFactory
@@ -185,8 +184,8 @@ public class LosslessFactoryTest
     }
 
     /**
-     * Tests INT_ARGB LosslessFactoryTest#createFromImage(PDDocument document, BufferedImage image) with BITMASK
-     * transparency
+     * Tests INT_ARGB LosslessFactoryTest#createFromImage(PDDocument document, BufferedImage image)
+     * with BITMASK transparency
      *
      * @throws java.io.IOException
      */
@@ -197,8 +196,8 @@ public class LosslessFactoryTest
     }
 
     /**
-     * Tests 4BYTE_ABGR LosslessFactoryTest#createFromImage(PDDocument document, BufferedImage image) with BITMASK
-     * transparency
+     * Tests 4BYTE_ABGR LosslessFactoryTest#createFromImage(PDDocument document, BufferedImage
+     * image) with BITMASK transparency
      *
      * @throws java.io.IOException
      */
@@ -209,7 +208,8 @@ public class LosslessFactoryTest
     }
 
     /**
-     * Tests 4BYTE_ABGR LosslessFactoryTest#createFromImage(PDDocument document, BufferedImage image)
+     * Tests 4BYTE_ABGR LosslessFactoryTest#createFromImage(PDDocument document, BufferedImage
+     * image)
      *
      * @throws java.io.IOException
      */
@@ -259,8 +259,9 @@ public class LosslessFactoryTest
     }
 
     /**
-     * Tests USHORT_555_RGB LosslessFactoryTest#createFromImage(PDDocument document, BufferedImage image). This should
-     * create an 8-bit-image; prevent the problems from PDFBOX-4674 in case image creation is modified in the future.
+     * Tests USHORT_555_RGB LosslessFactoryTest#createFromImage(PDDocument document, BufferedImage
+     * image). This should create an 8-bit-image; prevent the problems from PDFBOX-4674 in case
+     * image creation is modified in the future.
      *
      * @throws java.io.IOException
      */
@@ -297,7 +298,8 @@ public class LosslessFactoryTest
     }
 
     /**
-     * Tests LosslessFactoryTest#createFromImage(PDDocument document, BufferedImage image) with transparent GIF
+     * Tests LosslessFactoryTest#createFromImage(PDDocument document, BufferedImage image) with
+     * transparent GIF
      *
      * @throws java.io.IOException
      */
@@ -325,16 +327,17 @@ public class LosslessFactoryTest
     }
 
     /**
-     * Tests LosslessFactoryTest#createFromImage(PDDocument document, BufferedImage image) with a transparent 1 bit GIF.
-     * (PDFBOX-4672) This ends up as RGB because the 1 bit fast path doesn't support transparency.
+     * Tests LosslessFactoryTest#createFromImage(PDDocument document, BufferedImage image) with a
+     * transparent 1 bit GIF. (PDFBOX-4672) This ends up as RGB because the 1 bit fast path doesn't
+     * support transparency.
      *
      * @throws java.io.IOException
      */
     public void testCreateLosslessFromTransparent1BitGIF() throws IOException
     {
         PDDocument document = new PDDocument();
-        BufferedImage image = ImageIO
-                .read(this.getClass().getResourceAsStream("gif-1bit-transparent.gif"));
+        BufferedImage image = ImageIO.read(
+                this.getClass().getResourceAsStream("gif-1bit-transparent.gif"));
 
         assertEquals(Transparency.BITMASK, image.getColorModel().getTransparency());
         assertEquals(BufferedImage.TYPE_BYTE_BINARY, image.getType());
@@ -363,8 +366,8 @@ public class LosslessFactoryTest
     public void testCreateLosslessFromGovdocs032163() throws IOException
     {
         PDDocument document = new PDDocument();
-        BufferedImage image = ImageIO
-                .read(this.getClass().getResourceAsStream("PDFBOX-4184-032163.jpg"));
+        BufferedImage image = ImageIO.read(
+                this.getClass().getResourceAsStream("PDFBOX-4184-032163.jpg"));
         PDImageXObject ximage = LosslessFactory.createFromImage(image);
         validate(ximage, 8, image.getWidth(), image.getHeight(), "png",
                 PDDeviceRGB.INSTANCE.getName());
@@ -400,6 +403,59 @@ public class LosslessFactoryTest
                 }
                 assertEquals(errMsg, expectedImage.getRGB(x, y) & 0xFFFFFF,
                         actualImage.getRGB(x, y) & 0xFFFFFF);
+            }
+        }
+    }
+
+    /**
+     * Check whether the raw data of images are identical.
+     *
+     * @param expectedImage
+     * @param actualImage
+     */
+    static void checkIdentRaw(BufferedImage expectedImage, PDImageXObject actualImage)
+            throws IOException
+    {
+        WritableRaster expectedRaster = expectedImage.getRaster();
+        WritableRaster actualRaster = actualImage.getRawRaster();
+        int w = expectedRaster.getWidth();
+        int h = expectedRaster.getHeight();
+        assertEquals(w, actualRaster.getWidth());
+        assertEquals(h, actualRaster.getHeight());
+        assertEquals(expectedRaster.getDataBuffer().getDataType(),
+                actualRaster.getDataBuffer().getDataType());
+        int numDataElements = expectedRaster.getNumDataElements();
+        int numDataElementsToCompare;
+        if (expectedImage.getAlphaRaster() != null)
+        {
+            // We do not compare the alpha channel, as this is stored extra
+            numDataElementsToCompare = numDataElements - 1;
+            assertEquals(numDataElementsToCompare, actualRaster.getNumDataElements());
+        }
+        else
+        {
+            numDataElementsToCompare = numDataElements;
+            assertEquals(numDataElements, actualRaster.getNumDataElements());
+        }
+        int[] expectedData = new int[numDataElements];
+        int[] actualData = new int[numDataElements];
+        for (int y = 0; y < h; ++y)
+        {
+            for (int x = 0; x < w; ++x)
+            {
+                expectedRaster.getPixel(x, y, expectedData);
+                actualRaster.getPixel(x, y, actualData);
+                for (int i = 0; i < numDataElementsToCompare; i++)
+                {
+                    int expectedValue = expectedData[i];
+                    int actualValue = actualData[i];
+                    if (expectedValue != actualValue)
+                    {
+                        String errMsg = String.format("(%d,%d) Channel %d %04X != %04X", x, y, i,
+                                expectedValue, actualValue);
+                        assertEquals(errMsg, expectedValue, actualValue);
+                    }
+                }
             }
         }
     }
@@ -630,7 +686,8 @@ public class LosslessFactoryTest
         validate(ximage, 16, w, h, "png", PDDeviceRGB.INSTANCE.getName());
         checkIdent(image, ximage.getImage());
         checkIdentRGB(image, ximage.getOpaqueImage());
-
+        checkIdentRaw(image, ximage);
+        
         assertNotNull(ximage.getSoftMask());
         validate(ximage.getSoftMask(), 16, w, h, "png", PDDeviceGray.INSTANCE.getName());
         assertEquals(35, colorCount(ximage.getSoftMask().getImage()));

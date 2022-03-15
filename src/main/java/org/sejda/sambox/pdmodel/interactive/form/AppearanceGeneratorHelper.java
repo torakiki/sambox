@@ -16,20 +16,7 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
-import static java.util.Arrays.asList;
-import static java.util.Objects.isNull;
-import static java.util.Optional.ofNullable;
-import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
-import static org.sejda.io.CountingWritableByteChannel.from;
-
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Point2D;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import org.apache.fontbox.util.BoundingBox;
 import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSString;
@@ -39,7 +26,12 @@ import org.sejda.sambox.pdmodel.PDPageContentStream;
 import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.font.PDFont;
+import org.sejda.sambox.pdmodel.font.PDSimpleFont;
+import org.sejda.sambox.pdmodel.font.PDType3CharProc;
+import org.sejda.sambox.pdmodel.font.PDType3Font;
+import org.sejda.sambox.pdmodel.font.PDVectorFont;
 import org.sejda.sambox.pdmodel.graphics.color.PDColor;
+import org.sejda.sambox.pdmodel.interactive.action.PDActionJavaScript;
 import org.sejda.sambox.pdmodel.interactive.action.PDFormFieldAdditionalActions;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceCharacteristicsDictionary;
@@ -51,9 +43,24 @@ import org.sejda.sambox.util.Matrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.geom.AffineTransform;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Point2D;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static java.util.Arrays.asList;
+import static java.util.Objects.isNull;
+import static java.util.Optional.ofNullable;
+import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
+import static org.sejda.io.CountingWritableByteChannel.from;
+
 /**
  * Create the AcroForms field appearance helper.
- * 
+ *
  * @author Stephan Gerhard
  * @author Ben Litchfield
  */
@@ -71,10 +78,12 @@ public class AppearanceGeneratorHelper
 
     /**
      * The highlight color
-     *
-     * The color setting is used by Adobe to display the highlight box for selected entries in a list box.
-     *
-     * Regardless of other settings in an existing appearance stream Adobe will always use this value.
+     * <p>
+     * The color setting is used by Adobe to display the highlight box for selected entries in a
+     * list box.
+     * <p>
+     * Regardless of other settings in an existing appearance stream Adobe will always use this
+     * value.
      */
     private static final float[] HIGHLIGHT_COLOR = { 153 / 255f, 193 / 255f, 215 / 255f };
 
@@ -111,8 +120,7 @@ public class AppearanceGeneratorHelper
         {
             throw new IOException(
                     "Could not process default appearance string '" + field.getDefaultAppearance()
-                            + "' for field '" + field.getFullyQualifiedName() + "'",
-                    ex);
+                            + "' for field '" + field.getFullyQualifiedName() + "'", ex);
         }
     }
 
@@ -174,8 +182,8 @@ public class AppearanceGeneratorHelper
     public void setAppearanceValue(String apValue) throws IOException
     {
         value = apValue;
-        
-        if(field instanceof PDTextField)
+
+        if (field instanceof PDTextField)
         {
             // avoid java.lang.IllegalArgumentException: U+00A0 ('nbspace') is not available in this font XYZ
             // TODO: generic way of handling any character which is not supported by the font?
@@ -196,6 +204,12 @@ public class AppearanceGeneratorHelper
 
         for (PDAnnotationWidget widget : field.getWidgets())
         {
+            if (widget.getCOSObject().containsKey("PMD"))
+            {
+                LOG.warn("Widget of field {} is a PaperMetaData, no appearance stream created",
+                        field.getFullyQualifiedName());
+                continue;
+            }
             // some fields have the /Da at the widget level if the
             // widgets differ in layout.
             PDDefaultAppearanceString acroFormAppearance = defaultAppearance;
@@ -214,49 +228,71 @@ public class AppearanceGeneratorHelper
                 continue;
             }
 
-            PDFormFieldAdditionalActions actions = field.getActions();
-
-            // in case all tests fail the field will be formatted by acrobat
-            // when it is opened. See FreedomExpressions.pdf for an example of this.
-            if (actions == null || actions.getF() == null
-                    || widget.getCOSObject().getDictionaryObject(COSName.AP) != null)
+            PDAppearanceDictionary appearanceDict = widget.getAppearance();
+            if (appearanceDict == null)
             {
-                PDAppearanceDictionary appearanceDict = widget.getAppearance();
-                if (appearanceDict == null)
-                {
-                    appearanceDict = new PDAppearanceDictionary();
-                    widget.setAppearance(appearanceDict);
-                }
-
-                PDAppearanceEntry appearance = appearanceDict.getNormalAppearance();
-                // TODO support appearances other than "normal"
-
-                PDAppearanceStream appearanceStream;
-                if (isValidAppearanceStream(appearance))
-                {
-                    appearanceStream = appearance.getAppearanceStream();
-                }
-                else
-                {
-                    appearanceStream = prepareNormalAppearanceStream(widget);
-                    appearanceDict.setNormalAppearance(appearanceStream);
-                    // TODO support appearances other than "normal"
-                }
-                /*
-                 * Adobe Acrobat always recreates the complete appearance stream if there is an appearance
-                 * characteristics entry (the widget dictionaries MK entry). In addition if there is no content yet also
-                 * create the apperance stream from the entries.
-                 */
-                if (widget.getAppearanceCharacteristics() != null
-                        || appearanceStream.getContentStream().getLength() == 0)
-                {
-                    initializeAppearanceContent(widget, appearanceStream);
-                }
-                setAppearanceContent(widget, appearanceStream);
+                appearanceDict = new PDAppearanceDictionary();
+                widget.setAppearance(appearanceDict);
             }
-            // restore the field level appearance;
+
+            PDAppearanceEntry appearance = appearanceDict.getNormalAppearance();
+            // TODO support appearances other than "normal"
+
+            PDAppearanceStream appearanceStream;
+            if (isValidAppearanceStream(appearance))
+            {
+                appearanceStream = appearance.getAppearanceStream();
+            }
+            else
+            {
+                appearanceStream = prepareNormalAppearanceStream(widget);
+                appearanceDict.setNormalAppearance(appearanceStream);
+                // TODO support appearances other than "normal"
+            }
+
+            /*
+             * Adobe Acrobat always recreates the complete appearance stream if there is an
+             * appearance characteristics entry (the widget dictionaries MK entry). In
+             * addition if there is no content yet also create the appearance stream from
+             * the entries.
+             *
+             */
+            if (widget.getAppearanceCharacteristics() != null
+                    || appearanceStream.getContentStream().getLength() == 0)
+            {
+                initializeAppearanceContent(widget, appearanceStream);
+            }
+
+            setAppearanceContent(widget, appearanceStream);
+
+            // restore the field level appearance
             defaultAppearance = acroFormAppearance;
         }
+    }
+
+    private String getFormattedValue(String apValue)
+    {
+        // format the field value for the appearance if there is scripting support and
+        // the field
+        // has a format event
+        PDFormFieldAdditionalActions actions = field.getActions();
+
+        if (actions != null && actions.getF() != null)
+        {
+            if (field.getAcroForm().getScriptingHandler() != null)
+            {
+                ScriptingHandler scriptingHandler = field.getAcroForm().getScriptingHandler();
+                return scriptingHandler.format((PDActionJavaScript) field.getActions().getF(),
+                        apValue);
+            }
+            else
+            {
+                LOG.info(
+                        "Field contains a formatting action but no SriptingHandler has been supplied - formatted value might be incorrect");
+                return apValue;
+            }
+        }
+        return apValue;
     }
 
     private static boolean isValidAppearanceStream(PDAppearanceEntry appearance)
@@ -301,7 +337,8 @@ public class AppearanceGeneratorHelper
     private PDDefaultAppearanceString getWidgetDefaultAppearanceString(PDAnnotationWidget widget)
             throws IOException
     {
-        COSString da = DefaultAppearanceHelper.getDefaultAppearance(widget.getCOSObject().getDictionaryObject(COSName.DA));
+        COSString da = DefaultAppearanceHelper.getDefaultAppearance(
+                widget.getCOSObject().getDictionaryObject(COSName.DA));
         PDResources dr = field.getAcroForm().getDefaultResources();
         try
         {
@@ -318,8 +355,7 @@ public class AppearanceGeneratorHelper
 
     private int resolveRotation(PDAnnotationWidget widget)
     {
-        PDAppearanceCharacteristicsDictionary characteristicsDictionary = widget
-                .getAppearanceCharacteristics();
+        PDAppearanceCharacteristicsDictionary characteristicsDictionary = widget.getAppearanceCharacteristics();
         if (characteristicsDictionary != null)
         {
             // 0 is the default value if the R key doesn't exist
@@ -330,11 +366,11 @@ public class AppearanceGeneratorHelper
 
     /**
      * Initialize the content of the appearance stream.
-     * 
-     * Get settings like border style, border width and colors to be used to draw a rectangle and background color
-     * around the widget
-     * 
-     * @param widget the field widget
+     * <p>
+     * Get settings like border style, border width and colors to be used to draw a rectangle and
+     * background color around the widget
+     *
+     * @param widget           the field widget
      * @param appearanceStream the appearance stream to be used
      * @throws IOException in case we can't write to the appearance stream
      */
@@ -344,8 +380,7 @@ public class AppearanceGeneratorHelper
         try (PDPageContentStream contents = new PDPageContentStream(
                 field.getAcroForm().getDocument(), appearanceStream))
         {
-            PDAppearanceCharacteristicsDictionary appearanceCharacteristics = widget
-                    .getAppearanceCharacteristics();
+            PDAppearanceCharacteristicsDictionary appearanceCharacteristics = widget.getAppearanceCharacteristics();
 
             // TODO: support more entries like patterns, etc.
             if (appearanceCharacteristics != null)
@@ -479,8 +514,8 @@ public class AppearanceGeneratorHelper
         // callers might have determined that the default font does not support rendering the field's value
         // so the font was substituted to another one, which has better unicode support
         // see PDVariableText.setAppearanceOverrideFont()
-        PDFont font = ofNullable(field.getAppearanceFont())
-                .orElseGet(() -> defaultAppearance.getFont());
+        PDFont font = ofNullable(field.getAppearanceFont()).orElseGet(
+                () -> defaultAppearance.getFont());
 
         requireNotNullArg(font, "font is null, check whether /DA entry is incomplete or incorrect");
         if (font.getName().contains("+"))
@@ -513,7 +548,7 @@ public class AppearanceGeneratorHelper
         {
             float newFontSize = calculateFontSize(font, contentRect);
             // avoid increasing the font size, if one was already specified
-            if(newFontSize < fontSize || fontSize == 0) 
+            if (newFontSize < fontSize || fontSize == 0)
             {
                 fontSize = newFontSize;
             }
@@ -537,8 +572,23 @@ public class AppearanceGeneratorHelper
         // calculate font metrics at font size
         float fontScaleY = fontSize / FONTSCALE;
         float fontBoundingBoxAtSize = font.getBoundingBox().getHeight() * fontScaleY;
-        float fontCapAtSize = font.getFontDescriptor().getCapHeight() * fontScaleY;
-        float fontDescentAtSize = font.getFontDescriptor().getDescent() * fontScaleY;
+        float fontCapAtSize = 0;
+        float fontDescentAtSize = 0;
+
+        if (font.getFontDescriptor() != null)
+        {
+            fontCapAtSize = font.getFontDescriptor().getCapHeight() * fontScaleY;
+            fontDescentAtSize = font.getFontDescriptor().getDescent() * fontScaleY;
+        }
+        else
+        {
+            float fontCapHeight = resolveCapHeight(font);
+            float fontDescent = resolveDescent(font);
+            LOG.debug("missing font descriptor - resolved Cap/Descent to " + fontCapHeight + "/"
+                    + fontDescent);
+            fontCapAtSize = fontCapHeight * fontScaleY;
+            fontDescentAtSize = fontDescent * fontScaleY;
+        }
 
         if (field instanceof PDTextField && ((PDTextField) field).isMultiline())
         {
@@ -564,8 +614,8 @@ public class AppearanceGeneratorHelper
                 {
 
                     float fontDescentBased = -fontDescentAtSize + contentRect.getLowerLeftY();
-                    float fontCapBased = contentRect.getHeight() - contentRect.getLowerLeftY()
-                            - fontCapAtSize;
+                    float fontCapBased =
+                            contentRect.getHeight() - contentRect.getLowerLeftY() - fontCapAtSize;
 
                     y = Math.min(fontDescentBased, Math.max(y, fontCapBased));
                 }
@@ -596,14 +646,26 @@ public class AppearanceGeneratorHelper
             // Adobe Acrobat uses the font's bounding box for the leading between the lines
             appearanceStyle.setLeading(calculateLineHeight(font, fontScaleY));
 
-            PlainTextFormatter formatter = new PlainTextFormatter.Builder(contents)
-                    .style(appearanceStyle).text(textContent).width(contentRect.getWidth())
-                    .wrapLines(isMultiLine()).initialOffset(x, y).textAlign(field.getQ()).build();
+            PlainTextFormatter formatter = new PlainTextFormatter.Builder(contents).style(
+                            appearanceStyle).text(textContent).width(contentRect.getWidth())
+                    .wrapLines(isMultiLine()).initialOffset(x, y).textAlign(getTextAlign(widget))
+                    .build();
             formatter.format();
         }
 
         contents.endTextIfRequired();
         contents.restoreGraphicsState();
+    }
+
+    /**
+     * PDFBox handles a widget with a joined in field dictionary and without an individual name as a
+     * widget only. As a result - as a widget can't have a quadding /Q entry we need to do a low
+     * level access to the dictionary and otherwise get the quadding from the field.
+     */
+    private int getTextAlign(PDAnnotationWidget widget)
+    {
+        // Use quadding value from joined field/widget if set, else use from field.
+        return widget.getCOSObject().getInt(COSName.Q, field.getQ());
     }
 
     private AffineTransform calculateMatrix(PDRectangle bbox, int rotation)
@@ -640,13 +702,14 @@ public class AppearanceGeneratorHelper
 
     /**
      * Determine if the appearance shall provide a comb output.
-     * 
+     *
      * <p>
-     * May be set only if the MaxLen entry is present in the text field dictionary and if the Multiline, Password, and
-     * FileSelect flags are clear. If set, the field shall be automatically divided into as many equally spaced
-     * positions, or combs, as the value of MaxLen, and the text is laid out into those combs.
+     * May be set only if the MaxLen entry is present in the text field dictionary and if the
+     * Multiline, Password, and FileSelect flags are clear. If set, the field shall be automatically
+     * divided into as many equally spaced positions, or combs, as the value of MaxLen, and the text
+     * is laid out into those combs.
      * </p>
-     * 
+     *
      * @return the comb state
      */
     private boolean shallComb()
@@ -658,10 +721,10 @@ public class AppearanceGeneratorHelper
 
     /**
      * Generate the appearance for comb fields.
-     * 
+     *
      * @param contents the content stream to write to
-     * @param bbox the bbox used
-     * @param font the font to be used
+     * @param bbox     the bbox used
+     * @param font     the font to be used
      * @param fontSize the font size to be used
      * @throws IOException
      */
@@ -679,8 +742,8 @@ public class AppearanceGeneratorHelper
 
         float combWidth = bbox.getWidth() / maxLen;
         float ascentAtFontSize = font.getFontDescriptor().getAscent() / FONTSCALE * fontSize;
-        float baselineOffset = paddingEdge.getLowerLeftY()
-                + (bbox.getHeight() - ascentAtFontSize) / 2;
+        float baselineOffset =
+                paddingEdge.getLowerLeftY() + (bbox.getHeight() - ascentAtFontSize) / 2;
 
         float prevCharWidth = 0f;
 
@@ -740,9 +803,8 @@ public class AppearanceGeneratorHelper
                     HIGHLIGHT_COLOR[2]);
 
             contents.addRect(paddingEdge.getLowerLeftX(),
-                    paddingEdge.getUpperRightY()
-                            - highlightBoxHeight * (selectedIndex - topIndex + 1) + 2,
-                    paddingEdge.getWidth(), highlightBoxHeight);
+                    paddingEdge.getUpperRightY() - highlightBoxHeight * (selectedIndex - topIndex
+                            + 1) + 2, paddingEdge.getWidth(), highlightBoxHeight);
             contents.fill();
         }
         contents.setNonStrokingColor(0f);
@@ -803,7 +865,7 @@ public class AppearanceGeneratorHelper
             }
         }
     }
-    
+
     private String replaceTabChars(String input)
     {
         // avoid java.lang.IllegalArgumentException: U+0009 ('controlHT') is not available in this font XYZ
@@ -813,8 +875,23 @@ public class AppearanceGeneratorHelper
     private float calculateLineHeight(PDFont font, float fontScaleY) throws IOException
     {
         float fontBoundingBoxAtSize = font.getBoundingBox().getHeight() * fontScaleY;
-        float fontCapAtSize = font.getFontDescriptor().getCapHeight() * fontScaleY;
-        float fontDescentAtSize = font.getFontDescriptor().getDescent() * fontScaleY;
+        float fontCapAtSize = 0;
+        float fontDescentAtSize = 0;
+
+        if (font.getFontDescriptor() != null)
+        {
+            fontCapAtSize = font.getFontDescriptor().getCapHeight() * fontScaleY;
+            fontDescentAtSize = font.getFontDescriptor().getDescent() * fontScaleY;
+        }
+        else
+        {
+            float fontCapHeight = resolveCapHeight(font);
+            float fontDescent = resolveDescent(font);
+            LOG.debug("missing font descriptor - resolved Cap/Descent to " + fontCapHeight + "/"
+                    + fontDescent);
+            fontCapAtSize = fontCapHeight * fontScaleY;
+            fontDescentAtSize = fontDescent * fontScaleY;
+        }
 
         float lineHeight = fontCapAtSize - fontDescentAtSize;
         if (lineHeight < 0)
@@ -826,8 +903,9 @@ public class AppearanceGeneratorHelper
     }
 
     /**
-     * My "not so great" method for calculating the fontsize. It does not work superb, but it handles ok.
-     * 
+     * My "not so great" method for calculating the fontsize. It does not work superb, but it
+     * handles ok.
+     *
      * @return the calculated font-size
      * @throws IOException If there is an error getting the font information.
      */
@@ -850,8 +928,8 @@ public class AppearanceGeneratorHelper
             float lineHeight = calculateLineHeight(font, font.getFontMatrix().getScaleY());
             float scaledContentHeight = contentRect.getHeight() * yScalingFactor;
 
-            boolean looksLikeFauxMultiline = calculateLineHeight(font,
-                    DEFAULT_FONT_SIZE / FONTSCALE) > scaledContentHeight;
+            boolean looksLikeFauxMultiline =
+                    calculateLineHeight(font, DEFAULT_FONT_SIZE / FONTSCALE) > scaledContentHeight;
             int userTypedLinesCount = new PlainText(value).getParagraphs().size();
             boolean userTypedMultipleLines = userTypedLinesCount > 1;
 
@@ -867,8 +945,8 @@ public class AppearanceGeneratorHelper
             {
                 // calculate a font size which fits at least x lines
                 int minimumLinesToFitInAMultilineField = Math.max(2, userTypedLinesCount);
-                float fontSize = scaledContentHeight
-                        / (minimumLinesToFitInAMultilineField * lineHeight);
+                float fontSize =
+                        scaledContentHeight / (minimumLinesToFitInAMultilineField * lineHeight);
                 // don't return a font size larger than the default
                 return Math.min(fontSize, DEFAULT_FONT_SIZE);
             }
@@ -886,10 +964,89 @@ public class AppearanceGeneratorHelper
         return Math.min(heightBasedFontSize, widthBasedFontSize);
     }
 
+    /*
+     * Resolve the cap height.
+     *
+     * This is a very basic implementation using the height of "H" as reference.
+     */
+    private float resolveCapHeight(PDFont font) throws IOException
+    {
+        return resolveGlyphHeight(font, "H".codePointAt(0));
+    }
+
+    /*
+     * Resolve the descent.
+     *
+     * This is a very basic implementation using the height of "y" - "a" as reference.
+     */
+    private float resolveDescent(PDFont font) throws IOException
+    {
+        return resolveGlyphHeight(font, "y".codePointAt(0)) - resolveGlyphHeight(font,
+                "a".codePointAt(0));
+    }
+
+    // this calculates the real (except for type 3 fonts) individual glyph bounds
+    private float resolveGlyphHeight(PDFont font, int code) throws IOException
+    {
+        GeneralPath path = null;
+        if (font instanceof PDType3Font)
+        {
+            // It is difficult to calculate the real individual glyph bounds for type 3
+            // fonts
+            // because these are not vector fonts, the content stream could contain almost
+            // anything
+            // that is found in page content streams.
+            PDType3Font t3Font = (PDType3Font) font;
+            PDType3CharProc charProc = t3Font.getCharProc(code);
+            if (charProc != null)
+            {
+                BoundingBox fontBBox = t3Font.getBoundingBox();
+                PDRectangle glyphBBox = charProc.getGlyphBBox();
+                if (glyphBBox != null)
+                {
+                    // PDFBOX-3850: glyph bbox could be larger than the font bbox
+                    glyphBBox.setLowerLeftX(
+                            Math.max(fontBBox.getLowerLeftX(), glyphBBox.getLowerLeftX()));
+                    glyphBBox.setLowerLeftY(
+                            Math.max(fontBBox.getLowerLeftY(), glyphBBox.getLowerLeftY()));
+                    glyphBBox.setUpperRightX(
+                            Math.min(fontBBox.getUpperRightX(), glyphBBox.getUpperRightX()));
+                    glyphBBox.setUpperRightY(
+                            Math.min(fontBBox.getUpperRightY(), glyphBBox.getUpperRightY()));
+                    path = glyphBBox.toGeneralPath();
+                }
+            }
+        }
+        else if (font instanceof PDVectorFont)
+        {
+            PDVectorFont vectorFont = (PDVectorFont) font;
+            path = vectorFont.getPath(code);
+        }
+        else if (font instanceof PDSimpleFont)
+        {
+            PDSimpleFont simpleFont = (PDSimpleFont) font;
+
+            // these two lines do not always work, e.g. for the TT fonts in file 032431.pdf
+            // which is why PDVectorFont is tried first.
+            String name = simpleFont.getEncoding().getName(code);
+            path = simpleFont.getPath(name);
+        }
+        else
+        {
+            // shouldn't happen, please open issue in JIRA
+            LOG.warn("Unknown font class: " + font.getClass());
+        }
+        if (path == null)
+        {
+            return -1;
+        }
+        return (float) path.getBounds2D().getHeight();
+    }
+
     /**
      * Resolve the bounding box.
-     * 
-     * @param fieldWidget the annotation widget.
+     *
+     * @param fieldWidget      the annotation widget.
      * @param appearanceStream the annotations appearance stream.
      * @return the resolved boundingBox.
      */

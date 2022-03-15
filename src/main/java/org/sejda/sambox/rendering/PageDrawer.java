@@ -107,13 +107,14 @@ import java.util.Set;
 import java.util.StringTokenizer;
 
 /**
- * Paints a page in a PDF document to a Graphics context. May be subclassed to provide custom rendering.
+ * Paints a page in a PDF document to a Graphics context. May be subclassed to provide custom
+ * rendering.
  *
  * <p>
- * If you want to do custom graphics processing rather than Graphics2D rendering, then you should subclass
- * {@link PDFGraphicsStreamEngine} instead. Subclassing PageDrawer is only suitable for cases where the goal is to
- * render onto a {@link Graphics2D} surface. In that case you'll also have to subclass {@link PDFRenderer} and modify
- * {@link PDFRenderer#createPageDrawer(PageDrawerParameters)}.
+ * If you want to do custom graphics processing rather than Graphics2D rendering, then you should
+ * subclass {@link PDFGraphicsStreamEngine} instead. Subclassing PageDrawer is only suitable for
+ * cases where the goal is to render onto a {@link Graphics2D} surface. In that case you'll also
+ * have to subclass {@link PDFRenderer} and modify {@link PDFRenderer#createPageDrawer(PageDrawerParameters)}.
  *
  * @author Ben Litchfield
  */
@@ -248,7 +249,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
     /**
      * Draws the page to the requested context.
      *
-     * @param g The graphics context to draw onto.
+     * @param g        The graphics context to draw onto.
      * @param pageSize The size of the page to draw.
      * @throws IOException If there is an IO error while drawing the page.
      */
@@ -279,10 +280,10 @@ public class PageDrawer extends PDFGraphicsStreamEngine
     /**
      * Draws the pattern stream to the requested context.
      *
-     * @param g The graphics context to draw onto.
-     * @param pattern The tiling pattern to be used.
-     * @param colorSpace color space for this tiling.
-     * @param color color for this tiling.
+     * @param g             The graphics context to draw onto.
+     * @param pattern       The tiling pattern to be used.
+     * @param colorSpace    color space for this tiling.
+     * @param color         color for this tiling.
      * @param patternMatrix the pattern matrix
      * @throws IOException If there is an IO error while drawing the page.
      */
@@ -458,7 +459,8 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         }
     }
 
-    @Override protected void showFontGlyph(Matrix textRenderingMatrix, PDFont font, int code,
+    @Override
+    protected void showFontGlyph(Matrix textRenderingMatrix, PDFont font, int code,
             Vector displacement) throws IOException
     {
         AffineTransform at = textRenderingMatrix.createAffineTransform();
@@ -471,11 +473,11 @@ public class PageDrawer extends PDFGraphicsStreamEngine
     /**
      * Render the font using the Glyph2D interface.
      *
-     * @param glyph2D the Glyph2D implementation provided a GeneralPath for each glyph
-     * @param font the font
-     * @param code character code
+     * @param glyph2D      the Glyph2D implementation provided a GeneralPath for each glyph
+     * @param font         the font
+     * @param code         character code
      * @param displacement the glyph's displacement (advance)
-     * @param at the transformation
+     * @param at           the transformation
      * @throws IOException if something went wrong
      */
     private void drawGlyph2D(Glyph2D glyph2D, PDFont font, int code, Vector displacement,
@@ -535,7 +537,8 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         }
     }
 
-    @Override protected void showType3Glyph(Matrix textRenderingMatrix, PDType3Font font, int code,
+    @Override
+    protected void showType3Glyph(Matrix textRenderingMatrix, PDType3Font font, int code,
             Vector displacement) throws IOException
     {
         PDGraphicsState state = getGraphicsState();
@@ -588,7 +591,8 @@ public class PageDrawer extends PDFGraphicsStreamEngine
             {
                 // a Type0 CIDFont contains CFF font
                 PDCIDFontType0 cidType0Font = (PDCIDFontType0) type0Font.getDescendantFont();
-                glyph2D = new CIDType0Glyph2D(cidType0Font); // todo: could be null (need incorporate fallback)
+                glyph2D = new CIDType0Glyph2D(
+                        cidType0Font); // todo: could be null (need incorporate fallback)
             }
         }
         else
@@ -774,7 +778,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         if (miterLimit < 1)
         {
             // avoid java.lang.IllegalArgumentException: miter limit < 1
-            miterLimit = 1;
+            miterLimit = 10;
         }
         return new BasicStroke(lineWidth, lineCap, lineJoin, miterLimit, dashArray, phaseStart);
     }
@@ -842,8 +846,8 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         // note that we ignore paths with a width/height under 1 as these are fills used as strokes,
         // see PDFBOX-1658 for an example
         Rectangle2D bounds = linePath.getBounds2D();
-        boolean noAntiAlias = isRectangular(linePath) && bounds.getWidth() > 1
-                && bounds.getHeight() > 1;
+        boolean noAntiAlias =
+                isRectangular(linePath) && bounds.getWidth() > 1 && bounds.getHeight() > 1;
         if (noAntiAlias)
         {
             graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
@@ -1017,7 +1021,11 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         if (clipWindingRule != -1)
         {
             linePath.setWindingRule(clipWindingRule);
-            getGraphicsState().intersectClippingPath(linePath);
+            if (!linePath.getPathIterator(null).isDone())
+            {
+                // PDFBOX-4949 / PDF.js 12306: don't clip if "W n" only
+                getGraphicsState().intersectClippingPath(linePath);
+            }
 
             // PDFBOX-3836: lastClip needs to be reset, because after intersection it is still the same
             // object, thus setClip() would believe that it is cached.
@@ -1133,8 +1141,9 @@ public class PageDrawer extends PDFGraphicsStreamEngine
                 graphics.setComposite(getGraphicsState().getNonStrokingJavaComposite());
                 if (isContentRendered())
                 {
-                    graphics.drawImage(renderedPaint, AffineTransform
-                            .getTranslateInstance(bounds.getMinX(), bounds.getMinY()), null);
+                    graphics.drawImage(renderedPaint,
+                            AffineTransform.getTranslateInstance(bounds.getMinX(),
+                                    bounds.getMinY()), null);
                 }
             }
             else
@@ -1529,12 +1538,14 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         /**
          * Creates a buffered image for a transparency group result.
          *
-         * @param form the transparency group of the form or soft mask.
-         * @param isSoftMask true if this is a soft mask.
-         * @param ctm the relevant current transformation matrix. For soft masks, this is the CTM at the time the soft
-         * mask is set (not at the time the soft mask is used for fill/stroke!), for forms, this is the CTM at the time
-         * the form is invoked.
-         * @param backdropColor the color according to the /bc entry to be used for luminosity soft masks.
+         * @param form          the transparency group of the form or soft mask.
+         * @param isSoftMask    true if this is a soft mask.
+         * @param ctm           the relevant current transformation matrix. For soft masks, this is
+         *                      the CTM at the time the soft mask is set (not at the time the soft
+         *                      mask is used for fill/stroke!), for forms, this is the CTM at the
+         *                      time the form is invoked.
+         * @param backdropColor the color according to the /bc entry to be used for luminosity soft
+         *                      masks.
          * @throws IOException
          */
         private TransparencyGroup(PDTransparencyGroup form, boolean isSoftMask, Matrix ctm,
@@ -1593,8 +1604,9 @@ public class PageDrawer extends PDFGraphicsStreamEngine
             {
                 image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
             }
-            boolean needsBackdrop = !isSoftMask && !form.getGroup().isIsolated()
-                    && hasBlendMode(form, new HashSet<COSBase>());
+            boolean needsBackdrop =
+                    !isSoftMask && !form.getGroup().isIsolated() && hasBlendMode(form,
+                            new HashSet<COSBase>());
             BufferedImage backdropImage = null;
             // Position of this group in parent group's coordinates
             int backdropX = 0;
@@ -1732,8 +1744,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
             {
                 try
                 {
-                    return ((PDICCBased) colorSpace)
-                            .getAlternateColorSpace() instanceof PDDeviceGray;
+                    return ((PDICCBased) colorSpace).getAlternateColorSpace() instanceof PDDeviceGray;
                 }
                 catch (IOException ex)
                 {
@@ -1807,8 +1818,8 @@ public class PageDrawer extends PDFGraphicsStreamEngine
             {
                 continue;
             }
-            if (xObject instanceof PDTransparencyGroup
-                    && hasBlendMode((PDTransparencyGroup) xObject, groupsDone))
+            if (xObject instanceof PDTransparencyGroup && hasBlendMode(
+                    (PDTransparencyGroup) xObject, groupsDone))
             {
                 return true;
             }

@@ -16,7 +16,14 @@
  */
 package org.sejda.sambox.pdmodel.graphics.color;
 
+import org.sejda.sambox.cos.COSArray;
+import org.sejda.sambox.cos.COSBase;
+import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.cos.COSNull;
+import org.sejda.sambox.pdmodel.common.function.PDFunction;
+
 import java.awt.Point;
+import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
@@ -25,17 +32,11 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSBase;
-import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.cos.COSNull;
-import org.sejda.sambox.pdmodel.common.function.PDFunction;
-
 /**
- * A Separation color space used to specify either additional colorants or for isolating the control of individual
- * colour components of a device colour space for a subtractive device. When such a space is the current colour space,
- * the current colour shall be a single-component value, called a tint, that controls the given colorant or colour
- * components only.
+ * A Separation color space used to specify either additional colorants or for isolating the control
+ * of individual colour components of a device colour space for a subtractive device. When such a
+ * space is the current colour space, the current colour shall be a single-component value, called a
+ * tint, that controls the given colorant or colour components only.
  *
  * @author Ben Litchfield
  * @author John Hewson
@@ -54,10 +55,11 @@ public class PDSeparation extends PDSpecialColorSpace
     private PDFunction tintTransform = null;
 
     /**
-     * Map used to speed up {@link #toRGB(float[])}. Note that this class contains three maps (this and the two in
-     * {@link #toRGBImage(java.awt.image.WritableRaster) } and {@link #toRGBImage2(java.awt.image.WritableRaster) }. The
-     * maps use different key intervals. This map here is needed for shading, which produce more than 256 different
-     * float values, which we cast to int so that the map can work.
+     * Map used to speed up {@link #toRGB(float[])}. Note that this class contains three maps (this
+     * and the two in {@link #toRGBImage(java.awt.image.WritableRaster) } and {@link
+     * #toRGBImage2(java.awt.image.WritableRaster) }. The maps use different key intervals. This map
+     * here is needed for shading, which produce more than 256 different float values, which we cast
+     * to int so that the map can work.
      */
     private Map<Integer, float[]> toRGBMap = null;
 
@@ -76,7 +78,7 @@ public class PDSeparation extends PDSpecialColorSpace
 
     /**
      * Creates a new Separation color space from a PDF color space array.
-     * 
+     *
      * @param separation an array containing all separation information.
      * @throws IOException if the color space or the function could not be created.
      */
@@ -222,9 +224,15 @@ public class PDSeparation extends PDSpecialColorSpace
         }
     }
 
+    @Override
+    public BufferedImage toRawImage(WritableRaster raster)
+    {
+        return toRawImage(raster, ColorSpace.getInstance(ColorSpace.CS_GRAY));
+    }
+
     /**
      * Returns the colorant name.
-     * 
+     *
      * @return the name of the colorant
      */
     public PDColorSpace getAlternateColorSpace()
@@ -234,7 +242,7 @@ public class PDSeparation extends PDSpecialColorSpace
 
     /**
      * Returns the colorant name.
-     * 
+     *
      * @return the name of the colorant
      */
     public String getColorantName()
@@ -245,7 +253,7 @@ public class PDSeparation extends PDSpecialColorSpace
 
     /**
      * Sets the colorant name.
-     * 
+     *
      * @param name the name of the colorant
      */
     public void setColorantName(String name)
@@ -255,7 +263,7 @@ public class PDSeparation extends PDSpecialColorSpace
 
     /**
      * Sets the alternate color space.
-     * 
+     *
      * @param colorSpace The alternate color space.
      */
     public void setAlternateColorSpace(PDColorSpace colorSpace)
@@ -271,7 +279,7 @@ public class PDSeparation extends PDSpecialColorSpace
 
     /**
      * Sets the tint transform function.
-     * 
+     *
      * @param tint the tint transform function
      */
     public void setTintTransform(PDFunction tint)

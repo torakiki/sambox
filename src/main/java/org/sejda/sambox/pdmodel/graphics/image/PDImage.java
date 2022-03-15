@@ -16,15 +16,16 @@
  */
 package org.sejda.sambox.pdmodel.graphics.image;
 
-import java.awt.Paint;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.ByteBuffer;
-
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSObjectable;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
+
+import java.awt.Paint;
+import java.awt.image.BufferedImage;
+import java.awt.image.WritableRaster;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
 
 /**
  * An image in a PDF document.
@@ -34,28 +35,62 @@ import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
 public interface PDImage extends COSObjectable
 {
     /**
-     * Returns the content of this image as an AWT buffered image with an (A)RGB color space. The size of the returned
-     * image is the larger of the size of the image itself or its mask.
-     * 
+     * Returns the content of this image as an AWT buffered image with an (A)RGB color space. The
+     * size of the returned image is the larger of the size of the image itself or its mask.
+     *
      * @return content of this image as a buffered image.
      * @throws IOException
      */
     BufferedImage getImage() throws IOException;
 
     /**
+     * Return the image data as WritableRaster. You should consult the PDColorSpace returned by
+     * {@link #getColorSpace()} to know how to interpret the data in this WritableRaster.
+     * <p>
+     * Use this if e.g. want access to the raw color information of a {@link
+     * org.sejda.sambox.pdmodel.graphics.color.PDDeviceN} image.
+     *
+     * @return the raw writable raster for this image
+     * @throws IOException
+     */
+    WritableRaster getRawRaster() throws IOException;
+
+    /**
+     * Try to get the raw image as AWT buffered image with it's original colorspace. No color
+     * conversion is performed.
+     * <p>
+     * You could use the returned BufferedImage for draw operations. But this would be very slow as
+     * the color conversion would happen on demand. You rather should use {@link #getImage()} for
+     * that.
+     * <p>
+     * This method returns null if it is not possible to map the underlying colorspace into a
+     * java.awt.ColorSpace.
+     * <p>
+     * Use this method if you want to extract the image without loosing any color information, as no
+     * color conversion will be performed.
+     * <p>
+     * You can alwoys use {@link #getRawRaster()}, if you want to access the raw data even if no
+     * matching java.awt.ColorSpace exists
+     *
+     * @return the raw image with a java.awt.ColorSpace or null
+     * @throws IOException
+     */
+    BufferedImage getRawImage() throws IOException;
+
+    /**
      * Returns an ARGB image filled with the given paint and using this image as a mask.
-     * 
+     *
      * @param paint the paint to fill the visible portions of the image with
      * @return a masked image filled with the given paint
-     * @throws IOException if the image cannot be read
+     * @throws IOException           if the image cannot be read
      * @throws IllegalStateException if the image is not a stencil.
      */
     BufferedImage getStencilImage(Paint paint) throws IOException;
 
     /**
-     * Returns an InputStream containing the image data, irrespective of whether this is an inline image or an image
-     * XObject.
-     * 
+     * Returns an InputStream containing the image data, irrespective of whether this is an inline
+     * image or an image XObject.
+     *
      * @return Decoded stream
      * @throws IOException if the data could not be read.
      */
@@ -68,7 +103,7 @@ public interface PDImage extends COSObjectable
 
     /**
      * Returns true if the image has no data.
-     * 
+     *
      * @throws IOException
      */
     boolean isEmpty() throws IOException;
@@ -79,9 +114,9 @@ public interface PDImage extends COSObjectable
     boolean isStencil();
 
     /**
-     * Sets whether or not the image is a stencil. This corresponds to the {@code ImageMask} entry in the image stream's
-     * dictionary.
-     * 
+     * Sets whether or not the image is a stencil. This corresponds to the {@code ImageMask} entry
+     * in the image stream's dictionary.
+     *
      * @param isStencil True to make the image a stencil.
      */
     void setStencil(boolean isStencil);
@@ -93,21 +128,21 @@ public interface PDImage extends COSObjectable
 
     /**
      * Set the number of bits per component.
-     * 
+     *
      * @param bitsPerComponent The number of bits per component.
      */
     void setBitsPerComponent(int bitsPerComponent);
 
     /**
      * Returns the image's color space.
-     * 
+     *
      * @throws IOException If there is an error getting the color space.
      */
     PDColorSpace getColorSpace() throws IOException;
 
     /**
      * Sets the color space for this image.
-     * 
+     *
      * @param colorSpace The color space for this image.
      */
     void setColorSpace(PDColorSpace colorSpace);
@@ -119,7 +154,7 @@ public interface PDImage extends COSObjectable
 
     /**
      * Sets the height of the image.
-     * 
+     *
      * @param height The height of the image.
      */
     void setHeight(int height);
@@ -131,14 +166,14 @@ public interface PDImage extends COSObjectable
 
     /**
      * Sets the width of the image.
-     * 
+     *
      * @param width The width of the image.
      */
     void setWidth(int width);
 
     /**
      * Sets the decode array.
-     * 
+     *
      * @param decode the new decode array.
      */
     void setDecode(COSArray decode);

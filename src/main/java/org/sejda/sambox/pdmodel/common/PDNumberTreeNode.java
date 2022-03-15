@@ -16,15 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.common;
 
-import static java.util.Objects.nonNull;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSArrayList;
 import org.sejda.sambox.cos.COSBase;
@@ -36,8 +27,18 @@ import org.sejda.sambox.cos.COSObjectable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static java.util.Objects.nonNull;
+
 /**
- * This class represents a PDF Number tree. See the PDF Reference 1.7 section 7.9.7 for more details.
+ * This class represents a PDF Number tree. See the PDF Reference 1.7 section 7.9.7 for more
+ * details.
  *
  * @author Ben Litchfield,
  * @author Igor Podolskiy
@@ -63,7 +64,7 @@ public class PDNumberTreeNode implements COSObjectable
     /**
      * Constructor.
      *
-     * @param dict The dictionary that holds the name information.
+     * @param dict       The dictionary that holds the name information.
      * @param valueClass The PD Model type of object that is the value.
      */
     public PDNumberTreeNode(COSDictionary dict, Class<? extends COSObjectable> valueClass)
@@ -132,9 +133,7 @@ public class PDNumberTreeNode implements COSObjectable
      * Returns the value corresponding to an index in the number tree.
      *
      * @param index The index in the number tree.
-     *
      * @return The value corresponding to the index.
-     *
      * @throws IOException If there is a problem creating the values.
      */
     public Object getValue(Integer index) throws IOException
@@ -166,11 +165,10 @@ public class PDNumberTreeNode implements COSObjectable
     }
 
     /**
-     * This will return a map of numbers. The key will be a java.lang.Integer, the value will depend on where this class
-     * is being used.
+     * This will return a map of numbers. The key will be a java.lang.Integer, the value will depend
+     * on where this class is being used.
      *
      * @return A map of COS objects.
-     *
      * @throws IOException If there is a problem creating the values.
      */
     public Map<Integer, COSObjectable> getNumbers() throws IOException
@@ -180,7 +178,11 @@ public class PDNumberTreeNode implements COSObjectable
         if (nonNull(numbersArray))
         {
             indices = new HashMap<>();
-            for (int i = 0; i < numbersArray.size(); i += 2)
+            if (numbersArray.size() % 2 != 0)
+            {
+                LOG.warn("Numbers array has odd size: " + numbersArray.size());
+            }
+            for (int i = 0; i + 1 < numbersArray.size(); i += 2)
             {
                 COSBase base = numbersArray.getObject(i);
                 if (!(base instanceof COSInteger))
@@ -199,8 +201,9 @@ public class PDNumberTreeNode implements COSObjectable
     }
 
     /**
-     * Method to convert the COS value in the name tree to the PD Model object. The default implementation will simply
-     * use reflection to create the correct object type. Subclasses can do whatever they want.
+     * Method to convert the COS value in the name tree to the PD Model object. The default
+     * implementation will simply use reflection to create the correct object type. Subclasses can
+     * do whatever they want.
      *
      * @param base The COS object to convert.
      * @return The converted PD Model object.
@@ -230,8 +233,9 @@ public class PDNumberTreeNode implements COSObjectable
     }
 
     /**
-     * Set the names of for this node. The keys should be java.lang.String and the values must be a COSObjectable. This
-     * method will set the appropriate upper and lower limits based on the keys in the map.
+     * Set the names of for this node. The keys should be java.lang.String and the values must be a
+     * COSObjectable. This method will set the appropriate upper and lower limits based on the keys
+     * in the map.
      *
      * @param numbers The map of names to objects.
      */

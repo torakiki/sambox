@@ -16,6 +16,14 @@
  */
 package org.sejda.sambox.pdmodel.graphics.color;
 
+import org.sejda.sambox.cos.COSArray;
+import org.sejda.sambox.cos.COSArrayList;
+import org.sejda.sambox.cos.COSBase;
+import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.cos.COSNull;
+import org.sejda.sambox.pdmodel.common.function.PDFunction;
+
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -28,19 +36,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSArrayList;
-import org.sejda.sambox.cos.COSBase;
-import org.sejda.sambox.cos.COSDictionary;
-import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.cos.COSNull;
-import org.sejda.sambox.pdmodel.common.function.PDFunction;
-
 /**
- * DeviceN colour spaces may contain an arbitrary number of colour components. DeviceN represents a colour space
- * containing multiple components that correspond to colorants of some target device. As with Separation colour spaces,
- * readers are able to approximate the colorants if they are not available on the current output device, such as a
- * display
+ * DeviceN colour spaces may contain an arbitrary number of colour components. DeviceN represents a
+ * colour space containing multiple components that correspond to colorants of some target device.
+ * As with Separation colour spaces, readers are able to approximate the colorants if they are not
+ * available on the current output device, such as a display
  *
  * @author John Hewson
  * @author Ben Litchfield
@@ -81,7 +81,7 @@ public class PDDeviceN extends PDSpecialColorSpace
 
     /**
      * Creates a new DeviceN color space from the given COS array.
-     * 
+     *
      * @param deviceN an array containing the color space information
      */
     public PDDeviceN(COSArray deviceN) throws IOException
@@ -419,9 +419,16 @@ public class PDDeviceN extends PDSpecialColorSpace
         return alternateColorSpace.toRGB(altValue);
     }
 
+    @Override
+    public BufferedImage toRawImage(WritableRaster raster)
+    {
+        // We don't know how to convert that.
+        return null;
+    }
+
     /**
      * Returns true if this color space has the NChannel subtype.
-     * 
+     *
      * @return true if subtype is NChannel
      */
     public boolean isNChannel()
@@ -461,7 +468,7 @@ public class PDDeviceN extends PDSpecialColorSpace
 
     /**
      * Returns the list of colorants.
-     * 
+     *
      * @return the list of colorants
      */
     public List<String> getColorantNames()
@@ -472,7 +479,7 @@ public class PDDeviceN extends PDSpecialColorSpace
 
     /**
      * Returns the attributes associated with the DeviceN color space.
-     * 
+     *
      * @return the DeviceN attributes
      */
     public PDDeviceNAttributes getAttributes()
@@ -482,7 +489,7 @@ public class PDDeviceN extends PDSpecialColorSpace
 
     /**
      * Sets the list of colorants
-     * 
+     *
      * @param names the list of colorants
      */
     public void setColorantNames(List<String> names)
@@ -493,7 +500,7 @@ public class PDDeviceN extends PDSpecialColorSpace
 
     /**
      * Sets the color space attributes. If null is passed in then all attribute will be removed.
-     * 
+     *
      * @param attributes the color space attributes, or null
      */
     public void setAttributes(PDDeviceNAttributes attributes)
@@ -518,7 +525,6 @@ public class PDDeviceN extends PDSpecialColorSpace
      * This will get the alternate color space for this separation.
      *
      * @return The alternate color space.
-     *
      * @throws IOException If there is an error getting the alternate color space.
      */
     public PDColorSpace getAlternateColorSpace() throws IOException
@@ -550,7 +556,6 @@ public class PDDeviceN extends PDSpecialColorSpace
      * This will get the tint transform function.
      *
      * @return The tint transform function.
-     *
      * @throws IOException if there is an error creating the function.
      */
     public PDFunction getTintTransform() throws IOException

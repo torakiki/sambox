@@ -119,7 +119,8 @@ public final class PDICCBased extends PDCIEBasedColorSpace
      * @deprecated This will be private in 3.0. Please use {@link PDICCBased#create(org.sejda.sambox.cos.COSArray,
      * org.sejda.sambox.pdmodel.PDResources)} instead, which supports caching.
      */
-    @Deprecated public PDICCBased(COSArray iccArray) throws IOException
+    @Deprecated
+    public PDICCBased(COSArray iccArray) throws IOException
     {
         requireIOCondition(iccArray.size() >= 2,
                 "ICCBased colorspace array must have two elements");
@@ -167,7 +168,8 @@ public final class PDICCBased extends PDCIEBasedColorSpace
         return space;
     }
 
-    @Override public String getName()
+    @Override
+    public String getName()
     {
         return COSName.ICCBASED.getName();
     }
@@ -311,7 +313,8 @@ public final class PDICCBased extends PDCIEBasedColorSpace
         array[index + 3] = (byte) (value);
     }
 
-    @Override public float[] toRGB(float[] value) throws IOException
+    @Override
+    public float[] toRGB(float[] value) throws IOException
     {
         if (isRGB)
         {
@@ -339,7 +342,8 @@ public final class PDICCBased extends PDCIEBasedColorSpace
         return result;
     }
 
-    @Override public BufferedImage toRGBImage(WritableRaster raster) throws IOException
+    @Override
+    public BufferedImage toRGBImage(WritableRaster raster) throws IOException
     {
         if (awtColorSpace != null)
         {
@@ -357,7 +361,18 @@ public final class PDICCBased extends PDCIEBasedColorSpace
         return alternateColorSpace.toRGBImage(raster);
     }
 
-    @Override public int getNumberOfComponents()
+    @Override
+    public BufferedImage toRawImage(WritableRaster raster) throws IOException
+    {
+        if (awtColorSpace == null)
+        {
+            return alternateColorSpace.toRawImage(raster);
+        }
+        return toRawImage(raster, awtColorSpace);
+    }
+
+    @Override
+    public int getNumberOfComponents()
     {
         if (numberOfComponents < 0)
         {
@@ -368,7 +383,9 @@ public final class PDICCBased extends PDCIEBasedColorSpace
                 int numIccComponents = iccProfile.getNumComponents();
                 if (numIccComponents != numberOfComponents)
                 {
-                    LOG.warn("Using {} components from ICC profile info instead of {} components from /N entry", numIccComponents, numberOfComponents);
+                    LOG.warn(
+                            "Using {} components from ICC profile info instead of {} components from /N entry",
+                            numIccComponents, numberOfComponents);
                     numberOfComponents = numIccComponents;
                 }
             }
@@ -376,7 +393,8 @@ public final class PDICCBased extends PDCIEBasedColorSpace
         return numberOfComponents;
     }
 
-    @Override public float[] getDefaultDecode(int bitsPerComponent)
+    @Override
+    public float[] getDefaultDecode(int bitsPerComponent)
     {
         if (awtColorSpace != null)
         {
@@ -395,7 +413,8 @@ public final class PDICCBased extends PDCIEBasedColorSpace
         }
     }
 
-    @Override public PDColor getInitialColor()
+    @Override
+    public PDColor getInitialColor()
     {
         return initialColor;
     }
@@ -477,7 +496,7 @@ public final class PDICCBased extends PDCIEBasedColorSpace
      */
     public COSStream getMetadata()
     {
-        return (COSStream) stream.getCOSObject().getDictionaryObject(COSName.METADATA);
+        return stream.getCOSObject().getDictionaryObject(COSName.METADATA, COSStream.class);
     }
 
     /**
@@ -514,7 +533,8 @@ public final class PDICCBased extends PDCIEBasedColorSpace
      * @param n the number of color components
      */
     // TODO it's probably not safe to use this
-    @Deprecated public void setNumberOfComponents(int n)
+    @Deprecated
+    public void setNumberOfComponents(int n)
     {
         numberOfComponents = n;
         stream.getCOSObject().setInt(COSName.N, n);
@@ -569,7 +589,18 @@ public final class PDICCBased extends PDCIEBasedColorSpace
         stream.getCOSObject().setItem(COSName.METADATA, metadata);
     }
 
-    @Override public String toString()
+    /**
+     * Internal accessor to support indexed raw images.
+     *
+     * @return true if this colorspace is sRGB.
+     */
+    boolean isSRGB()
+    {
+        return isRGB;
+    }
+
+    @Override
+    public String toString()
     {
         return getName() + "{numberOfComponents: " + getNumberOfComponents() + "}";
     }

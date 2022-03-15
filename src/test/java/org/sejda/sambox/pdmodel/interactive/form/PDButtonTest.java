@@ -16,17 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -41,9 +30,19 @@ import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceDictionary;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceEntry;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceStream;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 /**
  * Test for the PDButton class.
- *
  */
 public class PDButtonTest
 {
@@ -59,8 +58,8 @@ public class PDButtonTest
         document = new PDDocument();
         acroForm = new PDAcroForm(document);
 
-        acrobatDocument = PDFParser
-                .parse(SeekableSources.inMemorySeekableSourceFrom(getClass().getResourceAsStream(
+        acrobatDocument = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream(
                         "/org/sejda/sambox/pdmodel/interactive/form/AcroFormsBasicFields.pdf")));
         acrobatAcroForm = acrobatDocument.getDocumentCatalog().getAcroForm();
     }
@@ -118,17 +117,17 @@ public class PDButtonTest
 
     /**
      * PDFBOX-3656
-     *
-     * Test a radio button with options. This was causing an ArrayIndexOutOfBoundsException when trying to set to "Off",
-     * as this wasn't treated to be a valid option.
+     * <p>
+     * Test a radio button with options. This was causing an ArrayIndexOutOfBoundsException when
+     * trying to set to "Off", as this wasn't treated to be a valid option.
      *
      * @throws IOException
      */
     @Test
     public void testRadioButtonWithOptions() throws IOException
     {
-        try (PDDocument document = PDFParser.parse(
-                SeekableSources.inMemorySeekableSourceFrom(this.getClass().getResourceAsStream(
+        try (PDDocument document = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                this.getClass().getResourceAsStream(
                         "/org/sejda/sambox/pdmodel/interactive/form/radio_with_options.pdf"))))
         {
 
@@ -148,8 +147,8 @@ public class PDButtonTest
     @Test
     public void testRadioButtonWithOptionsThatDontMatchNormalAppearance() throws IOException
     {
-        try (PDDocument document = PDFParser.parse(
-                SeekableSources.inMemorySeekableSourceFrom(this.getClass().getResourceAsStream(
+        try (PDDocument document = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                this.getClass().getResourceAsStream(
                         "/org/sejda/sambox/pdmodel/interactive/form/simple_form.pdf"))))
         {
 
@@ -159,7 +158,7 @@ public class PDButtonTest
             radioButton.setValue("Second Choice");
 
             assertEquals("Export value does not exist in normal appearance. Don't export value",
-                    radioButton.getValue(), "1");
+                    "Second Choice", radioButton.getValue());
 
             assertEquals("First widget should be Off", COSName.Off,
                     radioButton.getWidgets().get(0).getCOSObject().getItem(COSName.AS));
@@ -173,8 +172,8 @@ public class PDButtonTest
     @Test
     public void testRadioButtonWithOptionsThatDoMatchNormalAppearance() throws IOException
     {
-        try (PDDocument document = PDFParser.parse(
-                SeekableSources.inMemorySeekableSourceFrom(this.getClass().getResourceAsStream(
+        try (PDDocument document = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                this.getClass().getResourceAsStream(
                         "/org/sejda/sambox/pdmodel/interactive/form/PDFBOX-3656 - test.pdf"))))
         {
 
@@ -200,8 +199,8 @@ public class PDButtonTest
     @Test
     public void testCheckboxWithExportValuesMoreThanWidgetsButSameExportValue() throws IOException
     {
-        try (PDDocument document = PDFParser.parse(
-                SeekableSources.inMemorySeekableSourceFrom(this.getClass().getResourceAsStream(
+        try (PDDocument document = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                this.getClass().getResourceAsStream(
                         "/org/sejda/sambox/pdmodel/interactive/form/P020130830121570742708.pdf"))))
         {
 
@@ -209,15 +208,15 @@ public class PDButtonTest
                     .getField("Check Box3");
 
             checkbox.check();
-            assertEquals(checkbox.getValue(), "0");
+            assertEquals("是", checkbox.getValue());
         }
     }
 
     @Test
     public void testMalformedCheckboxNormalAppearances() throws IOException
     {
-        try (PDDocument document = PDFParser.parse(
-                SeekableSources.inMemorySeekableSourceFrom(this.getClass().getResourceAsStream(
+        try (PDDocument document = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                this.getClass().getResourceAsStream(
                         "/sambox/forms-malformed-checkbox-normal-appearances.pdf"))))
         {
 
@@ -230,9 +229,9 @@ public class PDButtonTest
 
     /**
      * PDFBOX-3682
-     *
-     * Test a radio button with options. Special handling for a radio button with /Opt and the On state not being named
-     * after the index.
+     * <p>
+     * Test a radio button with options. Special handling for a radio button with /Opt and the On
+     * state not being named after the index.
      *
      * @throws IOException
      */
@@ -240,8 +239,8 @@ public class PDButtonTest
     public void testOptionsAndNamesNotNumbers() throws IOException
     {
 
-        try (PDDocument document = PDFParser.parse(
-                SeekableSources.inMemorySeekableSourceFrom(this.getClass().getResourceAsStream(
+        try (PDDocument document = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                this.getClass().getResourceAsStream(
                         "/org/sejda/sambox/pdmodel/interactive/form/options_names_not_numbers.pdf"))))
         {
 
@@ -551,11 +550,11 @@ public class PDButtonTest
 
         PDAnnotationWidget widget = new PDAnnotationWidget();
         PDAppearanceDictionary appearance = new PDAppearanceDictionary();
-        
+
         COSDictionary normalAppearanceDict = new COSDictionary();
         normalAppearanceDict.putIfAbsent(COSName.getPDFName("0"), new PDAppearanceStream());
         PDAppearanceEntry normalAppearance = new PDAppearanceEntry(normalAppearanceDict);
-        
+
         appearance.setNormalAppearance(normalAppearance);
         widget.setAppearance(appearance);
 
@@ -564,7 +563,7 @@ public class PDButtonTest
         assertEquals(radio.getWidgets().size(), 1);
         assertEquals(radio.getOnValues(), new HashSet<>(Arrays.asList("0", "Yes", "Yes")));
         assertEquals(radio.getValue(), "Off");
-        
+
         radio.setValueIgnoreExportOptions("0");
         assertEquals(radio.getValue(), "0");
     }
@@ -591,12 +590,16 @@ public class PDButtonTest
         assertEquals(radio.getOnValues(), new HashSet<>(Arrays.asList("0", "1")));
         assertEquals(radio.getValue(), "Off");
 
-        try {
-            radio.setValueIgnoreExportOptions("1");    
+        try
+        {
+            radio.setValueIgnoreExportOptions("1");
             Assert.fail("Expected failure");
-            
-        } catch (IllegalArgumentException ex) {
-            Assert.assertEquals(ex.getMessage(), "The number of options doesn't match the number of widgets");
+
+        }
+        catch (IllegalArgumentException ex)
+        {
+            Assert.assertEquals(ex.getMessage(),
+                    "The number of options doesn't match the number of widgets");
         }
     }
 

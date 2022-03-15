@@ -1,12 +1,5 @@
 package org.sejda.sambox.pdmodel.interactive.form;
 
-import static org.hamcrest.CoreMatchers.startsWith;
-import static org.junit.Assert.assertEquals;
-import static org.hamcrest.MatcherAssert.assertThat;
-
-import java.io.IOException;
-import java.util.Collections;
-
 import org.junit.Test;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSString;
@@ -16,10 +9,19 @@ import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.font.PDType1Font;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
 
-public class AppearanceGeneratorHelperTest {
+import java.io.IOException;
+import java.util.Collections;
+
+import static org.hamcrest.CoreMatchers.startsWith;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
+
+public class AppearanceGeneratorHelperTest
+{
 
     @Test
-    public void testCalculateFontSizeForFauxMultiline() throws IOException {
+    public void testCalculateFontSizeForFauxMultiline() throws IOException
+    {
         AppearanceGeneratorHelper helper = new AppearanceGeneratorHelper(multilineTextField());
         helper.setAppearanceValue("This is a test");
         PDRectangle content = new PDRectangle(2, 2, 517, 10);
@@ -29,7 +31,9 @@ public class AppearanceGeneratorHelperTest {
     }
 
     @Test
-    public void testCalculateFontSizeForFauxMultilineFieldButUserEnteredMultipleLines() throws IOException {
+    public void testCalculateFontSizeForFauxMultilineFieldButUserEnteredMultipleLines()
+            throws IOException
+    {
         AppearanceGeneratorHelper helper = new AppearanceGeneratorHelper(multilineTextField());
         helper.setAppearanceValue("This is a test\nright here");
         PDRectangle content = new PDRectangle(2, 2, 517, 10);
@@ -39,7 +43,8 @@ public class AppearanceGeneratorHelperTest {
     }
 
     @Test
-    public void testCalculateFontSizeForMultiline() throws IOException {
+    public void testCalculateFontSizeForMultiline() throws IOException
+    {
         AppearanceGeneratorHelper helper = new AppearanceGeneratorHelper(multilineTextField());
         helper.setAppearanceValue("Line 1\nLine 2\nLine 3\nLine 4\nLine 5");
 
@@ -49,7 +54,8 @@ public class AppearanceGeneratorHelperTest {
     }
 
     @Test
-    public void testCalculateFontSizeForMultilineDefaultFontSizeFits() throws IOException {
+    public void testCalculateFontSizeForMultilineDefaultFontSizeFits() throws IOException
+    {
         AppearanceGeneratorHelper helper = new AppearanceGeneratorHelper(multilineTextField());
         helper.setAppearanceValue("Line 1\nLine 2\nLine 3\nLine 4\nLine 5");
 
@@ -59,7 +65,8 @@ public class AppearanceGeneratorHelperTest {
     }
 
     @Test
-    public void testCalculateFontSize() throws IOException {
+    public void testCalculateFontSize() throws IOException
+    {
         AppearanceGeneratorHelper helper = new AppearanceGeneratorHelper(textField());
         helper.setAppearanceValue("This is a test");
 
@@ -69,9 +76,11 @@ public class AppearanceGeneratorHelperTest {
     }
 
     @Test
-    public void testCalculateFontSizeWidthTooLarge() throws IOException {
+    public void testCalculateFontSizeWidthTooLarge() throws IOException
+    {
         AppearanceGeneratorHelper helper = new AppearanceGeneratorHelper(textField());
-        helper.setAppearanceValue("This is a test for a field that is very wide so the font will be shrinked to fit the width of the field on the page aaaaaaaaaa");
+        helper.setAppearanceValue(
+                "This is a test for a field that is very wide so the font will be shrinked to fit the width of the field on the page aaaaaaaaaa");
 
         PDRectangle content = new PDRectangle(2, 2, 517, 10);
         float fontSize = helper.calculateFontSize(PDType1Font.HELVETICA, content);
@@ -79,7 +88,8 @@ public class AppearanceGeneratorHelperTest {
     }
 
     @Test
-    public void testInvalidAppearanceString() throws IOException {
+    public void testInvalidAppearanceString() throws IOException
+    {
         String invalid = "/Helv Tf 0.25 g";
 
         // make sure this is an invalid default appearance string
@@ -104,17 +114,19 @@ public class AppearanceGeneratorHelperTest {
         helper.setAppearanceValue("Some text");
     }
 
-    private PDTextField multilineTextField() {
+    private PDTextField multilineTextField()
+    {
         PDTextField tf = textField();
         tf.setMultiline(true);
         return tf;
     }
 
-    private PDTextField textField() {
+    private PDTextField textField()
+    {
         PDDocument doc = new PDDocument();
         doc.addPage(new PDPage());
         PDAcroForm form = new PDAcroForm(doc);
-        PDTextField tf =  new PDTextField(form);
+        PDTextField tf = new PDTextField(form);
         tf.setDefaultAppearance("/Helvetica 10.00 Tf 0 g");
         return tf;
     }

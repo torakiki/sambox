@@ -16,11 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
-import static java.util.Optional.ofNullable;
-
-import java.io.IOException;
-import java.util.List;
-
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
@@ -28,6 +23,12 @@ import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.common.PDDictionaryWrapper;
 import org.sejda.sambox.pdmodel.interactive.action.PDFormFieldAdditionalActions;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
+
+import java.io.IOException;
+import java.util.List;
+
+import static java.util.Optional.ofNullable;
+import static org.sejda.commons.util.RequireUtils.requireArg;
 
 /**
  * A field in an interactive form.
@@ -43,7 +44,7 @@ public abstract class PDField extends PDDictionaryWrapper
 
     /**
      * Constructor.
-     * 
+     *
      * @param acroForm The form that this field is part of.
      */
     PDField(PDAcroForm acroForm)
@@ -53,10 +54,10 @@ public abstract class PDField extends PDDictionaryWrapper
 
     /**
      * Constructor.
-     * 
-     * @param acroForm The form that this field is part of.
+     *
+     * @param acroForm   The form that this field is part of.
      * @param dictionary the PDF object to represent as a field.
-     * @param parent the parent node of the node
+     * @param parent     the parent node of the node
      */
     PDField(PDAcroForm acroForm, COSDictionary dictionary, PDNonTerminalField parent)
     {
@@ -68,8 +69,8 @@ public abstract class PDField extends PDDictionaryWrapper
     /**
      * Creates a COSField subclass from the given COS field. This is for reading fields from PDFs.
      *
-     * @param form the form that the field is part of
-     * @param field the dictionary representing a field element
+     * @param form   the form that the field is part of
+     * @param field  the dictionary representing a field element
      * @param parent the parent node of the node to be created, or null if root.
      * @return a new PDField instance
      */
@@ -101,17 +102,16 @@ public abstract class PDField extends PDDictionaryWrapper
     }
 
     /**
-     * Get the FT entry of the field. This is a read only field and is set depending on the actual type. The field type
-     * is an inheritable attribute.
-     * 
+     * Get the FT entry of the field. This is a read only field and is set depending on the actual
+     * type. The field type is an inheritable attribute.
+     *
      * @return The Field type.
-     * 
      */
     public abstract String getFieldType();
 
     /**
      * Returns a string representation of the "V" entry, or an empty string.
-     * 
+     *
      * @return A non-null string.
      */
     public abstract String getValueAsString();
@@ -120,24 +120,23 @@ public abstract class PDField extends PDDictionaryWrapper
      * Sets the value of the field.
      *
      * @param value the new field value.
-     * 
      * @throws IOException if the value could not be set
      */
     public abstract void setValue(String value) throws IOException;
 
     /**
      * Returns the widget annotations associated with this field.
-     * 
-     * For {@link PDNonTerminalField} the list will be empty as non terminal fields have no visual representation in the
-     * form.
-     * 
+     * <p>
+     * For {@link PDNonTerminalField} the list will be empty as non terminal fields have no visual
+     * representation in the form.
+     *
      * @return A non-null string.
      */
     public abstract List<PDAnnotationWidget> getWidgets();
 
     /**
      * sets the field to be read-only.
-     * 
+     *
      * @param readonly The new flag for readonly.
      */
     public void setReadonly(boolean readonly)
@@ -146,7 +145,6 @@ public abstract class PDField extends PDDictionaryWrapper
     }
 
     /**
-     * 
      * @return true if the field is readonly
      */
     public boolean isReadonly()
@@ -156,7 +154,7 @@ public abstract class PDField extends PDDictionaryWrapper
 
     /**
      * sets the field to be required.
-     * 
+     *
      * @param required The new flag for required.
      */
     public void setRequired(boolean required)
@@ -165,7 +163,6 @@ public abstract class PDField extends PDDictionaryWrapper
     }
 
     /**
-     * 
      * @return true if the field is required
      */
     public boolean isRequired()
@@ -175,7 +172,7 @@ public abstract class PDField extends PDDictionaryWrapper
 
     /**
      * sets the field to be not exported.
-     * 
+     *
      * @param noExport The new flag for noExport.
      */
     public void setNoExport(boolean noExport)
@@ -184,7 +181,6 @@ public abstract class PDField extends PDDictionaryWrapper
     }
 
     /**
-     * 
      * @return true if the field is not to be exported.
      */
     public boolean isNoExport()
@@ -194,14 +190,14 @@ public abstract class PDField extends PDDictionaryWrapper
 
     /**
      * This will get the flags for this field.
-     * 
+     *
      * @return flags The set of flags.
      */
     public abstract int getFieldFlags();
 
     /**
      * This will set the flags for this field.
-     * 
+     *
      * @param flags The new flags.
      */
     public void setFieldFlags(int flags)
@@ -210,20 +206,20 @@ public abstract class PDField extends PDDictionaryWrapper
     }
 
     /**
-     * Get the additional actions for this field. This will return null if there are no additional actions for this
-     * field.
+     * Get the additional actions for this field. This will return null if there are no additional
+     * actions for this field.
      *
      * @return The actions of the field.
      */
     public PDFormFieldAdditionalActions getActions()
     {
-        return ofNullable(getCOSObject().getDictionaryObject(COSName.AA, COSDictionary.class))
-                .map(PDFormFieldAdditionalActions::new).orElse(null);
+        return ofNullable(getCOSObject().getDictionaryObject(COSName.AA, COSDictionary.class)).map(
+                PDFormFieldAdditionalActions::new).orElse(null);
     }
 
     /**
      * Get the parent field to this field, or null if none exists.
-     * 
+     *
      * @return The parent field.
      */
     public PDNonTerminalField getParent()
@@ -232,11 +228,11 @@ public abstract class PDField extends PDDictionaryWrapper
     }
 
     /**
-     * This will find one of the child elements. The name array are the components of the name to search down the tree
-     * of names. The nameIndex is where to start in that array. This method is called recursively until it finds the end
-     * point based on the name array.
-     * 
-     * @param name An array that picks the path to the field.
+     * This will find one of the child elements. The name array are the components of the name to
+     * search down the tree of names. The nameIndex is where to start in that array. This method is
+     * called recursively until it finds the end point based on the name array.
+     *
+     * @param name      An array that picks the path to the field.
      * @param nameIndex The index into the array.
      * @return The field at the endpoint or null if none is found.
      */
@@ -265,7 +261,7 @@ public abstract class PDField extends PDDictionaryWrapper
 
     /**
      * This will get the acroform that this field is part of.
-     * 
+     *
      * @return The form this field is on.
      */
     public PDAcroForm getAcroForm()
@@ -275,7 +271,7 @@ public abstract class PDField extends PDDictionaryWrapper
 
     /**
      * Returns the partial name of the field.
-     * 
+     *
      * @return the name of the field
      */
     public String getPartialName()
@@ -285,17 +281,20 @@ public abstract class PDField extends PDDictionaryWrapper
 
     /**
      * This will set the partial name of the field.
-     * 
+     *
      * @param name The new name for the field.
      */
     public void setPartialName(String name)
     {
+        requireArg(!name.contains("."),
+                "A field partial name shall not contain a period character: " + name);
         getCOSObject().setString(COSName.T, name);
     }
 
     /**
-     * Returns the fully qualified name of the field, which is a concatenation of the names of all the parents fields.
-     * 
+     * Returns the fully qualified name of the field, which is a concatenation of the names of all
+     * the parents fields.
+     *
      * @return the name of the field
      */
     public String getFullyQualifiedName()
@@ -317,9 +316,10 @@ public abstract class PDField extends PDDictionaryWrapper
     }
 
     /**
-     * Gets the alternate name of the field ("shall be used in place of the actual field name wherever the field shall
-     * be identified in the user interface (such as in error or status messages referring to the field)").
-     * 
+     * Gets the alternate name of the field ("shall be used in place of the actual field name
+     * wherever the field shall be identified in the user interface (such as in error or status
+     * messages referring to the field)").
+     *
      * @return the alternate name of the field
      */
     public String getAlternateFieldName()
@@ -328,11 +328,11 @@ public abstract class PDField extends PDDictionaryWrapper
     }
 
     /**
-     * This will set the alternate name of the field ("shall be used in place of the actual field name wherever the
-     * field shall be identified in the user interface (such as in error or status messages referring to the field)").
-     * The text appears as a tool tip in Adobe Reader. Because of the usage for error or status messages, it should be
-     * different for each field.
-     * 
+     * This will set the alternate name of the field ("shall be used in place of the actual field
+     * name wherever the field shall be identified in the user interface (such as in error or status
+     * messages referring to the field)"). The text appears as a tool tip in Adobe Reader. Because
+     * of the usage for error or status messages, it should be different for each field.
+     *
      * @param alternateFieldName the alternate name of the field
      */
     public void setAlternateFieldName(String alternateFieldName)
@@ -342,9 +342,9 @@ public abstract class PDField extends PDDictionaryWrapper
 
     /**
      * Gets the mapping name of the field.
-     * 
+     * <p>
      * The mapping name shall be used when exporting interactive form field data from the document.
-     * 
+     *
      * @return the mapping name of the field
      */
     public String getMappingName()
@@ -354,7 +354,7 @@ public abstract class PDField extends PDDictionaryWrapper
 
     /**
      * This will set the mapping name of the field.
-     * 
+     *
      * @param mappingName the mapping name of the field
      */
     public void setMappingName(String mappingName)

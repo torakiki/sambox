@@ -17,18 +17,6 @@
 
 package org.sejda.sambox.pdmodel.font;
 
-import static java.util.Objects.nonNull;
-import static org.sejda.sambox.pdmodel.font.UniUtil.getUniNameOfCodePoint;
-
-import java.awt.geom.AffineTransform;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.Point2D;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.fontbox.EncodedFont;
 import org.apache.fontbox.FontBoxFont;
 import org.apache.fontbox.cff.CFFParser;
@@ -44,6 +32,18 @@ import org.sejda.sambox.pdmodel.font.encoding.Type1Encoding;
 import org.sejda.sambox.util.Matrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.awt.geom.AffineTransform;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Point2D;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static java.util.Objects.nonNull;
+import static org.sejda.sambox.pdmodel.font.UniUtil.getUniNameOfCodePoint;
 
 /**
  * Type 1-equivalent CFF font.
@@ -70,7 +70,7 @@ public class PDType1CFont extends PDSimpleFont
 
     /**
      * Constructor.
-     * 
+     *
      * @param fontDictionary the corresponding dictionary
      * @throws IOException it something went wrong
      */
@@ -121,8 +121,8 @@ public class PDType1CFont extends PDSimpleFont
         else
         {
             this.isOriginalEmbeddedMissing = true;
-            FontMapping<FontBoxFont> mapping = FontMappers.instance().getFontBoxFont(getBaseFont(),
-                    fd);
+            FontMapping<FontBoxFont> mapping = FontMappers.instance()
+                    .getFontBoxFont(getBaseFont(), fd);
             genericFont = mapping.getFont();
 
             if (mapping.isFallback())
@@ -168,7 +168,7 @@ public class PDType1CFont extends PDSimpleFont
         {
             return new GeneralPath();
         }
-        return genericFont.getPath(name);
+        return "nbspace".equals(name) ? genericFont.getPath("space") : genericFont.getPath(name);
     }
 
     @Override
@@ -297,7 +297,12 @@ public class PDType1CFont extends PDSimpleFont
         float height;
         if (!glyphHeights.containsKey(name))
         {
-            height = (float) cffFont.getType1CharString(name).getBounds().getHeight(); // todo: cffFont could be null
+            if (cffFont == null)
+            {
+                LOG.warn("No embedded CFF font, returning height 0");
+                return 0;
+            }
+            height = (float) cffFont.getType1CharString(name).getBounds().getHeight();
             glyphHeights.put(name, height);
         }
         else
@@ -334,6 +339,11 @@ public class PDType1CFont extends PDSimpleFont
     @Override
     public float getStringWidth(String string) throws IOException
     {
+        if (cffFont == null)
+        {
+            LOG.warn("No embedded CFF font, returning width 0");
+            return 0;
+        }
         float width = 0;
         for (int i = 0; i < string.length(); i++)
         {
@@ -356,7 +366,7 @@ public class PDType1CFont extends PDSimpleFont
 
     /**
      * Returns the embedded Type 1-equivalent CFF font.
-     * 
+     *
      * @return the cffFont
      */
     public CFFType1Font getCFFType1Font()
@@ -372,8 +382,8 @@ public class PDType1CFont extends PDSimpleFont
     }
 
     /**
-     * Maps a PostScript glyph name to the name in the underlying font, for example when using a TTF font we might map
-     * "W" to "uni0057".
+     * Maps a PostScript glyph name to the name in the underlying font, for example when using a TTF
+     * font we might map "W" to "uni0057".
      */
     private String getNameInFont(String name) throws IOException
     {
@@ -395,12 +405,14 @@ public class PDType1CFont extends PDSimpleFont
     }
 
     @Override
-    public boolean isOriginalEmbeddedMissing() {
+    public boolean isOriginalEmbeddedMissing()
+    {
         return isOriginalEmbeddedMissing;
     }
 
     @Override
-    public boolean isMappingFallbackUsed() {
+    public boolean isMappingFallbackUsed()
+    {
         return isMappingFallbackUsed;
     }
 }

@@ -16,14 +16,14 @@
  */
 package org.sejda.sambox.pdmodel.graphics.color;
 
-import java.awt.image.BufferedImage;
-import java.awt.image.WritableRaster;
-import java.io.IOException;
-
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSFloat;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.common.PDRange;
+
+import java.awt.image.BufferedImage;
+import java.awt.image.WritableRaster;
+import java.io.IOException;
 
 /**
  * A Lab colour space is a CIE-based ABC colour space with two transformation stages.
@@ -34,7 +34,7 @@ import org.sejda.sambox.pdmodel.common.PDRange;
 public final class PDLab extends PDCIEDictionaryBasedColorSpace
 {
     private PDColor initialColor;
-    
+
     /**
      * Creates a new Lab color space.
      */
@@ -45,13 +45,14 @@ public final class PDLab extends PDCIEDictionaryBasedColorSpace
 
     /**
      * Creates a new Lab color space from a PDF array.
+     *
      * @param lab the color space array
      */
     public PDLab(COSArray lab)
     {
         super(lab);
     }
-    
+
     @Override
     public String getName()
     {
@@ -87,7 +88,7 @@ public final class PDLab extends PDCIEDictionaryBasedColorSpace
                 abc[0] /= 255;
                 abc[1] /= 255;
                 abc[2] /= 255;
-                
+
                 // scale to range
                 abc[0] *= 100;
                 abc[1] = minA + (abc[1] * (maxA - minA));
@@ -108,6 +109,13 @@ public final class PDLab extends PDCIEDictionaryBasedColorSpace
     }
 
     @Override
+    public BufferedImage toRawImage(WritableRaster raster)
+    {
+        // Not handled at the moment.
+        return null;
+    }
+
+    @Override
     public float[] toRGB(float[] value)
     {
         // CIE LAB to RGB, see http://en.wikipedia.org/wiki/Lab_color_space
@@ -121,7 +129,7 @@ public final class PDLab extends PDCIEDictionaryBasedColorSpace
         float x = wpX * inverse(lstar + value[1] * (1f / 500f));
         float y = wpY * inverse(lstar);
         float z = wpZ * inverse(lstar - value[2] * (1f / 200f));
-        
+
         return convXYZtoRGB(x, y, z);
     }
 
@@ -157,17 +165,15 @@ public final class PDLab extends PDCIEDictionaryBasedColorSpace
     {
         if (initialColor == null)
         {
-            initialColor = new PDColor(new float[] {
-                    0,
-                    Math.max(0, getARange().getMin()),
-                    Math.max(0, getBRange().getMin()) },
-                    this);
+            initialColor = new PDColor(new float[] { 0, Math.max(0, getARange().getMin()),
+                    Math.max(0, getBRange().getMin()) }, this);
         }
         return initialColor;
     }
 
     /**
      * creates a range array with default values (-100..100 -100..100).
+     *
      * @return the new range array.
      */
     private COSArray getDefaultRangeArray()
@@ -181,8 +187,9 @@ public final class PDLab extends PDCIEDictionaryBasedColorSpace
     }
 
     /**
-     * This will get the valid range for the "a" component.
-     * If none is found then the default will be returned, which is -100..100.
+     * This will get the valid range for the "a" component. If none is found then the default will
+     * be returned, which is -100..100.
+     *
      * @return the "a" range.
      */
     public PDRange getARange()
@@ -196,8 +203,9 @@ public final class PDLab extends PDCIEDictionaryBasedColorSpace
     }
 
     /**
-     * This will get the valid range for the "b" component.
-     * If none is found  then the default will be returned, which is -100..100.
+     * This will get the valid range for the "b" component. If none is found  then the default will
+     * be returned, which is -100..100.
+     *
      * @return the "b" range.
      */
     public PDRange getBRange()
@@ -212,8 +220,9 @@ public final class PDLab extends PDCIEDictionaryBasedColorSpace
 
     /**
      * This will set the a range for the "a" component.
-     * @param range the new range for the "a" component, 
-     * or null if defaults (-100..100) are to be set.
+     *
+     * @param range the new range for the "a" component, or null if defaults (-100..100) are to be
+     *              set.
      */
     public void setARange(PDRange range)
     {
@@ -222,8 +231,9 @@ public final class PDLab extends PDCIEDictionaryBasedColorSpace
 
     /**
      * This will set the "b" range for this color space.
-     * @param range the new range for the "b" component,
-     * or null if defaults (-100..100) are to be set.
+     *
+     * @param range the new range for the "b" component, or null if defaults (-100..100) are to be
+     *              set.
      */
     public void setBRange(PDRange range)
     {

@@ -17,29 +17,6 @@
 
 package org.sejda.sambox.pdmodel.encryption;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.IdentityHashMap;
-import java.util.Map;
-import java.util.Set;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-
 import org.bouncycastle.crypto.engines.AESFastEngine;
 import org.bouncycastle.crypto.io.CipherInputStream;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
@@ -58,8 +35,31 @@ import org.sejda.sambox.pdmodel.PDDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.Map;
+import java.util.Set;
+
 /**
- * A security handler as described in the PDF specifications. A security handler is responsible of documents protection.
+ * A security handler as described in the PDF specifications. A security handler is responsible of
+ * documents protection.
  *
  * @author Ben Litchfield
  * @author Benoit Guillon
@@ -74,16 +74,24 @@ public abstract class SecurityHandler
     // see 7.6.2, page 58, PDF 32000-1:2008
     private static final byte[] AES_SALT = { (byte) 0x73, (byte) 0x41, (byte) 0x6c, (byte) 0x54 };
 
-    /** The length of the secret key used to encrypt the document. */
+    /**
+     * The length of the secret key used to encrypt the document.
+     */
     protected int keyLength = DEFAULT_KEY_LENGTH;
 
-    /** The encryption key that will used to encrypt / decrypt. */
+    /**
+     * The encryption key that will used to encrypt / decrypt.
+     */
     private byte[] encryptionKey;
 
-    /** The RC4 implementation used for cryptographic functions. */
+    /**
+     * The RC4 implementation used for cryptographic functions.
+     */
     private final RC4Cipher rc4 = new RC4Cipher();
 
-    /** indicates if the Metadata have to be decrypted of not. */
+    /**
+     * indicates if the Metadata have to be decrypted of not.
+     */
     private boolean decryptMetadata;
 
     // PDFBOX-4453, PDFBOX-4477: Originally this was just a Set. This failed in rare cases
@@ -96,8 +104,8 @@ public abstract class SecurityHandler
     private boolean useAES;
 
     /**
-     * The access permission granted to the current user for the document. These permissions are computed during
-     * decryption and are in read only mode.
+     * The access permission granted to the current user for the document. These permissions are
+     * computed during decryption and are in read only mode.
      */
     private AccessPermission currentAccessPermission = null;
 
@@ -123,7 +131,7 @@ public abstract class SecurityHandler
 
     /**
      * Set the string filter name.
-     * 
+     *
      * @param stringFilterName the string filter name.
      */
     protected void setStringFilterName(COSName stringFilterName)
@@ -133,7 +141,7 @@ public abstract class SecurityHandler
 
     /**
      * Set the stream filter name.
-     * 
+     *
      * @param streamFilterName the stream filter name.
      */
     protected void setStreamFilterName(COSName streamFilterName)
@@ -144,10 +152,10 @@ public abstract class SecurityHandler
     /**
      * Prepares everything to decrypt the document.
      *
-     * @param encryption encryption dictionary, can be retrieved via {@link PDDocument#getEncryption()}
-     * @param documentIDArray document id which is returned via {@link org.sejda.sambox.cos.COSDocument#getDocumentID()}
+     * @param encryption         encryption dictionary, can be retrieved via {@link
+     *                           PDDocument#getEncryption()}
+     * @param documentIDArray    document id which is returned via {@link org.sejda.sambox.cos.COSDocument#getDocumentID()}
      * @param decryptionMaterial Information used to decrypt the document.
-     *
      * @throws IOException If there is an error accessing data.
      */
     public abstract void prepareForDecryption(PDEncryption encryption, COSArray documentIDArray,
@@ -157,10 +165,9 @@ public abstract class SecurityHandler
      * Encrypt or decrypt a set of data.
      *
      * @param objectNumber The data object number.
-     * @param genNumber The data generation number.
-     * @param data The data to encrypt.
-     * @param output The output to write the encrypted data to.
-     *
+     * @param genNumber    The data generation number.
+     * @param data         The data to encrypt.
+     * @param output       The output to write the encrypted data to.
      * @throws IOException If there is an error reading the data.
      */
     private void decryptData(long objectNumber, long genNumber, InputStream data,
@@ -191,7 +198,7 @@ public abstract class SecurityHandler
      * Calculate the key to be used for RC4 and AES-128.
      *
      * @param objectNumber The data object number.
-     * @param genNumber The data generation number.
+     * @param genNumber    The data generation number.
      * @return the calculated key.
      */
     private byte[] calcFinalKey(long objectNumber, long genNumber)
@@ -226,9 +233,8 @@ public abstract class SecurityHandler
      * Encrypt or decrypt data with RC4.
      *
      * @param finalKey The final key obtained with via {@link #calcFinalKey(long, long)}.
-     * @param input The data to encrypt.
-     * @param output The output to write the encrypted data to.
-     *
+     * @param input    The data to encrypt.
+     * @param output   The output to write the encrypted data to.
      * @throws IOException If there is an error reading the data.
      */
     protected void decryptDataRC4(byte[] finalKey, InputStream input, OutputStream output)
@@ -242,9 +248,8 @@ public abstract class SecurityHandler
      * Encrypt or decrypt data with RC4.
      *
      * @param finalKey The final key obtained with via {@link #calcFinalKey(long, long)}.
-     * @param input The data to encrypt.
-     * @param output The output to write the encrypted data to.
-     *
+     * @param input    The data to encrypt.
+     * @param output   The output to write the encrypted data to.
      * @throws IOException If there is an error reading the data.
      */
     protected void decryptDataRC4(byte[] finalKey, byte[] input, OutputStream output)
@@ -257,10 +262,9 @@ public abstract class SecurityHandler
     /**
      * Encrypt or decrypt data with AES with key length other than 256 bits.
      *
-     * @param finalKey The final key obtained with via {@link #calcFinalKey()}.
-     * @param data The data to encrypt.
-     * @param output The output to write the encrypted data to.
-     *
+     * @param finalKey The final key obtained with via .
+     * @param data     The data to encrypt.
+     * @param output   The output to write the encrypted data to.
      * @throws IOException If there is an error reading the data.
      */
     private void decryptDataAESother(byte[] finalKey, InputStream data, OutputStream output)
@@ -298,8 +302,7 @@ public abstract class SecurityHandler
             }
             output.write(decryptCipher.doFinal());
         }
-        catch (InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException
-                | BadPaddingException | NoSuchAlgorithmException | NoSuchPaddingException e)
+        catch (InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException | NoSuchAlgorithmException | NoSuchPaddingException e)
         {
             throw new IOException(e);
         }
@@ -308,9 +311,8 @@ public abstract class SecurityHandler
     /**
      * Encrypt or decrypt data with AES256.
      *
-     * @param data The data to encrypt.
+     * @param data   The data to encrypt.
      * @param output The output to write the encrypted data to.
-     *
      * @throws IOException If there is an error reading the data.
      */
     private void decryptDataAES256(InputStream data, OutputStream output) throws IOException
@@ -341,10 +343,9 @@ public abstract class SecurityHandler
     /**
      * This will dispatch to the correct method.
      *
-     * @param obj The object to decrypt.
+     * @param obj    The object to decrypt.
      * @param objNum The object number.
      * @param genNum The object generation Number.
-     *
      * @throws IOException If there is an error getting the stream data.
      */
     public void decrypt(COSBase obj, long objNum, long genNum) throws IOException
@@ -388,7 +389,6 @@ public abstract class SecurityHandler
      * @param stream The stream to decrypt.
      * @param objNum The object number.
      * @param genNum The object generation number.
-     *
      * @throws IOException If there is an error getting the stream data.
      */
     public void decryptStream(COSStream stream, long objNum, long genNum) throws IOException
@@ -434,9 +434,8 @@ public abstract class SecurityHandler
      * This will decrypt a dictionary.
      *
      * @param dictionary The dictionary to decrypt.
-     * @param objNum The object number.
-     * @param genNum The object generation number.
-     *
+     * @param objNum     The object number.
+     * @param genNum     The object generation number.
      * @throws IOException If there is an error creating a new string.
      */
     private void decryptDictionary(COSDictionary dictionary, long objNum, long genNum)
@@ -449,8 +448,8 @@ public abstract class SecurityHandler
         }
         COSBase type = dictionary.getDictionaryObject(COSName.TYPE);
         boolean isSignature = COSName.SIG.equals(type) || COSName.DOC_TIME_STAMP.equals(type) ||
-        // PDFBOX-4466: /Type is optional, see
-        // https://ec.europa.eu/cefdigital/tracker/browse/DSS-1538
+                // PDFBOX-4466: /Type is optional, see
+                // https://ec.europa.eu/cefdigital/tracker/browse/DSS-1538
                 (dictionary.getDictionaryObject(COSName.CONTENTS) instanceof COSString
                         && dictionary.getDictionaryObject(COSName.BYTERANGE) instanceof COSArray);
         for (Map.Entry<COSName, COSBase> entry : dictionary.entrySet())
@@ -476,7 +475,6 @@ public abstract class SecurityHandler
      * @param string the string to decrypt.
      * @param objNum The object number.
      * @param genNum The object generation number.
-     *
      * @throws IOException If an error occurs writing the new string.
      */
     private void decryptString(COSString string, long objNum, long genNum) throws IOException
@@ -501,10 +499,9 @@ public abstract class SecurityHandler
     /**
      * This will decrypt an array.
      *
-     * @param array The array to decrypt.
+     * @param array  The array to decrypt.
      * @param objNum The object number.
      * @param genNum The object generation number.
-     *
      * @throws IOException If there is an error accessing the data.
      */
     private void decryptArray(COSArray array, long objNum, long genNum) throws IOException
@@ -517,7 +514,7 @@ public abstract class SecurityHandler
 
     /**
      * Getter of the property <tt>keyLength</tt>.
-     * 
+     *
      * @return Returns the keyLength.
      */
     public int getKeyLength()
@@ -546,8 +543,8 @@ public abstract class SecurityHandler
     }
 
     /**
-     * Returns the access permissions that were computed during document decryption. The returned object is in read only
-     * mode.
+     * Returns the access permissions that were computed during document decryption. The returned
+     * object is in read only mode.
      *
      * @return the access permissions or null if the document was not decrypted.
      */
@@ -570,7 +567,6 @@ public abstract class SecurityHandler
      * Set to true if AES for encryption and decryption should be used.
      *
      * @param aesValue if true AES will be used
-     *
      */
     public void setAES(boolean aesValue)
     {
@@ -586,11 +582,4 @@ public abstract class SecurityHandler
     {
         this.encryptionKey = encryptionKey;
     }
-
-    /**
-     * Returns whether a protection policy has been set.
-     *
-     * @return true if a protection policy has been set.
-     */
-    public abstract boolean hasProtectionPolicy();
 }

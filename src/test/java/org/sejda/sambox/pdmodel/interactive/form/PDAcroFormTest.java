@@ -16,19 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,9 +34,22 @@ import org.sejda.sambox.pdmodel.font.PDType1Font;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotation;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 /**
  * Test for the PDButton class.
- *
  */
 public class PDAcroFormTest
 {
@@ -100,8 +100,8 @@ public class PDAcroFormTest
     @Test
     public void testFlatten() throws IOException
     {
-        try (PDDocument doc = PDFParser
-                .parse(SeekableSources.inMemorySeekableSourceFrom(getClass().getResourceAsStream(
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream(
                         "/org/sejda/sambox/pdmodel/interactive/form/AlignmentTests.pdf"))))
         {
             doc.getDocumentCatalog().getAcroForm().flatten();
@@ -116,8 +116,8 @@ public class PDAcroFormTest
     @Test
     public void testFlattenWidgetNoRef() throws IOException
     {
-        try (PDDocument doc = PDFParser
-                .parse(SeekableSources.inMemorySeekableSourceFrom(getClass().getResourceAsStream(
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream(
                         "/org/sejda/sambox/pdmodel/interactive/form/AlignmentTests.pdf"))))
         {
             PDAcroForm acroForm = doc.getDocumentCatalog().getAcroForm();
@@ -139,8 +139,8 @@ public class PDAcroFormTest
     public void testFlattenSpecificFieldsOnly() throws IOException
     {
 
-        try (PDDocument doc = PDFParser
-                .parse(SeekableSources.inMemorySeekableSourceFrom(getClass().getResourceAsStream(
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream(
                         "/org/sejda/sambox/pdmodel/interactive/form/AlignmentTests.pdf"))))
         {
             List<PDField> fieldsToFlatten = new ArrayList<>();
@@ -164,23 +164,23 @@ public class PDAcroFormTest
 
     /**
      * calling flatten() removes all the fields, also non terminal in case of a hierarchy
-     * 
+     *
      * @throws IOException
      */
     @Test
     public void testFlattenAllRemovesFields() throws IOException
     {
         FastByteArrayOutputStream out = new FastByteArrayOutputStream();
-        try (PDDocument doc = PDFParser
-                .parse(SeekableSources.inMemorySeekableSourceFrom(getClass().getResourceAsStream(
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream(
                         "/org/sejda/sambox/pdmodel/interactive/form/flatten_fields_hierarchy.pdf"))))
         {
             PDAcroForm acroForm = doc.getDocumentCatalog().getAcroForm();
             acroForm.flatten();
             doc.writeTo(out);
         }
-        try (PDDocument doc = PDFParser
-                .parse(SeekableSources.inMemorySeekableSourceFrom(out.toByteArray())))
+        try (PDDocument doc = PDFParser.parse(
+                SeekableSources.inMemorySeekableSourceFrom(out.toByteArray())))
         {
             PDAcroForm acroForm = doc.getDocumentCatalog().getAcroForm();
             assertNotNull(acroForm);
@@ -190,7 +190,7 @@ public class PDAcroFormTest
 
     /**
      * PDFBOX_3941 and PDFBOX-3809
-     * 
+     *
      * @throws IOException
      */
     @Test
@@ -201,7 +201,7 @@ public class PDAcroFormTest
 
     /**
      * PDFBOX_3941 and PDFBOX-3809
-     * 
+     *
      * @throws IOException
      */
     @Test
@@ -223,8 +223,8 @@ public class PDAcroFormTest
             acroForm.flatten(fields, true);
             doc.writeTo(out);
         }
-        try (PDDocument doc = PDFParser
-                .parse(SeekableSources.inMemorySeekableSourceFrom(out.toByteArray())))
+        try (PDDocument doc = PDFParser.parse(
+                SeekableSources.inMemorySeekableSourceFrom(out.toByteArray())))
         {
             PDAcroForm acroForm = doc.getDocumentCatalog().getAcroForm();
             assertNotNull(acroForm);
@@ -235,7 +235,7 @@ public class PDAcroFormTest
 
     /**
      * PDFBOX-4235: a bad /DA string should not result in an NPE.
-     * 
+     *
      * @throws IOException
      */
     @Test
@@ -318,8 +318,8 @@ public class PDAcroFormTest
     @Test
     public void calculatingOrder() throws IOException
     {
-        try (PDDocument doc = PDFParser
-                .parse(SeekableSources.inMemorySeekableSourceFrom(getClass().getResourceAsStream(
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream(
                         "/org/sejda/sambox/pdmodel/interactive/form/test_form_with_calc.pdf"))))
         {
             PDAcroForm form = doc.getDocumentCatalog().getAcroForm();
@@ -330,20 +330,20 @@ public class PDAcroFormTest
     }
 
     /**
-     * Test that we do not modify an AcroForm with missing resource information when loading the document only.
-     * (PDFBOX-3752)
+     * Test that we do not modify an AcroForm with missing resource information when loading the
+     * document only. (PDFBOX-3752)
      */
     @Test
     public void testDontAddMissingInformationOnDocumentLoad() throws IOException
     {
-        try (PDDocument document = PDFParser.parse(SeekableSources
-                .inMemorySeekableSourceFrom(createAcroFormWithMissingResourceInformation())))
+        try (PDDocument document = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                createAcroFormWithMissingResourceInformation())))
         {
             // do a low level access to the AcroForm to avoid the generation of missing entries
             PDDocumentCatalog documentCatalog = document.getDocumentCatalog();
             COSDictionary catalogDictionary = documentCatalog.getCOSObject();
-            COSDictionary acroFormDictionary = (COSDictionary) catalogDictionary
-                    .getDictionaryObject(COSName.ACRO_FORM);
+            COSDictionary acroFormDictionary = (COSDictionary) catalogDictionary.getDictionaryObject(
+                    COSName.ACRO_FORM);
 
             // ensure that the missing information has not been generated
             assertNull(acroFormDictionary.getDictionaryObject(COSName.DA));
@@ -352,16 +352,16 @@ public class PDAcroFormTest
     }
 
     /**
-     * Test that we add missing ressouce information to an AcroForm when accessing the AcroForm on the PD level
-     * (PDFBOX-3752)
-     * 
+     * Test that we add missing ressouce information to an AcroForm when accessing the AcroForm on
+     * the PD level (PDFBOX-3752)
+     *
      * @throws IOException
      */
     @Test
     public void testAddMissingInformationOnAcroFormAccess() throws IOException
     {
-        try (PDDocument document = PDFParser.parse(SeekableSources
-                .inMemorySeekableSourceFrom(createAcroFormWithMissingResourceInformation())))
+        try (PDDocument document = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                createAcroFormWithMissingResourceInformation())))
         {
             PDDocumentCatalog documentCatalog = document.getDocumentCatalog();
 
@@ -386,7 +386,8 @@ public class PDAcroFormTest
     }
 
     /**
-     * PDFBOX-3732, PDFBOX-4303, PDFBOX-4393: Test whether /Helv and /ZaDb get added, but only if they don't exist.
+     * PDFBOX-3732, PDFBOX-4303, PDFBOX-4393: Test whether /Helv and /ZaDb get added, but only if
+     * they don't exist.
      */
     @Test
     public void testAcroFormDefaultFonts() throws IOException
@@ -423,8 +424,8 @@ public class PDAcroFormTest
             assertNotNull(zadb);
             document.writeTo(baos); // this is a working PDF
         }
-        try (PDDocument doc = PDFParser
-                .parse(SeekableSources.inMemorySeekableSourceFrom(baos.toByteArray())))
+        try (PDDocument doc = PDFParser.parse(
+                SeekableSources.inMemorySeekableSourceFrom(baos.toByteArray())))
         {
             PDAcroForm acroForm2 = doc.getDocumentCatalog().getAcroForm();
             PDResources defaultResources = acroForm2.getDefaultResources();
@@ -435,6 +436,18 @@ public class PDAcroFormTest
             // make sure that font wasn't overwritten
             assertNotEquals(PDType1Font.HELVETICA, helv);
             assertNotEquals(PDType1Font.ZAPF_DINGBATS, zadb);
+        }
+    }
+
+    @Test
+    public void testIllegalFieldsDefinition() throws IOException
+    {
+        {
+            try (PDDocument testPdf = PDFParser.parse(
+                    SeekableSources.seekableSourceFrom(new File("target/pdfs/D1790B.PDF"))))
+            {
+                testPdf.getDocumentCatalog().getAcroForm();
+            }
         }
     }
 

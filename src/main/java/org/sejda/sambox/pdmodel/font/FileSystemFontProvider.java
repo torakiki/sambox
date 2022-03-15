@@ -114,7 +114,7 @@ final class FileSystemFontProvider extends FontProvider
         }
 
         @Override
-        public FontBoxFont getFont()
+        public synchronized FontBoxFont getFont()
         {
             FontBoxFont cached = parent.cache.getFont(this);
             if (cached != null)
@@ -342,13 +342,13 @@ final class FileSystemFontProvider extends FontProvider
         {
             try
             {
-                if (file.getPath().toLowerCase().endsWith(".ttf")
-                        || file.getPath().toLowerCase().endsWith(".otf"))
+                if (file.getPath().toLowerCase().endsWith(".ttf") || file.getPath().toLowerCase()
+                        .endsWith(".otf"))
                 {
                     addTrueTypeFont(file);
                 }
-                else if (file.getPath().toLowerCase().endsWith(".ttc")
-                        || file.getPath().toLowerCase().endsWith(".otc"))
+                else if (file.getPath().toLowerCase().endsWith(".ttc") || file.getPath()
+                        .toLowerCase().endsWith(".otc"))
                 {
                     addTrueTypeCollection(file);
                 }
@@ -560,7 +560,7 @@ final class FileSystemFontProvider extends FontProvider
 
     /**
      * Adds a TTC or OTC to the file cache. To reduce memory, the parsed font is not cached.
-     * 
+     *
      * @throws IOException
      */
     private void addTrueTypeCollection(final File ttcFile) throws IOException
@@ -580,7 +580,7 @@ final class FileSystemFontProvider extends FontProvider
 
     /**
      * Adds an OTF or TTF font to the file cache. To reduce memory, the parsed font is not cached.
-     * 
+     *
      * @throws IOException
      */
     private void addTrueTypeFont(File ttfFile) throws IOException
@@ -647,9 +647,10 @@ final class FileSystemFontProvider extends FontProvider
                         int supplement = cidFont.getSupplement();
                         ros = new CIDSystemInfo(registry, ordering, supplement);
                     }
-                    fontInfoList.add(new FSFontInfo(file, FontFormat.OTF, ttf.getName(), ros,
-                            usWeightClass, sFamilyClass, ulCodePageRange1, ulCodePageRange2,
-                            macStyle, panose, this));
+                    fontInfoList.add(
+                            new FSFontInfo(file, FontFormat.OTF, ttf.getName(), ros, usWeightClass,
+                                    sFamilyClass, ulCodePageRange1, ulCodePageRange2, macStyle,
+                                    panose, this));
                 }
                 else
                 {
@@ -667,9 +668,10 @@ final class FileSystemFontProvider extends FontProvider
                     }
 
                     format = "TTF";
-                    fontInfoList.add(new FSFontInfo(file, FontFormat.TTF, ttf.getName(), ros,
-                            usWeightClass, sFamilyClass, ulCodePageRange1, ulCodePageRange2,
-                            macStyle, panose, this));
+                    fontInfoList.add(
+                            new FSFontInfo(file, FontFormat.TTF, ttf.getName(), ros, usWeightClass,
+                                    sFamilyClass, ulCodePageRange1, ulCodePageRange2, macStyle,
+                                    panose, this));
                 }
 
                 if (LOG.isTraceEnabled())
@@ -701,7 +703,7 @@ final class FileSystemFontProvider extends FontProvider
 
     /**
      * Adds a Type 1 font to the file cache. To reduce memory, the parsed font is not cached.
-     * 
+     *
      * @throws IOException
      */
     private void addType1Font(File pfbFile) throws IOException
@@ -709,8 +711,9 @@ final class FileSystemFontProvider extends FontProvider
         try (InputStream input = new FileInputStream(pfbFile))
         {
             Type1Font type1 = Type1Font.createWithPFB(input);
-            fontInfoList.add(new FSFontInfo(pfbFile, FontFormat.PFB, type1.getName(), null, -1, -1,
-                    0, 0, -1, null, this));
+            fontInfoList.add(
+                    new FSFontInfo(pfbFile, FontFormat.PFB, type1.getName(), null, -1, -1, 0, 0, -1,
+                            null, this));
 
             if (LOG.isTraceEnabled())
             {

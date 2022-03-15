@@ -16,18 +16,20 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Before;
+import org.junit.Test;
+import org.sejda.io.SeekableSources;
+import org.sejda.sambox.input.PDFParser;
+import org.sejda.sambox.pdmodel.PDDocument;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.sejda.sambox.pdmodel.PDDocument;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Andrea Vacondio
- *
  */
 public class PDFieldTreeTest
 {
@@ -87,5 +89,27 @@ public class PDFieldTreeTest
         StringBuilder builder = new StringBuilder();
         form.getFieldTree().stream().map(PDField::getPartialName).forEach(builder::append);
         assertEquals("FBADCEGIH", builder.toString());
+    }
+
+    /**
+     * PDFBOX-5044 stack overflow
+     *
+     * @throws IOException
+     */
+    @Test
+    public void test5044() throws IOException
+    {
+        try (PDDocument doc = PDFParser.parse(
+                SeekableSources.seekableSourceFrom(new File("target/pdfs/PDFBOX-4131-0.pdf"))))
+        {
+            PDAcroForm acroForm = doc.getDocumentCatalog().getAcroForm();
+            int count = 0;
+            for (PDField field : acroForm.getFieldTree())
+            {
+                ++count;
+            }
+            //SAMBox specific. This test is different from PDFBox but looking at this broken PDF with Acrobat it seems we are more aligned then PDFBox
+            assertEquals(2, count);
+        }
     }
 }

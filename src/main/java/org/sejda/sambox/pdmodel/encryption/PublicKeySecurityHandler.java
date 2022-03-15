@@ -17,14 +17,6 @@
 
 package org.sejda.sambox.pdmodel.encryption;
 
-import java.io.IOException;
-import java.math.BigInteger;
-import java.security.KeyStoreException;
-import java.security.PrivateKey;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
-import java.util.Collection;
-
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cms.CMSEnvelopedData;
 import org.bouncycastle.cms.CMSException;
@@ -37,15 +29,25 @@ import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSString;
 import org.sejda.sambox.pdmodel.PDDocument;
 
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.KeyStoreException;
+import java.security.PrivateKey;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
+import java.util.Collection;
+
 /**
  * This class implements the public key security handler described in the PDF specification.
  *
- * @see PublicKeyProtectionPolicy to see how to protect document with this security handler.
  * @author Benoit Guillon
+ * @see PublicKeyProtectionPolicy to see how to protect document with this security handler.
  */
 public final class PublicKeySecurityHandler extends SecurityHandler
 {
-    /** The filter name. */
+    /**
+     * The filter name.
+     */
     public static final String FILTER = "Adobe.PubSec";
 
     private PublicKeyProtectionPolicy policy = null;
@@ -71,13 +73,14 @@ public final class PublicKeySecurityHandler extends SecurityHandler
     /**
      * Prepares everything to decrypt the document.
      *
-     * @param encryption encryption dictionary, can be retrieved via {@link PDDocument#getEncryption()}
-     * @param documentIDArray document id which is returned via
-     * {@link org.apache.pdfbox.cos.COSDocument#getDocumentID()} (not used by this handler)
+     * @param encryption         encryption dictionary, can be retrieved via {@link
+     *                           PDDocument#getEncryption()}
+     * @param documentIDArray    document id which is returned via {@link org.sejda.sambox.cos.COSDocument#getDocumentID()}
+     *                           (not used by this handler)
      * @param decryptionMaterial Information used to decrypt the document.
-     *
-     * @throws IOException If there is an error accessing data. If verbose mode is enabled, the exception message will
-     * provide more details why the match wasn't successful.
+     * @throws IOException If there is an error accessing data. If verbose mode is enabled, the
+     *                     exception message will provide more details why the match wasn't
+     *                     successful.
      */
     @Override
     public void prepareForDecryption(PDEncryption encryption, COSArray documentIDArray,
@@ -90,9 +93,14 @@ public final class PublicKeySecurityHandler extends SecurityHandler
         }
 
         setDecryptMetadata(encryption.isEncryptMetaData());
-        if (encryption.getLength() != 0)
+        PDCryptFilterDictionary defaultCryptFilterDictionary = encryption.getDefaultCryptFilterDictionary();
+        if (defaultCryptFilterDictionary != null && defaultCryptFilterDictionary.getLength() != 0)
         {
-            this.keyLength = encryption.getLength();
+            setKeyLength(defaultCryptFilterDictionary.getLength());
+        }
+        else if (encryption.getLength() != 0)
+        {
+            setKeyLength(encryption.getLength());
         }
 
         PublicKeyDecryptionMaterial material = (PublicKeyDecryptionMaterial) decryptionMaterial;
@@ -113,12 +121,14 @@ public final class PublicKeySecurityHandler extends SecurityHandler
             byte[] envelopedData = null;
 
             // the bytes of each recipient in the recipients array
-            COSArray array = encryption.getCOSObject().getDictionaryObject(COSName.RECIPIENTS,
-                    COSArray.class);
+            COSArray array = encryption.getCOSObject().getCOSArray(COSName.RECIPIENTS);
+            if (array == null && defaultCryptFilterDictionary != null)
+            {
+                array = defaultCryptFilterDictionary.getCOSObject().getCOSArray(COSName.RECIPIENTS);
+            }
             if (array == null)
             {
-                array = encryption.getDefaultCryptFilterDictionary().getCOSObject()
-                        .getDictionaryObject(COSName.RECIPIENTS, COSArray.class);
+                throw new IOException("/Recipients entry is missing in encryption dictionary");
             }
             byte[][] recipientFieldsBytes = new byte[array.size()][];
             // TODO encryption.getRecipientsLength() and getRecipientStringAt() should be deprecated
@@ -144,8 +154,8 @@ public final class PublicKeySecurityHandler extends SecurityHandler
                         PrivateKey privateKey = (PrivateKey) material.getPrivateKey();
                         // might need to call setContentProvider() if we use PKI token, see
                         // http://bouncy-castle.1462172.n4.nabble.com/CMSException-exception-unwrapping-key-key-invalid-unknown-key-type-passed-to-RSA-td4658109.html
-                        envelopedData = ri
-                                .getContent(new JceKeyTransEnvelopedRecipient(privateKey));
+                        envelopedData = ri.getContent(
+                                new JceKeyTransEnvelopedRecipient(privateKey));
                         break;
                     }
                     j++;
@@ -166,8 +176,9 @@ public final class PublicKeySecurityHandler extends SecurityHandler
             }
             if (!foundRecipient || envelopedData == null)
             {
-                throw new IOException("The certificate matches none of " + array.size()
-                        + " recipient entries" + extraInfo.toString());
+                throw new IOException(
+                        "The certificate matches none of " + array.size() + " recipient entries"
+                                + extraInfo.toString());
             }
             if (envelopedData.length != 24)
             {
@@ -202,18 +213,23 @@ public final class PublicKeySecurityHandler extends SecurityHandler
             byte[] mdResult;
             if (encryption.getVersion() == 4 || encryption.getVersion() == 5)
             {
-                mdResult = MessageDigests.getSHA256().digest(sha1Input);
+                if (encryption.getVersion() == 4)
+                {
+                    mdResult = MessageDigests.getSHA1().digest(sha1Input);
+                }
+                else
+                {
+                    mdResult = MessageDigests.getSHA256().digest(sha1Input);
+                }
 
                 // detect whether AES encryption is used. This assumes that the encryption algo is
                 // stored in the PDCryptFilterDictionary
                 // However, crypt filters are used only when V is 4 or 5.
-                PDCryptFilterDictionary defaultCryptFilterDictionary = encryption
-                        .getDefaultCryptFilterDictionary();
                 if (defaultCryptFilterDictionary != null)
                 {
                     COSName cryptFilterMethod = defaultCryptFilterDictionary.getCryptFilterMethod();
-                    setAES(COSName.AESV2.equals(cryptFilterMethod)
-                            || COSName.AESV3.equals(cryptFilterMethod));
+                    setAES(COSName.AESV2.equals(cryptFilterMethod) || COSName.AESV3.equals(
+                            cryptFilterMethod));
                 }
             }
             else
@@ -225,15 +241,7 @@ public final class PublicKeySecurityHandler extends SecurityHandler
             setEncryptionKey(new byte[this.keyLength / 8]);
             System.arraycopy(mdResult, 0, getEncryptionKey(), 0, this.keyLength / 8);
         }
-        catch (CMSException e)
-        {
-            throw new IOException(e);
-        }
-        catch (KeyStoreException e)
-        {
-            throw new IOException(e);
-        }
-        catch (CertificateEncodingException e)
+        catch (CMSException | KeyStoreException | CertificateEncodingException e)
         {
             throw new IOException(e);
         }
@@ -261,14 +269,5 @@ public final class PublicKeySecurityHandler extends SecurityHandler
             extraInfo.append(materialCert == null ? "null" : materialCert.getIssuer());
             extraInfo.append("\' ");
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean hasProtectionPolicy()
-    {
-        return policy != null;
     }
 }

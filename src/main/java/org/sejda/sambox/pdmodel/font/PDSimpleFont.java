@@ -152,7 +152,8 @@ public abstract class PDSimpleFont extends PDFont
     }
 
     /**
-     * Returns true the font is a symbolic (that is, it does not use the Adobe Standard Roman character set).
+     * Returns true the font is a symbolic (that is, it does not use the Adobe Standard Roman
+     * character set).
      */
     public final boolean isSymbolic()
     {
@@ -173,7 +174,8 @@ public abstract class PDSimpleFont extends PDFont
     }
 
     /**
-     * Internal implementation of isSymbolic, allowing for the fact that the result may be indeterminate.
+     * Internal implementation of isSymbolic, allowing for the fact that the result may be
+     * indeterminate.
      */
     protected Boolean isFontSymbolic()
     {
@@ -233,7 +235,8 @@ public abstract class PDSimpleFont extends PDFont
     }
 
     /**
-     * Returns the value of the symbolic flag, allowing for the fact that the result may be indeterminate.
+     * Returns the value of the symbolic flag, allowing for the fact that the result may be
+     * indeterminate.
      */
     protected final Boolean getSymbolicFlag()
     {
@@ -320,6 +323,12 @@ public abstract class PDSimpleFont extends PDFont
         if (getStandard14AFM() != null)
         {
             String nameInAFM = getEncoding().getName(code);
+            if ("nbspace".equals(nameInAFM))
+            {
+                // PDFBOX-4944: nbspace is missing in AFM files,
+                // but PDF specification tells "it is typographically the same as SPACE"
+                nameInAFM = "space";
+            }
 
             // the Adobe AFMs don't include .notdef, but Acrobat uses 250, test with PDFBOX-2334
             if (".notdef".equals(nameInAFM))
@@ -362,8 +371,8 @@ public abstract class PDSimpleFont extends PDFont
     }
 
     /**
-     * Returns the path for the character with the given name. For some fonts, GIDs may be used instead of names when
-     * calling this method.
+     * Returns the path for the character with the given name. For some fonts, GIDs may be used
+     * instead of names when calling this method.
      *
      * @return glyph path
      * @throws IOException if the path could not be read

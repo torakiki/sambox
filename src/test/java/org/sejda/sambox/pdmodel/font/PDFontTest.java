@@ -1,6 +1,6 @@
 /*
  *  Copyright 2011 adam.
- * 
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -52,7 +52,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 
  * @author adam
  * @author Tilman Hausherr
  */
@@ -73,8 +72,8 @@ public class PDFontTest extends TestCase
      */
     public void testPDFBox988() throws Exception
     {
-        try (PDDocument doc = PDFParser.parse(SeekableSources
-                .inMemorySeekableSourceFrom(getClass().getResourceAsStream("F001u_3_7j.pdf"))))
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("F001u_3_7j.pdf"))))
         {
             PDFRenderer renderer = new PDFRenderer(doc);
             renderer.renderImage(0);
@@ -83,9 +82,9 @@ public class PDFontTest extends TestCase
     }
 
     /**
-     * PDFBOX-3747: Test that using "-" with Calibri in Windows 7 has "-" in text extraction and not \u2010, which was
-     * because of a wrong ToUnicode mapping because prior to the bugfix, CmapSubtable#getCharCodes provided values in
-     * random order.
+     * PDFBOX-3747: Test that using "-" with Calibri in Windows 7 has "-" in text extraction and not
+     * \u2010, which was because of a wrong ToUnicode mapping because prior to the bugfix,
+     * CmapSubtable#getCharCodes provided values in random order.
      *
      * @throws IOException
      */
@@ -109,8 +108,8 @@ public class PDFontTest extends TestCase
 
             doc.writeTo(baos);
         }
-        try (PDDocument doc = PDFParser
-                .parse(SeekableSources.inMemorySeekableSourceFrom(baos.toByteArray())))
+        try (PDDocument doc = PDFParser.parse(
+                SeekableSources.inMemorySeekableSourceFrom(baos.toByteArray())))
         {
             PDFTextStripper stripper = new PDFTextStripper();
             String text = stripper.getText(doc);
@@ -119,9 +118,9 @@ public class PDFontTest extends TestCase
     }
 
     /**
-     * PDFBOX-3826: Test ability to reuse a TrueTypeFont created from a file or a stream for several PDFs to avoid
-     * parsing it over and over again. Also check that full or partial embedding is done, and do render and text
-     * extraction.
+     * PDFBOX-3826: Test ability to reuse a TrueTypeFont created from a file or a stream for several
+     * PDFs to avoid parsing it over and over again. Also check that full or partial embedding is
+     * done, and do render and text extraction.
      *
      * @throws IOException
      * @throws URISyntaxException
@@ -129,8 +128,8 @@ public class PDFontTest extends TestCase
     @Test
     public void testPDFBox3826() throws IOException, URISyntaxException
     {
-        URL url = PDFont.class
-                .getResource("/org/sejda/sambox/resources/ttf/LiberationSans-Regular.ttf");
+        URL url = PDFont.class.getResource(
+                "/org/sejda/sambox/resources/ttf/LiberationSans-Regular.ttf");
         File fontFile = new File(url.toURI());
 
         TrueTypeFont ttf1 = new TTFParser().parse(fontFile);
@@ -143,8 +142,8 @@ public class PDFontTest extends TestCase
     }
 
     /**
-     * PDFBOX-4115: Test ability to create PDF with german umlaut glyphs with a type 1 font. Test for everything that
-     * went wrong before this was fixed.
+     * PDFBOX-4115: Test ability to create PDF with german umlaut glyphs with a type 1 font. Test
+     * for everything that went wrong before this was fixed.
      *
      * @throws IOException
      */
@@ -195,7 +194,7 @@ public class PDFontTest extends TestCase
 
     /**
      * Test whether bug from PDFBOX-4318 is fixed, which had the wrong cache key.
-     * 
+     *
      * @throws java.io.IOException
      */
     @Test
@@ -268,6 +267,26 @@ public class PDFontTest extends TestCase
         Assert.fail("should have thrown IOException");
     }
 
+    /**
+     * Test using broken Type1C font.
+     *
+     * @throws IOException
+     */
+    @Test
+    public void testPDFox5048() throws IOException
+    {
+        try (PDDocument testPdf = PDFParser.parse(
+                SeekableSources.seekableSourceFrom(new File("target/pdfs/stringwidth.pdf"))))
+        {
+            PDPage page = testPdf.getPage(0);
+            PDFont font = page.getResources().getFont(COSName.getPDFName("F70"));
+            assertTrue(font.isDamaged());
+            assertEquals(0f, font.getHeight(0));
+            assertEquals(0f, font.getStringWidth("Pa"));
+        }
+
+    }
+
     private void testPDFBox3826checkFonts(byte[] byteArray, File fontFile) throws IOException
     {
         try (PDDocument doc = PDFParser.parse(
@@ -280,8 +299,8 @@ public class PDFontTest extends TestCase
             PDType0Font fontF1 = (PDType0Font) page2.getResources()
                     .getFont(COSName.getPDFName("F1"));
             Assert.assertTrue(fontF1.getName().contains("+"));
-            Assert.assertTrue(fontFile
-                    .length() > fontF1.getFontDescriptor().getFontFile2().toByteArray().length);
+            Assert.assertTrue(fontFile.length() > fontF1.getFontDescriptor().getFontFile2()
+                    .toByteArray().length);
 
             // F2 = type0 full embed
             PDType0Font fontF2 = (PDType0Font) page2.getResources()

@@ -7,8 +7,8 @@
 		</encoder>
 	</appender>
 
-	<logger name="org.sejda.sambox" level="INFO" />
+	<logger name="org.sejda.sambox" level="DEBUG"/>
 	<root level="INFO">
-		<appender-ref ref="STDOUT" />
+		<appender-ref ref="STDOUT"/>
 	</root>
 </configuration>

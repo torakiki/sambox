@@ -16,15 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.graphics.color;
 
-import java.awt.Transparency;
-import java.awt.color.ColorSpace;
-import java.awt.image.BufferedImage;
-import java.awt.image.ColorConvertOp;
-import java.awt.image.ColorModel;
-import java.awt.image.ComponentColorModel;
-import java.awt.image.WritableRaster;
-import java.io.IOException;
-
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
@@ -35,6 +26,15 @@ import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.ResourceCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.awt.Transparency;
+import java.awt.color.ColorSpace;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorConvertOp;
+import java.awt.image.ColorModel;
+import java.awt.image.ComponentColorModel;
+import java.awt.image.WritableRaster;
+import java.io.IOException;
 
 /**
  * A color space specifies how the colours of graphics objects will be painted on the page.
@@ -48,7 +48,7 @@ public abstract class PDColorSpace implements COSObjectable
 
     /**
      * Creates a color space given a name or array.
-     * 
+     *
      * @param colorSpace the color space COS object
      * @return a new color space
      * @throws IOException if the color space is unknown or cannot be created
@@ -59,14 +59,14 @@ public abstract class PDColorSpace implements COSObjectable
     }
 
     /**
-     * Creates a color space given a name or array. Abbreviated device color names are not supported here, please
-     * replace them first.
+     * Creates a color space given a name or array. Abbreviated device color names are not supported
+     * here, please replace them first.
      *
      * @param colorSpace the color space COS object
-     * @param resources the current resources.
+     * @param resources  the current resources.
      * @return a new color space
      * @throws MissingResourceException if the color space is missing in the resources dictionary
-     * @throws IOException if the color space is unknown or cannot be created
+     * @throws IOException              if the color space is unknown or cannot be created
      */
     public static PDColorSpace create(COSBase colorSpace, PDResources resources) throws IOException
     {
@@ -76,8 +76,8 @@ public abstract class PDColorSpace implements COSObjectable
     public static PDColorSpace create(COSBase colorSpace, PDResources resources, boolean wasDefault)
             throws IOException
     {
-        boolean canCache = colorSpace.hasId() && resources != null
-                && resources.getResourceCache() != null;
+        boolean canCache =
+                colorSpace.hasId() && resources != null && resources.getResourceCache() != null;
 
         if (canCache)
         {
@@ -111,17 +111,18 @@ public abstract class PDColorSpace implements COSObjectable
     }
 
     /**
-     * Creates a color space given a name or array. Abbreviated device color names are not supported here, please
-     * replace them first. This method is for PDFBox internal use only, others should use {@link create(COSBase,
-     * PDResources)}.
+     * Creates a color space given a name or array. Abbreviated device color names are not supported
+     * here, please replace them first. This method is for PDFBox internal use only, others should
+     * use {@link create(COSBase, PDResources)}.
      *
-     * @param colorSpace the color space COS object
-     * @param resources the current resources.
-     * @param wasDefault if current color space was used by a default color space.
-     * @param recursionAccumulator counts the levels of recursion for this method, to avoid going too deep
+     * @param colorSpace           the color space COS object
+     * @param resources            the current resources.
+     * @param wasDefault           if current color space was used by a default color space.
+     * @param recursionAccumulator counts the levels of recursion for this method, to avoid going
+     *                             too deep
      * @return a new color space.
      * @throws MissingResourceException if the color space is missing in the resources dictionary
-     * @throws IOException if the color space is unknown or cannot be created.
+     * @throws IOException              if the color space is unknown or cannot be created.
      */
     private static PDColorSpace createUncached(COSBase colorSpace, PDResources resources,
             boolean wasDefault, int recursionAccumulator) throws IOException
@@ -140,18 +141,18 @@ public abstract class PDColorSpace implements COSObjectable
             if (resources != null)
             {
                 COSName defaultName = null;
-                if (name.equals(COSName.DEVICECMYK)
-                        && resources.hasColorSpace(COSName.DEFAULT_CMYK))
+                if (name.equals(COSName.DEVICECMYK) && resources.hasColorSpace(
+                        COSName.DEFAULT_CMYK))
                 {
                     defaultName = COSName.DEFAULT_CMYK;
                 }
-                else if (name.equals(COSName.DEVICERGB)
-                        && resources.hasColorSpace(COSName.DEFAULT_RGB))
+                else if (name.equals(COSName.DEVICERGB) && resources.hasColorSpace(
+                        COSName.DEFAULT_RGB))
                 {
                     defaultName = COSName.DEFAULT_RGB;
                 }
-                else if (name.equals(COSName.DEVICEGRAY)
-                        && resources.hasColorSpace(COSName.DEFAULT_GRAY))
+                else if (name.equals(COSName.DEVICEGRAY) && resources.hasColorSpace(
+                        COSName.DEFAULT_GRAY))
                 {
                     defaultName = COSName.DEFAULT_GRAY;
                 }
@@ -274,21 +275,21 @@ public abstract class PDColorSpace implements COSObjectable
 
     /**
      * Returns the name of the color space.
-     * 
+     *
      * @return the name of the color space
      */
     public abstract String getName();
 
     /**
      * Returns the number of components in this color space
-     * 
+     *
      * @return the number of components in this color space
      */
     public abstract int getNumberOfComponents();
 
     /**
      * Returns the default decode array for this color space.
-     * 
+     *
      * @param bitsPerComponent the number of bits per component.
      * @return the default decode array
      */
@@ -296,14 +297,14 @@ public abstract class PDColorSpace implements COSObjectable
 
     /**
      * Returns the initial color value for this color space.
-     * 
+     *
      * @return the initial color value for this color space
      */
     public abstract PDColor getInitialColor();
 
     /**
      * Returns the RGB equivalent of the given color value.
-     * 
+     *
      * @param value a color value with component values between 0 and 1
      * @return an array of R,G,B value between 0 and 255
      * @throws IOException if the color conversion fails
@@ -312,7 +313,7 @@ public abstract class PDColorSpace implements COSObjectable
 
     /**
      * Returns the (A)RGB equivalent of the given raster.
-     * 
+     *
      * @param raster the source raster
      * @return an (A)RGB buffered image
      * @throws IOException if the color conversion fails
@@ -320,9 +321,39 @@ public abstract class PDColorSpace implements COSObjectable
     public abstract BufferedImage toRGBImage(WritableRaster raster) throws IOException;
 
     /**
-     * Returns the (A)RGB equivalent of the given raster, using the given AWT color space to perform the conversion.
-     * 
+     * Returns the image in this colorspace or null. No conversion is performed.
+     * <p>
+     * For special colorspaces like PDSeparation the image is returned in the gray colorspace. For
+     * undefined colorspaces like DeviceCMYK/DeviceRGB and DeviceGray null is returned.
+     * <p>
+     * You can always fallback to {@link #toRGBImage(WritableRaster)} if this returns null.
+     *
      * @param raster the source raster
+     * @return an buffered image in this colorspace. Or null if it is not possible to extract that
+     * image with the original colorspace without conversion.
+     */
+    public abstract BufferedImage toRawImage(WritableRaster raster) throws IOException;
+
+    /**
+     * Returns the given raster as BufferedImage with the given awtColorSpace using a
+     * ComponentColorModel.
+     *
+     * @param raster        the source raster
+     * @param awtColorSpace the AWT colorspace
+     * @return a BufferedImage in this colorspace
+     */
+    protected final BufferedImage toRawImage(WritableRaster raster, ColorSpace awtColorSpace)
+    {
+        ColorModel colorModel = new ComponentColorModel(awtColorSpace, false, false,
+                Transparency.OPAQUE, raster.getDataBuffer().getDataType());
+        return new BufferedImage(colorModel, raster, false, null);
+    }
+
+    /**
+     * Returns the (A)RGB equivalent of the given raster, using the given AWT color space to perform
+     * the conversion.
+     *
+     * @param raster     the source raster
      * @param colorSpace the AWT
      * @return an (A)RGB buffered image
      */

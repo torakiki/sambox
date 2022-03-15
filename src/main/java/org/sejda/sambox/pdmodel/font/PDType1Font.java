@@ -140,8 +140,8 @@ public class PDType1Font extends PDSimpleFont
 
         // todo: could load the PFB font here if we wanted to support Standard 14 embedding
         type1font = null;
-        FontMapping<FontBoxFont> mapping = FontMappers.instance().getFontBoxFont(getBaseFont(),
-                getFontDescriptor());
+        FontMapping<FontBoxFont> mapping = FontMappers.instance()
+                .getFontBoxFont(getBaseFont(), getFontDescriptor());
         genericFont = mapping.getFont();
 
         if (mapping.isFallback())
@@ -166,7 +166,7 @@ public class PDType1Font extends PDSimpleFont
     /**
      * Creates a new Type 1 font for embedding.
      *
-     * @param doc PDF document to write to
+     * @param doc   PDF document to write to
      * @param pfbIn PFB file stream
      * @throws IOException
      */
@@ -178,8 +178,8 @@ public class PDType1Font extends PDSimpleFont
     /**
      * Creates a new Type 1 font for embedding.
      *
-     * @param doc PDF document to write to
-     * @param pfbIn PFB file stream
+     * @param doc      PDF document to write to
+     * @param pfbIn    PFB file stream
      * @param encoding
      * @throws IOException
      */
@@ -198,9 +198,9 @@ public class PDType1Font extends PDSimpleFont
 
     /**
      * Creates a Type 1 font from a Font dictionary in a PDF.
-     * 
+     *
      * @param fontDictionary font dictionary.
-     * @throws IOException if there was an error initializing the font.
+     * @throws IOException              if there was an error initializing the font.
      * @throws IllegalArgumentException if /FontFile3 was used.
      */
     public PDType1Font(COSDictionary fontDictionary) throws IOException
@@ -232,10 +232,14 @@ public class PDType1Font extends PDSimpleFont
 
                     // repair Length1 and Length2 if necessary
                     byte[] bytes = fontFile.toByteArray();
+                    if (bytes.length <= 0)
+                    {
+                        throw new IOException("Font data unavailable");
+                    }
                     length1 = repairLength1(bytes, length1);
                     length2 = repairLength2(bytes, length1, length2);
 
-                    if (bytes.length > 0 && (bytes[0] & 0xff) == PFB_START_MARKER)
+                    if ((bytes[0] & 0xff) == PFB_START_MARKER)
                     {
                         // some bad files embed the entire PFB, see PDFBOX-2607
                         t1 = Type1Font.createWithPFB(bytes);
@@ -243,6 +247,12 @@ public class PDType1Font extends PDSimpleFont
                     else
                     {
                         // the PFB embedded as two segments back-to-back
+                        if (length1 < 0 || length1 > length1 + length2)
+                        {
+                            throw new IOException(
+                                    "Invalid length data, actual length: " + bytes.length
+                                            + ", /Length1: " + length1 + ", /Length2: " + length2);
+                        }
                         byte[] segment1 = Arrays.copyOfRange(bytes, 0, length1);
                         byte[] segment2 = Arrays.copyOfRange(bytes, length1, length1 + length2);
 
@@ -277,8 +287,8 @@ public class PDType1Font extends PDSimpleFont
         else
         {
             this.isOriginalEmbeddedMissing = true;
-            FontMapping<FontBoxFont> mapping = FontMappers.instance().getFontBoxFont(getBaseFont(),
-                    fd);
+            FontMapping<FontBoxFont> mapping = FontMappers.instance()
+                    .getFontBoxFont(getBaseFont(), fd);
             genericFont = mapping.getFont();
 
             if (mapping.isFallback())
@@ -293,10 +303,10 @@ public class PDType1Font extends PDSimpleFont
     }
 
     /**
-     * Some Type 1 fonts have an invalid Length1, which causes the binary segment of the font to be truncated, see
-     * PDFBOX-2350.
+     * Some Type 1 fonts have an invalid Length1, which causes the binary segment of the font to be
+     * truncated, see PDFBOX-2350.
      *
-     * @param bytes Type 1 stream bytes
+     * @param bytes   Type 1 stream bytes
      * @param length1 Length1 from the Type 1 stream
      * @return repaired Length1 value
      */
@@ -352,9 +362,10 @@ public class PDType1Font extends PDSimpleFont
 
     /**
      * Some Type 1 fonts have an invalid Length2, see PDFBOX-3475. A negative /Length2 brings an
-     * IllegalArgumentException in Arrays.copyOfRange(), a huge value eats up memory because of padding.
+     * IllegalArgumentException in Arrays.copyOfRange(), a huge value eats up memory because of
+     * padding.
      *
-     * @param bytes Type 1 stream bytes
+     * @param bytes   Type 1 stream bytes
      * @param length1 Length1 from the Type 1 stream
      * @param length2 Length2 from the Type 1 stream
      * @return repaired Length2 value
@@ -385,7 +396,8 @@ public class PDType1Font extends PDSimpleFont
         if (getStandard14AFM() != null)
         {
             String afmName = getEncoding().getName(code);
-            return getStandard14AFM().getCharacterHeight(afmName); // todo: isn't this the y-advance, not the height?
+            return getStandard14AFM().getCharacterHeight(
+                    afmName); // todo: isn't this the y-advance, not the height?
         }
         // todo: should be scaled by font matrix
         return (float) genericFont.getPath(name).getBounds().getHeight();
@@ -553,8 +565,8 @@ public class PDType1Font extends PDSimpleFont
     }
 
     /**
-     * Maps a PostScript glyph name to the name in the underlying font, for example when using a TTF font we might map
-     * "W" to "uni0057".
+     * Maps a PostScript glyph name to the name in the underlying font, for example when using a TTF
+     * font we might map "W" to "uni0057".
      */
     private String getNameInFont(String name) throws IOException
     {
@@ -660,12 +672,14 @@ public class PDType1Font extends PDSimpleFont
     }
 
     @Override
-    public boolean isOriginalEmbeddedMissing() {
+    public boolean isOriginalEmbeddedMissing()
+    {
         return isOriginalEmbeddedMissing;
     }
 
     @Override
-    public boolean isMappingFallbackUsed() {
+    public boolean isMappingFallbackUsed()
+    {
         return isMappingFallbackUsed;
     }
 }

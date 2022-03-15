@@ -45,7 +45,7 @@ final class UnmodifiableCOSDictionary extends COSDictionary
     @Override
     public void setItem(COSName key, COSObjectable value)
     {
-       throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -129,7 +129,7 @@ final class UnmodifiableCOSDictionary extends COSDictionary
     @Override
     public void setEmbeddedString(String embedded, COSName key, String value)
     {
-       throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -200,6 +200,12 @@ final class UnmodifiableCOSDictionary extends COSDictionary
 
     @Override
     public void merge(COSDictionary dic)
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setFlag(COSName field, int bitFlag, boolean value)
     {
         throw new UnsupportedOperationException();
     }

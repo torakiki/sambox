@@ -16,14 +16,6 @@
  */
 package org.sejda.sambox.pdmodel;
 
-import static java.util.Objects.nonNull;
-import static java.util.Optional.ofNullable;
-import static org.sejda.sambox.util.SpecVersionUtils.V1_5;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSArrayList;
 import org.sejda.sambox.cos.COSBase;
@@ -50,6 +42,14 @@ import org.sejda.sambox.pdmodel.interactive.pagenavigation.PDThread;
 import org.sejda.sambox.pdmodel.interactive.viewerpreferences.PDViewerPreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
+import static org.sejda.sambox.util.SpecVersionUtils.V1_5;
 
 /**
  * The Document Catalog of a PDF.
@@ -80,7 +80,7 @@ public class PDDocumentCatalog implements COSObjectable
     /**
      * Constructor.
      *
-     * @param doc The document that this catalog is part of.
+     * @param doc            The document that this catalog is part of.
      * @param rootDictionary The root dictionary that this object wraps.
      */
     public PDDocumentCatalog(PDDocument doc, COSDictionary rootDictionary)
@@ -109,16 +109,17 @@ public class PDDocumentCatalog implements COSObjectable
     {
         if (cachedAcroForm == null)
         {
-            COSDictionary dict = root.getDictionaryObject(COSName.ACRO_FORM, COSDictionary.class);
-            cachedAcroForm = dict == null ? null : new PDAcroForm(document, dict);
+            cachedAcroForm = ofNullable(
+                    root.getDictionaryObject(COSName.ACRO_FORM, COSDictionary.class)).map(
+                    d -> new PDAcroForm(document, d)).orElse(null);
         }
         return cachedAcroForm;
     }
 
     /**
-     * Sets the AcroForm for this catalog.
+     * sets the acroform for this catalog.
      *
-     * @param acroForm The new AcroForm.
+     * @param acroform the new acroform.
      */
     public void setAcroForm(PDAcroForm acroForm)
     {
@@ -142,8 +143,9 @@ public class PDDocumentCatalog implements COSObjectable
      */
     public PDViewerPreferences getViewerPreferences()
     {
-        return ofNullable(root.getDictionaryObject(COSName.VIEWER_PREFERENCES, COSDictionary.class))
-                .map(PDViewerPreferences::new).orElse(null);
+        return ofNullable(
+                root.getDictionaryObject(COSName.VIEWER_PREFERENCES, COSDictionary.class)).map(
+                PDViewerPreferences::new).orElse(null);
     }
 
     /**
@@ -163,8 +165,8 @@ public class PDDocumentCatalog implements COSObjectable
      */
     public PDDocumentOutline getDocumentOutline()
     {
-        return ofNullable(root.getDictionaryObject(COSName.OUTLINES, COSDictionary.class))
-                .map(PDDocumentOutline::new).orElse(null);
+        return ofNullable(root.getDictionaryObject(COSName.OUTLINES, COSDictionary.class)).map(
+                PDDocumentOutline::new).orElse(null);
     }
 
     /**
@@ -207,15 +209,15 @@ public class PDDocumentCatalog implements COSObjectable
     }
 
     /**
-     * Get the metadata that is part of the document catalog. This will return null if there is no meta data for this
-     * object.
+     * Get the metadata that is part of the document catalog. This will return null if there is no
+     * meta data for this object.
      *
      * @return The metadata for this object.
      */
     public PDMetadata getMetadata()
     {
-        return ofNullable(root.getDictionaryObject(COSName.METADATA, COSStream.class))
-                .map(PDMetadata::new).orElse(null);
+        return ofNullable(root.getDictionaryObject(COSName.METADATA, COSStream.class)).map(
+                PDMetadata::new).orElse(null);
     }
 
     /**
@@ -290,8 +292,8 @@ public class PDDocumentCatalog implements COSObjectable
      */
     public PDDocumentNameDictionary getNames()
     {
-        return ofNullable(root.getDictionaryObject(COSName.NAMES, COSDictionary.class))
-                .map(PDDocumentNameDictionary::new).orElse(null);
+        return ofNullable(root.getDictionaryObject(COSName.NAMES, COSDictionary.class)).map(
+                PDDocumentNameDictionary::new).orElse(null);
     }
 
     /**
@@ -299,8 +301,8 @@ public class PDDocumentCatalog implements COSObjectable
      */
     public PDDocumentNameDestinationDictionary getDests()
     {
-        return ofNullable(root.getDictionaryObject(COSName.DESTS, COSDictionary.class))
-                .map(PDDocumentNameDestinationDictionary::new).orElse(null);
+        return ofNullable(root.getDictionaryObject(COSName.DESTS, COSDictionary.class)).map(
+                PDDocumentNameDestinationDictionary::new).orElse(null);
     }
 
     /**
@@ -314,14 +316,15 @@ public class PDDocumentCatalog implements COSObjectable
     }
 
     /**
-     * Get info about doc's usage of tagged features. This will return null if there is no information.
+     * Get info about doc's usage of tagged features. This will return null if there is no
+     * information.
      *
      * @return The new mark info.
      */
     public PDMarkInfo getMarkInfo()
     {
-        return ofNullable(root.getDictionaryObject(COSName.MARK_INFO, COSDictionary.class))
-                .map(PDMarkInfo::new).orElse(null);
+        return ofNullable(root.getDictionaryObject(COSName.MARK_INFO, COSDictionary.class)).map(
+                PDMarkInfo::new).orElse(null);
     }
 
     /**
@@ -355,7 +358,8 @@ public class PDDocumentCatalog implements COSObjectable
     }
 
     /**
-     * Add an OutputIntent to the list. If there is not OutputIntent, the list is created and the first element added.
+     * Add an OutputIntent to the list. If there is not OutputIntent, the list is created and the
+     * first element added.
      *
      * @param outputIntent the OutputIntent to add.
      */
@@ -373,7 +377,8 @@ public class PDDocumentCatalog implements COSObjectable
     /**
      * Replace the list of OutputIntents of the document.
      *
-     * @param outputIntents the list of OutputIntents, if the list is empty all OutputIntents are removed.
+     * @param outputIntents the list of OutputIntents, if the list is empty all OutputIntents are
+     *                      removed.
      */
     public void setOutputIntents(List<PDOutputIntent> outputIntents)
     {
@@ -450,8 +455,8 @@ public class PDDocumentCatalog implements COSObjectable
      */
     public PDURIDictionary getURI()
     {
-        return ofNullable(root.getDictionaryObject(COSName.URI, COSDictionary.class))
-                .map(PDURIDictionary::new).orElse(null);
+        return ofNullable(root.getDictionaryObject(COSName.URI, COSDictionary.class)).map(
+                PDURIDictionary::new).orElse(null);
     }
 
     /**
@@ -469,8 +474,9 @@ public class PDDocumentCatalog implements COSObjectable
      */
     public PDStructureTreeRoot getStructureTreeRoot()
     {
-        return ofNullable(root.getDictionaryObject(COSName.STRUCT_TREE_ROOT, COSDictionary.class))
-                .map(PDStructureTreeRoot::new).orElse(null);
+        return ofNullable(
+                root.getDictionaryObject(COSName.STRUCT_TREE_ROOT, COSDictionary.class)).map(
+                PDStructureTreeRoot::new).orElse(null);
     }
 
     /**
@@ -550,8 +556,8 @@ public class PDDocumentCatalog implements COSObjectable
      */
     public PDOptionalContentProperties getOCProperties()
     {
-        return ofNullable(root.getDictionaryObject(COSName.OCPROPERTIES, COSDictionary.class))
-                .map(PDOptionalContentProperties::new).orElse(null);
+        return ofNullable(root.getDictionaryObject(COSName.OCPROPERTIES, COSDictionary.class)).map(
+                PDOptionalContentProperties::new).orElse(null);
     }
 
     /**
@@ -571,8 +577,9 @@ public class PDDocumentCatalog implements COSObjectable
     }
 
     /**
-     * Looks up for the {@link PDPageDestination} referenced by the given {@link PDNamedDestination}
-     * 
+     * Looks up for the {@link PDPageDestination} referenced by the given {@link
+     * PDNamedDestination}
+     *
      * @param namedDest
      * @return the destination or null if nothing is fond
      * @throws IOException
@@ -588,8 +595,8 @@ public class PDDocumentCatalog implements COSObjectable
             PDDocumentNameDestinationDictionary nameDestDict = getDests();
             if (nameDestDict != null)
             {
-                return (PDPageDestination) nameDestDict
-                        .getDestination(namedDest.getNamedDestination());
+                return (PDPageDestination) nameDestDict.getDestination(
+                        namedDest.getNamedDestination());
             }
         }
         return namesDest;

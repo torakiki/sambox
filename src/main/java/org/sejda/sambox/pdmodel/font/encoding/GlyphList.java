@@ -16,7 +16,8 @@
  */
 package org.sejda.sambox.pdmodel.font.encoding;
 
-import static java.util.Objects.nonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -26,11 +27,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.util.Objects.nonNull;
 
 /**
- * PostScript glyph list, maps glyph names to sequences of Unicode characters. Instances of GlyphList are immutable.
+ * PostScript glyph list, maps glyph names to sequences of Unicode characters. Instances of
+ * GlyphList are immutable.
  */
 public final class GlyphList
 {
@@ -48,16 +49,19 @@ public final class GlyphList
     private static GlyphList load(String filename, int numberOfEntries)
     {
 
-        String path = "/org/sejda/sambox/resources/glyphlist/";
-        try
+        String path = "/org/sejda/sambox/resources/glyphlist/" + filename;
+        try (InputStream resourceStream = GlyphList.class.getResourceAsStream(path))
         {
-            return new GlyphList(GlyphList.class.getResourceAsStream(path + filename),
-                    numberOfEntries);
+            if (nonNull(resourceStream))
+            {
+                return new GlyphList(resourceStream, numberOfEntries);
+            }
         }
         catch (IOException e)
         {
             throw new RuntimeException(e);
         }
+        throw new RuntimeException("GlyphList '" + path + "' not found");
     }
 
     static
@@ -118,7 +122,7 @@ public final class GlyphList
      * Creates a new GlyphList from multiple glyph list files.
      *
      * @param glyphList an existing glyph list to be copied
-     * @param input glyph list in Adobe format
+     * @param input     glyph list in Adobe format
      * @throws IOException if the glyph list could not be read
      */
     public GlyphList(GlyphList glyphList, InputStream input) throws IOException

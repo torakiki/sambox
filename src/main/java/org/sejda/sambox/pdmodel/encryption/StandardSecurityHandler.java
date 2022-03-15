@@ -45,26 +45,29 @@ import static org.bouncycastle.util.Arrays.copyOf;
 
 /**
  * The standard security handler. This security handler protects document with password.
- * 
- * @see StandardProtectionPolicy to see how to protect document with this security handler.
+ *
  * @author Ben Litchfield
  * @author Benoit Guillon
  * @author Manuel Kasper
+ * @see StandardProtectionPolicy to see how to protect document with this security handler.
  */
 public final class StandardSecurityHandler extends SecurityHandler
 {
-    /**
-     * Log instance.
-     */
     private static final Logger LOG = LoggerFactory.getLogger(StandardSecurityHandler.class);
 
-    /** Type of security handler. */
+    /**
+     * Type of security handler.
+     */
     public static final String FILTER = "Standard";
 
-    /** Protection policy class for this handler. */
+    /**
+     * Protection policy class for this handler.
+     */
     public static final Class<?> PROTECTION_POLICY_CLASS = StandardProtectionPolicy.class;
 
-    /** Standard padding for encryption. */
+    /**
+     * Standard padding for encryption.
+     */
     private static final byte[] ENCRYPT_PADDING = { (byte) 0x28, (byte) 0xBF, (byte) 0x4E,
             (byte) 0x5E, (byte) 0x4E, (byte) 0x75, (byte) 0x8A, (byte) 0x41, (byte) 0x64,
             (byte) 0x00, (byte) 0x4E, (byte) 0x56, (byte) 0xFF, (byte) 0xFA, (byte) 0x01,
@@ -75,8 +78,6 @@ public final class StandardSecurityHandler extends SecurityHandler
     // hashes used for Algorithm 2.B, depending on remainder from E modulo 3
     private static final String[] HASHES_2B = new String[] { "SHA-256", "SHA-384", "SHA-512" };
 
-    private StandardProtectionPolicy policy;
-
     /**
      * Constructor.
      */
@@ -85,27 +86,15 @@ public final class StandardSecurityHandler extends SecurityHandler
     }
 
     /**
-     * Constructor used for encryption.
-     *
-     * @param p The protection policy.
-     */
-    public StandardSecurityHandler(StandardProtectionPolicy p)
-    {
-        policy = p;
-        keyLength = policy.getEncryptionKeyLength();
-    }
-
-    /**
      * Prepares everything to decrypt the document.
-     *
+     * <p>
      * Only if decryption of single objects is needed this should be called.
      *
-     * @param encryption encryption dictionary
-     * @param documentIDArray document id
+     * @param encryption         encryption dictionary
+     * @param documentIDArray    document id
      * @param decryptionMaterial Information used to decrypt the document.
-     *
      * @throws InvalidPasswordException If the password is incorrect.
-     * @throws IOException If there is an error accessing data.
+     * @throws IOException              If there is an error accessing data.
      */
     @Override
     public void prepareForDecryption(PDEncryption encryption, COSArray documentIDArray,
@@ -187,9 +176,10 @@ public final class StandardSecurityHandler extends SecurityHandler
             currentAccessPermission = new AccessPermission(dicPermissions);
             setCurrentAccessPermission(currentAccessPermission);
 
-            setEncryptionKey(computeEncryptedKey(password.getBytes(passwordCharset), ownerKey,
-                    userKey, oe, ue, dicPermissions, documentIDBytes, dicRevision, dicLength,
-                    encryptMetadata, false));
+            setEncryptionKey(
+                    computeEncryptedKey(password.getBytes(passwordCharset), ownerKey, userKey, oe,
+                            ue, dicPermissions, documentIDBytes, dicRevision, dicLength,
+                            encryptMetadata, false));
         }
         else
         {
@@ -206,8 +196,7 @@ public final class StandardSecurityHandler extends SecurityHandler
             // detect whether AES encryption is used. This assumes that the encryption algo is
             // stored in the PDCryptFilterDictionary
             // However, crypt filters are used only when V is 4 or 5.
-            PDCryptFilterDictionary stdCryptFilterDictionary = encryption
-                    .getStdCryptFilterDictionary();
+            PDCryptFilterDictionary stdCryptFilterDictionary = encryption.getStdCryptFilterDictionary();
 
             if (stdCryptFilterDictionary != null)
             {
@@ -281,17 +270,15 @@ public final class StandardSecurityHandler extends SecurityHandler
     /**
      * Check for owner password.
      *
-     * @param ownerPassword The owner password.
-     * @param user The u entry of the encryption dictionary.
-     * @param owner The o entry of the encryption dictionary.
-     * @param permissions The set of permissions on the document.
-     * @param id The document id.
-     * @param encRevision The encryption algorithm revision.
-     * @param length The encryption key length.
+     * @param ownerPassword   The owner password.
+     * @param user            The u entry of the encryption dictionary.
+     * @param owner           The o entry of the encryption dictionary.
+     * @param permissions     The set of permissions on the document.
+     * @param id              The document id.
+     * @param encRevision     The encryption algorithm revision.
+     * @param length          The encryption key length.
      * @param encryptMetadata The encryption metadata
-     *
      * @return True If the ownerPassword param is the owner password.
-     *
      * @throws IOException If there is an error accessing data.
      */
     public boolean isOwnerPassword(byte[] ownerPassword, byte[] user, byte[] owner, int permissions,
@@ -330,12 +317,10 @@ public final class StandardSecurityHandler extends SecurityHandler
      * Get the user password based on the owner password.
      *
      * @param ownerPassword The plaintext owner password.
-     * @param owner The o entry of the encryption dictionary.
-     * @param encRevision The encryption revision number.
-     * @param length The key length.
-     *
+     * @param owner         The o entry of the encryption dictionary.
+     * @param encRevision   The encryption revision number.
+     * @param length        The key length.
      * @return The u entry of the encryption dictionary.
-     *
      * @throws IOException If there is an error accessing data while generating the user password.
      */
     public byte[] getUserPassword(byte[] ownerPassword, byte[] owner, int encRevision, int length)
@@ -372,20 +357,18 @@ public final class StandardSecurityHandler extends SecurityHandler
     /**
      * Compute the encryption key.
      *
-     * @param password The password to compute the encrypted key.
-     * @param o The O entry of the encryption dictionary.
-     * @param u The U entry of the encryption dictionary.
-     * @param oe The OE entry of the encryption dictionary.
-     * @param ue The UE entry of the encryption dictionary.
-     * @param permissions The permissions for the document.
-     * @param id The document id.
-     * @param encRevision The revision of the encryption algorithm.
-     * @param length The length of the encryption key.
+     * @param password        The password to compute the encrypted key.
+     * @param o               The O entry of the encryption dictionary.
+     * @param u               The U entry of the encryption dictionary.
+     * @param oe              The OE entry of the encryption dictionary.
+     * @param ue              The UE entry of the encryption dictionary.
+     * @param permissions     The permissions for the document.
+     * @param id              The document id.
+     * @param encRevision     The revision of the encryption algorithm.
+     * @param length          The length of the encryption key.
      * @param encryptMetadata The encryption metadata
      * @param isOwnerPassword whether the password given is the owner password (for revision 6)
-     *
      * @return The encrypted key bytes.
-     *
      * @throws IOException If there is an error with encryption.
      */
     public byte[] computeEncryptedKey(byte[] password, byte[] o, byte[] u, byte[] oe, byte[] ue,
@@ -502,16 +485,14 @@ public final class StandardSecurityHandler extends SecurityHandler
     /**
      * This will compute the user password hash.
      *
-     * @param password The plain text password.
-     * @param owner The owner password hash.
-     * @param permissions The document permissions.
-     * @param id The document id.
-     * @param encRevision The revision of the encryption.
-     * @param length The length of the encryption key.
+     * @param password        The plain text password.
+     * @param owner           The owner password hash.
+     * @param permissions     The document permissions.
+     * @param id              The document id.
+     * @param encRevision     The revision of the encryption.
+     * @param length          The length of the encryption key.
      * @param encryptMetadata The encryption metadata
-     *
      * @return The user password.
-     *
      * @throws IOException if the password could not be computed
      */
     public byte[] computeUserPassword(byte[] password, byte[] owner, int permissions, byte[] id,
@@ -559,12 +540,10 @@ public final class StandardSecurityHandler extends SecurityHandler
      * Compute the owner entry in the encryption dictionary.
      *
      * @param ownerPassword The plaintext owner password.
-     * @param userPassword The plaintext user password.
-     * @param encRevision The revision number of the encryption algorithm.
-     * @param length The length of the encryption key.
-     *
+     * @param userPassword  The plaintext user password.
+     * @param encRevision   The revision number of the encryption algorithm.
+     * @param length        The length of the encryption key.
      * @return The o entry of the encryption dictionary.
-     *
      * @throws IOException if the owner password could not be computed
      */
     public byte[] computeOwnerPassword(byte[] ownerPassword, byte[] userPassword, int encRevision,
@@ -625,7 +604,6 @@ public final class StandardSecurityHandler extends SecurityHandler
      * This will take the password and truncate or pad it as necessary.
      *
      * @param password The password to pad or truncate.
-     *
      * @return The padded or truncated password.
      */
     private byte[] truncateOrPad(byte[] password)
@@ -641,17 +619,15 @@ public final class StandardSecurityHandler extends SecurityHandler
     /**
      * Check if a plaintext password is the user password.
      *
-     * @param password The plaintext password.
-     * @param user The u entry of the encryption dictionary.
-     * @param owner The o entry of the encryption dictionary.
-     * @param permissions The permissions set in the PDF.
-     * @param id The document id used for encryption.
-     * @param encRevision The revision of the encryption algorithm.
-     * @param length The length of the encryption key.
+     * @param password        The plaintext password.
+     * @param user            The u entry of the encryption dictionary.
+     * @param owner           The o entry of the encryption dictionary.
+     * @param permissions     The permissions set in the PDF.
+     * @param id              The document id used for encryption.
+     * @param encRevision     The revision of the encryption algorithm.
+     * @param length          The length of the encryption key.
      * @param encryptMetadata The encryption metadata
-     *
      * @return true If the plaintext password is the user password.
-     *
      * @throws IOException If there is an error accessing data.
      */
     public boolean isUserPassword(byte[] password, byte[] user, byte[] owner, int permissions,
@@ -700,17 +676,15 @@ public final class StandardSecurityHandler extends SecurityHandler
     /**
      * Check if a plaintext password is the user password.
      *
-     * @param password The plaintext password.
-     * @param user The u entry of the encryption dictionary.
-     * @param owner The o entry of the encryption dictionary.
-     * @param permissions The permissions set in the PDF.
-     * @param id The document id used for encryption.
-     * @param encRevision The revision of the encryption algorithm.
-     * @param length The length of the encryption key.
+     * @param password        The plaintext password.
+     * @param user            The u entry of the encryption dictionary.
+     * @param owner           The o entry of the encryption dictionary.
+     * @param permissions     The permissions set in the PDF.
+     * @param id              The document id used for encryption.
+     * @param encRevision     The revision of the encryption algorithm.
+     * @param length          The length of the encryption key.
      * @param encryptMetadata The encryption metadata
-     *
      * @return true If the plaintext password is the user password.
-     *
      * @throws IOException If there is an error accessing data.
      */
     public boolean isUserPassword(String password, byte[] user, byte[] owner, int permissions,
@@ -731,17 +705,15 @@ public final class StandardSecurityHandler extends SecurityHandler
     /**
      * Check for owner password.
      *
-     * @param password The owner password.
-     * @param user The u entry of the encryption dictionary.
-     * @param owner The o entry of the encryption dictionary.
-     * @param permissions The set of permissions on the document.
-     * @param id The document id.
-     * @param encRevision The encryption algorithm revision.
-     * @param length The encryption key length.
+     * @param password        The owner password.
+     * @param user            The u entry of the encryption dictionary.
+     * @param owner           The o entry of the encryption dictionary.
+     * @param permissions     The set of permissions on the document.
+     * @param id              The document id.
+     * @param encRevision     The encryption algorithm revision.
+     * @param length          The encryption key length.
      * @param encryptMetadata The encryption metadata
-     *
      * @return True If the ownerPassword param is the owner password.
-     *
      * @throws IOException If there is an error accessing data.
      */
     public boolean isOwnerPassword(String password, byte[] user, byte[] owner, int permissions,
@@ -876,12 +848,6 @@ public final class StandardSecurityHandler extends SecurityHandler
         byte[] trunc = new byte[127];
         System.arraycopy(in, 0, trunc, 0, 127);
         return trunc;
-    }
-
-    @Override
-    public boolean hasProtectionPolicy()
-    {
-        return policy != null;
     }
 
 }

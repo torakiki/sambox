@@ -35,7 +35,6 @@ import static org.junit.Assert.assertNull;
  *
  * @author Ben Litchfield
  * @author Fred Hansen
- * 
  */
 public class TestDateUtil
 {
@@ -66,9 +65,9 @@ public class TestDateUtil
 
     /**
      * Calendar.equals test case.
-     * 
+     *
      * @param expect the expected calendar value
-     * @param was the calendar value to be checked
+     * @param was    the calendar value to be checked
      */
     public static void assertCalendarEquals(Calendar expect, Calendar was)
     {
@@ -78,7 +77,7 @@ public class TestDateUtil
 
     /**
      * Test case for <a href="https://issues.apache.org/jira/browse/PDFBOX-598">PDFBOX-598</a>.
-     * 
+     *
      * @throws IOException if something went wrong.
      */
     @Test
@@ -96,16 +95,17 @@ public class TestDateUtil
 
     /**
      * Check toCalendarSTATIC.
-     * 
-     * @param yr expected year value If an IOException is the expected result, yr should be null
-     * @param mon expected month value
-     * @param day expected dayofmonth value
-     * @param hr expected hour value
-     * @param min expected minute value
-     * @param sec expected second value
-     * @param offsetHours expected timezone offset in hours (-11..11)
+     *
+     * @param yr            expected year value If an IOException is the expected result, yr should
+     *                      be null
+     * @param mon           expected month value
+     * @param day           expected dayofmonth value
+     * @param hr            expected hour value
+     * @param min           expected minute value
+     * @param sec           expected second value
+     * @param offsetHours   expected timezone offset in hours (-11..11)
      * @param offsetMinutes expected timezone offset in minutes (0..59)
-     * @param orig A date to be parsed.
+     * @param orig          A date to be parsed.
      * @throws Exception If an unexpected error occurs.
      */
     private static void checkParse(int yr, int mon, int day, int hr, int min, int sec,
@@ -136,7 +136,7 @@ public class TestDateUtil
 
     /**
      * Test dates in various formats. Years differ to make it easier to find failures.
-     * 
+     *
      * @throws Exception none expected
      */
     @Test
@@ -224,9 +224,11 @@ public class TestDateUtil
         // "yyyy-MM-dd'T'HH:mm:ssz"
         checkParse(1976, 7, 6, 17, 22, 1, -4, 0, "1976-7-6T17:22:1GMT-4");
         // "yyyy-MM-dd'T'HH:mm:ssz"
-        checkParse(BAD, 7, 6, 17, 22, 1, -4, 0, "2076-7-6T17:22:1EDT"); // "EDT" is not a known tz ID
+        checkParse(BAD, 7, 6, 17, 22, 1, -4, 0,
+                "2076-7-6T17:22:1EDT"); // "EDT" is not a known tz ID
         // "yyyy-MM-dd'T'HH:mm:ssz"
-        checkParse(1960, 7, 6, 17, 22, 1, -5, 0, "1960-7-6T17:22:1EST"); // "EST" does not have a DST rule
+        checkParse(1960, 7, 6, 17, 22, 1, -5, 0,
+                "1960-7-6T17:22:1EST"); // "EST" does not have a DST rule
         // "EEEE, MMM dd, yyyy"
         checkParse(1977, 7, 6, 0, 0, 0, 0, 0, "Wednesday, Jul 6, 1977");
         // "EEEE MMM dd, yyyy HH:mm:ss"
@@ -253,7 +255,8 @@ public class TestDateUtil
         checkParse(1988, 7, 6, 0, 0, 0, 0, 0, "7/6/1988");
 
         // test ends of range of two digit years
-        checkParse(year - 79, 1, 1, 0, 0, 0, 0, 0, "1/1/" + ((year - 79) % 100) + " 00:00:00"); // "M/d/yy hh:mm:ss"
+        checkParse(year - 79, 1, 1, 0, 0, 0, 0, 0,
+                "1/1/" + ((year - 79) % 100) + " 00:00:00"); // "M/d/yy hh:mm:ss"
         // "M/d/yy"
         checkParse(year + 19, 1, 1, 0, 0, 0, 0, 0, "1/1/" + ((year + 19) % 100));
 
@@ -302,7 +305,7 @@ public class TestDateUtil
 
     /**
      * Test toString() and toISO8601() for various dates.
-     * 
+     *
      * @throws Exception if something went wrong.
      */
     @Test
@@ -318,6 +321,8 @@ public class TestDateUtil
 
         assertNull(DateConverter.toCalendar((COSString) null));
         assertNull(DateConverter.toCalendar((String) null));
+        assertNull(DateConverter.toCalendar("D:    "));
+        assertNull(DateConverter.toCalendar("D:"));
 
         checkToString(2013, 8, 28, 3, 14, 15, tzPgh, -4, 0);
         checkToString(2014, 2, 28, 3, 14, 15, tzPgh, -5, 0);
@@ -330,18 +335,10 @@ public class TestDateUtil
         checkToString(2015, 8, 28, 3, 14, 15, tzAdelaide, +9, 30);
         checkToString(2016, 2, 28, 3, 14, 15, tzAdelaide, +10, 30);
         // McMurdo has a daylightsavings rule, but it seems never to apply
-        checkToString(1981, 1, 1, 1, 14, 15, tzMcMurdo, +0, 0);
-        checkToString(1982, 2, 1, 1, 14, 15, tzMcMurdo, +0, 0);
-        checkToString(1983, 3, 1, 1, 14, 15, tzMcMurdo, +0, 0);
-        checkToString(1984, 4, 1, 1, 14, 15, tzMcMurdo, +0, 0);
-        checkToString(1985, 5, 1, 1, 14, 15, tzMcMurdo, +0, 0);
-        checkToString(1986, 6, 1, 1, 14, 15, tzMcMurdo, +0, 0);
-        checkToString(1987, 7, 1, 1, 14, 15, tzMcMurdo, +0, 0);
-        checkToString(1988, 8, 1, 1, 14, 15, tzMcMurdo, +0, 0);
-        checkToString(1989, 9, 1, 1, 14, 15, tzMcMurdo, +0, 0);
-        checkToString(1990, 10, 1, 1, 14, 15, tzMcMurdo, +0, 0);
-        checkToString(1991, 11, 1, 1, 14, 15, tzMcMurdo, +0, 0);
-        checkToString(1992, 12, 1, 1, 14, 15, tzMcMurdo, +0, 0);
+        for (int m = 1; m <= 12; ++m)
+        {
+            checkToString(1980 + m, m, 1, 1, 14, 15, tzMcMurdo, +0, 0);
+        }
     }
 
     private static void checkParseTZ(int expect, String src)

@@ -15,22 +15,6 @@
  */
 package org.sejda.sambox.pdmodel.graphics.image;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertNotNull;
-import static junit.framework.TestCase.assertTrue;
-
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.imageio.ImageIO;
-import javax.imageio.ImageWriter;
-import javax.imageio.spi.ImageWriterSpi;
-
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSStream;
@@ -40,6 +24,22 @@ import org.sejda.sambox.pdmodel.PDPage;
 import org.sejda.sambox.pdmodel.PDPageContentStream;
 import org.sejda.sambox.pdmodel.PDPageContentStream.AppendMode;
 import org.sejda.sambox.rendering.PDFRenderer;
+
+import javax.imageio.ImageIO;
+import javax.imageio.ImageWriter;
+import javax.imageio.spi.ImageWriterSpi;
+import java.awt.image.BufferedImage;
+import java.awt.image.WritableRaster;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertNotNull;
+import static junit.framework.TestCase.assertTrue;
 
 /**
  * Helper class to do some validations for PDImageXObject.
@@ -68,6 +68,17 @@ public class ValidateXImage
         assertNotNull(ximage.getImage());
         assertEquals(ximage.getWidth(), ximage.getImage().getWidth());
         assertEquals(ximage.getHeight(), ximage.getImage().getHeight());
+        WritableRaster rawRaster = ximage.getRawRaster();
+        assertNotNull(rawRaster);
+        assertEquals(rawRaster.getWidth(), ximage.getWidth());
+        assertEquals(rawRaster.getHeight(), ximage.getHeight());
+        if (colorSpaceName.equals("ICCBased"))
+        {
+            BufferedImage rawImage = ximage.getRawImage();
+            assertNotNull(rawImage);
+            assertEquals(rawImage.getWidth(), ximage.getWidth());
+            assertEquals(rawImage.getHeight(), ximage.getHeight());
+        }
 
         boolean canEncode = true;
         boolean writeOk;
@@ -175,7 +186,7 @@ public class ValidateXImage
 
     /**
      * This will get the suffix for this image type, e.g. jpg/png.
-     * 
+     *
      * @return The image suffix or null if not available.
      */
     public static String getSuffix(PDImageXObject ximage)

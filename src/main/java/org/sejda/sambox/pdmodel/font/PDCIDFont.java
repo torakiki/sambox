@@ -16,13 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.font;
 
-import static java.util.Objects.nonNull;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.sejda.commons.util.IOUtils;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
@@ -32,10 +25,19 @@ import org.sejda.sambox.cos.COSNumber;
 import org.sejda.sambox.cos.COSObjectable;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.util.Vector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
+
+import static java.util.Objects.nonNull;
 
 /**
- * A CIDFont. A CIDFont is a PDF object that contains information about a CIDFont program. Although its Type value is
- * Font, a CIDFont is not actually a font.
+ * A CIDFont. A CIDFont is a PDF object that contains information about a CIDFont program. Although
+ * its Type value is Font, a CIDFont is not actually a font.
  *
  * <p>
  * It is not usually necessary to use this class directly, prefer {@link PDType0Font}.
@@ -44,6 +46,8 @@ import org.sejda.sambox.util.Vector;
  */
 public abstract class PDCIDFont implements COSObjectable, PDFontLike, PDVectorFont
 {
+    private static final Logger LOG = LoggerFactory.getLogger(PDCIDFont.class);
+
     protected final PDType0Font parent;
 
     private Map<Integer, Float> widths;
@@ -80,7 +84,13 @@ public abstract class PDCIDFont implements COSObjectable, PDFontLike, PDVectorFo
             int counter = 0;
             while (counter < size)
             {
-                COSNumber firstCode = (COSNumber) wArray.getObject(counter++);
+                COSBase firstCodeBase = wArray.getObject(counter++);
+                if (!(firstCodeBase instanceof COSNumber))
+                {
+                    LOG.warn("Expected a number array member, got {}", firstCodeBase);
+                    continue;
+                }
+                COSNumber firstCode = (COSNumber) firstCodeBase;
                 COSBase next = wArray.getObject(counter++);
                 if (next instanceof COSArray)
                 {
@@ -95,8 +105,17 @@ public abstract class PDCIDFont implements COSObjectable, PDFontLike, PDVectorFo
                 }
                 else
                 {
-                    COSNumber secondCode = (COSNumber) next;
-                    COSNumber rangeWidth = (COSNumber) wArray.getObject(counter++);
+                    COSBase secondCodeBase = next;
+                    COSBase rangeWidthBase = wArray.getObject(counter++);
+                    if (!(secondCodeBase instanceof COSNumber)
+                            || !(rangeWidthBase instanceof COSNumber))
+                    {
+                        LOG.warn("Expected two numbers, got {} and {}", secondCodeBase,
+                                rangeWidthBase);
+                        continue;
+                    }
+                    COSNumber secondCode = (COSNumber) secondCodeBase;
+                    COSNumber rangeWidth = (COSNumber) rangeWidthBase;
                     int startRange = firstCode.intValue();
                     int endRange = secondCode.intValue();
                     float width = rangeWidth.floatValue();
@@ -356,8 +375,8 @@ public abstract class PDCIDFont implements COSObjectable, PDFontLike, PDVectorFo
     public abstract int codeToGID(int code) throws IOException;
 
     /**
-     * Encodes the given Unicode code point for use in a PDF content stream. Content streams use a multi-byte encoding
-     * with 1 to 4 bytes.
+     * Encodes the given Unicode code point for use in a PDF content stream. Content streams use a
+     * multi-byte encoding with 1 to 4 bytes.
      *
      * <p>
      * This method is called when embedding text in PDFs and when filling in fields.

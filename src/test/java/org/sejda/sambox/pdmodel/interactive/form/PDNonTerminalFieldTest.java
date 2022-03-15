@@ -16,19 +16,21 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.pdmodel.PDDocument;
 
 import java.io.IOException;
 import java.util.Arrays;
 
-import org.junit.Test;
-import org.sejda.sambox.cos.COSDictionary;
-import org.sejda.sambox.pdmodel.PDDocument;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 /**
  * @author Andrea Vacondio
- *
  */
 public class PDNonTerminalFieldTest
 {
@@ -68,10 +70,21 @@ public class PDNonTerminalFieldTest
             form.addFields(Arrays.asList(f));
             assertNotNull(form.getField("F.G.I.H"));
             assertNull(i.removeChild(PDFieldFactory.createField(form, new COSDictionary(), null)));
-            assertNotNull(
-                    i.removeChild(PDFieldFactory.createField(form, h.getCOSObject(), null)));
+            assertNotNull(i.removeChild(PDFieldFactory.createField(form, h.getCOSObject(), null)));
             assertNull(form.getField("F.G.I.H"));
         }
+    }
+
+    @Test
+    void setPartialName()
+    {
+        IllegalArgumentException thrown = Assertions.assertThrows(IllegalArgumentException.class,
+                () -> {
+                    new PDNonTerminalField(null).setPartialName("this.that");
+                });
+
+        assertThat(thrown.getMessage(),
+                containsString("A field partial name shall not contain a period character"));
     }
 
 }

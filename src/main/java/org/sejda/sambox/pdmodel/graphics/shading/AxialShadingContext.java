@@ -16,6 +16,13 @@
  */
 package org.sejda.sambox.pdmodel.graphics.shading;
 
+import org.sejda.sambox.cos.COSArray;
+import org.sejda.sambox.cos.COSBoolean;
+import org.sejda.sambox.pdmodel.common.function.PDFunction;
+import org.sejda.sambox.util.Matrix;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.awt.PaintContext;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
@@ -25,16 +32,9 @@ import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
 
-import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSBoolean;
-import org.sejda.sambox.pdmodel.common.function.PDFunction;
-import org.sejda.sambox.util.Matrix;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * AWT PaintContext for axial shading.
- *
+ * <p>
  * Performance improvement done as part of GSoC2014, Tilman Hausherr is the mentor.
  *
  * @author Shaola Ren
@@ -61,10 +61,10 @@ public class AxialShadingContext extends ShadingContext implements PaintContext
     /**
      * Constructor creates an instance to be used for fill operations.
      *
-     * @param shading the shading type to be used
-     * @param colorModel the color model to be used
-     * @param xform transformation for user to device space
-     * @param matrix the pattern matrix concatenated with that of the parent content stream
+     * @param shading      the shading type to be used
+     * @param colorModel   the color model to be used
+     * @param xform        transformation for user to device space
+     * @param matrix       the pattern matrix concatenated with that of the parent content stream
      * @param deviceBounds the bounds of the area to paint, in device units
      * @throws IOException if there is an error getting the color space or doing color conversion.
      */
@@ -123,8 +123,9 @@ public class AxialShadingContext extends ShadingContext implements PaintContext
         shadingToDevice.concatenate(matrix.createAffineTransform());
 
         // worst case for the number of steps is opposite diagonal corners, so use that
-        double dist = Math.sqrt(Math.pow(deviceBounds.getMaxX() - deviceBounds.getMinX(), 2)
-                + Math.pow(deviceBounds.getMaxY() - deviceBounds.getMinY(), 2));
+        double dist = Math.sqrt(
+                Math.pow(deviceBounds.getMaxX() - deviceBounds.getMinX(), 2) + Math.pow(
+                        deviceBounds.getMaxY() - deviceBounds.getMinY(), 2));
         factor = (int) Math.ceil(dist);
 
         // build the color table for the given number of steps
@@ -134,7 +135,8 @@ public class AxialShadingContext extends ShadingContext implements PaintContext
     /**
      * Calculate the color on the axial line and store them in an array.
      *
-     * @return an array, index denotes the relative position, the corresponding value is the color on the axial line
+     * @return an array, index denotes the relative position, the corresponding value is the color
+     * on the axial line
      * @throws IOException if the color conversion fails.
      */
     private int[] calcColorTable() throws IOException
@@ -204,7 +206,7 @@ public class AxialShadingContext extends ShadingContext implements PaintContext
                     // the shading has to be extended if extend[0] == true
                     if (extend[0])
                     {
-                        inputValue = 0;
+                        inputValue = domain[0];
                     }
                     else
                     {
@@ -221,7 +223,7 @@ public class AxialShadingContext extends ShadingContext implements PaintContext
                     // the shading has to be extended if extend[1] == true
                     if (extend[1])
                     {
-                        inputValue = 1;
+                        inputValue = domain[1];
                     }
                     else
                     {

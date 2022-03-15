@@ -32,16 +32,19 @@ import static java.util.Objects.nonNull;
 import static org.sejda.commons.util.RequireUtils.requireIOCondition;
 
 /**
- * Allows colors to be specified according to the subtractive CMYK (cyan, magenta, yellow, black) model typical of
- * printers and other paper-based output devices.
+ * Allows colors to be specified according to the subtractive CMYK (cyan, magenta, yellow, black)
+ * model typical of printers and other paper-based output devices.
  *
  * @author John Hewson
  * @author Ben Litchfield
  */
 public class PDDeviceCMYK extends PDDeviceColorSpace
 {
-    /** The single instance of this class. */
+    /**
+     * The single instance of this class.
+     */
     public static PDDeviceCMYK INSTANCE;
+
     static
     {
         try
@@ -73,8 +76,8 @@ public class PDDeviceCMYK extends PDDeviceColorSpace
         // an initial color conversion while we're still in a static context, see PDFBOX-2184
         awtColorSpace.toRGB(new float[] { 0, 0, 0, 0 });
 
-        usePureJavaCMYKConversion = System
-                .getProperty("org.sejda.sambox.rendering.UsePureJavaCMYKConversion") != null;
+        usePureJavaCMYKConversion =
+                System.getProperty("org.sejda.sambox.rendering.UsePureJavaCMYKConversion") != null;
     }
 
     protected ICC_Profile getICCProfile() throws IOException
@@ -120,6 +123,14 @@ public class PDDeviceCMYK extends PDDeviceColorSpace
     public float[] toRGB(float[] value)
     {
         return awtColorSpace.toRGB(value);
+    }
+
+    @Override
+    public BufferedImage toRawImage(WritableRaster raster) throws IOException
+    {
+        // Device CMYK is not specified, as its the colors of whatever device you use.
+        // The user should fallback to the RGB image
+        return null;
     }
 
     @Override

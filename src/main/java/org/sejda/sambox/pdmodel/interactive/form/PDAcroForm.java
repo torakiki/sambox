@@ -29,8 +29,9 @@ import org.sejda.sambox.pdmodel.PDPageContentStream.AppendMode;
 import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.common.PDDictionaryWrapper;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
-import org.sejda.sambox.pdmodel.font.PDType1Font;
-import org.sejda.sambox.pdmodel.graphics.PDXObject;
+import org.sejda.sambox.pdmodel.fixup.AcroFormAppearancesGenerator;
+import org.sejda.sambox.pdmodel.fixup.AcroFormDefaultValuesGenerator;
+import org.sejda.sambox.pdmodel.fixup.AcroFormOrphanWindgetsGenerator;
 import org.sejda.sambox.pdmodel.graphics.form.PDFormXObject;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotation;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
@@ -39,14 +40,18 @@ import org.sejda.sambox.util.Matrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
@@ -66,9 +71,10 @@ public final class PDAcroForm extends PDDictionaryWrapper
     private static final int FLAG_APPEND_ONLY = 1 << 1;
 
     private final PDDocument document;
+    private ScriptingHandler scriptingHandler;
 
     /**
-     * @param doc The document that this form is part of.
+     * @param document The document that this form is part of.
      */
     public PDAcroForm(PDDocument document)
     {
@@ -77,59 +83,15 @@ public final class PDAcroForm extends PDDictionaryWrapper
     }
 
     /**
-     * @param doc The document that this form is part of.
-     * @param form The existing acroForm.
+     * @param document The document that this form is part of.
+     * @param form     The existing acroForm.
      */
     public PDAcroForm(PDDocument document, COSDictionary form)
     {
         super(form);
         this.document = document;
-        verifyOrCreateDefaults();
-    }
-
-    /**
-     * Verify that there are default entries for required properties.
-     * 
-     * If these are missing create default entries similar to Adobe Reader / Adobe Acrobat
-     * 
-     */
-    private void verifyOrCreateDefaults()
-    {
-        final String adobeDefaultAppearanceString = "/Helv 0 Tf 0 g ";
-
-        // DA entry is required
-        if (getDefaultAppearance().length() == 0)
-        {
-            setDefaultAppearance(adobeDefaultAppearanceString);
-        }
-
-        // DR entry is required
-        PDResources defaultResources = getDefaultResources();
-        if (defaultResources == null)
-        {
-            defaultResources = new PDResources();
-            setDefaultResources(defaultResources);
-        }
-
-        // PDFBOX-3732: Adobe Acrobat uses Helvetica as a default font and
-        // stores that under the name '/Helv' in the resources dictionary
-        // Zapf Dingbats is included per default for check boxes and
-        // radio buttons as /ZaDb.
-        // PDFBOX-4393: the two fonts are added by Adobe when signing
-        // and this breaks a previous signature. (Might be an Adobe bug)
-        COSDictionary fontDict = ofNullable(defaultResources.getCOSObject()
-                .getDictionaryObject(COSName.FONT, COSDictionary.class))
-                        .orElseGet(COSDictionary::new);
-        defaultResources.getCOSObject().putIfAbsent(COSName.FONT, fontDict);
-
-        if (!fontDict.containsKey(COSName.HELV))
-        {
-            defaultResources.put(COSName.HELV, PDType1Font.HELVETICA);
-        }
-        if (!fontDict.containsKey(COSName.ZA_DB))
-        {
-            defaultResources.put(COSName.ZA_DB, PDType1Font.ZAPF_DINGBATS);
-        }
+        new AcroFormDefaultValuesGenerator().andThen(new AcroFormOrphanWindgetsGenerator())
+                .andThen(new AcroFormAppearancesGenerator()).accept(this);
     }
 
     /**
@@ -144,16 +106,16 @@ public final class PDAcroForm extends PDDictionaryWrapper
 
     /**
      * This will flatten all form fields.
-     * 
+     *
      * <p>
-     * Flattening a form field will take the current appearance and make that part of the pages content stream. All form
-     * fields and annotations associated are removed.
+     * Flattening a form field will take the current appearance and make that part of the pages
+     * content stream. All form fields and annotations associated are removed.
      * </p>
-     * 
+     *
      * <p>
      * The appearances for the form fields widgets will <strong>not</strong> be generated
      * <p>
-     * 
+     *
      * @throws IOException
      */
     public void flatten() throws IOException
@@ -175,13 +137,14 @@ public final class PDAcroForm extends PDDictionaryWrapper
 
     /**
      * This will flatten the specified form fields.
-     * 
+     *
      * <p>
-     * Flattening a form field will take the current appearance and make that part of the pages content stream. All form
-     * fields and annotations associated are removed.
+     * Flattening a form field will take the current appearance and make that part of the pages
+     * content stream. All form fields and annotations associated are removed.
      * </p>
-     * 
-     * @param refreshAppearances if set to true the appearances for the form field widgets will be updated
+     *
+     * @param refreshAppearances if set to true the appearances for the form field widgets will be
+     *                           updated
      * @throws IOException
      */
     public void flatten(List<PDField> fields, boolean refreshAppearances) throws IOException
@@ -248,56 +211,13 @@ public final class PDAcroForm extends PDDictionaryWrapper
 
                     contentStream.saveGraphicsState();
 
-                    // translate the appearance stream to the widget location if there is
-                    // not already a transformation in place
-                    boolean needsTranslation = resolveNeedsTranslation(appearanceStream);
-
-                    // scale the appearance stream - mainly needed for images
-                    // in buttons and signatures
-                    boolean needsScaling = resolveNeedsScaling(annotation, page.getRotation());
-
-                    Matrix transformationMatrix = new Matrix();
-                    boolean transformed = false;
-
-                    if (needsTranslation)
-                    {
-                        transformationMatrix.translate(annotation.getRectangle().getLowerLeftX(),
-                                annotation.getRectangle().getLowerLeftY());
-                        transformed = true;
-                    }
-
-                    // PDFBOX-4693: field could have a rotation matrix
-                    Matrix m = appearanceStream.getMatrix();
-                    int angle = (int) Math
-                            .round(Math.toDegrees(Math.atan2(m.getShearY(), m.getScaleY())));
-                    int rotation = (angle + 360) % 360;
-
-                    if (needsScaling)
-                    {
-                        PDRectangle bbox = appearanceStream.getBBox();
-                        PDRectangle fieldRect = annotation.getRectangle();
-
-                        float xScale;
-                        float yScale;
-                        if (rotation == 90 || rotation == 270)
-                        {
-                            xScale = fieldRect.getWidth() / bbox.getHeight();
-                            yScale = fieldRect.getHeight() / bbox.getWidth();
-                        }
-                        else
-                        {
-                            xScale = fieldRect.getWidth() / bbox.getWidth();
-                            yScale = fieldRect.getHeight() / bbox.getHeight();
-                        }
-                        Matrix scalingMatrix = Matrix.getScaleInstance(xScale, yScale);
-                        transformationMatrix.concatenate(scalingMatrix);
-                        transformed = true;
-                    }
-
-                    if (transformed)
-                    {
-                        contentStream.transform(transformationMatrix);
-                    }
+                    // see https://stackoverflow.com/a/54091766/1729265 for an explanation
+                    // of the steps required
+                    // this will transform the appearance stream form object into the rectangle of the
+                    // annotation bbox and map the coordinate systems
+                    Matrix transformationMatrix = resolveTransformationMatrix(annotation,
+                            appearanceStream);
+                    contentStream.transform(transformationMatrix);
 
                     contentStream.drawForm(fieldObject);
                     contentStream.restoreGraphicsState();
@@ -347,8 +267,9 @@ public final class PDAcroForm extends PDDictionaryWrapper
     }
 
     /**
-     * Refreshes the appearance streams and appearance dictionaries for the widget annotations of the specified fields.
-     * 
+     * Refreshes the appearance streams and appearance dictionaries for the widget annotations of
+     * the specified fields.
+     *
      * @throws IOException
      */
     public void refreshAppearances(List<PDField> fields) throws IOException
@@ -364,17 +285,17 @@ public final class PDAcroForm extends PDDictionaryWrapper
 
     /**
      * This will return all of the documents root fields.
-     * 
-     * A field might have children that are fields (non-terminal field) or does not have children which are fields
-     * (terminal fields).
-     * 
-     * The fields within an AcroForm are organized in a tree structure. The documents root fields might either be
-     * terminal fields, non-terminal fields or a mixture of both. Non-terminal fields mark branches which contents can
-     * be retrieved using {@link PDNonTerminalField#getChildren()}.
-     * 
-     * @return A list of the documents root fields, never null. If there are no fields then this method returns an empty
-     * list.
-     * 
+     * <p>
+     * A field might have children that are fields (non-terminal field) or does not have children
+     * which are fields (terminal fields).
+     * <p>
+     * The fields within an AcroForm are organized in a tree structure. The documents root fields
+     * might either be terminal fields, non-terminal fields or a mixture of both. Non-terminal
+     * fields mark branches which contents can be retrieved using {@link
+     * PDNonTerminalField#getChildren()}.
+     *
+     * @return A list of the documents root fields, never null. If there are no fields then this
+     * method returns an empty list.
      */
     public List<PDField> getFields()
     {
@@ -395,14 +316,14 @@ public final class PDAcroForm extends PDDictionaryWrapper
 
     /**
      * Adds the fields to the root fields of the form
-     * 
-     * @param fields
+     *
+     * @param toAdd
      */
     public void addFields(Collection<PDField> toAdd)
     {
         COSArray fields = ofNullable(
-                getCOSObject().getDictionaryObject(COSName.FIELDS, COSArray.class))
-                        .orElseGet(COSArray::new);
+                getCOSObject().getDictionaryObject(COSName.FIELDS, COSArray.class)).orElseGet(
+                COSArray::new);
         for (PDField field : toAdd)
         {
             fields.add(field);
@@ -412,7 +333,7 @@ public final class PDAcroForm extends PDDictionaryWrapper
 
     /**
      * removes the given field from the root fields of the form
-     * 
+     *
      * @return the removed element or null
      */
     public COSBase removeField(PDField remove)
@@ -448,7 +369,8 @@ public final class PDAcroForm extends PDDictionaryWrapper
     }
 
     /**
-     * @return the field tree representing all form fields and allowing a post-order visit of the tree
+     * @return the field tree representing all form fields and allowing a post-order visit of the
+     * tree
      */
     public PDFieldTree getFieldTree()
     {
@@ -478,13 +400,13 @@ public final class PDAcroForm extends PDDictionaryWrapper
      */
     public String getDefaultAppearance()
     {
-        return ofNullable(getCOSObject().getDictionaryObject(COSName.DA, COSString.class))
-                .map(COSString::getString).orElse("");
+        return ofNullable(getCOSObject().getDictionaryObject(COSName.DA, COSString.class)).map(
+                COSString::getString).orElse("");
     }
 
     /**
      * Set the default appearance.
-     * 
+     *
      * @param daValue a string describing the default appearance
      */
     public void setDefaultAppearance(String daValue)
@@ -503,9 +425,9 @@ public final class PDAcroForm extends PDDictionaryWrapper
     }
 
     /**
-     * True if the viewing application should construct the appearances of all field widgets. The default value is
-     * false.
-     * 
+     * True if the viewing application should construct the appearances of all field widgets. The
+     * default value is false.
+     *
      * @return the value of NeedAppearances, false if the value isn't set
      */
     public boolean isNeedAppearances()
@@ -514,8 +436,9 @@ public final class PDAcroForm extends PDDictionaryWrapper
     }
 
     /**
-     * Set the NeedAppearances value. If this is false, PDFBox will create appearances for all field widget.
-     * 
+     * Set the NeedAppearances value. If this is false, PDFBox will create appearances for all field
+     * widget.
+     *
      * @param value the value for NeedAppearances
      */
     public void setNeedAppearances(Boolean value)
@@ -530,8 +453,8 @@ public final class PDAcroForm extends PDDictionaryWrapper
      */
     public PDResources getDefaultResources()
     {
-        return ofNullable(getCOSObject().getDictionaryObject(COSName.DR, COSDictionary.class))
-                .map(dr -> new PDResources(dr, document.getResourceCache())).orElse(null);
+        return ofNullable(getCOSObject().getDictionaryObject(COSName.DR, COSDictionary.class)).map(
+                dr -> new PDResources(dr, document.getResourceCache())).orElse(null);
     }
 
     /**
@@ -571,8 +494,8 @@ public final class PDAcroForm extends PDDictionaryWrapper
      */
     public PDXFAResource getXFA()
     {
-        return ofNullable(getCOSObject().getDictionaryObject(COSName.XFA, COSDictionary.class))
-                .map(PDXFAResource::new).orElse(null);
+        return ofNullable(getCOSObject().getDictionaryObject(COSName.XFA, COSDictionary.class)).map(
+                PDXFAResource::new).orElse(null);
     }
 
     /**
@@ -586,10 +509,9 @@ public final class PDAcroForm extends PDDictionaryWrapper
     }
 
     /**
-     * This will get the 'quadding' or justification of the text to be displayed. 0 - Left(default)<br/>
-     * 1 - Centered<br />
-     * 2 - Right<br />
-     * See the QUADDING constants of {@link PDVariableText}.
+     * This will get the 'quadding' or justification of the text to be displayed. 0 -
+     * Left(default)<br/> 1 - Centered<br /> 2 - Right<br /> See the QUADDING constants of {@link
+     * PDVariableText}.
      *
      * @return The justification of the text strings.
      */
@@ -610,7 +532,7 @@ public final class PDAcroForm extends PDDictionaryWrapper
 
     /**
      * Determines if SignaturesExist is set.
-     * 
+     *
      * @return true if the document contains at least one signature.
      */
     public boolean isSignaturesExist()
@@ -630,8 +552,9 @@ public final class PDAcroForm extends PDDictionaryWrapper
 
     /**
      * Determines if AppendOnly is set.
-     * 
-     * @return true if the document contains signatures that may be invalidated if the file is saved.
+     *
+     * @return true if the document contains signatures that may be invalidated if the file is
+     * saved.
      */
     public boolean isAppendOnly()
     {
@@ -649,75 +572,58 @@ public final class PDAcroForm extends PDDictionaryWrapper
     }
 
     /**
-     * Check if there is a translation needed to place the annotations content.
-     * 
-     * @param appearanceStream
-     * @return the need for a translation transformation.
+     * Set a handler to support JavaScript actions in the form.
+     *
+     * @return scriptingHandler
      */
-    private boolean resolveNeedsTranslation(PDAppearanceStream appearanceStream)
+    public ScriptingHandler getScriptingHandler()
     {
-        boolean needsTranslation = true;
-
-        PDResources resources = appearanceStream.getResources();
-        if (resources != null && resources.getXObjectNames().iterator().hasNext())
-        {
-
-            Iterator<COSName> xObjectNames = resources.getXObjectNames().iterator();
-
-            while (xObjectNames.hasNext())
-            {
-                try
-                {
-                    // if the BBox of the PDFormXObject does not start at 0,0
-                    // there is no need do translate as this is done by the BBox definition.
-                    PDXObject xObject = resources.getXObject(xObjectNames.next());
-                    if (xObject instanceof PDFormXObject)
-                    {
-                        PDRectangle bbox = ((PDFormXObject) xObject).getBBox();
-                        float llX = bbox.getLowerLeftX();
-                        float llY = bbox.getLowerLeftY();
-                        if (Float.compare(llX, 0) != 0 && Float.compare(llY, 0) != 0)
-                        {
-                            needsTranslation = false;
-                        }
-                    }
-                }
-                catch (IOException e)
-                {
-                    // we can safely ignore the exception here
-                    // as this might only cause a misplacement
-                }
-            }
-            return needsTranslation;
-        }
-
-        return true;
+        return scriptingHandler;
     }
 
     /**
-     * Check if there needs to be a scaling transformation applied.
-     * 
-     * @param appearanceStream
-     * @return the need for a scaling transformation.
+     * Set a handler to support JavaScript actions in the form.
+     *
+     * @param scriptingHandler
      */
-    private boolean resolveNeedsScaling(PDAnnotation annotation, int rotation)
+    public void setScriptingHandler(ScriptingHandler scriptingHandler)
     {
-        PDAppearanceStream appearanceStream = annotation.getNormalAppearanceStream();
-        // Check if there is a transformation within the XObjects content
-        PDResources resources = appearanceStream.getResources();
-        if (resources != null && resources.getXObjectNames().iterator().hasNext())
-        {
-            return true;
-        }
-        PDRectangle bbox = appearanceStream.getBBox();
-        PDRectangle fieldRect = annotation.getRectangle();
-        if (rotation == 90 || rotation == 270)
-        {
-            return Float.compare(bbox.getWidth(), fieldRect.getHeight()) != 0
-                    || Float.compare(bbox.getHeight(), fieldRect.getWidth()) != 0;
-        }
-        return Float.compare(bbox.getWidth(), fieldRect.getWidth()) != 0
-                || Float.compare(bbox.getHeight(), fieldRect.getHeight()) != 0;
+        this.scriptingHandler = scriptingHandler;
+    }
+
+    private Matrix resolveTransformationMatrix(PDAnnotation annotation,
+            PDAppearanceStream appearanceStream)
+    {
+        // 1st step transform appearance stream bbox with appearance stream matrix
+        Rectangle2D transformedAppearanceBox = getTransformedAppearanceBBox(appearanceStream);
+        PDRectangle annotationRect = annotation.getRectangle();
+
+        // 2nd step caclulate matrix to transform calculated rectangle into the annotation Rect boundaries
+        Matrix transformationMatrix = new Matrix();
+        transformationMatrix.translate(
+                (float) (annotationRect.getLowerLeftX() - transformedAppearanceBox.getX()),
+                (float) (annotationRect.getLowerLeftY() - transformedAppearanceBox.getY()));
+        transformationMatrix.scale(
+                (float) (annotationRect.getWidth() / transformedAppearanceBox.getWidth()),
+                (float) (annotationRect.getHeight() / transformedAppearanceBox.getHeight()));
+        return transformationMatrix;
+    }
+
+    /**
+     * Calculate the transformed appearance box.
+     * <p>
+     * Apply the Matrix (or an identity transform) to the BBox of the appearance stream
+     *
+     * @param appearanceStream
+     * @return the transformed rectangle
+     */
+    private Rectangle2D getTransformedAppearanceBBox(PDAppearanceStream appearanceStream)
+    {
+        Matrix appearanceStreamMatrix = appearanceStream.getMatrix();
+        PDRectangle appearanceStreamBBox = appearanceStream.getBBox();
+        GeneralPath transformedAppearanceBox = appearanceStreamBBox.transform(
+                appearanceStreamMatrix);
+        return transformedAppearanceBox.getBounds2D();
     }
 
     private Map<COSDictionary, PDAnnotationWidget> widgets(List<PDField> fields)
@@ -732,6 +638,69 @@ public final class PDAcroForm extends PDDictionaryWrapper
         }
 
         return widgetMap;
+    }
+
+    private Map<COSDictionary, Set<COSDictionary>> buildPagesWidgetsMap(List<PDField> fields)
+            throws IOException
+    {
+        Map<COSDictionary, Set<COSDictionary>> pagesAnnotationsMap = new HashMap<COSDictionary, Set<COSDictionary>>();
+        boolean hasMissingPageRef = false;
+
+        for (PDField field : fields)
+        {
+            List<PDAnnotationWidget> widgets = field.getWidgets();
+            for (PDAnnotationWidget widget : widgets)
+            {
+                PDPage page = widget.getPage();
+                if (page != null)
+                {
+                    fillPagesAnnotationMap(pagesAnnotationsMap, page, widget);
+                }
+                else
+                {
+                    hasMissingPageRef = true;
+                }
+            }
+        }
+
+        if (!hasMissingPageRef)
+        {
+            return pagesAnnotationsMap;
+        }
+
+        // If there is a widget with a missing page reference we need to build the map reverse i.e.
+        // from the annotations to the widget.
+        LOG.warn(
+                "There has been a widget with a missing page reference, will check all page annotations");
+        for (PDPage page : document.getPages())
+        {
+            for (PDAnnotation annotation : page.getAnnotations())
+            {
+                if (annotation instanceof PDAnnotationWidget)
+                {
+                    fillPagesAnnotationMap(pagesAnnotationsMap, page,
+                            (PDAnnotationWidget) annotation);
+                }
+            }
+        }
+
+        return pagesAnnotationsMap;
+    }
+
+    private void fillPagesAnnotationMap(Map<COSDictionary, Set<COSDictionary>> pagesAnnotationsMap,
+            PDPage page, PDAnnotationWidget widget)
+    {
+        if (pagesAnnotationsMap.get(page.getCOSObject()) == null)
+        {
+            Set<COSDictionary> widgetsForPage = new HashSet<COSDictionary>();
+            widgetsForPage.add(widget.getCOSObject());
+            pagesAnnotationsMap.put(page.getCOSObject(), widgetsForPage);
+        }
+        else
+        {
+            Set<COSDictionary> widgetsForPage = pagesAnnotationsMap.get(page.getCOSObject());
+            widgetsForPage.add(widget.getCOSObject());
+        }
     }
 
     private void removeFields(List<PDField> fields)

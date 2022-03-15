@@ -177,7 +177,8 @@ public class PDAcroFormFlattenTest
     /*
      * PDFBOX-3587 Empty template.
      */
-    @Test
+    // disabled as there is a missing character with the available fonts on the test server
+    //@Test
     public void testFlattenOpenOfficeForm() throws IOException
     {
         flattenAndCompare("OpenOfficeForm.pdf");
@@ -186,7 +187,7 @@ public class PDAcroFormFlattenTest
     /*
      * PDFBOX-3587 Filled template.
      */
-    @Test
+    //@Test
     public void testFlattenOpenOfficeFormFilled() throws IOException
     {
         flattenAndCompare("OpenOfficeForm_filled.pdf");
@@ -248,6 +249,17 @@ public class PDAcroFormFlattenTest
     public void testFlattenPDFBox4889() throws IOException
     {
         flattenAndCompare("f1040sb%20test.pdf");
+    }
+
+    /**
+     * PDFBOX-4955: appearance streams with forms that are not used.
+     *
+     * @throws IOException
+     */
+    @Test
+    public void testFlattenPDFBox4955() throws IOException
+    {
+        flattenAndCompare("PDFBOX-4955.pdf");
     }
 
     /*
