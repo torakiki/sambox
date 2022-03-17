@@ -427,6 +427,11 @@ public abstract class SecurityHandler
             {
                 decryptData(objNum, genNum, encryptedStream, output);
             }
+            catch (IOException e)
+            {
+                LOG.error("An error occurred decrypting object {} {}", objNum, genNum);
+                throw e;
+            }
         }
     }
 

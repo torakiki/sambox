@@ -16,31 +16,6 @@
  */
 package org.sejda.sambox.pdmodel;
 
-import static java.util.Optional.ofNullable;
-import static org.sejda.commons.util.RequireUtils.requireNotBlank;
-import static org.sejda.io.CountingWritableByteChannel.from;
-import static org.sejda.sambox.cos.DirectCOSObject.asDirectObject;
-import static org.sejda.sambox.util.SpecVersionUtils.V1_4;
-import static org.sejda.sambox.util.SpecVersionUtils.isAtLeast;
-
-import java.awt.Point;
-import java.awt.image.DataBuffer;
-import java.awt.image.Raster;
-import java.io.Closeable;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.channels.WritableByteChannel;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.util.Calendar;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.Arrays;
-
 import org.apache.fontbox.ttf.TrueTypeFont;
 import org.sejda.commons.util.IOUtils;
 import org.sejda.io.CountingWritableByteChannel;
@@ -61,7 +36,6 @@ import org.sejda.sambox.encryption.StandardSecurity;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.output.PDDocumentWriter;
 import org.sejda.sambox.output.WriteOption;
-import org.sejda.sambox.pdmodel.common.PDStream;
 import org.sejda.sambox.pdmodel.encryption.AccessPermission;
 import org.sejda.sambox.pdmodel.encryption.PDEncryption;
 import org.sejda.sambox.pdmodel.encryption.SecurityHandler;
@@ -69,6 +43,30 @@ import org.sejda.sambox.pdmodel.font.Subsettable;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceRGB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.awt.Point;
+import java.awt.image.DataBuffer;
+import java.awt.image.Raster;
+import java.io.Closeable;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.channels.WritableByteChannel;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+
+import static java.util.Optional.ofNullable;
+import static org.sejda.commons.util.RequireUtils.requireNotBlank;
+import static org.sejda.io.CountingWritableByteChannel.from;
+import static org.sejda.sambox.cos.DirectCOSObject.asDirectObject;
+import static org.sejda.sambox.util.SpecVersionUtils.V1_4;
+import static org.sejda.sambox.util.SpecVersionUtils.isAtLeast;
 
 /**
  * This is the in-memory representation of the PDF document.
@@ -140,7 +138,7 @@ public class PDDocument implements Closeable
     /**
      * Constructor that uses an existing document. The COSDocument that is passed in must be valid.
      *
-     * @param document The COSDocument that this document wraps.
+     * @param document        The COSDocument that this document wraps.
      * @param securityHandler
      */
     public PDDocument(COSDocument document, SecurityHandler securityHandler)
@@ -150,8 +148,8 @@ public class PDDocument implements Closeable
     }
 
     /**
-     * This will add a page to the document. This is a convenience method, that will add the page to the root of the
-     * hierarchy and set the parent of the page to the root.
+     * This will add a page to the document. This is a convenience method, that will add the page to
+     * the root of the hierarchy and set the parent of the page to the root.
      *
      * @param page The page to add to the document.
      */
@@ -181,39 +179,6 @@ public class PDDocument implements Closeable
     {
         requireOpen();
         getPages().remove(pageNumber);
-    }
-
-    /**
-     * This will import and copy the contents from another location. Currently the content stream is stored in a scratch
-     * file. The scratch file is associated with the document. If you are adding a page to this document from another
-     * document and want to copy the contents to this document's scratch file then use this method otherwise just use
-     * the addPage method.
-     *
-     * @param page The page to import.
-     * @return The page that was imported.
-     *
-     */
-    public PDPage importPage(PDPage page)
-    {
-        requireOpen();
-        PDPage importedPage = new PDPage(page.getCOSObject().duplicate());
-        InputStream in = null;
-        try
-        {
-            in = page.getContents();
-            if (in != null)
-            {
-                PDStream dest = new PDStream(in, COSName.FLATE_DECODE);
-                importedPage.setContents(dest);
-
-            }
-            addPage(importedPage);
-        }
-        catch (IOException e)
-        {
-            IOUtils.closeQuietly(in);
-        }
-        return importedPage;
     }
 
     /**
@@ -249,8 +214,8 @@ public class PDDocument implements Closeable
     public void setDocumentInformation(PDDocumentInformation documentInformation)
     {
         requireOpen();
-        document.getTrailer().getCOSObject().setItem(COSName.INFO,
-                documentInformation.getCOSObject());
+        document.getTrailer().getCOSObject()
+                .setItem(COSName.INFO, documentInformation.getCOSObject());
     }
 
     /**
@@ -290,9 +255,9 @@ public class PDDocument implements Closeable
     }
 
     /**
-     * For internal PDFBox use when creating PDF documents: register a TrueTypeFont to make sure it is closed when the
-     * PDDocument is closed to avoid memory leaks. Users don't have to call this method, it is done by the appropriate
-     * PDFont classes.
+     * For internal PDFBox use when creating PDF documents: register a TrueTypeFont to make sure it
+     * is closed when the PDDocument is closed to avoid memory leaks. Users don't have to call this
+     * method, it is done by the appropriate PDFont classes.
      *
      * @param ttf
      */
@@ -332,10 +297,11 @@ public class PDDocument implements Closeable
     }
 
     /**
-     * Returns the access permissions granted when the document was decrypted. If the document was not decrypted this
-     * method returns the access permission for a document owner (ie can do everything). The returned object is in read
-     * only mode so that permissions cannot be changed. Methods providing access to content should rely on this object
-     * to verify if the current user is allowed to proceed.
+     * Returns the access permissions granted when the document was decrypted. If the document was
+     * not decrypted this method returns the access permission for a document owner (ie can do
+     * everything). The returned object is in read only mode so that permissions cannot be changed.
+     * Methods providing access to content should rely on this object to verify if the current user
+     * is allowed to proceed.
      *
      * @return the access permissions for the current user on the document.
      */
@@ -358,19 +324,18 @@ public class PDDocument implements Closeable
         String headerVersion = getDocument().getHeaderVersion();
         if (isAtLeast(headerVersion, V1_4))
         {
-            return ofNullable(getDocumentCatalog().getVersion())
-                    .filter(catalogVersion -> (catalogVersion.compareTo(headerVersion) > 0))
+            return ofNullable(getDocumentCatalog().getVersion()).filter(
+                            catalogVersion -> (catalogVersion.compareTo(headerVersion) > 0))
                     .orElse(headerVersion);
         }
         return headerVersion;
     }
 
     /**
-     * Sets the version of the PDF specification to which the document conforms. Downgrading of the document version is
-     * not allowed.
+     * Sets the version of the PDF specification to which the document conforms. Downgrading of the
+     * document version is not allowed.
      *
      * @param newVersion the new PDF version
-     *
      */
     public void setVersion(String newVersion)
     {
@@ -392,8 +357,8 @@ public class PDDocument implements Closeable
     }
 
     /**
-     * If the document is not at the given version or above, it sets the version of the PDF specification to which the
-     * document conforms.
+     * If the document is not at the given version or above, it sets the version of the PDF
+     * specification to which the document conforms.
      *
      * @param version
      */
@@ -416,7 +381,7 @@ public class PDDocument implements Closeable
         requireOpen();
         this.onClose = onClose.andThen(this.onClose);
     }
-    
+
     public void setOnBeforeWriteAction(OnBeforeWrite onBeforeWrite)
     {
         requireOpen();
@@ -432,8 +397,8 @@ public class PDDocument implements Closeable
     }
 
     /**
-     * Generates file identifier as defined in the chap 14.4 PDF 32000-1:2008 and sets it as first and second value for
-     * the ID array in the document trailer.
+     * Generates file identifier as defined in the chap 14.4 PDF 32000-1:2008 and sets it as first
+     * and second value for the ID array in the document trailer.
      *
      * @param md5Update
      * @param encContext
@@ -443,28 +408,27 @@ public class PDDocument implements Closeable
         COSString id = generateFileIdentifier(md5Update);
         encContext.ifPresent(c -> c.documentId(id.getBytes()));
         DirectCOSObject directId = asDirectObject(id);
-        getDocument().getTrailer().getCOSObject().setItem(COSName.ID,
-                asDirectObject(new COSArray(directId, directId)));
+        getDocument().getTrailer().getCOSObject()
+                .setItem(COSName.ID, asDirectObject(new COSArray(directId, directId)));
     }
 
     /**
-     *
      * @param md5Update
-     * @return a newly generated ID based on the input bytes, current timestamp and some other information, to be used
-     * as value of the ID array in the document trailer.
+     * @return a newly generated ID based on the input bytes, current timestamp and some other
+     * information, to be used as value of the ID array in the document trailer.
      */
     public COSString generateFileIdentifier(byte[] md5Update)
     {
         MessageDigest md5 = MessageDigests.md5();
         md5.update(Long.toString(System.currentTimeMillis()).getBytes(StandardCharsets.ISO_8859_1));
         md5.update(md5Update);
-        ofNullable(getDocument().getTrailer().getCOSObject().getDictionaryObject(COSName.INFO,
-                COSDictionary.class)).ifPresent(d -> {
-                    for (COSBase current : d.getValues())
-                    {
-                        md5.update(current.toString().getBytes(StandardCharsets.ISO_8859_1));
-                    }
-                });
+        ofNullable(getDocument().getTrailer().getCOSObject()
+                .getDictionaryObject(COSName.INFO, COSDictionary.class)).ifPresent(d -> {
+            for (COSBase current : d.getValues())
+            {
+                md5.update(current.toString().getBytes(StandardCharsets.ISO_8859_1));
+            }
+        });
         COSString retVal = COSString.newInstance(md5.digest());
         retVal.setForceHexForm(true);
         retVal.encryptable(false);
@@ -474,10 +438,10 @@ public class PDDocument implements Closeable
     /**
      * Writes the document to the given {@link File}. The document is closed once written.
      *
-     * @see PDDocument#close()
      * @param file
      * @param options
      * @throws IOException
+     * @see PDDocument#close()
      */
     public void writeTo(File file, WriteOption... options) throws IOException
     {
@@ -485,12 +449,13 @@ public class PDDocument implements Closeable
     }
 
     /**
-     * Writes the document to the file corresponding the given file name. The document is closed once written.
+     * Writes the document to the file corresponding the given file name. The document is closed
+     * once written.
      *
-     * @see PDDocument#close()
      * @param filename
      * @param options
      * @throws IOException
+     * @see PDDocument#close()
      */
     public void writeTo(String filename, WriteOption... options) throws IOException
     {
@@ -498,12 +463,13 @@ public class PDDocument implements Closeable
     }
 
     /**
-     * Writes the document to the given {@link WritableByteChannel}. The document is closed once written.
+     * Writes the document to the given {@link WritableByteChannel}. The document is closed once
+     * written.
      *
-     * @see PDDocument#close()
      * @param channel
      * @param options
      * @throws IOException
+     * @see PDDocument#close()
      */
     public void writeTo(WritableByteChannel channel, WriteOption... options) throws IOException
     {
@@ -513,10 +479,10 @@ public class PDDocument implements Closeable
     /**
      * Writes the document to the given {@link OutputStream}. The document is closed once written.
      *
-     * @see PDDocument#close()
      * @param out
      * @param options
      * @throws IOException
+     * @see PDDocument#close()
      */
     public void writeTo(OutputStream out, WriteOption... options) throws IOException
     {
@@ -524,14 +490,14 @@ public class PDDocument implements Closeable
     }
 
     /**
-     * Writes the document to the given {@link File} encrypting it using the given security. The document is closed once
-     * written.
+     * Writes the document to the given {@link File} encrypting it using the given security. The
+     * document is closed once written.
      *
-     * @see PDDocument#close()
      * @param file
      * @param security
      * @param options
      * @throws IOException
+     * @see PDDocument#close()
      */
     public void writeTo(File file, StandardSecurity security, WriteOption... options)
             throws IOException
@@ -540,14 +506,14 @@ public class PDDocument implements Closeable
     }
 
     /**
-     * Writes the document to the file corresponding the given file name encrypting it using the given security. The
-     * document is closed once written.
+     * Writes the document to the file corresponding the given file name encrypting it using the
+     * given security. The document is closed once written.
      *
-     * @see PDDocument#close()
      * @param filename
      * @param security
      * @param options
      * @throws IOException
+     * @see PDDocument#close()
      */
     public void writeTo(String filename, StandardSecurity security, WriteOption... options)
             throws IOException
@@ -556,14 +522,14 @@ public class PDDocument implements Closeable
     }
 
     /**
-     * Writes the document to the given {@link WritableByteChannel} encrypting it using the given security. The document
-     * is closed once written.
+     * Writes the document to the given {@link WritableByteChannel} encrypting it using the given
+     * security. The document is closed once written.
      *
-     * @see PDDocument#close()
      * @param channel
      * @param security
      * @param options
      * @throws IOException
+     * @see PDDocument#close()
      */
     public void writeTo(WritableByteChannel channel, StandardSecurity security,
             WriteOption... options) throws IOException
@@ -572,14 +538,14 @@ public class PDDocument implements Closeable
     }
 
     /**
-     * Writes the document to the given {@link OutputStream} encrypting it using the given security. The document is
-     * closed once written.
+     * Writes the document to the given {@link OutputStream} encrypting it using the given security.
+     * The document is closed once written.
      *
-     * @see PDDocument#close()
      * @param out
      * @param security
      * @param options
      * @throws IOException
+     * @see PDDocument#close()
      */
     public void writeTo(OutputStream out, StandardSecurity security, WriteOption... options)
             throws IOException
@@ -592,18 +558,25 @@ public class PDDocument implements Closeable
     {
         requireOpen();
 
-        if( Arrays.stream(options).anyMatch(i -> i == WriteOption.NO_METADATA_PRODUCER_MODIFIED_DATE_UPDATE)) {
+        if (Arrays.stream(options)
+                .anyMatch(i -> i == WriteOption.NO_METADATA_PRODUCER_MODIFIED_DATE_UPDATE))
+        {
             // does not update producer and last modification date
-        } else {
-            getDocumentInformation().setProducer(SAMBox.PRODUCER);
-            getDocumentInformation().setModificationDate(Calendar.getInstance());    
         }
-        
+        else
+        {
+            getDocumentInformation().setProducer(SAMBox.PRODUCER);
+            getDocumentInformation().setModificationDate(Calendar.getInstance());
+        }
+
         for (Subsettable font : fontsToSubset)
         {
-            try {
+            try
+            {
                 font.subset();
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 LOG.warn("Exception occurred while subsetting font: " + font, e);
             }
         }
@@ -632,8 +605,8 @@ public class PDDocument implements Closeable
     }
 
     /**
-     * Closes the {@link PDDocument} executing the set onClose action. Once closed the document is pretty much unusable
-     * since most of the methods requires an open document.
+     * Closes the {@link PDDocument} executing the set onClose action. Once closed the document is
+     * pretty much unusable since most of the methods requires an open document.
      *
      * @see PDDocument#setOnCloseAction(OnClose)
      */
@@ -702,7 +675,7 @@ public class PDDocument implements Closeable
     {
         return PDFParser.parse(SeekableSources.seekableSourceFrom(file));
     }
-    
+
     public boolean hasParseErrors()
     {
         return this.document.getTrailer().getFallbackScanStatus() != null;

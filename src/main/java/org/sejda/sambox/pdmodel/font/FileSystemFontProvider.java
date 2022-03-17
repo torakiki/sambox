@@ -20,6 +20,7 @@ import org.apache.fontbox.FontBoxFont;
 import org.apache.fontbox.cff.CFFCIDFont;
 import org.apache.fontbox.cff.CFFFont;
 import org.apache.fontbox.ttf.NamingTable;
+import org.apache.fontbox.ttf.OS2WindowsMetricsTable;
 import org.apache.fontbox.ttf.OTFParser;
 import org.apache.fontbox.ttf.OpenTypeFont;
 import org.apache.fontbox.ttf.TTFParser;
@@ -47,6 +48,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static java.util.Objects.nonNull;
 
 /**
  * A FontProvider which searches for fonts on the local filesystem.
@@ -209,7 +212,16 @@ final class FileSystemFontProvider extends FontProvider
                 // ttc not closed here because it is needed later when ttf is accessed,
                 // e.g. rendering PDF with non-embedded font which is in ttc file in our font directory
                 TrueTypeCollection ttc = new TrueTypeCollection(file);
-                TrueTypeFont ttf = ttc.getFontByName(postScriptName);
+                TrueTypeFont ttf = null;
+                try
+                {
+                    ttf = ttc.getFontByName(postScriptName);
+                }
+                catch (IOException ex)
+                {
+                    ttc.close();
+                    throw ex;
+                }
                 if (ttf == null)
                 {
                     ttc.close();
@@ -231,7 +243,17 @@ final class FileSystemFontProvider extends FontProvider
                     // ttc not closed here because it is needed later when ttf is accessed,
                     // e.g. rendering PDF with non-embedded font which is in ttc file in our font directory
                     TrueTypeCollection ttc = new TrueTypeCollection(file);
-                    TrueTypeFont ttf = ttc.getFontByName(postScriptName);
+                    TrueTypeFont ttf = null;
+                    try
+                    {
+                        ttf = ttc.getFontByName(postScriptName);
+                    }
+                    catch (IOException ex)
+                    {
+                        LOG.error(ex.getMessage(), ex);
+                        ttc.close();
+                        return null;
+                    }
                     if (ttf == null)
                     {
                         ttc.close();
@@ -342,17 +364,17 @@ final class FileSystemFontProvider extends FontProvider
         {
             try
             {
-                if (file.getPath().toLowerCase().endsWith(".ttf") || file.getPath().toLowerCase()
-                        .endsWith(".otf"))
+                String filePath = file.getPath().toLowerCase();
+                if (filePath.endsWith(".ttf") || filePath.endsWith(".otf"))
                 {
                     addTrueTypeFont(file);
                 }
-                else if (file.getPath().toLowerCase().endsWith(".ttc") || file.getPath()
-                        .toLowerCase().endsWith(".otc"))
+                else if (filePath.toLowerCase().endsWith(".ttc") || filePath.toLowerCase()
+                        .endsWith(".otc"))
                 {
                     addTrueTypeCollection(file);
                 }
-                else if (file.getPath().toLowerCase().endsWith(".pfb"))
+                else if (filePath.toLowerCase().endsWith(".pfb"))
                 {
                     addType1Font(file);
                 }
@@ -623,14 +645,16 @@ final class FileSystemFontProvider extends FontProvider
                 int ulCodePageRange2 = 0;
                 byte[] panose = null;
 
+                OS2WindowsMetricsTable os2WindowsMetricsTable = ttf.getOS2Windows();
+
                 // Apple's AAT fonts don't have an OS/2 table
-                if (ttf.getOS2Windows() != null)
+                if (nonNull(os2WindowsMetricsTable))
                 {
-                    sFamilyClass = ttf.getOS2Windows().getFamilyClass();
-                    usWeightClass = ttf.getOS2Windows().getWeightClass();
-                    ulCodePageRange1 = (int) ttf.getOS2Windows().getCodePageRange1();
-                    ulCodePageRange2 = (int) ttf.getOS2Windows().getCodePageRange2();
-                    panose = ttf.getOS2Windows().getPanose();
+                    sFamilyClass = os2WindowsMetricsTable.getFamilyClass();
+                    usWeightClass = os2WindowsMetricsTable.getWeightClass();
+                    ulCodePageRange1 = (int) os2WindowsMetricsTable.getCodePageRange1();
+                    ulCodePageRange2 = (int) os2WindowsMetricsTable.getCodePageRange2();
+                    panose = os2WindowsMetricsTable.getPanose();
                 }
 
                 String format;

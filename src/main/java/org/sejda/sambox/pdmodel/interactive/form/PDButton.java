@@ -203,7 +203,7 @@ public abstract class PDButton extends PDTerminalField
         {
             throw new IllegalArgumentException(
                     "index '" + index + "' is not a valid index for the field "
-                            + getFullyQualifiedName() + ", valid indizes are from 0 to " + (
+                            + getFullyQualifiedName() + ", valid indices are from 0 to " + (
                             getExportValues().size() - 1));
         }
 

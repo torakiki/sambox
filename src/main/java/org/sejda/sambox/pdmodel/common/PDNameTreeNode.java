@@ -81,7 +81,7 @@ public abstract class PDNameTreeNode<T extends COSObjectable> implements COSObje
 
     /**
      * Returns the parent node.
-     * 
+     *
      * @return parent node
      */
     public PDNameTreeNode<T> getParent()
@@ -91,7 +91,7 @@ public abstract class PDNameTreeNode<T extends COSObjectable> implements COSObje
 
     /**
      * Sets the parent to the given node.
-     * 
+     *
      * @param parentNode the node to be set as parent
      */
     public void setParent(PDNameTreeNode<T> parentNode)
@@ -102,7 +102,7 @@ public abstract class PDNameTreeNode<T extends COSObjectable> implements COSObje
 
     /**
      * Determines if this is a root node or not.
-     * 
+     *
      * @return true if this is a root node
      */
     public boolean isRootNode()
@@ -270,10 +270,11 @@ public abstract class PDNameTreeNode<T extends COSObjectable> implements COSObje
     }
 
     /**
-     * This will return a map of names. The key will be a string, and the value will depend on where this class is being
-     * used.
+     * This will return a map of names. The key will be a string, and the value will depend on where
+     * this class is being used.
      *
-     * @return ordered map of cos objects or <code>null</code> if dictionary contains no 'Names' entry
+     * @return ordered map of cos objects or <code>null</code> if dictionary contains no 'Names'
+     * entry
      * @throws IOException If there is an error while creating the sub types.
      */
     public Map<String, T> getNames() throws IOException
@@ -282,10 +283,14 @@ public abstract class PDNameTreeNode<T extends COSObjectable> implements COSObje
         if (namesArray != null)
         {
             Map<String, T> names = new LinkedHashMap<>();
+            if (namesArray.size() % 2 != 0)
+            {
+                LOG.warn("Names array has odd size: {}", namesArray.size());
+            }
             for (int i = 0; i < namesArray.size(); i += 2)
             {
                 COSBase base = namesArray.getObject(i);
-                if(i + 1 >= namesArray.size())
+                if (i + 1 >= namesArray.size())
                 {
                     // some invalid NAMES arrays have only the key without a value
                     LOG.warn("Found key without value in NAMES array: {}, at index: {}", base, i);
@@ -294,10 +299,10 @@ public abstract class PDNameTreeNode<T extends COSObjectable> implements COSObje
                 COSString key = (COSString) base;
                 COSBase cosValue = namesArray.getObject(i + 1);
                 T pdValue = null;
-                try 
+                try
                 {
                     pdValue = convertCOSToPD(cosValue);
-                } 
+                }
                 catch (ClassCastException ex)
                 {
                     LOG.warn("Skipping, could not convert COS to PD: " + cosValue, ex);
@@ -311,8 +316,9 @@ public abstract class PDNameTreeNode<T extends COSObjectable> implements COSObje
     }
 
     /**
-     * Method to convert the COS value in the name tree to the PD Model object. The default implementation will simply
-     * return the given COSBase object. Subclasses should do something specific.
+     * Method to convert the COS value in the name tree to the PD Model object. The default
+     * implementation will simply return the given COSBase object. Subclasses should do something
+     * specific.
      *
      * @param base The COS object to convert.
      * @return The converted PD Model object.
@@ -329,8 +335,9 @@ public abstract class PDNameTreeNode<T extends COSObjectable> implements COSObje
     protected abstract PDNameTreeNode<T> createChildNode(COSDictionary dic);
 
     /**
-     * Set the names of for this node. The keys should be java.lang.String and the values must be a COSObjectable. This
-     * method will set the appropriate upper and lower limits based on the keys in the map.
+     * Set the names of for this node. The keys should be java.lang.String and the values must be a
+     * COSObjectable. This method will set the appropriate upper and lower limits based on the keys
+     * in the map.
      *
      * @param names map of names to objects, or <code>null</code>
      */

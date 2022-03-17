@@ -17,16 +17,12 @@
 
 package org.sejda.sambox.pdmodel.font;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashSet;
-import java.util.Set;
-
+import junit.framework.TestCase;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.PDPage;
@@ -34,7 +30,14 @@ import org.sejda.sambox.pdmodel.PDPageContentStream;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.text.PDFTextStripper;
 
-import junit.framework.TestCase;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashSet;
+import java.util.Set;
+
+import static java.util.Objects.nonNull;
 
 /**
  * Tests font embedding.
@@ -217,14 +220,81 @@ public class TestFontEmbedding extends TestCase
         assertEquals(text, extracted.trim());
     }
 
+    /**
+     * Test that an embedded and subsetted font can be reused.
+     *
+     * @throws IOException
+     */
+    public void testReuseEmbeddedSubsettedFont() throws IOException
+    {
+        String text1 = "The quick brown fox";
+        String text2 = "xof nworb kciuq ehT";
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (PDDocument doc = new PDDocument())
+        {
+            PDPage page = new PDPage();
+            doc.addPage(page);
+            PDType0Font font = PDType0Font.load(doc, PDType0Font.class.getClassLoader()
+                    .getResourceAsStream(
+                            "org/sejda/sambox/resources/ttf/LiberationSans-Regular.ttf"));
+
+            try (PDPageContentStream formContents = new PDPageContentStream(doc, page))
+            {
+                formContents.beginText();
+                formContents.setFont(font, 20);
+                formContents.newLineAtOffset(50, 600);
+                formContents.showText(text1);
+                formContents.endText();
+            }
+            COSStream stream = page.getCOSObject()
+                    .getDictionaryObject(COSName.CONTENTS, COSStream.class);
+            stream.setItem(COSName.ANNOTS, new COSDictionary());
+            assertTrue(nonNull(page.getCOSObject()
+                    .getDictionaryObject(COSName.CONTENTS, COSStream.class)
+                    .getItem(COSName.ANNOTS)));
+            page.sanitizeDictionary();
+            assertFalse(nonNull(page.getCOSObject()
+                    .getDictionaryObject(COSName.CONTENTS, COSStream.class)
+                    .getItem(COSName.ANNOTS)));
+            doc.writeTo(baos);
+        }
+
+        try (PDDocument doc = PDFParser.parse(
+                SeekableSources.inMemorySeekableSourceFrom(baos.toByteArray())))
+        {
+            PDPage page = doc.getPage(0);
+            PDType0Font font = (PDType0Font) page.getResources().getFont(COSName.getPDFName("F1"));
+            try (PDPageContentStream formContents = new PDPageContentStream(doc, page,
+                    PDPageContentStream.AppendMode.APPEND, true))
+            {
+                formContents.beginText();
+                formContents.setFont(font, 20);
+                formContents.newLineAtOffset(250, 600);
+                formContents.showText(text2);
+                formContents.endText();
+            }
+            baos.reset();
+            doc.writeTo(baos);
+        }
+
+        // Test that both texts are there
+        try (PDDocument doc = PDFParser.parse(
+                SeekableSources.inMemorySeekableSourceFrom(baos.toByteArray())))
+        {
+            PDFTextStripper stripper = new PDFTextStripper();
+            String extractedText = stripper.getText(doc);
+            assertEquals(text1 + " " + text2, extractedText.trim());
+        }
+    }
+
     private void validateCIDFontType2(boolean useSubset) throws Exception
     {
         PDDocument document = new PDDocument();
         PDPage page = new PDPage(PDRectangle.A4);
         document.addPage(page);
 
-        InputStream input = PDFont.class
-                .getResourceAsStream("/org/sejda/sambox/resources/ttf/LiberationSans-Regular.ttf");
+        InputStream input = PDFont.class.getResourceAsStream(
+                "/org/sejda/sambox/resources/ttf/LiberationSans-Regular.ttf");
         PDType0Font font = PDType0Font.load(document, input, useSubset);
 
         PDPageContentStream stream = new PDPageContentStream(document, page);

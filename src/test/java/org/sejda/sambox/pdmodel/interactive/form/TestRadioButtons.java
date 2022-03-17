@@ -302,7 +302,7 @@ public class TestRadioButtons
             catch (Exception ex)
             {
                 // compare the messages
-                String expectedMessage = "index '6' is not a valid index for the field Checking/Savings, valid indizes are from 0 to 5";
+                String expectedMessage = "index '6' is not a valid index for the field Checking/Savings, valid indices are from 0 to 5";
                 String actualMessage = ex.getMessage();
                 assertTrue(actualMessage.contains(expectedMessage));
             }

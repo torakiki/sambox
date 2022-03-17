@@ -31,7 +31,6 @@ import java.io.IOException;
  * This class represents a function in a PDF document.
  *
  * @author Ben Litchfield
- * 
  */
 public abstract class PDFunction implements COSObjectable
 {
@@ -47,7 +46,6 @@ public abstract class PDFunction implements COSObjectable
      * Constructor.
      *
      * @param function The function stream.
-     * 
      */
     public PDFunction(COSBase function)
     {
@@ -64,19 +62,19 @@ public abstract class PDFunction implements COSObjectable
 
     /**
      * Returns the function type.
-     * 
+     * <p>
      * Possible values are:
-     * 
-     * 0 - Sampled function 2 - Exponential interpolation function 3 - Stitching function 4 - PostScript calculator
-     * function
-     * 
+     * <p>
+     * 0 - Sampled function 2 - Exponential interpolation function 3 - Stitching function 4 -
+     * PostScript calculator function
+     *
      * @return the function type.
      */
     public abstract int getFunctionType();
 
     /**
      * Returns the stream.
-     * 
+     *
      * @return The stream for this object.
      */
     @Override
@@ -91,7 +89,7 @@ public abstract class PDFunction implements COSObjectable
 
     /**
      * Returns the underlying PDStream.
-     * 
+     *
      * @return The stream.
      */
     protected PDStream getPDStream()
@@ -103,9 +101,7 @@ public abstract class PDFunction implements COSObjectable
      * Create the correct PD Model function based on the COS base function.
      *
      * @param function The COS function dictionary.
-     *
      * @return The PDModel Function object.
-     *
      * @throws IOException If we are unable to create the PDFunction object.
      */
     public static PDFunction create(COSBase function) throws IOException
@@ -118,8 +114,8 @@ public abstract class PDFunction implements COSObjectable
         COSBase base = function.getCOSObject();
         if (!(base instanceof COSDictionary))
         {
-            throw new IOException("Expected dictionary but found " + base.getClass().getSimpleName()
-                    + " for Function");
+            throw new IOException(
+                    "Unexpected type for function, expected COSDictionary but was: " + base);
         }
         COSDictionary functionDictionary = (COSDictionary) base;
         int functionType = functionDictionary.getInt(COSName.FUNCTION_TYPE);
@@ -139,9 +135,9 @@ public abstract class PDFunction implements COSObjectable
     }
 
     /**
-     * This will get the number of output parameters that have a range specified. A range for output parameters is
-     * optional so this may return zero for a function that does have output parameters, this will simply return the
-     * number that have the range specified.
+     * This will get the number of output parameters that have a range specified. A range for output
+     * parameters is optional so this may return zero for a function that does have output
+     * parameters, this will simply return the number that have the range specified.
      *
      * @return The number of output parameters that have a range specified.
      */
@@ -156,11 +152,10 @@ public abstract class PDFunction implements COSObjectable
     }
 
     /**
-     * This will get the range for a certain output parameters. This is will never return null. If it is not present
-     * then the range 0 to 0 will be returned.
+     * This will get the range for a certain output parameters. This is will never return null. If
+     * it is not present then the range 0 to 0 will be returned.
      *
      * @param n The output parameter number to get the range for.
-     *
      * @return The range for this component.
      */
     public PDRange getRangeForOutput(int n)
@@ -196,11 +191,10 @@ public abstract class PDFunction implements COSObjectable
     }
 
     /**
-     * This will get the range for a certain input parameter. This is will never return null. If it is not present then
-     * the range 0 to 0 will be returned.
+     * This will get the range for a certain input parameter. This is will never return null. If it
+     * is not present then the range 0 to 0 will be returned.
      *
      * @param n The parameter number to get the domain for.
-     *
      * @return The domain range for this component.
      */
     public PDRange getDomainForInput(int n)
@@ -235,19 +229,19 @@ public abstract class PDFunction implements COSObjectable
     /**
      * Evaluates the function at the given input. ReturnValue = f(input)
      *
-     * @param input The array of input values for the function. In many cases will be an array of a single value, but
-     * not always.
-     * 
-     * @return The of outputs the function returns based on those inputs. In many cases will be an array of a single
-     * value, but not always.
-     * 
-     * @throws IOException an IOExcpetion is thrown if something went wrong processing the function.
+     * @param input The array of input values for the function. In many cases will be an array of a
+     *              single value, but not always.
+     * @return The of outputs the function returns based on those inputs. In many cases will be an
+     * array of a single value, but not always.
+     * @throws IOException an IOExcpetion is thrown if something went wrong processing the
+     *                     function.
      */
     public abstract float[] eval(float[] input) throws IOException;
 
     /**
-     * Returns all ranges for the output values as COSArray . Required for type 0 and type 4 functions
-     * 
+     * Returns all ranges for the output values as COSArray . Required for type 0 and type 4
+     * functions
+     *
      * @return the ranges array.
      */
     protected COSArray getRangeValues()
@@ -261,7 +255,7 @@ public abstract class PDFunction implements COSObjectable
 
     /**
      * Returns all domains for the input values as COSArray. Required for all function types.
-     * 
+     *
      * @return the domains array.
      */
     private COSArray getDomainValues()
@@ -275,7 +269,7 @@ public abstract class PDFunction implements COSObjectable
 
     /**
      * Clip the given input values to the ranges.
-     * 
+     *
      * @param inputValues the input values
      * @return the clipped values
      */
@@ -303,11 +297,10 @@ public abstract class PDFunction implements COSObjectable
 
     /**
      * Clip the given input value to the given range.
-     * 
-     * @param x the input value
+     *
+     * @param x        the input value
      * @param rangeMin the min value of the range
      * @param rangeMax the max value of the range
-     * 
      * @return the clipped value
      */
     protected float clipToRange(float x, float rangeMin, float rangeMax)
@@ -324,10 +317,10 @@ public abstract class PDFunction implements COSObjectable
     }
 
     /**
-     * For a given value of x, interpolate calculates the y value on the line defined by the two points (xRangeMin ,
-     * xRangeMax ) and (yRangeMin , yRangeMax ).
-     * 
-     * @param x the to be interpolated value.
+     * For a given value of x, interpolate calculates the y value on the line defined by the two
+     * points (xRangeMin , xRangeMax ) and (yRangeMin , yRangeMax ).
+     *
+     * @param x         the to be interpolated value.
      * @param xRangeMin the min value of the x range
      * @param xRangeMax the max value of the x range
      * @param yRangeMin the min value of the y range

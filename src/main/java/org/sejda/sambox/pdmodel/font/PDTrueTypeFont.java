@@ -16,16 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.font;
 
-import static java.util.Objects.nonNull;
-import static org.sejda.sambox.pdmodel.font.UniUtil.getUniNameOfCodePoint;
-
-import java.awt.geom.GeneralPath;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.fontbox.FontBoxFont;
 import org.apache.fontbox.ttf.CmapSubtable;
 import org.apache.fontbox.ttf.CmapTable;
@@ -43,14 +33,26 @@ import org.sejda.sambox.pdmodel.font.encoding.BuiltInEncoding;
 import org.sejda.sambox.pdmodel.font.encoding.Encoding;
 import org.sejda.sambox.pdmodel.font.encoding.GlyphList;
 import org.sejda.sambox.pdmodel.font.encoding.MacOSRomanEncoding;
+import org.sejda.sambox.pdmodel.font.encoding.MacRomanEncoding;
 import org.sejda.sambox.pdmodel.font.encoding.StandardEncoding;
 import org.sejda.sambox.pdmodel.font.encoding.Type1Encoding;
+import org.sejda.sambox.pdmodel.font.encoding.WinAnsiEncoding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.geom.GeneralPath;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
+
+import static java.util.Objects.nonNull;
+import static org.sejda.sambox.pdmodel.font.UniUtil.getUniNameOfCodePoint;
+
 /**
  * TrueType font.
- * 
+ *
  * @author Ben Litchfield
  */
 public class PDTrueTypeFont extends PDSimpleFont implements PDVectorFont
@@ -77,13 +79,13 @@ public class PDTrueTypeFont extends PDSimpleFont implements PDVectorFont
 
     /**
      * Loads a TTF to be embedded into a document as a simple font.
-     * 
+     *
      * <p>
      * <b>Note:</b> Simple fonts only support 256 characters. For Unicode support, use
      * {@link PDType0Font#load(PDDocument, File)} instead.
      * </p>
      *
-     * @param file A TTF file.
+     * @param file     A TTF file.
      * @param encoding The PostScript encoding vector to be used for embedding.
      * @return a PDTrueTypeFont instance.
      * @throws IOException If there is an error loading the data.
@@ -100,8 +102,8 @@ public class PDTrueTypeFont extends PDSimpleFont implements PDVectorFont
      * <b>Note:</b> Simple fonts only support 256 characters. For Unicode support, use
      * {@link PDType0Font#load(PDDocument, InputStream)} instead.
      * </p>
-     * 
-     * @param input A TTF file stream
+     *
+     * @param input    A TTF file stream
      * @param encoding The PostScript encoding vector to be used for embedding.
      * @return a PDTrueTypeFont instance.
      * @throws IOException If there is an error loading the data.
@@ -118,8 +120,8 @@ public class PDTrueTypeFont extends PDSimpleFont implements PDVectorFont
      * <b>Note:</b> Simple fonts only support 256 characters. For Unicode support, use
      * {@link PDType0Font#load(InputStream)} instead.
      * </p>
-     * 
-     * @param ttf A true type font
+     *
+     * @param ttf      A true type font
      * @param encoding The PostScript encoding vector to be used for embedding.
      * @return a PDTrueTypeFont instance.
      * @throws IOException If there is an error loading the data.
@@ -227,8 +229,8 @@ public class PDTrueTypeFont extends PDSimpleFont implements PDVectorFont
         String standard14Name = Standard14Fonts.getMappedFontName(getName());
 
         // likewise, if the font is standard 14 then we know it's Standard Encoding
-        if (isStandard14() && !standard14Name.equals("Symbol")
-                && !standard14Name.equals("ZapfDingbats"))
+        if (isStandard14() && !standard14Name.equals("Symbol") && !standard14Name.equals(
+                "ZapfDingbats"))
         {
             return StandardEncoding.INSTANCE;
         }
@@ -519,35 +521,62 @@ public class PDTrueTypeFont extends PDSimpleFont implements PDVectorFont
             {
                 return 0;
             }
-            // (3, 1) - (Windows, Unicode)
-            if (cmapWinUnicode != null)
+            else
             {
-                String unicode = GlyphList.getAdobeGlyphList().toUnicode(name);
-                if (unicode != null)
+                // (3, 1) - (Windows, Unicode)
+                if (cmapWinUnicode != null)
                 {
-                    int uni = unicode.codePointAt(0);
-                    gid = cmapWinUnicode.getGlyphId(uni);
+                    String unicode = GlyphList.getAdobeGlyphList().toUnicode(name);
+                    if (unicode != null)
+                    {
+                        int uni = unicode.codePointAt(0);
+                        gid = cmapWinUnicode.getGlyphId(uni);
+                    }
                 }
-            }
 
-            // (1, 0) - (Macintosh, Roman)
-            if (gid == 0 && cmapMacRoman != null)
-            {
-                Integer macCode = INVERTED_MACOS_ROMAN.get(name);
-                if (macCode != null)
+                // (1, 0) - (Macintosh, Roman)
+                if (gid == 0 && cmapMacRoman != null)
                 {
-                    gid = cmapMacRoman.getGlyphId(macCode);
+                    Integer macCode = INVERTED_MACOS_ROMAN.get(name);
+                    if (macCode != null)
+                    {
+                        gid = cmapMacRoman.getGlyphId(macCode);
+                    }
                 }
-            }
 
-            // 'post' table
-            if (gid == 0)
-            {
-                gid = ttf.nameToGID(name);
+                // 'post' table
+                if (gid == 0)
+                {
+                    gid = ttf.nameToGID(name);
+                }
             }
         }
         else // symbolic
         {
+            // PDFBOX-4755 / PDF.js #5501
+            // PDFBOX-3965: fallback for font has that the symbol flag but isn't
+            if (gid == 0 && cmapWinUnicode != null)
+            {
+                if (encoding instanceof WinAnsiEncoding || encoding instanceof MacRomanEncoding)
+                {
+                    String name = encoding.getName(code);
+                    if (".notdef".equals(name))
+                    {
+                        return 0;
+                    }
+                    String unicode = GlyphList.getAdobeGlyphList().toUnicode(name);
+                    if (unicode != null)
+                    {
+                        int uni = unicode.codePointAt(0);
+                        gid = cmapWinUnicode.getGlyphId(uni);
+                    }
+                }
+                else
+                {
+                    gid = cmapWinUnicode.getGlyphId(code);
+                }
+            }
+
             // (3, 0) - (Windows, Symbol)
             if (cmapWinSymbol != null)
             {
@@ -580,30 +609,7 @@ public class PDTrueTypeFont extends PDSimpleFont implements PDVectorFont
             {
                 gid = cmapMacRoman.getGlyphId(code);
             }
-
-            // PDFBOX-4755 / PDF.js #5501
-            if (gid == 0 && cmapWinUnicode != null)
-            {
-                gid = cmapWinUnicode.getGlyphId(code);
-            }
-
-            // PDFBOX-3965: fallback for font has that the symbol flag but isn't
-            if (gid == 0 && cmapWinUnicode != null && encoding != null)
-            {
-                String name = encoding.getName(code);
-                if (".notdef".equals(name))
-                {
-                    return 0;
-                }
-                String unicode = GlyphList.getAdobeGlyphList().toUnicode(name);
-                if (unicode != null)
-                {
-                    int uni = unicode.codePointAt(0);
-                    gid = cmapWinUnicode.getGlyphId(uni);
-                }
-            }
         }
-
         return gid;
     }
 
@@ -652,12 +658,14 @@ public class PDTrueTypeFont extends PDSimpleFont implements PDVectorFont
     }
 
     @Override
-    public boolean isOriginalEmbeddedMissing() {
+    public boolean isOriginalEmbeddedMissing()
+    {
         return isOriginalEmbeddedMissing;
     }
 
     @Override
-    public boolean isMappingFallbackUsed() {
+    public boolean isMappingFallbackUsed()
+    {
         return isMappingFallbackUsed;
     }
 }

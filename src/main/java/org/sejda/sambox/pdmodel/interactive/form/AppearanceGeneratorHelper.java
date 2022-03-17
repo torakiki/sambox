@@ -181,7 +181,7 @@ public class AppearanceGeneratorHelper
      */
     public void setAppearanceValue(String apValue) throws IOException
     {
-        value = apValue;
+        value = getFormattedValue(apValue);
 
         if (field instanceof PDTextField)
         {
@@ -288,7 +288,7 @@ public class AppearanceGeneratorHelper
             else
             {
                 LOG.info(
-                        "Field contains a formatting action but no SriptingHandler has been supplied - formatted value might be incorrect");
+                        "Field contains a formatting action but no ScriptingHandler has been supplied - formatted value might be incorrect");
                 return apValue;
             }
         }

@@ -41,7 +41,9 @@ import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.util.Arrays;
 
+import static java.util.Objects.nonNull;
 import static org.bouncycastle.util.Arrays.copyOf;
+import static org.sejda.commons.util.RequireUtils.requireIOCondition;
 
 /**
  * The standard security handler. This security handler protects document with password.
@@ -290,6 +292,7 @@ public final class StandardSecurityHandler extends SecurityHandler
 
             byte[] oHash = new byte[32];
             byte[] oValidationSalt = new byte[8];
+            requireIOCondition(owner.length >= 40, "Owner password is too short");
             System.arraycopy(owner, 0, oHash, 0, 32);
             System.arraycopy(owner, 32, oValidationSalt, 0, 8);
 
@@ -436,6 +439,7 @@ public final class StandardSecurityHandler extends SecurityHandler
 
         if (isOwnerPassword)
         {
+            requireIOCondition(nonNull(oe), "/Encrypt/OE entry is missing");
             byte[] oKeySalt = new byte[8];
             System.arraycopy(o, 40, oKeySalt, 0, 8);
 
@@ -452,6 +456,7 @@ public final class StandardSecurityHandler extends SecurityHandler
         }
         else
         {
+            requireIOCondition(nonNull(ue), "/Encrypt/UE entry is missing");
             byte[] uKeySalt = new byte[8];
             System.arraycopy(u, 40, uKeySalt, 0, 8);
 

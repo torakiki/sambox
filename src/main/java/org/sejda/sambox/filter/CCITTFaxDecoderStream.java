@@ -4,28 +4,29 @@
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name "TwelveMonkeys" nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * * Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ *
+ * * Redistributions in binary form must reproduce the above copyright notice,
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ *
+ * * Neither the name of the copyright holder nor the names of its
+ *   contributors may be used to endorse or promote products derived from
+ *   this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.sejda.sambox.filter;
 
 import java.io.EOFException;
@@ -41,12 +42,12 @@ import java.util.Arrays;
  * @author <a href="https://github.com/Schmidor">Oliver Schmidtmer</a>
  * @author last modified by $Author: haraldk$
  * @version $Id: CCITTFaxDecoderStream.java,v 1.0 23.05.12 15:55 haraldk Exp$
- * 
- * Taken from commit fa0341f30237effe523e9905e672d709ffe9c6bd of 7.5.2016 from
+ * <p>
+ * Taken from commit 24c6682236e5a02151359486aa4075ddc5ab1534 of 18.08.2018 from
  * twelvemonkeys/imageio/plugins/tiff/CCITTFaxDecoderStream.java
- * 
- * Initial changes for PDFBox, discussed in PDFBOX-3338: - added optionByteAligned to constructor and to each
- * decodeRowType() method - removed Validate() usages - catch VALUE_EOL in decode1D()
+ * <p>
+ * Initial changes for PDFBox, discussed in PDFBOX-3338: - removed Validate() usages - catch
+ * VALUE_EOL in decode1D()
  */
 final class CCITTFaxDecoderStream extends FilterInputStream
 {
@@ -55,54 +56,95 @@ final class CCITTFaxDecoderStream extends FilterInputStream
     private final int columns;
     private final byte[] decodedRow;
 
-    private int decodedLength;
-    private int decodedPos;
+    private final boolean optionG32D;
+    // Leading zeros for aligning EOL
+    private final boolean optionG3Fill;
+    private final boolean optionUncompressed;
+    private final boolean optionByteAligned;
 
     // Need to take fill order into account (?) (use flip table?)
     private final int fillOrder;
     private final int type;
 
+    private int decodedLength;
+    private int decodedPos;
+
     private int[] changesReferenceRow;
     private int[] changesCurrentRow;
     private int changesReferenceRowCount;
     private int changesCurrentRowCount;
+
     private int lastChangingElement = 0;
 
-    private boolean optionG32D = false;
-
-    private boolean optionByteAligned = false;
-
-    CCITTFaxDecoderStream(final InputStream stream, final int columns, final int type,
-            final int fillOrder, final long options)
+    /**
+     * Creates a CCITTFaxDecoderStream. This constructor may be used for CCITT streams embedded in
+     * PDF files, which use EncodedByteAlign.
+     *
+     * @param stream      the compressed CCITT stream.
+     * @param columns     the number of columns in the stream.
+     * @param type        the type of stream, must be one of {@code COMPRESSION_CCITT_MODIFIED_HUFFMAN_RLE},
+     *                    {@code COMPRESSION_CCITT_T4} or {@code COMPRESSION_CCITT_T6}.
+     * @param fillOrder   fillOrder, must be {@code FILL_LEFT_TO_RIGHT} or {@code
+     *                    FILL_RIGHT_TO_LEFT}.
+     * @param options     CCITT T.4 or T.6 options.
+     * @param byteAligned enable byte alignment used in PDF files (EncodedByteAlign).
+     */
+    public CCITTFaxDecoderStream(final InputStream stream, final int columns, final int type,
+            final int fillOrder, final long options, final boolean byteAligned)
     {
         super(stream);
 
         this.columns = columns;
-        // We know this is only used for b/w (1 bit)
-        this.decodedRow = new byte[(columns + 7) / 8];
         this.type = type;
-
         this.fillOrder = fillOrder;
 
-        this.changesReferenceRow = new int[columns + 2];
-        this.changesCurrentRow = new int[columns + 2];
+        // We know this is only used for b/w (1 bit)
+        decodedRow = new byte[(columns + 7) / 8];
+        changesReferenceRow = new int[columns + 2];
+        changesCurrentRow = new int[columns + 2];
 
         switch (type)
         {
         case TIFFExtension.COMPRESSION_CCITT_MODIFIED_HUFFMAN_RLE:
-            optionByteAligned = (options & TIFFExtension.GROUP3OPT_BYTEALIGNED) != 0;
+            optionByteAligned = byteAligned;
+            optionG32D = false;
+            optionG3Fill = false;
+            optionUncompressed = false;
             break;
         case TIFFExtension.COMPRESSION_CCITT_T4:
+            optionByteAligned = byteAligned;
             optionG32D = (options & TIFFExtension.GROUP3OPT_2DENCODING) != 0;
-            optionByteAligned = (options & TIFFExtension.GROUP3OPT_BYTEALIGNED) != 0;
+            optionG3Fill = (options & TIFFExtension.GROUP3OPT_FILLBITS) != 0;
+            optionUncompressed = (options & TIFFExtension.GROUP3OPT_UNCOMPRESSED) != 0;
             break;
         case TIFFExtension.COMPRESSION_CCITT_T6:
-            optionByteAligned = (options & TIFFExtension.GROUP4OPT_BYTEALIGNED) != 0;
+            optionByteAligned = byteAligned;
+            optionG32D = false;
+            optionG3Fill = false;
+            optionUncompressed = (options & TIFFExtension.GROUP4OPT_UNCOMPRESSED) != 0;
             break;
         default:
-            break;
+            throw new IllegalArgumentException("Illegal parameter: " + type);
         }
 
+    }
+
+    /**
+     * Creates a CCITTFaxDecoderStream.
+     *
+     * @param stream    the compressed CCITT stream.
+     * @param columns   the number of columns in the stream.
+     * @param type      the type of stream, must be one of {@code COMPRESSION_CCITT_MODIFIED_HUFFMAN_RLE},
+     *                  {@code COMPRESSION_CCITT_T4} or {@code COMPRESSION_CCITT_T6}.
+     * @param fillOrder fillOrder, must be {@code FILL_LEFT_TO_RIGHT} or {@code
+     *                  FILL_RIGHT_TO_LEFT}.
+     * @param options   CCITT T.4 or T.6 options.
+     */
+    public CCITTFaxDecoderStream(final InputStream stream, final int columns, final int type,
+            final int fillOrder, final long options)
+    {
+        this(stream, columns, type, fillOrder, options,
+                type == TIFFExtension.COMPRESSION_CCITT_MODIFIED_HUFFMAN_RLE);
     }
 
     private void fetch() throws IOException
@@ -123,8 +165,8 @@ final class CCITTFaxDecoderStream extends FilterInputStream
                     throw e;
                 }
 
-                // ..otherwise, just client code trying to read past the end of
-                // stream
+                // ..otherwise, just let client code try to read past the
+                // end of stream
                 decodedLength = -1;
             }
 
@@ -151,11 +193,6 @@ final class CCITTFaxDecoderStream extends FilterInputStream
                 completeRun = decodeRun(blackRunTree);
             }
 
-            if (completeRun == VALUE_EOL)
-            {
-                continue;
-            }
-
             index += completeRun;
             changesCurrentRow[changesCurrentRowCount++] = index;
 
@@ -175,7 +212,8 @@ final class CCITTFaxDecoderStream extends FilterInputStream
         int index = 0;
         changesCurrentRowCount = 0;
 
-        mode: while (index < columns)
+        mode:
+        while (index < columns)
         {
             // read mode
             Node n = codeTree.root;
@@ -283,7 +321,8 @@ final class CCITTFaxDecoderStream extends FilterInputStream
         {
             resetBuffer();
         }
-        eof: while (true)
+        eof:
+        while (true)
         {
             // read till next EOL code
             Node n = eolOnlyTree.root;
@@ -337,7 +376,7 @@ final class CCITTFaxDecoderStream extends FilterInputStream
             decodeRowType6();
             break;
         default:
-            break;
+            throw new IllegalArgumentException("Illegal parameter: " + type);
         }
 
         int index = 0;
@@ -395,8 +434,9 @@ final class CCITTFaxDecoderStream extends FilterInputStream
 
         if (index != columns)
         {
-            throw new IOException("Sum of run-lengths does not equal scan line width: " + index
-                    + " > " + columns);
+            throw new IOException(
+                    "Sum of run-lengths does not equal scan line width: " + index + " > "
+                            + columns);
         }
 
         decodedLength = (index + 7) / 8;
@@ -421,11 +461,18 @@ final class CCITTFaxDecoderStream extends FilterInputStream
             if (n.isLeaf)
             {
                 total += n.value;
-                if (n.value < 64)
+                if (n.value >= 64)
+                {
+                    n = tree.root;
+                }
+                else if (n.value >= 0)
                 {
                     return total;
                 }
-                n = tree.root;
+                else
+                {
+                    return columns;
+                }
             }
         }
     }
@@ -499,7 +546,6 @@ final class CCITTFaxDecoderStream extends FilterInputStream
     {
         if (decodedLength < 0)
         {
-            // TODO better? Math.min(off + len, b.length)
             Arrays.fill(b, off, off + len, (byte) 0x0);
             return len;
         }
@@ -677,105 +723,66 @@ final class CCITTFaxDecoderStream extends FilterInputStream
     }
 
     static final short[][] BLACK_CODES = { { // 2 bits
-            0x2, 0x3, },
-            { // 3 bits
-                    0x2, 0x3, },
-            { // 4 bits
-                    0x2, 0x3, },
-            { // 5 bits
-                    0x3, },
-            { // 6 bits
-                    0x4, 0x5, },
-            { // 7 bits
-                    0x4, 0x5, 0x7, },
-            { // 8 bits
-                    0x4, 0x7, },
-            { // 9 bits
-                    0x18, },
-            { // 10 bits
-                    0x17, 0x18, 0x37, 0x8, 0xf, },
-            { // 11 bits
-                    0x17, 0x18, 0x28, 0x37, 0x67, 0x68, 0x6c, 0x8, 0xc, 0xd, },
-            { // 12 bits
-                    0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x1c, 0x1d, 0x1e, 0x1f, 0x24, 0x27, 0x28,
-                    0x2b, 0x2c, 0x33, 0x34, 0x35, 0x37, 0x38, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57,
-                    0x58, 0x59, 0x5a, 0x5b, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6a, 0x6b, 0x6c,
-                    0x6d, 0xc8, 0xc9, 0xca, 0xcb, 0xcc, 0xcd, 0xd2, 0xd3, 0xd4, 0xd5, 0xd6, 0xd7,
-                    0xda, 0xdb, },
-            { // 13 bits
-                    0x4a, 0x4b, 0x4c, 0x4d, 0x52, 0x53, 0x54, 0x55, 0x5a, 0x5b, 0x64, 0x65, 0x6c,
-                    0x6d, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77, } };
+            0x2, 0x3, }, { // 3 bits
+            0x2, 0x3, }, { // 4 bits
+            0x2, 0x3, }, { // 5 bits
+            0x3, }, { // 6 bits
+            0x4, 0x5, }, { // 7 bits
+            0x4, 0x5, 0x7, }, { // 8 bits
+            0x4, 0x7, }, { // 9 bits
+            0x18, }, { // 10 bits
+            0x17, 0x18, 0x37, 0x8, 0xf, }, { // 11 bits
+            0x17, 0x18, 0x28, 0x37, 0x67, 0x68, 0x6c, 0x8, 0xc, 0xd, }, { // 12 bits
+            0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x1c, 0x1d, 0x1e, 0x1f, 0x24, 0x27, 0x28, 0x2b,
+            0x2c, 0x33, 0x34, 0x35, 0x37, 0x38, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58, 0x59,
+            0x5a, 0x5b, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6a, 0x6b, 0x6c, 0x6d, 0xc8, 0xc9,
+            0xca, 0xcb, 0xcc, 0xcd, 0xd2, 0xd3, 0xd4, 0xd5, 0xd6, 0xd7, 0xda, 0xdb, }, { // 13 bits
+            0x4a, 0x4b, 0x4c, 0x4d, 0x52, 0x53, 0x54, 0x55, 0x5a, 0x5b, 0x64, 0x65, 0x6c, 0x6d,
+            0x72, 0x73, 0x74, 0x75, 0x76, 0x77, } };
     static final short[][] BLACK_RUN_LENGTHS = { { // 2 bits
-            3, 2, },
-            { // 3 bits
-                    1, 4, },
-            { // 4 bits
-                    6, 5, },
-            { // 5 bits
-                    7, },
-            { // 6 bits
-                    9, 8, },
-            { // 7 bits
-                    10, 11, 12, },
-            { // 8 bits
-                    13, 14, },
-            { // 9 bits
-                    15, },
-            { // 10 bits
-                    16, 17, 0, 18, 64, },
-            { // 11 bits
-                    24, 25, 23, 22, 19, 20, 21, 1792, 1856, 1920, },
-            { // 12 bits
-                    1984, 2048, 2112, 2176, 2240, 2304, 2368, 2432, 2496, 2560, 52, 55, 56, 59, 60,
-                    320, 384, 448, 53, 54, 50, 51, 44, 45, 46, 47, 57, 58, 61, 256, 48, 49, 62, 63,
-                    30, 31, 32, 33, 40, 41, 128, 192, 26, 27, 28, 29, 34, 35, 36, 37, 38, 39, 42,
-                    43, },
-            { // 13 bits
-                    640, 704, 768, 832, 1280, 1344, 1408, 1472, 1536, 1600, 1664, 1728, 512, 576,
-                    896, 960, 1024, 1088, 1152, 1216, } };
+            3, 2, }, { // 3 bits
+            1, 4, }, { // 4 bits
+            6, 5, }, { // 5 bits
+            7, }, { // 6 bits
+            9, 8, }, { // 7 bits
+            10, 11, 12, }, { // 8 bits
+            13, 14, }, { // 9 bits
+            15, }, { // 10 bits
+            16, 17, 0, 18, 64, }, { // 11 bits
+            24, 25, 23, 22, 19, 20, 21, 1792, 1856, 1920, }, { // 12 bits
+            1984, 2048, 2112, 2176, 2240, 2304, 2368, 2432, 2496, 2560, 52, 55, 56, 59, 60, 320,
+            384, 448, 53, 54, 50, 51, 44, 45, 46, 47, 57, 58, 61, 256, 48, 49, 62, 63, 30, 31, 32,
+            33, 40, 41, 128, 192, 26, 27, 28, 29, 34, 35, 36, 37, 38, 39, 42, 43, }, { // 13 bits
+            640, 704, 768, 832, 1280, 1344, 1408, 1472, 1536, 1600, 1664, 1728, 512, 576, 896, 960,
+            1024, 1088, 1152, 1216, } };
 
     public static final short[][] WHITE_CODES = { { // 4 bits
-            0x7, 0x8, 0xb, 0xc, 0xe, 0xf, },
-            { // 5 bits
-                    0x12, 0x13, 0x14, 0x1b, 0x7, 0x8, },
-            { // 6 bits
-                    0x17, 0x18, 0x2a, 0x2b, 0x3, 0x34, 0x35, 0x7, 0x8, },
-            { // 7 bits
-                    0x13, 0x17, 0x18, 0x24, 0x27, 0x28, 0x2b, 0x3, 0x37, 0x4, 0x8, 0xc, },
-            { // 8 bits
-                    0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x1a, 0x1b, 0x2, 0x24, 0x25, 0x28, 0x29,
-                    0x2a, 0x2b, 0x2c, 0x2d, 0x3, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x4, 0x4a,
-                    0x4b, 0x5, 0x52, 0x53, 0x54, 0x55, 0x58, 0x59, 0x5a, 0x5b, 0x64, 0x65, 0x67,
-                    0x68, 0xa, 0xb, },
-            { // 9 bits
-                    0x98, 0x99, 0x9a, 0x9b, 0xcc, 0xcd, 0xd2, 0xd3, 0xd4, 0xd5, 0xd6, 0xd7, 0xd8,
-                    0xd9, 0xda, 0xdb, },
-            { // 10 bits
-            }, { // 11 bits
-                    0x8, 0xc, 0xd, },
-            { // 12 bits
-                    0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x1c, 0x1d, 0x1e, 0x1f, } };
+            0x7, 0x8, 0xb, 0xc, 0xe, 0xf, }, { // 5 bits
+            0x12, 0x13, 0x14, 0x1b, 0x7, 0x8, }, { // 6 bits
+            0x17, 0x18, 0x2a, 0x2b, 0x3, 0x34, 0x35, 0x7, 0x8, }, { // 7 bits
+            0x13, 0x17, 0x18, 0x24, 0x27, 0x28, 0x2b, 0x3, 0x37, 0x4, 0x8, 0xc, }, { // 8 bits
+            0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x1a, 0x1b, 0x2, 0x24, 0x25, 0x28, 0x29, 0x2a, 0x2b,
+            0x2c, 0x2d, 0x3, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x4, 0x4a, 0x4b, 0x5, 0x52, 0x53,
+            0x54, 0x55, 0x58, 0x59, 0x5a, 0x5b, 0x64, 0x65, 0x67, 0x68, 0xa, 0xb, }, { // 9 bits
+            0x98, 0x99, 0x9a, 0x9b, 0xcc, 0xcd, 0xd2, 0xd3, 0xd4, 0xd5, 0xd6, 0xd7, 0xd8, 0xd9,
+            0xda, 0xdb, }, { // 10 bits
+    }, { // 11 bits
+            0x8, 0xc, 0xd, }, { // 12 bits
+            0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x1c, 0x1d, 0x1e, 0x1f, } };
 
     public static final short[][] WHITE_RUN_LENGTHS = { { // 4 bits
-            2, 3, 4, 5, 6, 7, },
-            { // 5 bits
-                    128, 8, 9, 64, 10, 11, },
-            { // 6 bits
-                    192, 1664, 16, 17, 13, 14, 15, 1, 12, },
-            { // 7 bits
-                    26, 21, 28, 27, 18, 24, 25, 22, 256, 23, 20, 19, },
-            { // 8 bits
-                    33, 34, 35, 36, 37, 38, 31, 32, 29, 53, 54, 39, 40, 41, 42, 43, 44, 30, 61, 62,
-                    63, 0, 320, 384, 45, 59, 60, 46, 49, 50, 51, 52, 55, 56, 57, 58, 448, 512, 640,
-                    576, 47, 48, },
+            2, 3, 4, 5, 6, 7, }, { // 5 bits
+            128, 8, 9, 64, 10, 11, }, { // 6 bits
+            192, 1664, 16, 17, 13, 14, 15, 1, 12, }, { // 7 bits
+            26, 21, 28, 27, 18, 24, 25, 22, 256, 23, 20, 19, }, { // 8 bits
+            33, 34, 35, 36, 37, 38, 31, 32, 29, 53, 54, 39, 40, 41, 42, 43, 44, 30, 61, 62, 63, 0,
+            320, 384, 45, 59, 60, 46, 49, 50, 51, 52, 55, 56, 57, 58, 448, 512, 640, 576, 47, 48, },
             { // 9 bits
                     1472, 1536, 1600, 1728, 704, 768, 832, 896, 960, 1024, 1088, 1152, 1216, 1280,
-                    1344, 1408, },
-            { // 10 bits
-            }, { // 11 bits
-                    1792, 1856, 1920, },
-            { // 12 bits
-                    1984, 2048, 2112, 2176, 2240, 2304, 2368, 2432, 2496, 2560, } };
+                    1344, 1408, }, { // 10 bits
+    }, { // 11 bits
+            1792, 1856, 1920, }, { // 12 bits
+            1984, 2048, 2112, 2176, 2240, 2304, 2368, 2432, 2496, 2560, } };
 
     final static Node EOL;
     final static Node FILL;

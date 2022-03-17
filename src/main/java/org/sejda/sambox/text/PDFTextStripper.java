@@ -190,7 +190,7 @@ public class PDFTextStripper extends PDFTextStreamEngine
      */
     protected ArrayList<List<TextPosition>> charactersByArticle = new ArrayList<>();
 
-    private Map<String, TreeMap<Float, TreeSet<Float>>> characterListMapping = new HashMap<String, TreeMap<Float, TreeSet<Float>>>();
+    private final Map<String, TreeMap<Float, TreeSet<Float>>> characterListMapping = new HashMap<>();
 
     protected PDDocument document;
     protected Writer output;
@@ -232,10 +232,7 @@ public class PDFTextStripper extends PDFTextStreamEngine
         {
             charactersByArticle.clear();
         }
-        if (characterListMapping != null)
-        {
-            characterListMapping.clear();
-        }
+        characterListMapping.clear();
     }
 
     /**

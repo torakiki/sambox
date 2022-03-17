@@ -20,7 +20,7 @@ import org.sejda.sambox.cos.COSName;
 
 /**
  * This the win ansi encoding.
- * 
+ *
  * @author Ben Litchfield
  */
 public class WinAnsiEncoding extends Encoding
@@ -88,11 +88,11 @@ public class WinAnsiEncoding extends Encoding
             { 0171, "y" }, { 0375, "yacute" }, { 0377, "ydieresis" }, { 0245, "yen" },
             { 0172, "z" }, { 0236, "zcaron" }, { 060, "zero" },
             // adding some additional mappings as defined in Appendix D of the pdf spec
-            { 0240, "nbspace" }, { 0255, "hyphen" } };
+            { 0240, "nbspace" }, { 0255, "sfthyphen" } };
 
     /**
      * Singleton instance of this class.
-     * 
+     *
      * @since Apache PDFBox 1.3.0
      */
     public static final WinAnsiEncoding INSTANCE = new WinAnsiEncoding();
@@ -120,7 +120,7 @@ public class WinAnsiEncoding extends Encoding
 
     /**
      * Convert this standard java object to a COS object.
-     * 
+     *
      * @return The cos object that matches this Java object.
      */
     @Override

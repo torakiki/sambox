@@ -95,7 +95,9 @@ public class AcroFormOrphanWindgetsGenerator implements Consumer<PDAcroForm>
             {
                 addFontFromWidget(acroFormResources, annot);
 
-                if (annot.getCOSObject().containsKey(COSName.PARENT))
+                COSDictionary parent = annot.getCOSObject()
+                        .getDictionaryObject(COSName.PARENT, COSDictionary.class);
+                if (nonNull(parent))
                 {
                     PDField resolvedField = resolveNonRootField(acroForm,
                             (PDAnnotationWidget) annot, nonTerminalFieldsMap);

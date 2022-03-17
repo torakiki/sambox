@@ -16,24 +16,23 @@
  */
 package org.sejda.sambox.pdmodel.font;
 
+import org.apache.fontbox.cmap.CMap;
+import org.apache.fontbox.cmap.CMapParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.fontbox.cmap.CMap;
-import org.apache.fontbox.cmap.CMapParser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * CMap resource loader and cache.
  */
 final class CMapManager
 {
-    static Map<String, CMap> cMapCache =
-            Collections.synchronizedMap(new HashMap<String, CMap>());
+    static Map<String, CMap> cMapCache = Collections.synchronizedMap(new HashMap<String, CMap>());
 
     private static final Logger LOG = LoggerFactory.getLogger(CMapManager.class);
 
@@ -56,8 +55,7 @@ final class CMapManager
             return cmap;
         }
 
-        CMapParser parser = new CMapParser();
-        CMap targetCmap = parser.parsePredefined(cMapName);
+        CMap targetCmap = new CMapParser().parsePredefined(cMapName);
 
         // limit the cache to predefined CMaps
         cMapCache.put(targetCmap.getName(), targetCmap);
@@ -75,11 +73,13 @@ final class CMapManager
         CMap targetCmap = null;
         if (cMapStream != null)
         {
-            CMapParser parser = new CMapParser();
             try
             {
-                targetCmap = parser.parse(cMapStream);
-            } catch(IOException e) {
+                // parse CMap using strict mode
+                targetCmap = new CMapParser(true).parse(cMapStream);
+            }
+            catch (IOException e)
+            {
                 LOG.warn("Failed to parse CMap for font", e);
             }
         }

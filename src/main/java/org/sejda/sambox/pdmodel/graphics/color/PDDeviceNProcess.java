@@ -16,14 +16,14 @@
  */
 package org.sejda.sambox.pdmodel.graphics.color;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A DeviceN Process Dictionary
@@ -44,6 +44,7 @@ public class PDDeviceNProcess
 
     /**
      * Creates a new  DeviceN Process Dictionary from the given attributes.
+     *
      * @param attributes a DeviceN attributes dictionary
      */
     public PDDeviceNProcess(COSDictionary attributes)
@@ -53,6 +54,7 @@ public class PDDeviceNProcess
 
     /**
      * Returns the underlying COS dictionary.
+     *
      * @return the underlying COS dictionary.
      */
     public COSDictionary getCOSDictionary()
@@ -62,6 +64,7 @@ public class PDDeviceNProcess
 
     /**
      * Returns the process color space
+     *
      * @return the process color space
      * @throws IOException if the color space cannot be read
      */
@@ -77,19 +80,20 @@ public class PDDeviceNProcess
 
     /**
      * Returns the names of the color components.
+     *
      * @return the names of the color components
      */
     public List<String> getComponents()
     {
         List<String> components = new ArrayList<String>();
-        COSArray cosComponents = (COSArray)dictionary.getDictionaryObject(COSName.COMPONENTS);
+        COSArray cosComponents = dictionary.getDictionaryObject(COSName.COMPONENTS, COSArray.class);
         if (cosComponents == null)
         {
             return components;
         }
         for (COSBase name : cosComponents)
         {
-            components.add(((COSName)name).getName());
+            components.add(((COSName) name).getName());
         }
         return components;
     }

@@ -16,8 +16,6 @@
  */
 package org.sejda.sambox.cos;
 
-import static java.util.Optional.ofNullable;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,6 +24,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Optional;
+
+import static java.util.Optional.ofNullable;
 
 /**
  * An array of PDFBase objects as part of the PDF document.
@@ -48,7 +48,7 @@ public class COSArray extends COSBase implements List<COSBase>
 
     /**
      * Add an object to the array
-     * 
+     *
      * @param object The object to add to the array.
      * @see List#add(Object)
      */
@@ -66,7 +66,7 @@ public class COSArray extends COSBase implements List<COSBase>
     /**
      * Add an object at the index location and push the rest to the right.
      *
-     * @param index The index to add at.
+     * @param index  The index to add at.
      * @param object The object to add at that index.
      * @see List#add(int, Object)
      */
@@ -134,7 +134,7 @@ public class COSArray extends COSBase implements List<COSBase>
     /**
      * Set an object at a specific index.
      *
-     * @param index zero based index into array.
+     * @param index  zero based index into array.
      * @param object The object to set.
      */
     public void set(int index, COSObjectable object)
@@ -148,8 +148,8 @@ public class COSArray extends COSBase implements List<COSBase>
     }
 
     /**
-     * This will get an object from the array. This will dereference the object. If the object is COSNull then null will
-     * be returned.
+     * This will get an object from the array. This will dereference the object. If the object is
+     * COSNull then null will be returned.
      *
      * @param index The index into the array to get the object.
      * @return The object at the requested index.
@@ -161,17 +161,17 @@ public class COSArray extends COSBase implements List<COSBase>
     }
 
     /**
-     * This will get an object from the array. This will dereference the object. If the type is not compatible, null is
-     * returned
-     * 
+     * This will get an object from the array. This will dereference the object. If the type is not
+     * compatible, null is returned
+     *
      * @param index
      * @param clazz
      * @return The object that matches the key and the type or null.
      */
     public <T extends COSBase> T getObject(int index, Class<T> clazz)
     {
-        return ofNullable(objects.get(index)).map(COSBase::getCOSObject)
-                .filter(i -> clazz.isInstance(i)).map(clazz::cast).orElse(null);
+        return ofNullable(objects.get(index)).map(COSBase::getCOSObject).filter(clazz::isInstance)
+                .map(clazz::cast).orElse(null);
     }
 
     /**
@@ -201,7 +201,7 @@ public class COSArray extends COSBase implements List<COSBase>
     /**
      * Get the value of the array as an integer, return the default if it does not exist.
      *
-     * @param index The value of the array.
+     * @param index        The value of the array.
      * @param defaultValue The value to return if the value is null.
      * @return The value at the index or the defaultValue.
      */
@@ -231,8 +231,8 @@ public class COSArray extends COSBase implements List<COSBase>
 
     /**
      * Get an entry in the array that is expected to be a COSName.
-     * 
-     * @param index The index into the array.
+     *
+     * @param index        The index into the array.
      * @param defaultValue The value to return if it is null.
      * @return The value at the index or defaultValue if none is found.
      */
@@ -251,8 +251,8 @@ public class COSArray extends COSBase implements List<COSBase>
 
     /**
      * Set the value in the array as a string.
-     * 
-     * @param index The index into the array.
+     *
+     * @param index  The index into the array.
      * @param string The string to set in the array.
      */
     public void setString(int index, String string)
@@ -280,8 +280,8 @@ public class COSArray extends COSBase implements List<COSBase>
 
     /**
      * Get an entry in the array that is expected to be a COSName.
-     * 
-     * @param index The index into the array.
+     *
+     * @param index        The index into the array.
      * @param defaultValue The value to return if it is null.
      * @return The value at the index or defaultValue if none is found.
      */
@@ -312,7 +312,7 @@ public class COSArray extends COSBase implements List<COSBase>
 
     /**
      * Removes the last object of the array
-     * 
+     *
      * @return the removed object or null if the array was empty
      */
     public COSBase removeLast()
@@ -331,7 +331,8 @@ public class COSArray extends COSBase implements List<COSBase>
     }
 
     /**
-     * This will remove an element from the array. This method will also remove a reference to the object.
+     * This will remove an element from the array. This method will also remove a reference to the
+     * object.
      *
      * @param o The object to remove.
      * @return <code>true</code> if the object was removed, <code>false</code> otherwise
@@ -384,8 +385,8 @@ public class COSArray extends COSBase implements List<COSBase>
     }
 
     /**
-     * This will return the index of the entry or -1 if it is not found. This method will also find references to
-     * indirect objects.
+     * This will return the index of the entry or -1 if it is not found. This method will also find
+     * references to indirect objects.
      *
      * @param object The object to search for.
      * @return The index of the object or -1.
@@ -404,8 +405,8 @@ public class COSArray extends COSBase implements List<COSBase>
     }
 
     /**
-     * This will add null values until the size of the array is at least as large as the parameter. If the array is
-     * already larger than the parameter then nothing is done.
+     * This will add null values until the size of the array is at least as large as the parameter.
+     * If the array is already larger than the parameter then nothing is done.
      *
      * @param size The desired size of the array.
      */
@@ -415,10 +416,10 @@ public class COSArray extends COSBase implements List<COSBase>
     }
 
     /**
-     * This will add the object until the size of the array is at least as large as the parameter. If the array is
-     * already larger than the parameter then nothing is done.
+     * This will add the object until the size of the array is at least as large as the parameter.
+     * If the array is already larger than the parameter then nothing is done.
      *
-     * @param size The desired size of the array.
+     * @param size   The desired size of the array.
      * @param object The object to fill the array with.
      */
     public COSArray growToSize(int size, COSBase object)
@@ -432,7 +433,7 @@ public class COSArray extends COSBase implements List<COSBase>
 
     /**
      * trims the array to the given size
-     * 
+     *
      * @param size
      */
     public COSArray trimToSize(int size)

@@ -16,10 +16,15 @@
  */
 package org.sejda.sambox.cos;
 
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
-import static java.util.Optional.ofNullable;
-import static org.sejda.io.SeekableSources.inMemorySeekableSourceFrom;
+import org.sejda.commons.FastByteArrayOutputStream;
+import org.sejda.commons.util.IOUtils;
+import org.sejda.io.SeekableSource;
+import org.sejda.io.SeekableSourceSupplier;
+import org.sejda.sambox.filter.DecodeResult;
+import org.sejda.sambox.filter.Filter;
+import org.sejda.sambox.filter.FilterFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.Closeable;
@@ -34,15 +39,11 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.sejda.commons.FastByteArrayOutputStream;
-import org.sejda.commons.util.IOUtils;
-import org.sejda.io.SeekableSource;
-import org.sejda.io.SeekableSourceSupplier;
-import org.sejda.sambox.filter.DecodeResult;
-import org.sejda.sambox.filter.Filter;
-import org.sejda.sambox.filter.FilterFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
+import static org.sejda.commons.util.RequireUtils.requireIOCondition;
+import static org.sejda.io.SeekableSources.inMemorySeekableSourceFrom;
 
 /**
  * This class represents a stream object in a PDF document.
@@ -80,12 +81,13 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
     }
 
     /**
-     * Creates a stream with the given dictionary and where filtered data is a view of the given {@link SeekableSource}.
-     * 
-     * @param dictionary The dictionary that is associated with this stream.
-     * @param seekableSource the source where filtered data is read from
+     * Creates a stream with the given dictionary and where filtered data is a view of the given
+     * {@link SeekableSource}.
+     *
+     * @param dictionary       The dictionary that is associated with this stream.
+     * @param seekableSource   the source where filtered data is read from
      * @param startingPosition starting position of the stream data in the {@link SeekableSource}
-     * @param length the length of the stream data
+     * @param length           the length of the stream data
      */
     public COSStream(COSDictionary dictionary, SeekableSource seekableSource, long startingPosition,
             long length)
@@ -196,7 +198,8 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
     }
 
     /**
-     * @return the (decoded) stream in the form of a read only {@link ByteBuffer} with all of the filters applied.
+     * @return the (decoded) stream in the form of a read only {@link ByteBuffer} with all of the
+     * filters applied.
      * @throws IOException when encoding/decoding causes an exception
      */
     public ByteBuffer getUnfilteredByteBuffer() throws IOException
@@ -298,7 +301,8 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
             InputStream input = startingFrom;
             for (int i = 0; i < filters.size(); i++)
             {
-                COSName filterName = (COSName) filters.getObject(i);
+                COSName filterName = filters.getObject(i, COSName.class);
+                requireIOCondition(nonNull(filterName), "Invalid filter type at index " + i);
                 tmpResult = decode(filterName, i, input);
                 input = new MyByteArrayInputStream(tmpResult);
             }
@@ -369,9 +373,9 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
     }
 
     /**
-     * This will return the filters to apply to the byte stream. The method will return - null if no filters are to be
-     * applied - a COSName if one filter is to be applied - a COSArray containing COSNames if multiple filters are to be
-     * applied
+     * This will return the filters to apply to the byte stream. The method will return - null if no
+     * filters are to be applied - a COSName if one filter is to be applied - a COSArray containing
+     * COSNames if multiple filters are to be applied
      *
      * @return the COSBase object representing the filters
      */
@@ -400,7 +404,7 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
 
     /**
      * Sets the function to be used to encrypt this stream.
-     * 
+     *
      * @param encryptor
      */
     public void setEncryptor(Function<InputStream, InputStream> encryptor)
@@ -409,8 +413,8 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
     }
 
     /**
-     * Creates a new stream for which filtered byte should be written to. You probably don't want this but want to use
-     * the createUnfilteredStream, which is used to write raw bytes to.
+     * Creates a new stream for which filtered byte should be written to. You probably don't want
+     * this but want to use the createUnfilteredStream, which is used to write raw bytes to.
      *
      * @return A stream that can be written to.
      */
@@ -427,7 +431,7 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
 
     /**
      * Returns a new OutputStream for writing stream data, using and the given filters.
-     * 
+     *
      * @param filters COSArray or COSName of filters to be used.
      * @return OutputStream for un-encoded stream data.
      * @throws IOException If the output stream could not be created.
@@ -471,7 +475,7 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
 
     /**
      * Adds Flate decode filter to the current filters list if possible
-     * 
+     *
      * @true if the FlateDecode filter has been added
      */
     public boolean addCompression()
@@ -545,7 +549,6 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
      * This will create an output stream that can be written to.
      *
      * @return An output stream which raw data bytes should be written to.
-     *
      * @throws IOException If there is an error creating the stream.
      */
     public OutputStream createUnfilteredStream()
@@ -571,7 +574,8 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
     }
 
     /**
-     * @return the contents of the stream as a text string. Text string as defined in Chap 7.9 of PDF 32000-1:2008.
+     * @return the contents of the stream as a text string. Text string as defined in Chap 7.9 of
+     * PDF 32000-1:2008.
      */
     public String asTextString()
     {
@@ -596,7 +600,8 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
     }
 
     /**
-     * offload decoded/unfiltered data leaving the COSStrem in its filtered state and reducing memory footprint
+     * offload decoded/unfiltered data leaving the COSStrem in its filtered state and reducing
+     * memory footprint
      */
     public void unDecode()
     {
@@ -660,7 +665,7 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
 
     /**
      * Holder for a view of a portion of the given {@link SeekableSource}
-     * 
+     *
      * @author Andrea Vacondio
      */
     private static class LazySeekableSourceViewHolder implements Closeable

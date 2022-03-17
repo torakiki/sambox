@@ -24,8 +24,8 @@ import java.io.OutputStream;
 import java.util.Arrays;
 
 /**
- * Helper class to contain predictor decoding used by Flate and LZW filter. To see the history, look at the FlateFilter
- * class.
+ * Helper class to contain predictor decoding used by Flate and LZW filter. To see the history, look
+ * at the FlateFilter class.
  */
 public final class Predictor
 {
@@ -36,15 +36,16 @@ public final class Predictor
 
     /**
      * Decodes a single line of data in-place.
-     * 
-     * @param predictor Predictor value for the current line
-     * @param colors Number of color components, from decode parameters.
+     *
+     * @param predictor        Predictor value for the current line
+     * @param colors           Number of color components, from decode parameters.
      * @param bitsPerComponent Number of bits per components, from decode parameters.
-     * @param columns Number samples in a row, from decode parameters.
-     * @param actline Current (active) line to decode. Data will be decoded in-place, i.e. - the contents of this buffer
-     * will be modified.
-     * @param lastline The previous decoded line. When decoding the first line, this parameter should be an empty byte
-     * array of the same length as <code>actline</code>.
+     * @param columns          Number samples in a row, from decode parameters.
+     * @param actline          Current (active) line to decode. Data will be decoded in-place, i.e.
+     *                         - the contents of this buffer will be modified.
+     * @param lastline         The previous decoded line. When decoding the first line, this
+     *                         parameter should be an empty byte array of the same length as
+     *                         <code>actline</code>.
      */
     static void decodePredictorRow(int predictor, int colors, int bitsPerComponent, int columns,
             byte[] actline, byte[] lastline)
@@ -77,8 +78,8 @@ public final class Predictor
                 for (int p = bytesPerPixel; p < rowlength; p += 2)
                 {
                     int sub = ((actline[p] & 0xff) << 8) + (actline[p + 1] & 0xff);
-                    int left = (((actline[p - bytesPerPixel] & 0xff) << 8)
-                            + (actline[p - bytesPerPixel + 1] & 0xff));
+                    int left = (((actline[p - bytesPerPixel] & 0xff) << 8) + (
+                            actline[p - bytesPerPixel + 1] & 0xff));
                     actline[p] = (byte) (((sub + left) >> 8) & 0xff);
                     actline[p + 1] = (byte) ((sub + left) & 0xff);
                 }
@@ -113,12 +114,12 @@ public final class Predictor
                         if (((sub + left) & 1) == 0)
                         {
                             // reset bit
-                            actline[p] = (byte) (actline[p] & ~(1 << bit));
+                            actline[p] &= ~(1 << bit);
                         }
                         else
                         {
                             // set bit
-                            actline[p] = (byte) (actline[p] | (1 << bit));
+                            actline[p] |= 1 << bit;
                         }
                     }
                 }
@@ -226,13 +227,13 @@ public final class Predictor
     }
 
     /**
-     * Wraps and <code>OutputStream</code> in a predictor decoding stream as necessary. If no predictor is specified by
-     * the parameters, the original stream is returned as is.
+     * Wraps and <code>OutputStream</code> in a predictor decoding stream as necessary. If no
+     * predictor is specified by the parameters, the original stream is returned as is.
      *
-     * @param out The stream to which decoded data should be written
+     * @param out          The stream to which decoded data should be written
      * @param decodeParams Decode parameters for the stream
-     * @return An <code>OutputStream</code> is returned, which will write decoded data into the given stream. If no
-     * predictor is specified, the original stream is returned.
+     * @return An <code>OutputStream</code> is returned, which will write decoded data into the
+     * given stream. If no predictor is specified, the original stream is returned.
      */
     static OutputStream wrapPredictor(OutputStream out, COSDictionary decodeParams)
     {
@@ -249,8 +250,9 @@ public final class Predictor
     }
 
     /**
-     * Output stream that implements predictor decoding. Data is buffered until a complete row is available, which is
-     * then decoded and written to the underlying stream. The previous row is retained for decoding the next row.
+     * Output stream that implements predictor decoding. Data is buffered until a complete row is
+     * available, which is then decoded and written to the underlying stream. The previous row is
+     * retained for decoding the next row.
      */
     private static final class PredictorOutputStream extends FilterOutputStream
     {
@@ -266,7 +268,8 @@ public final class Predictor
         private final boolean predictorPerRow;
 
         // data buffers
-        private byte[] currentRow, lastRow;
+        private byte[] currentRow;
+        private byte[] lastRow;
         // amount of data in the current row
         private int currentRowData = 0;
         // was the per-row predictor value read for the current row being processed
@@ -332,7 +335,8 @@ public final class Predictor
         }
 
         /**
-         * Flips the row buffers (to avoid copying), and resets the current-row index and predictorRead flag
+         * Flips the row buffers (to avoid copying), and resets the current-row index and
+         * predictorRead flag
          */
         private void flipRows()
         {
