@@ -165,8 +165,10 @@ public class AcroFormOrphanWindgetsGenerator implements Consumer<PDAcroForm>
         if (nonTerminalFieldsMap.get(parent.getString(COSName.T)) == null)
         {
             PDField field = PDFieldFactory.createField(acroForm, parent, null);
-            nonTerminalFieldsMap.put(field.getFullyQualifiedName(), field);
-
+            if (field != null)
+            {
+                nonTerminalFieldsMap.put(field.getFullyQualifiedName(), field);
+            }
             return field;
         }
 

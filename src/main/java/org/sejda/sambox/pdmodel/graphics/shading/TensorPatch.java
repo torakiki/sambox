@@ -19,8 +19,8 @@ import java.awt.geom.Point2D;
 import java.util.List;
 
 /**
- * This class is used to describe a patch for type 7 shading. This was done as
- * part of GSoC2014, Tilman Hausherr is the mentor.
+ * This class is used to describe a patch for type 7 shading. This was done as part of GSoC2014,
+ * Tilman Hausherr is the mentor.
  *
  * @author Shaola Ren
  */
@@ -30,11 +30,11 @@ class TensorPatch extends Patch
      * Constructor of a patch for type 7 shading.
      *
      * @param points 16 control points
-     * @param color 4 corner colors
+     * @param color  4 corner colors
      */
     protected TensorPatch(Point2D[] tcp, float[][] color)
     {
-        super(tcp, color);
+        super(color);
         controlPoints = reshapeControlPoints(tcp);
         level = calcLevel();
         listOfTriangles = getTriangles();
@@ -66,10 +66,7 @@ class TensorPatch extends Patch
     // calculate the dividing level from the control points
     private int[] calcLevel()
     {
-        int[] l =
-        {
-            4, 4
-        };
+        int[] l = { 4, 4 };
 
         Point2D[] ctlC1 = new Point2D[4];
         Point2D[] ctlC2 = new Point2D[4];
@@ -150,16 +147,18 @@ class TensorPatch extends Patch
     // whether a point is on the same side of edge C1 and edge C2
     private boolean isOnSameSideCC(Point2D p)
     {
-        double cc = edgeEquationValue(p, controlPoints[0][0], controlPoints[3][0])
-                * edgeEquationValue(p, controlPoints[0][3], controlPoints[3][3]);
+        double cc =
+                edgeEquationValue(p, controlPoints[0][0], controlPoints[3][0]) * edgeEquationValue(
+                        p, controlPoints[0][3], controlPoints[3][3]);
         return cc > 0;
     }
 
     // whether a point is on the same side of edge D1 and edge D2
     private boolean isOnSameSideDD(Point2D p)
     {
-        double dd = edgeEquationValue(p, controlPoints[0][0], controlPoints[0][3])
-                * edgeEquationValue(p, controlPoints[3][0], controlPoints[3][3]);
+        double dd =
+                edgeEquationValue(p, controlPoints[0][0], controlPoints[0][3]) * edgeEquationValue(
+                        p, controlPoints[3][0], controlPoints[3][3]);
         return dd > 0;
     }
 
@@ -235,8 +234,10 @@ class TensorPatch extends Patch
                 {
                     for (int j = 0; j < 4; j++)
                     {
-                        tmpx += controlPoints[i][j].getX() * bernsteinPolyU[i][l] * bernsteinPolyV[j][k];
-                        tmpy += controlPoints[i][j].getY() * bernsteinPolyU[i][l] * bernsteinPolyV[j][k];
+                        tmpx += controlPoints[i][j].getX() * bernsteinPolyU[i][l]
+                                * bernsteinPolyV[j][k];
+                        tmpy += controlPoints[i][j].getY() * bernsteinPolyU[i][l]
+                                * bernsteinPolyV[j][k];
                     }
                 }
                 Point2D tmpC = new Point2D.Double(tmpx, tmpy);
@@ -245,8 +246,10 @@ class TensorPatch extends Patch
                 float[] paramSC = new float[numberOfColorComponents];
                 for (int ci = 0; ci < numberOfColorComponents; ci++)
                 {
-                    paramSC[ci] = (float) ((1 - v) * ((1 - u) * cornerColor[0][ci] + u * cornerColor[3][ci])
-                            + v * ((1 - u) * cornerColor[1][ci] + u * cornerColor[2][ci])); // bilinear interpolation
+                    paramSC[ci] = (float) (
+                            (1 - v) * ((1 - u) * cornerColor[0][ci] + u * cornerColor[3][ci])
+                                    + v * ((1 - u) * cornerColor[1][ci]
+                                    + u * cornerColor[2][ci])); // bilinear interpolation
                 }
                 patchCC[k][l] = new CoordinateColorPair(tmpC, paramSC);
             }

@@ -16,25 +16,14 @@
  */
 package org.sejda.sambox.pdmodel.graphics.shading;
 
-import java.awt.Rectangle;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Point2D;
-import java.awt.image.ColorModel;
-import java.io.EOFException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import javax.imageio.stream.ImageInputStream;
-import javax.imageio.stream.MemoryCacheImageInputStream;
-
-import org.sejda.sambox.cos.COSDictionary;
-import org.sejda.sambox.cos.COSStream;
-import org.sejda.sambox.pdmodel.common.PDRange;
 import org.sejda.sambox.util.Matrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.awt.Rectangle;
+import java.awt.geom.AffineTransform;
+import java.awt.image.ColorModel;
+import java.io.IOException;
 
 /**
  * AWT PaintContext for Gouraud Triangle Mesh (Type 4) shading.
@@ -45,135 +34,25 @@ import org.slf4j.LoggerFactory;
 class Type4ShadingContext extends GouraudShadingContext
 {
     private static final Logger LOG = LoggerFactory.getLogger(Type4ShadingContext.class);
-    private final int bitsPerFlag;
 
     /**
      * Constructor creates an instance to be used for fill operations.
      *
      * @param shading the shading type to be used
-     * @param cm the color model to be used
-     * @param xform transformation for user to device space
-     * @param matrix the pattern matrix concatenated with that of the parent content stream
+     * @param cm      the color model to be used
+     * @param xform   transformation for user to device space
+     * @param matrix  the pattern matrix concatenated with that of the parent content stream
      */
-    Type4ShadingContext(PDShadingType4 shading, ColorModel cm, AffineTransform xform,
-            Matrix matrix, Rectangle deviceBounds) throws IOException
+    Type4ShadingContext(PDShadingType4 shading, ColorModel cm, AffineTransform xform, Matrix matrix,
+            Rectangle deviceBounds) throws IOException
     {
         super(shading, cm, xform, matrix);
         LOG.debug("Type4ShadingContext");
 
-        bitsPerFlag = shading.getBitsPerFlag();
-        // TODO handle cases where bitperflag isn't 8
+        int bitsPerFlag = shading.getBitsPerFlag();
+        //TODO handle cases where bitperflag isn't 8
         LOG.debug("bitsPerFlag: " + bitsPerFlag);
-        setTriangleList(collectTriangles(shading, xform, matrix));
+        setTriangleList(shading.collectTriangles(xform, matrix));
         createPixelTable(deviceBounds);
-    }
-
-    private List<ShadedTriangle> collectTriangles(PDShadingType4 freeTriangleShadingType,
-            AffineTransform xform, Matrix matrix) throws IOException
-    {
-        COSDictionary dict = freeTriangleShadingType.getCOSObject();
-        if (!(dict instanceof COSStream))
-        {
-            return Collections.emptyList();
-        }
-        PDRange rangeX = freeTriangleShadingType.getDecodeForParameter(0);
-        PDRange rangeY = freeTriangleShadingType.getDecodeForParameter(1);
-        if (Float.compare(rangeX.getMin(), rangeX.getMax()) == 0 ||
-                Float.compare(rangeY.getMin(), rangeY.getMax()) == 0)
-        {
-            return Collections.emptyList();
-        }
-        PDRange[] colRange = new PDRange[numberOfColorComponents];
-        for (int i = 0; i < numberOfColorComponents; ++i)
-        {
-            colRange[i] = freeTriangleShadingType.getDecodeForParameter(2 + i);
-        }
-        List<ShadedTriangle> list = new ArrayList<ShadedTriangle>();
-        long maxSrcCoord = (long) Math.pow(2, bitsPerCoordinate) - 1;
-        long maxSrcColor = (long) Math.pow(2, bitsPerColorComponent) - 1;
-        COSStream stream = (COSStream) dict;
-
-        ImageInputStream mciis = new MemoryCacheImageInputStream(stream.getUnfilteredStream());
-        try
-        {
-            byte flag = (byte) 0;
-            try
-            {
-                flag = (byte) (mciis.readBits(bitsPerFlag) & 3);
-            }
-            catch (EOFException ex)
-            {
-                LOG.error(ex.getMessage());
-            }
-
-            boolean eof = false;
-            while (!eof)
-            {
-                Vertex p0, p1, p2;
-                Point2D[] ps;
-                float[][] cs;
-                int lastIndex;
-                try
-                {
-                    switch (flag)
-                    {
-                    case 0:
-                        p0 = readVertex(mciis, maxSrcCoord, maxSrcColor, rangeX, rangeY, colRange,
-                                matrix, xform);
-                        flag = (byte) (mciis.readBits(bitsPerFlag) & 3);
-                        if (flag != 0)
-                        {
-                            LOG.error("bad triangle: " + flag);
-                        }
-                        p1 = readVertex(mciis, maxSrcCoord, maxSrcColor, rangeX, rangeY, colRange,
-                                matrix, xform);
-                        mciis.readBits(bitsPerFlag);
-                        if (flag != 0)
-                        {
-                            LOG.error("bad triangle: " + flag);
-                        }
-                        p2 = readVertex(mciis, maxSrcCoord, maxSrcColor, rangeX, rangeY, colRange,
-                                matrix, xform);
-                        ps = new Point2D[] { p0.point, p1.point, p2.point };
-                        cs = new float[][] { p0.color, p1.color, p2.color };
-                        list.add(new ShadedTriangle(ps, cs));
-                        flag = (byte) (mciis.readBits(bitsPerFlag) & 3);
-                        break;
-                    case 1:
-                    case 2:
-                        lastIndex = list.size() - 1;
-                        if (lastIndex < 0)
-                        {
-                            LOG.error("broken data stream: " + list.size());
-                        }
-                        else
-                        {
-                            ShadedTriangle preTri = list.get(lastIndex);
-                            p2 = readVertex(mciis, maxSrcCoord, maxSrcColor, rangeX, rangeY,
-                                    colRange, matrix, xform);
-                            ps = new Point2D[] { flag == 1 ? preTri.corner[1] : preTri.corner[0],
-                                    preTri.corner[2], p2.point };
-                            cs = new float[][] { flag == 1 ? preTri.color[1] : preTri.color[0],
-                                    preTri.color[2], p2.color };
-                            list.add(new ShadedTriangle(ps, cs));
-                            flag = (byte) (mciis.readBits(bitsPerFlag) & 3);
-                        }
-                        break;
-                    default:
-                        LOG.warn("bad flag: " + flag);
-                        break;
-                    }
-                }
-                catch (EOFException ex)
-                {
-                    eof = true;
-                }
-            }
-        }
-        finally
-        {
-            mciis.close();
-        }
-        return list;
     }
 }

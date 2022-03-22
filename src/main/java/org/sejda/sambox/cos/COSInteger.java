@@ -41,13 +41,13 @@ public final class COSInteger extends COSNumber
      * @param val integer value
      * @return COSInteger instance
      */
-    public static COSInteger get(long key)
+    public static COSInteger get(long val)
     {
-        COSInteger value = CACHE.get(key);
+        COSInteger value = CACHE.get(val);
         if (value == null)
         {
-            final COSInteger newVal = new COSInteger(key);
-            value = CACHE.putIfAbsent(key, newVal);
+            final COSInteger newVal = new COSInteger(val);
+            value = CACHE.putIfAbsent(val, newVal);
             if (value == null)
             {
                 value = newVal;

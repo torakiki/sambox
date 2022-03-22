@@ -20,7 +20,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * This class describes a rasterized line. This was done as part of GSoC2014, Tilman Hausherr is the mentor.
+ * This class describes a rasterized line. This was done as part of GSoC2014, Tilman Hausherr is the
+ * mentor.
  *
  * @author Shaola Ren
  */
@@ -52,7 +53,8 @@ class Line
 
     /**
      * Calculate the points of a line with Bresenham's line algorithm
-     * <a href="http://en.wikipedia.org/wiki/Bresenham's_line_algorithm">Bresenham's line algorithm</a>
+     * <a href="http://en.wikipedia.org/wiki/Bresenham's_line_algorithm">Bresenham's line
+     * algorithm</a>
      *
      * @param x0 coordinate
      * @param y0 coordinate
@@ -98,13 +100,14 @@ class Line
      */
     protected float[] calcColor(Point p)
     {
-        int numberOfColorComponents = color0.length;
-        float[] pc = new float[numberOfColorComponents];
+
         if (point0.x == point1.x && point0.y == point1.y)
         {
             return color0;
         }
-        else if (point0.x == point1.x)
+        int numberOfColorComponents = color0.length;
+        float[] pc = new float[numberOfColorComponents];
+        if (point0.x == point1.x)
         {
             float l = point1.y - point0.y;
             for (int i = 0; i < numberOfColorComponents; i++)

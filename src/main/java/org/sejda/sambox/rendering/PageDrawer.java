@@ -79,12 +79,14 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Shape;
+import java.awt.Stroke;
 import java.awt.TexturePaint;
 import java.awt.Transparency;
 import java.awt.color.ColorSpace;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -384,9 +386,14 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         }
     }
 
-    // sets the clipping path using caching for performance, we track lastClip manually because
-    // Graphics2D#getClip() returns a new object instead of the same one passed to setClip
-    private void setClip()
+    /**
+     * Sets the clipping path using caching for performance. We track lastClip manually because
+     * {@link Graphics2D#getClip()} returns a new object instead of the same one passed to {@link
+     * Graphics2D#setClip(java.awt.Shape) setClip()}. You may need to call this if you override
+     * {@link #showGlyph(Matrix, PDFont, int, Vector) showGlyph()}. See
+     * <a href="https://issues.apache.org/jira/browse/PDFBOX-5093">PDFBOX-5093</a> for more.
+     */
+    protected final void setClip()
     {
         Area clippingPath = getGraphicsState().getCurrentClippingPath();
         if (clippingPath != lastClip)
@@ -445,7 +452,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         {
             // PDFBOX-4150: this is much faster than using textClippingArea.add(new Area(glyph))
             // https://stackoverflow.com/questions/21519007/fast-union-of-shapes-in-java
-            GeneralPath path = new GeneralPath();
+            GeneralPath path = new GeneralPath(Path2D.WIND_NON_ZERO, textClippings.size());
             for (Shape shape : textClippings)
             {
                 path.append(shape, false);
@@ -641,11 +648,14 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         if (COSName.LUMINOSITY.equals(softMask.getSubType()))
         {
             COSArray backdropColorArray = softMask.getBackdropColor();
-            PDTransparencyGroup form = softMask.getGroup();
-            PDColorSpace colorSpace = form.getGroup().getColorSpace(form.getResources());
-            if (colorSpace != null && backdropColorArray != null)
+            if (backdropColorArray != null)
             {
-                backdropColor = new PDColor(backdropColorArray, colorSpace);
+                PDTransparencyGroup form = softMask.getGroup();
+                PDColorSpace colorSpace = form.getGroup().getColorSpace(form.getResources());
+                if (colorSpace != null)
+                {
+                    backdropColor = new PDColor(backdropColorArray, colorSpace);
+                }
             }
         }
         TransparencyGroup transparencyGroup = new TransparencyGroup(softMask.getGroup(), true,
@@ -728,15 +738,22 @@ public class PageDrawer extends PDFGraphicsStreamEngine
                 getGraphicsState().getSoftMask());
     }
 
-    // returns the non-stroking AWT Paint
-    private Paint getNonStrokingPaint() throws IOException
+    /**
+     * Returns the non-stroking AWT Paint. You may need to call this if you override {@link
+     * #showGlyph(Matrix, PDFont, int, Vector) showGlyph()}. See
+     * <a href="https://issues.apache.org/jira/browse/PDFBOX-5093">PDFBOX-5093</a> for more.
+     *
+     * @return The non-stroking AWT Paint.
+     * @throws IOException
+     */
+    protected final Paint getNonStrokingPaint() throws IOException
     {
         return applySoftMaskToPaint(getPaint(getGraphicsState().getNonStrokingColor()),
                 getGraphicsState().getSoftMask());
     }
 
     // create a new stroke based on the current CTM and the current stroke
-    private BasicStroke getStroke()
+    private Stroke getStroke()
     {
         PDGraphicsState state = getGraphicsState();
 
@@ -750,42 +767,67 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         }
 
         PDLineDashPattern dashPattern = state.getLineDashPattern();
+        // PDFBOX-5168: show an all-zero dash array line invisible like Adobe does
+        // must do it here because getDashArray() sets minimum width because of JVM bugs
+        float[] dashArray = dashPattern.getDashArray();
+        if (isAllZeroDash(dashArray))
+        {
+            return new Stroke()
+            {
+                @Override
+                public Shape createStrokedShape(Shape p)
+                {
+                    return new Area();
+                }
+            };
+        }
         float phaseStart = dashPattern.getPhase();
-        float[] dashArray = getDashArray(dashPattern);
+        dashArray = getDashArray(dashPattern);
         phaseStart = transformWidth(phaseStart);
 
-        // empty dash array is illegal
-        // avoid also infinite and NaN values (PDFBOX-3360)
-        if (dashArray.length == 0 || Float.isInfinite(phaseStart) || Float.isNaN(phaseStart))
-        {
-            dashArray = null;
-        }
-        else
-        {
-            for (int i = 0; i < dashArray.length; ++i)
-            {
-                if (Float.isInfinite(dashArray[i]) || Float.isNaN(dashArray[i]) || dashArray[i] < 0)
-                {
-                    dashArray = null;
-                    break;
-                }
-            }
-        }
         int lineCap = Math.min(2, Math.max(0, state.getLineCap()));
         int lineJoin = Math.min(2, Math.max(0, state.getLineJoin()));
-
         float miterLimit = state.getMiterLimit();
         if (miterLimit < 1)
         {
-            // avoid java.lang.IllegalArgumentException: miter limit < 1
+            LOG.warn("Miter limit must be >= 1, value " + miterLimit + " is ignored");
             miterLimit = 10;
         }
         return new BasicStroke(lineWidth, lineCap, lineJoin, miterLimit, dashArray, phaseStart);
     }
 
+    private boolean isAllZeroDash(float[] dashArray)
+    {
+        if (dashArray.length > 0)
+        {
+            for (int i = 0; i < dashArray.length; ++i)
+            {
+                if (dashArray[i] != 0)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
     private float[] getDashArray(PDLineDashPattern dashPattern)
     {
         float[] dashArray = dashPattern.getDashArray();
+        int phase = dashPattern.getPhase();
+        // avoid empty, infinite and NaN values (PDFBOX-3360)
+        if (dashArray.length == 0 || Float.isInfinite(phase) || Float.isNaN(phase))
+        {
+            return null;
+        }
+        for (int i = 0; i < dashArray.length; ++i)
+        {
+            if (Float.isInfinite(dashArray[i]) || Float.isNaN(dashArray[i]))
+            {
+                return null;
+            }
+        }
         if (JAVA_VERSION < 10)
         {
             float scalingFactorX = new Matrix(xform).getScalingFactorX();
@@ -1361,7 +1403,20 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         }
         else
         {
-            area = getGraphicsState().getCurrentClippingPath();
+            Rectangle2D bounds = shading.getBounds(new AffineTransform(), ctm);
+            if (bounds != null)
+            {
+                bounds.add(new Point2D.Double(Math.floor(bounds.getMinX() - 1),
+                        Math.floor(bounds.getMinY() - 1)));
+                bounds.add(new Point2D.Double(Math.ceil(bounds.getMaxX() + 1),
+                        Math.ceil(bounds.getMaxY() + 1)));
+                area = new Area(bounds);
+                area.intersect(getGraphicsState().getCurrentClippingPath());
+            }
+            else
+            {
+                area = getGraphicsState().getCurrentClippingPath();
+            }
         }
         if (isContentRendered())
         {
@@ -1374,10 +1429,10 @@ public class PageDrawer extends PDFGraphicsStreamEngine
     {
         lastClip = null;
         int deviceType = -1;
-        if (graphics.getDeviceConfiguration() != null
-                && graphics.getDeviceConfiguration().getDevice() != null)
+        GraphicsConfiguration graphicsConfiguration = graphics.getDeviceConfiguration();
+        if (graphicsConfiguration != null && graphicsConfiguration.getDevice() != null)
         {
-            deviceType = graphics.getDeviceConfiguration().getDevice().getType();
+            deviceType = graphicsConfiguration.getDevice().getType();
         }
         if (deviceType == GraphicsDevice.TYPE_PRINTER && !annotation.isPrinted())
         {
@@ -1617,9 +1672,15 @@ public class PageDrawer extends PDFGraphicsStreamEngine
                 {
                     // Use the current page as the parent group.
                     backdropImage = renderer.getPageImage();
-                    needsBackdrop = backdropImage != null;
-                    backdropX = minX;
-                    backdropY = (backdropImage != null) ? (backdropImage.getHeight() - maxY) : 0;
+                    if (backdropImage == null)
+                    {
+                        needsBackdrop = false;
+                    }
+                    else
+                    {
+                        backdropX = minX;
+                        backdropY = backdropImage.getHeight() - maxY;
+                    }
                 }
                 else
                 {

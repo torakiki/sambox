@@ -16,19 +16,6 @@
  */
 package org.sejda.sambox.input;
 
-import static org.sejda.sambox.util.CharUtils.ASCII_SPACE;
-import static org.sejda.sambox.util.CharUtils.isEOF;
-import static org.sejda.sambox.util.CharUtils.isEOL;
-import static org.sejda.sambox.util.CharUtils.isNul;
-import static org.sejda.sambox.util.CharUtils.isSpace;
-import static org.sejda.sambox.util.CharUtils.isWhitespace;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
 import org.sejda.commons.FastByteArrayOutputStream;
 import org.sejda.commons.util.IOUtils;
 import org.sejda.io.SeekableSource;
@@ -40,9 +27,22 @@ import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
+import static org.sejda.sambox.util.CharUtils.ASCII_SPACE;
+import static org.sejda.sambox.util.CharUtils.isEOF;
+import static org.sejda.sambox.util.CharUtils.isEOL;
+import static org.sejda.sambox.util.CharUtils.isNul;
+import static org.sejda.sambox.util.CharUtils.isSpace;
+import static org.sejda.sambox.util.CharUtils.isWhitespace;
+
 /**
- * Component responsible for parsing a a content stream to extract operands and such.
- * 
+ * Component responsible for parsing a content stream to extract operands and such.
+ *
  * @author Andrea Vacondio
  */
 public class ContentStreamParser extends SourceReader
@@ -126,7 +126,7 @@ public class ContentStreamParser extends SourceReader
 
     /**
      * Reads data until it finds an "EI" operator followed by a whitespace.
-     * 
+     *
      * @return the image data
      * @throws IOException
      */
@@ -145,8 +145,8 @@ public class ContentStreamParser extends SourceReader
             while ((current = source().read()) != -1)
             {
                 long position = source().position();
-                if ((current == 'E' && isEndOfImageFrom(position - 1))
-                        || (isWhitespace(current) && isEndOfImageFrom(position)))
+                if ((current == 'E' && isEndOfImageFrom(position - 1)) || (isWhitespace(current)
+                        && isEndOfImageFrom(position)))
                 {
                     break;
                 }
@@ -202,8 +202,8 @@ public class ContentStreamParser extends SourceReader
                         // continue checking the `followingBytes` (fixes issue8823.pdf).
                         continue;
                     }
-                    if (!isEOF(current) && !isEOL(current)
-                            && (current < ASCII_SPACE || current > 0x7F))
+                    if (!isEOF(current) && !isEOL(current) && (current < ASCII_SPACE
+                            || current > 0x7F))
                     {
                         // from PDF.js: Not a LF, CR, SPACE or any visible ASCII character, i.e. it's binary stuff.
                         return false;

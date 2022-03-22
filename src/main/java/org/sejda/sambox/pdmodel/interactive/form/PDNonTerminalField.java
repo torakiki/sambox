@@ -16,13 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
-import static java.util.Objects.nonNull;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSArrayList;
 import org.sejda.sambox.cos.COSBase;
@@ -33,13 +26,20 @@ import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import static java.util.Objects.nonNull;
+
 /**
  * A non terminal field in an interactive form.
- * 
+ * <p>
  * A non terminal field is a node in the fields tree node whose descendants are fields.
- * 
- * The attributes such as FT (field type) or V (field value) do not logically belong to the non terminal field but are
- * inheritable attributes for descendant terminal fields.
+ * <p>
+ * The attributes such as FT (field type) or V (field value) do not logically belong to the non
+ * terminal field but are inheritable attributes for descendant terminal fields.
  */
 public class PDNonTerminalField extends PDField
 {
@@ -48,7 +48,7 @@ public class PDNonTerminalField extends PDField
 
     /**
      * Constructor.
-     * 
+     *
      * @param acroForm The form that this field is part of.
      */
     public PDNonTerminalField(PDAcroForm acroForm)
@@ -58,10 +58,10 @@ public class PDNonTerminalField extends PDField
 
     /**
      * Constructor.
-     * 
+     *
      * @param acroForm The form that this field is part of.
-     * @param field the PDF object to represent as a field.
-     * @param parent the parent node of the node to be created
+     * @param field    the PDF object to represent as a field.
+     * @param parent   the parent node of the node to be created
      */
     PDNonTerminalField(PDAcroForm acroForm, COSDictionary field, PDNonTerminalField parent)
     {
@@ -108,7 +108,6 @@ public class PDNonTerminalField extends PDField
     }
 
     /**
-     * 
      * @return true if the field has at least one child
      */
     public boolean hasChildren()
@@ -128,7 +127,7 @@ public class PDNonTerminalField extends PDField
 
     /**
      * Adds a child to the array of children
-     * 
+     *
      * @param field
      */
     public void addChild(PDField field)
@@ -148,7 +147,7 @@ public class PDNonTerminalField extends PDField
 
     /**
      * Removes the given node from the children list
-     * 
+     *
      * @param field
      * @return the removed COSBase or null
      */
@@ -168,7 +167,8 @@ public class PDNonTerminalField extends PDField
 
     /**
      * <p>
-     * <b>Note:</b> while non-terminal fields <b>do</b> inherit field values, this method returns the local value,
+     * <b>Note:</b> while non-terminal fields <b>do</b> inherit field values, this method returns
+     * the local value,
      * without inheritance.
      */
     @Override
@@ -179,7 +179,8 @@ public class PDNonTerminalField extends PDField
 
     /**
      * <p>
-     * <b>Note:</b> while non-terminal fields <b>do</b> inherit field values, this method returns the local value,
+     * <b>Note:</b> while non-terminal fields <b>do</b> inherit field values, this method returns
+     * the local value,
      * without inheritance.
      */
     public COSBase getValue()
@@ -189,7 +190,8 @@ public class PDNonTerminalField extends PDField
 
     /**
      * <p>
-     * <b>Note:</b> while non-terminal fields <b>do</b> inherit field values, this method returns the local value,
+     * <b>Note:</b> while non-terminal fields <b>do</b> inherit field values, this method returns
+     * the local value,
      * without inheritance.
      */
     @Override
@@ -199,10 +201,12 @@ public class PDNonTerminalField extends PDField
     }
 
     /**
-     * Sets the value of this field. This may be of any kind which is valid for this field's children.
+     * Sets the value of this field. This may be of any kind which is valid for this field's
+     * children.
      *
      * <p>
-     * <b>Note:</b> while non-terminal fields <b>do</b> inherit field values, this method returns the local value,
+     * <b>Note:</b> while non-terminal fields <b>do</b> inherit field values, this method returns
+     * the local value,
      * without inheritance.
      */
     public void setValue(COSBase object)
@@ -214,7 +218,7 @@ public class PDNonTerminalField extends PDField
 
     /**
      * Sets the plain text value of this field.
-     * 
+     *
      * @param value Plain text
      * @throws IOException if the value could not be set
      */
@@ -227,10 +231,12 @@ public class PDNonTerminalField extends PDField
     }
 
     /**
-     * Returns the default value of this field. This may be of any kind which is valid for this field's children.
+     * Returns the default value of this field. This may be of any kind which is valid for this
+     * field's children.
      *
      * <p>
-     * <b>Note:</b> while non-terminal fields <b>do</b> inherit field values, this method returns the local value,
+     * <b>Note:</b> while non-terminal fields <b>do</b> inherit field values, this method returns
+     * the local value,
      * without inheritance.
      */
     public COSBase getDefaultValue()
@@ -239,10 +245,12 @@ public class PDNonTerminalField extends PDField
     }
 
     /**
-     * Sets the default of this field. This may be of any kind which is valid for this field's children.
+     * Sets the default of this field. This may be of any kind which is valid for this field's
+     * children.
      *
      * <p>
-     * <b>Note:</b> while non-terminal fields <b>do</b> inherit field values, this method returns the local value,
+     * <b>Note:</b> while non-terminal fields <b>do</b> inherit field values, this method returns
+     * the local value,
      * without inheritance.
      */
     public void setDefaultValue(COSBase value)
@@ -253,7 +261,7 @@ public class PDNonTerminalField extends PDField
     @Override
     public List<PDAnnotationWidget> getWidgets()
     {
-        return Collections.unmodifiableList(Collections.emptyList());
+        return Collections.emptyList();
     }
 
     @Override

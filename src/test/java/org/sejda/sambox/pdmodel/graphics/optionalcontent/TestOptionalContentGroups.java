@@ -16,18 +16,7 @@
  */
 package org.sejda.sambox.pdmodel.graphics.optionalcontent;
 
-import java.awt.Color;
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferInt;
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.imageio.ImageIO;
-
+import junit.framework.TestCase;
 import org.junit.Assert;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSName;
@@ -39,13 +28,26 @@ import org.sejda.sambox.pdmodel.PDPageContentStream;
 import org.sejda.sambox.pdmodel.PDPageContentStream.AppendMode;
 import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.PageMode;
+import org.sejda.sambox.pdmodel.documentinterchange.markedcontent.PDMarkedContent;
 import org.sejda.sambox.pdmodel.font.PDFont;
 import org.sejda.sambox.pdmodel.font.PDType1Font;
 import org.sejda.sambox.pdmodel.graphics.optionalcontent.PDOptionalContentProperties.BaseState;
 import org.sejda.sambox.rendering.PDFRenderer;
+import org.sejda.sambox.text.PDFMarkedContentExtractor;
+import org.sejda.sambox.text.TextPosition;
 import org.sejda.sambox.util.SpecVersionUtils;
 
-import junit.framework.TestCase;
+import javax.imageio.ImageIO;
+import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferInt;
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Tests optional content group functionality (also called layers).
@@ -63,7 +65,7 @@ public class TestOptionalContentGroups extends TestCase
 
     /**
      * Tests OCG generation.
-     * 
+     *
      * @throws Exception if an error occurs
      */
     public void testOCGGeneration() throws Exception
@@ -139,8 +141,8 @@ public class TestOptionalContentGroups extends TestCase
             contentStream.beginText();
             contentStream.setFont(font, 12);
             contentStream.newLineAtOffset(80, 500);
-            contentStream
-                    .showText("This is from a disabled layer. If you see this, that's NOT good!");
+            contentStream.showText(
+                    "This is from a disabled layer. If you see this, that's NOT good!");
             contentStream.endText();
             contentStream.endMarkedContent();
 
@@ -157,7 +159,7 @@ public class TestOptionalContentGroups extends TestCase
 
     /**
      * Tests OCG functions on a loaded PDF.
-     * 
+     *
      * @throws Exception if an error occurs
      */
     public void testOCGConsumption() throws Exception
@@ -212,13 +214,42 @@ public class TestOptionalContentGroups extends TestCase
             assertTrue(nameSet.contains("enabled"));
             assertTrue(nameSet.contains("disabled"));
 
+            PDFMarkedContentExtractor extractor = new PDFMarkedContentExtractor();
+            extractor.processPage(page);
+            List<PDMarkedContent> markedContents = extractor.getMarkedContents();
+            assertEquals("oc1", markedContents.get(0).getTag());
+            assertEquals("PDF 1.5: Optional Content Groups"
+                            + "You should see a green textline, but no red text line.",
+                    textPositionListToString(markedContents.get(0).getContents()));
+            assertEquals("oc2", markedContents.get(1).getTag());
+            assertEquals("This is from an enabled layer. If you see this, that's good.",
+                    textPositionListToString(markedContents.get(1).getContents()));
+            assertEquals("oc3", markedContents.get(2).getTag());
+            assertEquals("This is from a disabled layer. If you see this, that's NOT good!",
+                    textPositionListToString(markedContents.get(2).getContents()));
         }
+    }
+
+    /**
+     * Convert a list of TextPosition objects to a string.
+     *
+     * @param contents list of TextPosition objects.
+     * @return
+     */
+    private String textPositionListToString(List<Object> contents)
+    {
+        StringBuilder sb = new StringBuilder();
+        for (Object o : contents)
+        {
+            TextPosition tp = (TextPosition) o;
+            sb.append(tp.getUnicode());
+        }
+        return sb.toString();
     }
 
     public void testOCGsWithSameNameCanHaveDifferentVisibility() throws Exception
     {
-        PDDocument doc = new PDDocument();
-        try
+        try (PDDocument doc = new PDDocument())
         {
             // Create new page
             PDPage page = new PDPage();
@@ -273,8 +304,8 @@ public class TestOptionalContentGroups extends TestCase
             contentStream.beginText();
             contentStream.setFont(font, 12);
             contentStream.newLineAtOffset(80, 500);
-            contentStream
-                    .showText("This is from a disabled layer. If you see this, that's NOT good!");
+            contentStream.showText(
+                    "This is from a disabled layer. If you see this, that's NOT good!");
             contentStream.endText();
             contentStream.endMarkedContent();
 
@@ -283,15 +314,11 @@ public class TestOptionalContentGroups extends TestCase
             File targetFile = new File(testResultsDir, "ocg-generation-same-name.pdf");
             doc.writeTo(targetFile);
         }
-        finally
-        {
-            doc.close();
-        }
     }
 
     /**
-     * PDFBOX-4496: setGroupEnabled(String, boolean) must catch all OCGs of a name even when several names are
-     * identical.
+     * PDFBOX-4496: setGroupEnabled(String, boolean) must catch all OCGs of a name even when several
+     * names are identical.
      *
      * @throws IOException
      */
@@ -392,8 +419,8 @@ public class TestOptionalContentGroups extends TestCase
         }
 
         // render PDF with science disabled and alternatives with same name enabled
-        try (PDDocument doc = PDDocument
-                .load(new File(testResultsDir, "ocg-generation-same-name-off.pdf")))
+        try (PDDocument doc = PDDocument.load(
+                new File(testResultsDir, "ocg-generation-same-name-off.pdf")))
         {
             doc.getDocumentCatalog().getOCProperties().setGroupEnabled("background", false);
             doc.getDocumentCatalog().getOCProperties().setGroupEnabled("science", false);
@@ -440,8 +467,8 @@ public class TestOptionalContentGroups extends TestCase
             doc2.writeTo(targetFile.getAbsolutePath());
         }
 
-        try (PDDocument doc = PDDocument
-                .load(new File(testResultsDir, "ocg-generation-same-name-off-expected.pdf")))
+        try (PDDocument doc = PDDocument.load(
+                new File(testResultsDir, "ocg-generation-same-name-off-expected.pdf")))
         {
             expectedImage = new PDFRenderer(doc).renderImage(0, 2);
             ImageIO.write(expectedImage, "png",

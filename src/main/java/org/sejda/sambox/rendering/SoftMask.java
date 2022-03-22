@@ -16,6 +16,10 @@
  */
 package org.sejda.sambox.rendering;
 
+import org.sejda.sambox.pdmodel.common.function.PDFunction;
+import org.sejda.sambox.pdmodel.common.function.PDFunctionTypeIdentity;
+import org.sejda.sambox.pdmodel.graphics.color.PDColor;
+
 import java.awt.Color;
 import java.awt.Paint;
 import java.awt.PaintContext;
@@ -29,13 +33,9 @@ import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
 
-import org.sejda.sambox.pdmodel.common.function.PDFunction;
-import org.sejda.sambox.pdmodel.common.function.PDFunctionTypeIdentity;
-import org.sejda.sambox.pdmodel.graphics.color.PDColor;
-
 /**
  * A Paint which applies a soft mask to an underlying Paint.
- * 
+ *
  * @author Petr Slaby
  * @author John Hewson
  * @author Matthias Bläsing
@@ -55,11 +55,11 @@ class SoftMask implements Paint
     /**
      * Creates a new soft mask paint.
      *
-     * @param paint underlying paint.
-     * @param mask soft mask
-     * @param bboxDevice bbox of the soft mask in the underlying Graphics2D device space
-     * @param backdropColor the color to be used outside the transparency group’s bounding box; if null, black will be
-     * used.
+     * @param paint            underlying paint.
+     * @param mask             soft mask
+     * @param bboxDevice       bbox of the soft mask in the underlying Graphics2D device space
+     * @param backdropColor    the color to be used outside the transparency group’s bounding box;
+     *                         if null, black will be used.
      * @param transferFunction the transfer function, may be null.
      */
     SoftMask(Paint paint, BufferedImage mask, Rectangle2D bboxDevice, PDColor backdropColor,
@@ -206,6 +206,7 @@ class SoftMask implements Paint
         @Override
         public void dispose()
         {
+            context.dispose();
         }
     }
 }

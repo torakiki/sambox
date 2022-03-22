@@ -88,7 +88,7 @@ public final class PDResources implements COSObjectable
      * Constructor for reading.
      *
      * @param resourceDictionary The cos dictionary for this resource.
-     * @param resourceCache The document's resource cache, may be null.
+     * @param resourceCache      The document's resource cache, may be null.
      */
     public PDResources(COSDictionary resourceDictionary, ResourceCache resourceCache)
     {
@@ -170,11 +170,12 @@ public final class PDResources implements COSObjectable
     }
 
     /**
-     * Returns the color space resource with the given name, or null if none exists. This method is for PDFBox internal
-     * use only, others should use {@link getColorSpace(COSName)}.
+     * Returns the color space resource with the given name, or null if none exists. This method is
+     * for PDFBox internal use only, others should use {@link getColorSpace(COSName)}.
      *
-     * @param name Name of the color space resource.
-     * @param wasDefault if current color space was used by a default color space. This parameter is to
+     * @param name       Name of the color space resource.
+     * @param wasDefault if current color space was used by a default color space. This parameter is
+     *                   to
      * @return a new color space.
      * @throws IOException if something went wrong.
      */
@@ -241,12 +242,12 @@ public final class PDResources implements COSObjectable
         PDExtendedGraphicsState extGState = null;
         COSBase base = get(COSName.EXT_G_STATE, name);
         COSDictionary dict = null;
-        
+
         if (base instanceof COSDictionary)
         {
-            dict = (COSDictionary) base;    
+            dict = (COSDictionary) base;
         }
-        
+
         if (dict != null)
         {
             extGState = new PDExtendedGraphicsState(dict);
@@ -431,8 +432,8 @@ public final class PDResources implements COSObjectable
             {
                 // don't cache if it might use page resources, see PDFBOX-2370 and PDFBOX-3484
                 COSName colorSpaceName = (COSName) colorSpace;
-                if (colorSpaceName.equals(COSName.DEVICECMYK)
-                        && hasColorSpace(COSName.DEFAULT_CMYK))
+                if (colorSpaceName.equals(COSName.DEVICECMYK) && hasColorSpace(
+                        COSName.DEFAULT_CMYK))
                 {
                     return false;
                 }
@@ -440,8 +441,8 @@ public final class PDResources implements COSObjectable
                 {
                     return false;
                 }
-                if (colorSpaceName.equals(COSName.DEVICEGRAY)
-                        && hasColorSpace(COSName.DEFAULT_GRAY))
+                if (colorSpaceName.equals(COSName.DEVICEGRAY) && hasColorSpace(
+                        COSName.DEFAULT_GRAY))
                 {
                     return false;
                 }
@@ -455,13 +456,13 @@ public final class PDResources implements COSObjectable
     }
 
     /**
-     * Returns the resource with the given name and kind as an indirect object, or null.
+     * @return the resource with the given name and kind as an indirect object, or null.
      */
     public COSObjectKey getIndirectKey(COSName kind, COSName name)
     {
-        COSBase found = Optional
-                .ofNullable(resources.getDictionaryObject(kind, COSDictionary.class))
-                .map(d -> d.getItem(name)).orElse(null);
+        COSBase found = Optional.ofNullable(
+                        resources.getDictionaryObject(kind, COSDictionary.class)).map(d -> d.getItem(name))
+                .orElse(null);
         if (found instanceof ExistingIndirectCOSObject)
         {
             return ((ExistingIndirectCOSObject) found).id().objectIdentifier;
@@ -480,8 +481,8 @@ public final class PDResources implements COSObjectable
      */
     private COSBase get(COSName kind, COSName name)
     {
-        return ofNullable(resources.getDictionaryObject(kind, COSDictionary.class))
-                .map(d -> d.getDictionaryObject(name)).orElse(null);
+        return ofNullable(resources.getDictionaryObject(kind, COSDictionary.class)).map(
+                d -> d.getDictionaryObject(name)).orElse(null);
     }
 
     /**
@@ -545,13 +546,13 @@ public final class PDResources implements COSObjectable
      */
     private Iterable<COSName> getNames(COSName kind)
     {
-        return ofNullable(resources.getDictionaryObject(kind, COSDictionary.class))
-                .map(COSDictionary::keySet).orElseGet(Collections::emptySet);
+        return ofNullable(resources.getDictionaryObject(kind, COSDictionary.class)).map(
+                COSDictionary::keySet).orElseGet(Collections::emptySet);
     }
 
     /**
-     * Adds the given font to the resources of the current page and returns the name for the new resources. Returns the
-     * existing resource name if the given item already exists.
+     * Adds the given font to the resources of the current page and returns the name for the new
+     * resources. Returns the existing resource name if the given item already exists.
      *
      * @param font the font to add
      * @return the name of the resource in the resources dictionary
@@ -562,8 +563,8 @@ public final class PDResources implements COSObjectable
     }
 
     /**
-     * Adds the given color space to the resources of the current page and returns the name for the new resources.
-     * Returns the existing resource name if the given item already exists.
+     * Adds the given color space to the resources of the current page and returns the name for the
+     * new resources. Returns the existing resource name if the given item already exists.
      *
      * @param colorSpace the color space to add
      * @return the name of the resource in the resources dictionary
@@ -574,8 +575,9 @@ public final class PDResources implements COSObjectable
     }
 
     /**
-     * Adds the given extended graphics state to the resources of the current page and returns the name for the new
-     * resources. Returns the existing resource name if the given item already exists.
+     * Adds the given extended graphics state to the resources of the current page and returns the
+     * name for the new resources. Returns the existing resource name if the given item already
+     * exists.
      *
      * @param extGState the extended graphics state to add
      * @return the name of the resource in the resources dictionary
@@ -586,8 +588,8 @@ public final class PDResources implements COSObjectable
     }
 
     /**
-     * Adds the given shading to the resources of the current page and returns the name for the new resources. Returns
-     * the existing resource name if the given item already exists.
+     * Adds the given shading to the resources of the current page and returns the name for the new
+     * resources. Returns the existing resource name if the given item already exists.
      *
      * @param shading the shading to add
      * @return the name of the resource in the resources dictionary
@@ -598,8 +600,8 @@ public final class PDResources implements COSObjectable
     }
 
     /**
-     * Adds the given pattern to the resources of the current page and returns the name for the new resources. Returns
-     * the existing resource name if the given item already exists.
+     * Adds the given pattern to the resources of the current page and returns the name for the new
+     * resources. Returns the existing resource name if the given item already exists.
      *
      * @param pattern the pattern to add
      * @return the name of the resource in the resources dictionary
@@ -610,8 +612,8 @@ public final class PDResources implements COSObjectable
     }
 
     /**
-     * Adds the given property list to the resources of the current page and returns the name for the new resources.
-     * Returns the existing resource name if the given item already exists.
+     * Adds the given property list to the resources of the current page and returns the name for
+     * the new resources. Returns the existing resource name if the given item already exists.
      *
      * @param properties the property list to add
      * @return the name of the resource in the resources dictionary
@@ -626,8 +628,8 @@ public final class PDResources implements COSObjectable
     }
 
     /**
-     * Adds the given image to the resources of the current page and returns the name for the new resources. Returns the
-     * existing resource name if the given item already exists.
+     * Adds the given image to the resources of the current page and returns the name for the new
+     * resources. Returns the existing resource name if the given item already exists.
      *
      * @param image the image to add
      * @return the name of the resource in the resources dictionary
@@ -638,8 +640,8 @@ public final class PDResources implements COSObjectable
     }
 
     /**
-     * Adds the given form to the resources of the current page and returns the name for the new resources. Returns the
-     * existing resource name if the given item already exists.
+     * Adds the given form to the resources of the current page and returns the name for the new
+     * resources. Returns the existing resource name if the given item already exists.
      *
      * @param form the form to add
      * @return the name of the resource in the resources dictionary
@@ -650,11 +652,11 @@ public final class PDResources implements COSObjectable
     }
 
     /**
-     * Adds the given XObject to the resources of the current page and returns the name for the new resources. Returns
-     * the existing resource name if the given item already exists.
+     * Adds the given XObject to the resources of the current page and returns the name for the new
+     * resources. Returns the existing resource name if the given item already exists.
      *
      * @param xobject the XObject to add
-     * @param prefix the prefix to be used when creating the resource name
+     * @param prefix  the prefix to be used when creating the resource name
      * @return the name of the resource in the resources dictionary
      */
     public COSName add(PDXObject xobject, String prefix)
@@ -727,7 +729,7 @@ public final class PDResources implements COSObjectable
     /**
      * Sets the color space resource with the given name.
      *
-     * @param name the name of the resource
+     * @param name       the name of the resource
      * @param colorSpace the color space to be added
      */
     public void put(COSName name, PDColorSpace colorSpace)
@@ -738,7 +740,7 @@ public final class PDResources implements COSObjectable
     /**
      * Sets the extended graphics state resource with the given name.
      *
-     * @param name the name of the resource
+     * @param name      the name of the resource
      * @param extGState the extended graphics state to be added
      */
     public void put(COSName name, PDExtendedGraphicsState extGState)
@@ -749,7 +751,7 @@ public final class PDResources implements COSObjectable
     /**
      * Sets the shading resource with the given name.
      *
-     * @param name the name of the resource
+     * @param name    the name of the resource
      * @param shading the shading to be added
      */
     public void put(COSName name, PDShading shading)
@@ -760,7 +762,7 @@ public final class PDResources implements COSObjectable
     /**
      * Sets the pattern resource with the given name.
      *
-     * @param name the name of the resource
+     * @param name    the name of the resource
      * @param pattern the pattern to be added
      */
     public void put(COSName name, PDAbstractPattern pattern)
@@ -771,7 +773,7 @@ public final class PDResources implements COSObjectable
     /**
      * Sets the property list resource with the given name.
      *
-     * @param name the name of the resource
+     * @param name       the name of the resource
      * @param properties the property list to be added
      */
     public void put(COSName name, PDPropertyList properties)
@@ -782,7 +784,7 @@ public final class PDResources implements COSObjectable
     /**
      * Sets the XObject resource with the given name.
      *
-     * @param name the name of the resource
+     * @param name    the name of the resource
      * @param xobject the XObject to be added
      */
     public void put(COSName name, PDXObject xobject)

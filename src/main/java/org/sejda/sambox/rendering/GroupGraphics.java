@@ -45,18 +45,19 @@ import java.util.Map;
 /**
  * Graphics implementation for non-isolated transparency groups.
  * <p>
- * Non-isolated groups require that the group backdrop (copied from parent group or page) is used as the initial
- * contents of the image to which the group is rendered. This allows blend modes to blend the group contents with the
- * graphics behind the group. Finally when the group rendering is done, backdrop removal must be computed (see
- * {@link #removeBackdrop(java.awt.image.BufferedImage, int, int) removeBackdrop}). It ensures the backdrop is not
- * rendered twice on the parent but it leaves the effects of blend modes.
+ * Non-isolated groups require that the group backdrop (copied from parent group or page) is used as
+ * the initial contents of the image to which the group is rendered. This allows blend modes to
+ * blend the group contents with the graphics behind the group. Finally when the group rendering is
+ * done, backdrop removal must be computed (see {@link #removeBackdrop(java.awt.image.BufferedImage,
+ * int, int) removeBackdrop}). It ensures the backdrop is not rendered twice on the parent but it
+ * leaves the effects of blend modes.
  * <p>
- * This class renders the group contents to two images. <code>groupImage</code> is initialized with the backdrop and
- * group contents are drawn over it. <code>groupAlphaImage</code> is initially fully transparent and it accumulates the
- * total alpha of the group contents excluding backdrop.
+ * This class renders the group contents to two images. <code>groupImage</code> is initialized with
+ * the backdrop and group contents are drawn over it. <code>groupAlphaImage</code> is initially
+ * fully transparent and it accumulates the total alpha of the group contents excluding backdrop.
  * <p>
- * If a non-isolated group uses only the blend mode Normal, it can be optimized and rendered like an isolated group;
- * backdrop usage and removal are not needed.
+ * If a non-isolated group uses only the blend mode Normal, it can be optimized and rendered like an
+ * isolated group; backdrop usage and removal are not needed.
  */
 
 class GroupGraphics extends Graphics2D
@@ -114,6 +115,8 @@ class GroupGraphics extends Graphics2D
         {
             return new GroupGraphics(groupImage, (Graphics2D) g, groupAlphaImage, (Graphics2D) a);
         }
+        g.dispose();
+        a.dispose();
         throw new UnsupportedOperationException();
     }
 
@@ -568,11 +571,13 @@ class GroupGraphics extends Graphics2D
     }
 
     /**
-     * Computes backdrop removal. The backdrop removal equation is given in section 11.4.4 in the PDF 32000-1:2008
-     * standard. It returns the final color <code>C</code> for each pixel in the group:<br>
+     * Computes backdrop removal. The backdrop removal equation is given in section 11.4.4 in the
+     * PDF 32000-1:2008 standard. It returns the final color <code>C</code> for each pixel in the
+     * group:<br>
      * <code>C = Cn + (Cn - C0) * (alpha0 / alphagn - alpha0)</code><br>
      * where<br>
-     * <code>Cn</code> is the group color including backdrop (read from <code>groupImage</code>),<br>
+     * <code>Cn</code> is the group color including backdrop (read from
+     * <code>groupImage</code>),<br>
      * <code>C0</code> is the backdrop color,<br>
      * <code>alpha0</code> is the backdrop alpha,<br>
      * <code>alphagn</code> is the group alpha excluding backdrop (read the alpha channel from
@@ -581,14 +586,15 @@ class GroupGraphics extends Graphics2D
      * The alpha of the result is equal to <code>alphagn</code>, i.e., the alpha channel of
      * <code>groupAlphaImage</code>.
      * <p>
-     * The <code>backdrop</code> image may be much larger than <code>groupImage</code> if, for example, the current page
-     * is used as the backdrop. Only a specific rectangular region of <code>backdrop</code> is used in the backdrop
-     * removal: upper-left corner is at <code>(offsetX, offsetY)</code>; width and height are equal to those of
+     * The <code>backdrop</code> image may be much larger than <code>groupImage</code> if, for
+     * example, the current page is used as the backdrop. Only a specific rectangular region of
+     * <code>backdrop</code> is used in the backdrop removal: upper-left corner is at
+     * <code>(offsetX, offsetY)</code>; width and height are equal to those of
      * <code>groupImage</code>.
      *
      * @param backdrop group backdrop
-     * @param offsetX backdrop left X coordinate
-     * @param offsetY backdrop upper Y coordinate
+     * @param offsetX  backdrop left X coordinate
+     * @param offsetY  backdrop upper Y coordinate
      */
     void removeBackdrop(BufferedImage backdrop, int offsetX, int offsetY)
     {
@@ -604,8 +610,8 @@ class GroupGraphics extends Graphics2D
         DataBuffer backdropDataBuffer = backdrop.getRaster().getDataBuffer();
 
         if (groupType == BufferedImage.TYPE_INT_ARGB
-                && groupAlphaType == BufferedImage.TYPE_INT_ARGB
-                && (backdropType == BufferedImage.TYPE_INT_ARGB
+                && groupAlphaType == BufferedImage.TYPE_INT_ARGB && (
+                backdropType == BufferedImage.TYPE_INT_ARGB
                         || backdropType == BufferedImage.TYPE_INT_RGB)
                 && groupDataBuffer instanceof DataBufferInt
                 && groupAlphaDataBuffer instanceof DataBufferInt
@@ -711,7 +717,8 @@ class GroupGraphics extends Graphics2D
     }
 
     /**
-     * Computes the backdrop removal equation. <code>C = Cn + (Cn - C0) * (alpha0 / alphagn - alpha0)</code>
+     * Computes the backdrop removal equation. <code>C = Cn + (Cn - C0) * (alpha0 / alphagn -
+     * alpha0)</code>
      */
     private int backdropRemoval(int groupRGB, int backdropRGB, int shift, float alphaFactor)
     {

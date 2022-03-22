@@ -480,9 +480,7 @@ public class COSArray extends COSBase implements List<COSBase>
      */
     public List<? extends COSBase> toList()
     {
-        ArrayList<COSBase> retList = new ArrayList<>(size());
-        retList.addAll(objects);
-        return retList;
+        return new ArrayList<>(objects);
     }
 
     @Override

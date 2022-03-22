@@ -16,19 +16,6 @@
  */
 package org.sejda.sambox.pdmodel;
 
-import static java.util.Objects.nonNull;
-import static org.sejda.commons.util.RequireUtils.requireState;
-import static org.sejda.io.CountingWritableByteChannel.from;
-
-import java.awt.Color;
-import java.awt.geom.AffineTransform;
-import java.io.Closeable;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.text.NumberFormat;
-import java.util.Locale;
-import java.util.Stack;
-
 import org.sejda.commons.util.IOUtils;
 import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.cos.COSArray;
@@ -60,6 +47,19 @@ import org.sejda.sambox.pdmodel.graphics.state.RenderingMode;
 import org.sejda.sambox.util.Matrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.awt.Color;
+import java.awt.geom.AffineTransform;
+import java.io.Closeable;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.text.NumberFormat;
+import java.util.Locale;
+import java.util.Stack;
+
+import static java.util.Objects.nonNull;
+import static org.sejda.commons.util.RequireUtils.requireState;
+import static org.sejda.io.CountingWritableByteChannel.from;
 
 /**
  * Provides the ability to write to a page content stream.
@@ -115,7 +115,7 @@ public final class PDPageContentStream implements Closeable
     /**
      * Create a new PDPage content stream.
      *
-     * @param document The document the page is part of.
+     * @param document   The document the page is part of.
      * @param sourcePage The page to write the contents to.
      * @throws IOException If there is an error writing to the page contents.
      */
@@ -127,10 +127,10 @@ public final class PDPageContentStream implements Closeable
     /**
      * Create a new PDPage content stream.
      *
-     * @param document The document the page is part of.
-     * @param sourcePage The page to write the contents to.
+     * @param document      The document the page is part of.
+     * @param sourcePage    The page to write the contents to.
      * @param appendContent Indicates whether content will be overwritten, appended or prepended.
-     * @param compress Tell if the content stream should compress the page contents.
+     * @param compress      Tell if the content stream should compress the page contents.
      * @throws IOException If there is an error writing to the page contents.
      */
     public PDPageContentStream(PDDocument document, PDPage sourcePage, AppendMode appendContent,
@@ -142,13 +142,15 @@ public final class PDPageContentStream implements Closeable
     /**
      * Create a new PDPage content stream.
      *
-     * @param document The document the page is part of.
-     * @param sourcePage The page to write the contents to.
+     * @param document      The document the page is part of.
+     * @param sourcePage    The page to write the contents to.
      * @param appendContent Indicates whether content will be overwritten, appended or prepended.
-     * @param compress Tell if the content stream should compress the page contents.
-     * @param resetContext Tell if the graphic context should be reset. This is only relevant when the appendContent
-     * parameter is set to {@link AppendMode#APPEND}. You should use this when appending to an existing stream, because
-     * the existing stream may have changed graphic properties (e.g. scaling, rotation).
+     * @param compress      Tell if the content stream should compress the page contents.
+     * @param resetContext  Tell if the graphic context should be reset. This is only relevant when
+     *                      the appendContent parameter is set to {@link AppendMode#APPEND}. You
+     *                      should use this when appending to an existing stream, because the
+     *                      existing stream may have changed graphic properties (e.g. scaling,
+     *                      rotation).
      * @throws IOException If there is an error writing to the page contents.
      */
     public PDPageContentStream(PDDocument document, PDPage sourcePage, AppendMode appendContent,
@@ -235,7 +237,7 @@ public final class PDPageContentStream implements Closeable
     /**
      * Create a new appearance stream. Note that this is not actually a "page" content stream.
      *
-     * @param doc The document the page is part of.
+     * @param doc        The document the page is part of.
      * @param appearance The appearance stream to write to.
      * @throws IOException If there is an error writing to the page contents.
      */
@@ -248,9 +250,9 @@ public final class PDPageContentStream implements Closeable
     /**
      * Create a new appearance stream. Note that this is not actually a "page" content stream.
      *
-     * @param doc The document the appearance is part of.
+     * @param doc        The document the appearance is part of.
      * @param appearance The appearance stream to add to.
-     * @param writer The writer to write the apperances
+     * @param writer     The writer to write the apperances
      * @throws IOException If there is an error writing to the page contents.
      */
     public PDPageContentStream(PDDocument doc, PDFormXObject appearance, ContentStreamWriter writer)
@@ -266,8 +268,8 @@ public final class PDPageContentStream implements Closeable
     /**
      * Create a new appearance stream. Note that this is not actually a "page" content stream.
      *
-     * @param doc The document the appearance is part of.
-     * @param pattern The pattern to add to.
+     * @param doc          The document the appearance is part of.
+     * @param pattern      The pattern to add to.
      * @param outputStream The output stream to write to.
      * @throws IOException If there is an error writing to the page contents.
      */
@@ -286,7 +288,8 @@ public final class PDPageContentStream implements Closeable
     /**
      * Begin some text operations.
      *
-     * @throws IOException If there is an error writing to the stream or if you attempt to nest beginText calls.
+     * @throws IOException           If there is an error writing to the stream or if you attempt to
+     *                               nest beginText calls.
      * @throws IllegalStateException If the method was not allowed to be called at this time.
      */
     public void beginText() throws IOException
@@ -302,7 +305,8 @@ public final class PDPageContentStream implements Closeable
     /**
      * End some text operations.
      *
-     * @throws IOException If there is an error writing to the stream or if you attempt to nest endText calls.
+     * @throws IOException           If there is an error writing to the stream or if you attempt to
+     *                               nest endText calls.
      * @throws IllegalStateException If the method was not allowed to be called at this time.
      */
     public void endText() throws IOException
@@ -327,7 +331,7 @@ public final class PDPageContentStream implements Closeable
     /**
      * Set the font and font size to draw text with.
      *
-     * @param font The font to use.
+     * @param font     The font to use.
      * @param fontSize The font size to draw the text.
      * @throws IOException If there is an error writing the font information.
      */
@@ -353,14 +357,17 @@ public final class PDPageContentStream implements Closeable
     }
 
     /**
-     * Shows the given text at the location specified by the current text matrix with the given interspersed
-     * positioning. This allows the user to efficiently position each glyph or sequence of glyphs.
+     * Shows the given text at the location specified by the current text matrix with the given
+     * interspersed positioning. This allows the user to efficiently position each glyph or sequence
+     * of glyphs.
      *
-     * @param textWithPositioningArray An array consisting of String and Float types. Each String is output to the page
-     * using the current text matrix. Using the default coordinate system, each interspersed number adjusts the current
-     * text matrix by translating to the left or down for horizontal and vertical text respectively. The number is
-     * expressed in thousands of a text space unit, and may be negative.
-     *
+     * @param textWithPositioningArray An array consisting of String and Float types. Each String is
+     *                                 output to the page using the current text matrix. Using the
+     *                                 default coordinate system, each interspersed number adjusts
+     *                                 the current text matrix by translating to the left or down
+     *                                 for horizontal and vertical text respectively. The number is
+     *                                 expressed in thousands of a text space unit, and may be
+     *                                 negative.
      * @throws IOException if an io exception occurs.
      */
     public void showTextWithPositioning(Object[] textWithPositioningArray) throws IOException
@@ -390,7 +397,7 @@ public final class PDPageContentStream implements Closeable
      * Shows the given text at the location specified by the current text matrix.
      *
      * @param text The Unicode text to show.
-     * @throws IOException If an io exception occurs.
+     * @throws IOException              If an io exception occurs.
      * @throws IllegalArgumentException if a character isn't supported by the current font
      */
     public void showText(String text) throws IOException
@@ -462,11 +469,12 @@ public final class PDPageContentStream implements Closeable
     }
 
     /**
-     * The Td operator. Move to the start of the next line, offset from the start of the current line by (tx, ty).
+     * The Td operator. Move to the start of the next line, offset from the start of the current
+     * line by (tx, ty).
      *
      * @param tx The x translation.
      * @param ty The y translation.
-     * @throws IOException If there is an error writing to the stream.
+     * @throws IOException           If there is an error writing to the stream.
      * @throws IllegalStateException If the method was not allowed to be called at this time.
      */
     public void newLineAtOffset(float tx, float ty) throws IOException
@@ -482,11 +490,11 @@ public final class PDPageContentStream implements Closeable
     }
 
     /**
-     * The Tm operator. Sets the text matrix to the given values. A current text matrix will be replaced with the new
-     * one.
+     * The Tm operator. Sets the text matrix to the given values. A current text matrix will be
+     * replaced with the new one.
      *
      * @param matrix the transformation matrix
-     * @throws IOException If there is an error writing to the stream.
+     * @throws IOException           If there is an error writing to the stream.
      * @throws IllegalStateException If the method was not allowed to be called at this time.
      */
     public void setTextMatrix(Matrix matrix) throws IOException
@@ -503,9 +511,8 @@ public final class PDPageContentStream implements Closeable
      * Draw an image at the x,y coordinates, with the default size of the image.
      *
      * @param image The image to draw.
-     * @param x The x-coordinate to draw the image.
-     * @param y The y-coordinate to draw the image.
-     *
+     * @param x     The x-coordinate to draw the image.
+     * @param y     The y-coordinate to draw the image.
      * @throws IOException If there is an error writing to the stream.
      */
     public void drawImage(PDImageXObject image, float x, float y) throws IOException
@@ -521,13 +528,12 @@ public final class PDPageContentStream implements Closeable
     /**
      * Draw an image at the x,y coordinates, with the given size.
      *
-     * @param image The image to draw.
-     * @param x The x-coordinate to draw the image.
-     * @param y The y-coordinate to draw the image.
-     * @param width The width to draw the image.
+     * @param image  The image to draw.
+     * @param x      The x-coordinate to draw the image.
+     * @param y      The y-coordinate to draw the image.
+     * @param width  The width to draw the image.
      * @param height The height to draw the image.
-     *
-     * @throws IOException If there is an error writing to the stream.
+     * @throws IOException           If there is an error writing to the stream.
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void drawImage(PDImageXObject image, float x, float y, float width, float height)
@@ -545,11 +551,10 @@ public final class PDPageContentStream implements Closeable
     /**
      * Draw an image at the origin with the given transformation matrix.
      *
-     * @param image The image to draw.
+     * @param image  The image to draw.
      * @param matrix The transformation matrix to apply to the image.
-     * @param state the graphic state to use
-     *
-     * @throws IOException If there is an error writing to the stream.
+     * @param state  the graphic state to use
+     * @throws IOException           If there is an error writing to the stream.
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void drawImage(PDImageXObject image, Matrix matrix, PDExtendedGraphicsState state)
@@ -597,9 +602,8 @@ public final class PDPageContentStream implements Closeable
      * Draw an inline image at the x,y coordinates, with the default size of the image.
      *
      * @param inlineImage The inline image to draw.
-     * @param x The x-coordinate to draw the inline image.
-     * @param y The y-coordinate to draw the inline image.
-     *
+     * @param x           The x-coordinate to draw the inline image.
+     * @param y           The y-coordinate to draw the inline image.
      * @throws IOException If there is an error writing to the stream.
      */
     public void drawImage(PDInlineImage inlineImage, float x, float y) throws IOException
@@ -611,12 +615,11 @@ public final class PDPageContentStream implements Closeable
      * Draw an inline image at the x,y coordinates and a certain width and height.
      *
      * @param inlineImage The inline image to draw.
-     * @param x The x-coordinate to draw the inline image.
-     * @param y The y-coordinate to draw the inline image.
-     * @param width The width of the inline image to draw.
-     * @param height The height of the inline image to draw.
-     *
-     * @throws IOException If there is an error writing to the stream.
+     * @param x           The x-coordinate to draw the inline image.
+     * @param y           The y-coordinate to draw the inline image.
+     * @param width       The width of the inline image to draw.
+     * @param height      The height of the inline image to draw.
+     * @throws IOException           If there is an error writing to the stream.
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void drawImage(PDInlineImage inlineImage, float x, float y, float width, float height)
@@ -644,11 +647,12 @@ public final class PDPageContentStream implements Closeable
         sb.append("/");
         sb.append(inlineImage.getColorSpace().getName());
 
-        if (inlineImage.getDecode() != null && inlineImage.getDecode().size() > 0)
+        COSArray decode = inlineImage.getDecode();
+        if (decode != null && decode.size() > 0)
         {
             sb.append("\n /D ");
             sb.append("[");
-            for (COSBase base : inlineImage.getDecode())
+            for (COSBase base : decode)
             {
                 sb.append(((COSNumber) base).intValue());
                 sb.append(" ");
@@ -681,7 +685,7 @@ public final class PDPageContentStream implements Closeable
      * Draws the given Form XObject at the current location.
      *
      * @param form Form XObject
-     * @throws IOException if the content stream could not be written
+     * @throws IOException           if the content stream could not be written
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void drawForm(PDFormXObject form) throws IOException
@@ -714,7 +718,7 @@ public final class PDPageContentStream implements Closeable
 
     /**
      * q operator. Saves the current graphics state.
-     * 
+     *
      * @throws IOException If an error occurs while writing to the stream.
      */
     public void saveGraphicsState() throws IOException
@@ -740,7 +744,7 @@ public final class PDPageContentStream implements Closeable
 
     /**
      * Q operator. Restores the current graphics state.
-     * 
+     *
      * @throws IOException If an error occurs while writing to the stream.
      */
     public void restoreGraphicsState() throws IOException
@@ -790,7 +794,7 @@ public final class PDPageContentStream implements Closeable
     {
         if (strokingColorSpaceStack.isEmpty()
                 || strokingColorSpaceStack.peek() != color.getColorSpace()
-                        && color.getColorSpace() != null)
+                && color.getColorSpace() != null)
         {
             writeOperand(getName(color.getColorSpace()));
             writeOperator(OperatorName.STROKING_COLORSPACE);
@@ -840,15 +844,16 @@ public final class PDPageContentStream implements Closeable
      * @param r The red value
      * @param g The green value.
      * @param b The blue value.
-     * @throws IOException If an IO error occurs while writing to the stream.
+     * @throws IOException              If an IO error occurs while writing to the stream.
      * @throws IllegalArgumentException If the parameters are invalid.
      */
     public void setStrokingColor(float r, float g, float b) throws IOException
     {
         if (isOutsideOneInterval(r) || isOutsideOneInterval(g) || isOutsideOneInterval(b))
         {
-            throw new IllegalArgumentException("Parameters must be within 0..1, but are "
-                    + String.format("(%.2f,%.2f,%.2f)", r, g, b));
+            throw new IllegalArgumentException(
+                    "Parameters must be within 0..1, but are " + String.format("(%.2f,%.2f,%.2f)",
+                            r, g, b));
         }
         writeOperand(r);
         writeOperand(g);
@@ -863,17 +868,19 @@ public final class PDPageContentStream implements Closeable
      * @param r The red value
      * @param g The green value.
      * @param b The blue value.
-     * @throws IOException If an IO error occurs while writing to the stream.
+     * @throws IOException              If an IO error occurs while writing to the stream.
      * @throws IllegalArgumentException If the parameters are invalid.
-     * @deprecated use {@link #setStrokingColor(float, float, float) setStrokingColor(r/255f, g/255f, b/255f)}
+     * @deprecated use {@link #setStrokingColor(float, float, float) setStrokingColor(r/255f,
+     * g/255f, b/255f)}
      */
     @Deprecated
     public void setStrokingColor(int r, int g, int b) throws IOException
     {
         if (isOutside255Interval(r) || isOutside255Interval(g) || isOutside255Interval(b))
         {
-            throw new IllegalArgumentException("Parameters must be within 0..255, but are "
-                    + String.format("(%d,%d,%d)", r, g, b));
+            throw new IllegalArgumentException(
+                    "Parameters must be within 0..255, but are " + String.format("(%d,%d,%d)", r, g,
+                            b));
         }
         setStrokingColor(r / 255f, g / 255f, b / 255f);
     }
@@ -885,7 +892,7 @@ public final class PDPageContentStream implements Closeable
      * @param m The magenta value.
      * @param y The yellow value.
      * @param k The black value.
-     * @throws IOException If an IO error occurs while writing to the stream.
+     * @throws IOException              If an IO error occurs while writing to the stream.
      * @throws IllegalArgumentException If the parameters are invalid.
      */
     public void setStrokingColor(float c, float m, float y, float k) throws IOException
@@ -893,8 +900,9 @@ public final class PDPageContentStream implements Closeable
         if (isOutsideOneInterval(c) || isOutsideOneInterval(m) || isOutsideOneInterval(y)
                 || isOutsideOneInterval(k))
         {
-            throw new IllegalArgumentException("Parameters must be within 0..1, but are "
-                    + String.format("(%.2f,%.2f,%.2f,%.2f)", c, m, y, k));
+            throw new IllegalArgumentException(
+                    "Parameters must be within 0..1, but are " + String.format(
+                            "(%.2f,%.2f,%.2f,%.2f)", c, m, y, k));
         }
         writeOperand(c);
         writeOperand(m);
@@ -908,7 +916,7 @@ public final class PDPageContentStream implements Closeable
      * Set the stroking color in the DeviceGray color space. Range is 0..1.
      *
      * @param g The gray value.
-     * @throws IOException If an IO error occurs while writing to the stream.
+     * @throws IOException              If an IO error occurs while writing to the stream.
      * @throws IllegalArgumentException If the parameter is invalid.
      */
     public void setStrokingColor(float g) throws IOException
@@ -926,7 +934,7 @@ public final class PDPageContentStream implements Closeable
      * Set the stroking color in the DeviceGray color space. Range is 0..255.
      *
      * @param g The gray value.
-     * @throws IOException If an IO error occurs while writing to the stream.
+     * @throws IOException              If an IO error occurs while writing to the stream.
      * @throws IllegalArgumentException If the parameter is invalid.
      * @deprecated Use {@link #setStrokingColor(float) setStrokingColor(g/255f)} instead.
      */
@@ -999,15 +1007,16 @@ public final class PDPageContentStream implements Closeable
      * @param r The red value.
      * @param g The green value.
      * @param b The blue value.
-     * @throws IOException If an IO error occurs while writing to the stream.
+     * @throws IOException              If an IO error occurs while writing to the stream.
      * @throws IllegalArgumentException If the parameters are invalid.
      */
     public void setNonStrokingColor(float r, float g, float b) throws IOException
     {
         if (isOutsideOneInterval(r) || isOutsideOneInterval(g) || isOutsideOneInterval(b))
         {
-            throw new IllegalArgumentException("Parameters must be within 0..1, but are "
-                    + String.format("(%.2f,%.2f,%.2f)", r, g, b));
+            throw new IllegalArgumentException(
+                    "Parameters must be within 0..1, but are " + String.format("(%.2f,%.2f,%.2f)",
+                            r, g, b));
         }
         writeOperand(r);
         writeOperand(g);
@@ -1022,17 +1031,19 @@ public final class PDPageContentStream implements Closeable
      * @param r The red value
      * @param g The green value.
      * @param b The blue value.
-     * @throws IOException If an IO error occurs while writing to the stream.
+     * @throws IOException              If an IO error occurs while writing to the stream.
      * @throws IllegalArgumentException If the parameters are invalid.
-     * @deprecated use {@link #setNonStrokingColor(float, float, float) setNonStrokingColor(r/255f, g/255f, b/255f)}
+     * @deprecated use {@link #setNonStrokingColor(float, float, float) setNonStrokingColor(r/255f,
+     * g/255f, b/255f)}
      */
     @Deprecated
     public void setNonStrokingColor(int r, int g, int b) throws IOException
     {
         if (isOutside255Interval(r) || isOutside255Interval(g) || isOutside255Interval(b))
         {
-            throw new IllegalArgumentException("Parameters must be within 0..255, but are "
-                    + String.format("(%d,%d,%d)", r, g, b));
+            throw new IllegalArgumentException(
+                    "Parameters must be within 0..255, but are " + String.format("(%d,%d,%d)", r, g,
+                            b));
         }
         setNonStrokingColor(r / 255f, g / 255f, b / 255f);
     }
@@ -1044,7 +1055,7 @@ public final class PDPageContentStream implements Closeable
      * @param m The magenta value.
      * @param y The yellow value.
      * @param k The black value.
-     * @throws IOException If an IO error occurs while writing to the stream.
+     * @throws IOException              If an IO error occurs while writing to the stream.
      * @throws IllegalArgumentException If the parameters are invalid.
      */
     public void setNonStrokingColor(int c, int m, int y, int k) throws IOException
@@ -1052,8 +1063,9 @@ public final class PDPageContentStream implements Closeable
         if (isOutside255Interval(c) || isOutside255Interval(m) || isOutside255Interval(y)
                 || isOutside255Interval(k))
         {
-            throw new IllegalArgumentException("Parameters must be within 0..255, but are "
-                    + String.format("(%d,%d,%d,%d)", c, m, y, k));
+            throw new IllegalArgumentException(
+                    "Parameters must be within 0..255, but are " + String.format("(%d,%d,%d,%d)", c,
+                            m, y, k));
         }
         setNonStrokingColor(c / 255f, m / 255f, y / 255f, k / 255f);
     }
@@ -1072,8 +1084,9 @@ public final class PDPageContentStream implements Closeable
         if (isOutsideOneInterval(c) || isOutsideOneInterval(m) || isOutsideOneInterval(y)
                 || isOutsideOneInterval(k))
         {
-            throw new IllegalArgumentException("Parameters must be within 0..1, but are "
-                    + String.format("(%.2f,%.2f,%.2f,%.2f)", c, m, y, k));
+            throw new IllegalArgumentException(
+                    "Parameters must be within 0..1, but are " + String.format(
+                            "(%.2f,%.2f,%.2f,%.2f)", c, m, y, k));
         }
         writeOperand(c);
         writeOperand(m);
@@ -1087,7 +1100,7 @@ public final class PDPageContentStream implements Closeable
      * Set the non-stroking color in the DeviceGray color space. Range is 0..255.
      *
      * @param g The gray value.
-     * @throws IOException If an IO error occurs while writing to the stream.
+     * @throws IOException              If an IO error occurs while writing to the stream.
      * @throws IllegalArgumentException If the parameter is invalid.
      */
     public void setNonStrokingColor(int g) throws IOException
@@ -1103,7 +1116,7 @@ public final class PDPageContentStream implements Closeable
      * Set the non-stroking color in the DeviceGray color space. Range is 0..1.
      *
      * @param g The gray value.
-     * @throws IOException If an IO error occurs while writing to the stream.
+     * @throws IOException              If an IO error occurs while writing to the stream.
      * @throws IllegalArgumentException If the parameter is invalid.
      */
     public void setNonStrokingColor(double g) throws IOException
@@ -1120,11 +1133,11 @@ public final class PDPageContentStream implements Closeable
     /**
      * Add a rectangle to the current path.
      *
-     * @param x The lower left x coordinate.
-     * @param y The lower left y coordinate.
-     * @param width The width of the rectangle.
+     * @param x      The lower left x coordinate.
+     * @param y      The lower left y coordinate.
+     * @param width  The width of the rectangle.
      * @param height The height of the rectangle.
-     * @throws IOException If the content stream could not be written.
+     * @throws IOException           If the content stream could not be written.
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void addRect(float x, float y, float width, float height) throws IOException
@@ -1141,8 +1154,8 @@ public final class PDPageContentStream implements Closeable
     }
 
     /**
-     * Append a cubic Bézier curve to the current path. The curve extends from the current point to the point (x3, y3),
-     * using (x1, y1) and (x2, y2) as the Bézier control points.
+     * Append a cubic Bézier curve to the current path. The curve extends from the current point to
+     * the point (x3, y3), using (x1, y1) and (x2, y2) as the Bézier control points.
      *
      * @param x1 x coordinate of the point 1
      * @param y1 y coordinate of the point 1
@@ -1150,7 +1163,7 @@ public final class PDPageContentStream implements Closeable
      * @param y2 y coordinate of the point 2
      * @param x3 x coordinate of the point 3
      * @param y3 y coordinate of the point 3
-     * @throws IOException If the content stream could not be written.
+     * @throws IOException           If the content stream could not be written.
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void curveTo(float x1, float y1, float x2, float y2, float x3, float y3)
@@ -1170,15 +1183,15 @@ public final class PDPageContentStream implements Closeable
     }
 
     /**
-     * Append a cubic Bézier curve to the current path. The curve extends from the current point to the point (x3, y3),
-     * using the current point and (x2, y2) as the Bézier control points.
+     * Append a cubic Bézier curve to the current path. The curve extends from the current point to
+     * the point (x3, y3), using the current point and (x2, y2) as the Bézier control points.
      *
      * @param x2 x coordinate of the point 2
      * @param y2 y coordinate of the point 2
      * @param x3 x coordinate of the point 3
      * @param y3 y coordinate of the point 3
      * @throws IllegalStateException If the method was called within a text block.
-     * @throws IOException If the content stream could not be written.
+     * @throws IOException           If the content stream could not be written.
      */
     public void curveTo2(float x2, float y2, float x3, float y3) throws IOException
     {
@@ -1194,14 +1207,14 @@ public final class PDPageContentStream implements Closeable
     }
 
     /**
-     * Append a cubic Bézier curve to the current path. The curve extends from the current point to the point (x3, y3),
-     * using (x1, y1) and (x3, y3) as the Bézier control points.
+     * Append a cubic Bézier curve to the current path. The curve extends from the current point to
+     * the point (x3, y3), using (x1, y1) and (x3, y3) as the Bézier control points.
      *
      * @param x1 x coordinate of the point 1
      * @param y1 y coordinate of the point 1
      * @param x3 x coordinate of the point 3
      * @param y3 y coordinate of the point 3
-     * @throws IOException If the content stream could not be written.
+     * @throws IOException           If the content stream could not be written.
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void curveTo1(float x1, float y1, float x3, float y3) throws IOException
@@ -1222,7 +1235,7 @@ public final class PDPageContentStream implements Closeable
      *
      * @param x The x coordinate.
      * @param y The y coordinate.
-     * @throws IOException If the content stream could not be written.
+     * @throws IOException           If the content stream could not be written.
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void moveTo(float x, float y) throws IOException
@@ -1241,7 +1254,7 @@ public final class PDPageContentStream implements Closeable
      *
      * @param x The x coordinate.
      * @param y The y coordinate.
-     * @throws IOException If the content stream could not be written.
+     * @throws IOException           If the content stream could not be written.
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void lineTo(float x, float y) throws IOException
@@ -1257,8 +1270,8 @@ public final class PDPageContentStream implements Closeable
 
     /**
      * Stroke the path.
-     * 
-     * @throws IOException If the content stream could not be written
+     *
+     * @throws IOException           If the content stream could not be written
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void stroke() throws IOException
@@ -1272,8 +1285,8 @@ public final class PDPageContentStream implements Closeable
 
     /**
      * Close and stroke the path.
-     * 
-     * @throws IOException If the content stream could not be written
+     *
+     * @throws IOException           If the content stream could not be written
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void closeAndStroke() throws IOException
@@ -1289,7 +1302,7 @@ public final class PDPageContentStream implements Closeable
     /**
      * Fills the path using the nonzero winding rule.
      *
-     * @throws IOException If the content stream could not be written
+     * @throws IOException           If the content stream could not be written
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void fill() throws IOException
@@ -1304,7 +1317,7 @@ public final class PDPageContentStream implements Closeable
     /**
      * Fills the path using the even-odd winding number rule.
      *
-     * @throws IOException If the content stream could not be written
+     * @throws IOException           If the content stream could not be written
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void fillEvenOdd() throws IOException
@@ -1318,11 +1331,11 @@ public final class PDPageContentStream implements Closeable
     }
 
     /**
-     * Fill and then stroke the path, using the nonzero winding number rule to determine the region to fill. This shall
-     * produce the same result as constructing two identical path objects, painting the first with {@link #fill() } and
-     * the second with {@link #stroke() }.
+     * Fill and then stroke the path, using the nonzero winding number rule to determine the region
+     * to fill. This shall produce the same result as constructing two identical path objects,
+     * painting the first with {@link #fill() } and the second with {@link #stroke() }.
      *
-     * @throws IOException If the content stream could not be written
+     * @throws IOException           If the content stream could not be written
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void fillAndStroke() throws IOException
@@ -1336,11 +1349,11 @@ public final class PDPageContentStream implements Closeable
     }
 
     /**
-     * Fill and then stroke the path, using the even-odd rule to determine the region to fill. This shall produce the
-     * same result as constructing two identical path objects, painting the first with {@link #fillEvenOdd() } and the
-     * second with {@link #stroke() }.
+     * Fill and then stroke the path, using the even-odd rule to determine the region to fill. This
+     * shall produce the same result as constructing two identical path objects, painting the first
+     * with {@link #fillEvenOdd() } and the second with {@link #stroke() }.
      *
-     * @throws IOException If the content stream could not be written
+     * @throws IOException           If the content stream could not be written
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void fillAndStrokeEvenOdd() throws IOException
@@ -1354,10 +1367,11 @@ public final class PDPageContentStream implements Closeable
     }
 
     /**
-     * Close, fill, and then stroke the path, using the nonzero winding number rule to determine the region to fill.
-     * This shall have the same effect as the sequence {@link #closePath() } and then {@link #fillAndStroke() }.
+     * Close, fill, and then stroke the path, using the nonzero winding number rule to determine the
+     * region to fill. This shall have the same effect as the sequence {@link #closePath() } and
+     * then {@link #fillAndStroke() }.
      *
-     * @throws IOException If the content stream could not be written
+     * @throws IOException           If the content stream could not be written
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void closeAndFillAndStroke() throws IOException
@@ -1371,10 +1385,11 @@ public final class PDPageContentStream implements Closeable
     }
 
     /**
-     * Close, fill, and then stroke the path, using the even-odd rule to determine the region to fill. This shall have
-     * the same effect as the sequence {@link #closePath() } and then {@link #fillAndStrokeEvenOdd() }.
+     * Close, fill, and then stroke the path, using the even-odd rule to determine the region to
+     * fill. This shall have the same effect as the sequence {@link #closePath() } and then {@link
+     * #fillAndStrokeEvenOdd() }.
      *
-     * @throws IOException If the content stream could not be written
+     * @throws IOException           If the content stream could not be written
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void closeAndFillAndStrokeEvenOdd() throws IOException
@@ -1391,7 +1406,7 @@ public final class PDPageContentStream implements Closeable
      * Fills the clipping area with the given shading.
      *
      * @param shading Shading resource
-     * @throws IOException If the content stream could not be written
+     * @throws IOException           If the content stream could not be written
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void shadingFill(PDShading shading) throws IOException
@@ -1409,7 +1424,7 @@ public final class PDPageContentStream implements Closeable
     /**
      * Closes the current subpath.
      *
-     * @throws IOException If the content stream could not be written
+     * @throws IOException           If the content stream could not be written
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void closePath() throws IOException
@@ -1424,7 +1439,7 @@ public final class PDPageContentStream implements Closeable
     /**
      * Intersects the current clipping path with the current path, using the nonzero rule.
      *
-     * @throws IOException If the content stream could not be written
+     * @throws IOException           If the content stream could not be written
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void clip() throws IOException
@@ -1442,7 +1457,7 @@ public final class PDPageContentStream implements Closeable
     /**
      * Intersects the current clipping path with the current path, using the even-odd rule.
      *
-     * @throws IOException If the content stream could not be written
+     * @throws IOException           If the content stream could not be written
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void clipEvenOdd() throws IOException
@@ -1462,7 +1477,7 @@ public final class PDPageContentStream implements Closeable
      * Set line width to the given value.
      *
      * @param lineWidth The width which is used for drwaing.
-     * @throws IOException If the content stream could not be written
+     * @throws IOException           If the content stream could not be written
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void setLineWidth(float lineWidth) throws IOException
@@ -1480,8 +1495,8 @@ public final class PDPageContentStream implements Closeable
      * Set the line join style.
      *
      * @param lineJoinStyle 0 for miter join, 1 for round join, and 2 for bevel join.
-     * @throws IOException If the content stream could not be written.
-     * @throws IllegalStateException If the method was called within a text block.
+     * @throws IOException              If the content stream could not be written.
+     * @throws IllegalStateException    If the method was called within a text block.
      * @throws IllegalArgumentException If the parameter is not a valid line join style.
      */
     public void setLineJoinStyle(int lineJoinStyle) throws IOException
@@ -1506,8 +1521,8 @@ public final class PDPageContentStream implements Closeable
      * Set the line cap style.
      *
      * @param lineCapStyle 0 for butt cap, 1 for round cap, and 2 for projecting square cap.
-     * @throws IOException If the content stream could not be written.
-     * @throws IllegalStateException If the method was called within a text block.
+     * @throws IOException              If the content stream could not be written.
+     * @throws IllegalStateException    If the method was called within a text block.
      * @throws IllegalArgumentException If the parameter is not a valid line cap style.
      */
     public void setLineCapStyle(int lineCapStyle) throws IOException
@@ -1532,8 +1547,8 @@ public final class PDPageContentStream implements Closeable
      * Set the line dash pattern.
      *
      * @param pattern The pattern array
-     * @param phase The phase of the pattern
-     * @throws IOException If the content stream could not be written.
+     * @param phase   The phase of the pattern
+     * @throws IOException           If the content stream could not be written.
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void setLineDashPattern(float[] pattern, float phase) throws IOException
@@ -1581,9 +1596,10 @@ public final class PDPageContentStream implements Closeable
     }
 
     /**
-     * Begin a marked content sequence with a reference to an entry in the page resources' Properties dictionary.
+     * Begin a marked content sequence with a reference to an entry in the page resources'
+     * Properties dictionary.
      *
-     * @param tag the tag
+     * @param tag          the tag
      * @param propertyList property list
      * @throws IOException If the content stream could not be written
      */
@@ -1606,7 +1622,7 @@ public final class PDPageContentStream implements Closeable
 
     /**
      * Set an extended graphics state.
-     * 
+     *
      * @param state The extended graphics state.
      * @throws IOException If the content stream could not be written.
      */
@@ -1620,9 +1636,9 @@ public final class PDPageContentStream implements Closeable
      * Write a comment line.
      *
      * @param comment
-     * @throws IOException If the content stream could not be written.
-     * @throws IllegalArgumentException If the comment contains a newline. This is not allowed, because the next line
-     * could be ordinary PDF content.
+     * @throws IOException              If the content stream could not be written.
+     * @throws IllegalArgumentException If the comment contains a newline. This is not allowed,
+     *                                  because the next line could be ordinary PDF content.
      */
     public void addComment(String comment) throws IOException
     {
@@ -1749,8 +1765,8 @@ public final class PDPageContentStream implements Closeable
     }
 
     /**
-     * Set the text rendering mode. This determines whether showing text shall cause glyph outlines to be stroked,
-     * filled, used as a clipping boundary, or some combination of the three.
+     * Set the text rendering mode. This determines whether showing text shall cause glyph outlines
+     * to be stroked, filled, used as a clipping boundary, or some combination of the three.
      *
      * @param rm The text rendering mode.
      * @throws IOException If the content stream could not be written.
@@ -1762,8 +1778,8 @@ public final class PDPageContentStream implements Closeable
     }
 
     /**
-     * Set the character spacing. The value shall be added to the horizontal or vertical component of the glyph's
-     * displacement, depending on the writing mode.
+     * Set the character spacing. The value shall be added to the horizontal or vertical component
+     * of the glyph's displacement, depending on the writing mode.
      *
      * @param spacing character spacing
      * @throws IOException If the content stream could not be written.
@@ -1775,8 +1791,8 @@ public final class PDPageContentStream implements Closeable
     }
 
     /**
-     * Set the word spacing. The value shall be added to the horizontal or vertical component of the ASCII SPACE
-     * character, depending on the writing mode.
+     * Set the word spacing. The value shall be added to the horizontal or vertical component of the
+     * ASCII SPACE character, depending on the writing mode.
      *
      * @param spacing word spacing
      * @throws IOException If the content stream could not be written.
@@ -1790,7 +1806,8 @@ public final class PDPageContentStream implements Closeable
     /**
      * Set the horizontal scaling to scale / 100.
      *
-     * @param scale number specifying the percentage of the normal width. Default value: 100 (normal width).
+     * @param scale number specifying the percentage of the normal width. Default value: 100 (normal
+     *              width).
      * @throws IOException If the content stream could not be written.
      */
     public void setHorizontalScaling(float scale) throws IOException
@@ -1800,11 +1817,11 @@ public final class PDPageContentStream implements Closeable
     }
 
     /**
-     * Set the text rise value, i.e. move the baseline up or down. This is useful for drawing superscripts or
-     * subscripts.
+     * Set the text rise value, i.e. move the baseline up or down. This is useful for drawing
+     * superscripts or subscripts.
      *
-     * @param rise Specifies the distance, in unscaled text space units, to move the baseline up or down from its
-     * default location. 0 restores the default location.
+     * @param rise Specifies the distance, in unscaled text space units, to move the baseline up or
+     *             down from its default location. 0 restores the default location.
      * @throws IOException
      */
     public void setTextRise(float rise) throws IOException

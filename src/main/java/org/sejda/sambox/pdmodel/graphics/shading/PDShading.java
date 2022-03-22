@@ -16,9 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.graphics.shading;
 
-import java.awt.Paint;
-import java.io.IOException;
-
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
@@ -29,9 +26,13 @@ import org.sejda.sambox.pdmodel.common.function.PDFunction;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
 import org.sejda.sambox.util.Matrix;
 
+import java.awt.Paint;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
+import java.io.IOException;
+
 /**
  * A Shading Resource.
- *
  */
 public abstract class PDShading implements COSObjectable
 {
@@ -159,8 +160,8 @@ public abstract class PDShading implements COSObjectable
     }
 
     /**
-     * An array of four numbers in the form coordinate system (see below), giving the coordinates of the left, bottom,
-     * right, and top edges, respectively, of the shading's bounding box.
+     * An array of four numbers in the form coordinate system (see below), giving the coordinates of
+     * the left, bottom, right, and top edges, respectively, of the shading's bounding box.
      *
      * @return the BBox of the form
      */
@@ -196,6 +197,19 @@ public abstract class PDShading implements COSObjectable
     }
 
     /**
+     * Calculate a bounding rectangle around the areas of this shading context.
+     *
+     * @param xform
+     * @param matrix
+     * @return Bounding rectangle or null, if not supported by this shading type.
+     * @throws java.io.IOException
+     */
+    public Rectangle2D getBounds(AffineTransform xform, Matrix matrix) throws IOException
+    {
+        return null;
+    }
+
+    /**
      * This will set the AntiAlias value.
      *
      * @param antiAlias the new AntiAlias value
@@ -227,7 +241,7 @@ public abstract class PDShading implements COSObjectable
         {
             COSBase colorSpaceDictionary = dictionary.getDictionaryObject(COSName.CS,
                     COSName.COLORSPACE);
-            if (colorSpaceDictionary != null) 
+            if (colorSpaceDictionary != null)
             {
                 colorSpace = PDColorSpace.create(colorSpaceDictionary);
             }
@@ -428,8 +442,8 @@ public abstract class PDShading implements COSObjectable
     /**
      * Returns an AWT paint which corresponds to this shading
      *
-     * @param matrix the pattern matrix concatenated with that of the parent content stream, this matrix which maps the
-     * pattern's internal coordinate system to user space
+     * @param matrix the pattern matrix concatenated with that of the parent content stream, this
+     *               matrix which maps the pattern's internal coordinate system to user space
      * @return an AWT Paint instance
      */
     public abstract Paint toPaint(Matrix matrix);

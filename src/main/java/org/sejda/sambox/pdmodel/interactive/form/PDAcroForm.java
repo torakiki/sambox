@@ -181,8 +181,6 @@ public final class PDAcroForm extends PDDictionaryWrapper
         // has been wrapped in a q...Q pair.
         boolean isContentStreamWrapped;
 
-        // the content stream to write to
-        PDPageContentStream contentStream;
         Map<COSDictionary, PDAnnotationWidget> toFlatten = widgets(fields);
 
         // preserve all non widget annotations
@@ -201,27 +199,29 @@ public final class PDAcroForm extends PDDictionaryWrapper
                 }
                 else if (isVisibleAnnotation(annotation))
                 {
-                    contentStream = new PDPageContentStream(document, page, AppendMode.APPEND, true,
-                            !isContentStreamWrapped);
-                    isContentStreamWrapped = true;
+                    try (PDPageContentStream contentStream = new PDPageContentStream(document, page,
+                            AppendMode.APPEND, true, !isContentStreamWrapped))
+                    {
+                        isContentStreamWrapped = true;
 
-                    PDAppearanceStream appearanceStream = annotation.getNormalAppearanceStream();
+                        PDAppearanceStream appearanceStream = annotation.getNormalAppearanceStream();
 
-                    PDFormXObject fieldObject = new PDFormXObject(appearanceStream.getCOSObject());
+                        PDFormXObject fieldObject = new PDFormXObject(
+                                appearanceStream.getCOSObject());
 
-                    contentStream.saveGraphicsState();
+                        contentStream.saveGraphicsState();
 
-                    // see https://stackoverflow.com/a/54091766/1729265 for an explanation
-                    // of the steps required
-                    // this will transform the appearance stream form object into the rectangle of the
-                    // annotation bbox and map the coordinate systems
-                    Matrix transformationMatrix = resolveTransformationMatrix(annotation,
-                            appearanceStream);
-                    contentStream.transform(transformationMatrix);
+                        // see https://stackoverflow.com/a/54091766/1729265 for an explanation
+                        // of the steps required
+                        // this will transform the appearance stream form object into the rectangle of the
+                        // annotation bbox and map the coordinate systems
+                        Matrix transformationMatrix = resolveTransformationMatrix(annotation,
+                                appearanceStream);
+                        contentStream.transform(transformationMatrix);
 
-                    contentStream.drawForm(fieldObject);
-                    contentStream.restoreGraphicsState();
-                    contentStream.close();
+                        contentStream.drawForm(fieldObject);
+                        contentStream.restoreGraphicsState();
+                    }
                 }
             }
             page.setAnnotations(annotations);

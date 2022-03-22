@@ -16,23 +16,17 @@
  */
 package org.sejda.sambox.pdmodel.graphics.shading;
 
+import org.sejda.sambox.util.Matrix;
+
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Point2D;
 import java.awt.image.ColorModel;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.imageio.stream.ImageInputStream;
-
-import org.sejda.sambox.pdmodel.common.PDRange;
-import org.sejda.sambox.util.Matrix;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Shades Gouraud triangles for Type4ShadingContext and Type5ShadingContext.
@@ -42,8 +36,6 @@ import org.slf4j.LoggerFactory;
  */
 abstract class GouraudShadingContext extends TriangleBasedShadingContext
 {
-    private static final Logger LOG = LoggerFactory.getLogger(GouraudShadingContext.class);
-
     /**
      * triangle list.
      */
@@ -52,53 +44,16 @@ abstract class GouraudShadingContext extends TriangleBasedShadingContext
     /**
      * Constructor creates an instance to be used for fill operations.
      *
-     * @param shading the shading type to be used
+     * @param shading    the shading type to be used
      * @param colorModel the color model to be used
-     * @param xform transformation for user to device space
-     * @param matrix the pattern matrix concatenated with that of the parent content stream
+     * @param xform      transformation for user to device space
+     * @param matrix     the pattern matrix concatenated with that of the parent content stream
      * @throws IOException if something went wrong
      */
     protected GouraudShadingContext(PDShading shading, ColorModel colorModel, AffineTransform xform,
-                                    Matrix matrix) throws IOException
+            Matrix matrix) throws IOException
     {
         super(shading, colorModel, xform, matrix);
-    }
-
-    /**
-     * Read a vertex from the bit input stream performs interpolations.
-     *
-     * @param input bit input stream
-     * @param maxSrcCoord max value for source coordinate (2^bits-1)
-     * @param maxSrcColor max value for source color (2^bits-1)
-     * @param rangeX dest range for X
-     * @param rangeY dest range for Y
-     * @param colRangeTab dest range array for colors
-     * @param matrix the pattern matrix concatenated with that of the parent content stream
-     * @return a new vertex with the flag and the interpolated values
-     * @throws IOException if something went wrong
-     */
-    protected Vertex readVertex(ImageInputStream input, long maxSrcCoord, long maxSrcColor,
-                                PDRange rangeX, PDRange rangeY, PDRange[] colRangeTab,
-                                Matrix matrix, AffineTransform xform) throws IOException
-    {
-        float[] colorComponentTab = new float[numberOfColorComponents];
-        long x = input.readBits(bitsPerCoordinate);
-        long y = input.readBits(bitsPerCoordinate);
-        float dstX = interpolate(x, maxSrcCoord, rangeX.getMin(), rangeX.getMax());
-        float dstY = interpolate(y, maxSrcCoord, rangeY.getMin(), rangeY.getMax());
-        LOG.debug("coord: " + String.format("[%06X,%06X] -> [%f,%f]", x, y, dstX, dstY));
-        Point2D p = matrix.transformPoint(dstX, dstY);
-        xform.transform(p, p);
-
-        for (int n = 0; n < numberOfColorComponents; ++n)
-        {
-            int color = (int) input.readBits(bitsPerColorComponent);
-            colorComponentTab[n] = interpolate(color, maxSrcColor, colRangeTab[n].getMin(),
-                    colRangeTab[n].getMax());
-            LOG.debug("color[" + n + "]: " + color + "/" + String.format("%02x", color)
-                    + "-> color[" + n + "]: " + colorComponentTab[n]);
-        }
-        return new Vertex(p, colorComponentTab);
     }
 
     final void setTriangleList(List<ShadedTriangle> triangleList)
@@ -119,20 +74,6 @@ abstract class GouraudShadingContext extends TriangleBasedShadingContext
     {
         triangleList = null;
         super.dispose();
-    }
-
-    /**
-     * Calculate the interpolation, see p.345 pdf spec 1.7.
-     *
-     * @param src src value
-     * @param srcMax max src value (2^bits-1)
-     * @param dstMin min dst value
-     * @param dstMax max dst value
-     * @return interpolated value
-     */
-    private float interpolate(float src, long srcMax, float dstMin, float dstMax)
-    {
-        return dstMin + (src * (dstMax - dstMin) / srcMax);
     }
 
     @Override

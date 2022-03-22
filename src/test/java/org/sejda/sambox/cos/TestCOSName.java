@@ -16,15 +16,15 @@
 
 package org.sejda.sambox.cos;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.PDPage;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 public class TestCOSName
 {
@@ -37,17 +37,22 @@ public class TestCOSName
     public void PDFBox4076() throws IOException
     {
         String special = "中国你好!";
-        PDDocument document = new PDDocument();
-        PDPage page = new PDPage();
-        document.addPage(page);
-        document.getDocumentCatalog().getCOSObject().setString(COSName.getPDFName(special), special);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        document.writeTo(baos);
-        document.close();
-        document = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(baos.toByteArray()));
-        COSDictionary catalogDict = document.getDocumentCatalog().getCOSObject();
-        Assert.assertTrue(catalogDict.containsKey(special));
-        Assert.assertEquals(special, catalogDict.getString(special));
-        document.close();
+        try (PDDocument document = new PDDocument())
+        {
+            PDPage page = new PDPage();
+            document.addPage(page);
+            document.getDocumentCatalog().getCOSObject()
+                    .setString(COSName.getPDFName(special), special);
+
+            document.writeTo(baos);
+        }
+        try (PDDocument document = PDFParser.parse(
+                SeekableSources.inMemorySeekableSourceFrom(baos.toByteArray())))
+        {
+            COSDictionary catalogDict = document.getDocumentCatalog().getCOSObject();
+            Assert.assertTrue(catalogDict.containsKey(special));
+            Assert.assertEquals(special, catalogDict.getString(special));
+        }
     }
 }

@@ -16,24 +16,21 @@
  */
 package org.sejda.sambox.filter;
 
-import static java.util.Objects.nonNull;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Iterator;
-import java.util.Optional;
-import java.util.zip.Deflater;
-
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
-
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Iterator;
+import java.util.Optional;
+import java.util.zip.Deflater;
 
 /**
  * A filter for stream data.
@@ -45,9 +42,10 @@ public abstract class Filter
 {
     private static final Logger LOG = LoggerFactory.getLogger(Filter.class);
     /**
-     * Compression Level System Property. Set this to a value from 0 to 9 to change the zlib deflate compression level
-     * used to compress /Flate streams. The default value is -1 which is {@link Deflater#DEFAULT_COMPRESSION}. To set
-     * maximum compression, use {@code System.setProperty(Filter.SYSPROP_DEFLATELEVEL, "9");}
+     * Compression Level System Property. Set this to a value from 0 to 9 to change the zlib deflate
+     * compression level used to compress /Flate streams. The default value is -1 which is {@link
+     * Deflater#DEFAULT_COMPRESSION}. To set maximum compression, use {@code
+     * System.setProperty(Filter.SYSPROP_DEFLATELEVEL, "9");}
      */
     public static final String SYSPROP_DEFLATELEVEL = "org.sejda.sambox.filter.deflatelevel";
 
@@ -57,11 +55,11 @@ public abstract class Filter
 
     /**
      * Decodes data, producing the original non-encoded data.
-     * 
-     * @param encoded the encoded byte stream
-     * @param decoded the stream where decoded data will be written
+     *
+     * @param encoded    the encoded byte stream
+     * @param decoded    the stream where decoded data will be written
      * @param parameters the parameters used for decoding
-     * @param index the index to the filter being decoded
+     * @param index      the index to the filter being decoded
      * @return repaired parameters dictionary, or the original parameters dictionary
      * @throws IOException if the stream cannot be decoded
      */
@@ -70,9 +68,9 @@ public abstract class Filter
 
     /**
      * Encodes data.
-     * 
-     * @param input the byte stream to encode
-     * @param encoded the stream where encoded data will be written
+     *
+     * @param input      the byte stream to encode
+     * @param encoded    the stream where encoded data will be written
      * @param parameters the parameters used for encoding
      * @throws IOException if the stream cannot be encoded
      */
@@ -86,8 +84,8 @@ public abstract class Filter
         // AV: PDFBOX-3932 considers valid only the case name,dictionary and array,array but discards dp in the case
         // name,array of 1 where we previously picked the one element as dp
         COSBase filter = dictionary.getDictionaryObject(COSName.FILTER, COSName.F);
-        COSBase dp = Optional
-                .ofNullable(dictionary.getDictionaryObject(COSName.DECODE_PARMS, COSName.DP))
+        COSBase dp = Optional.ofNullable(
+                        dictionary.getDictionaryObject(COSName.DECODE_PARMS, COSName.DP))
                 .orElseGet(COSDictionary::new);
         if (filter instanceof COSName && dp instanceof COSDictionary)
         {
@@ -132,21 +130,17 @@ public abstract class Filter
             throws MissingImageReaderException
     {
         Iterator<ImageReader> readers = ImageIO.getImageReadersByFormatName(formatName);
-        ImageReader reader = null;
+        ImageReader reader;
         while (readers.hasNext())
         {
             reader = readers.next();
-            if (nonNull(reader) && reader.canReadRaster())
+            if (reader != null && reader.canReadRaster())
             {
-                break;
+                return reader;
             }
         }
-        if (reader == null)
-        {
-            throw new MissingImageReaderException(
-                    "Cannot read " + formatName + " image: " + errorCause);
-        }
-        return reader;
+        throw new MissingImageReaderException(
+                "Cannot read " + formatName + " image: " + errorCause);
     }
 
     /**
@@ -157,8 +151,8 @@ public abstract class Filter
         int compressionLevel = Deflater.DEFAULT_COMPRESSION;
         try
         {
-            compressionLevel = Integer
-                    .parseInt(System.getProperty(Filter.SYSPROP_DEFLATELEVEL, "-1"));
+            compressionLevel = Integer.parseInt(
+                    System.getProperty(Filter.SYSPROP_DEFLATELEVEL, "-1"));
         }
         catch (NumberFormatException ex)
         {

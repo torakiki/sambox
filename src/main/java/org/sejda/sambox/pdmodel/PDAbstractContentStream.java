@@ -16,20 +16,9 @@
  */
 package org.sejda.sambox.pdmodel;
 
-import static org.sejda.io.CountingWritableByteChannel.from;
-
-import java.awt.Color;
-import java.awt.geom.AffineTransform;
-import java.io.Closeable;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.text.NumberFormat;
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.Locale;
-
 import org.apache.fontbox.util.Charsets;
 import org.sejda.sambox.contentstream.operator.OperatorName;
+import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSNumber;
@@ -56,6 +45,18 @@ import org.sejda.sambox.util.Matrix;
 import org.sejda.sambox.util.NumberFormatUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.awt.Color;
+import java.awt.geom.AffineTransform;
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.text.NumberFormat;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.Locale;
+
+import static org.sejda.io.CountingWritableByteChannel.from;
 
 /**
  * Provides the ability to write to a content stream.
@@ -84,9 +85,9 @@ abstract class PDAbstractContentStream implements Closeable
     /**
      * Create a new appearance stream.
      *
-     * @param document may be null
+     * @param document     may be null
      * @param outputStream The appearances output stream to write to.
-     * @param resources The resources to use
+     * @param resources    The resources to use
      */
     PDAbstractContentStream(PDDocument document, OutputStream outputStream, PDResources resources)
     {
@@ -100,9 +101,9 @@ abstract class PDAbstractContentStream implements Closeable
 
     /**
      * Sets the maximum number of digits allowed for fractional numbers.
-     * 
-     * @see NumberFormat#setMaximumFractionDigits(int)
+     *
      * @param fractionDigitsNumber
+     * @see NumberFormat#setMaximumFractionDigits(int)
      */
     protected void setMaximumFractionDigits(int fractionDigitsNumber)
     {
@@ -112,7 +113,8 @@ abstract class PDAbstractContentStream implements Closeable
     /**
      * Begin some text operations.
      *
-     * @throws IOException If there is an error writing to the stream or if you attempt to nest beginText calls.
+     * @throws IOException           If there is an error writing to the stream or if you attempt to
+     *                               nest beginText calls.
      * @throws IllegalStateException If the method was not allowed to be called at this time.
      */
     public void beginText() throws IOException
@@ -128,7 +130,8 @@ abstract class PDAbstractContentStream implements Closeable
     /**
      * End some text operations.
      *
-     * @throws IOException If there is an error writing to the stream or if you attempt to nest endText calls.
+     * @throws IOException           If there is an error writing to the stream or if you attempt to
+     *                               nest endText calls.
      * @throws IllegalStateException If the method was not allowed to be called at this time.
      */
     public void endText() throws IOException
@@ -145,7 +148,7 @@ abstract class PDAbstractContentStream implements Closeable
     /**
      * Set the font and font size to draw text with.
      *
-     * @param font The font to use.
+     * @param font     The font to use.
      * @param fontSize The font size to draw the text.
      * @throws IOException If there is an error writing the font information.
      */
@@ -170,8 +173,8 @@ abstract class PDAbstractContentStream implements Closeable
             }
             else
             {
-                LOG.warn("attempting to use subset font " + font.getName()
-                        + " without proper context");
+                LOG.warn("Using the subsetted font '" + font.getName()
+                        + "' without a PDDocument context; call subset() before saving");
             }
         }
 
@@ -181,14 +184,17 @@ abstract class PDAbstractContentStream implements Closeable
     }
 
     /**
-     * Shows the given text at the location specified by the current text matrix with the given interspersed
-     * positioning. This allows the user to efficiently position each glyph or sequence of glyphs.
+     * Shows the given text at the location specified by the current text matrix with the given
+     * interspersed positioning. This allows the user to efficiently position each glyph or sequence
+     * of glyphs.
      *
-     * @param textWithPositioningArray An array consisting of String and Float types. Each String is output to the page
-     * using the current text matrix. Using the default coordinate system, each interspersed number adjusts the current
-     * text matrix by translating to the left or down for horizontal and vertical text respectively. The number is
-     * expressed in thousands of a text space unit, and may be negative.
-     *
+     * @param textWithPositioningArray An array consisting of String and Float types. Each String is
+     *                                 output to the page using the current text matrix. Using the
+     *                                 default coordinate system, each interspersed number adjusts
+     *                                 the current text matrix by translating to the left or down
+     *                                 for horizontal and vertical text respectively. The number is
+     *                                 expressed in thousands of a text space unit, and may be
+     *                                 negative.
      * @throws IOException if an io exception occurs.
      */
     public void showTextWithPositioning(Object[] textWithPositioningArray) throws IOException
@@ -218,7 +224,7 @@ abstract class PDAbstractContentStream implements Closeable
      * Shows the given text at the location specified by the current text matrix.
      *
      * @param text The Unicode text to show.
-     * @throws IOException If an io exception occurs.
+     * @throws IOException              If an io exception occurs.
      * @throws IllegalArgumentException if a character isn't supported by the current font
      */
     public void showText(String text) throws IOException
@@ -232,7 +238,6 @@ abstract class PDAbstractContentStream implements Closeable
      * Outputs a string using the correct encoding and subsetting as required.
      *
      * @param text The Unicode text to show.
-     * 
      * @throws IOException If an io exception occurs.
      */
     protected void showTextInternal(String text) throws IOException
@@ -278,7 +283,8 @@ abstract class PDAbstractContentStream implements Closeable
     }
 
     /**
-     * Move to the start of the next line of text. Requires the leading (see {@link #setLeading}) to have been set.
+     * Move to the start of the next line of text. Requires the leading (see {@link #setLeading}) to
+     * have been set.
      *
      * @throws IOException If there is an error writing to the stream.
      */
@@ -292,11 +298,12 @@ abstract class PDAbstractContentStream implements Closeable
     }
 
     /**
-     * The Td operator. Move to the start of the next line, offset from the start of the current line by (tx, ty).
+     * The Td operator. Move to the start of the next line, offset from the start of the current
+     * line by (tx, ty).
      *
      * @param tx The x translation.
      * @param ty The y translation.
-     * @throws IOException If there is an error writing to the stream.
+     * @throws IOException           If there is an error writing to the stream.
      * @throws IllegalStateException If the method was not allowed to be called at this time.
      */
     public void newLineAtOffset(float tx, float ty) throws IOException
@@ -312,11 +319,11 @@ abstract class PDAbstractContentStream implements Closeable
     }
 
     /**
-     * The Tm operator. Sets the text matrix to the given values. A current text matrix will be replaced with the new
-     * one.
+     * The Tm operator. Sets the text matrix to the given values. A current text matrix will be
+     * replaced with the new one.
      *
      * @param matrix the transformation matrix
-     * @throws IOException If there is an error writing to the stream.
+     * @throws IOException           If there is an error writing to the stream.
      * @throws IllegalStateException If the method was not allowed to be called at this time.
      */
     public void setTextMatrix(Matrix matrix) throws IOException
@@ -333,9 +340,8 @@ abstract class PDAbstractContentStream implements Closeable
      * Draw an image at the x,y coordinates, with the default size of the image.
      *
      * @param image The image to draw.
-     * @param x The x-coordinate to draw the image.
-     * @param y The y-coordinate to draw the image.
-     *
+     * @param x     The x-coordinate to draw the image.
+     * @param y     The y-coordinate to draw the image.
      * @throws IOException If there is an error writing to the stream.
      */
     public void drawImage(PDImageXObject image, float x, float y) throws IOException
@@ -346,13 +352,12 @@ abstract class PDAbstractContentStream implements Closeable
     /**
      * Draw an image at the x,y coordinates, with the given size.
      *
-     * @param image The image to draw.
-     * @param x The x-coordinate to draw the image.
-     * @param y The y-coordinate to draw the image.
-     * @param width The width to draw the image.
+     * @param image  The image to draw.
+     * @param x      The x-coordinate to draw the image.
+     * @param y      The y-coordinate to draw the image.
+     * @param width  The width to draw the image.
      * @param height The height to draw the image.
-     *
-     * @throws IOException If there is an error writing to the stream.
+     * @throws IOException           If there is an error writing to the stream.
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void drawImage(PDImageXObject image, float x, float y, float width, float height)
@@ -377,10 +382,9 @@ abstract class PDAbstractContentStream implements Closeable
     /**
      * Draw an image at the origin with the given transformation matrix.
      *
-     * @param image The image to draw.
+     * @param image  The image to draw.
      * @param matrix The transformation matrix to apply to the image.
-     *
-     * @throws IOException If there is an error writing to the stream.
+     * @throws IOException           If there is an error writing to the stream.
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void drawImage(PDImageXObject image, Matrix matrix) throws IOException
@@ -405,9 +409,8 @@ abstract class PDAbstractContentStream implements Closeable
      * Draw an inline image at the x,y coordinates, with the default size of the image.
      *
      * @param inlineImage The inline image to draw.
-     * @param x The x-coordinate to draw the inline image.
-     * @param y The y-coordinate to draw the inline image.
-     *
+     * @param x           The x-coordinate to draw the inline image.
+     * @param y           The y-coordinate to draw the inline image.
      * @throws IOException If there is an error writing to the stream.
      */
     public void drawImage(PDInlineImage inlineImage, float x, float y) throws IOException
@@ -419,12 +422,11 @@ abstract class PDAbstractContentStream implements Closeable
      * Draw an inline image at the x,y coordinates and a certain width and height.
      *
      * @param inlineImage The inline image to draw.
-     * @param x The x-coordinate to draw the inline image.
-     * @param y The y-coordinate to draw the inline image.
-     * @param width The width of the inline image to draw.
-     * @param height The height of the inline image to draw.
-     *
-     * @throws IOException If there is an error writing to the stream.
+     * @param x           The x-coordinate to draw the inline image.
+     * @param y           The y-coordinate to draw the inline image.
+     * @param width       The width of the inline image to draw.
+     * @param height      The height of the inline image to draw.
+     * @throws IOException           If there is an error writing to the stream.
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void drawImage(PDInlineImage inlineImage, float x, float y, float width, float height)
@@ -452,11 +454,12 @@ abstract class PDAbstractContentStream implements Closeable
         sb.append("/");
         sb.append(inlineImage.getColorSpace().getName());
 
-        if (inlineImage.getDecode() != null && inlineImage.getDecode().size() > 0)
+        COSArray decodeArray = inlineImage.getDecode();
+        if (decodeArray != null && decodeArray.size() > 0)
         {
             sb.append("\n /D ");
             sb.append("[");
-            for (COSBase base : inlineImage.getDecode())
+            for (COSBase base : decodeArray)
             {
                 sb.append(((COSNumber) base).intValue());
                 sb.append(" ");
@@ -489,7 +492,7 @@ abstract class PDAbstractContentStream implements Closeable
      * Draws the given Form XObject at the current location.
      *
      * @param form Form XObject
-     * @throws IOException if the content stream could not be written
+     * @throws IOException           if the content stream could not be written
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void drawForm(PDFormXObject form) throws IOException
@@ -523,7 +526,7 @@ abstract class PDAbstractContentStream implements Closeable
 
     /**
      * q operator. Saves the current graphics state.
-     * 
+     *
      * @throws IOException If an error occurs while writing to the stream.
      */
     public void saveGraphicsState() throws IOException
@@ -551,7 +554,7 @@ abstract class PDAbstractContentStream implements Closeable
 
     /**
      * Q operator. Restores the current graphics state.
-     * 
+     *
      * @throws IOException If an error occurs while writing to the stream.
      */
     public void restoreGraphicsState() throws IOException
@@ -646,15 +649,16 @@ abstract class PDAbstractContentStream implements Closeable
      * @param r The red value
      * @param g The green value.
      * @param b The blue value.
-     * @throws IOException If an IO error occurs while writing to the stream.
+     * @throws IOException              If an IO error occurs while writing to the stream.
      * @throws IllegalArgumentException If the parameters are invalid.
      */
     public void setStrokingColor(float r, float g, float b) throws IOException
     {
         if (isOutsideOneInterval(r) || isOutsideOneInterval(g) || isOutsideOneInterval(b))
         {
-            throw new IllegalArgumentException("Parameters must be within 0..1, but are "
-                    + String.format("(%.2f,%.2f,%.2f)", r, g, b));
+            throw new IllegalArgumentException(
+                    "Parameters must be within 0..1, but are " + String.format("(%.2f,%.2f,%.2f)",
+                            r, g, b));
         }
         writeOperand(r);
         writeOperand(g);
@@ -669,17 +673,19 @@ abstract class PDAbstractContentStream implements Closeable
      * @param r The red value
      * @param g The green value.
      * @param b The blue value.
-     * @throws IOException If an IO error occurs while writing to the stream.
+     * @throws IOException              If an IO error occurs while writing to the stream.
      * @throws IllegalArgumentException If the parameters are invalid.
-     * @deprecated use {@link #setStrokingColor(float, float, float) setStrokingColor(r/255f, g/255f, b/255f)}
+     * @deprecated use {@link #setStrokingColor(float, float, float) setStrokingColor(r/255f,
+     * g/255f, b/255f)}
      */
     @Deprecated
     public void setStrokingColor(int r, int g, int b) throws IOException
     {
         if (isOutside255Interval(r) || isOutside255Interval(g) || isOutside255Interval(b))
         {
-            throw new IllegalArgumentException("Parameters must be within 0..255, but are "
-                    + String.format("(%d,%d,%d)", r, g, b));
+            throw new IllegalArgumentException(
+                    "Parameters must be within 0..255, but are " + String.format("(%d,%d,%d)", r, g,
+                            b));
         }
         setStrokingColor(r / 255f, g / 255f, b / 255f);
     }
@@ -691,7 +697,7 @@ abstract class PDAbstractContentStream implements Closeable
      * @param m The magenta value.
      * @param y The yellow value.
      * @param k The black value.
-     * @throws IOException If an IO error occurs while writing to the stream.
+     * @throws IOException              If an IO error occurs while writing to the stream.
      * @throws IllegalArgumentException If the parameters are invalid.
      */
     public void setStrokingColor(float c, float m, float y, float k) throws IOException
@@ -699,8 +705,9 @@ abstract class PDAbstractContentStream implements Closeable
         if (isOutsideOneInterval(c) || isOutsideOneInterval(m) || isOutsideOneInterval(y)
                 || isOutsideOneInterval(k))
         {
-            throw new IllegalArgumentException("Parameters must be within 0..1, but are "
-                    + String.format("(%.2f,%.2f,%.2f,%.2f)", c, m, y, k));
+            throw new IllegalArgumentException(
+                    "Parameters must be within 0..1, but are " + String.format(
+                            "(%.2f,%.2f,%.2f,%.2f)", c, m, y, k));
         }
         writeOperand(c);
         writeOperand(m);
@@ -714,7 +721,7 @@ abstract class PDAbstractContentStream implements Closeable
      * Set the stroking color in the DeviceGray color space. Range is 0..1.
      *
      * @param g The gray value.
-     * @throws IOException If an IO error occurs while writing to the stream.
+     * @throws IOException              If an IO error occurs while writing to the stream.
      * @throws IllegalArgumentException If the parameter is invalid.
      */
     public void setStrokingColor(float g) throws IOException
@@ -787,15 +794,16 @@ abstract class PDAbstractContentStream implements Closeable
      * @param r The red value.
      * @param g The green value.
      * @param b The blue value.
-     * @throws IOException If an IO error occurs while writing to the stream.
+     * @throws IOException              If an IO error occurs while writing to the stream.
      * @throws IllegalArgumentException If the parameters are invalid.
      */
     public void setNonStrokingColor(float r, float g, float b) throws IOException
     {
         if (isOutsideOneInterval(r) || isOutsideOneInterval(g) || isOutsideOneInterval(b))
         {
-            throw new IllegalArgumentException("Parameters must be within 0..1, but are "
-                    + String.format("(%.2f,%.2f,%.2f)", r, g, b));
+            throw new IllegalArgumentException(
+                    "Parameters must be within 0..1, but are " + String.format("(%.2f,%.2f,%.2f)",
+                            r, g, b));
         }
         writeOperand(r);
         writeOperand(g);
@@ -810,17 +818,19 @@ abstract class PDAbstractContentStream implements Closeable
      * @param r The red value
      * @param g The green value.
      * @param b The blue value.
-     * @throws IOException If an IO error occurs while writing to the stream.
+     * @throws IOException              If an IO error occurs while writing to the stream.
      * @throws IllegalArgumentException If the parameters are invalid.
-     * @deprecated use {@link #setNonStrokingColor(float, float, float) setNonStrokingColor(r/255f, g/255f, b/255f)}
+     * @deprecated use {@link #setNonStrokingColor(float, float, float) setNonStrokingColor(r/255f,
+     * g/255f, b/255f)}
      */
     @Deprecated
     public void setNonStrokingColor(int r, int g, int b) throws IOException
     {
         if (isOutside255Interval(r) || isOutside255Interval(g) || isOutside255Interval(b))
         {
-            throw new IllegalArgumentException("Parameters must be within 0..255, but are "
-                    + String.format("(%d,%d,%d)", r, g, b));
+            throw new IllegalArgumentException(
+                    "Parameters must be within 0..255, but are " + String.format("(%d,%d,%d)", r, g,
+                            b));
         }
         setNonStrokingColor(r / 255f, g / 255f, b / 255f);
     }
@@ -832,7 +842,7 @@ abstract class PDAbstractContentStream implements Closeable
      * @param m The magenta value.
      * @param y The yellow value.
      * @param k The black value.
-     * @throws IOException If an IO error occurs while writing to the stream.
+     * @throws IOException              If an IO error occurs while writing to the stream.
      * @throws IllegalArgumentException If the parameters are invalid.
      */
     public void setNonStrokingColor(int c, int m, int y, int k) throws IOException
@@ -840,8 +850,9 @@ abstract class PDAbstractContentStream implements Closeable
         if (isOutside255Interval(c) || isOutside255Interval(m) || isOutside255Interval(y)
                 || isOutside255Interval(k))
         {
-            throw new IllegalArgumentException("Parameters must be within 0..255, but are "
-                    + String.format("(%d,%d,%d,%d)", c, m, y, k));
+            throw new IllegalArgumentException(
+                    "Parameters must be within 0..255, but are " + String.format("(%d,%d,%d,%d)", c,
+                            m, y, k));
         }
         setNonStrokingColor(c / 255f, m / 255f, y / 255f, k / 255f);
     }
@@ -860,8 +871,9 @@ abstract class PDAbstractContentStream implements Closeable
         if (isOutsideOneInterval(c) || isOutsideOneInterval(m) || isOutsideOneInterval(y)
                 || isOutsideOneInterval(k))
         {
-            throw new IllegalArgumentException("Parameters must be within 0..1, but are "
-                    + String.format("(%.2f,%.2f,%.2f,%.2f)", c, m, y, k));
+            throw new IllegalArgumentException(
+                    "Parameters must be within 0..1, but are " + String.format(
+                            "(%.2f,%.2f,%.2f,%.2f)", c, m, y, k));
         }
         writeOperand(c);
         writeOperand(m);
@@ -875,7 +887,7 @@ abstract class PDAbstractContentStream implements Closeable
      * Set the non-stroking color in the DeviceGray color space. Range is 0..255.
      *
      * @param g The gray value.
-     * @throws IOException If an IO error occurs while writing to the stream.
+     * @throws IOException              If an IO error occurs while writing to the stream.
      * @throws IllegalArgumentException If the parameter is invalid.
      * @deprecated use {@link #setNonStrokingColor(float) setNonStrokingColor(g/255f)}
      */
@@ -893,7 +905,7 @@ abstract class PDAbstractContentStream implements Closeable
      * Set the non-stroking color in the DeviceGray color space. Range is 0..1.
      *
      * @param g The gray value.
-     * @throws IOException If an IO error occurs while writing to the stream.
+     * @throws IOException              If an IO error occurs while writing to the stream.
      * @throws IllegalArgumentException If the parameter is invalid.
      */
     public void setNonStrokingColor(float g) throws IOException
@@ -910,11 +922,11 @@ abstract class PDAbstractContentStream implements Closeable
     /**
      * Add a rectangle to the current path.
      *
-     * @param x The lower left x coordinate.
-     * @param y The lower left y coordinate.
-     * @param width The width of the rectangle.
+     * @param x      The lower left x coordinate.
+     * @param y      The lower left y coordinate.
+     * @param width  The width of the rectangle.
      * @param height The height of the rectangle.
-     * @throws IOException If the content stream could not be written.
+     * @throws IOException           If the content stream could not be written.
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void addRect(float x, float y, float width, float height) throws IOException
@@ -931,8 +943,8 @@ abstract class PDAbstractContentStream implements Closeable
     }
 
     /**
-     * Append a cubic Bézier curve to the current path. The curve extends from the current point to the point (x3, y3),
-     * using (x1, y1) and (x2, y2) as the Bézier control points.
+     * Append a cubic Bézier curve to the current path. The curve extends from the current point to
+     * the point (x3, y3), using (x1, y1) and (x2, y2) as the Bézier control points.
      *
      * @param x1 x coordinate of the point 1
      * @param y1 y coordinate of the point 1
@@ -940,7 +952,7 @@ abstract class PDAbstractContentStream implements Closeable
      * @param y2 y coordinate of the point 2
      * @param x3 x coordinate of the point 3
      * @param y3 y coordinate of the point 3
-     * @throws IOException If the content stream could not be written.
+     * @throws IOException           If the content stream could not be written.
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void curveTo(float x1, float y1, float x2, float y2, float x3, float y3)
@@ -960,15 +972,15 @@ abstract class PDAbstractContentStream implements Closeable
     }
 
     /**
-     * Append a cubic Bézier curve to the current path. The curve extends from the current point to the point (x3, y3),
-     * using the current point and (x2, y2) as the Bézier control points.
+     * Append a cubic Bézier curve to the current path. The curve extends from the current point to
+     * the point (x3, y3), using the current point and (x2, y2) as the Bézier control points.
      *
      * @param x2 x coordinate of the point 2
      * @param y2 y coordinate of the point 2
      * @param x3 x coordinate of the point 3
      * @param y3 y coordinate of the point 3
      * @throws IllegalStateException If the method was called within a text block.
-     * @throws IOException If the content stream could not be written.
+     * @throws IOException           If the content stream could not be written.
      */
     public void curveTo2(float x2, float y2, float x3, float y3) throws IOException
     {
@@ -984,14 +996,14 @@ abstract class PDAbstractContentStream implements Closeable
     }
 
     /**
-     * Append a cubic Bézier curve to the current path. The curve extends from the current point to the point (x3, y3),
-     * using (x1, y1) and (x3, y3) as the Bézier control points.
+     * Append a cubic Bézier curve to the current path. The curve extends from the current point to
+     * the point (x3, y3), using (x1, y1) and (x3, y3) as the Bézier control points.
      *
      * @param x1 x coordinate of the point 1
      * @param y1 y coordinate of the point 1
      * @param x3 x coordinate of the point 3
      * @param y3 y coordinate of the point 3
-     * @throws IOException If the content stream could not be written.
+     * @throws IOException           If the content stream could not be written.
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void curveTo1(float x1, float y1, float x3, float y3) throws IOException
@@ -1012,7 +1024,7 @@ abstract class PDAbstractContentStream implements Closeable
      *
      * @param x The x coordinate.
      * @param y The y coordinate.
-     * @throws IOException If the content stream could not be written.
+     * @throws IOException           If the content stream could not be written.
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void moveTo(float x, float y) throws IOException
@@ -1031,7 +1043,7 @@ abstract class PDAbstractContentStream implements Closeable
      *
      * @param x The x coordinate.
      * @param y The y coordinate.
-     * @throws IOException If the content stream could not be written.
+     * @throws IOException           If the content stream could not be written.
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void lineTo(float x, float y) throws IOException
@@ -1047,8 +1059,8 @@ abstract class PDAbstractContentStream implements Closeable
 
     /**
      * Stroke the path.
-     * 
-     * @throws IOException If the content stream could not be written
+     *
+     * @throws IOException           If the content stream could not be written
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void stroke() throws IOException
@@ -1062,8 +1074,8 @@ abstract class PDAbstractContentStream implements Closeable
 
     /**
      * Close and stroke the path.
-     * 
-     * @throws IOException If the content stream could not be written
+     *
+     * @throws IOException           If the content stream could not be written
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void closeAndStroke() throws IOException
@@ -1079,7 +1091,7 @@ abstract class PDAbstractContentStream implements Closeable
     /**
      * Fills the path using the nonzero winding number rule.
      *
-     * @throws IOException If the content stream could not be written
+     * @throws IOException           If the content stream could not be written
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void fill() throws IOException
@@ -1094,7 +1106,7 @@ abstract class PDAbstractContentStream implements Closeable
     /**
      * Fills the path using the even-odd winding rule.
      *
-     * @throws IOException If the content stream could not be written
+     * @throws IOException           If the content stream could not be written
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void fillEvenOdd() throws IOException
@@ -1108,11 +1120,11 @@ abstract class PDAbstractContentStream implements Closeable
     }
 
     /**
-     * Fill and then stroke the path, using the nonzero winding number rule to determine the region to fill. This shall
-     * produce the same result as constructing two identical path objects, painting the first with {@link #fill() } and
-     * the second with {@link #stroke() }.
+     * Fill and then stroke the path, using the nonzero winding number rule to determine the region
+     * to fill. This shall produce the same result as constructing two identical path objects,
+     * painting the first with {@link #fill() } and the second with {@link #stroke() }.
      *
-     * @throws IOException If the content stream could not be written
+     * @throws IOException           If the content stream could not be written
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void fillAndStroke() throws IOException
@@ -1126,11 +1138,11 @@ abstract class PDAbstractContentStream implements Closeable
     }
 
     /**
-     * Fill and then stroke the path, using the even-odd rule to determine the region to fill. This shall produce the
-     * same result as constructing two identical path objects, painting the first with {@link #fillEvenOdd() } and the
-     * second with {@link #stroke() }.
+     * Fill and then stroke the path, using the even-odd rule to determine the region to fill. This
+     * shall produce the same result as constructing two identical path objects, painting the first
+     * with {@link #fillEvenOdd() } and the second with {@link #stroke() }.
      *
-     * @throws IOException If the content stream could not be written
+     * @throws IOException           If the content stream could not be written
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void fillAndStrokeEvenOdd() throws IOException
@@ -1144,10 +1156,11 @@ abstract class PDAbstractContentStream implements Closeable
     }
 
     /**
-     * Close, fill, and then stroke the path, using the nonzero winding number rule to determine the region to fill.
-     * This shall have the same effect as the sequence {@link #closePath() } and then {@link #fillAndStroke() }.
+     * Close, fill, and then stroke the path, using the nonzero winding number rule to determine the
+     * region to fill. This shall have the same effect as the sequence {@link #closePath() } and
+     * then {@link #fillAndStroke() }.
      *
-     * @throws IOException If the content stream could not be written
+     * @throws IOException           If the content stream could not be written
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void closeAndFillAndStroke() throws IOException
@@ -1161,10 +1174,11 @@ abstract class PDAbstractContentStream implements Closeable
     }
 
     /**
-     * Close, fill, and then stroke the path, using the even-odd rule to determine the region to fill. This shall have
-     * the same effect as the sequence {@link #closePath() } and then {@link #fillAndStrokeEvenOdd() }.
+     * Close, fill, and then stroke the path, using the even-odd rule to determine the region to
+     * fill. This shall have the same effect as the sequence {@link #closePath() } and then {@link
+     * #fillAndStrokeEvenOdd() }.
      *
-     * @throws IOException If the content stream could not be written
+     * @throws IOException           If the content stream could not be written
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void closeAndFillAndStrokeEvenOdd() throws IOException
@@ -1181,7 +1195,7 @@ abstract class PDAbstractContentStream implements Closeable
      * Fills the clipping area with the given shading.
      *
      * @param shading Shading resource
-     * @throws IOException If the content stream could not be written
+     * @throws IOException           If the content stream could not be written
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void shadingFill(PDShading shading) throws IOException
@@ -1199,7 +1213,7 @@ abstract class PDAbstractContentStream implements Closeable
     /**
      * Closes the current subpath.
      *
-     * @throws IOException If the content stream could not be written
+     * @throws IOException           If the content stream could not be written
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void closePath() throws IOException
@@ -1214,7 +1228,7 @@ abstract class PDAbstractContentStream implements Closeable
     /**
      * Intersects the current clipping path with the current path, using the nonzero rule.
      *
-     * @throws IOException If the content stream could not be written
+     * @throws IOException           If the content stream could not be written
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void clip() throws IOException
@@ -1232,7 +1246,7 @@ abstract class PDAbstractContentStream implements Closeable
     /**
      * Intersects the current clipping path with the current path, using the even-odd rule.
      *
-     * @throws IOException If the content stream could not be written
+     * @throws IOException           If the content stream could not be written
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void clipEvenOdd() throws IOException
@@ -1252,7 +1266,7 @@ abstract class PDAbstractContentStream implements Closeable
      * Set line width to the given value.
      *
      * @param lineWidth The width which is used for drawing.
-     * @throws IOException If the content stream could not be written
+     * @throws IOException           If the content stream could not be written
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void setLineWidth(float lineWidth) throws IOException
@@ -1270,8 +1284,8 @@ abstract class PDAbstractContentStream implements Closeable
      * Set the line join style.
      *
      * @param lineJoinStyle 0 for miter join, 1 for round join, and 2 for bevel join.
-     * @throws IOException If the content stream could not be written.
-     * @throws IllegalStateException If the method was called within a text block.
+     * @throws IOException              If the content stream could not be written.
+     * @throws IllegalStateException    If the method was called within a text block.
      * @throws IllegalArgumentException If the parameter is not a valid line join style.
      */
     public void setLineJoinStyle(int lineJoinStyle) throws IOException
@@ -1296,8 +1310,8 @@ abstract class PDAbstractContentStream implements Closeable
      * Set the line cap style.
      *
      * @param lineCapStyle 0 for butt cap, 1 for round cap, and 2 for projecting square cap.
-     * @throws IOException If the content stream could not be written.
-     * @throws IllegalStateException If the method was called within a text block.
+     * @throws IOException              If the content stream could not be written.
+     * @throws IllegalStateException    If the method was called within a text block.
      * @throws IllegalArgumentException If the parameter is not a valid line cap style.
      */
     public void setLineCapStyle(int lineCapStyle) throws IOException
@@ -1322,8 +1336,8 @@ abstract class PDAbstractContentStream implements Closeable
      * Set the line dash pattern.
      *
      * @param pattern The pattern array
-     * @param phase The phase of the pattern
-     * @throws IOException If the content stream could not be written.
+     * @param phase   The phase of the pattern
+     * @throws IOException           If the content stream could not be written.
      * @throws IllegalStateException If the method was called within a text block.
      */
     public void setLineDashPattern(float[] pattern, float phase) throws IOException
@@ -1378,9 +1392,10 @@ abstract class PDAbstractContentStream implements Closeable
     }
 
     /**
-     * Begin a marked content sequence with a reference to an entry in the page resources' Properties dictionary.
+     * Begin a marked content sequence with a reference to an entry in the page resources'
+     * Properties dictionary.
      *
-     * @param tag the tag
+     * @param tag          the tag
      * @param propertyList property list
      * @throws IOException If the content stream could not be written
      */
@@ -1403,7 +1418,7 @@ abstract class PDAbstractContentStream implements Closeable
 
     /**
      * Set an extended graphics state.
-     * 
+     *
      * @param state The extended graphics state.
      * @throws IOException If the content stream could not be written.
      */
@@ -1417,9 +1432,9 @@ abstract class PDAbstractContentStream implements Closeable
      * Write a comment line.
      *
      * @param comment
-     * @throws IOException If the content stream could not be written.
-     * @throws IllegalArgumentException If the comment contains a newline. This is not allowed, because the next line
-     * could be ordinary PDF content.
+     * @throws IOException              If the content stream could not be written.
+     * @throws IllegalArgumentException If the comment contains a newline. This is not allowed,
+     *                                  because the next line could be ordinary PDF content.
      */
     public void addComment(String comment) throws IOException
     {
@@ -1432,7 +1447,7 @@ abstract class PDAbstractContentStream implements Closeable
 
     /**
      * Writes a real number to the content stream.
-     * 
+     *
      * @param real
      * @throws java.io.IOException
      */
@@ -1460,7 +1475,7 @@ abstract class PDAbstractContentStream implements Closeable
 
     /**
      * Writes an integer number to the content stream.
-     * 
+     *
      * @param integer
      * @throws java.io.IOException
      */
@@ -1472,7 +1487,7 @@ abstract class PDAbstractContentStream implements Closeable
 
     /**
      * Writes a COSName to the content stream.
-     * 
+     *
      * @param name
      * @throws java.io.IOException
      */
@@ -1484,7 +1499,7 @@ abstract class PDAbstractContentStream implements Closeable
 
     /**
      * Writes a string to the content stream as ASCII.
-     * 
+     *
      * @param text
      * @throws java.io.IOException
      */
@@ -1496,7 +1511,7 @@ abstract class PDAbstractContentStream implements Closeable
 
     /**
      * Writes a string to the content stream as ASCII.
-     * 
+     *
      * @param text
      * @throws java.io.IOException
      */
@@ -1507,7 +1522,7 @@ abstract class PDAbstractContentStream implements Closeable
 
     /**
      * Writes a newline to the content stream as ASCII.
-     * 
+     *
      * @throws java.io.IOException
      */
     protected void writeLine() throws IOException
@@ -1517,7 +1532,7 @@ abstract class PDAbstractContentStream implements Closeable
 
     /**
      * Writes binary data to the content stream.
-     * 
+     *
      * @param data
      * @throws java.io.IOException
      */
@@ -1591,8 +1606,8 @@ abstract class PDAbstractContentStream implements Closeable
     }
 
     /**
-     * Set the character spacing. The value shall be added to the horizontal or vertical component of the glyph's
-     * displacement, depending on the writing mode.
+     * Set the character spacing. The value shall be added to the horizontal or vertical component
+     * of the glyph's displacement, depending on the writing mode.
      *
      * @param spacing character spacing
      * @throws IOException If the content stream could not be written.
@@ -1604,13 +1619,14 @@ abstract class PDAbstractContentStream implements Closeable
     }
 
     /**
-     * Set the word spacing. The value shall be added to the horizontal or vertical component of the ASCII SPACE
-     * character, depending on the writing mode.
+     * Set the word spacing. The value shall be added to the horizontal or vertical component of the
+     * ASCII SPACE character, depending on the writing mode.
      * <p>
-     * This will have an effect only with Type1 and TrueType fonts, not with Type0 fonts. The PDF specification tells
-     * why: "Word spacing shall be applied to every occurrence of the single-byte character code 32 in a string when
-     * using a simple font or a composite font that defines code 32 as a single-byte code. It shall not apply to
-     * occurrences of the byte value 32 in multiple-byte codes."
+     * This will have an effect only with Type1 and TrueType fonts, not with Type0 fonts. The PDF
+     * specification tells why: "Word spacing shall be applied to every occurrence of the
+     * single-byte character code 32 in a string when using a simple font or a composite font that
+     * defines code 32 as a single-byte code. It shall not apply to occurrences of the byte value 32
+     * in multiple-byte codes."
      *
      * @param spacing word spacing
      * @throws IOException If the content stream could not be written.
@@ -1624,7 +1640,8 @@ abstract class PDAbstractContentStream implements Closeable
     /**
      * Set the horizontal scaling to scale / 100.
      *
-     * @param scale number specifying the percentage of the normal width. Default value: 100 (normal width).
+     * @param scale number specifying the percentage of the normal width. Default value: 100 (normal
+     *              width).
      * @throws IOException If the content stream could not be written.
      */
     public void setHorizontalScaling(float scale) throws IOException
@@ -1634,8 +1651,8 @@ abstract class PDAbstractContentStream implements Closeable
     }
 
     /**
-     * Set the text rendering mode. This determines whether showing text shall cause glyph outlines to be stroked,
-     * filled, used as a clipping boundary, or some combination of the three.
+     * Set the text rendering mode. This determines whether showing text shall cause glyph outlines
+     * to be stroked, filled, used as a clipping boundary, or some combination of the three.
      *
      * @param rm The text rendering mode.
      * @throws IOException If the content stream could not be written.
@@ -1647,11 +1664,11 @@ abstract class PDAbstractContentStream implements Closeable
     }
 
     /**
-     * Set the text rise value, i.e. move the baseline up or down. This is useful for drawing superscripts or
-     * subscripts.
+     * Set the text rise value, i.e. move the baseline up or down. This is useful for drawing
+     * superscripts or subscripts.
      *
-     * @param rise Specifies the distance, in unscaled text space units, to move the baseline up or down from its
-     * default location. 0 restores the default location.
+     * @param rise Specifies the distance, in unscaled text space units, to move the baseline up or
+     *             down from its default location. 0 restores the default location.
      * @throws IOException
      */
     public void setTextRise(float rise) throws IOException

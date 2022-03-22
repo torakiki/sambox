@@ -16,9 +16,9 @@
  */
 package org.sejda.sambox.cos;
 
-import static java.util.Comparator.comparing;
-
 import java.util.Objects;
+
+import static java.util.Comparator.comparing;
 
 /**
  * Object representing a key to identify a PDF object
@@ -31,7 +31,7 @@ public final class COSObjectKey implements Comparable<COSObjectKey>
     private final int generation;
 
     /**
-     * @param number The object number.
+     * @param number     The object number.
      * @param generation The object generation number.
      */
     public COSObjectKey(long number, int generation)
@@ -90,6 +90,6 @@ public final class COSObjectKey implements Comparable<COSObjectKey>
     public int compareTo(COSObjectKey other)
     {
         return Objects.compare(this, other,
-                comparing(COSObjectKey::objectNumber).thenComparingInt(k -> k.generation()));
+                comparing(COSObjectKey::objectNumber).thenComparingInt(COSObjectKey::generation));
     }
 }

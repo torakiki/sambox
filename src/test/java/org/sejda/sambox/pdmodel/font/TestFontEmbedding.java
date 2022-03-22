@@ -18,6 +18,9 @@
 package org.sejda.sambox.pdmodel.font;
 
 import junit.framework.TestCase;
+import org.apache.fontbox.ttf.OS2WindowsMetricsTable;
+import org.apache.fontbox.ttf.TrueTypeFont;
+import org.mockito.Mockito;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
@@ -38,6 +41,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static java.util.Objects.nonNull;
+import static org.mockito.BDDMockito.given;
 
 /**
  * Tests font embedding.
@@ -323,8 +327,95 @@ public class TestFontEmbedding extends TestCase
 
     private String getUnicodeText(File file) throws IOException
     {
-        PDDocument document = PDFParser.parse(SeekableSources.seekableSourceFrom(file));
-        PDFTextStripper stripper = new PDFTextStripper();
-        return stripper.getText(document);
+        try (PDDocument document = PDFParser.parse(SeekableSources.seekableSourceFrom(file)))
+        {
+            PDFTextStripper stripper = new PDFTextStripper();
+            return stripper.getText(document);
+        }
+    }
+
+    /**
+     * Test that we validate embedding permissions properly for all legal permissions combinations
+     *
+     * @throws IOException
+     */
+    public void testIsEmbeddingPermittedMultipleVersions() throws IOException
+    {
+        // SETUP
+        InputStream input = PDFont.class.getResourceAsStream(
+                "/org/sejda/sambox/resources/ttf/LiberationSans-Regular.ttf");
+        TrueTypeFont mockTtf = Mockito.mock(TrueTypeFont.class);
+        OS2WindowsMetricsTable mockOS2 = Mockito.mock(OS2WindowsMetricsTable.class);
+        given(mockTtf.getOS2Windows()).willReturn(mockOS2);
+        Boolean embeddingIsPermitted;
+
+        // TEST 1: 0000 -- Installable embedding versions 0-3+
+        given(mockTtf.getOS2Windows().getFsType()).willReturn((short) 0x0000);
+        embeddingIsPermitted = FontUtils.isEmbeddingPermitted(mockTtf);
+
+        // VERIFY
+        assertTrue(embeddingIsPermitted);
+
+        // no test for 0001, since bit 0 is permanently reserved, and its use is deprecated
+        // TEST 2: 0010 -- Restricted License embedding versions 0-3+
+        given(mockTtf.getOS2Windows().getFsType()).willReturn((short) 0x0002);
+        embeddingIsPermitted = FontUtils.isEmbeddingPermitted(mockTtf);
+
+        // VERIFY
+        assertFalse(embeddingIsPermitted);
+
+        // no test for 0011
+        // TEST 3: 0100 -- Preview & Print embedding versions 0-3+
+        given(mockTtf.getOS2Windows().getFsType()).willReturn((short) 0x0004);
+        embeddingIsPermitted = FontUtils.isEmbeddingPermitted(mockTtf);
+
+        // VERIFY
+        assertTrue(embeddingIsPermitted);
+
+        // no test for 0101
+        // TEST 4: 0110 -- Restricted License embedding AND Preview & Print embedding versions 0-2
+        //              -- illegal permissions combination for versions 3+
+        given(mockTtf.getOS2Windows().getFsType()).willReturn((short) 0x0006);
+        embeddingIsPermitted = FontUtils.isEmbeddingPermitted(mockTtf);
+
+        // VERIFY
+        assertTrue(embeddingIsPermitted);
+
+        // no test for 0111
+        // TEST 5: 1000 -- Editable embedding versions 0-3+
+        given(mockTtf.getOS2Windows().getFsType()).willReturn((short) 0x0008);
+        embeddingIsPermitted = FontUtils.isEmbeddingPermitted(mockTtf);
+
+        // VERIFY
+        assertTrue(embeddingIsPermitted);
+
+        // no test for 1001
+        // TEST 6: 1010 -- Restricted License embedding AND Editable embedding versions 0-2
+        //              -- illegal permissions combination for versions 3+
+        given(mockTtf.getOS2Windows().getFsType()).willReturn((short) 0x000A);
+        embeddingIsPermitted = FontUtils.isEmbeddingPermitted(mockTtf);
+
+        // VERIFY
+        assertTrue(embeddingIsPermitted);
+
+        // no test for 1011
+        // TEST 7: 1100 -- Editable embedding AND Preview & Print embedding versions 0-2
+        //              -- illegal permissions combination for versions 3+
+        given(mockTtf.getOS2Windows().getFsType()).willReturn((short) 0x000C);
+        embeddingIsPermitted = FontUtils.isEmbeddingPermitted(mockTtf);
+
+        // VERIFY
+        assertTrue(embeddingIsPermitted);
+
+        // no test for 1101
+        // TEST 8: 1110 Editable embedding AND Preview & Print embedding AND Restricted License embedding versions 0-2
+        //              -- illegal permissions combination for versions 3+
+        given(mockTtf.getOS2Windows().getFsType()).willReturn((short) 0x000E);
+        embeddingIsPermitted = FontUtils.isEmbeddingPermitted(mockTtf);
+
+        // VERIFY
+        assertTrue(embeddingIsPermitted);
+
+        // no test for 1111
     }
 }

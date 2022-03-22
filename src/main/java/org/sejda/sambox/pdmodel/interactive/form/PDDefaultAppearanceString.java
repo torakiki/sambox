@@ -16,13 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
-import static org.sejda.io.SeekableSources.inMemorySeekableSourceFrom;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.cos.COSArray;
@@ -44,14 +37,21 @@ import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.sejda.io.SeekableSources.inMemorySeekableSourceFrom;
+
 /**
  * Represents a default appearance string, as found in the /DA entry of free text annotations.
- * 
+ *
  * <p>
- * The default appearance string (DA) contains any graphics state or text state operators needed to establish the
- * graphics state parameters, such as text size and colour, for displaying the field’s variable text. Only operators
- * that are allowed within text objects shall occur in this string.
- * 
+ * The default appearance string (DA) contains any graphics state or text state operators needed to
+ * establish the graphics state parameters, such as text size and colour, for displaying the field’s
+ * variable text. Only operators that are allowed within text objects shall occur in this string.
+ * <p>
  * Note: This class is not yet public, as its API is still unstable.
  */
 class PDDefaultAppearanceString
@@ -71,8 +71,8 @@ class PDDefaultAppearanceString
 
     /**
      * Constructor for reading an existing DA string.
-     * 
-     * @param defaultResources DR entry
+     *
+     * @param defaultResources  DR entry
      * @param defaultAppearance DA entry
      * @throws IOException If the DA could not be parsed
      */
@@ -131,7 +131,7 @@ class PDDefaultAppearanceString
 
     /**
      * This is used to handle an operation.
-     * 
+     *
      * @param operator The operation to perform.
      * @param operands The list of arguments.
      * @throws IOException If there is an error processing the operation.
@@ -160,16 +160,17 @@ class PDDefaultAppearanceString
 
     /**
      * Process the set font and font size operator.
-     * 
+     *
      * @param operands the font name and size
-     * @throws IOException in case there are missing operators or the font is not within the resources
+     * @throws IOException in case there are missing operators or the font is not within the
+     *                     resources
      */
     private void processSetFont(List<COSBase> operands) throws IOException
     {
         if (operands.size() < 2)
         {
-            throw new IOException("Missing operands for set font operator "
-                    + Arrays.toString(operands.toArray()));
+            throw new IOException("Missing operands for set font operator " + Arrays.toString(
+                    operands.toArray()));
         }
 
         COSBase base0 = operands.get(0);
@@ -201,9 +202,9 @@ class PDDefaultAppearanceString
 
     /**
      * Process the font color operator.
-     * 
+     * <p>
      * This is assumed to be an RGB color.
-     * 
+     *
      * @param operands the color components
      * @throws IOException in case of the color components not matching
      */
@@ -223,8 +224,9 @@ class PDDefaultAppearanceString
             colorSpace = PDDeviceCMYK.INSTANCE;
             break;
         default:
-            throw new IOException("Missing operands for set non stroking color operator "
-                    + Arrays.toString(operands.toArray()));
+            throw new IOException(
+                    "Missing operands for set non stroking color operator " + Arrays.toString(
+                            operands.toArray()));
         }
         COSArray array = new COSArray();
         array.addAll(operands);
@@ -233,7 +235,7 @@ class PDDefaultAppearanceString
 
     /**
      * Get the font name
-     * 
+     *
      * @return the font name to use for resource lookup
      */
     COSName getFontName()
@@ -243,7 +245,7 @@ class PDDefaultAppearanceString
 
     /**
      * Set the font name.
-     * 
+     *
      * @param fontName the font name to use for resource lookup
      */
     void setFontName(COSName fontName)
@@ -261,7 +263,7 @@ class PDDefaultAppearanceString
 
     /**
      * Set the font.
-     * 
+     *
      * @param font the font to use.
      */
     void setFont(PDFont font)
@@ -279,7 +281,7 @@ class PDDefaultAppearanceString
 
     /**
      * Set the font size.
-     * 
+     *
      * @param fontSize the font size.
      */
     void setFontSize(float fontSize)
@@ -297,7 +299,7 @@ class PDDefaultAppearanceString
 
     /**
      * Set the font color.
-     * 
+     *
      * @param fontColor the fontColor to use.
      */
     void setFontColor(PDColor fontColor)
@@ -328,8 +330,8 @@ class PDDefaultAppearanceString
     }
 
     /**
-     * Copies any needed resources from the document’s DR dictionary into the stream’s Resources dictionary. Resources
-     * with the same name shall be left intact.
+     * Copies any needed resources from the document’s DR dictionary into the stream’s Resources
+     * dictionary. Resources with the same name shall be left intact.
      */
     void copyNeededResourcesTo(PDAppearanceStream appearanceStream) throws IOException
     {

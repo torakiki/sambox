@@ -16,15 +16,19 @@
  */
 package org.sejda.sambox.pdmodel.graphics.shading;
 
-import java.awt.Paint;
-
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.util.Matrix;
+
+import java.awt.Paint;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+import java.io.IOException;
 
 /**
  * Resources for a shading type 6 (Coons Patch Mesh).
  */
-public class PDShadingType6 extends PDShadingType4
+public class PDShadingType6 extends PDMeshBasedShadingType
 {
     /**
      * Constructor using the given shading dictionary.
@@ -46,5 +50,17 @@ public class PDShadingType6 extends PDShadingType4
     public Paint toPaint(Matrix matrix)
     {
         return new Type6ShadingPaint(this, matrix);
+    }
+
+    @Override
+    protected Patch generatePatch(Point2D[] points, float[][] color)
+    {
+        return new CoonsPatch(points, color);
+    }
+
+    @Override
+    public Rectangle2D getBounds(AffineTransform xform, Matrix matrix) throws IOException
+    {
+        return getBounds(xform, matrix, 12);
     }
 }

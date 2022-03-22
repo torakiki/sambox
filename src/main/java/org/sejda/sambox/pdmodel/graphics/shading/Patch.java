@@ -20,8 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Patch is extended by CoonsPatch and TensorPatch. This was done as part of
- * GSoC2014, Tilman Hausherr is the mentor.
+ * Patch is extended by CoonsPatch and TensorPatch. This was done as part of GSoC2014, Tilman
+ * Hausherr is the mentor.
  *
  * @author Shaola Ren
  */
@@ -41,11 +41,9 @@ abstract class Patch
     /**
      * Constructor of Patch.
      *
-     * @param ctl control points, size is 12 (for type 6 shading) or 16 (for
-     * type 7 shading)
      * @param color 4 corner's colors
      */
-    Patch(Point2D[] ctl, float[][] color)
+    Patch(float[][] color)
     {
         cornerColor = color.clone();
     }
@@ -152,18 +150,19 @@ abstract class Patch
     }
 
     /**
-     * A line from point p1 to point p2 defines an equation, adjust the form of
-     * the equation to let the rhs equals 0, then calculate the lhs value by
-     * plugging the coordinate of p in the lhs expression.
+     * A line from point p1 to point p2 defines an equation, adjust the form of the equation to let
+     * the rhs equals 0, then calculate the lhs value by plugging the coordinate of p in the lhs
+     * expression.
      *
-     * @param p target point
+     * @param p  target point
      * @param p1 one end of a line
      * @param p2 the other end of a line
      * @return calculated value
      */
     protected double edgeEquationValue(Point2D p, Point2D p1, Point2D p2)
     {
-        return (p2.getY() - p1.getY()) * (p.getX() - p1.getX()) - (p2.getX() - p1.getX()) * (p.getY() - p1.getY());
+        return (p2.getY() - p1.getY()) * (p.getX() - p1.getX()) - (p2.getX() - p1.getX()) * (
+                p.getY() - p1.getY());
     }
 
     /**
@@ -181,8 +180,10 @@ abstract class Patch
         {
             for (int j = 1; j < szU; j++)
             {
-                Point2D p0 = patchCC[i - 1][j - 1].coordinate, p1 = patchCC[i - 1][j].coordinate, p2 = patchCC[i][j].coordinate,
-                        p3 = patchCC[i][j - 1].coordinate;
+                Point2D p0 = patchCC[i - 1][j - 1].coordinate;
+                Point2D p1 = patchCC[i - 1][j].coordinate;
+                Point2D p2 = patchCC[i][j].coordinate;
+                Point2D p3 = patchCC[i][j - 1].coordinate;
                 boolean ll = true;
                 if (overlaps(p0, p1) || overlaps(p0, p3))
                 {
@@ -191,15 +192,11 @@ abstract class Patch
                 else
                 {
                     // p0, p1 and p3 are in counter clock wise order, p1 has priority over p0, p3 has priority over p1
-                    Point2D[] llCorner =
-                    {
-                        p0, p1, p3
-                    };
-                    float[][] llColor =
-                    {
-                        patchCC[i - 1][j - 1].color, patchCC[i - 1][j].color, patchCC[i][j - 1].color
-                    };
-                    ShadedTriangle tmpll = new ShadedTriangle(llCorner, llColor); // lower left triangle
+                    Point2D[] llCorner = { p0, p1, p3 };
+                    float[][] llColor = { patchCC[i - 1][j - 1].color, patchCC[i - 1][j].color,
+                            patchCC[i][j - 1].color };
+                    ShadedTriangle tmpll = new ShadedTriangle(llCorner,
+                            llColor); // lower left triangle
                     list.add(tmpll);
                 }
                 if (ll && (overlaps(p2, p1) || overlaps(p2, p3)))
@@ -208,15 +205,11 @@ abstract class Patch
                 else
                 {
                     // p3, p1 and p2 are in counter clock wise order, p1 has priority over p3, p2 has priority over p1
-                    Point2D[] urCorner =
-                    {
-                        p3, p1, p2
-                    };
-                    float[][] urColor =
-                    {
-                        patchCC[i][j - 1].color, patchCC[i - 1][j].color, patchCC[i][j].color
-                    };
-                    ShadedTriangle tmpur = new ShadedTriangle(urCorner, urColor); // upper right triangle
+                    Point2D[] urCorner = { p3, p1, p2 };
+                    float[][] urColor = { patchCC[i][j - 1].color, patchCC[i - 1][j].color,
+                            patchCC[i][j].color };
+                    ShadedTriangle tmpur = new ShadedTriangle(urCorner,
+                            urColor); // upper right triangle
                     list.add(tmpur);
                 }
             }

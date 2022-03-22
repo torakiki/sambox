@@ -199,7 +199,7 @@ final class FileSystemFontProvider extends FontProvider
             }
             catch (NullPointerException | IOException e) // TTF parser is buggy
             {
-                LOG.error("Could not load font file: " + file, e);
+                LOG.warn("Could not load font file: " + file, e);
             }
             return null;
         }
@@ -268,7 +268,7 @@ final class FileSystemFontProvider extends FontProvider
             }
             catch (IOException e)
             {
-                LOG.error("Could not load font file: " + file, e);
+                LOG.warn("Could not load font file: " + file, e);
             }
             return null;
         }
@@ -283,7 +283,7 @@ final class FileSystemFontProvider extends FontProvider
             }
             catch (IOException e)
             {
-                LOG.error("Could not load font file " + file, e);
+                LOG.warn("Could not load font file " + file, e);
             }
             return null;
         }
@@ -381,7 +381,7 @@ final class FileSystemFontProvider extends FontProvider
             }
             catch (Exception e) // TTF parser is buggy
             {
-                LOG.error("Unable to load font file: " + file, e);
+                LOG.warn("Unable to load font file: " + file, e);
             }
         }
     }
@@ -500,7 +500,7 @@ final class FileSystemFontProvider extends FontProvider
                     String[] parts = line.split("(?<!\\\\)\\|", 10);
                     if (parts.length < 10)
                     {
-                        LOG.error("Incorrect line '" + line + "' in font disk cache is skipped");
+                        LOG.warn("Incorrect line '" + line + "' in font disk cache is skipped");
                         continue;
                     }
 
@@ -565,7 +565,7 @@ final class FileSystemFontProvider extends FontProvider
             }
             catch (IOException e)
             {
-                LOG.error("Error loading font cache, will be re-built", e);
+                LOG.warn("Error loading font cache, will be re-built", e);
                 return null;
             }
         }
@@ -607,7 +607,7 @@ final class FileSystemFontProvider extends FontProvider
      */
     private void addTrueTypeFont(File ttfFile) throws IOException
     {
-        if (ttfFile.getPath().endsWith(".otf"))
+        if (ttfFile.getPath().toLowerCase().endsWith(".otf"))
         {
             OTFParser parser = new OTFParser(false, true);
             OpenTypeFont otf = parser.parse(ttfFile);
@@ -717,7 +717,7 @@ final class FileSystemFontProvider extends FontProvider
         catch (IOException e)
         {
             fontInfoList.add(new FSIgnored(file, FontFormat.TTF, "*skipexception*"));
-            LOG.error("Could not load font file: " + file, e);
+            LOG.warn("Could not load font file: " + file, e);
         }
         finally
         {

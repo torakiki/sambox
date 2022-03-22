@@ -34,7 +34,9 @@ import java.io.InputStream;
  */
 public class PDTilingPattern extends PDAbstractPattern implements PDContentStream
 {
-    /** paint type 1 = colored tiling pattern. */
+    /**
+     * paint type 1 = colored tiling pattern.
+     */
     public static final int PAINT_COLORED = 1;
 
     /**
@@ -111,7 +113,7 @@ public class PDTilingPattern extends PDAbstractPattern implements PDContentStrea
 
     /**
      * This will return the paint type.
-     * 
+     *
      * @return The paint type
      */
     public int getPaintType()
@@ -121,7 +123,7 @@ public class PDTilingPattern extends PDAbstractPattern implements PDContentStrea
 
     /**
      * This will set the tiling type.
-     * 
+     *
      * @param tilingType The new tiling type.
      */
     public void setTilingType(int tilingType)
@@ -131,7 +133,7 @@ public class PDTilingPattern extends PDAbstractPattern implements PDContentStrea
 
     /**
      * This will return the tiling type.
-     * 
+     *
      * @return The tiling type
      */
     public int getTilingType()
@@ -141,7 +143,7 @@ public class PDTilingPattern extends PDAbstractPattern implements PDContentStrea
 
     /**
      * This will set the XStep value.
-     * 
+     *
      * @param xStep The new XStep value.
      */
     public void setXStep(float xStep)
@@ -151,7 +153,7 @@ public class PDTilingPattern extends PDAbstractPattern implements PDContentStrea
 
     /**
      * This will return the XStep value.
-     * 
+     *
      * @return The XStep value
      */
     public float getXStep()
@@ -161,7 +163,7 @@ public class PDTilingPattern extends PDAbstractPattern implements PDContentStrea
 
     /**
      * This will set the YStep value.
-     * 
+     *
      * @param yStep The new YStep value.
      */
     public void setYStep(float yStep)
@@ -171,7 +173,7 @@ public class PDTilingPattern extends PDAbstractPattern implements PDContentStrea
 
     /**
      * This will return the YStep value.
-     * 
+     *
      * @return The YStep value
      */
     public float getYStep()
@@ -196,26 +198,26 @@ public class PDTilingPattern extends PDAbstractPattern implements PDContentStrea
     }
 
     /**
-     * This will get the resources for this pattern. This will return null if no resources are available at this level.
-     * 
+     * This will get the resources for this pattern. This will return null if no resources are
+     * available at this level.
+     *
      * @return The resources for this pattern.
      */
     @Override
     public PDResources getResources()
     {
-        PDResources retval = null;
-        COSDictionary resources = (COSDictionary) getCOSObject()
-                .getDictionaryObject(COSName.RESOURCES);
+        COSDictionary resources = getCOSObject().getDictionaryObject(COSName.RESOURCES,
+                COSDictionary.class);
         if (resources != null)
         {
-            retval = new PDResources(resources);
+            return new PDResources(resources);
         }
-        return retval;
+        return null;
     }
 
     /**
      * This will set the resources for this pattern.
-     * 
+     *
      * @param resources The new resources for this pattern.
      */
     public void setResources(PDResources resources)
@@ -224,26 +226,25 @@ public class PDTilingPattern extends PDAbstractPattern implements PDContentStrea
     }
 
     /**
-     * An array of four numbers in the form coordinate system (see below), giving the coordinates of the left, bottom,
-     * right, and top edges, respectively, of the pattern's bounding box.
+     * An array of four numbers in the form coordinate system (see below), giving the coordinates of
+     * the left, bottom, right, and top edges, respectively, of the pattern's bounding box.
      *
      * @return The BBox of the pattern.
      */
     @Override
     public PDRectangle getBBox()
     {
-        PDRectangle retval = null;
-        COSArray array = (COSArray) getCOSObject().getDictionaryObject(COSName.BBOX);
+        COSArray array = getCOSObject().getDictionaryObject(COSName.BBOX, COSArray.class);
         if (array != null)
         {
-            retval = new PDRectangle(array);
+            return new PDRectangle(array);
         }
-        return retval;
+        return null;
     }
 
     /**
      * This will set the BBox (bounding box) for this Pattern.
-     * 
+     *
      * @param bbox The new BBox for this Pattern.
      */
     public void setBBox(PDRectangle bbox)

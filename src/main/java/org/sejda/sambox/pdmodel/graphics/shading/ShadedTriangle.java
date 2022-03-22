@@ -21,9 +21,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * This is an assistant class for accomplishing type 4, 5, 6 and 7 shading. It describes a triangle actually, which is
- * used to compose a patch. It contains the degenerated cases, a triangle degenerates to a line or to a point. This was
- * done as part of GSoC2014, Tilman Hausherr is the mentor.
+ * This is an assistant class for accomplishing type 4, 5, 6 and 7 shading. It describes a triangle
+ * actually, which is used to compose a patch. It contains the degenerated cases, a triangle
+ * degenerates to a line or to a point. This was done as part of GSoC2014, Tilman Hausherr is the
+ * mentor.
  *
  * @author Shaola Ren
  */
@@ -50,12 +51,13 @@ class ShadedTriangle
     /**
      * Constructor.
      *
-     * @param p an array of the 3 vertices of a triangle
+     * @param p an array of the 3 vertices of a triangle; the Point2D objects should not be modified
+     *          by the caller.
      * @param c an array of color corresponding the vertex array p
      */
     ShadedTriangle(Point2D[] p, float[][] c)
     {
-        corner = p.clone();
+        corner = p.clone(); // yes this is a shallow clone
         color = c.clone();
         area = getArea(p[0], p[1], p[2]);
         degree = calcDeg(p);
@@ -208,15 +210,16 @@ class ShadedTriangle
      */
     private double edgeEquationValue(Point2D p, Point2D p1, Point2D p2)
     {
-        return (p2.getY() - p1.getY()) * (p.getX() - p1.getX())
-                - (p2.getX() - p1.getX()) * (p.getY() - p1.getY());
+        return (p2.getY() - p1.getY()) * (p.getX() - p1.getX()) - (p2.getX() - p1.getX()) * (
+                p.getY() - p1.getY());
     }
 
     // calcuate the area of a triangle
     private double getArea(Point2D a, Point2D b, Point2D c)
     {
-        return Math.abs((c.getX() - b.getX()) * (c.getY() - a.getY())
-                - (c.getX() - a.getX()) * (c.getY() - b.getY())) / 2.0;
+        return Math.abs(
+                (c.getX() - b.getX()) * (c.getY() - a.getY()) - (c.getX() - a.getX()) * (c.getY()
+                        - b.getY())) / 2.0;
     }
 
     /**

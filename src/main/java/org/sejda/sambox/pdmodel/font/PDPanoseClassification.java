@@ -20,14 +20,14 @@ package org.sejda.sambox.pdmodel.font;
 /**
  * Represents a 10-byte PANOSE classification.
  *
- * @link http://www.monotype.com/services/pan2
  * @author John Hewson
+ * @link http://www.monotype.com/services/pan2
  */
 public class PDPanoseClassification
 {
     private final byte[] bytes;
 
-    PDPanoseClassification(byte[] bytes)
+    public PDPanoseClassification(byte[] bytes)
     {
         this.bytes = bytes;
     }

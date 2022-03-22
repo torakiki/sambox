@@ -43,8 +43,9 @@ public final class FontUtils
         {
             int fsType = ttf.getOS2Windows().getFsType();
 
-            if ((fsType & OS2WindowsMetricsTable.FSTYPE_RESTRICTED)
-                    == OS2WindowsMetricsTable.FSTYPE_RESTRICTED)
+            int maskedFsType = fsType & 0x000F;
+            // PDFBOX-5191: don't check the bit because permissions are exclusive
+            if (maskedFsType == OS2WindowsMetricsTable.FSTYPE_RESTRICTED)
             {
                 // restricted License embedding
                 return false;
@@ -67,8 +68,8 @@ public final class FontUtils
         if (ttf.getOS2Windows() != null)
         {
             int fsType = ttf.getOS2Windows().getFsType();
-            if ((fsType
-                    & OS2WindowsMetricsTable.FSTYPE_NO_SUBSETTING) == OS2WindowsMetricsTable.FSTYPE_NO_SUBSETTING)
+            if ((fsType & OS2WindowsMetricsTable.FSTYPE_NO_SUBSETTING)
+                    == OS2WindowsMetricsTable.FSTYPE_NO_SUBSETTING)
             {
                 return false;
             }

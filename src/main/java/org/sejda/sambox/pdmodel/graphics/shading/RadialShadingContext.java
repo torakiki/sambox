@@ -16,6 +16,13 @@
  */
 package org.sejda.sambox.pdmodel.graphics.shading;
 
+import org.sejda.sambox.cos.COSArray;
+import org.sejda.sambox.cos.COSBoolean;
+import org.sejda.sambox.pdmodel.common.function.PDFunction;
+import org.sejda.sambox.util.Matrix;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.awt.PaintContext;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
@@ -25,16 +32,9 @@ import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
 
-import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSBoolean;
-import org.sejda.sambox.pdmodel.common.function.PDFunction;
-import org.sejda.sambox.util.Matrix;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * AWT PaintContext for radial shading.
- *
+ * <p>
  * Performance improvement done as part of GSoC2014, Tilman Hausherr is the mentor.
  *
  * @author Shaola Ren
@@ -63,16 +63,15 @@ public class RadialShadingContext extends ShadingContext implements PaintContext
     /**
      * Constructor creates an instance to be used for fill operations.
      *
-     * @param shading the shading type to be used
-     * @param colorModel the color model to be used
-     * @param xform transformation for user to device space
-     * @param matrix the pattern matrix concatenated with that of the parent content stream
+     * @param shading      the shading type to be used
+     * @param colorModel   the color model to be used
+     * @param xform        transformation for user to device space
+     * @param matrix       the pattern matrix concatenated with that of the parent content stream
      * @param deviceBounds the bounds of the area to paint, in device units
      * @throws IOException if there is an error getting the color space or doing color conversion.
      */
     public RadialShadingContext(PDShadingType3 shading, ColorModel colorModel,
-            AffineTransform xform, Matrix matrix, Rectangle deviceBounds)
-                                throws IOException
+            AffineTransform xform, Matrix matrix, Rectangle deviceBounds) throws IOException
     {
         super(shading, colorModel, xform, matrix);
         this.radialShadingType = shading;
@@ -128,8 +127,9 @@ public class RadialShadingContext extends ShadingContext implements PaintContext
         shadingToDevice.concatenate(matrix.createAffineTransform());
 
         // worst case for the number of steps is opposite diagonal corners, so use that
-        double dist = Math.sqrt(Math.pow(deviceBounds.getMaxX() - deviceBounds.getMinX(), 2)
-                + Math.pow(deviceBounds.getMaxY() - deviceBounds.getMinY(), 2));
+        double dist = Math.sqrt(
+                Math.pow(deviceBounds.getMaxX() - deviceBounds.getMinX(), 2) + Math.pow(
+                        deviceBounds.getMaxY() - deviceBounds.getMinY(), 2));
         factor = (int) Math.ceil(dist);
 
         // build the color table for the given number of steps
@@ -183,11 +183,13 @@ public class RadialShadingContext extends ShadingContext implements PaintContext
         float inputValue = -1;
         boolean useBackground;
         int[] data = new int[w * h * 4];
+        float[] values = new float[2];
         for (int j = 0; j < h; j++)
         {
             for (int i = 0; i < w; i++)
             {
-                float[] values = new float[] { x + i, y + j };
+                values[0] = x + i;
+                values[1] = y + j;
                 rat.transform(values, 0, values, 0, 1);
                 useBackground = false;
                 float[] inputValues = calculateInputValues(values[0], values[1]);

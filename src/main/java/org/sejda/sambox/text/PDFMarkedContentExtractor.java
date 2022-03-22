@@ -40,7 +40,7 @@ import java.util.Map;
  */
 public class PDFMarkedContentExtractor extends PDFTextStreamEngine
 {
-    private final boolean suppressDuplicateOverlappingText = true;
+    private boolean suppressDuplicateOverlappingText = true;
     private final List<PDMarkedContent> markedContents = new ArrayList<>();
     private final Deque<PDMarkedContent> currentMarkedContents = new ArrayDeque<PDMarkedContent>();
     private final Map<String, List<TextPosition>> characterListMapping = new HashMap<>();
@@ -69,10 +69,31 @@ public class PDFMarkedContentExtractor extends PDFTextStreamEngine
     }
 
     /**
+     * @return the suppressDuplicateOverlappingText setting.
+     */
+    public boolean isSuppressDuplicateOverlappingText()
+    {
+        return suppressDuplicateOverlappingText;
+    }
+
+    /**
+     * By default the class will attempt to remove text that overlaps each other. Word paints the
+     * same character several times in order to make it look bold. By setting this to false all text
+     * will be extracted, which means that certain sections will be duplicated, but better
+     * performance will be noticed.
+     *
+     * @param suppressDuplicateOverlappingText The suppressDuplicateOverlappingText setting to set.
+     */
+    public void setSuppressDuplicateOverlappingText(boolean suppressDuplicateOverlappingText)
+    {
+        this.suppressDuplicateOverlappingText = suppressDuplicateOverlappingText;
+    }
+
+    /**
      * This will determine of two floating point numbers are within a specified variance.
      *
-     * @param first The first number to compare to.
-     * @param second The second number to compare to.
+     * @param first    The first number to compare to.
+     * @param second   The second number to compare to.
      * @param variance The allowed variance.
      */
     private boolean within(float first, float second, float variance)
@@ -117,8 +138,8 @@ public class PDFMarkedContentExtractor extends PDFTextStreamEngine
     }
 
     /**
-     * This will process a TextPosition object and add the text to the list of characters on a page. It takes care of
-     * overlapping text.
+     * This will process a TextPosition object and add the text to the list of characters on a page.
+     * It takes care of overlapping text.
      *
      * @param text The text to process.
      */
@@ -154,13 +175,12 @@ public class PDFMarkedContentExtractor extends PDFTextStreamEngine
             float tolerance = (text.getWidth() / textCharacter.length()) / 3.0f;
             for (TextPosition sameTextCharacter : sameTextCharacters)
             {
-                TextPosition character = sameTextCharacter;
-                String charCharacter = character.getUnicode();
-                float charX = character.getX();
-                float charY = character.getY();
+                String charCharacter = sameTextCharacter.getUnicode();
+                float charX = sameTextCharacter.getX();
+                float charY = sameTextCharacter.getY();
                 // only want to suppress
                 if (charCharacter != null &&
-                // charCharacter.equals( textCharacter ) &&
+                        // charCharacter.equals( textCharacter ) &&
                         within(charX, textX, tolerance) && within(charY, textY, tolerance))
                 {
                     suppressCharacter = true;

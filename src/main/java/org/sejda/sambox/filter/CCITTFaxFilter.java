@@ -153,6 +153,5 @@ final class CCITTFaxFilter extends Filter
         int rows = parameters.getInt(COSName.ROWS);
         IOUtils.copy(input,
                 new CCITTFaxEncoderStream(encoded, cols, rows, TIFFExtension.FILL_LEFT_TO_RIGHT));
-        input.close();
     }
 }

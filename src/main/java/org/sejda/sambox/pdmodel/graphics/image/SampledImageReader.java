@@ -154,7 +154,6 @@ final class SampledImageReader
         final int width = pdImage.getWidth();
         final int height = pdImage.getHeight();
         final int bitsPerComponent = pdImage.getBitsPerComponent();
-        final float[] decode = getDecodeArray(pdImage);
 
         if (width <= 0 || height <= 0)
         {
@@ -172,11 +171,13 @@ final class SampledImageReader
             // will be unpacked into a byte-backed raster. Images with 16bpc will be reduced
             // in depth to 8bpc as they will be drawn to TYPE_INT_RGB images anyway. All code
             // in PDColorSpace#toRGBImage expects an 8-bit range, i.e. 0-255.
-            //
+            // Interleaved raster allows chunk-copying for 8-bit images.
+            // Here it's different from PDFBox, we should investigate
             WritableRaster raster = Raster.createBandedRaster(DataBuffer.TYPE_BYTE, width, height,
                     numComponents, new Point(0, 0));
             final float[] defaultDecode = pdImage.getColorSpace().getDefaultDecode(8);
-            if (bitsPerComponent == 8 && Arrays.equals(decode, defaultDecode) && colorKey == null)
+            final float[] decode = getDecodeArray(pdImage);
+            if (bitsPerComponent == 8 && colorKey == null && Arrays.equals(decode, defaultDecode))
             {
                 // convert image, faster path for non-decoded, non-colormasked 8-bit images
                 return from8bit(pdImage, raster);

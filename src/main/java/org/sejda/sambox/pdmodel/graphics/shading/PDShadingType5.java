@@ -16,11 +16,22 @@
  */
 package org.sejda.sambox.pdmodel.graphics.shading;
 
-import java.awt.Paint;
-
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.cos.COSStream;
+import org.sejda.sambox.pdmodel.common.PDRange;
 import org.sejda.sambox.util.Matrix;
+
+import javax.imageio.stream.ImageInputStream;
+import javax.imageio.stream.MemoryCacheImageInputStream;
+import java.awt.Paint;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
+import java.io.EOFException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Resources for a shading type 5 (Lattice-Form Gouraud-Shade Triangle Mesh).
@@ -44,8 +55,7 @@ public class PDShadingType5 extends PDTriangleBasedShadingType
     }
 
     /**
-     * The vertices per row of this shading. This will return -1 if one has not
-     * been set.
+     * The vertices per row of this shading. This will return -1 if one has not been set.
      *
      * @return the number of vertices per row
      */
@@ -68,5 +78,91 @@ public class PDShadingType5 extends PDTriangleBasedShadingType
     public Paint toPaint(Matrix matrix)
     {
         return new Type5ShadingPaint(this, matrix);
+    }
+
+    @SuppressWarnings("squid:S1166")
+    @Override
+    List<ShadedTriangle> collectTriangles(AffineTransform xform, Matrix matrix) throws IOException
+    {
+        COSDictionary dict = getCOSObject();
+        if (!(dict instanceof COSStream))
+        {
+            return Collections.emptyList();
+        }
+        PDRange rangeX = getDecodeForParameter(0);
+        PDRange rangeY = getDecodeForParameter(1);
+        if (Float.compare(rangeX.getMin(), rangeX.getMax()) == 0
+                || Float.compare(rangeY.getMin(), rangeY.getMax()) == 0)
+        {
+            return Collections.emptyList();
+        }
+        int numPerRow = getVerticesPerRow();
+        PDRange[] colRange = new PDRange[getNumberOfColorComponents()];
+        for (int i = 0; i < getNumberOfColorComponents(); ++i)
+        {
+            colRange[i] = getDecodeForParameter(2 + i);
+        }
+        List<Vertex> vlist = new ArrayList<Vertex>();
+        long maxSrcCoord = (long) Math.pow(2, getBitsPerCoordinate()) - 1;
+        long maxSrcColor = (long) Math.pow(2, getBitsPerComponent()) - 1;
+        COSStream cosStream = (COSStream) dict;
+
+        try (ImageInputStream mciis = new MemoryCacheImageInputStream(
+                cosStream.getUnfilteredStream()))
+        {
+            boolean eof = false;
+            while (!eof)
+            {
+                Vertex p;
+                try
+                {
+                    p = readVertex(mciis, maxSrcCoord, maxSrcColor, rangeX, rangeY, colRange,
+                            matrix, xform);
+                    vlist.add(p);
+                }
+                catch (EOFException ex)
+                {
+                    eof = true;
+                }
+            }
+        }
+        int rowNum = vlist.size() / numPerRow;
+        Vertex[][] latticeArray = new Vertex[rowNum][numPerRow];
+        List<ShadedTriangle> list = new ArrayList<ShadedTriangle>();
+        if (rowNum < 2)
+        {
+            // must have at least two rows; if not, return empty list
+            return list;
+        }
+        for (int i = 0; i < rowNum; i++)
+        {
+            for (int j = 0; j < numPerRow; j++)
+            {
+                latticeArray[i][j] = vlist.get(i * numPerRow + j);
+            }
+        }
+
+        for (int i = 0; i < rowNum - 1; i++)
+        {
+            for (int j = 0; j < numPerRow - 1; j++)
+            {
+                Point2D[] ps = new Point2D[] { latticeArray[i][j].point,
+                        latticeArray[i][j + 1].point, latticeArray[i + 1][j].point };
+
+                float[][] cs = new float[][] { latticeArray[i][j].color,
+                        latticeArray[i][j + 1].color, latticeArray[i + 1][j].color };
+
+                list.add(new ShadedTriangle(ps, cs));
+
+                ps = new Point2D[] { latticeArray[i][j + 1].point, latticeArray[i + 1][j].point,
+                        latticeArray[i + 1][j + 1].point };
+
+                cs = new float[][] { latticeArray[i][j + 1].color, latticeArray[i + 1][j].color,
+                        latticeArray[i + 1][j + 1].color };
+
+                list.add(new ShadedTriangle(ps, cs));
+            }
+        }
+        return list;
     }
 }

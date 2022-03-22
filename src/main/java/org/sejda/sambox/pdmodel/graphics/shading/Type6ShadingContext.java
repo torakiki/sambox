@@ -15,17 +15,16 @@
  */
 package org.sejda.sambox.pdmodel.graphics.shading;
 
+import org.sejda.sambox.util.Matrix;
+
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Point2D;
 import java.awt.image.ColorModel;
 import java.io.IOException;
 
-import org.sejda.sambox.util.Matrix;
-
 /**
- * AWT PaintContext for coons patch meshes (type 6) shading. This was done as
- * part of GSoC2014, Tilman Hausherr is the mentor.
+ * AWT PaintContext for coons patch meshes (type 6) shading. This was done as part of GSoC2014,
+ * Tilman Hausherr is the mentor.
  *
  * @author Shaola Ren
  */
@@ -34,22 +33,17 @@ class Type6ShadingContext extends PatchMeshesShadingContext
     /**
      * Constructor creates an instance to be used for fill operations.
      *
-     * @param shading the shading type to be used
-     * @param colorModel the color model to be used
-     * @param xform transformation for user to device space
-     * @param matrix the pattern matrix concatenated with that of the parent content stream
+     * @param shading      the shading type to be used
+     * @param colorModel   the color model to be used
+     * @param xform        transformation for user to device space
+     * @param matrix       the pattern matrix concatenated with that of the parent content stream
      * @param deviceBounds device bounds
      * @throws IOException if something went wrong
      */
     Type6ShadingContext(PDShadingType6 shading, ColorModel colorModel, AffineTransform xform,
-                               Matrix matrix, Rectangle deviceBounds) throws IOException
+            Matrix matrix, Rectangle deviceBounds) throws IOException
     {
         super(shading, colorModel, xform, matrix, deviceBounds, 12);
     }
 
-    @Override
-    protected Patch generatePatch(Point2D[] points, float[][] color)
-    {
-        return new CoonsPatch(points, color);
-    }
 }

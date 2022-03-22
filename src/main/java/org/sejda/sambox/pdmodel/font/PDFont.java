@@ -47,7 +47,7 @@ import static java.util.Objects.nonNull;
 
 /**
  * This is the base class for all PDF fonts.
- * 
+ *
  * @author Ben Litchfield
  */
 public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
@@ -149,6 +149,7 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
                 {
                     // assume that if encoding is identity, then the reverse is also true
                     cmap = CMapManager.getPredefinedCMap(COSName.IDENTITY_H.getName());
+                    LOG.warn("Using predefined identity CMap instead");
                 }
             }
         }
@@ -182,8 +183,8 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
     }
 
     /**
-     * 
-     * /** Reads a CMap given a COS Stream or Name. May return null if a predefined CMap does not exist.
+     * /** Reads a CMap given a COS Stream or Name. May return null if a predefined CMap does not
+     * exist.
      *
      * @param base COSName or COSStream
      */
@@ -228,8 +229,8 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
     }
 
     /**
-     * Returns the displacement vector (w0, w1) in text space, for the given character. For horizontal text only the x
-     * component is used, for vertical text only the y component.
+     * Returns the displacement vector (w0, w1) in text space, for the given character. For
+     * horizontal text only the x component is used, for vertical text only the y component.
      *
      * @param code character code
      * @return displacement vector
@@ -255,8 +256,8 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
         // embedded", however PDFBOX-427 shows that it also applies to embedded fonts.
 
         // Type1, Type1C, Type3
-        if (dict.getDictionaryObject(COSName.WIDTHS) != null
-                || dict.containsKey(COSName.MISSING_WIDTH))
+        if (dict.getDictionaryObject(COSName.WIDTHS) != null || dict.containsKey(
+                COSName.MISSING_WIDTH))
         {
             int firstChar = dict.getInt(COSName.FIRST_CHAR, -1);
             int lastChar = dict.getInt(COSName.LAST_CHAR, -1);
@@ -299,7 +300,7 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
 
     /**
      * Returns the glyph width from the AFM if this is a Standard 14 font.
-     * 
+     *
      * @param code character code
      * @return width in 1/1000 text space
      */
@@ -330,12 +331,13 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
     }
 
     /**
-     * Similar to encode() but handles leniently cases where fonts don't have a glyph by assuming the identity mapping
+     * Similar to encode() but handles leniently cases where fonts don't have a glyph by assuming
+     * the identity mapping
      */
     public final byte[] encodeLeniently(String text) throws IOException
     {
         FastByteArrayOutputStream out = new FastByteArrayOutputStream();
-        for (int offset = 0; offset < text.length();)
+        for (int offset = 0; offset < text.length(); )
         {
             int codePoint = text.codePointAt(offset);
 
@@ -347,8 +349,8 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
             }
             catch (IllegalArgumentException e)
             {
-                if (e.getMessage().contains("No glyph")
-                        || e.getMessage().contains("is not available in this"))
+                if (e.getMessage().contains("No glyph") || e.getMessage()
+                        .contains("is not available in this"))
                 {
                     bytes = new byte[] { (byte) codePoint };
                 }
@@ -365,8 +367,8 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
     }
 
     /**
-     * Encodes the given Unicode code point for use in a PDF content stream. Content streams use a multi-byte encoding
-     * with 1 to 4 bytes.
+     * Encodes the given Unicode code point for use in a PDF content stream. Content streams use a
+     * multi-byte encoding with 1 to 4 bytes.
      *
      * <p>
      * This method is called when embedding text in PDFs and when filling in fields.
@@ -400,9 +402,9 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
     }
 
     /**
-     * Similar to getStringWidth() but handles leniently fonts where glyphs are missing, assuming the identity mapping
-     * of glyphs
-     *
+     * Similar to getStringWidth() but handles leniently fonts where glyphs are missing, assuming
+     * the identity mapping of glyphs
+     * <p>
      * Uses encodeLeniently() instead of encode()
      */
     public float getStringWidthLeniently(String text) throws IOException
@@ -477,7 +479,7 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
     /**
      * Returns the Unicode character sequence which corresponds to the given character code.
      *
-     * @param code character code
+     * @param code            character code
      * @param customGlyphList a custom glyph list to use instead of the Adobe Glyph List
      * @return Unicode character(s)
      */
@@ -499,7 +501,7 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
         {
             if (toUnicodeCMap.getName() != null && toUnicodeCMap.getName().startsWith("Identity-")
                     && (dict.getDictionaryObject(COSName.TO_UNICODE) instanceof COSName
-                            || !toUnicodeCMap.hasUnicodeMappings()))
+                    || !toUnicodeCMap.hasUnicodeMappings()))
             {
                 // handle the undocumented case of using Identity-H/V as a ToUnicode CMap, this
                 // isn't actually valid as the Identity-x CMaps are code->CID maps, not
@@ -519,7 +521,7 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
 
     /**
      * This will always return "Font" for fonts.
-     * 
+     *
      * @return The type of object that this is.
      */
     public String getType()
@@ -565,7 +567,7 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
 
     /**
      * Determines the width of the space character.
-     * 
+     *
      * @return the width of the space character
      */
     public float getSpaceWidth()

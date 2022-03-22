@@ -16,8 +16,7 @@
  */
 package org.sejda.sambox.cos;
 
-import static java.util.Objects.nonNull;
-import static java.util.Optional.ofNullable;
+import org.sejda.sambox.util.DateConverter;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -28,18 +27,19 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.sejda.sambox.util.DateConverter;
+import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
 
 /**
  * This class represents a dictionary where name/value pairs reside.
  *
  * @author Ben Litchfield
- * 
  */
 public class COSDictionary extends COSBase
 {
     /**
-     * The name-value pairs of this dictionary. The pairs are kept in the order they were added to the dictionary.
+     * The name-value pairs of this dictionary. The pairs are kept in the order they were added to
+     * the dictionary.
      */
     private Map<COSName, COSBase> items = new LinkedHashMap<>();
 
@@ -59,7 +59,8 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Search in the map for the value that matches the parameter and return the first key that maps to that value.
+     * Search in the map for the value that matches the parameter and return the first key that maps
+     * to that value.
      *
      * @param value The value to search for in the map.
      * @return The key for the value in the map or null if it does not exist.
@@ -90,8 +91,8 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * This will get an object from this dictionary. If the object is a reference then it will dereference it. If the
-     * object is COSNull then null will be returned.
+     * This will get an object from this dictionary. If the object is a reference then it will
+     * dereference it. If the object is COSNull then null will be returned.
      *
      * @param key The key to the object that we are getting.
      * @return The object that matches the key.
@@ -102,8 +103,9 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Get an object of the expected type from this dictionary. If the type is not compatible, null is returned
-     * 
+     * Get an object of the expected type from this dictionary. If the type is not compatible, null
+     * is returned
+     *
      * @param key
      * @param clazz
      * @return The object that matches the key and the type or null.
@@ -114,12 +116,13 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * This is a special case of getDictionaryObject that takes multiple keys, it will handle the situation where
-     * multiple keys could get the same value, ie if either CS or ColorSpace is used to get the colorspace. This will
-     * get an object from this dictionary. If the object is a reference then it will dereference it and get it from the
-     * document. If the object is COSNull then null will be returned.
+     * This is a special case of getDictionaryObject that takes multiple keys, it will handle the
+     * situation where multiple keys could get the same value, ie if either CS or ColorSpace is used
+     * to get the colorspace. This will get an object from this dictionary. If the object is a
+     * reference then it will dereference it and get it from the document. If the object is COSNull
+     * then null will be returned.
      *
-     * @param firstKey The first key to try.
+     * @param firstKey  The first key to try.
      * @param secondKey The second key to try.
      * @return The object that matches the key.
      */
@@ -134,7 +137,6 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * 
      * @param firstKey
      * @param secondKey
      * @param clazz
@@ -154,8 +156,8 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Get an object from this dictionary. If the object is a reference then it will dereference it. If the object is
-     * COSNull then null will be returned.
+     * Get an object from this dictionary. If the object is a reference then it will dereference it.
+     * If the object is COSNull then null will be returned.
      *
      * @param key The key to the object that we are getting.
      * @return The object that matches the key or null.
@@ -167,8 +169,9 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Get an object of the expected type from this dictionary. If the type is not compatible, null is returned
-     * 
+     * Get an object of the expected type from this dictionary. If the type is not compatible, null
+     * is returned
+     *
      * @param key
      * @param clazz
      * @return The object that matches the key and the type or null.
@@ -180,9 +183,10 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Set an item in the dictionary. If value is null then the result will be the same as removeItem( key ).
+     * Set an item in the dictionary. If value is null then the result will be the same as
+     * removeItem( key ).
      *
-     * @param key The key to the dictionary object.
+     * @param key   The key to the dictionary object.
      * @param value The value to the dictionary object.
      */
     public void setItem(COSName key, COSBase value)
@@ -203,10 +207,10 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Set the wrapped {@link COSBase} as item in the dictionary. If value is null then the result will be the same as
-     * removeItem( key ).
+     * Set the wrapped {@link COSBase} as item in the dictionary. If value is null then the result
+     * will be the same as removeItem( key ).
      *
-     * @param key The key to the dictionary object.
+     * @param key   The key to the dictionary object.
      * @param value The value to the dictionary object.
      */
     public void setItem(COSName key, COSObjectable value)
@@ -228,10 +232,10 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Set the wrapped {@link COSBase} as item in the dictionary. If value is null then the result will be the same as
-     * removeItem( key ).
+     * Set the wrapped {@link COSBase} as item in the dictionary. If value is null then the result
+     * will be the same as removeItem( key ).
      *
-     * @param key The key to the dictionary object.
+     * @param key   The key to the dictionary object.
      * @param value The value to the dictionary object.
      */
     public void setItem(String key, COSObjectable value)
@@ -242,7 +246,7 @@ public class COSDictionary extends COSBase
     /**
      * Set a boolean item in the dictionary.
      *
-     * @param key The key to the dictionary object.
+     * @param key   The key to the dictionary object.
      * @param value The value to the dictionary object.
      */
     public void setBoolean(String key, boolean value)
@@ -253,7 +257,7 @@ public class COSDictionary extends COSBase
     /**
      * Set a boolean item in the dictionary.
      *
-     * @param key The key to the dictionary object.
+     * @param key   The key to the dictionary object.
      * @param value The value to the dictionary object.
      */
     public void setBoolean(COSName key, boolean value)
@@ -267,9 +271,10 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Set an item in the dictionary. If value is null then the result will be the same as removeItem( key ).
+     * Set an item in the dictionary. If value is null then the result will be the same as
+     * removeItem( key ).
      *
-     * @param key The key to the dictionary object.
+     * @param key   The key to the dictionary object.
      * @param value The value to the dictionary object.
      */
     public void setItem(String key, COSBase value)
@@ -278,10 +283,10 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Convenience method that will convert the value to a COSName object. If it is null then the object will be
-     * removed.
+     * Convenience method that will convert the value to a COSName object. If it is null then the
+     * object will be removed.
      *
-     * @param key The key to the object,
+     * @param key   The key to the object,
      * @param value The string value for the name.
      */
     public void setName(String key, String value)
@@ -290,10 +295,10 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Convenience method that will convert the value to a COSName object. If it is null then the object will be
-     * removed.
+     * Convenience method that will convert the value to a COSName object. If it is null then the
+     * object will be removed.
      *
-     * @param key The key to the object,
+     * @param key   The key to the object,
      * @param value The string value for the name.
      */
     public void setName(COSName key, String value)
@@ -304,7 +309,7 @@ public class COSDictionary extends COSBase
     /**
      * Set the value of a date entry in the dictionary.
      *
-     * @param key The key to the date value.
+     * @param key  The key to the date value.
      * @param date The date value.
      */
     public void setDate(String key, Calendar date)
@@ -315,7 +320,7 @@ public class COSDictionary extends COSBase
     /**
      * Set the date object.
      *
-     * @param key The key to the date.
+     * @param key  The key to the date.
      * @param date The date to set.
      */
     public void setDate(COSName key, Calendar date)
@@ -327,8 +332,8 @@ public class COSDictionary extends COSBase
      * Set the value of a date entry in the dictionary.
      *
      * @param embedded The embedded dictionary.
-     * @param key The key to the date value.
-     * @param date The date value.
+     * @param key      The key to the date value.
+     * @param date     The date value.
      */
     public void setEmbeddedDate(String embedded, String key, Calendar date)
     {
@@ -339,8 +344,8 @@ public class COSDictionary extends COSBase
      * Set the date object.
      *
      * @param embedded The embedded dictionary.
-     * @param key The key to the date.
-     * @param date The date to set.
+     * @param key      The key to the date.
+     * @param date     The date to set.
      */
     public void setEmbeddedDate(String embedded, COSName key, Calendar date)
     {
@@ -357,10 +362,10 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Convenience method that will convert the value to a COSString object. If it is null then the object will be
-     * removed.
+     * Convenience method that will convert the value to a COSString object. If it is null then the
+     * object will be removed.
      *
-     * @param key The key to the object,
+     * @param key   The key to the object,
      * @param value The string value for the name.
      */
     public void setString(String key, String value)
@@ -369,10 +374,10 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Convenience method that will convert the value to a COSString object. If it is null then the object will be
-     * removed.
+     * Convenience method that will convert the value to a COSString object. If it is null then the
+     * object will be removed.
      *
-     * @param key The key to the object,
+     * @param key   The key to the object,
      * @param value The string value for the name.
      */
     public void setString(COSName key, String value)
@@ -391,12 +396,12 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Convenience method that will convert the value to a COSString object. If it is null then the object will be
-     * removed.
+     * Convenience method that will convert the value to a COSString object. If it is null then the
+     * object will be removed.
      *
      * @param embedded The embedded dictionary to set the item in.
-     * @param key The key to the object,
-     * @param value The string value for the name.
+     * @param key      The key to the object,
+     * @param value    The string value for the name.
      */
     public void setEmbeddedString(String embedded, String key, String value)
     {
@@ -404,12 +409,12 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Convenience method that will convert the value to a COSString object. If it is null then the object will be
-     * removed.
+     * Convenience method that will convert the value to a COSString object. If it is null then the
+     * object will be removed.
      *
      * @param embedded The embedded dictionary to set the item in.
-     * @param key The key to the object,
-     * @param value The string value for the name.
+     * @param key      The key to the object,
+     * @param value    The string value for the name.
      */
     public void setEmbeddedString(String embedded, COSName key, String value)
     {
@@ -428,7 +433,7 @@ public class COSDictionary extends COSBase
     /**
      * Convenience method that will convert the value to a COSInteger object.
      *
-     * @param key The key to the object,
+     * @param key   The key to the object,
      * @param value The int value for the name.
      */
     public void setInt(String key, int value)
@@ -439,7 +444,7 @@ public class COSDictionary extends COSBase
     /**
      * Convenience method that will convert the value to a COSInteger object.
      *
-     * @param key The key to the object,
+     * @param key   The key to the object,
      * @param value The int value for the name.
      */
     public void setInt(COSName key, int value)
@@ -455,7 +460,7 @@ public class COSDictionary extends COSBase
     /**
      * Convenience method that will convert the value to a COSInteger object.
      *
-     * @param key The key to the object,
+     * @param key   The key to the object,
      * @param value The int value for the name.
      */
     public void setLong(String key, long value)
@@ -466,7 +471,7 @@ public class COSDictionary extends COSBase
     /**
      * Convenience method that will convert the value to a COSInteger object.
      *
-     * @param key The key to the object,
+     * @param key   The key to the object,
      * @param value The int value for the name.
      */
     public void setLong(COSName key, long value)
@@ -483,8 +488,8 @@ public class COSDictionary extends COSBase
      * Convenience method that will convert the value to a COSInteger object.
      *
      * @param embeddedDictionary The embedded dictionary.
-     * @param key The key to the object,
-     * @param value The int value for the name.
+     * @param key                The key to the object,
+     * @param value              The int value for the name.
      */
     public void setEmbeddedInt(String embeddedDictionary, String key, long value)
     {
@@ -495,8 +500,8 @@ public class COSDictionary extends COSBase
      * Convenience method that will convert the value to a COSInteger object.
      *
      * @param embeddedDictionary The embedded dictionary.
-     * @param key The key to the object,
-     * @param value The int value for the name.
+     * @param key                The key to the object,
+     * @param value              The int value for the name.
      */
     public void setEmbeddedInt(String embeddedDictionary, COSName key, long value)
     {
@@ -512,7 +517,7 @@ public class COSDictionary extends COSBase
     /**
      * Convenience method that will convert the value to a COSFloat object.
      *
-     * @param key The key to the object,
+     * @param key   The key to the object,
      * @param value The int value for the name.
      */
     public void setFloat(String key, float value)
@@ -523,7 +528,7 @@ public class COSDictionary extends COSBase
     /**
      * Convenience method that will convert the value to a COSFloat object.
      *
-     * @param key The key to the object,
+     * @param key   The key to the object,
      * @param value The int value for the name.
      */
     public void setFloat(COSName key, float value)
@@ -534,9 +539,9 @@ public class COSDictionary extends COSBase
     /**
      * Sets the given boolean value at bitPos in the flags.
      *
-     * @param field The COSName of the field to set the value into.
+     * @param field   The COSName of the field to set the value into.
      * @param bitFlag the bit position to set the value in.
-     * @param value the value the bit position should have.
+     * @param value   the value the bit position should have.
      */
     public void setFlag(COSName field, int bitFlag, boolean value)
     {
@@ -553,8 +558,8 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Convenience method that will get the dictionary object that is expected to be a name. Null is returned if the
-     * entry does not exist in the dictionary.
+     * Convenience method that will get the dictionary object that is expected to be a name. Null is
+     * returned if the entry does not exist in the dictionary.
      *
      * @param key The key to the item in the dictionary.
      * @return The COS name.
@@ -565,8 +570,8 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * This is a convenience method that will get the dictionary object that is expected to be a COSArray. Null is
-     * returned if the entry does not exist in the dictionary.
+     * This is a convenience method that will get the dictionary object that is expected to be a
+     * COSArray. Null is returned if the entry does not exist in the dictionary.
      *
      * @param key The key to the item in the dictionary.
      * @return The COSArray.
@@ -582,10 +587,10 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Convenience method that will get the dictionary object that is expected to be a name. Default is returned if the
-     * entry does not exist in the dictionary.
+     * Convenience method that will get the dictionary object that is expected to be a name. Default
+     * is returned if the entry does not exist in the dictionary.
      *
-     * @param key The key to the item in the dictionary.
+     * @param key          The key to the item in the dictionary.
      * @param defaultValue The value to return if the dictionary item is null.
      * @return The COS name.
      */
@@ -595,8 +600,8 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Convenience method that will get the dictionary object that is expected to be a name and convert it to a string.
-     * Null is returned if the entry does not exist in the dictionary.
+     * Convenience method that will get the dictionary object that is expected to be a name and
+     * convert it to a string. Null is returned if the entry does not exist in the dictionary.
      *
      * @param key The key to the item in the dictionary.
      * @return The name converted to a string.
@@ -607,8 +612,8 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Convenience method that will get the dictionary object that is expected to be a name and convert it to a string.
-     * Null is returned if the entry does not exist in the dictionary.
+     * Convenience method that will get the dictionary object that is expected to be a name and
+     * convert it to a string. Null is returned if the entry does not exist in the dictionary.
      *
      * @param key The key to the item in the dictionary.
      * @return The name converted to a string.
@@ -620,7 +625,7 @@ public class COSDictionary extends COSBase
         {
             return ((COSName) name).getName();
         }
-        else if (name instanceof COSString)
+        if (name instanceof COSString)
         {
             return ((COSString) name).getString();
         }
@@ -628,9 +633,10 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Convenience method that will get the dictionary object that is expected to be a name and convert it to a string.
+     * Convenience method that will get the dictionary object that is expected to be a name and
+     * convert it to a string.
      *
-     * @param key The key to the item in the dictionary.
+     * @param key          The key to the item in the dictionary.
      * @param defaultValue The value to return if the dictionary item is null.
      * @return The name converted to a string.
      */
@@ -640,9 +646,10 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Convenience method that will get the dictionary object that is expected to be a name and convert it to a string.
+     * Convenience method that will get the dictionary object that is expected to be a name and
+     * convert it to a string.
      *
-     * @param key The key to the item in the dictionary.
+     * @param key          The key to the item in the dictionary.
      * @param defaultValue The value to return if the dictionary item is null.
      * @return The name converted to a string.
      */
@@ -652,8 +659,8 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Convenience method that will get the dictionary object that is expected to be a name and convert it to a string.
-     * Null is returned if the entry does not exist in the dictionary.
+     * Convenience method that will get the dictionary object that is expected to be a name and
+     * convert it to a string. Null is returned if the entry does not exist in the dictionary.
      *
      * @param key The key to the item in the dictionary.
      * @return The name converted to a string.
@@ -664,8 +671,8 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Convenience method that will get the dictionary object that is expected to be a name and convert it to a string.
-     * Null is returned if the entry does not exist in the dictionary.
+     * Convenience method that will get the dictionary object that is expected to be a name and
+     * convert it to a string. Null is returned if the entry does not exist in the dictionary.
      *
      * @param key The key to the item in the dictionary.
      * @return The name converted to a string.
@@ -677,9 +684,10 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Convenience method that will get the dictionary object that is expected to be a name and convert it to a string.
+     * Convenience method that will get the dictionary object that is expected to be a name and
+     * convert it to a string.
      *
-     * @param key The key to the item in the dictionary.
+     * @param key          The key to the item in the dictionary.
      * @param defaultValue The default value to return.
      * @return The name converted to a string.
      */
@@ -689,9 +697,10 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Convenience method that will get the dictionary object that is expected to be a name and convert it to a string.
+     * Convenience method that will get the dictionary object that is expected to be a name and
+     * convert it to a string.
      *
-     * @param key The key to the item in the dictionary.
+     * @param key          The key to the item in the dictionary.
      * @param defaultValue The default value to return.
      * @return The name converted to a string.
      */
@@ -701,11 +710,11 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Convenience method that will get the dictionary object that is expected to be a name and convert it to a string.
-     * Null is returned if the entry does not exist in the dictionary.
+     * Convenience method that will get the dictionary object that is expected to be a name and
+     * convert it to a string. Null is returned if the entry does not exist in the dictionary.
      *
      * @param embedded The embedded dictionary.
-     * @param key The key to the item in the dictionary.
+     * @param key      The key to the item in the dictionary.
      * @return The name converted to a string.
      */
     public String getEmbeddedString(String embedded, String key)
@@ -714,11 +723,11 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Convenience method that will get the dictionary object that is expected to be a name and convert it to a string.
-     * Null is returned if the entry does not exist in the dictionary.
+     * Convenience method that will get the dictionary object that is expected to be a name and
+     * convert it to a string. Null is returned if the entry does not exist in the dictionary.
      *
      * @param embedded The embedded dictionary.
-     * @param key The key to the item in the dictionary.
+     * @param key      The key to the item in the dictionary.
      * @return The name converted to a string.
      */
     public String getEmbeddedString(String embedded, COSName key)
@@ -727,11 +736,11 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Convenience method that will get the dictionary object that is expected to be a name and convert it to a string.
-     * Null is returned if the entry does not exist in the dictionary.
+     * Convenience method that will get the dictionary object that is expected to be a name and
+     * convert it to a string. Null is returned if the entry does not exist in the dictionary.
      *
-     * @param embedded The embedded dictionary.
-     * @param key The key to the item in the dictionary.
+     * @param embedded     The embedded dictionary.
+     * @param key          The key to the item in the dictionary.
      * @param defaultValue The default value to return.
      * @return The name converted to a string.
      */
@@ -741,22 +750,24 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Convenience method that will get the dictionary object that is expected to be a name and convert it to a string.
+     * Convenience method that will get the dictionary object that is expected to be a name and
+     * convert it to a string.
      *
-     * @param embedded The embedded dictionary.
-     * @param key The key to the item in the dictionary.
+     * @param embedded     The embedded dictionary.
+     * @param key          The key to the item in the dictionary.
      * @param defaultValue The default value to return.
      * @return The name converted to a string.
      */
     public String getEmbeddedString(String embedded, COSName key, String defaultValue)
     {
-        return ofNullable(getDictionaryObject(embedded, COSDictionary.class))
-                .map(d -> d.getString(key, defaultValue)).orElse(defaultValue);
+        return ofNullable(getDictionaryObject(embedded, COSDictionary.class)).map(
+                d -> d.getString(key, defaultValue)).orElse(defaultValue);
     }
 
     /**
-     * Convenience method that will get the dictionary object that is expected to be a name and convert it to a string.
-     * Null is returned if the entry does not exist in the dictionary or if the date was invalid.
+     * Convenience method that will get the dictionary object that is expected to be a name and
+     * convert it to a string. Null is returned if the entry does not exist in the dictionary or if
+     * the date was invalid.
      *
      * @param key The key to the item in the dictionary.
      * @return The name converted to a date.
@@ -767,8 +778,9 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Convenience method that will get the dictionary object that is expected to be a name and convert it to a string.
-     * Null is returned if the entry does not exist in the dictionary or if the date was invalid.
+     * Convenience method that will get the dictionary object that is expected to be a name and
+     * convert it to a string. Null is returned if the entry does not exist in the dictionary or if
+     * the date was invalid.
      *
      * @param key The key to the item in the dictionary.
      * @return The name converted to a date.
@@ -779,10 +791,10 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Convenience method that will get the dictionary object that is expected to be a date. Null is returned if the
-     * entry does not exist in the dictionary or if the date was invalid.
+     * Convenience method that will get the dictionary object that is expected to be a date. Null is
+     * returned if the entry does not exist in the dictionary or if the date was invalid.
      *
-     * @param key The key to the item in the dictionary.
+     * @param key          The key to the item in the dictionary.
      * @param defaultValue The default value to return.
      * @return The name converted to a date.
      */
@@ -792,10 +804,10 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Convenience method that will get the dictionary object that is expected to be a date. Null is returned if the
-     * entry does not exist in the dictionary or if the date was invalid.
+     * Convenience method that will get the dictionary object that is expected to be a date. Null is
+     * returned if the entry does not exist in the dictionary or if the date was invalid.
      *
-     * @param key The key to the item in the dictionary.
+     * @param key          The key to the item in the dictionary.
      * @param defaultValue The default value to return.
      * @return The name converted to a date.
      */
@@ -805,11 +817,11 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Convenience method that will get the dictionary object that is expected to be a name and convert it to a string.
-     * Null is returned if the entry does not exist in the dictionary.
+     * Convenience method that will get the dictionary object that is expected to be a name and
+     * convert it to a string. Null is returned if the entry does not exist in the dictionary.
      *
      * @param embedded The embedded dictionary to get.
-     * @param key The key to the item in the dictionary.
+     * @param key      The key to the item in the dictionary.
      * @return The name converted to a string.
      */
     public Calendar getEmbeddedDate(String embedded, String key)
@@ -818,11 +830,11 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Convenience method that will get the dictionary object that is expected to be a name and convert it to a string.
-     * Null is returned if the entry does not exist in the dictionary.
+     * Convenience method that will get the dictionary object that is expected to be a name and
+     * convert it to a string. Null is returned if the entry does not exist in the dictionary.
      *
      * @param embedded The embedded dictionary to get.
-     * @param key The key to the item in the dictionary.
+     * @param key      The key to the item in the dictionary.
      * @return The name converted to a string.
      */
     public Calendar getEmbeddedDate(String embedded, COSName key)
@@ -831,11 +843,11 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Convenience method that will get the dictionary object that is expected to be a date. Null is returned if the
-     * entry does not exist in the dictionary.
+     * Convenience method that will get the dictionary object that is expected to be a date. Null is
+     * returned if the entry does not exist in the dictionary.
      *
-     * @param embedded The embedded dictionary to get.
-     * @param key The key to the item in the dictionary.
+     * @param embedded     The embedded dictionary to get.
+     * @param key          The key to the item in the dictionary.
      * @param defaultValue The default value to return.
      * @return The name converted to a string.
      */
@@ -845,27 +857,26 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Convenience method that will get the dictionary object that is expected to be a date. Null is returned if the
-     * entry does not exist in the dictionary.
+     * Convenience method that will get the dictionary object that is expected to be a date. Null is
+     * returned if the entry does not exist in the dictionary.
      *
-     * @param embedded The embedded dictionary to get.
-     * @param key The key to the item in the dictionary.
+     * @param embedded     The embedded dictionary to get.
+     * @param key          The key to the item in the dictionary.
      * @param defaultValue The default value to return.
      * @return The name converted to a string.
      */
     public Calendar getEmbeddedDate(String embedded, COSName key, Calendar defaultValue)
     {
-        return ofNullable(getDictionaryObject(embedded, COSDictionary.class))
-                .map(d -> d.getDate(key, defaultValue)).orElse(defaultValue);
+        return ofNullable(getDictionaryObject(embedded, COSDictionary.class)).map(
+                d -> d.getDate(key, defaultValue)).orElse(defaultValue);
     }
 
     /**
-     * Convenience method that will get the dictionary object that is expected to be a cos boolean and convert it to a
-     * primitive boolean.
+     * Convenience method that will get the dictionary object that is expected to be a cos boolean
+     * and convert it to a primitive boolean.
      *
-     * @param key The key to the item in the dictionary.
+     * @param key          The key to the item in the dictionary.
      * @param defaultValue The value returned if the entry is null.
-     *
      * @return The value converted to a boolean.
      */
     public boolean getBoolean(String key, boolean defaultValue)
@@ -874,12 +885,11 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Convenience method that will get the dictionary object that is expected to be a COSBoolean and convert it to a
-     * primitive boolean.
+     * Convenience method that will get the dictionary object that is expected to be a COSBoolean
+     * and convert it to a primitive boolean.
      *
-     * @param key The key to the item in the dictionary.
+     * @param key          The key to the item in the dictionary.
      * @param defaultValue The value returned if the entry is null.
-     *
      * @return The entry converted to a boolean.
      */
     public boolean getBoolean(COSName key, boolean defaultValue)
@@ -888,21 +898,20 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Convenience method that will get the dictionary object that is expected to be a COSBoolean and convert it to a
-     * primitive boolean.
+     * Convenience method that will get the dictionary object that is expected to be a COSBoolean
+     * and convert it to a primitive boolean.
      *
-     * @param firstKey The first key to the item in the dictionary.
-     * @param secondKey The second key to the item in the dictionary.
+     * @param firstKey     The first key to the item in the dictionary.
+     * @param secondKey    The second key to the item in the dictionary.
      * @param defaultValue The value returned if the entry is null.
-     *
      * @return The entry converted to a boolean.
      */
     public boolean getBoolean(COSName firstKey, COSName secondKey, boolean defaultValue)
     {
-        COSBase bool = getDictionaryObject(firstKey, secondKey);
-        if (bool instanceof COSBoolean)
+        COSBoolean value = getDictionaryObject(firstKey, secondKey, COSBoolean.class);
+        if (nonNull(value))
         {
-            return ((COSBoolean) bool).getValue();
+            return value.getValue();
         }
         return defaultValue;
     }
@@ -911,8 +920,7 @@ public class COSDictionary extends COSBase
      * Get an integer from an embedded dictionary. Useful for 1-1 mappings. default:-1
      *
      * @param embeddedDictionary The name of the embedded dictionary.
-     * @param key The key in the embedded dictionary.
-     *
+     * @param key                The key in the embedded dictionary.
      * @return The value of the embedded integer.
      */
     public int getEmbeddedInt(String embeddedDictionary, String key)
@@ -924,8 +932,7 @@ public class COSDictionary extends COSBase
      * Get an integer from an embedded dictionary. Useful for 1-1 mappings. default:-1
      *
      * @param embeddedDictionary The name of the embedded dictionary.
-     * @param key The key in the embedded dictionary.
-     *
+     * @param key                The key in the embedded dictionary.
      * @return The value of the embedded integer.
      */
     public int getEmbeddedInt(String embeddedDictionary, COSName key)
@@ -937,9 +944,9 @@ public class COSDictionary extends COSBase
      * Get an integer from an embedded dictionary. Useful for 1-1 mappings.
      *
      * @param embeddedDictionary The name of the embedded dictionary.
-     * @param key The key in the embedded dictionary.
-     * @param defaultValue The value if there is no embedded dictionary or it does not contain the key.
-     *
+     * @param key                The key in the embedded dictionary.
+     * @param defaultValue       The value if there is no embedded dictionary or it does not contain
+     *                           the key.
      * @return The value of the embedded integer.
      */
     public int getEmbeddedInt(String embeddedDictionary, String key, int defaultValue)
@@ -951,20 +958,20 @@ public class COSDictionary extends COSBase
      * Get an integer from an embedded dictionary. Useful for 1-1 mappings.
      *
      * @param embeddedDictionary The name of the embedded dictionary.
-     * @param key The key in the embedded dictionary.
-     * @param defaultValue The value if there is no embedded dictionary or it does not contain the key.
-     *
+     * @param key                The key in the embedded dictionary.
+     * @param defaultValue       The value if there is no embedded dictionary or it does not contain
+     *                           the key.
      * @return The value of the embedded integer.
      */
     public int getEmbeddedInt(String embeddedDictionary, COSName key, int defaultValue)
     {
-        return ofNullable(getDictionaryObject(embeddedDictionary, COSDictionary.class))
-                .map(d -> d.getInt(key, defaultValue)).orElse(defaultValue);
+        return ofNullable(getDictionaryObject(embeddedDictionary, COSDictionary.class)).map(
+                d -> d.getInt(key, defaultValue)).orElse(defaultValue);
     }
 
     /**
-     * Convenience method that will get the dictionary object that is expected to be an int. -1 is returned if there is
-     * no value.
+     * Convenience method that will get the dictionary object that is expected to be an int. -1 is
+     * returned if there is no value.
      *
      * @param key The key to the item in the dictionary.
      * @return The integer value.
@@ -975,8 +982,8 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Convenience method that will get the dictionary object that is expected to be an int. -1 is returned if there is
-     * no value.
+     * Convenience method that will get the dictionary object that is expected to be an int. -1 is
+     * returned if there is no value.
      *
      * @param key The key to the item in the dictionary.
      * @return The integer value..
@@ -987,10 +994,10 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Convenience method that will get the dictionary object that is expected to be an integer. If the dictionary value
-     * is null then the default Value will be returned.
+     * Convenience method that will get the dictionary object that is expected to be an integer. If
+     * the dictionary value is null then the default Value will be returned.
      *
-     * @param key The key to the item in the dictionary.
+     * @param key          The key to the item in the dictionary.
      * @param defaultValue The value to return if the dictionary item is null.
      * @return The integer value.
      */
@@ -1000,10 +1007,10 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Convenience method that will get the dictionary object that is expected to be an integer. If the dictionary value
-     * is null then the default Value will be returned.
+     * Convenience method that will get the dictionary object that is expected to be an integer. If
+     * the dictionary value is null then the default Value will be returned.
      *
-     * @param key The key to the item in the dictionary.
+     * @param key          The key to the item in the dictionary.
      * @param defaultValue The value to return if the dictionary item is null.
      * @return The integer value.
      */
@@ -1013,10 +1020,10 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Convenience method that will get the dictionary object that is expected to be an integer. If the dictionary value
-     * is null then the default Value -1 will be returned.
+     * Convenience method that will get the dictionary object that is expected to be an integer. If
+     * the dictionary value is null then the default Value -1 will be returned.
      *
-     * @param firstKey The first key to the item in the dictionary.
+     * @param firstKey  The first key to the item in the dictionary.
      * @param secondKey The second key to the item in the dictionary.
      * @return The integer value.
      */
@@ -1026,11 +1033,11 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Convenience method that will get the dictionary object that is expected to be an integer. If the dictionary value
-     * is null then the default Value will be returned.
+     * Convenience method that will get the dictionary object that is expected to be an integer. If
+     * the dictionary value is null then the default Value will be returned.
      *
-     * @param firstKey The first key to the item in the dictionary.
-     * @param secondKey The second key to the item in the dictionary.
+     * @param firstKey     The first key to the item in the dictionary.
+     * @param secondKey    The second key to the item in the dictionary.
      * @param defaultValue The value to return if the dictionary item is null.
      * @return The integer value.
      */
@@ -1045,11 +1052,10 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Convenience method that will get the dictionary object that is expected to be an long. -1 is returned if there is
-     * no value.
+     * Convenience method that will get the dictionary object that is expected to be an long. -1 is
+     * returned if there is no value.
      *
      * @param key The key to the item in the dictionary.
-     *
      * @return The long value.
      */
     public long getLong(String key)
@@ -1058,8 +1064,8 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Convenience method that will get the dictionary object that is expected to be an long. -1 is returned if there is
-     * no value.
+     * Convenience method that will get the dictionary object that is expected to be an long. -1 is
+     * returned if there is no value.
      *
      * @param key The key to the item in the dictionary.
      * @return The long value.
@@ -1070,10 +1076,10 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Convenience method that will get the dictionary object that is expected to be an integer. If the dictionary value
-     * is null then the default Value will be returned.
+     * Convenience method that will get the dictionary object that is expected to be an integer. If
+     * the dictionary value is null then the default Value will be returned.
      *
-     * @param key The key to the item in the dictionary.
+     * @param key          The key to the item in the dictionary.
      * @param defaultValue The value to return if the dictionary item is null.
      * @return The integer value.
      */
@@ -1083,10 +1089,10 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Convenience method that will get the dictionary object that is expected to be an integer. If the dictionary value
-     * is null then the default Value will be returned.
+     * Convenience method that will get the dictionary object that is expected to be an integer. If
+     * the dictionary value is null then the default Value will be returned.
      *
-     * @param key The key to the item in the dictionary.
+     * @param key          The key to the item in the dictionary.
      * @param defaultValue The value to return if the dictionary item is null.
      * @return The integer value.
      */
@@ -1097,8 +1103,8 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Convenience method that will get the dictionary object that is expected to be an float. -1 is returned if there
-     * is no value.
+     * Convenience method that will get the dictionary object that is expected to be an float. -1 is
+     * returned if there is no value.
      *
      * @param key The key to the item in the dictionary.
      * @return The float value.
@@ -1109,8 +1115,8 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Convenience method that will get the dictionary object that is expected to be an float. -1 is returned if there
-     * is no value.
+     * Convenience method that will get the dictionary object that is expected to be an float. -1 is
+     * returned if there is no value.
      *
      * @param key The key to the item in the dictionary.
      * @return The float value.
@@ -1121,10 +1127,10 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Convenience method that will get the dictionary object that is expected to be a float. If the dictionary value is
-     * null then the default Value will be returned.
+     * Convenience method that will get the dictionary object that is expected to be a float. If the
+     * dictionary value is null then the default Value will be returned.
      *
-     * @param key The key to the item in the dictionary.
+     * @param key          The key to the item in the dictionary.
      * @param defaultValue The value to return if the dictionary item is null.
      * @return The float value.
      */
@@ -1134,10 +1140,10 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Convenience method that will get the dictionary object that is expected to be an float. If the dictionary value
-     * is null then the default Value will be returned.
+     * Convenience method that will get the dictionary object that is expected to be an float. If
+     * the dictionary value is null then the default Value will be returned.
      *
-     * @param key The key to the item in the dictionary.
+     * @param key          The key to the item in the dictionary.
      * @param defaultValue The value to return if the dictionary item is null.
      * @return The float value.
      */
@@ -1150,9 +1156,8 @@ public class COSDictionary extends COSBase
     /**
      * Gets the boolean value from the flags at the given bit position.
      *
-     * @param field The COSName of the field to get the flag from.
+     * @param field   The COSName of the field to get the flag from.
      * @param bitFlag the bitPosition to get the value from.
-     *
      * @return true if the number at bitPos is '1'
      */
     public boolean getFlag(COSName field, int bitFlag)
@@ -1200,13 +1205,12 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * This is a special case of getItem that takes multiple keys, it will handle the situation where multiple keys
-     * could get the same value, ie if either CS or ColorSpace is used to get the colorspace. This will get an object
-     * from this dictionary.
+     * This is a special case of getItem that takes multiple keys, it will handle the situation
+     * where multiple keys could get the same value, ie if either CS or ColorSpace is used to get
+     * the colorspace. This will get an object from this dictionary.
      *
-     * @param firstKey The first key to try.
+     * @param firstKey  The first key to try.
      * @param secondKey The second key to try.
-     *
      * @return The object that matches the key.
      */
     public COSBase getItem(COSName firstKey, COSName secondKey)
@@ -1220,8 +1224,8 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * @return names of the entries in this dictionary. The returned set is in the order the entries were added to the
-     * dictionary.
+     * @return names of the entries in this dictionary. The returned set is in the order the entries
+     * were added to the dictionary.
      */
     public Set<COSName> keySet()
     {
@@ -1229,8 +1233,8 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * @return name-value entries in this dictionary. The returned set is in the order the entries were added to the
-     * dictionary.
+     * @return name-value entries in this dictionary. The returned set is in the order the entries
+     * were added to the dictionary.
      */
     public Set<Map.Entry<COSName, COSBase>> entrySet()
     {
@@ -1253,7 +1257,7 @@ public class COSDictionary extends COSBase
 
     /**
      * This will add all of the dictionaries keys/values to this dictionary.
-     * 
+     *
      * @param dic The dic to get the keys from.
      */
     public void addAll(COSDictionary dic)
@@ -1265,10 +1269,9 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * @see java.util.Map#containsKey(Object)
-     *
      * @param name The key to find in the map.
      * @return true if the map contains this key.
+     * @see java.util.Map#containsKey(Object)
      */
     public boolean containsKey(COSName name)
     {
@@ -1276,10 +1279,9 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * @see java.util.Map#containsKey(Object)
-     *
      * @param name The key to find in the map.
      * @return true if the map contains this key.
+     * @see java.util.Map#containsKey(Object)
      */
     public boolean containsKey(String name)
     {
@@ -1287,8 +1289,8 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Adds all of the dictionaries keys/values to this dictionary, but only if they don't already exist. If a key
-     * already exists in this dictionary then nothing is changed.
+     * Adds all of the dictionaries keys/values to this dictionary, but only if they don't already
+     * exist. If a key already exists in this dictionary then nothing is changed.
      *
      * @param dic The {@link COSDictionary} to get the keys from.
      */
@@ -1304,8 +1306,8 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Adds all of the dictionaries keys/values to this dictionary. If a key already exists in this dictionary the value
-     * is overridden.
+     * Adds all of the dictionaries keys/values to this dictionary. If a key already exists in this
+     * dictionary the value is overridden.
      *
      * @param dic The {@link COSDictionary} to get the keys from.
      */
@@ -1348,7 +1350,7 @@ public class COSDictionary extends COSBase
                 {
                     return "COSDictionary{.." + ((COSDictionary) v).size() + " items ..}";
                 }
-                else if (v instanceof COSArray)
+                if (v instanceof COSArray)
                 {
                     return "COSArray{.." + ((COSArray) v).size() + " items ..}";
                 }

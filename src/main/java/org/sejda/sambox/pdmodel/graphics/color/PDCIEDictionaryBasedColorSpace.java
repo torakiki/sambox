@@ -15,13 +15,12 @@
  */
 package org.sejda.sambox.pdmodel.graphics.color;
 
-import java.awt.color.ColorSpace;
-
 import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSFloat;
 import org.sejda.sambox.cos.COSName;
+
+import java.awt.color.ColorSpace;
 
 /**
  * CIE-based colour spaces that use a dictionary.
@@ -89,16 +88,12 @@ public abstract class PDCIEDictionaryBasedColorSpace extends PDCIEBasedColorSpac
         {
             z = 0;
         }
-        return CIEXYZ.toRGB(new float[]
-        {
-            x, y, z
-        });
+        return CIEXYZ.toRGB(new float[] { x, y, z });
     }
 
     /**
-     * This will return the whitepoint tristimulus. As this is a required field
-     * this will never return null. A default of 1,1,1 will be returned if the
-     * pdf does not have any values yet.
+     * This will return the whitepoint tristimulus. As this is a required field this will never
+     * return null. A default of 1,1,1 will be returned if the pdf does not have any values yet.
      *
      * @return the whitepoint tristimulus
      */
@@ -116,9 +111,9 @@ public abstract class PDCIEDictionaryBasedColorSpace extends PDCIEBasedColorSpac
     }
 
     /**
-     * This will return the BlackPoint tristimulus. This is an optional field
-     * but has defaults so this will never return null. A default of 0,0,0 will
-     * be returned if the pdf does not have any values yet.
+     * This will return the BlackPoint tristimulus. This is an optional field but has defaults so
+     * this will never return null. A default of 0,0,0 will be returned if the pdf does not have any
+     * values yet.
      *
      * @return the blackpoint tristimulus
      */
@@ -136,35 +131,29 @@ public abstract class PDCIEDictionaryBasedColorSpace extends PDCIEBasedColorSpac
     }
 
     /**
-     * This will set the whitepoint tristimulus. As this is a required field
-     * this null should not be passed into this function.
+     * This will set the whitepoint tristimulus. As this is a required field this null should not be
+     * passed into this function.
      *
      * @param whitepoint the whitepoint tristimulus
      */
     public void setWhitePoint(PDTristimulus whitepoint)
     {
-        COSBase wpArray = whitepoint.getCOSObject();
-        if (wpArray != null)
+        if (whitepoint == null)
         {
-            dictionary.setItem(COSName.WHITE_POINT, wpArray);
+            throw new IllegalArgumentException("Whitepoint may not be null");
         }
+        dictionary.setItem(COSName.WHITE_POINT, whitepoint);
         fillWhitepointCache(whitepoint);
     }
 
     /**
-     * This will set the BlackPoint tristimulus. As this is a required field
-     * this null should not be passed into this function.
+     * This will set the BlackPoint tristimulus.
      *
      * @param blackpoint the BlackPoint tristimulus
      */
     public void setBlackPoint(PDTristimulus blackpoint)
     {
-        COSBase bpArray = null;
-        if (blackpoint != null)
-        {
-            bpArray = blackpoint.getCOSObject();
-        }
-        dictionary.setItem(COSName.BLACK_POINT, bpArray);
+        dictionary.setItem(COSName.BLACK_POINT, blackpoint);
     }
 
 }

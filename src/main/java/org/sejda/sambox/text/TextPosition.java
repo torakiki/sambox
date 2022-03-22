@@ -16,18 +16,18 @@
  */
 package org.sejda.sambox.text;
 
-import java.awt.geom.Rectangle2D;
-import java.text.Normalizer;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.sejda.sambox.pdmodel.font.PDFont;
 import org.sejda.sambox.pdmodel.graphics.color.PDColor;
 import org.sejda.sambox.pdmodel.graphics.state.RenderingMode;
 import org.sejda.sambox.util.Matrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.awt.geom.Rectangle2D;
+import java.text.Normalizer;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This represents a string and a position on the screen of those characters.
@@ -61,7 +61,7 @@ public class TextPosition
     private final PDFont font;
     private final float fontSize;
     private final int fontSizePt;
-    
+
     private final PDColor color;
     private final RenderingMode renderingMode;
 
@@ -71,42 +71,45 @@ public class TextPosition
     private float direction = -1;
 
     public TextPosition(int pageRotation, float pageWidth, float pageHeight, Matrix textMatrix,
-                        float endX, float endY, float maxHeight, float individualWidth, float spaceWidth,
-                        String unicode, int[] charCodes, PDFont font, float fontSize, int fontSizeInPt) {
-        this(pageRotation, pageWidth, pageHeight, textMatrix, endX, endY, maxHeight, individualWidth, spaceWidth, 
-                unicode, charCodes, font, fontSize, fontSizeInPt, null, null);
+            float endX, float endY, float maxHeight, float individualWidth, float spaceWidth,
+            String unicode, int[] charCodes, PDFont font, float fontSize, int fontSizeInPt)
+    {
+        this(pageRotation, pageWidth, pageHeight, textMatrix, endX, endY, maxHeight,
+                individualWidth, spaceWidth, unicode, charCodes, font, fontSize, fontSizeInPt, null,
+                null);
     }
 
     /**
      * Constructor.
      *
-     * @param pageRotation rotation of the page that the text is located in
-     * @param pageWidth width of the page that the text is located in
-     * @param pageHeight height of the page that the text is located in
-     * @param textMatrix text rendering matrix for start of text (in display units)
-     * @param endX x coordinate of the end position
-     * @param endY y coordinate of the end position
-     * @param maxHeight Maximum height of text (in display units)
+     * @param pageRotation    rotation of the page that the text is located in
+     * @param pageWidth       width of the page that the text is located in
+     * @param pageHeight      height of the page that the text is located in
+     * @param textMatrix      text rendering matrix for start of text (in display units)
+     * @param endX            x coordinate of the end position
+     * @param endY            y coordinate of the end position
+     * @param maxHeight       Maximum height of text (in display units)
      * @param individualWidth The width of the given character/string. (in text units)
-     * @param spaceWidth The width of the space character. (in display units)
-     * @param unicode The string of Unicode characters to be displayed.
-     * @param charCodes An array of the internal PDF character codes for the glyphs in this text.
-     * @param font The current font for this text position.
-     * @param fontSize The new font size.
-     * @param fontSizeInPt The font size in pt units (see {@link #getFontSizeInPt()} for details).
+     * @param spaceWidth      The width of the space character. (in display units)
+     * @param unicode         The string of Unicode characters to be displayed.
+     * @param charCodes       An array of the internal PDF character codes for the glyphs in this
+     *                        text.
+     * @param font            The current font for this text position.
+     * @param fontSize        The new font size.
+     * @param fontSizeInPt    The font size in pt units (see {@link #getFontSizeInPt()} for
+     *                        details).
      */
     public TextPosition(int pageRotation, float pageWidth, float pageHeight, Matrix textMatrix,
-                        float endX, float endY, float maxHeight, float individualWidth, float spaceWidth,
-                        String unicode, int[] charCodes, PDFont font, float fontSize, int fontSizeInPt,
-                        PDColor color, RenderingMode renderingMode)
+            float endX, float endY, float maxHeight, float individualWidth, float spaceWidth,
+            String unicode, int[] charCodes, PDFont font, float fontSize, int fontSizeInPt,
+            PDColor color, RenderingMode renderingMode)
     {
         this.textMatrix = textMatrix;
 
         this.endX = endX;
         this.endY = endY;
 
-        int rotationAngle = pageRotation;
-        this.rotation = rotationAngle;
+        this.rotation = pageRotation;
 
         this.maxHeight = maxHeight;
         this.pageHeight = pageHeight;
@@ -122,14 +125,14 @@ public class TextPosition
         this.color = color;
         this.renderingMode = renderingMode;
 
-        x = getXRot(rotationAngle);
-        if (rotationAngle == 0 || rotationAngle == 180)
+        x = getXRot(rotation);
+        if (rotation == 0 || rotation == 180)
         {
-            y = this.pageHeight - getYLowerLeftRot(rotationAngle);
+            y = this.pageHeight - getYLowerLeftRot(rotation);
         }
         else
         {
-            y = this.pageWidth - getYLowerLeftRot(rotationAngle);
+            y = this.pageWidth - getYLowerLeftRot(rotation);
         }
     }
 
@@ -176,8 +179,9 @@ public class TextPosition
     }
 
     /**
-     * Return the string of characters stored in this object. The length can be different than the CharacterCodes length
-     * e.g. if ligatures are used ("fi", "fl", "ffl") where one glyph represents several unicode characters.
+     * Return the string of characters stored in this object. The length can be different than the
+     * CharacterCodes length e.g. if ligatures are used ("fi", "fl", "ffl") where one glyph
+     * represents several unicode characters.
      *
      * @return The string on the screen.
      */
@@ -197,10 +201,10 @@ public class TextPosition
     }
 
     /**
-     * The matrix containing the starting text position and scaling. Despite the name, it is not the text matrix set by
-     * the "Tm" operator, it is really the effective text rendering matrix (which is dependent on the current
-     * transformation matrix (set by the "cm" operator), the text matrix (set by the "Tm" operator), the font size (set
-     * by the "Tf" operator) and the page cropbox).
+     * The matrix containing the starting text position and scaling. Despite the name, it is not the
+     * text matrix set by the "Tm" operator, it is really the effective text rendering matrix (which
+     * is dependent on the current transformation matrix (set by the "cm" operator), the text matrix
+     * (set by the "Tm" operator), the font size (set by the "Tf" operator) and the page cropbox).
      *
      * @return The Matrix containing the starting text position
      */
@@ -210,9 +214,9 @@ public class TextPosition
     }
 
     /**
-     * Return the direction/orientation of the string in this object based on its text matrix. Only angles of 0, 90,
-     * 180, or 270 are supported. To get other angles, use this code:
-     * 
+     * Return the direction/orientation of the string in this object based on its text matrix. Only
+     * angles of 0, 90, 180, or 270 are supported. To get other angles, use this code:
+     *
      * <pre>
      * TextPosition text = ...
      * Matrix m = text.getTextMatrix().clone();
@@ -264,8 +268,8 @@ public class TextPosition
     }
 
     /**
-     * Return the X starting coordinate of the text, adjusted by the given rotation amount. The rotation adjusts where
-     * the 0,0 location is relative to the text.
+     * Return the X starting coordinate of the text, adjusted by the given rotation amount. The
+     * rotation adjusts where the 0,0 location is relative to the text.
      *
      * @param rotation Rotation to apply (0, 90, 180, or 270). 0 will perform no adjustments.
      * @return X coordinate
@@ -292,10 +296,13 @@ public class TextPosition
     }
 
     /**
-     * This will get the page rotation adjusted x position of the character. This is adjusted based on page rotation so
-     * that the upper left is 0,0 which is unlike PDF coordinates, which start at the bottom left. See also
-     * <a href="https://stackoverflow.com/questions/57067372/">this answer by Michael Klink</a> for further details and
-     * <a href="https://issues.apache.org/jira/browse/PDFBOX-4597">PDFBOX-4597</a> for a sample file.
+     * This will get the page rotation adjusted x position of the character. This is adjusted based
+     * on page rotation so that the upper left is 0,0 which is unlike PDF coordinates, which start
+     * at the bottom left. See also
+     * <a href="https://stackoverflow.com/questions/57067372/">this answer by Michael Klink</a> for
+     * further details and
+     * <a href="https://issues.apache.org/jira/browse/PDFBOX-4597">PDFBOX-4597</a> for a sample
+     * file.
      *
      * @return The x coordinate of the character.
      */
@@ -305,13 +312,16 @@ public class TextPosition
     }
 
     /**
-     * This will get the text direction adjusted x position of the character. This is adjusted based on text direction
-     * so that the first character in that direction is in the upper left at 0,0. This method ignores the page rotation
-     * but takes the text rotation (see {@link #getDir() getDir()}) and adjusts the coordinates to awt. This is useful
-     * when doing text extraction, to compare the glyph positions when imagining these to be horizontal. See also
-     * <a href="https://stackoverflow.com/questions/57067372/">this answer by Michael Klink</a> for further details and
-     * <a href="https://issues.apache.org/jira/browse/PDFBOX-4597">PDFBOX-4597</a> for a sample file.
-     * 
+     * This will get the text direction adjusted x position of the character. This is adjusted based
+     * on text direction so that the first character in that direction is in the upper left at 0,0.
+     * This method ignores the page rotation but takes the text rotation (see {@link #getDir()
+     * getDir()}) and adjusts the coordinates to awt. This is useful when doing text extraction, to
+     * compare the glyph positions when imagining these to be horizontal. See also
+     * <a href="https://stackoverflow.com/questions/57067372/">this answer by Michael Klink</a> for
+     * further details and
+     * <a href="https://issues.apache.org/jira/browse/PDFBOX-4597">PDFBOX-4597</a> for a sample
+     * file.
+     *
      * @return The x coordinate of the text.
      */
     public float getXDirAdj()
@@ -320,8 +330,8 @@ public class TextPosition
     }
 
     /**
-     * This will get the y position of the character with 0,0 in lower left. This will be adjusted by the given
-     * rotation.
+     * This will get the y position of the character with 0,0 in lower left. This will be adjusted
+     * by the given rotation.
      *
      * @param rotation Rotation to apply to text to adjust the 0,0 location (0,90,180,270)
      * @return The y coordinate of the text
@@ -348,12 +358,14 @@ public class TextPosition
     }
 
     /**
-     * This will get the y position of the text, adjusted so that 0,0 is upper left and it is adjusted based on the page
-     * rotation. This method ignores the page rotation but takes the text rotation and adjusts the coordinates to awt.
-     * This is useful when doing text extraction, to compare the glyph positions when imagining these to be horizontal.
-     * See also <a href="https://stackoverflow.com/questions/57067372/">this answer by Michael Klink</a> for further
-     * details and <a href="https://issues.apache.org/jira/browse/PDFBOX-4597">PDFBOX-4597</a> for a sample file.
-     * 
+     * This will get the y position of the text, adjusted so that 0,0 is upper left and it is
+     * adjusted based on the page rotation. This method ignores the page rotation but takes the text
+     * rotation and adjusts the coordinates to awt. This is useful when doing text extraction, to
+     * compare the glyph positions when imagining these to be horizontal. See also <a
+     * href="https://stackoverflow.com/questions/57067372/">this answer by Michael Klink</a> for
+     * further details and <a href="https://issues.apache.org/jira/browse/PDFBOX-4597">PDFBOX-4597</a>
+     * for a sample file.
+     *
      * @return The adjusted y coordinate of the character.
      */
     public float getY()
@@ -362,8 +374,8 @@ public class TextPosition
     }
 
     /**
-     * This will get the y position of the text, adjusted so that 0,0 is upper left and it is adjusted based on the text
-     * direction.
+     * This will get the y position of the text, adjusted so that 0,0 is upper left and it is
+     * adjusted based on the text direction.
      *
      * @return The adjusted y coordinate of the character.
      */
@@ -435,9 +447,10 @@ public class TextPosition
     }
 
     /**
-     * This will get the font size that has been set with the "Tf" operator (Set text font and size). When the text is
-     * rendered, it may appear bigger or smaller depending on the current transformation matrix (set by the "cm"
-     * operator) and the text matrix (set by the "Tm" operator).
+     * This will get the font size that has been set with the "Tf" operator (Set text font and
+     * size). When the text is rendered, it may appear bigger or smaller depending on the current
+     * transformation matrix (set by the "cm" operator) and the text matrix (set by the "Tm"
+     * operator).
      *
      * @return The font size.
      */
@@ -447,10 +460,11 @@ public class TextPosition
     }
 
     /**
-     * This will get the font size in pt. To get this size we have to multiply the font size from {@link #getFontSize()
-     * getFontSize()} with the text matrix (set by the "Tm" operator) horizontal scaling factor and truncate the result
-     * to integer. The actual rendering may appear bigger or smaller depending on the current transformation matrix (set
-     * by the "cm" operator). To get the size in rendering, use {@link #getXScale() getXScale()}.
+     * This will get the font size in pt. To get this size we have to multiply the font size from
+     * {@link #getFontSize() getFontSize()} with the text matrix (set by the "Tm" operator)
+     * horizontal scaling factor and truncate the result to integer. The actual rendering may appear
+     * bigger or smaller depending on the current transformation matrix (set by the "cm" operator).
+     * To get the size in rendering, use {@link #getXScale() getXScale()}.
      *
      * @return The font size in pt.
      */
@@ -470,8 +484,8 @@ public class TextPosition
     }
 
     /**
-     * This will get the width of a space character. This is useful for some algorithms such as the text stripper, that
-     * need to know the width of a space character.
+     * This will get the width of a space character. This is useful for some algorithms such as the
+     * text stripper, that need to know the width of a space character.
      *
      * @return The width of a space character.
      */
@@ -481,8 +495,9 @@ public class TextPosition
     }
 
     /**
-     * This will get the X scaling factor. This is dependent on the current transformation matrix (set by the "cm"
-     * operator), the text matrix (set by the "Tm" operator) and the font size (set by the "Tf" operator).
+     * This will get the X scaling factor. This is dependent on the current transformation matrix
+     * (set by the "cm" operator), the text matrix (set by the "Tm" operator) and the font size (set
+     * by the "Tf" operator).
      *
      * @return The X scaling factor.
      */
@@ -492,8 +507,9 @@ public class TextPosition
     }
 
     /**
-     * This will get the Y scaling factor. This is dependent on the current transformation matrix (set by the "cm"
-     * operator), the text matrix (set by the "Tm" operator) and the font size (set by the "Tf" operator).
+     * This will get the Y scaling factor. This is dependent on the current transformation matrix
+     * (set by the "cm" operator), the text matrix (set by the "Tm" operator) and the font size (set
+     * by the "Tf" operator).
      *
      * @return The Y scaling factor.
      */
@@ -513,8 +529,8 @@ public class TextPosition
     }
 
     /**
-     * Determine if this TextPosition logically contains another (i.e. they overlap and should be rendered on top of
-     * each other).
+     * Determine if this TextPosition logically contains another (i.e. they overlap and should be
+     * rendered on top of each other).
      *
      * @param tp2 The other TestPosition to compare against
      * @return True if tp2 is contained in the bounding box of this text.
@@ -561,9 +577,10 @@ public class TextPosition
     }
 
     /**
-     * Merge a single character TextPosition into the current object. This is to be used only for cases where we have a
-     * diacritic that overlaps an existing TextPosition. In a graphical display, we could overlay them, but for text
-     * extraction we need to merge them. Use the contains() method to test if two objects overlap.
+     * Merge a single character TextPosition into the current object. This is to be used only for
+     * cases where we have a diacritic that overlaps an existing TextPosition. In a graphical
+     * display, we could overlay them, but for text extraction we need to merge them. Use the
+     * contains() method to test if two objects overlap.
      *
      * @param diacritic TextPosition to merge into the current TextPosition.
      */
@@ -647,16 +664,16 @@ public class TextPosition
     }
 
     /**
-     * Inserts the diacritic TextPosition to the str of this TextPosition and updates the widths array to include the
-     * extra character width.
+     * Inserts the diacritic TextPosition to the str of this TextPosition and updates the widths
+     * array to include the extra character width.
      *
-     * @param i current character
+     * @param i         current character
      * @param diacritic The diacritic TextPosition
      */
     private void insertDiacritic(int i, TextPosition diacritic)
     {
         StringBuilder sb = new StringBuilder();
-        sb.append(unicode.substring(0, i));
+        sb.append(unicode, 0, i);
 
         float[] widths2 = new float[widths.length + 1];
         System.arraycopy(widths, 0, widths2, 0, i);
@@ -669,7 +686,7 @@ public class TextPosition
         widths2[i + 1] = 0;
 
         // get the rest of the string
-        sb.append(unicode.substring(i + 1, unicode.length()));
+        sb.append(unicode.substring(i + 1));
         System.arraycopy(widths, i + 1, widths2, i + 2, widths.length - i - 1);
 
         unicode = sb.toString();
@@ -677,7 +694,8 @@ public class TextPosition
     }
 
     /**
-     * Combine the diacritic, for example, convert non-combining diacritic characters to their combining counterparts.
+     * Combine the diacritic, for example, convert non-combining diacritic characters to their
+     * combining counterparts.
      *
      * @param str String to normalize
      * @return Normalized string
@@ -746,7 +764,8 @@ public class TextPosition
     }
 
     /**
-     * This will get the x coordinate of the end position. This is the unadjusted value passed into the constructor.
+     * This will get the x coordinate of the end position. This is the unadjusted value passed into
+     * the constructor.
      *
      * @return The unadjusted x coordinate of the end position
      */
@@ -756,7 +775,8 @@ public class TextPosition
     }
 
     /**
-     * This will get the y coordinate of the end position. This is the unadjusted value passed into the constructor.
+     * This will get the y coordinate of the end position. This is the unadjusted value passed into
+     * the constructor.
      *
      * @return The unadjusted y coordinate of the end position
      */
@@ -766,8 +786,8 @@ public class TextPosition
     }
 
     /**
-     * This will get the rotation of the page that the text is located in. This is the unadjusted value passed into the
-     * constructor.
+     * This will get the rotation of the page that the text is located in. This is the unadjusted
+     * value passed into the constructor.
      *
      * @return The unadjusted rotation of the page that the text is located in
      */
@@ -777,8 +797,8 @@ public class TextPosition
     }
 
     /**
-     * This will get the height of the page that the text is located in. This is the unadjusted value passed into the
-     * constructor.
+     * This will get the height of the page that the text is located in. This is the unadjusted
+     * value passed into the constructor.
      *
      * @return The unadjusted height of the page that the text is located in
      */
@@ -788,8 +808,8 @@ public class TextPosition
     }
 
     /**
-     * This will get the width of the page that the text is located in. This is the unadjusted value passed into the
-     * constructor.
+     * This will get the width of the page that the text is located in. This is the unadjusted value
+     * passed into the constructor.
      *
      * @return The unadjusted width of the page that the text is located in
      */
@@ -798,11 +818,13 @@ public class TextPosition
         return pageWidth;
     }
 
-    public PDColor getColor() {
+    public PDColor getColor()
+    {
         return color;
     }
 
-    public RenderingMode getRenderingMode() {
+    public RenderingMode getRenderingMode()
+    {
         return renderingMode;
     }
 
@@ -872,7 +894,8 @@ public class TextPosition
         {
             return false;
         }
-        if (renderingMode != null ? !renderingMode.equals(that.renderingMode) : that.renderingMode != null)
+        if (renderingMode != null ? !renderingMode.equals(that.renderingMode) :
+                that.renderingMode != null)
         {
             return false;
         }

@@ -16,6 +16,9 @@
  */
 package org.sejda.sambox.pdmodel.graphics.blend;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.awt.AlphaComposite;
 import java.awt.Composite;
 import java.awt.CompositeContext;
@@ -25,12 +28,9 @@ import java.awt.image.ColorModel;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * AWT composite for blend modes.
- * 
+ *
  * @author Kühn & Weyh Software, GmbH
  */
 public final class BlendComposite implements Composite
@@ -40,8 +40,9 @@ public final class BlendComposite implements Composite
     /**
      * Creates a blend composite
      *
-     * @param blendMode Desired blend mode
-     * @param constantAlpha Constant alpha, must be in the inclusive range [0.0...1.0] or it will be clipped.
+     * @param blendMode     Desired blend mode
+     * @param constantAlpha Constant alpha, must be in the inclusive range [0.0...1.0] or it will be
+     *                      clipped.
      * @return a blend composite.
      */
     public static Composite getInstance(BlendMode blendMode, float constantAlpha)
@@ -60,10 +61,7 @@ public final class BlendComposite implements Composite
         {
             return AlphaComposite.getInstance(AlphaComposite.SRC_OVER, constantAlpha);
         }
-        else
-        {
-            return new BlendComposite(blendMode, constantAlpha);
-        }
+        return new BlendComposite(blendMode, constantAlpha);
     }
 
     private final BlendMode blendMode;
@@ -125,14 +123,12 @@ public final class BlendComposite implements Composite
 
             int srcColorSpaceType = srcColorSpace.getType();
             int dstColorSpaceType = dstColorSpace.getType();
-            boolean subtractive = (dstColorSpaceType != ColorSpace.TYPE_RGB)
-                    && (dstColorSpaceType != ColorSpace.TYPE_GRAY);
+            boolean subtractive = (dstColorSpaceType != ColorSpace.TYPE_RGB) && (dstColorSpaceType
+                    != ColorSpace.TYPE_GRAY);
 
             boolean blendModeIsSeparable = blendMode instanceof SeparableBlendMode;
-            SeparableBlendMode separableBlendMode = blendModeIsSeparable
-                    ? (SeparableBlendMode) blendMode : null;
-            NonSeparableBlendMode nonSeparableBlendMode = !blendModeIsSeparable
-                    ? (NonSeparableBlendMode) blendMode : null;
+            SeparableBlendMode separableBlendMode = blendModeIsSeparable ? (SeparableBlendMode) blendMode : null;
+            NonSeparableBlendMode nonSeparableBlendMode = !blendModeIsSeparable ? (NonSeparableBlendMode) blendMode : null;
 
             boolean needsColorConversion = !srcColorSpace.equals(dstColorSpace);
 

@@ -17,6 +17,13 @@
 
 package org.sejda.sambox.printing;
 
+import org.sejda.sambox.pdmodel.PDDocument;
+import org.sejda.sambox.pdmodel.PDPage;
+import org.sejda.sambox.pdmodel.PDPageTree;
+import org.sejda.sambox.pdmodel.common.PDRectangle;
+import org.sejda.sambox.rendering.PDFRenderer;
+import org.sejda.sambox.rendering.RenderDestination;
+
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
@@ -30,12 +37,6 @@ import java.awt.print.PrinterException;
 import java.awt.print.PrinterIOException;
 import java.io.IOException;
 
-import org.sejda.sambox.pdmodel.PDDocument;
-import org.sejda.sambox.pdmodel.PDPage;
-import org.sejda.sambox.pdmodel.common.PDRectangle;
-import org.sejda.sambox.rendering.PDFRenderer;
-import org.sejda.sambox.rendering.RenderDestination;
-
 /**
  * Prints pages from a PDF document using any page size or scaling mode.
  *
@@ -43,7 +44,7 @@ import org.sejda.sambox.rendering.RenderDestination;
  */
 public final class PDFPrintable implements Printable
 {
-    private final PDDocument document;
+    private final PDPageTree pageTree;
     private final PDFRenderer renderer;
 
     private final boolean showPageBorder;
@@ -67,7 +68,7 @@ public final class PDFPrintable implements Printable
      * Creates a new PDFPrintable with the given page scaling.
      *
      * @param document the document to print
-     * @param scaling page scaling policy
+     * @param scaling  page scaling policy
      */
     public PDFPrintable(PDDocument document, Scaling scaling)
     {
@@ -77,8 +78,8 @@ public final class PDFPrintable implements Printable
     /**
      * Creates a new PDFPrintable with the given page scaling and with optional page borders shown.
      *
-     * @param document the document to print
-     * @param scaling page scaling policy
+     * @param document       the document to print
+     * @param scaling        page scaling policy
      * @param showPageBorder true if page borders are to be printed
      */
     public PDFPrintable(PDDocument document, Scaling scaling, boolean showPageBorder)
@@ -87,13 +88,13 @@ public final class PDFPrintable implements Printable
     }
 
     /**
-     * Creates a new PDFPrintable with the given page scaling and with optional page borders shown. The image will be
-     * rasterized at the given DPI before being sent to the printer.
+     * Creates a new PDFPrintable with the given page scaling and with optional page borders shown.
+     * The image will be rasterized at the given DPI before being sent to the printer.
      *
-     * @param document the document to print
-     * @param scaling page scaling policy
+     * @param document       the document to print
+     * @param scaling        page scaling policy
      * @param showPageBorder true if page borders are to be printed
-     * @param dpi if non-zero then the image will be rasterized at the given DPI
+     * @param dpi            if non-zero then the image will be rasterized at the given DPI
      */
     public PDFPrintable(PDDocument document, Scaling scaling, boolean showPageBorder, float dpi)
     {
@@ -101,20 +102,40 @@ public final class PDFPrintable implements Printable
     }
 
     /**
-     * Creates a new PDFPrintable with the given page scaling and with optional page borders shown. The image will be
-     * rasterized at the given DPI before being sent to the printer.
+     * Creates a new PDFPrintable with the given page scaling and with optional page borders shown.
+     * The image will be rasterized at the given DPI before being sent to the printer.
      *
-     * @param document the document to print
-     * @param scaling page scaling policy
+     * @param document       the document to print
+     * @param scaling        page scaling policy
      * @param showPageBorder true if page borders are to be printed
-     * @param dpi if non-zero then the image will be rasterized at the given DPI
-     * @param center true if the content is to be centered on the page (otherwise top-left).
+     * @param dpi            if non-zero then the image will be rasterized at the given DPI
+     * @param center         true if the content is to be centered on the page (otherwise
+     *                       top-left).
      */
     public PDFPrintable(PDDocument document, Scaling scaling, boolean showPageBorder, float dpi,
             boolean center)
     {
-        this.document = document;
-        this.renderer = new PDFRenderer(document);
+        this(document, scaling, showPageBorder, dpi, center, new PDFRenderer(document));
+    }
+
+    /**
+     * Creates a new PDFPrintable with the given page scaling and with optional page borders shown.
+     * The image will be rasterized at the given DPI before being sent to the printer.
+     *
+     * @param document       the document to print
+     * @param scaling        page scaling policy
+     * @param showPageBorder true if page borders are to be printed
+     * @param dpi            if non-zero then the image will be rasterized at the given DPI
+     * @param center         true if the content is to be centered on the page (otherwise
+     *                       top-left).
+     * @param renderer       the document renderer. Useful if {@link PDFRenderer} has been
+     *                       subclassed.
+     */
+    public PDFPrintable(PDDocument document, Scaling scaling, boolean showPageBorder, float dpi,
+            boolean center, PDFRenderer renderer)
+    {
+        this.pageTree = document.getPages();
+        this.renderer = renderer;
         this.scaling = scaling;
         this.showPageBorder = showPageBorder;
         this.dpi = dpi;
@@ -122,11 +143,11 @@ public final class PDFPrintable implements Printable
     }
 
     /**
-     * Value indicating if the renderer is allowed to subsample images before drawing, according to image dimensions and
-     * requested scale.
-     *
-     * Subsampling may be faster and less memory-intensive in some cases, but it may also lead to loss of quality,
-     * especially in images with high spatial frequency.
+     * Value indicating if the renderer is allowed to subsample images before drawing, according to
+     * image dimensions and requested scale.
+     * <p>
+     * Subsampling may be faster and less memory-intensive in some cases, but it may also lead to
+     * loss of quality, especially in images with high spatial frequency.
      *
      * @return true if subsampling of images is allowed, false otherwise.
      */
@@ -136,11 +157,12 @@ public final class PDFPrintable implements Printable
     }
 
     /**
-     * Sets a value instructing the renderer whether it is allowed to subsample images before drawing. The subsampling
-     * frequency is determined according to image size and requested scale.
-     *
-     * Subsampling may be faster and less memory-intensive in some cases, but it may also lead to loss of quality,
-     * especially in images with high spatial frequency.
+     * Sets a value instructing the renderer whether it is allowed to subsample images before
+     * drawing. The subsampling frequency is determined according to image size and requested
+     * scale.
+     * <p>
+     * Subsampling may be faster and less memory-intensive in some cases, but it may also lead to
+     * loss of quality, especially in images with high spatial frequency.
      *
      * @param subsamplingAllowed The new value indicating if subsampling is allowed.
      */
@@ -160,8 +182,9 @@ public final class PDFPrintable implements Printable
     }
 
     /**
-     * Set the rendering hints. Use this to influence rendering quality and speed. If you don't set them yourself or
-     * pass null, PDFBox will decide <b><u>at runtime</u></b> depending on the destination.
+     * Set the rendering hints. Use this to influence rendering quality and speed. If you don't set
+     * them yourself or pass null, PDFBox will decide <b><u>at runtime</u></b> depending on the
+     * destination.
      *
      * @param renderingHints
      */
@@ -174,7 +197,7 @@ public final class PDFPrintable implements Printable
     public int print(Graphics graphics, PageFormat pageFormat, int pageIndex)
             throws PrinterException
     {
-        if (pageIndex < 0 || pageIndex >= document.getNumberOfPages())
+        if (pageIndex < 0 || pageIndex >= pageTree.getCount())
         {
             return NO_SUCH_PAGE;
         }
@@ -182,7 +205,7 @@ public final class PDFPrintable implements Printable
         {
             Graphics2D graphics2D = (Graphics2D) graphics;
 
-            PDPage page = document.getPage(pageIndex);
+            PDPage page = pageTree.get(pageIndex);
             PDRectangle cropBox = getRotatedCropBox(page);
 
             // the imageable area is the area within the page margins
@@ -274,7 +297,8 @@ public final class PDFPrintable implements Printable
     }
 
     /**
-     * This will find the CropBox with rotation applied, for this page by looking up the hierarchy until it finds them.
+     * This will find the CropBox with rotation applied, for this page by looking up the hierarchy
+     * until it finds them.
      *
      * @return The CropBox at this level in the hierarchy.
      */
@@ -294,7 +318,8 @@ public final class PDFPrintable implements Printable
     }
 
     /**
-     * This will find the MediaBox with rotation applied, for this page by looking up the hierarchy until it finds them.
+     * This will find the MediaBox with rotation applied, for this page by looking up the hierarchy
+     * until it finds them.
      *
      * @return The MediaBox at this level in the hierarchy.
      */

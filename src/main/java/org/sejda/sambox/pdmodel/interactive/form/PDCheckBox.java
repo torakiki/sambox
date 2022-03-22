@@ -16,15 +16,15 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Set;
-
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceDictionary;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceEntry;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Set;
 
 /**
  * A check box toggles between two states, on and off.
@@ -35,9 +35,8 @@ import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceEntry;
 public final class PDCheckBox extends PDButton
 {
     /**
-     * @see PDField#PDField(PDAcroForm)
-     *
      * @param acroForm The acroform.
+     * @see PDField#PDField(PDAcroForm)
      */
     public PDCheckBox(PDAcroForm acroForm)
     {
@@ -46,10 +45,10 @@ public final class PDCheckBox extends PDButton
 
     /**
      * Constructor.
-     * 
+     *
      * @param acroForm The form that this field is part of.
-     * @param field the PDF object to represent as a field.
-     * @param parent the parent node of the node
+     * @param field    the PDF object to represent as a field.
+     * @param parent   the parent node of the node
      */
     PDCheckBox(PDAcroForm acroForm, COSDictionary field, PDNonTerminalField parent)
     {
@@ -57,14 +56,14 @@ public final class PDCheckBox extends PDButton
     }
 
     /**
-     * This will tell if this radio button is currently checked or not. This is equivalent to calling
-     * {@link #getValue()}.
+     * This will tell if this radio button is currently checked or not. This is equivalent to
+     * calling {@link #getValue()}.
      *
      * @return true If this field is checked.
      */
     public boolean isChecked()
     {
-        if(COSName.Off.getName().equals(getValue()))
+        if (COSName.Off.getName().equals(getValue()))
         {
             return false;
         }
@@ -76,7 +75,7 @@ public final class PDCheckBox extends PDButton
 
     /**
      * Checks the check box.
-     * 
+     *
      * @throws IOException if the appearance couldn't be generated.
      */
     public void check() throws IOException
@@ -86,7 +85,7 @@ public final class PDCheckBox extends PDButton
 
     /**
      * Unchecks the check box.
-     * 
+     *
      * @throws IOException if the appearance couldn't be generated.
      */
     public void unCheck() throws IOException
@@ -96,26 +95,26 @@ public final class PDCheckBox extends PDButton
 
     /**
      * Get the value which sets the check box to the On state.
-     * 
+     *
      * <p>
-     * The On value should be 'Yes' but other values are possible so we need to look for that. On the other hand the Off
-     * value shall always be 'Off'. If not set or not part of the normal appearance keys 'Off' is the default
+     * The On value should be 'Yes' but other values are possible so we need to look for that. On
+     * the other hand the Off value shall always be 'Off'. If not set or not part of the normal
+     * appearance keys 'Off' is the default
      * </p>
      *
-     * @return the value setting the check box to the On state
-     * definition.
+     * @return the value setting the check box to the On state definition.
      */
     public String getOnValue()
     {
         List<String> exportValues = getExportValues();
-        if(exportValues.size() > 0) {
+        if (exportValues.size() > 0)
+        {
             return exportValues.get(0);
         }
 
         PDAnnotationWidget widget = this.getWidgets().get(0);
         PDAppearanceDictionary apDictionary = widget.getAppearance();
 
-        String onValue = "Yes";
         if (apDictionary != null)
         {
             PDAppearanceEntry normalAppearance = apDictionary.getNormalAppearance();
@@ -126,12 +125,12 @@ public final class PDCheckBox extends PDButton
                 {
                     if (COSName.Off.compareTo(entry) != 0)
                     {
-                        onValue = entry.getName();
+                        return entry.getName();
                     }
                 }
             }
         }
-        return onValue;
+        return "Yes";
     }
 
 }

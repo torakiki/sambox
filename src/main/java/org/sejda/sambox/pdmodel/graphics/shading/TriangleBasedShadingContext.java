@@ -15,6 +15,8 @@
  */
 package org.sejda.sambox.pdmodel.graphics.shading;
 
+import org.sejda.sambox.util.Matrix;
+
 import java.awt.PaintContext;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -26,26 +28,15 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import org.sejda.sambox.util.Matrix;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
- * Intermediate class extended by the shading types 4,5,6 and 7 that contains the common methods used by these classes.
+ * Intermediate class extended by the shading types 4,5,6 and 7 that contains the common methods
+ * used by these classes.
  *
  * @author Shaola Ren
  * @author Tilman Hausherr
  */
 abstract class TriangleBasedShadingContext extends ShadingContext implements PaintContext
 {
-    private static final Logger LOG = LoggerFactory.getLogger(TriangleBasedShadingContext.class);
-
-    protected int bitsPerCoordinate;
-    protected int bitsPerColorComponent;
-    protected int numberOfColorComponents;
-
-    private final boolean hasFunction;
-
     // map of pixels within triangles to their RGB color
     private Map<Point, Integer> pixelTable;
 
@@ -53,23 +44,16 @@ abstract class TriangleBasedShadingContext extends ShadingContext implements Pai
      * Constructor.
      *
      * @param shading the shading type to be used
-     * @param cm the color model to be used
-     * @param xform transformation for user to device space
-     * @param matrix the pattern matrix concatenated with that of the parent content stream
-     * @throws IOException if there is an error getting the color space or doing background color conversion.
+     * @param cm      the color model to be used
+     * @param xform   transformation for user to device space
+     * @param matrix  the pattern matrix concatenated with that of the parent content stream
+     * @throws IOException if there is an error getting the color space or doing background color
+     *                     conversion.
      */
     TriangleBasedShadingContext(PDShading shading, ColorModel cm, AffineTransform xform,
             Matrix matrix) throws IOException
     {
         super(shading, cm, xform, matrix);
-        PDTriangleBasedShadingType triangleBasedShadingType = (PDTriangleBasedShadingType) shading;
-        hasFunction = shading.getFunction() != null;
-        bitsPerCoordinate = triangleBasedShadingType.getBitsPerCoordinate();
-        LOG.debug("bitsPerCoordinate: " + (Math.pow(2, bitsPerCoordinate) - 1));
-        bitsPerColorComponent = triangleBasedShadingType.getBitsPerComponent();
-        LOG.debug("bitsPerColorComponent: " + bitsPerColorComponent);
-        numberOfColorComponents = hasFunction ? 1 : getShadingColorSpace().getNumberOfComponents();
-        LOG.debug("numberOfColorComponents: " + numberOfColorComponents);
     }
 
     /**
@@ -151,12 +135,12 @@ abstract class TriangleBasedShadingContext extends ShadingContext implements Pai
     }
 
     /**
-     * Convert color to RGB color value, using function if required, then convert from the shading color space to an RGB
-     * value, which is encoded into an integer.
+     * Convert color to RGB color value, using function if required, then convert from the shading
+     * color space to an RGB value, which is encoded into an integer.
      */
     private int evalFunctionAndConvertToRGB(float[] values) throws IOException
     {
-        if (hasFunction)
+        if (getShading().getFunction() != null)
         {
             values = getShading().evalFunction(values);
         }

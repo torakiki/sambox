@@ -16,8 +16,6 @@
  */
 package org.sejda.sambox.contentstream.operator.state;
 
-import java.util.List;
-
 import org.sejda.sambox.contentstream.operator.MissingOperandException;
 import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.contentstream.operator.OperatorName;
@@ -27,6 +25,8 @@ import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSNumber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 /**
  * d: Set the line dash pattern.
@@ -57,7 +57,6 @@ public class SetLineDashPattern extends OperatorProcessor
         COSArray dashArray = (COSArray) base0;
         int dashPhase = ((COSNumber) base1).intValue();
 
-        boolean allZero = true;
         for (COSBase base : dashArray)
         {
             if (base instanceof COSNumber)
@@ -65,7 +64,6 @@ public class SetLineDashPattern extends OperatorProcessor
                 COSNumber num = (COSNumber) base;
                 if (num.floatValue() != 0)
                 {
-                    allZero = false;
                     break;
                 }
             }
@@ -75,11 +73,6 @@ public class SetLineDashPattern extends OperatorProcessor
                 dashArray = new COSArray();
                 break;
             }
-        }
-        if (dashArray.size() > 0 && allZero)
-        {
-            LOG.warn("dash lengths all zero, ignored");
-            dashArray = new COSArray();
         }
         getContext().setLineDashPattern(dashArray, dashPhase);
     }
