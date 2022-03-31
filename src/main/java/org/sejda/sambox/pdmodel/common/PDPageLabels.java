@@ -78,7 +78,7 @@ public class PDPageLabels implements COSObjectable
     {
         if (nonNull(dict))
         {
-            findLabels(new PDNumberTreeNode(dict, COSDictionary.class));
+            findLabels(new PDNumberTreeNode(dict, PDPageLabelRange.class));
         }
     }
 

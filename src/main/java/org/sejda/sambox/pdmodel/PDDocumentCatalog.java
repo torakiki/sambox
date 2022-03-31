@@ -119,7 +119,7 @@ public class PDDocumentCatalog implements COSObjectable
     /**
      * sets the acroform for this catalog.
      *
-     * @param acroform the new acroform.
+     * @param acroForm the new acroform.
      */
     public void setAcroForm(PDAcroForm acroForm)
     {
@@ -536,8 +536,12 @@ public class PDDocumentCatalog implements COSObjectable
      */
     public PDPageLabels getPageLabels() throws IOException
     {
-        COSDictionary dict = (COSDictionary) root.getDictionaryObject(COSName.PAGE_LABELS);
-        return dict == null ? null : new PDPageLabels(dict);
+        COSDictionary labels = root.getDictionaryObject(COSName.PAGE_LABELS, COSDictionary.class);
+        if (nonNull(labels))
+        {
+            return new PDPageLabels(labels);
+        }
+        return null;
     }
 
     /**

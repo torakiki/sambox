@@ -18,7 +18,7 @@ package org.sejda.sambox.pdmodel.interactive.form;
  * limitations under the License.
  */
 
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.input.PDFParser;
@@ -39,7 +39,7 @@ public class CombAlignmentTest
     private static final String NAME_OF_PDF = "CombTest.pdf";
     private static final String TEST_VALUE = "1234567";
 
-    @BeforeClass
+    @BeforeAll
     public static void setUp() throws IOException
     {
         OUT_DIR.mkdirs();
