@@ -83,9 +83,9 @@ public abstract class Filter
     {
         // AV: PDFBOX-3932 considers valid only the case name,dictionary and array,array but discards dp in the case
         // name,array of 1 where we previously picked the one element as dp
-        COSBase filter = dictionary.getDictionaryObject(COSName.FILTER, COSName.F);
+        COSBase filter = dictionary.getDictionaryObject(COSName.F, COSName.FILTER);
         COSBase dp = Optional.ofNullable(
-                        dictionary.getDictionaryObject(COSName.DECODE_PARMS, COSName.DP))
+                        dictionary.getDictionaryObject(COSName.DP, COSName.DECODE_PARMS))
                 .orElseGet(COSDictionary::new);
         if (filter instanceof COSName && dp instanceof COSDictionary)
         {

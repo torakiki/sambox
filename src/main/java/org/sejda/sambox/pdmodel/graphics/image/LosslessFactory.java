@@ -15,6 +15,20 @@
  */
 package org.sejda.sambox.pdmodel.graphics.image;
 
+import org.sejda.commons.FastByteArrayOutputStream;
+import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSInteger;
+import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.filter.Filter;
+import org.sejda.sambox.filter.FilterFactory;
+import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
+import org.sejda.sambox.pdmodel.graphics.color.PDDeviceCMYK;
+import org.sejda.sambox.pdmodel.graphics.color.PDDeviceColorSpace;
+import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
+import org.sejda.sambox.pdmodel.graphics.color.PDDeviceRGB;
+import org.sejda.sambox.pdmodel.graphics.color.PDICCBased;
+
+import javax.imageio.stream.MemoryCacheImageOutputStream;
 import java.awt.Transparency;
 import java.awt.color.ColorSpace;
 import java.awt.color.ICC_ColorSpace;
@@ -28,21 +42,6 @@ import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
-
-import javax.imageio.stream.MemoryCacheImageOutputStream;
-
-import org.sejda.commons.FastByteArrayOutputStream;
-import org.sejda.sambox.cos.COSDictionary;
-import org.sejda.sambox.cos.COSInteger;
-import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.filter.Filter;
-import org.sejda.sambox.filter.FilterFactory;
-import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
-import org.sejda.sambox.pdmodel.graphics.color.PDDeviceCMYK;
-import org.sejda.sambox.pdmodel.graphics.color.PDDeviceColorSpace;
-import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
-import org.sejda.sambox.pdmodel.graphics.color.PDDeviceRGB;
-import org.sejda.sambox.pdmodel.graphics.color.PDICCBased;
 
 /**
  * Factory for creating a PDImageXObject containing a lossless compressed image.
@@ -64,15 +63,15 @@ public final class LosslessFactory
      * Creates a new lossless encoded image XObject from a BufferedImage.
      * <p>
      * <u>New for advanced users from 2.0.12 on:</u><br>
-     * If you created your image with a non standard ICC colorspace, it will be preserved. (If you load images in java
-     * using ImageIO then no need to read this segment) However a new colorspace will be created for each image. So if
-     * you create a PDF with several such images, consider replacing the colorspace with a common object to save space.
-     * This is done with {@link PDImageXObject#getColorSpace()} and
-     * {@link PDImageXObject#setColorSpace(org.sejda.sambox.pdmodel.graphics.color.PDColorSpace)
+     * If you created your image with a non standard ICC colorspace, it will be preserved. (If you
+     * load images in java using ImageIO then no need to read this segment) However a new colorspace
+     * will be created for each image. So if you create a PDF with several such images, consider
+     * replacing the colorspace with a common object to save space. This is done with {@link
+     * PDImageXObject#getColorSpace()} and {@link PDImageXObject#setColorSpace(org.sejda.sambox.pdmodel.graphics.color.PDColorSpace)
      * PDImageXObject.setColorSpace()}
      *
      * @param document the document where the image will be created
-     * @param image the BufferedImage to embed
+     * @param image    the BufferedImage to embed
      * @return a new image XObject
      * @throws IOException if something goes wrong
      */
@@ -95,8 +94,8 @@ public final class LosslessFactory
                 {
                     // also create classic compressed image, compare sizes
                     PDImageXObject pdImageXObjectClassic = createFromRGBImage(image);
-                    if (pdImageXObjectClassic.getCOSObject().getFilteredLength() < pdImageXObject
-                            .getCOSObject().getFilteredLength())
+                    if (pdImageXObjectClassic.getCOSObject().getFilteredLength()
+                            < pdImageXObject.getCOSObject().getFilteredLength())
                     {
                         pdImageXObject.getCOSObject().close();
                         return pdImageXObjectClassic;
@@ -190,25 +189,22 @@ public final class LosslessFactory
                 imageData[byteIdx++] = (byte) ((pixel >> 16) & 0xFF);
                 imageData[byteIdx++] = (byte) ((pixel >> 8) & 0xFF);
                 imageData[byteIdx++] = (byte) (pixel & 0xFF);
-                if (transparency != Transparency.OPAQUE)
+                // we have the alpha right here, so no need to do it separately
+                // as done prior April 2018
+                if (transparency == Transparency.BITMASK)
                 {
-                    // we have the alpha right here, so no need to do it separately
-                    // as done prior April 2018
-                    if (transparency == Transparency.BITMASK)
+                    // write a bit
+                    alphaImageData[alphaByteIdx] |= ((pixel >> 24) & 1) << alphaBitPos;
+                    if (--alphaBitPos < 0)
                     {
-                        // write a bit
-                        alphaImageData[alphaByteIdx] |= ((pixel >> 24) & 1) << alphaBitPos;
-                        if (--alphaBitPos < 0)
-                        {
-                            alphaBitPos = 7;
-                            ++alphaByteIdx;
-                        }
+                        alphaBitPos = 7;
+                        ++alphaByteIdx;
                     }
-                    else
-                    {
-                        // write a byte
-                        alphaImageData[alphaByteIdx++] = (byte) ((pixel >> 24) & 0xFF);
-                    }
+                }
+                else if (transparency != Transparency.OPAQUE)
+                {
+                    // write a byte
+                    alphaImageData[alphaByteIdx++] = (byte) ((pixel >> 24) & 0xFF);
                 }
             }
 
@@ -231,15 +227,15 @@ public final class LosslessFactory
     }
 
     /**
-     * Create a PDImageXObject while making a decision whether not to compress, use Flate filter only, or Flate and LZW
-     * filters.
-     * 
-     * @param document The document.
-     * @param byteArray array with data.
-     * @param width the image width
-     * @param height the image height
+     * Create a PDImageXObject while making a decision whether not to compress, use Flate filter
+     * only, or Flate and LZW filters.
+     *
+     * @param document         The document.
+     * @param byteArray        array with data.
+     * @param width            the image width
+     * @param height           the image height
      * @param bitsPerComponent the bits per component
-     * @param initColorSpace the color space
+     * @param initColorSpace   the color space
      * @return the newly created PDImageXObject with the data compressed.
      * @throws IOException
      */
@@ -334,7 +330,8 @@ public final class LosslessFactory
         /**
          * Tries to compress the image using a predictor.
          *
-         * @return the image or null if it is not possible to encoded the image (e.g. not supported raster format etc.)
+         * @return the image or null if it is not possible to encoded the image (e.g. not supported
+         * raster format etc.)
          */
         PDImageXObject encode() throws IOException
         {
@@ -441,7 +438,8 @@ public final class LosslessFactory
                     transferRowByte = prevRowByte = null;
                 }
 
-                for (int indexInTransferRow = 0; indexInTransferRow < elementsInTransferRow; indexInTransferRow += elementsInRowPerPixel, alphaPtr += bytesPerComponent)
+                for (int indexInTransferRow = 0; indexInTransferRow
+                        < elementsInTransferRow; indexInTransferRow += elementsInRowPerPixel, alphaPtr += bytesPerComponent)
                 {
                     // Copy the pixel values into the byte array
                     if (transferRowByte != null)
@@ -570,9 +568,9 @@ public final class LosslessFactory
 
             ColorSpace srcCspace = image.getColorModel().getColorSpace();
             int srcCspaceType = srcCspace.getType();
-            PDColorSpace pdColorSpace = srcCspaceType == ColorSpace.TYPE_CMYK
-                    ? PDDeviceCMYK.INSTANCE : (srcCspaceType == ColorSpace.TYPE_GRAY
-                            ? PDDeviceGray.INSTANCE : PDDeviceRGB.INSTANCE);
+            PDColorSpace pdColorSpace =
+                    srcCspaceType == ColorSpace.TYPE_CMYK ? PDDeviceCMYK.INSTANCE : (srcCspaceType
+                            == ColorSpace.TYPE_GRAY ? PDDeviceGray.INSTANCE : PDDeviceRGB.INSTANCE);
 
             // Encode the image profile if the image has one
             if (srcCspace instanceof ICC_ColorSpace)
@@ -586,12 +584,12 @@ public final class LosslessFactory
                             .createOutputStream(COSName.FLATE_DECODE);
                     outputStream.write(profile.getData());
                     outputStream.close();
-                    pdProfile.getPDStream().getCOSObject().setInt(COSName.N,
-                            srcCspace.getNumComponents());
+                    pdProfile.getPDStream().getCOSObject()
+                            .setInt(COSName.N, srcCspace.getNumComponents());
                     pdProfile.getPDStream().getCOSObject().setItem(COSName.ALTERNATE,
-                            srcCspaceType == ColorSpace.TYPE_GRAY ? COSName.DEVICEGRAY
-                                    : (srcCspaceType == ColorSpace.TYPE_CMYK ? COSName.DEVICECMYK
-                                            : COSName.DEVICERGB));
+                            srcCspaceType == ColorSpace.TYPE_GRAY ? COSName.DEVICEGRAY : (
+                                    srcCspaceType
+                                            == ColorSpace.TYPE_CMYK ? COSName.DEVICECMYK : COSName.DEVICERGB));
                     pdColorSpace = pdProfile;
                 }
             }
@@ -617,10 +615,11 @@ public final class LosslessFactory
         }
 
         /**
-         * We look which row encoding is the "best" one, ie. has the lowest sum. We don't implement anything fancier to
-         * choose the right row encoding. This is just the recommend algorithm in the spec. The get the perfect encoding
-         * you would need to do a brute force check how all the different encoded rows compress in the zip stream
-         * together. You have would have to check 5*image-height permutations...
+         * We look which row encoding is the "best" one, ie. has the lowest sum. We don't implement
+         * anything fancier to choose the right row encoding. This is just the recommend algorithm
+         * in the spec. The get the perfect encoding you would need to do a brute force check how
+         * all the different encoded rows compress in the zip stream together. You have would have
+         * to check 5*image-height permutations...
          *
          * @return the "best" row encoding of the row encodings
          */

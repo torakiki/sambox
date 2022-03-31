@@ -16,9 +16,6 @@
  */
 package org.sejda.sambox.contentstream.operator.markedcontent;
 
-import java.io.IOException;
-import java.util.List;
-
 import org.sejda.sambox.contentstream.operator.MissingOperandException;
 import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.contentstream.operator.OperatorName;
@@ -31,6 +28,9 @@ import org.sejda.sambox.pdmodel.graphics.form.PDTransparencyGroup;
 import org.sejda.sambox.text.PDFMarkedContentExtractor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.List;
 
 /**
  * Do: Draws an XObject.
@@ -63,19 +63,18 @@ public class DrawObject extends OperatorProcessor
             try
             {
                 getContext().increaseLevel();
-                if (getContext().getLevel() > 25)
+                if (getContext().getLevel() > 50)
                 {
                     LOG.error("recursion is too deep, skipping form XObject");
                     return;
                 }
-                PDFormXObject form = (PDFormXObject) xobject;
-                if (form instanceof PDTransparencyGroup)
+                if (xobject instanceof PDTransparencyGroup)
                 {
-                    getContext().showTransparencyGroup((PDTransparencyGroup) form);
+                    getContext().showTransparencyGroup((PDTransparencyGroup) xobject);
                 }
                 else
                 {
-                    getContext().showForm(form);
+                    getContext().showForm((PDFormXObject) xobject);
                 }
             }
             finally

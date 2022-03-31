@@ -30,6 +30,9 @@ import java.util.Map;
  */
 public abstract class Encoding implements COSObjectable
 {
+    protected static final int CHAR_CODE = 0;
+    protected static final int CHAR_NAME = 1;
+
     /**
      * This will get an encoding by name. May return null.
      *

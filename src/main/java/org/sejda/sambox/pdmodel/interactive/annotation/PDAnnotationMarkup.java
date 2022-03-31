@@ -16,11 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.interactive.annotation;
 
-import static java.util.Optional.ofNullable;
-
-import java.io.IOException;
-import java.util.Calendar;
-
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
@@ -39,9 +34,14 @@ import org.sejda.sambox.pdmodel.interactive.annotation.handlers.PDPolylineAppear
 import org.sejda.sambox.pdmodel.interactive.annotation.handlers.PDSoundAppearanceHandler;
 import org.sejda.sambox.pdmodel.interactive.form.PDVariableText;
 
+import java.io.IOException;
+import java.util.Calendar;
+
+import static java.util.Optional.ofNullable;
+
 /**
- * This class represents the additonal fields of a Markup type Annotation. See section 12.5.6 of ISO32000-1:2008
- * (starting with page 390) for details on annotation types.
+ * This class represents the additonal fields of a Markup type Annotation. See section 12.5.6 of
+ * ISO32000-1:2008 (starting with page 390) for details on annotation types.
  *
  * @author Paul King
  */
@@ -120,8 +120,8 @@ public class PDAnnotationMarkup extends PDAnnotation
     }
 
     /**
-     * Retrieve the string used as the title of the popup window shown when open and active (by convention this
-     * identifies who added the annotation).
+     * Retrieve the string used as the title of the popup window shown when open and active (by
+     * convention this identifies who added the annotation).
      *
      * @return The title of the popup.
      */
@@ -131,8 +131,8 @@ public class PDAnnotationMarkup extends PDAnnotation
     }
 
     /**
-     * Set the string used as the title of the popup window shown when open and active (by convention this identifies
-     * who added the annotation).
+     * Set the string used as the title of the popup window shown when open and active (by
+     * convention this identifies who added the annotation).
      *
      * @param t The title of the popup.
      */
@@ -142,14 +142,16 @@ public class PDAnnotationMarkup extends PDAnnotation
     }
 
     /**
-     * This will retrieve the popup annotation used for entering/editing the text for this annotation.
+     * This will retrieve the popup annotation used for entering/editing the text for this
+     * annotation.
      *
      * @return the popup annotation.
      */
     public PDAnnotationPopup getPopup()
     {
-        return ofNullable(getCOSObject().getDictionaryObject(COSName.POPUP, COSDictionary.class))
-                .map(PDAnnotationPopup::new).orElse(null);
+        return ofNullable(
+                getCOSObject().getDictionaryObject(COSName.POPUP, COSDictionary.class)).map(
+                PDAnnotationPopup::new).orElse(null);
     }
 
     /**
@@ -163,7 +165,8 @@ public class PDAnnotationMarkup extends PDAnnotation
     }
 
     /**
-     * This will retrieve the constant opacity value used when rendering the annotation (excluing any popup).
+     * This will retrieve the constant opacity value used when rendering the annotation (excluing
+     * any popup).
      *
      * @return the constant opacity value.
      */
@@ -173,7 +176,8 @@ public class PDAnnotationMarkup extends PDAnnotation
     }
 
     /**
-     * This will set the constant opacity value used when rendering the annotation (excluing any popup).
+     * This will set the constant opacity value used when rendering the annotation (excluing any
+     * popup).
      *
      * @param ca the constant opacity value.
      */
@@ -233,21 +237,21 @@ public class PDAnnotationMarkup extends PDAnnotation
     }
 
     /**
-     * This will retrieve the annotation to which this one is "In Reply To" the actual relationship is specified by the
-     * RT entry.
+     * This will retrieve the annotation to which this one is "In Reply To" the actual relationship
+     * is specified by the RT entry.
      *
      * @return the other annotation or null if there is none.
      * @throws IOException if there is an error creating the other annotation.
      */
     public PDAnnotation getInReplyTo()
     {
-        return ofNullable(getCOSObject().getDictionaryObject("IRT", COSDictionary.class))
-                .map(PDAnnotation::createAnnotation).orElse(null);
+        return ofNullable(getCOSObject().getDictionaryObject("IRT", COSDictionary.class)).map(
+                PDAnnotation::createAnnotation).orElse(null);
     }
 
     /**
-     * This will set the annotation to which this one is "In Reply To" the actual relationship is specified by the RT
-     * entry.
+     * This will set the annotation to which this one is "In Reply To" the actual relationship is
+     * specified by the RT entry.
      *
      * @param irt the annotation this one is "In Reply To".
      */
@@ -277,8 +281,8 @@ public class PDAnnotationMarkup extends PDAnnotation
     }
 
     /**
-     * This will retrieve the Reply Type (relationship) with the annotation in the IRT entry See the RT_* constants for
-     * the available values.
+     * This will retrieve the Reply Type (relationship) with the annotation in the IRT entry See the
+     * RT_* constants for the available values.
      *
      * @return the relationship.
      */
@@ -288,8 +292,8 @@ public class PDAnnotationMarkup extends PDAnnotation
     }
 
     /**
-     * This will set the Reply Type (relationship) with the annotation in the IRT entry See the RT_* constants for the
-     * available values.
+     * This will set the Reply Type (relationship) with the annotation in the IRT entry See the RT_*
+     * constants for the available values.
      *
      * @param rt the reply type.
      */
@@ -299,8 +303,8 @@ public class PDAnnotationMarkup extends PDAnnotation
     }
 
     /**
-     * This will retrieve the intent of the annotation The values and meanings are specific to the actual annotation See
-     * the IT_* constants for the annotation classes.
+     * This will retrieve the intent of the annotation The values and meanings are specific to the
+     * actual annotation See the IT_* constants for the annotation classes.
      *
      * @return the intent
      */
@@ -310,8 +314,8 @@ public class PDAnnotationMarkup extends PDAnnotation
     }
 
     /**
-     * This will set the intent of the annotation The values and meanings are specific to the actual annotation See the
-     * IT_* constants for the annotation classes.
+     * This will set the intent of the annotation The values and meanings are specific to the actual
+     * annotation See the IT_* constants for the annotation classes.
      *
      * @param it the intent
      */
@@ -322,7 +326,7 @@ public class PDAnnotationMarkup extends PDAnnotation
 
     /**
      * This will return the external data dictionary.
-     * 
+     *
      * @return the external data dictionary
      */
     public PDExternalDataDictionary getExternalData()
@@ -337,7 +341,7 @@ public class PDAnnotationMarkup extends PDAnnotation
 
     /**
      * This will set the external data dictionary.
-     * 
+     *
      * @param externalData the external data dictionary
      */
     public void setExternalData(PDExternalDataDictionary externalData)
@@ -346,10 +350,10 @@ public class PDAnnotationMarkup extends PDAnnotation
     }
 
     /**
-     * This will set the border style dictionary, specifying the width and dash pattern used in drawing the line.
+     * This will set the border style dictionary, specifying the width and dash pattern used in
+     * drawing the line.
      *
      * @param bs the border style dictionary to set.
-     *
      */
     public void setBorderStyle(PDBorderStyleDictionary bs)
     {
@@ -357,7 +361,8 @@ public class PDAnnotationMarkup extends PDAnnotation
     }
 
     /**
-     * This will retrieve the border style dictionary, specifying the width and dash pattern used in drawing the line.
+     * This will retrieve the border style dictionary, specifying the width and dash pattern used in
+     * drawing the line.
      *
      * @return the border style dictionary.
      */
@@ -384,8 +389,8 @@ public class PDAnnotationMarkup extends PDAnnotation
     /**
      * This will retrieve the line ending style.
      *
-     * @return The line ending style, possible values shown in the LE_ constants section, LE_NONE if missing, never
-     * null.
+     * @return The line ending style, possible values shown in the LE_ constants section, LE_NONE if
+     * missing, never null.
      */
     public String getLineEndingStyle()
     {
@@ -416,11 +421,10 @@ public class PDAnnotationMarkup extends PDAnnotation
     }
 
     /**
-     * This will set the border effect dictionary, specifying effects to be applied when drawing the line. This is
-     * supported by PDF 1.5 and higher.
+     * This will set the border effect dictionary, specifying effects to be applied when drawing the
+     * line. This is supported by PDF 1.5 and higher.
      *
      * @param be The border effect dictionary to set.
-     *
      */
     public void setBorderEffect(PDBorderEffectDictionary be)
     {
@@ -428,7 +432,8 @@ public class PDAnnotationMarkup extends PDAnnotation
     }
 
     /**
-     * This will retrieve the border effect dictionary, specifying effects to be applied used in drawing the line.
+     * This will retrieve the border effect dictionary, specifying effects to be applied used in
+     * drawing the line.
      *
      * @return The border effect dictionary
      */
@@ -448,8 +453,9 @@ public class PDAnnotationMarkup extends PDAnnotation
     /**
      * Sets the paths that make this annotation.
      *
-     * @param inkList An array of arrays, each representing a stroked path. Each array shall be a series of alternating
-     * horizontal and vertical coordinates. If the parameter is null the entry will be removed.
+     * @param inkList An array of arrays, each representing a stroked path. Each array shall be a
+     *                series of alternating horizontal and vertical coordinates. If the parameter is
+     *                null the entry will be removed.
      */
     public void setInkList(float[][] inkList)
     {
@@ -471,8 +477,8 @@ public class PDAnnotationMarkup extends PDAnnotation
     /**
      * Get one or more disjoint paths that make this annotation.
      *
-     * @return An array of arrays, each representing a stroked path. Each array shall be a series of alternating
-     * horizontal and vertical coordinates.
+     * @return An array of arrays, each representing a stroked path. Each array shall be a series of
+     * alternating horizontal and vertical coordinates.
      */
     public float[][] getInkList()
     {
@@ -486,7 +492,7 @@ public class PDAnnotationMarkup extends PDAnnotation
                 COSBase base2 = array.getObject(i);
                 if (base2 instanceof COSArray)
                 {
-                    inkList[i] = ((COSArray) array.getObject(i)).toFloatArray();
+                    inkList[i] = ((COSArray) base2).toFloatArray();
                 }
                 else
                 {
@@ -500,7 +506,7 @@ public class PDAnnotationMarkup extends PDAnnotation
 
     /**
      * Get the default appearance.
-     * 
+     *
      * @return a string describing the default appearance.
      */
     public String getDefaultAppearance()
@@ -520,7 +526,7 @@ public class PDAnnotationMarkup extends PDAnnotation
 
     /**
      * Get the default style string.
-     *
+     * <p>
      * The default style string defines the default style for rich text fields.
      *
      * @return the DS element of the dictionary object
@@ -532,7 +538,7 @@ public class PDAnnotationMarkup extends PDAnnotation
 
     /**
      * Set the default style string.
-     *
+     * <p>
      * Providing null as the value will remove the default style string.
      *
      * @param defaultStyleString a string describing the default style.
@@ -543,11 +549,9 @@ public class PDAnnotationMarkup extends PDAnnotation
     }
 
     /**
-     * This will get the 'quadding' or justification of the text to be displayed. <br>
-     * 0 - Left (default)<br>
-     * 1 - Centered<br>
-     * 2 - Right<br>
-     * Please see the QUADDING_CONSTANTS in {@link PDVariableText }.
+     * This will get the 'quadding' or justification of the text to be displayed. <br> 0 - Left
+     * (default)<br> 1 - Centered<br> 2 - Right<br> Please see the QUADDING_CONSTANTS in {@link
+     * PDVariableText }.
      *
      * @return The justification of the text strings.
      */
@@ -557,8 +561,8 @@ public class PDAnnotationMarkup extends PDAnnotation
     }
 
     /**
-     * This will set the quadding/justification of the text. Please see the QUADDING_CONSTANTS in {@link PDVariableText
-     * }.
+     * This will set the quadding/justification of the text. Please see the QUADDING_CONSTANTS in
+     * {@link PDVariableText }.
      *
      * @param q The new text justification.
      */
@@ -568,11 +572,11 @@ public class PDAnnotationMarkup extends PDAnnotation
     }
 
     /**
-     * This will set the rectangle difference rectangle. Giving the difference between the annotations rectangle and
-     * where the drawing occurs. (To take account of any effects applied through the BE entry for example)
+     * This will set the rectangle difference rectangle. Giving the difference between the
+     * annotations rectangle and where the drawing occurs. (To take account of any effects applied
+     * through the BE entry for example)
      *
      * @param rd the rectangle difference
-     *
      */
     public void setRectDifference(PDRectangle rd)
     {
@@ -580,8 +584,9 @@ public class PDAnnotationMarkup extends PDAnnotation
     }
 
     /**
-     * This will get the rectangle difference rectangle. Giving the difference between the annotations rectangle and
-     * where the drawing occurs. (To take account of any effects applied through the BE entry for example)
+     * This will get the rectangle difference rectangle. Giving the difference between the
+     * annotations rectangle and where the drawing occurs. (To take account of any effects applied
+     * through the BE entry for example)
      *
      * @return the rectangle difference
      */
@@ -596,13 +601,13 @@ public class PDAnnotationMarkup extends PDAnnotation
     }
 
     /**
-     * This will set the difference between the annotations "outer" rectangle defined by /Rect and boundaries of the
-     * underlying.
-     * 
+     * This will set the difference between the annotations "outer" rectangle defined by /Rect and
+     * boundaries of the underlying.
+     *
      * <p>
      * This will set an equal difference for all sides
      * </p>
-     * 
+     *
      * @param difference from the annotations /Rect entry
      */
     public void setRectDifferences(float difference)
@@ -611,13 +616,13 @@ public class PDAnnotationMarkup extends PDAnnotation
     }
 
     /**
-     * This will set the difference between the annotations "outer" rectangle defined by /Rect and the border.
-     * 
-     * @param differenceLeft left difference from the annotations /Rect entry
-     * @param differenceTop top difference from the annotations /Rect entry
-     * @param differenceRight right difference from the annotations /Rect entry
+     * This will set the difference between the annotations "outer" rectangle defined by /Rect and
+     * the border.
+     *
+     * @param differenceLeft   left difference from the annotations /Rect entry
+     * @param differenceTop    top difference from the annotations /Rect entry
+     * @param differenceRight  right difference from the annotations /Rect entry
      * @param differenceBottom bottom difference from the annotations /Rect entry
-     * 
      */
     public void setRectDifferences(float differenceLeft, float differenceTop, float differenceRight,
             float differenceBottom)
@@ -631,9 +636,9 @@ public class PDAnnotationMarkup extends PDAnnotation
     }
 
     /**
-     * This will get the margin between the annotations "outer" rectangle defined by /Rect and the boundaries of the
-     * underlying caret.
-     * 
+     * This will get the margin between the annotations "outer" rectangle defined by /Rect and the
+     * boundaries of the underlying caret.
+     *
      * @return the differences. If the entry hasn't been set am empty array is returned.
      */
     public float[] getRectDifferences()
@@ -647,12 +652,14 @@ public class PDAnnotationMarkup extends PDAnnotation
     }
 
     /**
-     * This will set the coordinates of the callout line. (PDF 1.6 and higher) Only relevant if the intent is
-     * FreeTextCallout.
+     * This will set the coordinates of the callout line. (PDF 1.6 and higher) Only relevant if the
+     * intent is FreeTextCallout.
      *
-     * @param callout An array of four or six numbers specifying a callout line attached to the free text annotation.
-     * Six numbers [ x1 y1 x2 y2 x3 y3 ] represent the starting, knee point, and ending coordinates of the line in
-     * default user space, four numbers [ x1 y1 x2 y2 ] represent the starting and ending coordinates of the line.
+     * @param callout An array of four or six numbers specifying a callout line attached to the free
+     *                text annotation. Six numbers [ x1 y1 x2 y2 x3 y3 ] represent the starting,
+     *                knee point, and ending coordinates of the line in default user space, four
+     *                numbers [ x1 y1 x2 y2 ] represent the starting and ending coordinates of the
+     *                line.
      */
     public final void setCallout(float[] callout)
     {
@@ -662,12 +669,13 @@ public class PDAnnotationMarkup extends PDAnnotation
     }
 
     /**
-     * This will get the coordinates of the callout line. (PDF 1.6 and higher) Only relevant if the intent is
-     * FreeTextCallout.
+     * This will get the coordinates of the callout line. (PDF 1.6 and higher) Only relevant if the
+     * intent is FreeTextCallout.
      *
-     * @return An array of four or six numbers specifying a callout line attached to the free text annotation. Six
-     * numbers [ x1 y1 x2 y2 x3 y3 ] represent the starting, knee point, and ending coordinates of the line in default
-     * user space, four numbers [ x1 y1 x2 y2 ] represent the starting and ending coordinates of the line.
+     * @return An array of four or six numbers specifying a callout line attached to the free text
+     * annotation. Six numbers [ x1 y1 x2 y2 x3 y3 ] represent the starting, knee point, and ending
+     * coordinates of the line in default user space, four numbers [ x1 y1 x2 y2 ] represent the
+     * starting and ending coordinates of the line.
      */
     public float[] getCallout()
     {
@@ -680,7 +688,8 @@ public class PDAnnotationMarkup extends PDAnnotation
     }
 
     /**
-     * This will set the line ending style for the start point, see the LE_ constants for the possible values.
+     * This will set the line ending style for the start point, see the LE_ constants for the
+     * possible values.
      *
      * @param style The new style.
      */
@@ -704,7 +713,8 @@ public class PDAnnotationMarkup extends PDAnnotation
     }
 
     /**
-     * This will retrieve the line ending style for the start point, possible values shown in the LE_ constants section.
+     * This will retrieve the line ending style for the start point, possible values shown in the
+     * LE_ constants section.
      *
      * @return The ending style for the start point, LE_NONE if missing, never null.
      */
@@ -719,7 +729,8 @@ public class PDAnnotationMarkup extends PDAnnotation
     }
 
     /**
-     * This will set the line ending style for the end point, see the LE_ constants for the possible values.
+     * This will set the line ending style for the end point, see the LE_ constants for the possible
+     * values.
      *
      * @param style The new style.
      */
@@ -743,7 +754,8 @@ public class PDAnnotationMarkup extends PDAnnotation
     }
 
     /**
-     * This will retrieve the line ending style for the end point, possible values shown in the LE_ constants section.
+     * This will retrieve the line ending style for the end point, possible values shown in the LE_
+     * constants section.
      *
      * @return The ending style for the end point, LE_NONE if missing, never null.
      */
@@ -758,7 +770,8 @@ public class PDAnnotationMarkup extends PDAnnotation
     }
 
     /**
-     * This will retrieve the numbers that shall represent the alternating horizontal and vertical coordinates.
+     * This will retrieve the numbers that shall represent the alternating horizontal and vertical
+     * coordinates.
      *
      * @return An array of floats representing the alternating horizontal and vertical coordinates.
      */
@@ -773,9 +786,11 @@ public class PDAnnotationMarkup extends PDAnnotation
     }
 
     /**
-     * This will set the numbers that shall represent the alternating horizontal and vertical coordinates.
+     * This will set the numbers that shall represent the alternating horizontal and vertical
+     * coordinates.
      *
-     * @param points an array with the numbers that shall represent the alternating horizontal and vertical coordinates.
+     * @param points an array with the numbers that shall represent the alternating horizontal and
+     *               vertical coordinates.
      */
     public void setVertices(float[] points)
     {
@@ -785,11 +800,11 @@ public class PDAnnotationMarkup extends PDAnnotation
     }
 
     /**
-     * PDF 2.0: This will retrieve the arrays that shall represent the alternating horizontal and vertical coordinates
-     * for path building.
+     * PDF 2.0: This will retrieve the arrays that shall represent the alternating horizontal and
+     * vertical coordinates for path building.
      *
-     * @return An array of float arrays, each supplying the operands for a path building operator (m, l or c). The first
-     * array should have 2 elements, the others should have 2 or 6 elements.
+     * @return An array of float arrays, each supplying the operands for a path building operator
+     * (m, l or c). The first array should have 2 elements, the others should have 2 or 6 elements.
      */
     public float[][] getPath()
     {
@@ -803,7 +818,7 @@ public class PDAnnotationMarkup extends PDAnnotation
                 COSBase base2 = array.getObject(i);
                 if (base2 instanceof COSArray)
                 {
-                    pathArray[i] = ((COSArray) array.getObject(i)).toFloatArray();
+                    pathArray[i] = ((COSArray) base2).toFloatArray();
                 }
                 else
                 {
@@ -817,7 +832,7 @@ public class PDAnnotationMarkup extends PDAnnotation
 
     /**
      * Set a custom appearance handler for generating the annotations appearance streams.
-     * 
+     *
      * @param appearanceHandler
      */
     public void setCustomAppearanceHandler(PDAppearanceHandler appearanceHandler)

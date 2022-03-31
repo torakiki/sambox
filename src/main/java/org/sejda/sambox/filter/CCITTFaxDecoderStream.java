@@ -57,13 +57,8 @@ final class CCITTFaxDecoderStream extends FilterInputStream
     private final byte[] decodedRow;
 
     private final boolean optionG32D;
-    // Leading zeros for aligning EOL
-    private final boolean optionG3Fill;
-    private final boolean optionUncompressed;
     private final boolean optionByteAligned;
 
-    // Need to take fill order into account (?) (use flip table?)
-    private final int fillOrder;
     private final int type;
 
     private int decodedLength;
@@ -84,19 +79,16 @@ final class CCITTFaxDecoderStream extends FilterInputStream
      * @param columns     the number of columns in the stream.
      * @param type        the type of stream, must be one of {@code COMPRESSION_CCITT_MODIFIED_HUFFMAN_RLE},
      *                    {@code COMPRESSION_CCITT_T4} or {@code COMPRESSION_CCITT_T6}.
-     * @param fillOrder   fillOrder, must be {@code FILL_LEFT_TO_RIGHT} or {@code
-     *                    FILL_RIGHT_TO_LEFT}.
      * @param options     CCITT T.4 or T.6 options.
      * @param byteAligned enable byte alignment used in PDF files (EncodedByteAlign).
      */
     public CCITTFaxDecoderStream(final InputStream stream, final int columns, final int type,
-            final int fillOrder, final long options, final boolean byteAligned)
+            final long options, final boolean byteAligned)
     {
         super(stream);
 
         this.columns = columns;
         this.type = type;
-        this.fillOrder = fillOrder;
 
         // We know this is only used for b/w (1 bit)
         decodedRow = new byte[(columns + 7) / 8];
@@ -108,8 +100,9 @@ final class CCITTFaxDecoderStream extends FilterInputStream
         case TIFFExtension.COMPRESSION_CCITT_MODIFIED_HUFFMAN_RLE:
             optionByteAligned = byteAligned;
             optionG32D = false;
-            optionG3Fill = false;
-            optionUncompressed = false;
+            // Leading zeros for aligning EOL
+            boolean optionG3Fill = false;
+            boolean optionUncompressed = false;
             break;
         case TIFFExtension.COMPRESSION_CCITT_T4:
             optionByteAligned = byteAligned;
@@ -129,24 +122,6 @@ final class CCITTFaxDecoderStream extends FilterInputStream
 
     }
 
-    /**
-     * Creates a CCITTFaxDecoderStream.
-     *
-     * @param stream    the compressed CCITT stream.
-     * @param columns   the number of columns in the stream.
-     * @param type      the type of stream, must be one of {@code COMPRESSION_CCITT_MODIFIED_HUFFMAN_RLE},
-     *                  {@code COMPRESSION_CCITT_T4} or {@code COMPRESSION_CCITT_T6}.
-     * @param fillOrder fillOrder, must be {@code FILL_LEFT_TO_RIGHT} or {@code
-     *                  FILL_RIGHT_TO_LEFT}.
-     * @param options   CCITT T.4 or T.6 options.
-     */
-    public CCITTFaxDecoderStream(final InputStream stream, final int columns, final int type,
-            final int fillOrder, final long options)
-    {
-        this(stream, columns, type, fillOrder, options,
-                type == TIFFExtension.COMPRESSION_CCITT_MODIFIED_HUFFMAN_RLE);
-    }
-
     private void fetch() throws IOException
     {
         if (decodedPos >= decodedLength)
@@ -156,6 +131,11 @@ final class CCITTFaxDecoderStream extends FilterInputStream
             try
             {
                 decodeRow();
+            }
+            catch (ArrayIndexOutOfBoundsException e)
+            {
+                // Mask the AIOOBE as an IOException
+                throw new IOException("Malformed CCITT stream", e);
             }
             catch (EOFException e)
             {
@@ -499,23 +479,9 @@ final class CCITTFaxDecoderStream extends FilterInputStream
             bufferPos = 0;
         }
 
-        boolean isSet;
-
-        if (fillOrder == TIFFExtension.FILL_LEFT_TO_RIGHT)
-        {
-            isSet = ((buffer >> (7 - bufferPos)) & 1) == 1;
-        }
-        else
-        {
-            isSet = ((buffer >> (bufferPos)) & 1) == 1;
-        }
-
+        boolean isSet = (buffer & 0x80) != 0;
+        buffer <<= 1;
         bufferPos++;
-
-        if (bufferPos > 7)
-        {
-            bufferPos = -1;
-        }
 
         return isSet;
     }

@@ -24,8 +24,8 @@ import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSNumber;
 
 /**
- * This represents a destination to a page at an x,y coordinate with a zoom setting. The default x,y,z will be whatever
- * is the current value in the viewer application and are not required.
+ * This represents a destination to a page at an x,y coordinate with a zoom setting. The default
+ * x,y,z will be whatever is the current value in the viewer application and are not required.
  *
  * @author Ben Litchfield
  */
@@ -38,7 +38,6 @@ public class PDPageXYZDestination extends PDPageDestination
 
     public PDPageXYZDestination()
     {
-        super();
         array.growToSize(5);
         array.set(1, COSName.getPDFName(TYPE));
     }
@@ -54,7 +53,8 @@ public class PDPageXYZDestination extends PDPageDestination
     }
 
     /**
-     * @return The left x coordinate. A value of -1 implies that the current x-coordinate will be used.
+     * @return The left x coordinate. A value of -1 implies that the current x-coordinate will be
+     * used.
      */
     public int getLeft()
     {
@@ -62,9 +62,9 @@ public class PDPageXYZDestination extends PDPageDestination
     }
 
     /**
-     * Set the left x-coordinate, a value of -1 implies that null will be used and the current x-coordinate will be
-     * used.
-     * 
+     * Set the left x-coordinate, a value of -1 implies that null will be used and the current
+     * x-coordinate will be used.
+     *
      * @param x The left x coordinate.
      */
     public void setLeft(int x)
@@ -81,7 +81,8 @@ public class PDPageXYZDestination extends PDPageDestination
     }
 
     /**
-     * @return The top y coordinate. A value of -1 implies that the current y-coordinate will be used.
+     * @return The top y coordinate. A value of -1 implies that the current y-coordinate will be
+     * used.
      */
     public int getTop()
     {
@@ -89,8 +90,9 @@ public class PDPageXYZDestination extends PDPageDestination
     }
 
     /**
-     * Set the top y-coordinate, a value of -1 implies that null will be used and the current y-coordinate will be used.
-     * 
+     * Set the top y-coordinate, a value of -1 implies that null will be used and the current
+     * y-coordinate will be used.
+     *
      * @param y The top ycoordinate.
      */
     public void setTop(int y)
@@ -107,8 +109,8 @@ public class PDPageXYZDestination extends PDPageDestination
     }
 
     /**
-     *
-     * @return The zoom value for the page. Values of 0 or -1 imply that the current zoom will be used
+     * @return The zoom value for the page. Values of 0 or -1 imply that the current zoom will be
+     * used
      */
     public float getZoom()
     {
@@ -122,7 +124,7 @@ public class PDPageXYZDestination extends PDPageDestination
 
     /**
      * Set the zoom value for the page, values 0 or -1 imply that the current zoom will be used.
-     * 
+     *
      * @param zoom The zoom value.
      */
     public void setZoom(float zoom)

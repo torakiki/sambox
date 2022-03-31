@@ -70,8 +70,10 @@ final class CCITTFaxFilter extends Filter
         {
             type = TIFFExtension.COMPRESSION_CCITT_T4; // Group 3 1D
             byte[] streamData = new byte[20];
-            encoded.read(streamData);
-            encoded = new PushbackInputStream(encoded, streamData.length);
+            PushbackInputStream pushbackInputStream = new PushbackInputStream(encoded,
+                    streamData.length);
+            pushbackInputStream.unread(streamData);
+            encoded = pushbackInputStream;
             ((PushbackInputStream) encoded).unread(streamData);
             if (streamData[0] != 0 || (streamData[1] >> 4 != 1 && streamData[1] != 1))
             {
@@ -102,8 +104,7 @@ final class CCITTFaxFilter extends Filter
             type = TIFFExtension.COMPRESSION_CCITT_T6;
         }
 
-        s = new CCITTFaxDecoderStream(encoded, cols, type, TIFFExtension.FILL_LEFT_TO_RIGHT,
-                tiffOptions, encodedByteAlign);
+        s = new CCITTFaxDecoderStream(encoded, cols, type, tiffOptions, encodedByteAlign);
         readFromDecoderStream(s, decompressed);
 
         // invert bitmap

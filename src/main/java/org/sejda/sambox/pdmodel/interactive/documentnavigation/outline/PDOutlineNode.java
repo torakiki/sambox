@@ -16,13 +16,15 @@
  */
 package org.sejda.sambox.pdmodel.interactive.documentnavigation.outline;
 
-import static java.util.Optional.ofNullable;
-
-import java.util.Iterator;
-
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.common.PDDictionaryWrapper;
+
+import java.util.Iterator;
+
+import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
+
 /**
  * Base class for a node in the outline of a PDF document.
  *
@@ -71,8 +73,8 @@ public abstract class PDOutlineNode extends PDDictionaryWrapper
      * Adds the given node to the bottom of the children list.
      *
      * @param newChild The node to add.
-     * @throws IllegalArgumentException if the given node is part of a list (i.e. if it has a previous or a next
-     * sibling)
+     * @throws IllegalArgumentException if the given node is part of a list (i.e. if it has a
+     *                                  previous or a next sibling)
      */
     public void addLast(PDOutlineItem newChild)
     {
@@ -83,10 +85,10 @@ public abstract class PDOutlineNode extends PDDictionaryWrapper
 
     /**
      * Adds the given node to the top of the children list.
-     * 
+     *
      * @param newChild The node to add.
-     * @throws IllegalArgumentException if the given node is part of a list (i.e. if it has a previous or a next
-     * sibling)
+     * @throws IllegalArgumentException if the given node is part of a list (i.e. if it has a
+     *                                  previous or a next sibling)
      */
     public void addFirst(PDOutlineItem newChild)
     {
@@ -97,8 +99,8 @@ public abstract class PDOutlineNode extends PDDictionaryWrapper
 
     /**
      * @param node
-     * @throws IllegalArgumentException if the given node is part of a list (i.e. if it has a previous or a next
-     * sibling)
+     * @throws IllegalArgumentException if the given node is part of a list (i.e. if it has a
+     *                                  previous or a next sibling)
      */
     void requireSingleNode(PDOutlineItem node)
     {
@@ -109,9 +111,9 @@ public abstract class PDOutlineNode extends PDDictionaryWrapper
     }
 
     /**
-     * Appends the child to the linked list of children. This method only adjust pointers but doesn't take care of the
-     * Count key in the parent hierarchy.
-     * 
+     * Appends the child to the linked list of children. This method only adjust pointers but
+     * doesn't take care of the Count key in the parent hierarchy.
+     *
      * @param newChild
      */
     private void append(PDOutlineItem newChild)
@@ -131,9 +133,9 @@ public abstract class PDOutlineNode extends PDDictionaryWrapper
     }
 
     /**
-     * Prepends the child to the linked list of children. This method only adjust pointers but doesn't take care of the
-     * Count key in the parent hierarchy.
-     * 
+     * Prepends the child to the linked list of children. This method only adjust pointers but
+     * doesn't take care of the Count key in the parent hierarchy.
+     *
      * @param newChild
      */
     private void prepend(PDOutlineItem newChild)
@@ -167,13 +169,13 @@ public abstract class PDOutlineNode extends PDDictionaryWrapper
      */
     public boolean hasChildren()
     {
-        return getFirstChild() != null;
+        return nonNull(getCOSObject().getDictionaryObject(COSName.FIRST, COSDictionary.class));
     }
 
     PDOutlineItem getOutlineItem(COSName name)
     {
-        return ofNullable(getCOSObject().getDictionaryObject(name, COSDictionary.class))
-                .map(PDOutlineItem::new).orElse(null);
+        return ofNullable(getCOSObject().getDictionaryObject(name, COSDictionary.class)).map(
+                PDOutlineItem::new).orElse(null);
     }
 
     /**
@@ -213,8 +215,9 @@ public abstract class PDOutlineNode extends PDDictionaryWrapper
     }
 
     /**
-     * Get the number of open nodes or a negative number if this node is closed. See PDF Reference 32000-1:2008 table
-     * 152 and 153 for more details. This value is updated as you append children and siblings.
+     * Get the number of open nodes or a negative number if this node is closed. See PDF Reference
+     * 32000-1:2008 table 152 and 153 for more details. This value is updated as you append children
+     * and siblings.
      *
      * @return The Count attribute of the outline dictionary.
      */
@@ -224,7 +227,8 @@ public abstract class PDOutlineNode extends PDDictionaryWrapper
     }
 
     /**
-     * Set the open count. This number is automatically managed for you when you add items to the outline.
+     * Set the open count. This number is automatically managed for you when you add items to the
+     * outline.
      *
      * @param openCount The new open count.
      */
@@ -234,8 +238,8 @@ public abstract class PDOutlineNode extends PDDictionaryWrapper
     }
 
     /**
-     * This will set this node to be open when it is shown in the viewer. By default, when a new node is created it will
-     * be closed. This will do nothing if the node is already open.
+     * This will set this node to be open when it is shown in the viewer. By default, when a new
+     * node is created it will be closed. This will do nothing if the node is already open.
      */
     public void openNode()
     {
@@ -248,7 +252,6 @@ public abstract class PDOutlineNode extends PDDictionaryWrapper
 
     /**
      * Close this node.
-     *
      */
     public void closeNode()
     {

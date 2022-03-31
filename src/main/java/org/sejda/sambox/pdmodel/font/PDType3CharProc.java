@@ -17,14 +17,11 @@
 
 package org.sejda.sambox.pdmodel.font;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.sejda.sambox.contentstream.PDContentStream;
 import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.cos.COSBase;
+import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSNumber;
 import org.sejda.sambox.cos.COSObjectable;
 import org.sejda.sambox.cos.COSStream;
@@ -35,6 +32,13 @@ import org.sejda.sambox.pdmodel.common.PDStream;
 import org.sejda.sambox.util.Matrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+import static java.util.Objects.nonNull;
 
 /**
  * A Type 3 character procedure. This is a standalone PDF content stream.
@@ -79,6 +83,15 @@ public final class PDType3CharProc implements COSObjectable, PDContentStream
     @Override
     public PDResources getResources()
     {
+        COSDictionary resources = charStream.getDictionaryObject(COSName.RESOURCES,
+                COSDictionary.class);
+        if (nonNull(resources))
+        {
+            // PDFBOX-5294
+            LOG.warn("Using resources dictionary found in charproc entry");
+            LOG.warn("This should have been in the font or in the page dictionary");
+            return new PDResources(resources);
+        }
         return font.getResources();
     }
 
@@ -89,7 +102,8 @@ public final class PDType3CharProc implements COSObjectable, PDContentStream
     }
 
     /**
-     * Calculate the bounding box of this glyph. This will work only if the first operator in the stream is d1.
+     * Calculate the bounding box of this glyph. This will work only if the first operator in the
+     * stream is d1.
      *
      * @return the bounding box of this glyph, or null if the first operator is not d1.
      */
@@ -142,8 +156,8 @@ public final class PDType3CharProc implements COSObjectable, PDContentStream
      * Get the width from a type3 charproc stream.
      *
      * @return the glyph width.
-     * @throws IOException if the stream could not be read, or did not have d0 or d1 as first operator, or if their
-     * first argument was not a number.
+     * @throws IOException if the stream could not be read, or did not have d0 or d1 as first
+     *                     operator, or if their first argument was not a number.
      */
     public float getWidth() throws IOException
     {
@@ -170,14 +184,11 @@ public final class PDType3CharProc implements COSObjectable, PDContentStream
             {
                 return ((Number) obj).floatValue();
             }
-            else if (obj instanceof COSNumber)
+            if (obj instanceof COSNumber)
             {
                 return ((COSNumber) obj).floatValue();
             }
-            else
-            {
-                throw new IOException("Unexpected argument type: " + obj.getClass().getName());
-            }
+            throw new IOException("Unexpected argument type: " + obj.getClass().getName());
         }
         throw new IOException("First operator must be d0 or d1");
     }

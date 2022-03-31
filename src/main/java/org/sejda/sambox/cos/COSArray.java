@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
@@ -395,7 +396,8 @@ public class COSArray extends COSBase implements List<COSBase>
     {
         for (int i = 0; i < this.size(); i++)
         {
-            if (this.get(i).equals(object) || this.get(i).getCOSObject().equals(object))
+            COSBase cosBase = this.get(i);
+            if (Objects.equals(cosBase, object) || Objects.equals(cosBase.getCOSObject(), object))
             {
                 return i;
             }

@@ -16,70 +16,50 @@
  */
 package org.sejda.sambox.util;
 
+import org.junit.jupiter.api.Test;
+
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 /**
- *
  * @author Uwe Pachler
  */
-public class TestQuickSort extends TestCase
+public class TestSort
 {
 
     <T extends Comparable<T>> void doTest(T[] input, T[] expected)
     {
         List<T> list = Arrays.asList(input);
-        QuickSort.sort(list);
-
-        boolean equal = Arrays.equals(list.toArray(new Object[input.length]), expected);
-
-        assertTrue(equal);
+        IterativeMergeSort.sort(list, new Comparator<T>()
+        {
+            @Override
+            public int compare(T comparable, T o)
+            {
+                return comparable.compareTo(o);
+            }
+        });
+        assertArrayEquals(list.toArray(new Object[input.length]), expected);
     }
 
     /**
      * Test for different cases.
      */
+    @Test
     public void testSort()
     {
 
-        {
-            Integer[] input = new Integer[] { 9, 8, 7, 6, 5, 4, 3, 2, 1 };
-            Integer[] expected = new Integer[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-            doTest(input, expected);
-        }
-
-        {
-            Integer[] input = new Integer[] { 4, 3, 2, 1, 9, 8, 7, 6, 5 };
-            Integer[] expected = new Integer[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-            doTest(input, expected);
-        }
-
-        {
-            Integer[] input = new Integer[] {};
-            Integer[] expected = new Integer[] {};
-            doTest(input, expected);
-        }
-
-        {
-            Integer[] input = new Integer[] { 5 };
-            Integer[] expected = new Integer[] { 5 };
-            doTest(input, expected);
-        }
-
-        {
-            Integer[] input = new Integer[] { 5, 6 };
-            Integer[] expected = new Integer[] { 5, 6 };
-            doTest(input, expected);
-        }
-
-        {
-            Integer[] input = new Integer[] { 6, 5 };
-            Integer[] expected = new Integer[] { 5, 6 };
-            doTest(input, expected);
-        }
+        doTest(new Integer[] { 9, 8, 7, 6, 5, 4, 3, 2, 1 },
+                new Integer[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 });
+        doTest(new Integer[] { 4, 3, 2, 1, 9, 8, 7, 6, 5 },
+                new Integer[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 });
+        doTest(new Integer[] {}, new Integer[] {});
+        doTest(new Integer[] { 5 }, new Integer[] { 5 });
+        doTest(new Integer[] { 5, 6 }, new Integer[] { 5, 6 });
+        doTest(new Integer[] { 6, 5 }, new Integer[] { 5, 6 });
 
         Random rnd = new Random(12345);
         for (int cnt = 0; cnt < 100; ++cnt)

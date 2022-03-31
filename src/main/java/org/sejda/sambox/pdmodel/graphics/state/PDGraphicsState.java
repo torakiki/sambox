@@ -16,11 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.graphics.state;
 
-import java.awt.BasicStroke;
-import java.awt.Composite;
-import java.awt.geom.Area;
-import java.awt.geom.GeneralPath;
-
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.graphics.PDLineDashPattern;
@@ -31,6 +26,16 @@ import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
 import org.sejda.sambox.util.Matrix;
 
+import java.awt.BasicStroke;
+import java.awt.Composite;
+import java.awt.geom.Area;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
+import java.util.ArrayList;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * The current state of the graphics parameters when executing a content stream.
  *
@@ -39,7 +44,8 @@ import org.sejda.sambox.util.Matrix;
 public class PDGraphicsState implements Cloneable
 {
     private boolean isClippingPathDirty;
-    private Area clippingPath;
+    private List<Path2D> clippingPaths = new ArrayList<>();
+    private Map<Path2D, Area> clippingCache = new IdentityHashMap<>();
     private Matrix currentTransformationMatrix = new Matrix();
     private PDColor strokingColor = PDDeviceGray.INSTANCE.getInitialColor();
     private PDColor nonStrokingColor = PDDeviceGray.INSTANCE.getInitialColor();
@@ -71,11 +77,12 @@ public class PDGraphicsState implements Cloneable
 
     /**
      * Constructor with a given page size to initialize the clipping path.
+     *
      * @param page the size of the page
      */
     public PDGraphicsState(PDRectangle page)
     {
-        clippingPath = new Area(page.toGeneralPath());
+        clippingPaths.add(new Path2D.Double(page.toGeneralPath()));
     }
 
     /**
@@ -263,11 +270,10 @@ public class PDGraphicsState implements Cloneable
      *
      * @return softMask
      */
-    public PDSoftMask getSoftMask() 
+    public PDSoftMask getSoftMask()
     {
         return softMask;
     }
-
 
     /**
      * Sets the current soft mask
@@ -300,9 +306,7 @@ public class PDGraphicsState implements Cloneable
     }
 
     /**
-
-    /**
-     * get the value of the overprint property.
+     * /** get the value of the overprint property.
      *
      * @return The value of the overprint parameter.
      */
@@ -424,9 +428,8 @@ public class PDGraphicsState implements Cloneable
     /**
      * This will get the rendering intent.
      *
-     * @see PDExtendedGraphicsState
-     *
      * @return The rendering intent
+     * @see PDExtendedGraphicsState
      */
     public RenderingIntent getRenderingIntent()
     {
@@ -448,13 +451,14 @@ public class PDGraphicsState implements Cloneable
     {
         try
         {
-            PDGraphicsState clone = (PDGraphicsState)super.clone();
+            PDGraphicsState clone = (PDGraphicsState) super.clone();
             clone.textState = textState.clone();
             clone.currentTransformationMatrix = currentTransformationMatrix.clone();
             clone.strokingColor = strokingColor; // immutable
             clone.nonStrokingColor = nonStrokingColor; // immutable
             clone.lineDashPattern = lineDashPattern; // immutable
-            clone.clippingPath = clippingPath; // not cloned, see intersectClippingPath
+            clone.clippingPaths = clippingPaths; // not cloned, see intersectClippingPath
+            clone.clippingCache = clippingCache;
             clone.isClippingPathDirty = false;
             return clone;
         }
@@ -547,32 +551,37 @@ public class PDGraphicsState implements Cloneable
 
     /**
      * Modify the current clipping path by intersecting it with the given path.
+     *
      * @param path path to intersect with the clipping path
      */
     public void intersectClippingPath(GeneralPath path)
     {
-        intersectClippingPath(new Area(path));
+        intersectClippingPath(new Path2D.Double(path), true);
     }
 
-    /**
-     * Modify the current clipping path by intersecting it with the given path.
-     * @param area area to intersect with the clipping path
-     */
-    public void intersectClippingPath(Area area)
+    private void intersectClippingPath(Path2D path, boolean clonePath)
     {
         // lazy cloning of clipping path for performance
         if (!isClippingPathDirty)
         {
-            // deep copy (can't use clone() as it performs only a shallow copy)
-            Area cloned = new Area();
-            cloned.add(clippingPath);
-            clippingPath = cloned;
+            // shallow copy
+            clippingPaths = new ArrayList<Path2D>(clippingPaths);
 
             isClippingPathDirty = true;
         }
 
-        // intersection as usual
-        clippingPath.intersect(area);
+        // add path to current clipping paths, combined later (see getCurrentClippingPath)
+        clippingPaths.add(clonePath ? (Path2D) path.clone() : path);
+    }
+
+    /**
+     * Modify the current clipping path by intersecting it with the given path.
+     *
+     * @param area area to intersect with the clipping path
+     */
+    public void intersectClippingPath(Area area)
+    {
+        intersectClippingPath(new Path2D.Double(area), false);
     }
 
     /**
@@ -582,9 +591,44 @@ public class PDGraphicsState implements Cloneable
      */
     public Area getCurrentClippingPath()
     {
-        return clippingPath;
+        if (clippingPaths.size() == 1)
+        {
+            // If there is just a single clipping path, no intersections are needed.
+            Path2D path = clippingPaths.get(0);
+            Area area = clippingCache.get(path);
+            if (area == null)
+            {
+                area = new Area(path);
+                clippingCache.put(path, area);
+            }
+            return area;
+        }
+        // If there are multiple clipping paths, combine them to a single area.
+        Area clippingArea = new Area();
+        clippingArea.add(new Area(clippingPaths.get(0)));
+        for (int i = 1; i < clippingPaths.size(); i++)
+        {
+            clippingArea.intersect(new Area(clippingPaths.get(i)));
+        }
+        // Replace the list of individual clipping paths with the intersection, and add it to the cache.
+        Path2D newPath = new Path2D.Double(clippingArea);
+        clippingPaths = new ArrayList<Path2D>();
+        clippingPaths.add(newPath);
+        clippingCache.put(newPath, clippingArea);
+        return clippingArea;
     }
 
+    /**
+     * This will get the current clipping path, as one or more individual paths. Do not modify the
+     * list or the paths!
+     *
+     * @return The current clipping paths.
+     */
+    public List<Path2D> getCurrentClippingPaths()
+    {
+        return clippingPaths;
+    }
+    
     public Composite getStrokingJavaComposite()
     {
         return BlendComposite.getInstance(blendMode, (float) alphaConstant);
@@ -598,10 +642,11 @@ public class PDGraphicsState implements Cloneable
     /**
      * This will get the transfer function.
      *
-     * @return The transfer function. According to the PDF specification, this is either a single function (which
-     * applies to all process colorants) or an array of four functions (which apply to the process colorants
-     * individually). The name Identity may be used to represent the identity function, and the name Default denotes the
-     * transfer function that was in effect at the start of the page.
+     * @return The transfer function. According to the PDF specification, this is either a single
+     * function (which applies to all process colorants) or an array of four functions (which apply
+     * to the process colorants individually). The name Identity may be used to represent the
+     * identity function, and the name Default denotes the transfer function that was in effect at
+     * the start of the page.
      */
     public COSBase getTransfer()
     {
@@ -611,10 +656,11 @@ public class PDGraphicsState implements Cloneable
     /**
      * This will set the transfer function.
      *
-     * @param transfer The transfer function. According to the PDF specification, this is either a single function
-     * (which applies to all process colorants) or an array of four functions (which apply to the process colorants
-     * individually). The name Identity may be used to represent the identity function, and the name Default denotes the
-     * transfer function that was in effect at the start of the page.
+     * @param transfer The transfer function. According to the PDF specification, this is either a
+     *                 single function (which applies to all process colorants) or an array of four
+     *                 functions (which apply to the process colorants individually). The name
+     *                 Identity may be used to represent the identity function, and the name Default
+     *                 denotes the transfer function that was in effect at the start of the page.
      */
     public void setTransfer(COSBase transfer)
     {

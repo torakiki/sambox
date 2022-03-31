@@ -16,8 +16,6 @@
 
 package org.sejda.sambox.pdmodel.interactive.annotation.handlers;
 
-import java.io.IOException;
-
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSStream;
@@ -34,8 +32,9 @@ import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationTextMarkup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+
 /**
- * 
  * @author Tilman Hausherr
  */
 public class PDHighlightAppearanceHandler extends PDAbstractAppearanceHandler
@@ -59,20 +58,19 @@ public class PDHighlightAppearanceHandler extends PDAbstractAppearanceHandler
     public void generateNormalAppearance()
     {
         PDAnnotationTextMarkup annotation = (PDAnnotationTextMarkup) getAnnotation();
-        PDRectangle rect = annotation.getRectangle();
         float[] pathsArray = annotation.getQuadPoints();
         if (pathsArray == null)
         {
             return;
         }
-        AnnotationBorder ab = AnnotationBorder.getAnnotationBorder(annotation,
-                annotation.getBorderStyle());
         PDColor color = annotation.getColor();
         if (color == null || color.getComponents().length == 0)
         {
             return;
         }
-
+        PDRectangle rect = annotation.getRectangle();
+        AnnotationBorder ab = AnnotationBorder.getAnnotationBorder(annotation,
+                annotation.getBorderStyle());
         // Adjust rectangle even if not empty, see PLPDF.com-MarkupAnnotations.pdf
         // TODO in a class structure this should be overridable
         // this is similar to polyline but different data type

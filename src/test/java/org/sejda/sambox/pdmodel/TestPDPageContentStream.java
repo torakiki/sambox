@@ -16,17 +16,18 @@
  */
 package org.sejda.sambox.pdmodel;
 
-import static org.junit.Assert.assertEquals;
-
-import java.io.IOException;
-import java.util.List;
-
 import org.junit.Test;
 import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.cos.COSNumber;
 import org.sejda.sambox.input.ContentStreamParser;
 import org.sejda.sambox.pdmodel.PDPageContentStream.AppendMode;
+import org.sejda.sambox.pdmodel.graphics.state.PDExtendedGraphicsState;
+
+import java.io.IOException;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Yegor Kozlov
@@ -172,7 +173,7 @@ public class TestPDPageContentStream
 
     /**
      * PDFBOX-3510: missing content stream should not fail.
-     * 
+     *
      * @throws IOException
      */
     @Test
@@ -192,13 +193,45 @@ public class TestPDPageContentStream
     @Test
     public void testCloseContract() throws IOException
     {
-        PDDocument doc = new PDDocument();
-        PDPage page = new PDPage();
-        doc.addPage(page);
-        PDPageContentStream contentStream = new PDPageContentStream(doc, page, AppendMode.OVERWRITE,
-                true);
-        contentStream.close();
-        contentStream.close();
-        doc.close();
+        try (PDDocument doc = new PDDocument())
+        {
+            PDPage page = new PDPage();
+            doc.addPage(page);
+            PDPageContentStream contentStream = new PDPageContentStream(doc, page,
+                    AppendMode.OVERWRITE, true);
+            contentStream.close();
+            contentStream.close();
+        }
+    }
+
+    /**
+     * Check that general graphics state operators are allowed in text mode.
+     *
+     * @throws IOException
+     */
+    @Test
+    public void testGeneralGraphicStateOperatorTextMode() throws IOException
+    {
+        try (PDDocument doc = new PDDocument())
+        {
+            PDPage page = new PDPage();
+            doc.addPage(page);
+            PDPageContentStream contentStream = new PDPageContentStream(doc, page);
+            contentStream.beginText();
+            // J
+            contentStream.setLineCapStyle(0);
+            // j
+            contentStream.setLineJoinStyle(0);
+            // w
+            contentStream.setLineWidth(10f);
+            // d
+            contentStream.setLineDashPattern(new float[] { 2, 1 }, 0f);
+            // M
+            contentStream.setMiterLimit(1.0f);
+            // gs
+            contentStream.setGraphicsStateParameters(new PDExtendedGraphicsState());
+            // ri, i are not supported with a specific setter
+            contentStream.endText();
+        }
     }
 }

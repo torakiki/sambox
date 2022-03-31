@@ -16,20 +16,20 @@
  */
 package org.sejda.sambox.pdmodel.graphics.color;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.common.COSDictionaryMap;
 import org.sejda.sambox.pdmodel.common.PDDictionaryWrapper;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
- * Contains additional information about the components of colour space. Instead of using the alternate color space and
- * tint transform, conforming readers may use custom blending algorithms, along with other information provided in the
- * attributes dictionary.
+ * Contains additional information about the components of colour space. Instead of using the
+ * alternate color space and tint transform, conforming readers may use custom blending algorithms,
+ * along with other information provided in the attributes dictionary.
  *
  * @author Ben Litchfield
  */
@@ -46,7 +46,7 @@ public final class PDDeviceNAttributes extends PDDictionaryWrapper
 
     /**
      * Creates a new DeviceN colour space attributes dictionary from the given dictionary.
-     * 
+     *
      * @param attributes a dictionary that has all of the attributes
      */
     public PDDeviceNAttributes(COSDictionary attributes)
@@ -56,7 +56,7 @@ public final class PDDeviceNAttributes extends PDDictionaryWrapper
 
     /**
      * Returns a map of colorants and their associated Separation color space.
-     * 
+     *
      * @return map of colorants to color spaces
      * @throws IOException If there is an error reading a color space
      */
@@ -70,17 +70,20 @@ public final class PDDeviceNAttributes extends PDDictionaryWrapper
             colorants = new COSDictionary();
             getCOSObject().setItem(COSName.COLORANTS, colorants);
         }
-        for (COSName name : colorants.keySet())
+        else
         {
-            COSBase value = colorants.getDictionaryObject(name);
-            actuals.put(name.getName(), (PDSeparation) PDColorSpace.create(value));
+            for (COSName name : colorants.keySet())
+            {
+                COSBase value = colorants.getDictionaryObject(name);
+                actuals.put(name.getName(), (PDSeparation) PDColorSpace.create(value));
+            }
         }
-        return new COSDictionaryMap<String, PDSeparation>(actuals, colorants);
+        return new COSDictionaryMap<>(actuals, colorants);
     }
 
     /**
      * Returns the DeviceN Process Dictionary, or null if it is missing.
-     * 
+     *
      * @return the DeviceN Process Dictionary, or null if it is missing.
      */
     public PDDeviceNProcess getProcess()
@@ -96,7 +99,7 @@ public final class PDDeviceNAttributes extends PDDictionaryWrapper
 
     /**
      * Returns true if this is an NChannel (PDF 1.6) color space.
-     * 
+     *
      * @return true if this is an NChannel color space.
      */
     public boolean isNChannel()
@@ -106,7 +109,7 @@ public final class PDDeviceNAttributes extends PDDictionaryWrapper
 
     /**
      * Sets the colorant map.
-     * 
+     *
      * @param colorants the map of colorants
      */
     public void setColorants(Map<String, PDColorSpace> colorants)

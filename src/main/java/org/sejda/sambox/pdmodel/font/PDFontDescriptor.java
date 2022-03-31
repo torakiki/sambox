@@ -331,8 +331,8 @@ public final class PDFontDescriptor implements COSObjectable
     }
 
     /**
-     * The weight of the font. According to the PDF spec "possible values are 100, 200, 300, 400, 500, 600, 700, 800 or
-     * 900" Where a higher number is more weight and appears to be more bold.
+     * The weight of the font. According to the PDF spec "possible values are 100, 200, 300, 400,
+     * 500, 600, 700, 800 or 900" Where a higher number is more weight and appears to be more bold.
      *
      * @return The font weight.
      */
@@ -352,9 +352,10 @@ public final class PDFontDescriptor implements COSObjectable
     }
 
     /**
-     * A string representing the preferred font stretch. According to the PDF Spec: The font stretch value; it must be
-     * one of the following (ordered from narrowest to widest): UltraCondensed, ExtraCondensed, Condensed,
-     * SemiCondensed, Normal, SemiExpanded, Expanded, ExtraExpanded or UltraExpanded.
+     * A string representing the preferred font stretch. According to the PDF Spec: The font stretch
+     * value; it must be one of the following (ordered from narrowest to widest): UltraCondensed,
+     * ExtraCondensed, Condensed, SemiCondensed, Normal, SemiExpanded, Expanded, ExtraExpanded or
+     * UltraExpanded.
      *
      * @return The stretch of the font.
      */
@@ -808,7 +809,10 @@ public final class PDFontDescriptor implements COSObjectable
             if (panose != null)
             {
                 byte[] bytes = panose.getBytes();
-                return new PDPanose(bytes);
+                if (bytes.length >= PDPanose.LENGTH)
+                {
+                    return new PDPanose(bytes);
+                }
             }
         }
         return null;

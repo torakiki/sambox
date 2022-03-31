@@ -17,6 +17,7 @@
 package org.sejda.sambox.pdmodel.font;
 
 import org.apache.fontbox.cmap.CMap;
+import org.apache.fontbox.ttf.CmapLookup;
 import org.apache.fontbox.ttf.TTFParser;
 import org.apache.fontbox.ttf.TrueTypeFont;
 import org.apache.fontbox.util.BoundingBox;
@@ -35,6 +36,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static java.util.Objects.nonNull;
@@ -489,7 +491,7 @@ public class PDType0Font extends PDFont implements PDVectorFont
         if ((isCMapPredefined || isDescendantCJK) && cMapUCS2 != null)
         {
             // if the font is composite and uses a predefined cmap (excluding Identity-H/V) then
-            // or if its decendant font uses Adobe-GB1/CNS1/Japan1/Korea1
+            // or if its descendant font uses Adobe-GB1/CNS1/Japan1/Korea1
 
             // a) Map the character code to a character identifier (CID) according to the font?s CMap
             int cid = codeToCID(code);
@@ -497,6 +499,44 @@ public class PDType0Font extends PDFont implements PDVectorFont
             // e) Map the CID according to the CMap from step d), producing a Unicode value
             return cMapUCS2.toUnicode(cid);
         }
+
+        // PDFBOX-5324: try to get unicode from font cmap
+        if (descendantFont instanceof PDCIDFontType2)
+        {
+            TrueTypeFont font = ((PDCIDFontType2) descendantFont).getTrueTypeFont();
+            if (font != null)
+            {
+                try
+                {
+                    CmapLookup cmap = font.getUnicodeCmapLookup(false);
+                    if (cmap != null)
+                    {
+                        int gid;
+                        if (descendantFont.isEmbedded())
+                        {
+                            // original PDFBOX-5324 supported only embedded fonts
+                            gid = descendantFont.codeToGID(code);
+                        }
+                        else
+                        {
+                            // PDFBOX-5331: this bypasses the fallback attempt in
+                            // PDCIDFontType2.codeToGID() which would bring a stackoverflow
+                            gid = descendantFont.codeToCID(code);
+                        }
+                        List<Integer> codes = cmap.getCharCodes(gid);
+                        if (codes != null && !codes.isEmpty())
+                        {
+                            return Character.toString((char) (int) codes.get(0));
+                        }
+                    }
+                }
+                catch (IOException e)
+                {
+                    LOG.warn("get unicode from font cmap fail", e);
+                }
+            }
+        }
+
         if (LOG.isWarnEnabled() && !noUnicode.contains(code))
         {
             // if no value has been produced, there is no way to obtain Unicode for the character.

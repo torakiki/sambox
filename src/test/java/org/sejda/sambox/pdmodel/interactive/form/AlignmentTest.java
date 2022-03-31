@@ -16,9 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
-import java.io.File;
-import java.io.IOException;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,6 +24,9 @@ import org.sejda.io.SeekableSources;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.rendering.TestPDFToImage;
+
+import java.io.File;
+import java.io.IOException;
 
 public class AlignmentTest
 {
@@ -42,8 +42,8 @@ public class AlignmentTest
     @Before
     public void setUp() throws IOException
     {
-        document = PDFParser
-                .parse(SeekableSources.seekableSourceFrom(new File(IN_DIR, NAME_OF_PDF)));
+        document = PDFParser.parse(
+                SeekableSources.seekableSourceFrom(new File(IN_DIR, NAME_OF_PDF)));
         acroForm = document.getDocumentCatalog().getAcroForm();
         OUT_DIR.mkdirs();
     }
@@ -51,58 +51,58 @@ public class AlignmentTest
     @Test
     public void fillFields() throws IOException
     {
-        PDTextField field = (PDTextField) acroForm.getField("AlignLeft");
+        PDField field = acroForm.getField("AlignLeft");
         field.setValue(TEST_VALUE);
 
-        field = (PDTextField) acroForm.getField("AlignLeft-Border_Small");
+        field = acroForm.getField("AlignLeft-Border_Small");
         field.setValue(TEST_VALUE);
 
-        field = (PDTextField) acroForm.getField("AlignLeft-Border_Medium");
+        field = acroForm.getField("AlignLeft-Border_Medium");
         field.setValue(TEST_VALUE);
 
-        field = (PDTextField) acroForm.getField("AlignLeft-Border_Wide");
+        field = acroForm.getField("AlignLeft-Border_Wide");
         field.setValue(TEST_VALUE);
 
-        field = (PDTextField) acroForm.getField("AlignLeft-Border_Wide_Clipped");
+        field = acroForm.getField("AlignLeft-Border_Wide_Clipped");
         field.setValue(TEST_VALUE);
 
-        field = (PDTextField) acroForm.getField("AlignLeft-Border_Small_Outside");
+        field = acroForm.getField("AlignLeft-Border_Small_Outside");
         field.setValue(TEST_VALUE);
 
-        field = (PDTextField) acroForm.getField("AlignMiddle");
+        field = acroForm.getField("AlignMiddle");
         field.setValue(TEST_VALUE);
 
-        field = (PDTextField) acroForm.getField("AlignMiddle-Border_Small");
+        field = acroForm.getField("AlignMiddle-Border_Small");
         field.setValue(TEST_VALUE);
 
-        field = (PDTextField) acroForm.getField("AlignMiddle-Border_Medium");
+        field = acroForm.getField("AlignMiddle-Border_Medium");
         field.setValue(TEST_VALUE);
 
-        field = (PDTextField) acroForm.getField("AlignMiddle-Border_Wide");
+        field = acroForm.getField("AlignMiddle-Border_Wide");
         field.setValue(TEST_VALUE);
 
-        field = (PDTextField) acroForm.getField("AlignMiddle-Border_Wide_Clipped");
+        field = acroForm.getField("AlignMiddle-Border_Wide_Clipped");
         field.setValue(TEST_VALUE);
 
-        field = (PDTextField) acroForm.getField("AlignMiddle-Border_Medium_Outside");
+        field = acroForm.getField("AlignMiddle-Border_Medium_Outside");
         field.setValue(TEST_VALUE);
 
-        field = (PDTextField) acroForm.getField("AlignRight");
+        field = acroForm.getField("AlignRight");
         field.setValue(TEST_VALUE);
 
-        field = (PDTextField) acroForm.getField("AlignRight-Border_Small");
+        field = acroForm.getField("AlignRight-Border_Small");
         field.setValue(TEST_VALUE);
 
-        field = (PDTextField) acroForm.getField("AlignRight-Border_Medium");
+        field = acroForm.getField("AlignRight-Border_Medium");
         field.setValue(TEST_VALUE);
 
-        field = (PDTextField) acroForm.getField("AlignRight-Border_Wide");
+        field = acroForm.getField("AlignRight-Border_Wide");
         field.setValue(TEST_VALUE);
 
-        field = (PDTextField) acroForm.getField("AlignRight-Border_Wide_Clipped");
+        field = acroForm.getField("AlignRight-Border_Wide_Clipped");
         field.setValue(TEST_VALUE);
 
-        field = (PDTextField) acroForm.getField("AlignRight-Border_Wide_Outside");
+        field = acroForm.getField("AlignRight-Border_Wide_Outside");
         field.setValue(TEST_VALUE);
 
         // compare rendering

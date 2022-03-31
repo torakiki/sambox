@@ -16,21 +16,15 @@
  */
 package org.sejda.sambox.pdmodel.graphics.image;
 
-import static java.util.Objects.nonNull;
-import static org.sejda.commons.util.RequireUtils.requireIOCondition;
-
-import java.awt.Transparency;
-import java.awt.color.ColorSpace;
-import java.awt.color.ICC_ColorSpace;
-import java.awt.image.BufferedImage;
-import java.awt.image.ColorConvertOp;
-import java.awt.image.WritableRaster;
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Iterator;
+import org.sejda.commons.FastByteArrayOutputStream;
+import org.sejda.io.SeekableSource;
+import org.sejda.io.SeekableSources;
+import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
+import org.sejda.sambox.pdmodel.graphics.color.PDDeviceCMYK;
+import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
+import org.sejda.sambox.pdmodel.graphics.color.PDDeviceRGB;
+import org.w3c.dom.Element;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
@@ -41,21 +35,24 @@ import javax.imageio.ImageWriter;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
+import java.awt.Transparency;
+import java.awt.color.ColorSpace;
+import java.awt.color.ICC_ColorSpace;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorConvertOp;
+import java.awt.image.WritableRaster;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.util.Iterator;
 
-import org.sejda.commons.FastByteArrayOutputStream;
-import org.sejda.commons.util.IOUtils;
-import org.sejda.io.SeekableSource;
-import org.sejda.io.SeekableSources;
-import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
-import org.sejda.sambox.pdmodel.graphics.color.PDDeviceCMYK;
-import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
-import org.sejda.sambox.pdmodel.graphics.color.PDDeviceRGB;
-import org.w3c.dom.Element;
+import static java.util.Objects.nonNull;
+import static org.sejda.commons.util.RequireUtils.requireIOCondition;
 
 /**
  * Factory for creating a PDImageXObject containing a JPEG compressed image.
- * 
+ *
  * @author John Hewson
  */
 public final class JPEGFactory
@@ -66,12 +63,11 @@ public final class JPEGFactory
 
     /**
      * Creates a new JPEG Image XObject from an input stream containing JPEG data.
-     * 
+     * <p>
      * The input stream data will be preserved and embedded in the PDF file without modification.
-     * 
+     *
      * @param file a JPEG file
      * @return a new Image XObject
-     * 
      * @throws IOException if the input stream cannot be read
      */
     public static PDImageXObject createFromFile(File file) throws IOException
@@ -135,7 +131,7 @@ public final class JPEGFactory
 
     /**
      * Creates a new JPEG Image XObject from a Buffered Image.
-     * 
+     *
      * @param image the buffered image to embed
      * @return a new Image XObject
      * @throws IOException if the JPEG data cannot be written
@@ -146,9 +142,10 @@ public final class JPEGFactory
     }
 
     /**
-     * Creates a new JPEG Image XObject from a Buffered Image and a given quality. The image will be created at 72 DPI.
-     * 
-     * @param image the buffered image to embed
+     * Creates a new JPEG Image XObject from a Buffered Image and a given quality. The image will be
+     * created at 72 DPI.
+     *
+     * @param image   the buffered image to embed
      * @param quality the desired JPEG compression quality
      * @return a new Image XObject
      * @throws IOException if the JPEG data cannot be written
@@ -161,10 +158,10 @@ public final class JPEGFactory
 
     /**
      * Creates a new JPEG Image XObject from a Buffered Image, a given quality and DPI.
-     * 
-     * @param image the buffered image to embed
+     *
+     * @param image   the buffered image to embed
      * @param quality the desired JPEG compression quality
-     * @param dpi the desired DPI (resolution) of the JPEG
+     * @param dpi     the desired DPI (resolution) of the JPEG
      * @return a new Image XObject
      * @throws IOException if the JPEG data cannot be written
      */
@@ -204,18 +201,17 @@ public final class JPEGFactory
     {
         // extract alpha channel (if any)
         BufferedImage awtColorImage = getColorImage(image);
-        BufferedImage awtAlphaImage = getAlphaImage(image);
 
         // create XObject
-        FastByteArrayOutputStream baos = new FastByteArrayOutputStream();
-        encodeImageToJPEGStream(awtColorImage, quality, dpi, baos);
-        ByteArrayInputStream byteStream = new ByteArrayInputStream(baos.toByteArray());
+        ByteArrayInputStream byteStream = new ByteArrayInputStream(
+                encodeImageToJPEGStream(awtColorImage, quality, dpi));
 
         PDImageXObject pdImage = new PDImageXObject(byteStream, COSName.DCT_DECODE,
                 awtColorImage.getWidth(), awtColorImage.getHeight(), 8,
                 getColorSpaceFromAWT(awtColorImage));
 
         // alpha -> soft mask
+        BufferedImage awtAlphaImage = getAlphaImage(image);
         if (awtAlphaImage != null)
         {
             PDImage xAlpha = JPEGFactory.createFromImage(awtAlphaImage, quality);
@@ -225,17 +221,13 @@ public final class JPEGFactory
         return pdImage;
     }
 
-    private static void encodeImageToJPEGStream(BufferedImage image, float quality, int dpi,
-            OutputStream out) throws IOException
+    private static byte[] encodeImageToJPEGStream(BufferedImage image, float quality, int dpi)
+            throws IOException
     {
-        // encode to JPEG
-        ImageOutputStream ios = null;
-        ImageWriter imageWriter = null;
-        try
+        ImageWriter imageWriter = ImageIO.getImageWritersBySuffix("jpeg").next(); // find JAI writer
+        FastByteArrayOutputStream out = new FastByteArrayOutputStream();
+        try (ImageOutputStream ios = ImageIO.createImageOutputStream(out))
         {
-            // find JAI writer
-            imageWriter = ImageIO.getImageWritersBySuffix("jpeg").next();
-            ios = ImageIO.createImageOutputStream(out);
             imageWriter.setOutput(ios);
 
             // add compression
@@ -245,26 +237,27 @@ public final class JPEGFactory
 
             // add metadata
             ImageTypeSpecifier imageTypeSpecifier = new ImageTypeSpecifier(image);
-            IIOMetadata data = imageWriter.getDefaultImageMetadata(imageTypeSpecifier, jpegParam);
-            Element tree = (Element) data.getAsTree("javax_imageio_jpeg_image_1.0");
+            IIOMetadata metadata = imageWriter.getDefaultImageMetadata(imageTypeSpecifier,
+                    jpegParam);
+            Element tree = (Element) metadata.getAsTree("javax_imageio_jpeg_image_1.0");
             Element jfif = (Element) tree.getElementsByTagName("app0JFIF").item(0);
-            jfif.setAttribute("Xdensity", Integer.toString(dpi));
-            jfif.setAttribute("Ydensity", Integer.toString(dpi));
+            String dpiString = Integer.toString(dpi);
+            jfif.setAttribute("Xdensity", dpiString);
+            jfif.setAttribute("Ydensity", dpiString);
             jfif.setAttribute("resUnits", "1"); // 1 = dots/inch
 
             // write
-            imageWriter.write(data, new IIOImage(image, null, null), jpegParam);
+            imageWriter.write(metadata, new IIOImage(image, null, null), jpegParam);
         }
         finally
         {
             // clean up
-            IOUtils.closeQuietly(out);
-            IOUtils.closeQuietly(ios);
             if (imageWriter != null)
             {
                 imageWriter.dispose();
             }
         }
+        return out.toByteArray();
     }
 
     // returns a PDColorSpace for a given BufferedImage

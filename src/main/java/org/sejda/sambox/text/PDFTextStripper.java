@@ -23,7 +23,7 @@ import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.interactive.documentnavigation.outline.PDOutlineItem;
 import org.sejda.sambox.pdmodel.interactive.pagenavigation.PDThreadBead;
 import org.sejda.sambox.util.BidiUtils;
-import org.sejda.sambox.util.QuickSort;
+import org.sejda.sambox.util.IterativeMergeSort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +32,6 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.text.Normalizer;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -40,7 +39,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.SortedSet;
-import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
@@ -60,7 +58,6 @@ public class PDFTextStripper extends PDFTextStreamEngine
 {
     private static float defaultIndentThreshold = 2.0f;
     private static float defaultDropThreshold = 2.5f;
-    private static final boolean useCustomQuickSort;
 
     private static final Logger LOG = LoggerFactory.getLogger(PDFTextStripper.class);
 
@@ -106,36 +103,6 @@ public class PDFTextStripper extends PDFTextStreamEngine
                 // ignore and use default
             }
         }
-    }
-
-    static
-    {
-        // check if we need to use the custom quicksort algorithm as a
-        // workaround to the PDFBOX-1512 transitivity issue of TextPositionComparator:
-        boolean is16orLess = false;
-        try
-        {
-            String version = System.getProperty("java.specification.version");
-            StringTokenizer st = new StringTokenizer(version, ".");
-            int majorVersion = Integer.parseInt(st.nextToken());
-            int minorVersion = 0;
-            if (st.hasMoreTokens())
-            {
-                minorVersion = Integer.parseInt(st.nextToken());
-            }
-            is16orLess = majorVersion == 1 && minorVersion <= 6;
-        }
-        catch (SecurityException x)
-        {
-            // when run in an applet ignore and use default
-            // assume 1.7 or higher so that quicksort is used
-        }
-        catch (NumberFormatException nfe)
-        {
-            // should never happen, but if it does,
-            // assume 1.7 or higher so that quicksort is used
-        }
-        useCustomQuickSort = !is16orLess;
     }
 
     /**
@@ -529,14 +496,14 @@ public class PDFTextStripper extends PDFTextStreamEngine
 
                 // because the TextPositionComparator is not transitive, but
                 // JDK7+ enforces transitivity on comparators, we need to use
-                // a custom quicksort implementation (which is slower, unfortunately).
-                if (useCustomQuickSort)
+                // a custom mergesort implementation (which is slower, unfortunately).
+                try
                 {
-                    QuickSort.sort(textList, comparator);
+                    textList.sort(comparator);
                 }
-                else
+                catch (IllegalArgumentException e)
                 {
-                    Collections.sort(textList, comparator);
+                    IterativeMergeSort.sort(textList, comparator);
                 }
             }
 

@@ -22,9 +22,10 @@ import org.sejda.sambox.cos.COSFloat;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSNumber;
 
+import static java.util.Optional.ofNullable;
+
 /**
- * This class represents a Type 2 (exponential interpolation) function in a PDF
- * document.
+ * This class represents a Type 2 (exponential interpolation) function in a PDF document.
  *
  * @author Ben Litchfield
  */
@@ -52,28 +53,16 @@ public class PDFunctionType2 extends PDFunction
     public PDFunctionType2(COSBase function)
     {
         super(function);
+        c0 = ofNullable(getCOSObject().getDictionaryObject(COSName.C0, COSArray.class)).orElseGet(
+                COSArray::new);
 
-        if (getCOSObject().getDictionaryObject(COSName.C0) instanceof COSArray)
-        {
-            c0 = (COSArray) getCOSObject().getDictionaryObject(COSName.C0);
-        }
-        else
-        {
-            c0 = new COSArray();
-        }
         if (c0.size() == 0)
         {
             c0.add(new COSFloat(0));
         }
 
-        if (getCOSObject().getDictionaryObject(COSName.C1) instanceof COSArray)
-        {
-            c1 = (COSArray) getCOSObject().getDictionaryObject(COSName.C1);
-        }
-        else
-        {
-            c1 = new COSArray();
-        }
+        c1 = ofNullable(getCOSObject().getDictionaryObject(COSName.C1, COSArray.class)).orElseGet(
+                COSArray::new);
         if (c1.size() == 0)
         {
             c1.add(new COSFloat(1));
@@ -93,7 +82,7 @@ public class PDFunctionType2 extends PDFunction
 
     /**
      * Performs exponential interpolation
-     *
+     * <p>
      * {@inheritDoc}
      */
     @Override
@@ -149,9 +138,7 @@ public class PDFunctionType2 extends PDFunction
     @Override
     public String toString()
     {
-        return "FunctionType2{"
-                + "C0: " + getC0() + " "
-                + "C1: " + getC1() + " "
-                + "N: " + getN() + "}";
+        return "FunctionType2{" + "C0: " + getC0() + " " + "C1: " + getC1() + " " + "N: " + getN()
+                + "}";
     }
 }

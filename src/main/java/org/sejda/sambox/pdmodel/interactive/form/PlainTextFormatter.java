@@ -16,19 +16,20 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
-import java.io.IOException;
-import java.util.List;
-
 import org.sejda.sambox.pdmodel.PDPageContentStream;
 import org.sejda.sambox.pdmodel.interactive.form.PlainText.Line;
 import org.sejda.sambox.pdmodel.interactive.form.PlainText.Paragraph;
 import org.sejda.sambox.pdmodel.interactive.form.PlainText.TextAttribute;
 import org.sejda.sambox.pdmodel.interactive.form.PlainText.Word;
 
+import java.io.IOException;
+import java.util.List;
+
 /**
  * TextFormatter to handle plain text formatting.
- * 
- * The text formatter will take a single value or an array of values which are treated as paragraphs.
+ * <p>
+ * The text formatter will take a single value or an array of values which are treated as
+ * paragraphs.
  */
 
 class PlainTextFormatter
@@ -36,7 +37,10 @@ class PlainTextFormatter
 
     enum TextAlign
     {
-        LEFT(0), CENTER(1), RIGHT(2), JUSTIFY(4);
+        LEFT(0),
+        CENTER(1),
+        RIGHT(2),
+        JUSTIFY(4);
 
         private final int alignment;
 
@@ -164,7 +168,7 @@ class PlainTextFormatter
 
     /**
      * Format the text block.
-     * 
+     *
      * @throws IOException if there is an error writing to the stream.
      */
     public void format() throws IOException
@@ -218,9 +222,10 @@ class PlainTextFormatter
 
     /**
      * Process lines for output.
+     * <p>
+     * Process lines for an individual paragraph and generate the commands for the content stream to
+     * show the text.
      *
-     * Process lines for an individual paragraph and generate the commands for the content stream to show the text.
-     * 
      * @param lines the lines to process.
      * @throws IOException if there is an error writing to the stream.
      */
@@ -267,16 +272,18 @@ class PlainTextFormatter
             lastPos += offset;
 
             List<Word> words = line.getWords();
+            int wordIndex = 0;
             for (Word word : words)
             {
                 contents.showText(word.getText());
                 wordWidth = (Float) word.getAttributes().getIterator()
                         .getAttribute(TextAttribute.WIDTH);
-                if (words.indexOf(word) != words.size() - 1)
+                if (wordIndex != words.size() - 1)
                 {
                     contents.newLineAtOffset(wordWidth + interWordSpacing, 0f);
                     lastPos = lastPos + wordWidth + interWordSpacing;
                 }
+                ++wordIndex;
             }
         }
         horizontalOffset = horizontalOffset - lastPos;

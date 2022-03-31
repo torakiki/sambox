@@ -502,7 +502,7 @@ public abstract class PDFStreamEngine
             if (token instanceof Operator)
             {
                 processOperator((Operator) token, arguments);
-                arguments.clear();
+                arguments = new ArrayList<>();
             }
             else
             {
@@ -557,9 +557,9 @@ public abstract class PDFStreamEngine
     {
         if (rectangle != null)
         {
-            GeneralPath clip = rectangle.transform(
-                    getGraphicsState().getCurrentTransformationMatrix());
-            getGraphicsState().intersectClippingPath(clip);
+            PDGraphicsState graphicsState = getGraphicsState();
+            GeneralPath clip = rectangle.transform(graphicsState.getCurrentTransformationMatrix());
+            graphicsState.intersectClippingPath(clip);
         }
     }
 
@@ -608,7 +608,7 @@ public abstract class PDFStreamEngine
         float fontSize = textState.getFontSize();
         float horizontalScaling = textState.getHorizontalScaling() / 100f;
         PDFont font = textState.getFont();
-        boolean isVertical = ofNullable(font).map(f -> f.isVertical()).orElse(false);
+        boolean isVertical = ofNullable(font).map(PDFont::isVertical).orElse(false);
 
         for (COSBase obj : array)
         {
@@ -635,6 +635,10 @@ public abstract class PDFStreamEngine
             {
                 byte[] string = ((COSString) obj).getBytes();
                 showText(string);
+            }
+            else if (obj instanceof COSArray)
+            {
+                LOG.error("Nested arrays are not allowed in an array for TJ operation: {}", obj);
             }
             else
             {

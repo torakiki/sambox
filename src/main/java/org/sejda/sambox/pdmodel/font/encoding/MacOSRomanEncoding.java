@@ -19,16 +19,15 @@ package org.sejda.sambox.pdmodel.font.encoding;
 import org.sejda.sambox.cos.COSName;
 
 /**
- * This is the Mac OS Roman encoding, which is similar to the MacRomanEncoding with the addition of 15 entries
+ * This is the Mac OS Roman encoding, which is similar to the MacRomanEncoding with the addition of
+ * 15 entries
  */
 public class MacOSRomanEncoding extends MacRomanEncoding
 {
 
-    private static final int CHAR_CODE = 0;
-    private static final int CHAR_NAME = 1;
-
     /**
-     * Table of octal character codes and their corresponding names on top of {@link MacRomanEncoding}.
+     * Table of octal character codes and their corresponding names on top of {@link
+     * MacRomanEncoding}.
      */
     private static final Object[][] MAC_OS_ROMAN_ENCODING_TABLE = { { 255, "notequal" },
             { 260, "infinity" }, { 262, "lessequal" }, { 263, "greaterequal" },

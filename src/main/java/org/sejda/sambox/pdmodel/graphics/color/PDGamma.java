@@ -29,22 +29,19 @@ import org.sejda.sambox.cos.COSObjectable;
  */
 public final class PDGamma implements COSObjectable
 {
-    private COSArray values = null;
+    private final COSArray values;
 
     /**
-     * Creates a new gamma.
-     * Defaults all values to 0, 0, 0.
+     * Creates a new gamma. Defaults all values to 0, 0, 0.
      */
     public PDGamma()
     {
-        values = new COSArray();
-        values.add(new COSFloat(0.0f));
-        values.add(new COSFloat(0.0f));
-        values.add(new COSFloat(0.0f));
+        values = new COSArray(new COSFloat(0.0f), new COSFloat(0.0f), new COSFloat(0.0f));
     }
 
     /**
      * Creates a new gamma from a COS array.
+     *
      * @param array the array containing the XYZ values
      */
     public PDGamma(COSArray array)
@@ -54,6 +51,7 @@ public final class PDGamma implements COSObjectable
 
     /**
      * Convert this standard java object to a COS object.
+     *
      * @return the cos object that matches this Java object
      */
     public COSBase getCOSObject()
@@ -63,6 +61,7 @@ public final class PDGamma implements COSObjectable
 
     /**
      * Convert this standard java object to a COS object.
+     *
      * @return the cos object that matches this Java object
      */
     public COSArray getCOSArray()
@@ -72,15 +71,17 @@ public final class PDGamma implements COSObjectable
 
     /**
      * Returns the r value of the tristimulus.
+     *
      * @return the R value.
      */
     public float getR()
     {
-        return ((COSNumber)values.get(0)).floatValue();
+        return ((COSNumber) values.get(0)).floatValue();
     }
 
     /**
      * Sets the r value of the tristimulus.
+     *
      * @param r the r value for the tristimulus
      */
     public void setR(float r)
@@ -90,15 +91,17 @@ public final class PDGamma implements COSObjectable
 
     /**
      * Returns the g value of the tristimulus.
+     *
      * @return the g value
      */
     public float getG()
     {
-        return ((COSNumber)values.get(1)).floatValue();
+        return ((COSNumber) values.get(1)).floatValue();
     }
 
     /**
      * Sets the g value of the tristimulus.
+     *
      * @param g the g value for the tristimulus
      */
     public void setG(float g)
@@ -108,15 +111,17 @@ public final class PDGamma implements COSObjectable
 
     /**
      * Returns the b value of the tristimulus.
+     *
      * @return the B value
      */
     public float getB()
     {
-        return ((COSNumber)values.get(2)).floatValue();
+        return ((COSNumber) values.get(2)).floatValue();
     }
 
     /**
      * Sets the b value of the tristimulus.
+     *
      * @param b he b value for the tristimulus
      */
     public void setB(float b)

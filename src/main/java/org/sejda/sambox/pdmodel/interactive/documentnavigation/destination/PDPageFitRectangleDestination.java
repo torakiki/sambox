@@ -21,8 +21,8 @@ import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
 
 /**
- * This represents a destination to a page at a y location and the width is magnified
- * to just fit on the screen.
+ * This represents a destination to a page at a y location and the width is magnified to just fit on
+ * the screen.
  *
  * @author Ben Litchfield
  */
@@ -35,11 +35,9 @@ public class PDPageFitRectangleDestination extends PDPageDestination
 
     /**
      * Default constructor.
-     *
      */
     public PDPageFitRectangleDestination()
     {
-        super();
         array.growToSize(6);
         array.set(1, COSName.getPDFName(TYPE));
 
@@ -50,31 +48,31 @@ public class PDPageFitRectangleDestination extends PDPageDestination
      *
      * @param arr The destination array.
      */
-    public PDPageFitRectangleDestination( COSArray arr )
+    public PDPageFitRectangleDestination(COSArray arr)
     {
-        super( arr );
+        super(arr);
     }
 
     /**
-     * Get the left x coordinate.  A return value of -1 implies that the current x-coordinate
-     * will be used.
+     * Get the left x coordinate.  A return value of -1 implies that the current x-coordinate will
+     * be used.
      *
      * @return The left x coordinate.
      */
     public int getLeft()
     {
-        return array.getInt( 2 );
+        return array.getInt(2);
     }
 
     /**
-     * Set the left x-coordinate, a value of -1 implies that the current x-coordinate
-     * will be used.
+     * Set the left x-coordinate, a value of -1 implies that the current x-coordinate will be used.
+     *
      * @param x The left x coordinate.
      */
-    public void setLeft( int x )
+    public void setLeft(int x)
     {
-        array.growToSize( 3 );
-        if( x == -1 )
+        array.growToSize(3);
+        if (x == -1)
         {
             array.set(2, null);
         }
@@ -85,25 +83,26 @@ public class PDPageFitRectangleDestination extends PDPageDestination
     }
 
     /**
-     * Get the bottom y coordinate.  A return value of -1 implies that the current y-coordinate
-     * will be used.
+     * Get the bottom y coordinate.  A return value of -1 implies that the current y-coordinate will
+     * be used.
      *
      * @return The bottom y coordinate.
      */
     public int getBottom()
     {
-        return array.getInt( 3 );
+        return array.getInt(3);
     }
 
     /**
-     * Set the bottom y-coordinate, a value of -1 implies that the current y-coordinate
-     * will be used.
+     * Set the bottom y-coordinate, a value of -1 implies that the current y-coordinate will be
+     * used.
+     *
      * @param y The bottom y coordinate.
      */
-    public void setBottom( int y )
+    public void setBottom(int y)
     {
-        array.growToSize( 6 );
-        if( y == -1 )
+        array.growToSize(6);
+        if (y == -1)
         {
             array.set(3, null);
         }
@@ -114,25 +113,26 @@ public class PDPageFitRectangleDestination extends PDPageDestination
     }
 
     /**
-     * Get the right x coordinate.  A return value of -1 implies that the current x-coordinate
-     * will be used.
+     * Get the right x coordinate.  A return value of -1 implies that the current x-coordinate will
+     * be used.
      *
      * @return The right x coordinate.
      */
     public int getRight()
     {
-        return array.getInt( 4 );
+        return array.getInt(4);
     }
 
     /**
-     * Set the right x-coordinate, a value of -1 implies that the current x-coordinate
-     * will be used.
+     * Set the right x-coordinate, a value of -1 implies that the current x-coordinate will be
+     * used.
+     *
      * @param x The right x coordinate.
      */
-    public void setRight( int x )
+    public void setRight(int x)
     {
-        array.growToSize( 6 );
-        if( x == -1 )
+        array.growToSize(6);
+        if (x == -1)
         {
             array.set(4, null);
         }
@@ -142,27 +142,26 @@ public class PDPageFitRectangleDestination extends PDPageDestination
         }
     }
 
-
     /**
-     * Get the top y coordinate.  A return value of -1 implies that the current y-coordinate
-     * will be used.
+     * Get the top y coordinate.  A return value of -1 implies that the current y-coordinate will be
+     * used.
      *
      * @return The top y coordinate.
      */
     public int getTop()
     {
-        return array.getInt( 5 );
+        return array.getInt(5);
     }
 
     /**
-     * Set the top y-coordinate, a value of -1 implies that the current y-coordinate
-     * will be used.
+     * Set the top y-coordinate, a value of -1 implies that the current y-coordinate will be used.
+     *
      * @param y The top ycoordinate.
      */
-    public void setTop( int y )
+    public void setTop(int y)
     {
-        array.growToSize( 6 );
-        if( y == -1 )
+        array.growToSize(6);
+        if (y == -1)
         {
             array.set(5, null);
         }

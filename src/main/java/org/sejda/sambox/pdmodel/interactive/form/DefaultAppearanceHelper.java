@@ -22,26 +22,33 @@ import org.sejda.sambox.cos.COSString;
 
 import java.io.IOException;
 
-public class DefaultAppearanceHelper {
+public class DefaultAppearanceHelper
+{
 
-    public static COSString getDefaultAppearance(PDField field) throws IOException {
+    public static COSString getDefaultAppearance(PDField field) throws IOException
+    {
         return getDefaultAppearance(field.getInheritableAttribute(COSName.DA));
     }
 
-    public static COSString getDefaultAppearance(COSBase defaultAppearance) throws IOException {
-        if (defaultAppearance == null) {
+    public static COSString getDefaultAppearance(COSBase defaultAppearance) throws IOException
+    {
+        if (defaultAppearance == null)
+        {
             return null;
         }
 
-        if(defaultAppearance instanceof COSString) {
+        if (defaultAppearance instanceof COSString)
+        {
             return (COSString) defaultAppearance;
-        } else if(defaultAppearance instanceof COSName) {
+        }
+        if (defaultAppearance instanceof COSName)
+        {
             String value = ((COSName) defaultAppearance).getName();
             return COSString.parseLiteral(value);
-        } else {
-            // IOException is probably not the best choice here, RuntimeException would likely be better
-            // but existing code seems to expect IOException in a lot of places
-            throw new IOException("Expected DA to be COSString, got: " + defaultAppearance.getClass().getSimpleName());
         }
+        // IOException is probably not the best choice here, RuntimeException would likely be better
+        // but existing code seems to expect IOException in a lot of places
+        throw new IOException("Expected DA to be COSString, got: " + defaultAppearance.getClass()
+                .getSimpleName());
     }
 }

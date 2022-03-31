@@ -17,21 +17,19 @@
 
 package org.sejda.sambox.pdmodel.encryption;
 
-
 /**
- *
- * Represents the necessary information to decrypt a document protected by
- * the standard security handler (password protection).
- *
+ * Represents the necessary information to decrypt a document protected by the standard security
+ * handler (password protection).
+ * <p>
  * This is only composed of a password.
- * @author Benoit Guillon
  *
+ * @author Benoit Guillon
  */
 
 public class StandardDecryptionMaterial extends DecryptionMaterial
 {
 
-    private String password = null;
+    private final String password;
 
     /**
      * Create a new standard decryption material with the given password.
@@ -43,11 +41,6 @@ public class StandardDecryptionMaterial extends DecryptionMaterial
         password = pwd;
     }
 
-    /**
-     * Returns the password.
-     *
-     * @return The password used to decrypt the document.
-     */
     public String getPassword()
     {
         return password;

@@ -25,6 +25,8 @@ package org.sejda.sambox.pdmodel.font;
  */
 public class PDPanoseClassification
 {
+    public static final int LENGTH = 10;
+
     private final byte[] bytes;
 
     public PDPanoseClassification(byte[] bytes)

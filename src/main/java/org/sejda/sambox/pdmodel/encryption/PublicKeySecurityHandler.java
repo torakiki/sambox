@@ -35,6 +35,7 @@ import java.security.KeyStoreException;
 import java.security.PrivateKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.Collection;
 
 /**
@@ -92,15 +93,16 @@ public final class PublicKeySecurityHandler extends SecurityHandler
                     "Provided decryption material is not compatible with the document");
         }
 
-        setDecryptMetadata(encryption.isEncryptMetaData());
         PDCryptFilterDictionary defaultCryptFilterDictionary = encryption.getDefaultCryptFilterDictionary();
         if (defaultCryptFilterDictionary != null && defaultCryptFilterDictionary.getLength() != 0)
         {
             setKeyLength(defaultCryptFilterDictionary.getLength());
+            setDecryptMetadata(defaultCryptFilterDictionary.isEncryptMetaData());
         }
         else if (encryption.getLength() != 0)
         {
             setKeyLength(encryption.getLength());
+            setDecryptMetadata(encryption.isEncryptMetaData());
         }
 
         PublicKeyDecryptionMaterial material = (PublicKeyDecryptionMaterial) decryptionMaterial;
@@ -213,6 +215,15 @@ public final class PublicKeySecurityHandler extends SecurityHandler
             byte[] mdResult;
             if (encryption.getVersion() == 4 || encryption.getVersion() == 5)
             {
+                if (!isDecryptMetadata())
+                {
+                    // "4 bytes with the value 0xFF if the key being generated is intended for use in
+                    // document-level encryption and the document metadata is being left as plaintext"
+                    sha1Input = Arrays.copyOf(sha1Input, sha1Input.length + 4);
+                    System.arraycopy(
+                            new byte[] { (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff }, 0,
+                            sha1Input, sha1Input.length - 4, 4);
+                }
                 if (encryption.getVersion() == 4)
                 {
                     mdResult = MessageDigests.getSHA1().digest(sha1Input);

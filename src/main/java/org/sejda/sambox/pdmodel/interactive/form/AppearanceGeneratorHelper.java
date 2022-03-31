@@ -18,6 +18,8 @@ package org.sejda.sambox.pdmodel.interactive.form;
 
 import org.apache.fontbox.util.BoundingBox;
 import org.sejda.sambox.contentstream.operator.Operator;
+import org.sejda.sambox.cos.COSBase;
+import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSString;
 import org.sejda.sambox.input.ContentStreamParser;
@@ -31,6 +33,7 @@ import org.sejda.sambox.pdmodel.font.PDType3CharProc;
 import org.sejda.sambox.pdmodel.font.PDType3Font;
 import org.sejda.sambox.pdmodel.font.PDVectorFont;
 import org.sejda.sambox.pdmodel.graphics.color.PDColor;
+import org.sejda.sambox.pdmodel.interactive.action.PDAction;
 import org.sejda.sambox.pdmodel.interactive.action.PDActionJavaScript;
 import org.sejda.sambox.pdmodel.interactive.action.PDFormFieldAdditionalActions;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
@@ -54,6 +57,7 @@ import java.util.Map;
 
 import static java.util.Arrays.asList;
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
 import static org.sejda.io.CountingWritableByteChannel.from;
@@ -141,33 +145,40 @@ public class AppearanceGeneratorHelper
 
         for (PDAnnotationWidget widget : field.getWidgets())
         {
-            if (widget.getNormalAppearanceStream() != null
-                    && widget.getNormalAppearanceStream().getResources() != null)
+            PDAppearanceStream normalAppearanceStream = widget.getNormalAppearanceStream();
+            if (nonNull(normalAppearanceStream))
             {
-                PDResources widgetResources = widget.getNormalAppearanceStream().getResources();
-                Map<COSName, PDFont> missingFonts = new HashMap<>();
-                for (COSName fontResourceName : widgetResources.getFontNames())
+                PDResources widgetResources = normalAppearanceStream.getResources();
+                if (nonNull(widgetResources))
                 {
-                    try
+                    COSDictionary widgetFontDict = widgetResources.getCOSObject()
+                            .getDictionaryObject(COSName.FONT, COSDictionary.class);
+                    Map<COSName, COSBase> missingFonts = new HashMap<>();
+                    for (COSName fontResourceName : widgetResources.getFontNames())
                     {
-                        if (acroFormResources.getFont(fontResourceName) == null)
+                        try
                         {
-                            LOG.debug("Adding font resource " + fontResourceName
-                                    + " from widget to AcroForm");
-                            missingFonts.put(fontResourceName,
-                                    widgetResources.getFont(fontResourceName));
+                            if (acroFormResources.getFont(fontResourceName) == null)
+                            {
+                                LOG.debug("Adding font resource " + fontResourceName
+                                        + " from widget to AcroForm");
+                                missingFonts.put(fontResourceName,
+                                        widgetFontDict.getItem(fontResourceName));
+                            }
+                        }
+                        catch (IOException e)
+                        {
+                            LOG.warn("Unable to match field level font with AcroForm font");
                         }
                     }
-                    catch (IOException e)
-                    {
-                        LOG.warn("Unable to match field level font with AcroForm font");
-                    }
-                }
 
-                // add all missing font resources from widget to AcroForm
-                for (COSName key : missingFonts.keySet())
-                {
-                    acroFormResources.put(key, missingFonts.get(key));
+                    COSDictionary acroFormFontDict = acroFormResources.getCOSObject()
+                            .getDictionaryObject(COSName.FONT, COSDictionary.class);
+                    // add all missing font resources from widget to AcroForm
+                    for (COSName key : missingFonts.keySet())
+                    {
+                        acroFormFontDict.setItem(key, missingFonts.get(key));
+                    }
                 }
             }
         }
@@ -249,6 +260,7 @@ public class AppearanceGeneratorHelper
                 appearanceDict.setNormalAppearance(appearanceStream);
                 // TODO support appearances other than "normal"
             }
+            PDAppearanceCharacteristicsDictionary appearanceCharacteristics = widget.getAppearanceCharacteristics();
 
             /*
              * Adobe Acrobat always recreates the complete appearance stream if there is an
@@ -257,10 +269,10 @@ public class AppearanceGeneratorHelper
              * the entries.
              *
              */
-            if (widget.getAppearanceCharacteristics() != null
+            if (appearanceCharacteristics != null
                     || appearanceStream.getContentStream().getLength() == 0)
             {
-                initializeAppearanceContent(widget, appearanceStream);
+                initializeAppearanceContent(widget, appearanceCharacteristics, appearanceStream);
             }
 
             setAppearanceContent(widget, appearanceStream);
@@ -276,21 +288,20 @@ public class AppearanceGeneratorHelper
         // the field
         // has a format event
         PDFormFieldAdditionalActions actions = field.getActions();
-
-        if (actions != null && actions.getF() != null)
+        if (actions == null)
+        {
+            return apValue;
+        }
+        PDAction actionF = actions.getF();
+        if (actionF != null)
         {
             if (field.getAcroForm().getScriptingHandler() != null)
             {
                 ScriptingHandler scriptingHandler = field.getAcroForm().getScriptingHandler();
-                return scriptingHandler.format((PDActionJavaScript) field.getActions().getF(),
-                        apValue);
+                return scriptingHandler.format((PDActionJavaScript) actionF, apValue);
             }
-            else
-            {
-                LOG.info(
-                        "Field contains a formatting action but no ScriptingHandler has been supplied - formatted value might be incorrect");
-                return apValue;
-            }
+            LOG.info(
+                    "Field contains a formatting action but no ScriptingHandler has been supplied - formatted value might be incorrect");
         }
         return apValue;
     }
@@ -375,13 +386,12 @@ public class AppearanceGeneratorHelper
      * @throws IOException in case we can't write to the appearance stream
      */
     private void initializeAppearanceContent(PDAnnotationWidget widget,
+            PDAppearanceCharacteristicsDictionary appearanceCharacteristics,
             PDAppearanceStream appearanceStream) throws IOException
     {
         try (PDPageContentStream contents = new PDPageContentStream(
                 field.getAcroForm().getDocument(), appearanceStream))
         {
-            PDAppearanceCharacteristicsDictionary appearanceCharacteristics = widget.getAppearanceCharacteristics();
-
             // TODO: support more entries like patterns, etc.
             if (appearanceCharacteristics != null)
             {
@@ -572,8 +582,8 @@ public class AppearanceGeneratorHelper
         // calculate font metrics at font size
         float fontScaleY = fontSize / FONTSCALE;
         float fontBoundingBoxAtSize = font.getBoundingBox().getHeight() * fontScaleY;
-        float fontCapAtSize = 0;
-        float fontDescentAtSize = 0;
+        float fontCapAtSize;
+        float fontDescentAtSize;
 
         if (font.getFontDescriptor() != null)
         {
@@ -596,7 +606,7 @@ public class AppearanceGeneratorHelper
         }
         else
         {
-            // Adobe shows the text 'shiftet up' in case the caps don't fit into the clipping area
+            // Adobe shows the text 'shifted up' in case the caps don't fit into the clipping area
             if (fontCapAtSize > clipRect.getHeight())
             {
                 y = clipRect.getLowerLeftY() + -fontDescentAtSize;
@@ -732,10 +742,8 @@ public class AppearanceGeneratorHelper
             PDFont font, float fontSize) throws IOException
     {
 
-        // TODO: Currently the quadding is not taken into account
-        // so the comb is always filled from left to right.
-
         int maxLen = ((PDTextField) field).getMaxLen();
+        int quadding = field.getQ();
         int numChars = Math.min(value.length(), maxLen);
 
         PDRectangle paddingEdge = applyPadding(bbox, 1);
@@ -751,6 +759,16 @@ public class AppearanceGeneratorHelper
 
         contents.saveGraphicsState();
         contents.setFont(font, fontSize);
+
+        // add to initial offset if right aligned or centered
+        if (quadding == 2)
+        {
+            xOffset = xOffset + (maxLen - numChars) * combWidth;
+        }
+        else if (quadding == 1)
+        {
+            xOffset = xOffset + (maxLen - numChars) / 2 * combWidth;
+        }
 
         for (int i = 0; i < numChars; i++)
         {

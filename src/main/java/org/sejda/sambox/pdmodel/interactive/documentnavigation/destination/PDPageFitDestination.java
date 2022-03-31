@@ -20,8 +20,8 @@ import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSName;
 
 /**
- * This represents a destination to a page and the page contents will be magnified to just
- * fit on the screen.
+ * This represents a destination to a page and the page contents will be magnified to just fit on
+ * the screen.
  *
  * @author Ben Litchfield
  */
@@ -38,11 +38,9 @@ public class PDPageFitDestination extends PDPageDestination
 
     /**
      * Default constructor.
-     *
      */
     public PDPageFitDestination()
     {
-        super();
         array.growToSize(2);
         array.set(1, COSName.getPDFName(TYPE));
 
@@ -53,9 +51,9 @@ public class PDPageFitDestination extends PDPageDestination
      *
      * @param arr The destination array.
      */
-    public PDPageFitDestination( COSArray arr )
+    public PDPageFitDestination(COSArray arr)
     {
-        super( arr );
+        super(arr);
     }
 
     /**
@@ -65,7 +63,7 @@ public class PDPageFitDestination extends PDPageDestination
      */
     public boolean fitBoundingBox()
     {
-        return TYPE_BOUNDED.equals( array.getName( 1 ) );
+        return TYPE_BOUNDED.equals(array.getName(1));
     }
 
     /**
@@ -73,10 +71,10 @@ public class PDPageFitDestination extends PDPageDestination
      *
      * @param fitBoundingBox A flag indicating if this should fit the bounding box.
      */
-    public void setFitBoundingBox( boolean fitBoundingBox )
+    public void setFitBoundingBox(boolean fitBoundingBox)
     {
-        array.growToSize( 2 );
-        if( fitBoundingBox )
+        array.growToSize(2);
+        if (fitBoundingBox)
         {
             array.set(1, COSName.getPDFName(TYPE_BOUNDED));
         }

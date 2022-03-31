@@ -83,9 +83,9 @@ import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
 /**
  * PDFStreamEngine subclass for advanced processing of text via TextPosition.
  *
- * @see org.sejda.sambox.text.TextPosition
  * @author Ben Litchfield
  * @author John Hewson
+ * @see org.sejda.sambox.text.TextPosition
  */
 public class PDFTextStreamEngine extends PDFStreamEngine
 {
@@ -94,8 +94,25 @@ public class PDFTextStreamEngine extends PDFStreamEngine
     private int pageRotation;
     private PDRectangle cropBox;
     private Matrix translateMatrix;
-    private final GlyphList glyphList;
+    private static final GlyphList GLYPHLIST;
     private final Map<COSDictionary, Float> fontHeightMap = new WeakHashMap<COSDictionary, Float>();
+
+    static
+    {
+        // load additional glyph list for Unicode mapping
+        try
+        {
+            InputStream input = GlyphList.class.getResourceAsStream(
+                    "/org/sejda/sambox/resources/glyphlist/additional.txt");
+            requireNotNullArg(input,
+                    "Unable to load org/sejda/sambox/resources/glyphlist/additional.txt");
+            GLYPHLIST = new GlyphList(GlyphList.getAdobeGlyphList(), input);
+        }
+        catch (IOException ex)
+        {
+            throw new RuntimeException(ex);
+        }
+    }
 
     /**
      * Constructor.
@@ -140,13 +157,6 @@ public class PDFTextStreamEngine extends PDFStreamEngine
         addOperator(new SetNonStrokingDeviceCMYKColor());
         addOperator(new SetNonStrokingDeviceGrayColor());
         addOperator(new SetNonStrokingColorN());
-
-        // load additional glyph list for Unicode mapping
-        InputStream input = GlyphList.class
-                .getResourceAsStream("/org/sejda/sambox/resources/glyphlist/additional.txt");
-        requireNotNullArg(input,
-                "Unable to load org/sejda/sambox/resources/glyphlist/additional.txt");
-        glyphList = new GlyphList(GlyphList.getAdobeGlyphList(), input);
     }
 
     /**
@@ -291,7 +301,7 @@ public class PDFTextStreamEngine extends PDFStreamEngine
         float spaceWidthDisplay = spaceWidthText * textRenderingMatrix.getScalingFactorX();
 
         // use our additional glyph list for Unicode mapping
-        String unicode = font.toUnicode(code, glyphList);
+        String unicode = font.toUnicode(code, GLYPHLIST);
 
         // when there is no Unicode mapping available, Acrobat simply coerces the character code
         // into Unicode, so we do the same. Subclasses of PDFStreamEngine don't necessarily want
@@ -330,7 +340,8 @@ public class PDFTextStreamEngine extends PDFStreamEngine
 
         PDColor color = null;
         RenderingMode renderingMode = state.getTextState().getRenderingMode();
-        if (renderingMode.isFill()) {
+        if (renderingMode.isFill())
+        {
             color = state.getNonStrokingColor();
         }
         else if (renderingMode.isStroke())

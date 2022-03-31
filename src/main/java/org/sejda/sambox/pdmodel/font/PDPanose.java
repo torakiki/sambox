@@ -21,12 +21,14 @@ import java.util.Arrays;
 
 /**
  * Represents the "Panose" entry of a FontDescriptor's Style dictionary. This is a sequence of 12
- * bytes which contain both the TTF sFamilyClass and PANOSE classification bytes. 
+ * bytes which contain both the TTF sFamilyClass and PANOSE classification bytes.
  *
  * @author John Hewson
  */
 public class PDPanose
 {
+    public static final int LENGTH = 12;
+
     private final byte[] bytes;
 
     public PDPanose(byte[] bytes)
@@ -35,19 +37,19 @@ public class PDPanose
     }
 
     /**
-     * The font family class and subclass ID bytes, given in the sFamilyClass field of the
-     * “OS/2” table in a TrueType font.
-     * 
+     * The font family class and subclass ID bytes, given in the sFamilyClass field of the “OS/2”
+     * table in a TrueType font.
+     *
      * @see <a href="http://www.microsoft.com/typography/otspec/ibmfc.htm">http://www.microsoft.com/typography/otspec/ibmfc.htm</a>
      */
     public int getFamilyClass()
     {
-        return bytes[0] << 8 | bytes[1]; 
+        return bytes[0] << 8 | bytes[1];
     }
 
     /**
      * Ten bytes for the PANOSE classification number for the font.
-     * 
+     *
      * @see <a href="http://www.monotype.com/services/pan1">http://www.monotype.com/services/pan1</a>
      */
     public PDPanoseClassification getPanose()

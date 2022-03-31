@@ -23,45 +23,65 @@ import java.awt.image.BufferedImage;
  */
 public enum ImageType
 {
-    /** Black or white. */
+    /**
+     * Black or white.
+     */
     BINARY
-    {
-        @Override
-        public int toBufferedImageType()
-        {
-            return BufferedImage.TYPE_BYTE_BINARY;
-        }
-    },
+            {
+                @Override
+                public int toBufferedImageType()
+                {
+                    return BufferedImage.TYPE_BYTE_BINARY;
+                }
+            },
 
-    /** Shades of gray */
+    /**
+     * Shades of gray
+     */
     GRAY
-    {
-        @Override
-        public int toBufferedImageType()
-        {
-            return BufferedImage.TYPE_BYTE_GRAY;
-        }
-    },
+            {
+                @Override
+                public int toBufferedImageType()
+                {
+                    return BufferedImage.TYPE_BYTE_GRAY;
+                }
+            },
 
-    /** Red, Green, Blue */
+    /**
+     * Red, Green, Blue
+     */
     RGB
-    {
-        @Override
-        public int toBufferedImageType()
-        {
-            return BufferedImage.TYPE_INT_RGB;
-        }
-    },
+            {
+                @Override
+                public int toBufferedImageType()
+                {
+                    return BufferedImage.TYPE_INT_RGB;
+                }
+            },
 
-    /** Alpha, Red, Green, Blue */
+    /**
+     * Alpha, Red, Green, Blue
+     */
     ARGB
-    {
-        @Override
-        public int toBufferedImageType()
-        {
-            return BufferedImage.TYPE_INT_ARGB;
-        }
-    };
+            {
+                @Override
+                public int toBufferedImageType()
+                {
+                    return BufferedImage.TYPE_INT_ARGB;
+                }
+
+            },
+    /**
+     * Blue, Green, Red
+     */
+    BGR
+            {
+                @Override
+                public int toBufferedImageType()
+                {
+                    return BufferedImage.TYPE_3BYTE_BGR;
+                }
+            };
 
     public abstract int toBufferedImageType();
 }

@@ -392,13 +392,13 @@ public class PDType1Font extends PDSimpleFont
     @Override
     public float getHeight(int code) throws IOException
     {
-        String name = codeToName(code);
         if (getStandard14AFM() != null)
         {
             String afmName = getEncoding().getName(code);
             return getStandard14AFM().getCharacterHeight(
                     afmName); // todo: isn't this the y-advance, not the height?
         }
+        String name = codeToName(code);
         // todo: should be scaled by font matrix
         return (float) genericFont.getPath(name).getBounds().getHeight();
     }
@@ -426,7 +426,7 @@ public class PDType1Font extends PDSimpleFont
             if (".notdef".equals(name))
             {
                 throw new IllegalArgumentException(
-                        String.format("No glyph for U+%04X in font %s", unicode, getName()));
+                        String.format("No glyph for U+%04X in this font %s", unicode, getName()));
             }
         }
         else
@@ -451,6 +451,12 @@ public class PDType1Font extends PDSimpleFont
 
         Map<String, Integer> inverted = encoding.getNameToCodeMap();
         int code = inverted.get(name);
+        if (code < 0)
+        {
+            throw new IllegalArgumentException(String.format(
+                    "U+%04X ('%s') is not available in this font %s (generic: %s), encoding: %s",
+                    unicode, name, getName(), genericFont.getName(), encoding.getEncodingName()));
+        }
         bytes = new byte[] { (byte) code };
         codeToBytesMap.put(unicode, bytes);
         return bytes;

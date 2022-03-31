@@ -1,13 +1,5 @@
 package org.sejda.sambox.pdmodel.interactive.form;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.sejda.sambox.cos.COSArray;
@@ -19,6 +11,15 @@ import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.font.PDFont;
 import org.sejda.sambox.pdmodel.font.PDType0Font;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
+
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 public class PDListBoxTest
 {
@@ -33,7 +34,7 @@ public class PDListBoxTest
         acroForm = new PDAcroForm(doc);
         acroForm.setDefaultResources(new PDResources());
     }
-    
+
     @Test
     public void overridingAppearanceFont() throws IOException
     {
@@ -55,8 +56,8 @@ public class PDListBoxTest
             assertThat(ex.getMessage(), containsString("is not available in this font Helvetica"));
         }
 
-        InputStream input = PDFont.class
-                .getResourceAsStream("/org/sejda/sambox/resources/ttf/LiberationSans-Regular.ttf");
+        InputStream input = PDFont.class.getResourceAsStream(
+                "/org/sejda/sambox/resources/ttf/LiberationSans-Regular.ttf");
         PDType0Font font = PDType0Font.load(doc, input);
 
         listBox.getAcroForm().getDefaultResources().add(font);
@@ -66,7 +67,8 @@ public class PDListBoxTest
     }
 
     @Test
-    public void optionsWithTabChars() throws IOException {
+    public void optionsWithTabChars() throws IOException
+    {
         PDChoice choiceField = new PDListBox(acroForm);
 
         // makes sure an appearance will be generated when we set a value

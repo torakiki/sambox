@@ -277,13 +277,12 @@ public class PDNumberTreeNode implements COSObjectable
      */
     public Integer getUpperLimit()
     {
-        Integer retval = null;
-        COSArray arr = (COSArray) node.getDictionaryObject(COSName.LIMITS);
-        if (arr != null && arr.get(0) != null)
+        COSArray arr = node.getDictionaryObject(COSName.LIMITS, COSArray.class);
+        if (arr != null && arr.get(1) != null)
         {
-            retval = arr.getInt(1);
+            return arr.getInt(1);
         }
-        return retval;
+        return null;
     }
 
     /**
@@ -293,7 +292,7 @@ public class PDNumberTreeNode implements COSObjectable
      */
     private void setUpperLimit(Integer upper)
     {
-        COSArray arr = (COSArray) node.getDictionaryObject(COSName.LIMITS);
+        COSArray arr = node.getDictionaryObject(COSName.LIMITS, COSArray.class);
         if (arr == null)
         {
             arr = new COSArray();
@@ -318,13 +317,12 @@ public class PDNumberTreeNode implements COSObjectable
      */
     public Integer getLowerLimit()
     {
-        Integer retval = null;
-        COSArray arr = (COSArray) node.getDictionaryObject(COSName.LIMITS);
+        COSArray arr = node.getDictionaryObject(COSName.LIMITS, COSArray.class);
         if (arr != null && arr.get(0) != null)
         {
-            retval = arr.getInt(0);
+            return arr.getInt(0);
         }
-        return retval;
+        return null;
     }
 
     /**
@@ -334,7 +332,7 @@ public class PDNumberTreeNode implements COSObjectable
      */
     private void setLowerLimit(Integer lower)
     {
-        COSArray arr = (COSArray) node.getDictionaryObject(COSName.LIMITS);
+        COSArray arr = node.getDictionaryObject(COSName.LIMITS, COSArray.class);
         if (arr == null)
         {
             arr = new COSArray();

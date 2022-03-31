@@ -16,16 +16,16 @@
  */
 package org.sejda.sambox.pdmodel;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.io.OutputStream;
-
 import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.graphics.color.PDColor;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceStream;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDBorderStyleDictionary;
+
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * Provides the ability to write to an appearance content stream.
@@ -49,8 +49,8 @@ public final class PDAppearanceContentStream extends PDAbstractContentStream imp
      * Create a new appearance stream.
      *
      * @param appearance The appearance stream to write to.
-     * @param compress whether the content stream is to be compressed. Set this to true when creating long content
-     * streams.
+     * @param compress   whether the content stream is to be compressed. Set this to true when
+     *                   creating long content streams.
      * @throws IOException If there is an error writing to the content stream.
      */
     public PDAppearanceContentStream(PDAppearanceStream appearance, boolean compress)
@@ -63,7 +63,7 @@ public final class PDAppearanceContentStream extends PDAbstractContentStream imp
     /**
      * Create a new appearance stream.
      *
-     * @param appearance The appearance stream to add to.
+     * @param appearance   The appearance stream to add to.
      * @param outputStream The appearances output stream to write to.
      */
     public PDAppearanceContentStream(PDAppearanceStream appearance, OutputStream outputStream)
@@ -73,10 +73,10 @@ public final class PDAppearanceContentStream extends PDAbstractContentStream imp
 
     /**
      * Set the stroking color.
-     * 
+     *
      * <p>
      * The command is only emitted if the color is not null and the number of components is &gt; 0.
-     * 
+     *
      * @param color The colorspace to write.
      * @throws IOException If there is an error writing to the content stream.
      * @see PDAbstractContentStream#setStrokingColor(PDColor)
@@ -97,10 +97,10 @@ public final class PDAppearanceContentStream extends PDAbstractContentStream imp
 
     /**
      * Set the stroking color.
-     * 
-     * @see PDAbstractContentStream#setStrokingColor(java.awt.Color)
+     *
      * @param components the color components dependent on the color space being used.
      * @throws IOException If there is an error writing to the content stream.
+     * @see PDAbstractContentStream#setStrokingColor(java.awt.Color)
      */
     public void setStrokingColor(float[] components) throws IOException
     {
@@ -130,10 +130,10 @@ public final class PDAppearanceContentStream extends PDAbstractContentStream imp
 
     /**
      * Set the non stroking color.
-     * 
+     *
      * <p>
      * The command is only emitted if the color is not null and the number of components is &gt; 0.
-     * 
+     *
      * @param color The colorspace to write.
      * @throws IOException If there is an error writing to the content stream.
      * @see PDAbstractContentStream#setNonStrokingColor(PDColor)
@@ -154,10 +154,10 @@ public final class PDAppearanceContentStream extends PDAbstractContentStream imp
 
     /**
      * Set the non stroking color.
-     * 
-     * @see PDAbstractContentStream#setNonStrokingColor(java.awt.Color)
+     *
      * @param components the color components dependent on the color space being used.
      * @throws IOException If there is an error writing to the content stream.
+     * @see PDAbstractContentStream#setNonStrokingColor(java.awt.Color)
      */
     public void setNonStrokingColor(float[] components) throws IOException
     {
@@ -189,9 +189,9 @@ public final class PDAppearanceContentStream extends PDAbstractContentStream imp
      * Convenience method for annotations: sets the line with and dash style.
      *
      * @param lineWidth The line width.
-     * @param bs The border style, may be null.
-     * @param border The border array, must have at least three entries. This is only used if the border style is null.
-     *
+     * @param bs        The border style, may be null.
+     * @param border    The border array, must have at least three entries. This is only used if the
+     *                  border style is null.
      * @throws IOException If there is an error writing to the content stream.
      */
     public void setBorderLine(float lineWidth, PDBorderStyleDictionary bs, COSArray border)
@@ -199,21 +199,29 @@ public final class PDAppearanceContentStream extends PDAbstractContentStream imp
     {
         // Can't use PDBorderStyleDictionary.getDashStyle() as
         // this will return a default dash style if non is existing
-        if (bs != null && bs.getCOSObject().containsKey(COSName.D)
-                && bs.getStyle().equals(PDBorderStyleDictionary.STYLE_DASHED))
+        if (bs != null && bs.getCOSObject().containsKey(COSName.D) && bs.getStyle()
+                .equals(PDBorderStyleDictionary.STYLE_DASHED))
         {
             setLineDashPattern(bs.getDashStyle().getDashArray(), 0);
         }
-        else if (bs == null && border.size() > 3 && border.getObject(3) instanceof COSArray)
+        else if (bs == null && border.size() > 3)
         {
-            setLineDashPattern(((COSArray) border.getObject(3)).toFloatArray(), 0);
+            if (border.getObject(3) instanceof COSArray)
+            {
+                setLineDashPattern(((COSArray) border.getObject(3)).toFloatArray(), 0);
+            }
+            else
+            {
+                // PDFBOX-5266: invalid dash array, be invisible
+                setLineDashPattern(new float[1], 0);
+            }
         }
         setLineWidthOnDemand(lineWidth);
     }
 
     /**
      * Sets the line width. The command is only emitted if the lineWidth is different to 1.
-     * 
+     *
      * @param lineWidth the line width of the path.
      * @throws IOException If there is an error writing to the content stream.
      * @see PDAbstractContentStream#setLineWidth(float)
@@ -233,12 +241,12 @@ public final class PDAppearanceContentStream extends PDAbstractContentStream imp
      * Draw a shape.
      *
      * <p>
-     * Dependent on the lineWidth and whether or not there is a background to be generated there are different commands
-     * to be used for draw a shape.
+     * Dependent on the lineWidth and whether or not there is a background to be generated there are
+     * different commands to be used for draw a shape.
      *
      * @param lineWidth the line width of the path.
      * @param hasStroke shall there be a stroking color.
-     * @param hasFill shall there be a fill color.
+     * @param hasFill   shall there be a fill color.
      * @throws IOException If there is an error writing to the content stream.
      */
     public void drawShape(float lineWidth, boolean hasStroke, boolean hasFill) throws IOException

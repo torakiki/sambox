@@ -16,9 +16,6 @@
  */
 package org.sejda.sambox.contentstream.operator;
 
-import java.io.IOException;
-import java.util.List;
-
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.graphics.PDXObject;
@@ -26,6 +23,9 @@ import org.sejda.sambox.pdmodel.graphics.form.PDFormXObject;
 import org.sejda.sambox.pdmodel.graphics.form.PDTransparencyGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.List;
 
 /**
  * Do: Draws an XObject.
@@ -62,19 +62,18 @@ public class DrawObject extends OperatorProcessor
             try
             {
                 getContext().increaseLevel();
-                if (getContext().getLevel() > 25)
+                if (getContext().getLevel() > 50)
                 {
                     LOG.error("recursion is too deep, skipping form XObject");
                     return;
                 }
-                PDFormXObject form = (PDFormXObject) xobject;
-                if (form instanceof PDTransparencyGroup)
+                if (xobject instanceof PDTransparencyGroup)
                 {
-                    getContext().showTransparencyGroup((PDTransparencyGroup) form);
+                    getContext().showTransparencyGroup((PDTransparencyGroup) xobject);
                 }
                 else
                 {
-                    getContext().showForm(form);
+                    getContext().showForm((PDFormXObject) xobject);
                 }
             }
             finally

@@ -17,12 +17,6 @@
 
 package org.sejda.sambox.pdmodel.interactive.annotation.handlers;
 
-import java.awt.geom.AffineTransform;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.pdmodel.PDAppearanceContentStream;
 import org.sejda.sambox.pdmodel.PDResources;
@@ -36,11 +30,16 @@ import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceDictionary;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceEntry;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceStream;
 
+import java.awt.geom.AffineTransform;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Generic handler to generate the fields appearance.
- * 
+ * <p>
  * Individual handler will provide specific implementations for different field types.
- * 
  */
 public abstract class PDAbstractAppearanceHandler implements PDAppearanceHandler
 {
@@ -85,11 +84,11 @@ public abstract class PDAbstractAppearanceHandler implements PDAppearanceHandler
 
     /**
      * Get the annotations appearance dictionary.
-     * 
+     *
      * <p>
-     * This will get the annotations appearance dictionary. If this is not existent an empty appearance dictionary will
-     * be created.
-     * 
+     * This will get the annotations appearance dictionary. If this is not existent an empty
+     * appearance dictionary will be created.
+     *
      * @return the annotations appearance dictionary
      */
     PDAppearanceDictionary getAppearance()
@@ -105,9 +104,10 @@ public abstract class PDAbstractAppearanceHandler implements PDAppearanceHandler
 
     /**
      * Get the annotations normal appearance content stream.
-     * 
+     *
      * <p>
-     * This will get the annotations normal appearance content stream, to 'draw' to. It will be uncompressed.
+     * This will get the annotations normal appearance content stream, to 'draw' to. It will be
+     * uncompressed.
      *
      * @return the appearance entry representing the normal appearance.
      * @throws IOException
@@ -119,12 +119,12 @@ public abstract class PDAbstractAppearanceHandler implements PDAppearanceHandler
 
     /**
      * Get the annotations normal appearance content stream.
-     * 
+     *
      * <p>
      * This will get the annotations normal appearance content stream, to 'draw' to.
-     * 
-     * @param compress whether the content stream is to be compressed. Set this to true when creating long content
-     * streams.
+     *
+     * @param compress whether the content stream is to be compressed. Set this to true when
+     *                 creating long content streams.
      * @return the appearance entry representing the normal appearance.
      * @throws IOException
      */
@@ -137,10 +137,11 @@ public abstract class PDAbstractAppearanceHandler implements PDAppearanceHandler
 
     /**
      * Get the annotations down appearance.
-     * 
+     *
      * <p>
-     * This will get the annotations down appearance. If this is not existent an empty appearance entry will be created.
-     * 
+     * This will get the annotations down appearance. If this is not existent an empty appearance
+     * entry will be created.
+     *
      * @return the appearance entry representing the down appearance.
      */
     PDAppearanceEntry getDownAppearance()
@@ -159,11 +160,11 @@ public abstract class PDAbstractAppearanceHandler implements PDAppearanceHandler
 
     /**
      * Get the annotations rollover appearance.
-     * 
+     *
      * <p>
-     * This will get the annotations rollover appearance. If this is not existent an empty appearance entry will be
-     * created.
-     * 
+     * This will get the annotations rollover appearance. If this is not existent an empty
+     * appearance entry will be created.
+     *
      * @return the appearance entry representing the rollover appearance.
      */
     PDAppearanceEntry getRolloverAppearance()
@@ -182,12 +183,12 @@ public abstract class PDAbstractAppearanceHandler implements PDAppearanceHandler
 
     /**
      * Get a padded rectangle.
-     * 
+     *
      * <p>
      * Creates a new rectangle with padding applied to each side. .
-     * 
+     *
      * @param rectangle the rectangle.
-     * @param padding the padding to apply.
+     * @param padding   the padding to apply.
      * @return the padded rectangle.
      */
     PDRectangle getPaddedRectangle(PDRectangle rectangle, float padding)
@@ -201,10 +202,10 @@ public abstract class PDAbstractAppearanceHandler implements PDAppearanceHandler
      * Get a rectangle enlarged by the differences.
      *
      * <p>
-     * Creates a new rectangle with differences added to each side. If there are no valid differences, then the original
-     * rectangle is returned.
+     * Creates a new rectangle with differences added to each side. If there are no valid
+     * differences, then the original rectangle is returned.
      *
-     * @param rectangle the rectangle.
+     * @param rectangle   the rectangle.
      * @param differences the differences to apply.
      * @return the padded rectangle.
      */
@@ -225,10 +226,10 @@ public abstract class PDAbstractAppearanceHandler implements PDAppearanceHandler
      * Get a rectangle with the differences applied to each side.
      *
      * <p>
-     * Creates a new rectangle with differences added to each side. If there are no valid differences, then the original
-     * rectangle is returned.
+     * Creates a new rectangle with differences added to each side. If there are no valid
+     * differences, then the original rectangle is returned.
      *
-     * @param rectangle the rectangle.
+     * @param rectangle   the rectangle.
      * @param differences the differences to apply.
      * @return the padded rectangle.
      */
@@ -258,7 +259,7 @@ public abstract class PDAbstractAppearanceHandler implements PDAppearanceHandler
 
     /**
      * Draw a line ending style.
-     * 
+     *
      * @param style
      * @param cs
      * @param x
@@ -266,8 +267,8 @@ public abstract class PDAbstractAppearanceHandler implements PDAppearanceHandler
      * @param width
      * @param hasStroke
      * @param hasBackground
-     * @param ending false if left, true if right of an imagined horizontal line (important for arrows).
-     *
+     * @param ending        false if left, true if right of an imagined horizontal line (important
+     *                      for arrows).
      * @throws IOException
      */
     void drawStyle(String style, final PDAppearanceContentStream cs, float x, float y, float width,
@@ -275,8 +276,8 @@ public abstract class PDAbstractAppearanceHandler implements PDAppearanceHandler
     {
         int sign = ending ? -1 : 1;
 
-        if (PDAnnotationLine.LE_OPEN_ARROW.equals(style)
-                || PDAnnotationLine.LE_CLOSED_ARROW.equals(style))
+        if (PDAnnotationLine.LE_OPEN_ARROW.equals(style) || PDAnnotationLine.LE_CLOSED_ARROW.equals(
+                style))
         {
             drawArrow(cs, x + sign * width, y, sign * width * 9);
         }
@@ -300,15 +301,16 @@ public abstract class PDAbstractAppearanceHandler implements PDAppearanceHandler
         else if (PDAnnotationLine.LE_R_OPEN_ARROW.equals(style)
                 || PDAnnotationLine.LE_R_CLOSED_ARROW.equals(style))
         {
-            drawArrow(cs, x + (0 - sign) * width, y, (0 - sign) * width * 9);
+            drawArrow(cs, x + (-sign) * width, y, (-sign) * width * 9);
         }
         else if (PDAnnotationLine.LE_SLASH.equals(style))
         {
             // the line is 18 x linewidth at an angle of 60°
-            cs.moveTo(x + (float) (Math.cos(Math.toRadians(60)) * width * 9),
-                    y + (float) (Math.sin(Math.toRadians(60)) * width * 9));
-            cs.lineTo(x + (float) (Math.cos(Math.toRadians(240)) * width * 9),
-                    y + (float) (Math.sin(Math.toRadians(240)) * width * 9));
+            float width9 = width * 9;
+            cs.moveTo(x + (float) (Math.cos(Math.toRadians(60)) * width9),
+                    y + (float) (Math.sin(Math.toRadians(60)) * width9));
+            cs.lineTo(x + (float) (Math.cos(Math.toRadians(240)) * width9),
+                    y + (float) (Math.sin(Math.toRadians(240)) * width9));
         }
 
         if (PDAnnotationLine.LE_R_CLOSED_ARROW.equals(style)
@@ -319,17 +321,16 @@ public abstract class PDAbstractAppearanceHandler implements PDAppearanceHandler
         cs.drawShape(width, hasStroke,
                 // make sure to only paint a background color (/IC value)
                 // for interior color styles, even if an /IC value is set.
-                INTERIOR_COLOR_STYLES.contains(style) ? hasBackground : false);
+                INTERIOR_COLOR_STYLES.contains(style) && hasBackground);
     }
 
     /**
      * Add the two arms of a horizontal arrow.
-     * 
-     * @param cs Content stream
+     *
+     * @param cs  Content stream
      * @param x
      * @param y
      * @param len The arm length. Positive goes to the right, negative goes to the left.
-     * 
      * @throws IOException If the content stream could not be written
      */
     void drawArrow(PDAppearanceContentStream cs, float x, float y, float len) throws IOException
@@ -338,11 +339,11 @@ public abstract class PDAbstractAppearanceHandler implements PDAppearanceHandler
         // cos(angle) = x position
         // sin(angle) = y position
         // this comes very close to what Adobe is doing
-        cs.moveTo(x + (float) (Math.cos(ARROW_ANGLE) * len),
-                y + (float) (Math.sin(ARROW_ANGLE) * len));
+        float armX = x + (float) (Math.cos(ARROW_ANGLE) * len);
+        float armYdelta = (float) (Math.sin(ARROW_ANGLE) * len);
+        cs.moveTo(armX, y + armYdelta);
         cs.lineTo(x, y);
-        cs.lineTo(x + (float) (Math.cos(ARROW_ANGLE) * len),
-                y - (float) (Math.sin(ARROW_ANGLE) * len));
+        cs.lineTo(armX, y - armYdelta);
     }
 
     /**
@@ -351,8 +352,7 @@ public abstract class PDAbstractAppearanceHandler implements PDAppearanceHandler
      * @param cs Content stream
      * @param x
      * @param y
-     * @param r Radius (to a corner)
-     * 
+     * @param r  Radius (to a corner)
      * @throws IOException If the content stream could not be written
      */
     void drawDiamond(PDAppearanceContentStream cs, float x, float y, float r) throws IOException
@@ -370,8 +370,7 @@ public abstract class PDAbstractAppearanceHandler implements PDAppearanceHandler
      * @param cs Content stream
      * @param x
      * @param y
-     * @param r Radius
-     * 
+     * @param r  Radius
      * @throws IOException If the content stream could not be written.
      */
     void drawCircle(PDAppearanceContentStream cs, float x, float y, float r) throws IOException
@@ -387,14 +386,13 @@ public abstract class PDAbstractAppearanceHandler implements PDAppearanceHandler
     }
 
     /**
-     * Add a circle shape to the path in counterclockwise direction. You'll need this e.g. when drawing a doughnut
-     * shape. See "Nonzero Winding Number Rule" for more information.
+     * Add a circle shape to the path in counterclockwise direction. You'll need this e.g. when
+     * drawing a doughnut shape. See "Nonzero Winding Number Rule" for more information.
      *
      * @param cs Content stream
      * @param x
      * @param y
-     * @param r Radius
-     *
+     * @param r  Radius
      * @throws IOException If the content stream could not be written.
      */
     void drawCircle2(PDAppearanceContentStream cs, float x, float y, float r) throws IOException
@@ -445,11 +443,11 @@ public abstract class PDAbstractAppearanceHandler implements PDAppearanceHandler
 
     /**
      * Get the annotations normal appearance.
-     * 
+     *
      * <p>
-     * This will get the annotations normal appearance. If this is not existent an empty appearance entry will be
-     * created.
-     * 
+     * This will get the annotations normal appearance. If this is not existent an empty appearance
+     * entry will be created.
+     *
      * @return the appearance entry representing the normal appearance.
      */
     private PDAppearanceEntry getNormalAppearance()
@@ -507,11 +505,11 @@ public abstract class PDAbstractAppearanceHandler implements PDAppearanceHandler
         // be set to be the line width and the /Rect is enlarged by the /RD amount
         PDRectangle borderBox;
         float[] rectDifferences = annotation.getRectDifferences();
-        if(getRectangle() == null)
+        if (getRectangle() == null)
         {
             return null;
         }
-        
+
         if (rectDifferences.length == 0)
         {
             borderBox = getPaddedRectangle(getRectangle(), lineWidth / 2);
@@ -521,10 +519,12 @@ public abstract class PDAbstractAppearanceHandler implements PDAppearanceHandler
                     addRectDifferences(getRectangle(), annotation.getRectDifferences()));
             // when the normal appearance stream was generated BBox and Matrix have been set to the
             // values of the original /Rect. As the /Rect was changed that needs to be adjusted too.
-            annotation.getNormalAppearanceStream().setBBox(getRectangle());
-            AffineTransform transform = AffineTransform.getTranslateInstance(
-                    -getRectangle().getLowerLeftX(), -getRectangle().getLowerLeftY());
-            annotation.getNormalAppearanceStream().setMatrix(transform);
+            PDRectangle rect = getRectangle();
+            PDAppearanceStream appearanceStream = annotation.getNormalAppearanceStream();
+            AffineTransform transform = AffineTransform.getTranslateInstance(-rect.getLowerLeftX(),
+                    -rect.getLowerLeftY());
+            appearanceStream.setBBox(rect);
+            appearanceStream.setMatrix(transform);
         }
         else
         {

@@ -16,16 +16,6 @@
  */
 package org.sejda.sambox.pdmodel;
 
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
-import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.toList;
-import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
-
-import java.util.*;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
@@ -35,6 +25,24 @@ import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.COSObjectable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.Queue;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toList;
+import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
 
 /**
  * The page tree, which defines the ordering of pages in the document in an efficient manner.
@@ -73,7 +81,7 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
     /**
      * Constructor for reading.
      *
-     * @param root A page tree root.
+     * @param root     A page tree root.
      * @param document The document which contains "root".
      */
     PDPageTree(COSDictionary root, PDDocument document)
@@ -97,19 +105,25 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
     }
 
     /**
-     * Similar to {@link #getInheritableAttribute(COSDictionary, COSName)} but also checks the returned element 
-     * matches the expected type class
+     * Similar to {@link #getInheritableAttribute(COSDictionary, COSName)} but also checks the
+     * returned element matches the expected type class
+     *
      * @param node
      * @param key
      * @param clazz expected type class
      * @param <T>
      * @return
      */
-    public static <T extends COSBase> COSBase getInheritableAttribute(COSDictionary node, COSName key, Class<T> clazz) {
+    public static <T extends COSBase> COSBase getInheritableAttribute(COSDictionary node,
+            COSName key, Class<T> clazz)
+    {
         COSBase result = getInheritableAttribute(node, key);
-        if(clazz.isInstance(result)) {
+        if (clazz.isInstance(result))
+        {
             return result;
-        } else {
+        }
+        else
+        {
             return null;
         }
     }
@@ -118,7 +132,7 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
      * Returns the given attribute, inheriting from parent tree nodes if necessary.
      *
      * @param node page object
-     * @param key the key to look up
+     * @param key  the key to look up
      * @return COS value for the given key
      */
     public static COSBase getInheritableAttribute(COSDictionary node, COSName key)
@@ -168,7 +182,7 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
 
     /**
      * Helper to get kids from malformed PDFs.
-     * 
+     *
      * @param node page tree node
      * @return list of kids
      */
@@ -315,15 +329,16 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
     /**
      * Returns the given COS page using a depth-first search.
      *
-     * @param pageNum 1-based page number
-     * @param node page tree node to search
-     * @param encountered number of pages encountered so far
+     * @param pageNum        1-based page number
+     * @param node           page tree node to search
+     * @param encountered    number of pages encountered so far
      * @param pageTreeParent the parent node, as determined traversing the page tree top -> down
      * @return COS dictionary of the Page object
      */
-    private PageAndPageTreeParent get(int pageNum, COSDictionary node, int encountered, COSDictionary pageTreeParent)
+    private PageAndPageTreeParent get(int pageNum, COSDictionary node, int encountered,
+            COSDictionary pageTreeParent)
     {
-        if (pageNum < 0)
+        if (pageNum < 1)
         {
             throw new PageNotFoundException(
                     "Index out of bounds: " + pageNum + " in " + getSourcePath(), pageNum,
@@ -390,8 +405,8 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
     {
         // some files such as PDFBOX-2250-229205.pdf don't have Pages set as the Type, so we have
         // to check for the presence of Kids too
-        return nonNull(node) && (node.getCOSName(COSName.TYPE) == COSName.PAGES
-                || node.containsKey(COSName.KIDS));
+        return nonNull(node) && (node.getCOSName(COSName.TYPE) == COSName.PAGES || node.containsKey(
+                COSName.KIDS));
     }
 
     /**
@@ -449,7 +464,8 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
     }
 
     /**
-     * Returns the number of leaf nodes (page objects) that are descendants of this root within the page tree.
+     * Returns the number of leaf nodes (page objects) that are descendants of this root within the
+     * page tree.
      */
     public int getCount()
     {
@@ -464,7 +480,7 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
 
     /**
      * Removes the page with the given index from the page tree.
-     * 
+     *
      * @param index zero-based page index
      */
     public void remove(int index)
@@ -499,20 +515,20 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
         // remove from parent's kids
         COSDictionary parent = node.getDictionaryObject(COSName.PARENT, COSName.P,
                 COSDictionary.class);
-        
-        if(parent == null)
+
+        if (parent == null)
         {
             // broken node with missing PARENT, use the one known from traversing the page tree
             parent = knownParent;
         }
-        
+
         COSArray kids = parent.getDictionaryObject(COSName.KIDS, COSArray.class);
         if (kids.removeObject(node))
         {
             // update ancestor counts
             parent.setInt(COSName.COUNT, parent.getInt(COSName.COUNT) - 1);
             node = parent;
-            
+
             do
             {
                 node = node.getDictionaryObject(COSName.PARENT, COSName.P, COSDictionary.class);
@@ -526,7 +542,7 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
 
     /**
      * Adds the given page to this page tree.
-     * 
+     *
      * @param page The page to add.
      */
     public void add(PDPage page)
@@ -555,19 +571,21 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
     /**
      * Insert a page before another page within a page tree.
      *
-     * @param newPage the page to be inserted.
+     * @param newPage  the page to be inserted.
      * @param nextPage the page that is to be after the new page.
-     * @throws IllegalArgumentException if one attempts to insert a page that isn't part of a page tree.
+     * @throws IllegalArgumentException if one attempts to insert a page that isn't part of a page
+     *                                  tree.
      */
     public void insertBefore(PDPage newPage, PDPage nextPage)
     {
         COSDictionary nextPageDict = nextPage.getCOSObject();
-        COSDictionary parentDict = nextPageDict.getDictionaryObject(COSName.PARENT, COSDictionary.class);
-        if(nextPage.getPageTreeParent() != null)
+        COSDictionary parentDict = nextPageDict.getDictionaryObject(COSName.PARENT,
+                COSDictionary.class);
+        if (nextPage.getPageTreeParent() != null)
         {
             parentDict = nextPage.getPageTreeParent();
         }
-        
+
         COSArray kids = parentDict.getDictionaryObject(COSName.KIDS, COSArray.class);
         boolean found = false;
         for (int i = 0; i < kids.size(); ++i)
@@ -591,20 +609,21 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
     /**
      * Insert a page after another page within a page tree.
      *
-     * @param newPage the page to be inserted.
+     * @param newPage  the page to be inserted.
      * @param prevPage the page that is to be before the new page.
-     * @throws IllegalArgumentException if one attempts to insert a page that isn't part of a page tree.
+     * @throws IllegalArgumentException if one attempts to insert a page that isn't part of a page
+     *                                  tree.
      */
     public void insertAfter(PDPage newPage, PDPage prevPage)
     {
         COSDictionary prevPageDict = prevPage.getCOSObject();
         COSDictionary parentDict = prevPageDict.getDictionaryObject(COSName.PARENT,
                 COSDictionary.class);
-        if(prevPage.getPageTreeParent() != null)
+        if (prevPage.getPageTreeParent() != null)
         {
             parentDict = prevPage.getPageTreeParent();
         }
-        
+
         COSArray kids = parentDict.getDictionaryObject(COSName.KIDS, COSArray.class);
         boolean found = false;
         for (int i = 0; i < kids.size(); ++i)
@@ -636,15 +655,17 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
     }
 
     /**
-     * A tuple of a page and the parent found when traversing the page tree top down.
-     * NOTE: The page tree parent can be different from page.PARENT (for invalid documents)
-     * hence the need for this class when adding new pages and having to increment kids counters in the page tree
+     * A tuple of a page and the parent found when traversing the page tree top down. NOTE: The page
+     * tree parent can be different from page.PARENT (for invalid documents) hence the need for this
+     * class when adding new pages and having to increment kids counters in the page tree
      */
-    public static class PageAndPageTreeParent {
-        public final COSDictionary node; 
+    public static class PageAndPageTreeParent
+    {
+        public final COSDictionary node;
         public final COSDictionary parent;
 
-        public PageAndPageTreeParent(COSDictionary node, COSDictionary parent) {
+        public PageAndPageTreeParent(COSDictionary node, COSDictionary parent)
+        {
             this.node = node;
             this.parent = parent;
         }

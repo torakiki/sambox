@@ -17,16 +17,18 @@
 
 package org.sejda.sambox.pdmodel.encryption;
 
-import java.io.IOException;
-
+import org.sejda.sambox.cos.COSBoolean;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.common.PDDictionaryWrapper;
 
+import java.io.IOException;
+
+import static java.util.Objects.nonNull;
+
 /**
- * This class is a specialized view of the crypt filter dictionary of a PDF document. It contains a low level dictionary
- * (COSDictionary) and provides the methods to manage its fields.
- *
+ * This class is a specialized view of the crypt filter dictionary of a PDF document. It contains a
+ * low level dictionary (COSDictionary) and provides the methods to manage its fields.
  */
 public class PDCryptFilterDictionary extends PDDictionaryWrapper
 {
@@ -52,9 +54,8 @@ public class PDCryptFilterDictionary extends PDDictionaryWrapper
     }
 
     /**
-     * This will return the Length entry of the crypt filter dictionary.<br />
-     * <br />
-     * The length in <b>bits</b> for the crypt filter algorithm. This will return a multiple of 8.
+     * This will return the Length entry of the crypt filter dictionary.<br /> <br /> The length in
+     * <b>bits</b> for the crypt filter algorithm. This will return a multiple of 8.
      *
      * @return The length in bits for the encryption algorithm
      */
@@ -67,7 +68,6 @@ public class PDCryptFilterDictionary extends PDDictionaryWrapper
      * This will set the crypt filter method. Allowed values are: NONE, V2, AESV2, AESV3
      *
      * @param cfm name of the crypt filter method.
-     *
      * @throws IOException If there is an error setting the data.
      */
     public void setCryptFilterMethod(COSName cfm)
@@ -79,7 +79,6 @@ public class PDCryptFilterDictionary extends PDDictionaryWrapper
      * This will return the crypt filter method. Allowed values are: NONE, V2, AESV2, AESV3
      *
      * @return the name of the crypt filter method.
-     *
      * @throws IOException If there is an error accessing the data.
      */
     public COSName getCryptFilterMethod()
@@ -87,4 +86,31 @@ public class PDCryptFilterDictionary extends PDDictionaryWrapper
         return getCOSObject().getDictionaryObject(COSName.CFM, COSName.class);
     }
 
+    /**
+     * Will get the EncryptMetaData dictionary info.
+     *
+     * @return true if EncryptMetaData is explicitly set (the default is true)
+     */
+    public boolean isEncryptMetaData()
+    {
+        COSBoolean value = getCOSObject().getDictionaryObject(COSName.ENCRYPT_META_DATA,
+                COSBoolean.class);
+        if (nonNull(value))
+        {
+            return value.getValue();
+        }
+
+        // default is true (see 7.6.3.2 Standard Encryption Dictionary PDF 32000-1:2008)
+        return true;
+    }
+
+    /**
+     * Set the EncryptMetaData dictionary info.
+     *
+     * @param encryptMetaData true if EncryptMetaData shall be set.
+     */
+    public void setEncryptMetaData(boolean encryptMetaData)
+    {
+        getCOSObject().setBoolean(COSName.ENCRYPT_META_DATA, encryptMetaData);
+    }
 }

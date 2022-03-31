@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.filter;
 
+import org.sejda.commons.util.IOUtils;
 import org.sejda.sambox.cos.COSDictionary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +30,8 @@ import java.util.zip.DeflaterOutputStream;
 import java.util.zip.Inflater;
 
 /**
- * Decompresses data encoded using the zlib/deflate compression method, reproducing the original text or binary data.
+ * Decompresses data encoded using the zlib/deflate compression method, reproducing the original
+ * text or binary data.
  *
  * @author Ben Litchfield
  * @author Marcel Kammer
@@ -37,7 +39,6 @@ import java.util.zip.Inflater;
 final class FlateFilter extends Filter
 {
     private static final Logger LOG = LoggerFactory.getLogger(FlateFilter.class);
-    private static final int BUFFER_SIZE = 0x4000;
 
     @Override
     public DecodeResult decode(InputStream encoded, OutputStream decoded, COSDictionary parameters,
@@ -95,11 +96,8 @@ final class FlateFilter extends Filter
                                     "FlateFilter: premature end of stream due to a DataFormatException");
                             break;
                         }
-                        else
-                        {
-                            // nothing could be read -> re-throw exception
-                            throw exception;
-                        }
+                        // nothing could be read -> re-throw exception
+                        throw exception;
                     }
                     if (resRead != 0)
                     {
@@ -131,16 +129,7 @@ final class FlateFilter extends Filter
         Deflater deflater = new Deflater(compressionLevel);
         try (DeflaterOutputStream out = new DeflaterOutputStream(encoded, deflater))
         {
-            int amountRead;
-            int mayRead = input.available();
-            if (mayRead > 0)
-            {
-                byte[] buffer = new byte[Math.min(mayRead, BUFFER_SIZE)];
-                while ((amountRead = input.read(buffer, 0, Math.min(mayRead, BUFFER_SIZE))) != -1)
-                {
-                    out.write(buffer, 0, amountRead);
-                }
-            }
+            IOUtils.copy(input, out);
         }
         encoded.flush();
     }

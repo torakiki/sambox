@@ -22,9 +22,8 @@ import java.util.NoSuchElementException;
 
 /**
  * Iterator over the linked list of {@link PDOutlineItem} siblings.
- * 
- * @author Andrea Vacondio
  *
+ * @author Andrea Vacondio
  */
 class PDOutlineItemIterator implements Iterator<PDOutlineItem>
 {
@@ -44,26 +43,23 @@ class PDOutlineItemIterator implements Iterator<PDOutlineItem>
         {
             return false;
         }
-        
-        if(currentItem == null)
+
+        if (currentItem == null)
         {
             return true;
         }
-        
+
         PDOutlineItem next = currentItem.getNextSibling();
         if (next != null)
         {
-           if (startingItem.equals(currentItem.getNextSibling()) || visited.contains(next))
-           {
-               // infinite loop detected
-               return false;
-           } 
-           else 
-           {
-               return true;
-           }
+            if (startingItem.equals(currentItem.getNextSibling()) || visited.contains(next))
+            {
+                // infinite loop detected
+                return false;
+            }
+            return true;
         }
-        
+
         return false;
     }
 
@@ -82,12 +78,12 @@ class PDOutlineItemIterator implements Iterator<PDOutlineItem>
         {
             currentItem = currentItem.getNextSibling();
         }
-        
-        if(visited.contains(currentItem))
+
+        if (visited.contains(currentItem))
         {
             throw new NoSuchElementException();
         }
-        
+
         visited.add(currentItem);
         return currentItem;
     }

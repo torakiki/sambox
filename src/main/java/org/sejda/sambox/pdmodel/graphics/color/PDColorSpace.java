@@ -47,6 +47,8 @@ public abstract class PDColorSpace implements COSObjectable
 {
     private static final Logger LOG = LoggerFactory.getLogger(PDColorSpace.class);
 
+    private final ColorConvertOp colorConvertOp = new ColorConvertOp(null);
+
     /**
      * Creates a color space given a name or array.
      *
@@ -168,19 +170,19 @@ public abstract class PDColorSpace implements COSObjectable
             {
                 return PDDeviceCMYK.INSTANCE;
             }
-            else if (name == COSName.DEVICERGB)
+            if (name == COSName.DEVICERGB)
             {
                 return PDDeviceRGB.INSTANCE;
             }
-            else if (name == COSName.DEVICEGRAY)
+            if (name == COSName.DEVICEGRAY)
             {
                 return PDDeviceGray.INSTANCE;
             }
-            else if (name == COSName.PATTERN)
+            if (name == COSName.PATTERN)
             {
                 return new PDPattern(resources);
             }
-            else if (resources != null)
+            if (resources != null)
             {
                 if (!resources.hasColorSpace(name))
                 {
@@ -188,12 +190,9 @@ public abstract class PDColorSpace implements COSObjectable
                 }
                 return resources.getColorSpace(name);
             }
-            else
-            {
-                throw new MissingResourceException("Unknown color space: " + name.getName());
-            }
+            throw new MissingResourceException("Unknown color space: " + name.getName());
         }
-        else if (colorSpace instanceof COSArray)
+        if (colorSpace instanceof COSArray)
         {
             COSArray array = (COSArray) colorSpace;
             if (array.size() == 0)
@@ -213,31 +212,31 @@ public abstract class PDColorSpace implements COSObjectable
             {
                 return new PDCalGray(array);
             }
-            else if (name == COSName.CALRGB)
+            if (name == COSName.CALRGB)
             {
                 return new PDCalRGB(array);
             }
-            else if (name == COSName.DEVICEN)
+            if (name == COSName.DEVICEN)
             {
                 return new PDDeviceN(array);
             }
-            else if (name == COSName.INDEXED)
+            if (name == COSName.INDEXED)
             {
                 return new PDIndexed(array);
             }
-            else if (name == COSName.SEPARATION)
+            if (name == COSName.SEPARATION)
             {
                 return new PDSeparation(array);
             }
-            else if (name == COSName.ICCBASED)
+            if (name == COSName.ICCBASED)
             {
                 return PDICCBased.create(array, resources);
             }
-            else if (name == COSName.LAB)
+            if (name == COSName.LAB)
             {
                 return new PDLab(array);
             }
-            else if (name == COSName.PATTERN)
+            if (name == COSName.PATTERN)
             {
                 if (array.size() == 1)
                 {
@@ -245,18 +244,15 @@ public abstract class PDColorSpace implements COSObjectable
                 }
                 return new PDPattern(resources, PDColorSpace.create(array.get(1)));
             }
-            else if (name == COSName.DEVICECMYK || name == COSName.DEVICERGB
+            if (name == COSName.DEVICECMYK || name == COSName.DEVICERGB
                     || name == COSName.DEVICEGRAY)
             {
                 // not allowed in an array, but we sometimes encounter these regardless
                 return createUncached(name, resources, wasDefault, recursionAccumulator + 1);
             }
-            else
-            {
-                throw new IOException("Invalid color space kind: " + name);
-            }
+            throw new IOException("Invalid color space kind: " + name);
         }
-        else if (colorSpace instanceof COSDictionary)
+        if (colorSpace instanceof COSDictionary)
         {
             COSDictionary csAsDic = (COSDictionary) colorSpace;
             if (csAsDic.containsKey(COSName.COLORSPACE))
@@ -385,8 +381,7 @@ public abstract class PDColorSpace implements COSObjectable
             g2d.dispose();
             return dest;
         }
-        ColorConvertOp op = new ColorConvertOp(null);
-        op.filter(src, dest);
+        colorConvertOp.filter(src, dest);
         return dest;
     }
 

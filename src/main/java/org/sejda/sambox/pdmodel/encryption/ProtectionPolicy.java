@@ -28,9 +28,9 @@ package org.sejda.sambox.pdmodel.encryption;
 public abstract class ProtectionPolicy
 {
 
-    private static final int DEFAULT_KEY_LENGTH = 40;
+    private static final short DEFAULT_KEY_LENGTH = 40;
 
-    private int encryptionKeyLength = DEFAULT_KEY_LENGTH;
+    private short encryptionKeyLength = DEFAULT_KEY_LENGTH;
 
     /**
      * set the length in (bits) of the secret key that will be used to encrypt document data. The
@@ -46,7 +46,7 @@ public abstract class ProtectionPolicy
             throw new IllegalArgumentException(
                     "Invalid key length '" + l + "' value must be 40, 128 or 256!");
         }
-        encryptionKeyLength = l;
+        encryptionKeyLength = (short) l;
     }
 
     /**
@@ -54,7 +54,7 @@ public abstract class ProtectionPolicy
      *
      * @return The length (in bits) of the encryption key.
      */
-    public int getEncryptionKeyLength()
+    public short getEncryptionKeyLength()
     {
         return encryptionKeyLength;
     }

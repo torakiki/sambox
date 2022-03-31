@@ -19,6 +19,7 @@ package org.sejda.sambox.rendering;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.PDPage;
+import org.sejda.sambox.pdmodel.PDPageTree;
 import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.graphics.blend.BlendMode;
@@ -68,6 +69,8 @@ public class PDFRenderer
 
     private BufferedImage pageImage;
 
+    private final PDPageTree pageTree;
+
     /**
      * Creates a new PDFRenderer.
      *
@@ -76,6 +79,7 @@ public class PDFRenderer
     public PDFRenderer(PDDocument document)
     {
         this.document = document;
+        this.pageTree = document.getPages();
     }
 
     /**
@@ -251,7 +255,7 @@ public class PDFRenderer
     public BufferedImage renderImage(int pageIndex, float scale, ImageType imageType,
             RenderDestination destination) throws IOException
     {
-        PDPage page = document.getPage(pageIndex);
+        PDPage page = pageTree.get(pageIndex);
 
         PDRectangle cropbBox = page.getCropBox();
         float widthPt = cropbBox.getWidth();
@@ -270,7 +274,7 @@ public class PDFRenderer
 
         int rotationAngle = page.getRotation();
 
-        int bimType = imageType.toBufferedImageType();
+        int bimType;
         if (imageType != ImageType.ARGB && hasBlendMode(page))
         {
             // PDFBOX-4095: if the PDF has blending on the top level, draw on transparent background
@@ -278,6 +282,10 @@ public class PDFRenderer
             // PDF.js renders everything on a fully transparent RGBA canvas.
             // Finally when the page has been rendered, PDF.js draws the RGBA canvas on a white canvas.
             bimType = BufferedImage.TYPE_INT_ARGB;
+        }
+        else
+        {
+            bimType = imageType.toBufferedImageType();
         }
 
         // swap width and height
@@ -399,7 +407,7 @@ public class PDFRenderer
     public void renderPageToGraphics(int pageIndex, Graphics2D graphics, float scaleX, float scaleY,
             RenderDestination destination) throws IOException
     {
-        PDPage page = document.getPage(pageIndex);
+        PDPage page = pageTree.get(pageIndex);
         // TODO need width/height calculations? should these be in PageDrawer?
 
         transform(graphics, page, scaleX, scaleY);

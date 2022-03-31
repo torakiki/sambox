@@ -69,7 +69,7 @@ public abstract class SecurityHandler
 {
     private static final Logger LOG = LoggerFactory.getLogger(SecurityHandler.class);
 
-    private static final int DEFAULT_KEY_LENGTH = 40;
+    private static final short DEFAULT_KEY_LENGTH = 40;
 
     // see 7.6.2, page 58, PDF 32000-1:2008
     private static final byte[] AES_SALT = { (byte) 0x73, (byte) 0x41, (byte) 0x6c, (byte) 0x54 };
@@ -77,7 +77,7 @@ public abstract class SecurityHandler
     /**
      * The length of the secret key used to encrypt the document.
      */
-    protected int keyLength = DEFAULT_KEY_LENGTH;
+    protected short keyLength = DEFAULT_KEY_LENGTH;
 
     /**
      * The encryption key that will used to encrypt / decrypt.
@@ -127,6 +127,14 @@ public abstract class SecurityHandler
     protected void setDecryptMetadata(boolean decryptMetadata)
     {
         this.decryptMetadata = decryptMetadata;
+    }
+
+    /**
+     * @return True if meta data has to be decrypted.
+     */
+    public boolean isDecryptMetadata()
+    {
+        return decryptMetadata;
     }
 
     /**
@@ -350,10 +358,6 @@ public abstract class SecurityHandler
      */
     public void decrypt(COSBase obj, long objNum, long genNum) throws IOException
     {
-        if (!(obj instanceof COSString || obj instanceof COSDictionary || obj instanceof COSArray))
-        {
-            return;
-        }
         // PDFBOX-4477: only cache strings and streams, this improves speed and memory footprint
         if (obj instanceof COSString)
         {
@@ -518,28 +522,19 @@ public abstract class SecurityHandler
     }
 
     /**
-     * Getter of the property <tt>keyLength</tt>.
-     *
-     * @return Returns the keyLength.
+     * @return key length in bits
      */
     public int getKeyLength()
     {
         return keyLength;
     }
 
-    /**
-     * Setter of the property <tt>keyLength</tt>.
-     *
-     * @param keyLen The keyLength to set.
-     */
     public void setKeyLength(int keyLen)
     {
-        this.keyLength = keyLen;
+        this.keyLength = (short) keyLen;
     }
 
     /**
-     * Sets the access permissions.
-     *
      * @param currentAccessPermission The access permissions to be set.
      */
     public void setCurrentAccessPermission(AccessPermission currentAccessPermission)

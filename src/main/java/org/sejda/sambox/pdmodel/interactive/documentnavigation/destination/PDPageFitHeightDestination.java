@@ -21,8 +21,8 @@ import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
 
 /**
- * This represents a destination to a page at a x location and the height is magnified
- * to just fit on the screen.
+ * This represents a destination to a page at a x location and the height is magnified to just fit
+ * on the screen.
  *
  * @author Ben Litchfield
  */
@@ -39,11 +39,9 @@ public class PDPageFitHeightDestination extends PDPageDestination
 
     /**
      * Default constructor.
-     *
      */
     public PDPageFitHeightDestination()
     {
-        super();
         array.growToSize(3);
         array.set(1, COSName.getPDFName(TYPE));
 
@@ -54,31 +52,31 @@ public class PDPageFitHeightDestination extends PDPageDestination
      *
      * @param arr The destination array.
      */
-    public PDPageFitHeightDestination( COSArray arr )
+    public PDPageFitHeightDestination(COSArray arr)
     {
-        super( arr );
+        super(arr);
     }
 
     /**
-     * Get the left x coordinate.  A return value of -1 implies that the current x-coordinate
-     * will be used.
+     * Get the left x coordinate.  A return value of -1 implies that the current x-coordinate will
+     * be used.
      *
      * @return The left x coordinate.
      */
     public int getLeft()
     {
-        return array.getInt( 2 );
+        return array.getInt(2);
     }
 
     /**
-     * Set the left x-coordinate, a value of -1 implies that the current x-coordinate
-     * will be used.
+     * Set the left x-coordinate, a value of -1 implies that the current x-coordinate will be used.
+     *
      * @param x The left x coordinate.
      */
-    public void setLeft( int x )
+    public void setLeft(int x)
     {
-        array.growToSize( 3 );
-        if( x == -1 )
+        array.growToSize(3);
+        if (x == -1)
         {
             array.set(2, null);
         }
@@ -95,7 +93,7 @@ public class PDPageFitHeightDestination extends PDPageDestination
      */
     public boolean fitBoundingBox()
     {
-        return TYPE_BOUNDED.equals( array.getName( 1 ) );
+        return TYPE_BOUNDED.equals(array.getName(1));
     }
 
     /**
@@ -103,10 +101,10 @@ public class PDPageFitHeightDestination extends PDPageDestination
      *
      * @param fitBoundingBox A flag indicating if this should fit the bounding box.
      */
-    public void setFitBoundingBox( boolean fitBoundingBox )
+    public void setFitBoundingBox(boolean fitBoundingBox)
     {
-        array.growToSize( 2 );
-        if( fitBoundingBox )
+        array.growToSize(2);
+        if (fitBoundingBox)
         {
             array.set(1, COSName.getPDFName(TYPE_BOUNDED));
         }

@@ -28,21 +28,19 @@ import org.sejda.sambox.cos.COSObjectable;
  */
 public final class PDTristimulus implements COSObjectable
 {
-    private COSArray values = null;
+    private final COSArray values;
 
     /**
      * Constructor. Defaults all values to 0, 0, 0.
      */
     public PDTristimulus()
     {
-        values = new COSArray();
-        values.add(new COSFloat(0.0f));
-        values.add(new COSFloat(0.0f));
-        values.add(new COSFloat(0.0f));
+        values = new COSArray(new COSFloat(0.0f), new COSFloat(0.0f), new COSFloat(0.0f));
     }
 
     /**
      * Constructor from COS object.
+     *
      * @param array the array containing the XYZ values
      */
     public PDTristimulus(COSArray array)
@@ -52,12 +50,13 @@ public final class PDTristimulus implements COSObjectable
 
     /**
      * Constructor from COS object.
+     *
      * @param array the array containing the XYZ values
      */
     public PDTristimulus(float[] array)
     {
         values = new COSArray();
-        for(int i=0; i<array.length && i<3; i++)
+        for (int i = 0; i < array.length && i < 3; i++)
         {
             values.add(new COSFloat(array[i]));
         }
@@ -71,6 +70,7 @@ public final class PDTristimulus implements COSObjectable
 
     /**
      * Returns the x value of the tristimulus.
+     *
      * @return the X value
      */
     public float getX()
@@ -80,6 +80,7 @@ public final class PDTristimulus implements COSObjectable
 
     /**
      * Sets the x value of the tristimulus.
+     *
      * @param x the x value for the tristimulus
      */
     public void setX(float x)
@@ -89,6 +90,7 @@ public final class PDTristimulus implements COSObjectable
 
     /**
      * Returns the y value of the tristimulus.
+     *
      * @return the Y value
      */
     public float getY()
@@ -98,6 +100,7 @@ public final class PDTristimulus implements COSObjectable
 
     /**
      * Sets the y value of the tristimulus.
+     *
      * @param y the y value for the tristimulus
      */
     public void setY(float y)
@@ -107,6 +110,7 @@ public final class PDTristimulus implements COSObjectable
 
     /**
      * Returns the z value of the tristimulus.
+     *
      * @return the Z value
      */
     public float getZ()
@@ -116,6 +120,7 @@ public final class PDTristimulus implements COSObjectable
 
     /**
      * Sets the z value of the tristimulus.
+     *
      * @param z the z value for the tristimulus
      */
     public void setZ(float z)

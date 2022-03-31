@@ -17,8 +17,6 @@
 
 package org.sejda.sambox.pdmodel.interactive.annotation.handlers;
 
-import java.io.IOException;
-
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSNumber;
@@ -32,9 +30,10 @@ import org.sejda.sambox.pdmodel.interactive.annotation.PDBorderStyleDictionary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+
 /**
  * Handler to generate the link annotations appearance.
- *
  */
 public class PDLinkAppearanceHandler extends PDAbstractAppearanceHandler
 {
@@ -57,7 +56,8 @@ public class PDLinkAppearanceHandler extends PDAbstractAppearanceHandler
     public void generateNormalAppearance()
     {
         PDAnnotationLink annotation = (PDAnnotationLink) getAnnotation();
-        if (annotation.getRectangle() == null)
+        PDRectangle rect = annotation.getRectangle();
+        if (rect == null)
         {
             // 660402-p1-AnnotationEmptyRect.pdf has /Rect entry with 0 elements
             return;
@@ -89,7 +89,6 @@ public class PDLinkAppearanceHandler extends PDAbstractAppearanceHandler
             {
                 // QuadPoints shall be ignored if any coordinate in the array lies outside
                 // the region specified by Rect.
-                PDRectangle rect = annotation.getRectangle();
                 for (int i = 0; i < pathsArray.length / 2; ++i)
                 {
                     if (!rect.contains(pathsArray[i * 2], pathsArray[i * 2 + 1]))
@@ -117,19 +116,23 @@ public class PDLinkAppearanceHandler extends PDAbstractAppearanceHandler
                 pathsArray[7] = borderEdge.getUpperRightY();
             }
 
+            boolean underline = false;
+            if (pathsArray.length >= 8)
+            {
+                PDBorderStyleDictionary borderStyleDic = annotation.getBorderStyle();
+                if (borderStyleDic != null)
+                {
+                    underline = PDBorderStyleDictionary.STYLE_UNDERLINE.equals(
+                            borderStyleDic.getStyle());
+                }
+            }
             int of = 0;
             while (of + 7 < pathsArray.length)
             {
-                if (annotation.getBorderStyle() != null && annotation.getBorderStyle().getStyle()
-                        .equals(PDBorderStyleDictionary.STYLE_UNDERLINE))
+                contentStream.moveTo(pathsArray[of], pathsArray[of + 1]);
+                contentStream.lineTo(pathsArray[of + 2], pathsArray[of + 3]);
+                if (!underline)
                 {
-                    contentStream.moveTo(pathsArray[of], pathsArray[of + 1]);
-                    contentStream.lineTo(pathsArray[of + 2], pathsArray[of + 3]);
-                }
-                else
-                {
-                    contentStream.moveTo(pathsArray[of], pathsArray[of + 1]);
-                    contentStream.lineTo(pathsArray[of + 2], pathsArray[of + 3]);
                     contentStream.lineTo(pathsArray[of + 4], pathsArray[of + 5]);
                     contentStream.lineTo(pathsArray[of + 6], pathsArray[of + 7]);
                     contentStream.closePath();
@@ -159,11 +162,11 @@ public class PDLinkAppearanceHandler extends PDAbstractAppearanceHandler
 
     /**
      * Get the line with of the border.
-     * 
-     * Get the width of the line used to draw a border around the annotation. This may either be specified by the
-     * annotation dictionaries Border setting or by the W entry in the BS border style dictionary. If both are missing
-     * the default width is 1.
-     * 
+     * <p>
+     * Get the width of the line used to draw a border around the annotation. This may either be
+     * specified by the annotation dictionaries Border setting or by the W entry in the BS border
+     * style dictionary. If both are missing the default width is 1.
+     *
      * @return the line width
      */
     // TODO: according to the PDF spec the use of the BS entry is annotation

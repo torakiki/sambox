@@ -26,9 +26,6 @@ import org.sejda.sambox.cos.COSName;
 public class WinAnsiEncoding extends Encoding
 {
 
-    private static final int CHAR_CODE = 0;
-    private static final int CHAR_NAME = 1;
-
     /**
      * Table of octal character codes and their corresponding names.
      */

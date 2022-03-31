@@ -16,15 +16,15 @@
  */
 package org.sejda.sambox.contentstream.operator.text;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.contentstream.operator.OperatorProcessor;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSFloat;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * T*: Move to start of next text line.
@@ -37,11 +37,11 @@ public class NextLine extends OperatorProcessor
     public void process(Operator operator, List<COSBase> arguments) throws IOException
     {
         //move to start of next text line
-        ArrayList<COSBase> args = new ArrayList<>();
+        ArrayList<COSBase> args = new ArrayList<>(2);
         args.add(new COSFloat(0f));
         // this must be -leading instead of just leading as written in the
         // specification (p.369) the acrobat reader seems to implement it the same way
-        args.add(new COSFloat(-1 * getContext().getGraphicsState().getTextState().getLeading()));
+        args.add(new COSFloat(-getContext().getGraphicsState().getTextState().getLeading()));
         // use Td instead of repeating code
         getContext().processOperator(OperatorName.MOVE_TEXT, args);
     }

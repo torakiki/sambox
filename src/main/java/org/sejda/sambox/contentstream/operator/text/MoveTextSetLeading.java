@@ -16,10 +16,6 @@
  */
 package org.sejda.sambox.contentstream.operator.text;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.sejda.sambox.contentstream.operator.MissingOperandException;
 import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.contentstream.operator.OperatorName;
@@ -27,6 +23,10 @@ import org.sejda.sambox.contentstream.operator.OperatorProcessor;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSFloat;
 import org.sejda.sambox.cos.COSNumber;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * TD: Move text position and set leading.
@@ -42,14 +42,14 @@ public class MoveTextSetLeading extends OperatorProcessor
         {
             throw new MissingOperandException(operator, arguments);
         }
-        
+
         //move text position and set leading
         COSBase base1 = arguments.get(1);
         if (base1 instanceof COSNumber)
         {
             COSNumber y = (COSNumber) base1;
             ArrayList<COSBase> args = new ArrayList<>();
-            args.add(new COSFloat(-1 * y.floatValue()));
+            args.add(new COSFloat(-y.floatValue()));
             getContext().processOperator("TL", args);
             getContext().processOperator("Td", arguments);
         }
