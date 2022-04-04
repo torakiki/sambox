@@ -397,5 +397,38 @@ public final class PDOutlineItem extends PDOutlineNode
     {
         getCOSObject().setFlag(COSName.F, BOLD_FLAG, bold);
     }
+    
+    public void delete() 
+    {
+        PDOutlineItem prev = getPreviousSibling();
+        PDOutlineItem next = getNextSibling();
 
+        PDOutlineNode parent = getParent();
+        
+        if (prev == null)
+        {
+            if (parent != null)
+            {
+                parent.setFirstChild(next);
+            }
+        }
+        else
+        {
+            prev.setNextSibling(next);
+        }
+        
+        if (next == null)
+        {
+            if (parent != null)
+            {
+                parent.setLastChild(prev);   
+            }
+        }
+        else
+        {
+            next.setPreviousSibling(prev);    
+        }
+
+        updateParentOpenCount(-1);
+    }
 }

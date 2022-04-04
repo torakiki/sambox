@@ -82,6 +82,13 @@ public abstract class PDOutlineNode extends PDDictionaryWrapper
         append(newChild);
         updateParentOpenCountForAddedChild(newChild);
     }
+    
+    public void addAtPosition(PDOutlineItem newChild, int index)
+    {
+        requireSingleNode(newChild);
+        insert(newChild, index);
+        updateParentOpenCountForAddedChild(newChild);
+    }
 
     /**
      * Adds the given node to the top of the children list.
@@ -152,6 +159,56 @@ public abstract class PDOutlineNode extends PDDictionaryWrapper
             previousFirstChild.setPreviousSibling(newChild);
         }
         setFirstChild(newChild);
+    }
+
+    private void insert(PDOutlineItem newChild, int index)
+    {
+        newChild.setParent(this);
+        
+        if(hasChildren()) {
+            int currentIndex = 0;
+            Iterator<PDOutlineItem> iterator = children().iterator();
+            PDOutlineItem current = iterator.next();
+
+            while (currentIndex < index && iterator.hasNext()) {
+                currentIndex++;
+                current = iterator.next();
+            }
+            
+            if(currentIndex == index)
+            {
+                // newChild is inserted before current
+                // newChild becomes index
+                // current becomes index + 1
+                PDOutlineItem prev = current.getPreviousSibling();
+
+                current.setPreviousSibling(newChild);
+
+                newChild.setNextSibling(current);
+                newChild.setPreviousSibling(prev);
+
+                if (prev != null) 
+                {
+                    prev.setNextSibling(newChild);
+                } 
+                else 
+                {
+                    setFirstChild(newChild);
+                }    
+            }
+            else if (currentIndex + 1 == index)
+            {
+                // newChild is inserted after last item, current
+                newChild.setPreviousSibling(current);
+                current.setNextSibling(newChild);
+                setLastChild(newChild);
+            }
+        }
+        else
+        {
+            setFirstChild(newChild);
+            setLastChild(newChild);
+        }
     }
 
     void updateParentOpenCountForAddedChild(PDOutlineItem newChild)
