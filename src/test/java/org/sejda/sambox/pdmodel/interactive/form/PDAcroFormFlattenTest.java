@@ -177,8 +177,7 @@ public class PDAcroFormFlattenTest
     /*
      * PDFBOX-3587 Empty template.
      */
-    // disabled as there is a missing character with the available fonts on the test server
-    //@Test
+    @Test
     public void testFlattenOpenOfficeForm() throws IOException
     {
         flattenAndCompare("OpenOfficeForm.pdf");
@@ -187,7 +186,7 @@ public class PDAcroFormFlattenTest
     /*
      * PDFBOX-3587 Filled template.
      */
-    //@Test
+    @Test
     public void testFlattenOpenOfficeFormFilled() throws IOException
     {
         flattenAndCompare("OpenOfficeForm_filled.pdf");
@@ -296,6 +295,10 @@ public class PDAcroFormFlattenTest
             throws IOException
     {
         PDDocument document = PDDocument.load(inputFile);
+        // loading the acroform performs some changes that will "fix" broken form fields
+        // see test for PDFBOX-3587 (OpenOfficeForm.pdf)
+        document.getDocumentCatalog().getAcroForm();
+        
         String outputPrefix = inputFile.getName() + "-";
         int numPages = document.getNumberOfPages();
 
