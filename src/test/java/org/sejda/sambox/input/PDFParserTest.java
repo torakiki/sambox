@@ -25,7 +25,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Base64;
 
-import com.tngtech.archunit.thirdparty.com.google.common.io.Files;
 import org.junit.Test;
 import org.sejda.io.DevNullWritableByteChannel;
 import org.sejda.io.SeekableSources;
