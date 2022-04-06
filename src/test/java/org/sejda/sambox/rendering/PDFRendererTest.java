@@ -5,8 +5,12 @@ import org.sejda.io.SeekableSources;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.PDDocument;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 
 public class PDFRendererTest {
 
@@ -18,6 +22,30 @@ public class PDFRendererTest {
             for(int i = 0; i < doc.getNumberOfPages(); i++) {
                 new PDFRenderer(doc).renderImage(i);
             }
+        }
+    }
+
+    @Test
+    public void disabledTextContentRendering() throws IOException {
+        String inputResPath = "/sambox/text-image-rendering.pdf";
+        try (PDDocument doc = PDFParser.parse(SeekableSources.onTempFileSeekableSourceFrom(
+                getClass().getResourceAsStream(inputResPath)))) {
+            PDFRenderer renderer = new PDFRenderer(doc){
+                @Override
+                protected PageDrawer createPageDrawer(PageDrawerParameters parameters) throws IOException {
+                    PageDrawer drawer = super.createPageDrawer(parameters);
+                    drawer.setTextContentRendered(false);
+                    return drawer;
+                }
+            };
+            
+            BufferedImage image = renderer.renderImage(0);
+            File actual = Files.createTempFile("text-image-rendering", "jpg").toFile();
+            actual.deleteOnExit();
+            ImageIO.write(image, "jpeg", new FileOutputStream(actual));
+            
+            File expected = new File(this.getClass().getResource(inputResPath.replace(".pdf", ".jpg")).getFile());
+            ImageCompareUtils.assertSameContents(expected, actual);
         }
     }
 }

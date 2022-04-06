@@ -534,7 +534,9 @@ public class PageDrawer extends PDFGraphicsStreamEngine
             // render glyph
             Shape glyph = at.createTransformedShape(path);
 
-            if (isContentRendered())
+            // WARNING SAMBOX SPECIFIC
+            // we also check if text content rendering is enabled
+            if (isContentRendered() && isTextContentRendered())
             {
                 if (renderingMode.isFill())
                 {
