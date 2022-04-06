@@ -157,6 +157,9 @@ public class PDButtonTest
             radioButton.setValue("1");
             radioButton.setValue("Second Choice");
 
+            assertEquals("Export value does not exist in normal appearance. Don't export value",
+                    "Second Choice", radioButton.getValue());
+
             assertEquals("First widget should be Off", COSName.Off,
                     radioButton.getWidgets().get(0).getCOSObject().getItem(COSName.AS));
 
