@@ -18,6 +18,7 @@ package org.sejda.sambox.pdmodel.interactive.documentnavigation.destination;
 
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.util.Matrix;
 
 /**
  * This represents a destination to a page and the page contents will be magnified to just fit on
@@ -82,5 +83,11 @@ public class PDPageFitDestination extends PDPageDestination
         {
             array.set(1, COSName.getPDFName(TYPE));
         }
+    }
+
+    @Override
+    public void transform(Matrix transformation)
+    {
+        //nothing to do
     }
 }

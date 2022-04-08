@@ -19,6 +19,9 @@ package org.sejda.sambox.pdmodel.interactive.documentnavigation.destination;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.util.Matrix;
+
+import java.awt.geom.Point2D;
 
 /**
  * This represents a destination to a page at a x location and the height is magnified to just fit
@@ -112,5 +115,12 @@ public class PDPageFitHeightDestination extends PDPageDestination
         {
             array.set(1, COSName.getPDFName(TYPE));
         }
+    }
+
+    @Override
+    public void transform(Matrix transformation)
+    {
+        Point2D.Float newCoord = transformation.transformPoint(getLeft(), 0);
+        setLeft((int) newCoord.x);
     }
 }

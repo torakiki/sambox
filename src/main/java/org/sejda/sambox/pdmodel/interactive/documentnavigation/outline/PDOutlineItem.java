@@ -16,9 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.interactive.documentnavigation.outline;
 
-import java.awt.Color;
-import java.io.IOException;
-
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSFloat;
@@ -30,19 +27,24 @@ import org.sejda.sambox.pdmodel.graphics.color.PDColor;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceRGB;
 import org.sejda.sambox.pdmodel.interactive.action.PDAction;
 import org.sejda.sambox.pdmodel.interactive.action.PDActionFactory;
-import org.sejda.sambox.pdmodel.interactive.action.PDActionGoTo;
 import org.sejda.sambox.pdmodel.interactive.documentnavigation.destination.PDDestination;
-import org.sejda.sambox.pdmodel.interactive.documentnavigation.destination.PDNamedDestination;
 import org.sejda.sambox.pdmodel.interactive.documentnavigation.destination.PDPageDestination;
 import org.sejda.sambox.pdmodel.interactive.documentnavigation.destination.PDPageXYZDestination;
+import org.sejda.sambox.pdmodel.interactive.documentnavigation.destination.WithActionOrDestination;
+
+import java.awt.Color;
+import java.io.IOException;
+
+import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
 
 /**
- * This represents an outline item in a pdf document. The items at each level of the hierarchy form an iterable linked
- * list, chained together through their Prev and Next entries.
+ * This represents an outline item in a pdf document. The items at each level of the hierarchy form
+ * an iterable linked list, chained together through their Prev and Next entries.
  *
  * @author Ben Litchfield
  */
-public final class PDOutlineItem extends PDOutlineNode
+public final class PDOutlineItem extends PDOutlineNode implements WithActionOrDestination
 {
     private static final int ITALIC_FLAG = 1;
     private static final int BOLD_FLAG = 2;
@@ -223,51 +225,22 @@ public final class PDOutlineItem extends PDOutlineNode
      */
     public PDPage findDestinationPage(PDDocument doc) throws IOException
     {
-        PDDestination dest = getDestination();
-        if (dest == null)
+        PDPageDestination pageDestination = resolveToPageDestination(
+                doc.getDocumentCatalog()).orElse(null);
+        if (nonNull(pageDestination))
         {
-            PDAction outlineAction = getAction();
-            if (outlineAction instanceof PDActionGoTo)
-            {
-                dest = ((PDActionGoTo) outlineAction).getDestination();
-            }
-        }
-        if (dest == null)
-        {
-            return null;
-        }
-
-        PDPageDestination pageDestination = null;
-        if (dest instanceof PDNamedDestination)
-        {
-            pageDestination = doc.getDocumentCatalog()
-                    .findNamedDestinationPage((PDNamedDestination) dest);
-            if (pageDestination == null)
-            {
+            return ofNullable(pageDestination.getPage()).orElseGet(() -> {
+                // Malformed PDF: local destinations must have a page object,
+                // not a page number, these are meant for remote destinations.
+                int pageNumber = pageDestination.getPageNumber();
+                if (pageNumber != -1)
+                {
+                    return doc.getPage(pageNumber);
+                }
                 return null;
-            }
+            });
         }
-        else if (dest instanceof PDPageDestination)
-        {
-            pageDestination = (PDPageDestination) dest;
-        }
-        else
-        {
-            throw new IOException("Error: Unknown destination type " + dest);
-        }
-
-        PDPage page = pageDestination.getPage();
-        if (page == null)
-        {
-            // Malformed PDF: local destinations must have a page object,
-            // not a page number, these are meant for remote destinations.
-            int pageNumber = pageDestination.getPageNumber();
-            if (pageNumber != -1)
-            {
-                page = doc.getPage(pageNumber);
-            }
-        }
-        return page;
+        return null;
     }
 
     /**

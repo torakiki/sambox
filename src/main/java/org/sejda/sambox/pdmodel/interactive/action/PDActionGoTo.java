@@ -16,14 +16,14 @@
  */
 package org.sejda.sambox.pdmodel.interactive.action;
 
-import java.io.IOException;
-
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.interactive.documentnavigation.destination.PDDestination;
 import org.sejda.sambox.pdmodel.interactive.documentnavigation.destination.PDPageDestination;
+
+import java.io.IOException;
 
 /**
  * This represents a go-to action that can be executed in a PDF document.
@@ -72,10 +72,9 @@ public class PDActionGoTo extends PDAction
      * This will set the destination to jump to.
      *
      * @param d The destination.
-     * 
-     * @IllegalArgumentException if the destination is not a page dictionary object.
+     * @throws IllegalArgumentException if the destination is not a page dictionary object.
      */
-    public void setDestination( PDDestination d )
+    public void setDestination(PDDestination d)
     {
         if (d instanceof PDPageDestination)
         {
@@ -86,8 +85,8 @@ public class PDActionGoTo extends PDAction
                 COSBase page = destArray.getObject(0);
                 if (!(page instanceof COSDictionary))
                 {
-                    throw new IllegalArgumentException("Destination of a GoTo action must be "
-                            + "a page dictionary object");
+                    throw new IllegalArgumentException(
+                            "Destination of a GoTo action must be " + "a page dictionary object");
                 }
             }
         }

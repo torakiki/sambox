@@ -17,8 +17,6 @@
 
 package org.sejda.sambox.pdmodel.common;
 
-import java.io.IOException;
-
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSInteger;
@@ -49,13 +47,13 @@ public class PDIntegerNameTreeNode extends PDNameTreeNode<COSInteger>
     }
 
     @Override
-    protected COSInteger convertCOSToPD(COSBase base) throws IOException
+    protected COSInteger convertCOSToPD(COSBase base)
     {
-        return (COSInteger)base;
+        return (COSInteger) base;
     }
 
     @Override
-    protected PDIntegerNameTreeNode createChildNode( COSDictionary dic )
+    protected PDIntegerNameTreeNode createChildNode(COSDictionary dic)
     {
         return new PDIntegerNameTreeNode(dic);
     }

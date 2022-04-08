@@ -24,6 +24,7 @@ import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSNumber;
 import org.sejda.sambox.pdmodel.PDPage;
 import org.sejda.sambox.pdmodel.PDPageTree;
+import org.sejda.sambox.util.Matrix;
 
 /**
  * This represents a destination to a page, see subclasses for specific parameters.
@@ -35,25 +36,19 @@ public abstract class PDPageDestination extends PDDestination
     /**
      * Storage for the page destination.
      */
-    protected COSArray array;
+    protected final COSArray array;
 
-    /**
-     * Constructor to create empty page destination.
-     *
-     */
     protected PDPageDestination()
     {
-        array = new COSArray();
+        this.array = new COSArray();
     }
 
     /**
-     * Constructor to create empty page destination.
-     *
-     * @param arr A page destination array.
+     * @param array A page destination array.
      */
-    protected PDPageDestination(COSArray arr)
+    protected PDPageDestination(COSArray array)
     {
-        array = arr;
+        this.array = array;
     }
 
     /**
@@ -65,16 +60,15 @@ public abstract class PDPageDestination extends PDDestination
      */
     public PDPage getPage()
     {
-        PDPage retval = null;
         if (array.size() > 0)
         {
             COSBase page = array.getObject(0);
             if (page instanceof COSDictionary)
             {
-                retval = new PDPage((COSDictionary) page);
+                return new PDPage((COSDictionary) page);
             }
         }
-        return retval;
+        return null;
     }
 
     /**
@@ -97,16 +91,15 @@ public abstract class PDPageDestination extends PDDestination
      */
     public int getPageNumber()
     {
-        int retval = -1;
         if (array.size() > 0)
         {
             COSBase page = array.getObject(0);
             if (page instanceof COSNumber)
             {
-                retval = ((COSNumber) page).intValue();
+                return ((COSNumber) page).intValue();
             }
         }
-        return retval;
+        return -1;
     }
 
     /**
@@ -118,20 +111,19 @@ public abstract class PDPageDestination extends PDDestination
      */
     public int retrievePageNumber()
     {
-        int retval = -1;
         if (array.size() > 0)
         {
             COSBase page = array.getObject(0);
             if (page instanceof COSNumber)
             {
-                retval = ((COSNumber) page).intValue();
+                return ((COSNumber) page).intValue();
             }
-            else if (page instanceof COSDictionary)
+            if (page instanceof COSDictionary)
             {
                 return indexOfPageTree((COSDictionary) page);
             }
         }
-        return retval;
+        return -1;
     }
 
     // climb up the page tree up to the top to be able to call PageTree.indexOf for a page dictionary
@@ -172,5 +164,12 @@ public abstract class PDPageDestination extends PDDestination
     {
         return array;
     }
+
+    /**
+     * Transforms the destination target coordinates based on the given transformation
+     *
+     * @param transformation
+     */
+    public abstract void transform(Matrix transformation);
 
 }

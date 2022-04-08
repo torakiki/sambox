@@ -16,10 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.interactive.annotation;
 
-import static java.util.Optional.ofNullable;
-
-import java.io.IOException;
-
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
@@ -30,6 +26,11 @@ import org.sejda.sambox.pdmodel.interactive.action.PDActionURI;
 import org.sejda.sambox.pdmodel.interactive.annotation.handlers.PDAppearanceHandler;
 import org.sejda.sambox.pdmodel.interactive.annotation.handlers.PDLinkAppearanceHandler;
 import org.sejda.sambox.pdmodel.interactive.documentnavigation.destination.PDDestination;
+import org.sejda.sambox.pdmodel.interactive.documentnavigation.destination.WithActionOrDestination;
+
+import java.io.IOException;
+
+import static java.util.Optional.ofNullable;
 
 /**
  * This is the class that represents a link annotation.
@@ -37,7 +38,7 @@ import org.sejda.sambox.pdmodel.interactive.documentnavigation.destination.PDDes
  * @author Ben Litchfield
  * @author Paul King
  */
-public class PDAnnotationLink extends PDAnnotation
+public class PDAnnotationLink extends PDAnnotation implements WithActionOrDestination
 {
     private PDAppearanceHandler customAppearanceHandler;
 
@@ -85,18 +86,19 @@ public class PDAnnotationLink extends PDAnnotation
      * Get the action to be performed when this annotation is to be activated.
      *
      * @return The action to be performed when this annotation is activated.
-     *
+     * <p>
      * TODO not all annotations have an A entry
      */
     public PDAction getAction()
     {
-        COSDictionary action = (COSDictionary) this.getCOSObject().getDictionaryObject(COSName.A);
+        COSDictionary action = this.getCOSObject()
+                .getDictionaryObject(COSName.A, COSDictionary.class);
         return PDActionFactory.createAction(action);
     }
 
     /**
      * Set the annotation action. As of PDF 1.6 this is only used for Widget Annotations
-     * 
+     *
      * @param action The annotation action. TODO not all annotations have an A entry
      */
     public void setAction(PDAction action)
@@ -190,7 +192,7 @@ public class PDAnnotationLink extends PDAnnotation
      */
     public PDActionURI getPreviousURI()
     {
-        COSDictionary pa = (COSDictionary) getCOSObject().getDictionaryObject("PA");
+        COSDictionary pa = getCOSObject().getDictionaryObject("PA", COSDictionary.class);
         if (pa != null)
         {
             return new PDActionURI(pa);
@@ -199,7 +201,8 @@ public class PDAnnotationLink extends PDAnnotation
     }
 
     /**
-     * This will set the set of quadpoints which encompass the areas of this annotation which will activate.
+     * This will set the set of quadpoints which encompass the areas of this annotation which will
+     * activate.
      *
      * @param quadPoints an array representing the set of area covered.
      */
@@ -223,7 +226,7 @@ public class PDAnnotationLink extends PDAnnotation
 
     /**
      * Set a custom appearance handler for generating the annotations appearance streams.
-     * 
+     *
      * @param appearanceHandler
      */
     public void setCustomAppearanceHandler(PDAppearanceHandler appearanceHandler)

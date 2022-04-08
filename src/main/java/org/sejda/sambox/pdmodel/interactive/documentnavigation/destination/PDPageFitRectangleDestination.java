@@ -19,10 +19,14 @@ package org.sejda.sambox.pdmodel.interactive.documentnavigation.destination;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.util.Matrix;
+
+import java.awt.geom.Point2D;
 
 /**
- * This represents a destination to a page at a y location and the width is magnified to just fit on
- * the screen.
+ * Display the page designated by page, with its contents magnified just enough to fit the rectangle
+ * specified by the coordinates left, bottom, right, and top entirely within the window both
+ * horizontally and vertically
  *
  * @author Ben Litchfield
  */
@@ -33,9 +37,6 @@ public class PDPageFitRectangleDestination extends PDPageDestination
      */
     protected static final String TYPE = "FitR";
 
-    /**
-     * Default constructor.
-     */
     public PDPageFitRectangleDestination()
     {
         array.growToSize(6);
@@ -169,5 +170,16 @@ public class PDPageFitRectangleDestination extends PDPageDestination
         {
             array.set(5, COSInteger.get(y));
         }
+    }
+
+    @Override
+    public void transform(Matrix transformation)
+    {
+        Point2D.Float newCoord = transformation.transformPoint(getLeft(), getTop());
+        setLeft((int) newCoord.x);
+        setTop((int) newCoord.y);
+        Point2D.Float newCoord1 = transformation.transformPoint(getRight(), getBottom());
+        setRight((int) newCoord1.x);
+        setBottom((int) newCoord1.y);
     }
 }

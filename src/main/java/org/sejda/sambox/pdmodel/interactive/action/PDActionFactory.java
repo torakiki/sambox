@@ -23,7 +23,7 @@ import org.sejda.sambox.cos.COSName;
  * This class will take a dictionary and determine which type of action to create.
  *
  * @author Ben Litchfield
- * 
+ *
  */
 public final class PDActionFactory
 {
@@ -99,7 +99,7 @@ public final class PDActionFactory
             {
                 return new PDActionThread(action);
             }
-            else if (PDActionEmbeddedGoTo.SUB_TYPE.equals(type))
+            if (PDActionEmbeddedGoTo.SUB_TYPE.equals(type))
             {
                 return new PDActionEmbeddedGoTo(action);
             }
