@@ -16,14 +16,17 @@
  */
 package org.sejda.sambox.pdmodel.interactive.documentnavigation.outline;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.StreamSupport;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 /**
  * @author Andrea Vacondio
@@ -93,25 +96,13 @@ public class PDDocumentOutlineTest
         
         return outline;
     }
-    
-    private PDOutlineItem find(PDOutlineNode node, String title)
+
+    private PDOutlineItem find(PDDocumentOutline outline, String title)
     {
-        if(node instanceof PDOutlineItem) {
-            PDOutlineItem item = (PDOutlineItem) node;
-            if (title.equals(item.getTitle())) {
-                return item;
-            }
-        }
-        
-        for (PDOutlineItem child: node.children()){
-            PDOutlineItem result = find(child, title); 
-            if (result != null)
-            {
-                return result; 
-            }
-        }
-        
-        return null;
+        return StreamSupport.stream(
+                        Spliterators.spliteratorUnknownSize(new PDOutlineTreeIterator(outline),
+                                Spliterator.ORDERED | Spliterator.NONNULL), false)
+                .filter(item -> title.equals(item.getTitle())).findFirst().orElse(null);
     }
 
     private String asString(PDOutlineNode node)
