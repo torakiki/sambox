@@ -212,6 +212,14 @@ public class PDDocumentOutlineTest
     }
 
     @Test
+    public void insertLastChildIndexLargerThanLast() {
+        PDDocumentOutline outline = createTestOutline();
+        find(outline, "Europe").addAtPosition(createOutlineItem("Spain"), 300);
+
+        assertOutline(outline, "[Europe [Netherlands Italy France Spain ] Asia [Japan India Korea ] Antarctica ]");
+    }
+
+    @Test
     public void insertSecondChild() {
         PDDocumentOutline outline = createTestOutline();
         find(outline, "Europe").addAtPosition(createOutlineItem("Spain"), 1);

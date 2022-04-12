@@ -196,12 +196,16 @@ public abstract class PDOutlineNode extends PDDictionaryWrapper
                     setFirstChild(newChild);
                 }    
             }
-            else if (currentIndex + 1 == index)
+            else if (currentIndex + 1 <= index)
             {
                 // newChild is inserted after last item, current
                 newChild.setPreviousSibling(current);
                 current.setNextSibling(newChild);
                 setLastChild(newChild);
+            } 
+            else
+            {
+                throw new RuntimeException("Cannot insert at: currentIndex: " + currentIndex + " index: " + index);
             }
         }
         else
