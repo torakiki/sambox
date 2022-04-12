@@ -47,8 +47,8 @@ public final class PDCheckBox extends PDButton
      * Constructor.
      *
      * @param acroForm The form that this field is part of.
-     * @param field    the PDF object to represent as a field.
-     * @param parent   the parent node of the node
+     * @param field the PDF object to represent as a field.
+     * @param parent the parent node of the node
      */
     PDCheckBox(PDAcroForm acroForm, COSDictionary field, PDNonTerminalField parent)
     {
@@ -106,19 +106,13 @@ public final class PDCheckBox extends PDButton
      */
     public String getOnValue()
     {
-        List<String> exportValues = getExportValues();
-        if (exportValues.size() > 0)
-        {
-            return exportValues.get(0);
-        }
-
         PDAnnotationWidget widget = this.getWidgets().get(0);
         PDAppearanceDictionary apDictionary = widget.getAppearance();
 
         if (apDictionary != null)
         {
             PDAppearanceEntry normalAppearance = apDictionary.getNormalAppearance();
-            if (normalAppearance != null)
+            if (normalAppearance != null && normalAppearance.isSubDictionary())
             {
                 Set<COSName> entries = normalAppearance.getSubDictionary().keySet();
                 for (COSName entry : entries)
@@ -132,5 +126,4 @@ public final class PDCheckBox extends PDButton
         }
         return "Yes";
     }
-
 }

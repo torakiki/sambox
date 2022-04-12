@@ -212,7 +212,7 @@ public class TestRadioButtons
             assertEquals("Off", field.getValue(), "Initially no option shall be selected");
             // set the field to a valid export value
             field.setValue("Checking");
-            assertEquals("Checking", field.getValue(),
+            assertEquals("Checking", field.getValueAsString(),
                     "setting by the export value should also return that");
         }
     }
@@ -268,7 +268,7 @@ public class TestRadioButtons
             assertEquals("Off", field.getValue(), "Initially no option shall be selected");
             // set the field to a valid index
             field.setValue(4);
-            assertEquals("Checking", field.getValue(),
+            assertEquals("Checking", field.getValueAsString(),
                     "Setting by the index value should return the corresponding export");
         }
     }

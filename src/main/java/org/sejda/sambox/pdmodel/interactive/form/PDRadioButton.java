@@ -32,23 +32,28 @@ import java.util.Set;
  */
 public final class PDRadioButton extends PDButton
 {
+    /**
+     * A Ff flag.
+     */
+    private static final int FLAG_NO_TOGGLE_TO_OFF = 1 << 14;
 
     /**
-     * @param acroForm The acroform.
      * @see PDField#PDField(PDAcroForm)
+     *
+     * @param acroForm The acroform.
      */
     public PDRadioButton(PDAcroForm acroForm)
     {
         super(acroForm);
-        setRadioButton(true);
+        getCOSObject().setFlag(COSName.FF, FLAG_RADIO, true);
     }
 
     /**
      * Constructor.
      *
      * @param acroForm The form that this field is part of.
-     * @param field    the PDF object to represent as a field.
-     * @param parent   the parent node of the node
+     * @param field the PDF object to represent as a field.
+     * @param parent the parent node of the node
      */
     PDRadioButton(PDAcroForm acroForm, COSDictionary field, PDNonTerminalField parent)
     {
@@ -96,7 +101,7 @@ public final class PDRadioButton extends PDButton
             {
                 return idx;
             }
-            idx++;
+            idx ++;
         }
         return -1;
     }
@@ -127,16 +132,16 @@ public final class PDRadioButton extends PDButton
             selectedExportValues.add(getValue());
             return selectedExportValues;
         }
-        String fieldValue = getValue();
-        int idx = 0;
-        for (String onValue : onValues)
-        {
-            if (onValue.compareTo(fieldValue) == 0)
+            String fieldValue = getValue();
+            int idx = 0;
+            for (String onValue : onValues)
             {
-                selectedExportValues.add(exportValues.get(idx));
+                if (onValue.compareTo(fieldValue) == 0)
+                {
+                    selectedExportValues.add(exportValues.get(idx));
+                }
+                ++idx;
             }
-            ++idx;
-        }
-        return selectedExportValues;
+            return selectedExportValues;
     }
 }

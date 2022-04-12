@@ -17,29 +17,25 @@
 package org.sejda.sambox.pdmodel.interactive.form;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.PDDocument;
-import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
-import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceDictionary;
-import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceEntry;
-import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceStream;
+import org.sejda.sambox.pdmodel.PDPage;
+import org.sejda.sambox.pdmodel.interactive.annotation.*;
 
+import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
+import java.util.*;
+import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.*;
 
 /**
  * Test for the PDButton class.
@@ -56,6 +52,7 @@ public class PDButtonTest
     public void setUp() throws IOException
     {
         document = new PDDocument();
+        document.addPage(new PDPage());
         acroForm = new PDAcroForm(document);
 
         acrobatDocument = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
@@ -154,18 +151,11 @@ public class PDButtonTest
 
             PDRadioButton radioButton = (PDRadioButton) document.getDocumentCatalog().getAcroForm()
                     .getField("Choice_Caption_0wUBrGuJDKIWD9g7kWcKpg");
+
+            radioButton.setIgnoreExportOptions(true);
+
             radioButton.setValue("1");
-            radioButton.setValue("Second Choice");
-
-            assertEquals("Export value does not exist in normal appearance. Don't export value",
-                    "Second Choice", radioButton.getValue());
-
-            assertEquals("First widget should be Off", COSName.Off,
-                    radioButton.getWidgets().get(0).getCOSObject().getItem(COSName.AS));
-
-            assertEquals("Second widget should be set to 1", COSName.getPDFName("1"),
-                    radioButton.getWidgets().get(1).getCOSObject().getItem(COSName.AS));
-
+            assertFieldV_widgetAS(radioButton, "1", "Off", "1");
         }
     }
 
@@ -206,9 +196,11 @@ public class PDButtonTest
 
             PDCheckBox checkbox = (PDCheckBox) document.getDocumentCatalog().getAcroForm()
                     .getField("Check Box3");
+            
+            checkbox.setIgnoreExportOptions(true);
 
             checkbox.check();
-            assertEquals("是", checkbox.getValue());
+            assertFieldV_widgetAS(checkbox, "0", "0");
         }
     }
 
@@ -224,6 +216,30 @@ public class PDButtonTest
                     .getField("English IELTS");
 
             assertEquals(checkbox.getOnValues().size(), 0);
+            assertFalse(checkbox.getWidgets().get(0).getAppearance().getNormalAppearance().isSubDictionary());
+            assertEquals(checkbox.getNormalAppearanceValues().size(), 0);
+            assertFalse(checkbox.isChecked());
+            assertFieldV_widgetAS(checkbox, "Off", "Off");
+            
+            checkbox.setIgnoreExportOptions(true);
+
+            RuntimeException thrown = Assertions.assertThrows(
+                    RuntimeException.class, () -> checkbox.check());
+
+            assertThat(thrown.getMessage(), containsString(
+                    "Check/radio has a single normal appearance, might look the same when checked or not"));
+
+//            checkbox.check();
+//            assertFieldV_widgetAS(checkbox, "Yes", "Yes");
+//            assertTrue(checkbox.isChecked());
+//
+//            checkbox.unCheck();
+//            assertFieldV_widgetAS(checkbox, "Off", "Off");
+//            assertFalse(checkbox.isChecked());
+//
+//            checkbox.setValue("Yes");
+//            assertFieldV_widgetAS(checkbox, "Yes", "Yes");
+//            assertTrue(checkbox.isChecked());
         }
     }
 
@@ -316,7 +332,9 @@ public class PDButtonTest
     {
         PDCheckBox checkbox = (PDCheckBox) acrobatAcroForm.getField("Checkbox");
         checkbox.setExportValues(Collections.singletonList("exportValue1"));
-        assertTrue(checkbox.getExportValues().size() > 0);
+        assertEquals(checkbox.getExportValues(), Arrays.asList("exportValue1"));
+
+        checkbox.setIgnoreExportOptions(true);
 
         checkbox.unCheck();
         assertEquals(checkbox.getValue(), COSName.Off.getName());
@@ -325,6 +343,13 @@ public class PDButtonTest
         checkbox.check();
         assertEquals(checkbox.getValue(), "Yes");
         assertEquals(checkbox.isChecked(), true);
+
+        checkbox.setIgnoreExportOptions(false);
+        assertEquals(checkbox.getOnValues(), new HashSet<>(Arrays.asList("Yes", "exportValue1")));
+        
+        checkbox.setIgnoreExportOptions(true);
+        assertEquals(checkbox.getOnValues(), new HashSet<>(Arrays.asList("Yes")));
+        assertEquals(checkbox.getOnValues(), new HashSet<>(Arrays.asList("Yes")));
     }
 
     @Test
@@ -523,83 +548,117 @@ public class PDButtonTest
     @Test
     public void checkBoxWithoutAppearances() throws IOException
     {
-        PDCheckBox checkBox = new PDCheckBox(acroForm);
-        assertNull(checkBox.getWidgets().get(0).getAppearance());
-        assertEquals(checkBox.getWidgets().size(), 1);
-        assertEquals(checkBox.getOnValue(), "Yes");
+        try(PDDocument doc = parseDoc("/org/sejda/sambox/pdmodel/interactive/form/checkbox-without-appearances.pdf"))
+        {
+            PDCheckBox checkBox = (PDCheckBox)doc.getDocumentCatalog().getAcroForm().getField("checkbox_1vpsz");
 
-        checkBox.check();
+            assertNull(checkBox.getWidgets().get(0).getAppearance());
+            assertEquals(checkBox.getWidgets().size(), 1);
+            assertEquals(checkBox.getOnValue(), "Yes");
 
-        assertTrue(checkBox.isChecked());
-        assertEquals(checkBox.getWidgets().get(0).getCOSObject().getCOSName(COSName.AS),
-                COSName.YES);
+            checkBox.setIgnoreExportOptions(true);
 
-        checkBox.unCheck();
+            checkBox.check();
+            
+            assertTrue(checkBox.isChecked());
+            assertEquals(COSName.YES, checkBox.getWidgets().get(0).getCOSObject().getCOSName(COSName.AS));
+            assertEquals(COSName.YES, checkBox.getCOSObject().getCOSName(COSName.V));
+            
+            checkBox.unCheck();
 
-        assertFalse(checkBox.isChecked());
-
-        assertEquals(checkBox.getWidgets().get(0).getCOSObject().getCOSName(COSName.AS),
-                COSName.Off);
+            assertFalse(checkBox.isChecked());
+            assertFieldV_widgetAS(checkBox, "Off", "Off");
+        }
     }
-
+    
     @Test
     public void radioButtonWithOneWidgetAndMoreExportValues() throws IOException
     {
-        PDRadioButton radio = new PDRadioButton(acroForm);
-        radio.setExportValues(Arrays.asList("0", "Yes", "Yes"));
+        try(PDDocument doc = parseDoc("/org/sejda/sambox/pdmodel/interactive/form/radio-field-one-widget-more-export-values.pdf")){
+            PDRadioButton radio = (PDRadioButton)doc.getDocumentCatalog().getAcroForm().getField("radio_group_test");
 
-        PDAnnotationWidget widget = new PDAnnotationWidget();
-        PDAppearanceDictionary appearance = new PDAppearanceDictionary();
+            assertEquals(radio.getWidgets().size(), 1);
+            assertEquals(radio.getExportValues(), Arrays.asList("0", "Yes", "Yes"));
+            assertEquals(radio.getValue(), "Off");
 
-        COSDictionary normalAppearanceDict = new COSDictionary();
-        normalAppearanceDict.putIfAbsent(COSName.getPDFName("0"), new PDAppearanceStream());
-        PDAppearanceEntry normalAppearance = new PDAppearanceEntry(normalAppearanceDict);
+            radio.setIgnoreExportOptions(true);
 
-        appearance.setNormalAppearance(normalAppearance);
-        widget.setAppearance(appearance);
-
-        radio.setWidgets(Arrays.asList(widget));
-
-        assertEquals(radio.getWidgets().size(), 1);
-        assertEquals(radio.getOnValues(), new HashSet<>(Arrays.asList("0", "Yes", "Yes")));
-        assertEquals(radio.getValue(), "Off");
-
-        radio.setValueIgnoreExportOptions("0");
-        assertEquals(radio.getValue(), "0");
+            radio.setValue("Yes");
+            
+            assertEquals(radio.getValue(), "Yes");
+            assertFieldV_widgetAS(radio, "Yes", "Yes");
+        }
+        
     }
 
     @Test
-    public void radioButtonWithOneWidgetAndMoreExportValues_Failure() throws IOException
+    public void radioButtonWithOneWidgetAndMoreExportValuesIntegers() throws IOException
     {
-        PDRadioButton radio = new PDRadioButton(acroForm);
-        radio.setExportValues(Arrays.asList("0", "1"));
+        try(PDDocument doc = parseDoc("/org/sejda/sambox/pdmodel/interactive/form/radio-field-more-export-values-integers.pdf")) {
+         
+            PDRadioButton radio = (PDRadioButton) doc.getDocumentCatalog().getAcroForm().getField("radio_group_test");
 
-        PDAnnotationWidget widget = new PDAnnotationWidget();
-        PDAppearanceDictionary appearance = new PDAppearanceDictionary();
+            radio.setIgnoreExportOptions(true);
+            
+            assertEquals(radio.getWidgets().size(), 1);
+            assertEquals(radio.getExportValues(), Arrays.asList("0", "1"));
+            assertEquals(radio.getValue(), "Off");
 
-        COSDictionary normalAppearanceDict = new COSDictionary();
-        normalAppearanceDict.putIfAbsent(COSName.getPDFName("0"), new PDAppearanceStream());
-        PDAppearanceEntry normalAppearance = new PDAppearanceEntry(normalAppearanceDict);
-
-        appearance.setNormalAppearance(normalAppearance);
-        widget.setAppearance(appearance);
-
-        radio.setWidgets(Arrays.asList(widget));
-
-        assertEquals(radio.getWidgets().size(), 1);
-        assertEquals(radio.getOnValues(), new HashSet<>(Arrays.asList("0", "1")));
-        assertEquals(radio.getValue(), "Off");
-
-        try
-        {
-            radio.setValueIgnoreExportOptions("1");
-            Assert.fail("Expected failure");
-
+            radio.setValue("1");
+            
+            assertEquals(radio.getValue(), "1");
+            assertFieldV_widgetAS(radio, "1", "1");
         }
-        catch (IllegalArgumentException ex)
+    }
+
+    @Test
+    public void testExportOptionsAreIntegers() throws IOException {
+        try (PDDocument document = parseDoc("/org/sejda/sambox/pdmodel/interactive/form/radio-field-export-values-integers.pdf")) 
         {
-            Assert.assertEquals(ex.getMessage(),
-                    "The number of options doesn't match the number of widgets");
+            PDAcroForm acroForm = document.getDocumentCatalog().getAcroForm();
+            PDRadioButton field = (PDRadioButton) acroForm.getField("radio_group_test");
+            
+            field.setIgnoreExportOptions(true);
+            
+            field.setValue("1");
+            assertFieldV_widgetAS(field, "1", "1", "Off");
+
+            field.setValue("2");
+            assertFieldV_widgetAS(field, "2", "Off", "2");
+        }
+    }
+    
+    @Test
+    public void multipleCheckboxesSameName() throws IOException {
+        try (PDDocument document = parseDoc("/org/sejda/sambox/pdmodel/interactive/form/multiple-checkboxes-same-name.pdf"))
+        {
+            PDAcroForm acroForm = document.getDocumentCatalog().getAcroForm();
+            PDCheckBox field = (PDCheckBox) acroForm.getField("checkbox_test");
+
+            field.setIgnoreExportOptions(true);
+
+            field.setValue("Yes");
+            assertFieldV_widgetAS(field, "Yes", "Yes", "Yes", "Off", "Off");
+
+            field.setValue("No");
+            assertFieldV_widgetAS(field, "No", "Off", "Off", "No", "No");
+        }
+    }
+
+    @Test
+    public void multipleRadiosSameName() throws IOException {
+        try (PDDocument document = parseDoc("/org/sejda/sambox/pdmodel/interactive/form/multiple-radios-same-name.pdf"))
+        {
+            PDAcroForm acroForm = document.getDocumentCatalog().getAcroForm();
+            PDRadioButton field = (PDRadioButton) acroForm.getField("radio_group_test");
+
+            field.setIgnoreExportOptions(true);
+
+            field.setValue("Value1");
+            assertFieldV_widgetAS(field, "Value1", "Value1", "Off", "Off", "Value1", "Off");
+
+            field.setValue("Value3");
+            assertFieldV_widgetAS(field, "Value3", "Off", "Off", "Value3", "Off", "Off");
         }
     }
 
@@ -608,6 +667,29 @@ public class PDButtonTest
     {
         document.close();
         acrobatDocument.close();
+    }
+    
+    private PDDocument parseDoc(String res) throws IOException {
+        if (new File(res).exists()) 
+        {
+            return PDFParser.parse(SeekableSources.seekableSourceFrom(
+                    new File(res)));
+        } else 
+        {
+            return PDFParser.parse(SeekableSources.onTempFileSeekableSourceFrom(
+                    getClass().getResourceAsStream(res)));
+        }
+    }
+    
+    private void assertFieldV_widgetAS(PDField field, String expectedV, String... expectedASs)
+    {
+        assertEquals("Field V", COSName.getPDFName(expectedV), field.getInheritableAttribute(COSName.V));
+        List<String> actualASList = field.getWidgets().stream()
+                .map(w -> w.getCOSObject().getCOSName(COSName.AS).getName()).collect(Collectors.toList());
+        
+        List<String> expectedASList = Arrays.asList(expectedASs);
+        
+        assertEquals("Widgets AS", expectedASList, actualASList);    
     }
 
 }
