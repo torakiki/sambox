@@ -16,6 +16,9 @@
  */
 package org.sejda.sambox.pdmodel.graphics.pattern;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.sejda.sambox.contentstream.PDContentStream;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
@@ -25,9 +28,6 @@ import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.ResourceCache;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.common.PDStream;
-
-import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * A tiling pattern dictionary.
@@ -65,8 +65,10 @@ public class PDTilingPattern extends PDAbstractPattern implements PDContentStrea
      */
     public PDTilingPattern()
     {
-        super();
+        super(new COSStream());
+        getCOSObject().setName(COSName.TYPE, COSName.PATTERN.getName());
         getCOSObject().setInt(COSName.PATTERN_TYPE, PDAbstractPattern.TYPE_TILING_PATTERN);
+
         // Resources required per PDF specification; when missing, pattern is not displayed in Adobe Reader
         setResources(new PDResources());
         resourceCache = null;
