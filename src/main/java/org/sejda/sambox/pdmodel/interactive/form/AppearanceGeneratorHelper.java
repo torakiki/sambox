@@ -558,7 +558,8 @@ public class AppearanceGeneratorHelper
         {
             float newFontSize = calculateFontSize(font, contentRect);
             // avoid increasing the font size, if one was already specified
-            if (newFontSize < fontSize || fontSize == 0)
+            // newFontSize can be infinite when contentRect width/height or string width are 0
+            if (Float.isFinite(newFontSize) && (newFontSize < fontSize || fontSize == 0))
             {
                 fontSize = newFontSize;
             }
