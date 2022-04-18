@@ -71,7 +71,7 @@ public class PDAcroFormFromAnnotsTest
                     .getDictionaryObject(COSName.ACRO_FORM);
             COSArray cosFields = cosAcroForm.getDictionaryObject(COSName.FIELDS, COSArray.class);
             assertEquals("Initially there shall be 0 fields", 0, cosFields.size());
-            PDAcroForm acroForm = catalog.getAcroForm();
+            PDAcroForm acroForm = catalog.getAcroFromWithFixups();
             assertEquals("After rebuild there shall be " + numFormFieldsByAcrobat + " fields",
                     numFormFieldsByAcrobat, acroForm.getFields().size());
         }
@@ -115,7 +115,7 @@ public class PDAcroFormFromAnnotsTest
             cosAcroForm.setItem(COSName.NEED_APPEARANCES, COSBoolean.TRUE);
             COSArray cosFields = cosAcroForm.getDictionaryObject(COSName.FIELDS, COSArray.class);
             assertEquals("Initially there shall be 0 fields", 0, cosFields.size());
-            PDAcroForm acroForm = catalog.getAcroForm();
+            PDAcroForm acroForm = catalog.getAcroFromWithFixups();
             assertEquals("After rebuild there shall be " + numFormFieldsByAcrobat + " fields",
                     numFormFieldsByAcrobat, acroForm.getFields().size());
 

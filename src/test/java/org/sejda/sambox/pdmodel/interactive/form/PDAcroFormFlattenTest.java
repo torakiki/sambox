@@ -295,9 +295,6 @@ public class PDAcroFormFlattenTest
             throws IOException
     {
         PDDocument document = PDDocument.load(inputFile);
-        // loading the acroform performs some changes that will "fix" broken form fields
-        // see test for PDFBOX-3587 (OpenOfficeForm.pdf)
-        document.getDocumentCatalog().getAcroForm();
         
         String outputPrefix = inputFile.getName() + "-";
         int numPages = document.getNumberOfPages();

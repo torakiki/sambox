@@ -29,9 +29,6 @@ import org.sejda.sambox.pdmodel.PDPageContentStream.AppendMode;
 import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.common.PDDictionaryWrapper;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
-import org.sejda.sambox.pdmodel.fixup.AcroFormAppearancesGenerator;
-import org.sejda.sambox.pdmodel.fixup.AcroFormDefaultValuesGenerator;
-import org.sejda.sambox.pdmodel.fixup.AcroFormOrphanWindgetsGenerator;
 import org.sejda.sambox.pdmodel.graphics.form.PDFormXObject;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotation;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
@@ -90,8 +87,6 @@ public final class PDAcroForm extends PDDictionaryWrapper
     {
         super(form);
         this.document = document;
-        new AcroFormDefaultValuesGenerator().andThen(new AcroFormOrphanWindgetsGenerator())
-                .andThen(new AcroFormAppearancesGenerator()).accept(this);
     }
 
     /**

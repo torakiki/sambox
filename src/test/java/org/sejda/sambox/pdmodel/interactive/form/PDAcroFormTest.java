@@ -366,7 +366,7 @@ public class PDAcroFormTest
             PDDocumentCatalog documentCatalog = document.getDocumentCatalog();
 
             // this call shall trigger the generation of missing information
-            PDAcroForm theAcroForm = documentCatalog.getAcroForm();
+            PDAcroForm theAcroForm = documentCatalog.getAcroFromWithFixups();
 
             // ensure that the missing information has been generated
             // DA entry
@@ -409,14 +409,14 @@ public class PDAcroFormTest
             assertNull(defaultResources.getFont(COSName.ZA_DB));
 
             // getting AcroForm sets the two fonts
-            acroForm2 = document.getDocumentCatalog().getAcroForm();
+            acroForm2 = document.getDocumentCatalog().getAcroFromWithFixups();
             defaultResources = acroForm2.getDefaultResources();
             assertNotNull(defaultResources.getFont(COSName.HELV));
             assertNotNull(defaultResources.getFont(COSName.ZA_DB));
 
             // repeat with a new AcroForm (to delete AcroForm cache) and thus missing /DR
             document.getDocumentCatalog().setAcroForm(new PDAcroForm(document));
-            acroForm2 = document.getDocumentCatalog().getAcroForm();
+            acroForm2 = document.getDocumentCatalog().getAcroFromWithFixups();
             defaultResources = acroForm2.getDefaultResources();
             PDFont helv = defaultResources.getFont(COSName.HELV);
             PDFont zadb = defaultResources.getFont(COSName.ZA_DB);

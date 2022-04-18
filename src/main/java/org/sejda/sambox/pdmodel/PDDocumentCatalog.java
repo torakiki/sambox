@@ -28,6 +28,8 @@ import org.sejda.sambox.pdmodel.common.PDMetadata;
 import org.sejda.sambox.pdmodel.common.PDPageLabels;
 import org.sejda.sambox.pdmodel.documentinterchange.logicalstructure.PDMarkInfo;
 import org.sejda.sambox.pdmodel.documentinterchange.logicalstructure.PDStructureTreeRoot;
+import org.sejda.sambox.pdmodel.fixup.AcroFormDefaultFixup;
+import org.sejda.sambox.pdmodel.fixup.PDDocumentFixup;
 import org.sejda.sambox.pdmodel.graphics.color.PDOutputIntent;
 import org.sejda.sambox.pdmodel.graphics.optionalcontent.PDOptionalContentProperties;
 import org.sejda.sambox.pdmodel.interactive.action.PDActionFactory;
@@ -62,6 +64,7 @@ public class PDDocumentCatalog implements COSObjectable
 
     private final COSDictionary root;
     private final PDDocument document;
+    private PDDocumentFixup acroFormFixupApplied;
     private PDAcroForm cachedAcroForm;
 
     /**
@@ -107,11 +110,45 @@ public class PDDocumentCatalog implements COSObjectable
      */
     public PDAcroForm getAcroForm()
     {
+        // SAMBOX: by default we apply no fixups
+        //return getAcroForm(new AcroFormDefaultFixup(document));
+        return getAcroForm(null);
+    }
+    
+    public PDAcroForm getAcroFromWithFixups()
+    {
+        return getAcroForm(new AcroFormDefaultFixup(document));
+    }
+
+    /**
+     * Get the documents AcroForm. This will return null if no AcroForm is part of the document.
+     *
+     * Dependent on setting <code>acroFormFixup</code> some fixing/changes will be done to the AcroForm.
+     * If you need to ensure that there are no fixes applied call <code>getAcroForm</code> with <code>null</code>.
+     *
+     * Using <code>getAcroForm(PDDocumentFixup acroFormFixup)</code> might change the original content and
+     * subsequent calls with <code>getAcroForm(null)</code> will return the changed content.
+     *
+     * @param acroFormFixup the fix up action or null
+     * @return The document's AcroForm.
+     */
+    public PDAcroForm getAcroForm(PDDocumentFixup acroFormFixup)
+    {
+        if (acroFormFixup != null && acroFormFixup != acroFormFixupApplied)
+        {
+            acroFormFixup.apply();
+            cachedAcroForm = null;
+            acroFormFixupApplied =  acroFormFixup;
+        }
+        else if (acroFormFixupApplied != null)
+        {
+            LOG.debug("AcroForm content has already been retrieved with fixes applied - original content changed because of that");
+        }
+
         if (cachedAcroForm == null)
         {
-            cachedAcroForm = ofNullable(
-                    root.getDictionaryObject(COSName.ACRO_FORM, COSDictionary.class)).map(
-                    d -> new PDAcroForm(document, d)).orElse(null);
+            COSDictionary dict = (COSDictionary)root.getDictionaryObject(COSName.ACRO_FORM);
+            cachedAcroForm = dict == null ? null : new PDAcroForm(document, dict);
         }
         return cachedAcroForm;
     }
