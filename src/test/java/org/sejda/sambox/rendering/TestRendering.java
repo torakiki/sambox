@@ -36,7 +36,7 @@ import org.sejda.sambox.pdmodel.PDDocument;
  * Functional test for PDF rendering. This test simply tries to render a series of PDFs using PDFBox to make sure that
  * no exceptions are thrown.
  *
- * It does not attempt to detect if rendering is correct, see {@link org.sejda.sambox.rendering.TestPDFToImage}.
+ * It does not attempt to detect if rendering is correct, see {@link TestPDFToImageTest}.
  *
  * These tests should not run in parallel
  * http://stackoverflow.com/questions/26535842/multithreaded-jpeg-image-processing-in-java

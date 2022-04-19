@@ -24,7 +24,7 @@ import org.sejda.commons.util.IOUtils;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.PDDocument;
-import org.sejda.sambox.rendering.TestPDFToImage;
+import org.sejda.sambox.rendering.TestPDFToImageTest;
 
 import java.io.File;
 import java.io.IOException;
@@ -109,7 +109,7 @@ public class AlignmentTest
         // compare rendering
         File file = new File(OUT_DIR, NAME_OF_PDF);
         document.writeTo(file);
-        TestPDFToImage testPDFToImage = new TestPDFToImage(TestPDFToImage.class.getName());
+        TestPDFToImageTest testPDFToImage = new TestPDFToImageTest(TestPDFToImageTest.class.getName());
         if (!testPDFToImage.doTestFile(file, IN_DIR.getAbsolutePath(), OUT_DIR.getAbsolutePath()))
         {
             Assert.fail(

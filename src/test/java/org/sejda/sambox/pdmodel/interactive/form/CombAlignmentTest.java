@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.PDDocument;
-import org.sejda.sambox.rendering.TestPDFToImage;
+import org.sejda.sambox.rendering.TestPDFToImageTest;
 
 import java.io.File;
 import java.io.IOException;
@@ -64,7 +64,7 @@ public class CombAlignmentTest
             // compare rendering
             document.writeTo(outFile);
         }
-        TestPDFToImage testPDFToImage = new TestPDFToImage(TestPDFToImage.class.getName());
+        TestPDFToImageTest testPDFToImage = new TestPDFToImageTest(TestPDFToImageTest.class.getName());
         if (!testPDFToImage.doTestFile(outFile, IN_DIR.getAbsolutePath(),
                 OUT_DIR.getAbsolutePath()))
         {

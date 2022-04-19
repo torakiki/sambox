@@ -28,13 +28,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
-import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -63,13 +61,13 @@ import static org.junit.Assert.fail;
  * @author Tilman Hausherr
  */
 @RunWith(ParallelParameterized.class)
-public class TestPDFToImage
+public class TestPDFToImageTest
 {
 
     /**
      * Logger instance.
      */
-    private static final Logger LOG = LoggerFactory.getLogger(TestPDFToImage.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TestPDFToImageTest.class);
 
     static String inDir = "src/test/resources/input/rendering";
     static String outDir = "target/test-output/rendering/";
@@ -103,7 +101,7 @@ public class TestPDFToImage
      *
      * @throws IOException If there is an error creating the test.
      */
-    public TestPDFToImage(String filename) throws IOException
+    public TestPDFToImageTest(String filename) throws IOException
     {
         this.filename = filename;
     }

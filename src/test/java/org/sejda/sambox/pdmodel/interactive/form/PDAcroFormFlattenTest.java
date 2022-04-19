@@ -22,7 +22,7 @@ import org.sejda.io.SeekableSources;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.rendering.PDFRenderer;
-import org.sejda.sambox.rendering.TestPDFToImage;
+import org.sejda.sambox.rendering.TestPDFToImageTest;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -279,7 +279,7 @@ public class PDAcroFormFlattenTest
         }
 
         // compare rendering
-        TestPDFToImage testPDFToImage = new TestPDFToImage(this.getClass().getName());
+        TestPDFToImageTest testPDFToImage = new TestPDFToImageTest(this.getClass().getName());
         if (!testPDFToImage.doTestFile(outputFile, IN_DIR, OUT_DIR))
         {
             System.out.println("Rendering of " + outputFile
