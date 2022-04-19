@@ -282,7 +282,6 @@ public class PDAcroFormFlattenTest
         TestPDFToImage testPDFToImage = new TestPDFToImage(this.getClass().getName());
         if (!testPDFToImage.doTestFile(outputFile, IN_DIR, OUT_DIR))
         {
-            // don't fail, rendering is different on different systems, result must be viewed manually
             System.out.println("Rendering of " + outputFile
                     + " failed or is not identical to expected rendering in "
                     + inputFile.getParent() + " directory;");

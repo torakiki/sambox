@@ -112,7 +112,6 @@ public class AlignmentTest
         TestPDFToImage testPDFToImage = new TestPDFToImage(TestPDFToImage.class.getName());
         if (!testPDFToImage.doTestFile(file, IN_DIR.getAbsolutePath(), OUT_DIR.getAbsolutePath()))
         {
-            // don't fail, rendering is different on different systems, result must be viewed manually
             Assert.fail(
                     "Rendering of " + file.getAbsolutePath() + " failed or is not identical to expected rendering in "
                             + IN_DIR + " directory");
