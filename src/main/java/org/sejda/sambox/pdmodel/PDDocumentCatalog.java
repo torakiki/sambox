@@ -29,6 +29,7 @@ import org.sejda.sambox.pdmodel.common.PDPageLabels;
 import org.sejda.sambox.pdmodel.documentinterchange.logicalstructure.PDMarkInfo;
 import org.sejda.sambox.pdmodel.documentinterchange.logicalstructure.PDStructureTreeRoot;
 import org.sejda.sambox.pdmodel.fixup.AcroFormDefaultFixup;
+import org.sejda.sambox.pdmodel.fixup.AcroFormDefaultSamboxFixup;
 import org.sejda.sambox.pdmodel.fixup.PDDocumentFixup;
 import org.sejda.sambox.pdmodel.graphics.color.PDOutputIntent;
 import org.sejda.sambox.pdmodel.graphics.optionalcontent.PDOptionalContentProperties;
@@ -112,7 +113,7 @@ public class PDDocumentCatalog implements COSObjectable
     {
         // SAMBOX: by default we apply no fixups
         //return getAcroForm(new AcroFormDefaultFixup(document));
-        return getAcroForm(null);
+        return getAcroForm(new AcroFormDefaultSamboxFixup(document));
     }
     
     public PDAcroForm getAcroFromWithFixups()
