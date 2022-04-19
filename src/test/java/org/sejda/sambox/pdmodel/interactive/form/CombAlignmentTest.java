@@ -18,6 +18,7 @@ package org.sejda.sambox.pdmodel.interactive.form;
  * limitations under the License.
  */
 
+import org.junit.Assert;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.sejda.io.SeekableSources;
@@ -67,8 +68,7 @@ public class CombAlignmentTest
         if (!testPDFToImage.doTestFile(outFile, IN_DIR.getAbsolutePath(),
                 OUT_DIR.getAbsolutePath()))
         {
-            // don't fail, rendering is different on different systems, result must be viewed manually
-            System.err.println("Rendering of " + outFile
+            Assert.fail("Rendering of " + outFile
                     + " failed or is not identical to expected rendering in " + IN_DIR
                     + " directory");
         }
