@@ -453,13 +453,17 @@ public class AppearanceGeneratorHelper
         // the stream’s Resources dictionary
         defaultAppearance.copyNeededResourcesTo(appearanceStream);
 
+        // IMPORTANT: tokenize before opening stream for writing
+        // as .createUnfilteredStream() wipes all unsaved changes done to the stream in current session,
+        // for example by initializeAppearanceContent(), so we end up without borders for the widget
+        List<Object> tokens = tokenize(appearanceStream);
+
         // then replace the existing contents of the appearance stream from /Tx BMC
         // to the matching EMC
         try (ContentStreamWriter writer = new ContentStreamWriter(
                 from(appearanceStream.getCOSObject().createUnfilteredStream())))
         {
 
-            List<Object> tokens = tokenize(appearanceStream);
             int bmcIndex = tokens.indexOf(BMC);
             if (bmcIndex == -1)
             {

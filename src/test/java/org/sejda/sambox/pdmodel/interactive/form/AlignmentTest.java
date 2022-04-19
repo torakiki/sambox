@@ -17,6 +17,7 @@
 package org.sejda.sambox.pdmodel.interactive.form;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.sejda.commons.util.IOUtils;
@@ -112,8 +113,8 @@ public class AlignmentTest
         if (!testPDFToImage.doTestFile(file, IN_DIR.getAbsolutePath(), OUT_DIR.getAbsolutePath()))
         {
             // don't fail, rendering is different on different systems, result must be viewed manually
-            System.err.println(
-                    "Rendering of " + file + " failed or is not identical to expected rendering in "
+            Assert.fail(
+                    "Rendering of " + file.getAbsolutePath() + " failed or is not identical to expected rendering in "
                             + IN_DIR + " directory");
         }
     }
