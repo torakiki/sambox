@@ -387,11 +387,7 @@ final class DCTFilter extends Filter
             }
             return numChannelsItem.getAttribute("value");
         }
-        catch (IOException e)
-        {
-            return "";
-        }
-        catch (NegativeArraySizeException e)
+        catch (IOException | NegativeArraySizeException | ClassCastException e)
         {
             return "";
         }
