@@ -5,7 +5,7 @@
     <artifactId>sambox</artifactId>
     <packaging>jar</packaging>
     <name>sambox</name>
-    <version>2.4.7-SNAPSHOT</version>
+    <version>2.4.7</version>
 
     <description>An Apache PDFBox fork intended to be used as PDF processor for Sejda and PDFsam
         related projects
@@ -35,7 +35,7 @@
         <connection>scm:git:git@github.com:torakiki/sambox.git</connection>
         <developerConnection>scm:git:git@github.com:torakiki/sambox.git</developerConnection>
         <url>scm:git:git@github.com:torakiki/sambox.git</url>
-        <tag>HEAD</tag>
+        <tag>v2.4.7</tag>
     </scm>
 
     <developers>
