@@ -160,6 +160,23 @@ public class PDButtonTest
     }
 
     @Test
+    public void checkboxMultipleOnNormalAppearances() throws IOException {
+        try (PDDocument document = parseDoc("/org/sejda/sambox/pdmodel/interactive/form/checkbox-multiple-on-entries-normal-appearance.pdf")) {
+
+            PDCheckBox field = (PDCheckBox) document.getDocumentCatalog().getAcroForm()
+                    .getField("CheckBox_Captio_s897lNLPSLVG32zNkn2DGg");
+            
+            assertEquals(field.getWidgets().size(), 1);
+            PDAnnotationWidget widget = field.getWidgets().get(0);
+            
+            assertEquals(widget.getAppearance().getNormalAppearance().getSubDictionary().keySet(), 
+                    new HashSet<>(Arrays.asList(COSName.getPDFName("On"), COSName.Off, COSName.YES)));
+            
+            assertEquals(field.getNormalAppearanceValues(), Arrays.asList("On"));
+        }
+    }
+
+    @Test
     public void testRadioButtonWithOptionsThatDoMatchNormalAppearance() throws IOException
     {
         try (PDDocument document = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(

@@ -29,11 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -427,7 +423,9 @@ public abstract class PDButton extends PDTerminalField
             PDAppearanceEntry normalAppearance = apDictionary.getNormalAppearance();
             if (normalAppearance != null && normalAppearance.isSubDictionary())
             {
-                Set<COSName> entries = normalAppearance.getSubDictionary().keySet();
+                // SAMBOX specific: there can be more than one entry, besides "Off"
+                // pick the first one alphabetically, so it's consistently returning the same value each time
+                SortedSet<COSName> entries = new TreeSet<>(normalAppearance.getSubDictionary().keySet());
                 for (COSName entry : entries)
                 {
                     if (COSName.Off.compareTo(entry) != 0)
