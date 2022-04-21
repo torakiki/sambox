@@ -16,9 +16,6 @@
  */
 package org.sejda.sambox.pdmodel;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -26,15 +23,19 @@ import java.util.List;
 import org.junit.Test;
 import org.sejda.commons.util.IOUtils;
 import org.sejda.io.SeekableSources;
+import org.sejda.sambox.cos.COSArray;
+import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.graphics.color.PDOutputIntent;
 import org.sejda.sambox.pdmodel.interactive.documentnavigation.destination.PDNamedDestination;
+
+import static org.junit.Assert.*;
 
 /**
  * Test PDDocument Catalog functionality.
  *
  */
-public class TestPDDocumentCatalog
+public class TestPDDocumentCatalogTest
 {
 
     /**
@@ -77,7 +78,7 @@ public class TestPDDocumentCatalog
             assertTrue(outputIntents.isEmpty());
 
             // add an OutputIntent
-            colorProfile = TestPDDocumentCatalog.class
+            colorProfile = TestPDDocumentCatalogTest.class
                     .getResourceAsStream("sRGB.icc");
             // create output intent
             PDOutputIntent oi = new PDOutputIntent(doc, colorProfile);
@@ -108,5 +109,14 @@ public class TestPDDocumentCatalog
         PDDocument broken = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
                 getClass().getResourceAsStream("document_catalog_invalid_names_array.pdf")));
         broken.getDocumentCatalog().findNamedDestinationPage(new PDNamedDestination("PAGE_1"));
+    }
+
+    @Test
+    public void invalidAcroForm() throws IOException {
+        PDDocument doc = new PDDocument();
+        PDDocumentCatalog catalog = doc.getDocumentCatalog();
+        catalog.getCOSObject().setItem(COSName.ACRO_FORM, new COSArray());
+        
+        assertNull(catalog.getAcroForm());
     }
 }
