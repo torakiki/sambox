@@ -530,7 +530,7 @@ public class PDType0Font extends PDFont implements PDVectorFont
                         }
                     }
                 }
-                catch (IOException e)
+                catch (IOException | NullPointerException e)
                 {
                     LOG.warn("get unicode from font cmap fail", e);
                 }
