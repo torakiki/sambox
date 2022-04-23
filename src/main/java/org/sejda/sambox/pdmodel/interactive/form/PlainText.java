@@ -193,7 +193,7 @@ class PlainText
                     lineWidth = font.getStringWidth(word) * scale;
                 }
 
-                if (wordWidth > width && textLine.getWords().isEmpty())
+                if (wordWidth > width && textLine.getWords().isEmpty() && word.length() > 1)
                 {
                     // single word does not fit into width
                     wordNeedsSplit = true;
