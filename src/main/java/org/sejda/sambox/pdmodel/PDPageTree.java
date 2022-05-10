@@ -16,6 +16,27 @@
  */
 package org.sejda.sambox.pdmodel;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toList;
+import static org.sejda.commons.util.RequireUtils.require;
+import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
+
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.Queue;
+import java.util.Set;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
@@ -25,24 +46,6 @@ import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.COSObjectable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Objects;
-import java.util.Queue;
-import java.util.Spliterator;
-import java.util.Spliterators;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
-import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.toList;
-import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
 
 /**
  * The page tree, which defines the ordering of pages in the document in an efficient manner.
@@ -302,7 +305,7 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
      */
     public PDPage get(int index)
     {
-        PageAndPageTreeParent res = get(index + 1, root, 0, null);
+        PageAndPageTreeParent res = get(index + 1, root, 0, null, new HashSet<>());
         COSDictionary dict = res.node;
 
         sanitizeType(dict);
@@ -336,14 +339,13 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
      * @return COS dictionary of the Page object
      */
     private PageAndPageTreeParent get(int pageNum, COSDictionary node, int encountered,
-            COSDictionary pageTreeParent)
+            COSDictionary pageTreeParent, Set<COSDictionary> visited)
     {
-        if (pageNum < 1)
-        {
-            throw new PageNotFoundException(
-                    "Index out of bounds: " + pageNum + " in " + getSourcePath(), pageNum,
-                    getSourcePath());
-        }
+        require(pageNum >= 0, () -> new PageNotFoundException(
+                "Index out of bounds: " + pageNum + " in " + getSourcePath(), pageNum,
+                getSourcePath()));
+        require(visited.add(node), () -> new IllegalStateException(
+                "Possible recursion found when searching for page " + pageNum));
 
         if (isPageTreeNode(node))
         {
@@ -360,7 +362,7 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
                         if (pageNum <= encountered + kidCount)
                         {
                             // it's this kid
-                            return get(pageNum, kid, encountered, node);
+                            return get(pageNum, kid, encountered, node, visited);
                         }
                         encountered += kidCount;
                     }
@@ -371,11 +373,10 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
                         if (pageNum == encountered)
                         {
                             // it's this page
-                            return get(pageNum, kid, encountered, node);
+                            return get(pageNum, kid, encountered, node, visited);
                         }
                     }
                 }
-
                 throw new PageNotFoundException(
                         "Unable to find page " + pageNum + " in " + getSourcePath(), pageNum,
                         getSourcePath());
@@ -485,7 +486,7 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
      */
     public void remove(int index)
     {
-        PageAndPageTreeParent res = get(index + 1, root, 0, null);
+        PageAndPageTreeParent res = get(index + 1, root, 0, null, new HashSet<>());
         remove(res.node, res.parent);
     }
 

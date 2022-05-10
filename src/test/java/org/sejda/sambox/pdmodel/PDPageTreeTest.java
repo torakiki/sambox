@@ -326,4 +326,14 @@ public class PDPageTreeTest
         doc.removePage(1);
         assertEquals(1, doc.getNumberOfPages());
     }
+
+    @Test(expected = IllegalStateException.class)
+    public void noStackOverflowInCaseOfLoop() throws IOException
+    {
+        try (PDDocument doc = parse(SeekableSources.inMemorySeekableSourceFrom(
+                PDPageTreeTest.class.getResourceAsStream("loop_in_page_tree.pdf"))))
+        {
+            doc.getPage(0);
+        }
+    }
 }
