@@ -16,6 +16,19 @@
  */
 package org.sejda.sambox.pdmodel;
 
+import static java.util.Objects.nonNull;
+import static org.sejda.commons.util.RequireUtils.requireState;
+import static org.sejda.io.CountingWritableByteChannel.from;
+
+import java.awt.Color;
+import java.awt.geom.AffineTransform;
+import java.io.Closeable;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.text.NumberFormat;
+import java.util.Locale;
+import java.util.Stack;
+
 import org.sejda.commons.util.IOUtils;
 import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.cos.COSArray;
@@ -47,19 +60,6 @@ import org.sejda.sambox.pdmodel.graphics.state.RenderingMode;
 import org.sejda.sambox.util.Matrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.awt.Color;
-import java.awt.geom.AffineTransform;
-import java.io.Closeable;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.text.NumberFormat;
-import java.util.Locale;
-import java.util.Stack;
-
-import static java.util.Objects.nonNull;
-import static org.sejda.commons.util.RequireUtils.requireState;
-import static org.sejda.io.CountingWritableByteChannel.from;
 
 /**
  * Provides the ability to write to a page content stream.
@@ -268,9 +268,9 @@ public final class PDPageContentStream implements Closeable
     /**
      * Create a new appearance stream. Note that this is not actually a "page" content stream.
      *
-     * @param doc          The document the appearance is part of.
-     * @param pattern      The pattern to add to.
-     * @param outputStream The output stream to write to.
+     * @param doc     The document the appearance is part of.
+     * @param pattern The pattern to add to.
+     * @param writer  The ContentStreamWriter to write to.
      * @throws IOException If there is an error writing to the page contents.
      */
     public PDPageContentStream(PDDocument doc, PDTilingPattern pattern, ContentStreamWriter writer)

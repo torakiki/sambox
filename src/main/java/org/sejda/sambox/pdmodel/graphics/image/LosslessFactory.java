@@ -15,20 +15,6 @@
  */
 package org.sejda.sambox.pdmodel.graphics.image;
 
-import org.sejda.commons.FastByteArrayOutputStream;
-import org.sejda.sambox.cos.COSDictionary;
-import org.sejda.sambox.cos.COSInteger;
-import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.filter.Filter;
-import org.sejda.sambox.filter.FilterFactory;
-import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
-import org.sejda.sambox.pdmodel.graphics.color.PDDeviceCMYK;
-import org.sejda.sambox.pdmodel.graphics.color.PDDeviceColorSpace;
-import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
-import org.sejda.sambox.pdmodel.graphics.color.PDDeviceRGB;
-import org.sejda.sambox.pdmodel.graphics.color.PDICCBased;
-
-import javax.imageio.stream.MemoryCacheImageOutputStream;
 import java.awt.Transparency;
 import java.awt.color.ColorSpace;
 import java.awt.color.ICC_ColorSpace;
@@ -42,6 +28,20 @@ import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
+
+import org.sejda.commons.FastByteArrayOutputStream;
+import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSInteger;
+import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.filter.Filter;
+import org.sejda.sambox.filter.FilterFactory;
+import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
+import org.sejda.sambox.pdmodel.graphics.color.PDDeviceCMYK;
+import org.sejda.sambox.pdmodel.graphics.color.PDDeviceColorSpace;
+import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
+import org.sejda.sambox.pdmodel.graphics.color.PDDeviceRGB;
+import org.sejda.sambox.pdmodel.graphics.color.PDICCBased;
+import javax.imageio.stream.MemoryCacheImageOutputStream;
 
 /**
  * Factory for creating a PDImageXObject containing a lossless compressed image.
@@ -546,7 +546,7 @@ public final class LosslessFactory
                 byte[] targetValues, byte[] alphaImageData, int alphaPtr)
         {
             int itr = indexInTranferRow;
-            for (int i = 0; i < targetValues.length; i += 2)
+            for (int i = 0; i < targetValues.length - 1; i += 2)
             {
                 short val = transferRow[itr++];
                 targetValues[i] = (byte) ((val >> 8) & 0xFF);

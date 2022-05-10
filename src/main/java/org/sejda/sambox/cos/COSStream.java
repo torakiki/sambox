@@ -16,15 +16,11 @@
  */
 package org.sejda.sambox.cos;
 
-import org.sejda.commons.FastByteArrayOutputStream;
-import org.sejda.commons.util.IOUtils;
-import org.sejda.io.SeekableSource;
-import org.sejda.io.SeekableSourceSupplier;
-import org.sejda.sambox.filter.DecodeResult;
-import org.sejda.sambox.filter.Filter;
-import org.sejda.sambox.filter.FilterFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
+import static org.sejda.commons.util.RequireUtils.requireIOCondition;
+import static org.sejda.io.SeekableSources.inMemorySeekableSourceFrom;
 
 import java.io.ByteArrayInputStream;
 import java.io.Closeable;
@@ -39,11 +35,15 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
-import static java.util.Optional.ofNullable;
-import static org.sejda.commons.util.RequireUtils.requireIOCondition;
-import static org.sejda.io.SeekableSources.inMemorySeekableSourceFrom;
+import org.sejda.commons.FastByteArrayOutputStream;
+import org.sejda.commons.util.IOUtils;
+import org.sejda.io.SeekableSource;
+import org.sejda.io.SeekableSourceSupplier;
+import org.sejda.sambox.filter.DecodeResult;
+import org.sejda.sambox.filter.Filter;
+import org.sejda.sambox.filter.FilterFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class represents a stream object in a PDF document.
@@ -94,6 +94,7 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
     {
         super(dictionary);
         this.existing = new LazySeekableSourceViewHolder(seekableSource, startingPosition, length);
+        this.setLong(COSName.LENGTH, length);
     }
 
     /**

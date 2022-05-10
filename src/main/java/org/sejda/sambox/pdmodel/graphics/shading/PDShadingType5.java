@@ -16,14 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.graphics.shading;
 
-import org.sejda.sambox.cos.COSDictionary;
-import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.cos.COSStream;
-import org.sejda.sambox.pdmodel.common.PDRange;
-import org.sejda.sambox.util.Matrix;
-
-import javax.imageio.stream.ImageInputStream;
-import javax.imageio.stream.MemoryCacheImageInputStream;
 import java.awt.Paint;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
@@ -32,6 +24,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.cos.COSStream;
+import org.sejda.sambox.pdmodel.common.PDRange;
+import org.sejda.sambox.util.Matrix;
+import javax.imageio.stream.ImageInputStream;
+import javax.imageio.stream.MemoryCacheImageInputStream;
 
 /**
  * Resources for a shading type 5 (Lattice-Form Gouraud-Shade Triangle Mesh).
@@ -91,16 +91,20 @@ public class PDShadingType5 extends PDTriangleBasedShadingType
         }
         PDRange rangeX = getDecodeForParameter(0);
         PDRange rangeY = getDecodeForParameter(1);
-        if (Float.compare(rangeX.getMin(), rangeX.getMax()) == 0
+        if (rangeX == null || rangeY == null || Float.compare(rangeX.getMin(), rangeX.getMax()) == 0
                 || Float.compare(rangeY.getMin(), rangeY.getMax()) == 0)
         {
             return Collections.emptyList();
         }
         int numPerRow = getVerticesPerRow();
         PDRange[] colRange = new PDRange[getNumberOfColorComponents()];
-        for (int i = 0; i < getNumberOfColorComponents(); ++i)
+        for (int i = 0; i < colRange.length; ++i)
         {
             colRange[i] = getDecodeForParameter(2 + i);
+            if (colRange[i] == null)
+            {
+                throw new IOException("Range missing in shading /Decode entry");
+            }
         }
         List<Vertex> vlist = new ArrayList<Vertex>();
         long maxSrcCoord = (long) Math.pow(2, getBitsPerCoordinate()) - 1;
@@ -127,13 +131,12 @@ public class PDShadingType5 extends PDTriangleBasedShadingType
             }
         }
         int rowNum = vlist.size() / numPerRow;
-        Vertex[][] latticeArray = new Vertex[rowNum][numPerRow];
-        List<ShadedTriangle> list = new ArrayList<ShadedTriangle>();
         if (rowNum < 2)
         {
             // must have at least two rows; if not, return empty list
-            return list;
+            return Collections.emptyList();
         }
+        Vertex[][] latticeArray = new Vertex[rowNum][numPerRow];
         for (int i = 0; i < rowNum; i++)
         {
             for (int j = 0; j < numPerRow; j++)
@@ -142,23 +145,36 @@ public class PDShadingType5 extends PDTriangleBasedShadingType
             }
         }
 
+        return createShadedTriangleList(rowNum, numPerRow, latticeArray);
+    }
+
+    private List<ShadedTriangle> createShadedTriangleList(int rowNum, int numPerRow,
+            Vertex[][] latticeArray)
+    {
+        Point2D[] ps = new Point2D[3]; // array will be shallow-cloned in ShadedTriangle constructor
+        float[][] cs = new float[3][];
+        List<ShadedTriangle> list = new ArrayList<ShadedTriangle>();
         for (int i = 0; i < rowNum - 1; i++)
         {
             for (int j = 0; j < numPerRow - 1; j++)
             {
-                Point2D[] ps = new Point2D[] { latticeArray[i][j].point,
-                        latticeArray[i][j + 1].point, latticeArray[i + 1][j].point };
+                ps[0] = latticeArray[i][j].point;
+                ps[1] = latticeArray[i][j + 1].point;
+                ps[2] = latticeArray[i + 1][j].point;
 
-                float[][] cs = new float[][] { latticeArray[i][j].color,
-                        latticeArray[i][j + 1].color, latticeArray[i + 1][j].color };
+                cs[0] = latticeArray[i][j].color;
+                cs[1] = latticeArray[i][j + 1].color;
+                cs[2] = latticeArray[i + 1][j].color;
 
                 list.add(new ShadedTriangle(ps, cs));
 
-                ps = new Point2D[] { latticeArray[i][j + 1].point, latticeArray[i + 1][j].point,
-                        latticeArray[i + 1][j + 1].point };
+                ps[0] = latticeArray[i][j + 1].point;
+                ps[1] = latticeArray[i + 1][j].point;
+                ps[2] = latticeArray[i + 1][j + 1].point;
 
-                cs = new float[][] { latticeArray[i][j + 1].color, latticeArray[i + 1][j].color,
-                        latticeArray[i + 1][j + 1].color };
+                cs[0] = latticeArray[i][j + 1].color;
+                cs[1] = latticeArray[i + 1][j].color;
+                cs[2] = latticeArray[i + 1][j + 1].color;
 
                 list.add(new ShadedTriangle(ps, cs));
             }

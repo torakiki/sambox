@@ -16,6 +16,22 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
+import static java.util.Arrays.asList;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
+import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
+import static org.sejda.io.CountingWritableByteChannel.from;
+
+import java.awt.geom.AffineTransform;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Point2D;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.fontbox.util.BoundingBox;
 import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.cos.COSBase;
@@ -45,22 +61,6 @@ import org.sejda.sambox.pdmodel.interactive.annotation.PDBorderStyleDictionary;
 import org.sejda.sambox.util.Matrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.awt.geom.AffineTransform;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.Point2D;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static java.util.Arrays.asList;
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
-import static java.util.Optional.ofNullable;
-import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
-import static org.sejda.io.CountingWritableByteChannel.from;
 
 /**
  * Create the AcroForms field appearance helper.
@@ -796,14 +796,15 @@ public class AppearanceGeneratorHelper
     private void insertGeneratedListboxSelectionHighlight(PDPageContentStream contents,
             PDAppearanceStream appearanceStream, PDFont font, float fontSize) throws IOException
     {
-        List<Integer> indexEntries = ((PDListBox) field).getSelectedOptionsIndex();
-        List<String> values = ((PDListBox) field).getValue();
-        List<String> options = ((PDListBox) field).getOptionsExportValues();
+        PDListBox listBox = (PDListBox) field;
+        List<Integer> indexEntries = listBox.getSelectedOptionsIndex();
+        List<String> values = listBox.getValue();
+        List<String> options = listBox.getOptionsExportValues();
 
         if (!values.isEmpty() && !options.isEmpty() && indexEntries.isEmpty())
         {
             // create indexEntries from options
-            indexEntries = new ArrayList<>();
+            indexEntries = new ArrayList<Integer>(values.size());
             for (String v : values)
             {
                 indexEntries.add(options.indexOf(v));
@@ -811,9 +812,9 @@ public class AppearanceGeneratorHelper
         }
 
         // The first entry which shall be presented might be adjusted by the optional TI key
-        // If this entry is present the first entry to be displayed is the keys value otherwise
-        // display starts with the first entry in Opt.
-        int topIndex = ((PDListBox) field).getTopIndex();
+        // If this entry is present, the first entry to be displayed is the keys value,
+        // otherwise display starts with the first entry in Opt.
+        int topIndex = listBox.getTopIndex();
 
         float highlightBoxHeight = font.getBoundingBox().getHeight() * fontSize / FONTSCALE;
 
@@ -864,17 +865,19 @@ public class AppearanceGeneratorHelper
         float yTextPos = contentRect.getUpperRightY();
 
         int topIndex = ((PDListBox) field).getTopIndex();
+        float ascent = font.getFontDescriptor().getAscent();
+        float height = font.getBoundingBox().getHeight();
 
         for (int i = topIndex; i < numOptions; i++)
         {
 
             if (i == topIndex)
             {
-                yTextPos = yTextPos - font.getFontDescriptor().getAscent() / FONTSCALE * fontSize;
+                yTextPos = yTextPos - ascent / FONTSCALE * fontSize;
             }
             else
             {
-                yTextPos = yTextPos - font.getBoundingBox().getHeight() / FONTSCALE * fontSize;
+                yTextPos = yTextPos - height / FONTSCALE * fontSize;
                 contents.beginText();
             }
 

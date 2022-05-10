@@ -82,7 +82,7 @@ class CloudyBorder
      */
     void createCloudyRectangle(PDRectangle rd) throws IOException
     {
-        rectWithDiff = applyRectDiff(rd, lineWidth / 2);
+        rectWithDiff = applyRectDiff(rd, (float) lineWidth / 2);
         double left = rectWithDiff.getLowerLeftX();
         double bottom = rectWithDiff.getLowerLeftY();
         double right = rectWithDiff.getUpperRightX();
@@ -476,7 +476,7 @@ class CloudyBorder
         }
     }
 
-    private PDRectangle applyRectDiff(PDRectangle rd, double min)
+    private PDRectangle applyRectDiff(PDRectangle rd, float min)
     {
         float rectLeft = annotRect.getLowerLeftX();
         float rectBottom = annotRect.getLowerLeftY();
@@ -489,10 +489,10 @@ class CloudyBorder
         rectRight = Math.max(rectLeft, rectRight);
         rectTop = Math.max(rectBottom, rectTop);
 
-        double rdLeft;
-        double rdBottom;
-        double rdRight;
-        double rdTop;
+        float rdLeft;
+        float rdBottom;
+        float rdRight;
+        float rdTop;
 
         if (rd != null)
         {

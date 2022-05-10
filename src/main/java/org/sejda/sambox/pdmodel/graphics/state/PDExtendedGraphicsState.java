@@ -331,7 +331,7 @@ public class PDExtendedGraphicsState implements COSObjectable
     }
 
     /**
-     * This will get the overprint control(OP).
+     * This will set the overprint control(OP).
      *
      * @param op The overprint control.
      */
@@ -352,7 +352,7 @@ public class PDExtendedGraphicsState implements COSObjectable
     }
 
     /**
-     * This will get the overprint control(OP).
+     * This will set the overprint control(OP).
      *
      * @param op The overprint control.
      */
@@ -372,13 +372,20 @@ public class PDExtendedGraphicsState implements COSObjectable
     }
 
     /**
-     * This will get the overprint mode(OPM).
+     * This will set the overprint mode(OPM).
      *
      * @param overprintMode The overprint mode
      */
     public void setOverprintMode(Float overprintMode)
     {
-        setFloatItem(COSName.OPM, overprintMode);
+        if (overprintMode == null)
+        {
+            dict.removeItem(COSName.OPM);
+        }
+        else
+        {
+            dict.setInt(COSName.OPM, overprintMode.intValue());
+        }
     }
 
     /**

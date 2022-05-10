@@ -16,15 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.graphics.shading;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.sejda.sambox.cos.COSDictionary;
-import org.sejda.sambox.cos.COSStream;
-import org.sejda.sambox.pdmodel.common.PDRange;
-import org.sejda.sambox.util.Matrix;
-
-import javax.imageio.stream.ImageInputStream;
-import javax.imageio.stream.MemoryCacheImageInputStream;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -33,6 +24,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSStream;
+import org.sejda.sambox.pdmodel.common.PDRange;
+import org.sejda.sambox.util.Matrix;
+import javax.imageio.stream.ImageInputStream;
+import javax.imageio.stream.MemoryCacheImageInputStream;
 
 /**
  * Common resources for shading types 6 and 7
@@ -69,7 +69,7 @@ abstract class PDMeshBasedShadingType extends PDShadingType4
         }
         PDRange rangeX = getDecodeForParameter(0);
         PDRange rangeY = getDecodeForParameter(1);
-        if (Float.compare(rangeX.getMin(), rangeX.getMax()) == 0
+        if (rangeX == null || rangeY == null || Float.compare(rangeX.getMin(), rangeX.getMax()) == 0
                 || Float.compare(rangeY.getMin(), rangeY.getMax()) == 0)
         {
             return Collections.emptyList();

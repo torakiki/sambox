@@ -16,8 +16,6 @@
  */
 package org.sejda.sambox.util;
 
-import org.sejda.sambox.cos.COSString;
-
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -26,6 +24,8 @@ import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.SimpleTimeZone;
 import java.util.TimeZone;
+
+import org.sejda.sambox.cos.COSString;
 
 /*
  * Date format is described in PDF Reference 1.7 section 3.8.2
@@ -391,8 +391,8 @@ public final class DateConverter
         {
             // we parsed a time zone in default format
             int hrSign = (sign == '-' ? -1 : 1);
-            tz.setRawOffset(restrainTZoffset(
-                    hrSign * (tzHours * MILLIS_PER_HOUR + tzMin * (long) MILLIS_PER_MINUTE)));
+            tz.setRawOffset(restrainTZoffset(hrSign * ((long) tzHours * MILLIS_PER_HOUR
+                    + tzMin * (long) MILLIS_PER_MINUTE)));
             updateZoneId(tz);
         }
         else if (!hadGMT)
@@ -406,11 +406,8 @@ public final class DateConverter
                 // no timezone in text, cal amd initialWhere are unchanged
                 return false;
             }
-            else
-            {
-                // we got a tz by name; use it
-                where.setIndex(text.length());
-            }
+            // we got a tz by name; use it
+            where.setIndex(text.length());
         }
         adjustTimeZoneNicely(cal, tz);
         initialWhere.setIndex(where.getIndex());

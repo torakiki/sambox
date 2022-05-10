@@ -16,6 +16,17 @@
  */
 package org.sejda.sambox.pdmodel.font;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+
+import java.awt.geom.GeneralPath;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.fontbox.cmap.CMap;
 import org.apache.fontbox.ttf.CmapLookup;
 import org.apache.fontbox.ttf.TTFParser;
@@ -30,16 +41,6 @@ import org.sejda.sambox.util.Matrix;
 import org.sejda.sambox.util.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.awt.geom.GeneralPath;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import static java.util.Objects.nonNull;
 
 /**
  * A Composite (Type 0) font.
@@ -184,23 +185,27 @@ public class PDType0Font extends PDFont implements PDVectorFont
     public PDType0Font(COSDictionary fontDictionary) throws IOException
     {
         super(fontDictionary);
-        COSBase base = dict.getDictionaryObject(COSName.DESCENDANT_FONTS);
-        if (!(base instanceof COSArray))
+        COSArray descendantFonts = dict.getDictionaryObject(COSName.DESCENDANT_FONTS,
+                COSArray.class);
+        if (isNull(descendantFonts))
         {
             throw new IOException("Missing descendant font array");
         }
-        COSArray descendantFonts = (COSArray) base;
         if (descendantFonts.size() == 0)
         {
             throw new IOException("Descendant font array is empty");
         }
-        COSBase descendantFontDictBase = descendantFonts.getObject(0);
-        if (!(descendantFontDictBase instanceof COSDictionary))
+        COSDictionary descendantFontDict = descendantFonts.getObject(0, COSDictionary.class);
+        if (isNull(descendantFontDict))
         {
             throw new IOException("Missing descendant font dictionary");
         }
-        descendantFont = PDFontFactory.createDescendantFont((COSDictionary) descendantFontDictBase,
-                this);
+        if (!COSName.FONT.equals(
+                descendantFontDict.getDictionaryObject(COSName.TYPE, COSName.FONT, COSName.class)))
+        {
+            throw new IOException("Missing or wrong type in descendant font dictionary");
+        }
+        descendantFont = PDFontFactory.createDescendantFont(descendantFontDict, this);
         readEncoding();
         fetchCMapUCS2();
     }

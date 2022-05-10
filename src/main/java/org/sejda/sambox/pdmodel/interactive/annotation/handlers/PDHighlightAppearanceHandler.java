@@ -16,6 +16,8 @@
 
 package org.sejda.sambox.pdmodel.interactive.annotation.handlers;
 
+import java.io.IOException;
+
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSStream;
@@ -31,8 +33,6 @@ import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotation;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationTextMarkup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 
 /**
  * @author Tilman Hausherr
@@ -69,6 +69,10 @@ public class PDHighlightAppearanceHandler extends PDAbstractAppearanceHandler
             return;
         }
         PDRectangle rect = annotation.getRectangle();
+        if (rect == null)
+        {
+            return;
+        }
         AnnotationBorder ab = AnnotationBorder.getAnnotationBorder(annotation,
                 annotation.getBorderStyle());
         // Adjust rectangle even if not empty, see PLPDF.com-MarkupAnnotations.pdf

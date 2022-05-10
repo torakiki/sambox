@@ -68,15 +68,15 @@ public final class PDFieldFactory
         {
             return createChoiceSubType(form, field, parent);
         }
-        else if (FIELD_TYPE_TEXT.equals(fieldType))
+        if (FIELD_TYPE_TEXT.equals(fieldType))
         {
             return new PDTextField(form, field, parent);
         }
-        else if (FIELD_TYPE_SIGNATURE.equals(fieldType))
+        if (FIELD_TYPE_SIGNATURE.equals(fieldType))
         {
             return new PDSignatureField(form, field, parent);
         }
-        else if (FIELD_TYPE_BUTTON.equals(fieldType))
+        if (FIELD_TYPE_BUTTON.equals(fieldType))
         {
             return createButtonSubType(form, field, parent);
         }

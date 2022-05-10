@@ -37,22 +37,22 @@ import java.util.Enumeration;
  * </ul>
  *
  * @author Benoit Guillon
- * 
+ *
  */
 
 public class PublicKeyDecryptionMaterial extends DecryptionMaterial
 {
-    private String password = null;
-    private KeyStore keyStore = null;
-    private String alias = null;
+    private final String password;
+    private final KeyStore keyStore;
+    private final String alias;
 
     /**
      * Create a new public key decryption material.
      *
      * @param keystore The keystore were the private key and the certificate are
-     * @param a The alias of the private key and the certificate.
-     *   If the keystore contains only 1 entry, this parameter can be left null.
-     * @param pwd The password to extract the private key from the keystore.
+     * @param a        The alias of the private key and the certificate. If the keystore contains
+     *                 only 1 entry, this parameter can be left null.
+     * @param pwd      The password to extract the private key from the keystore.
      */
 
     public PublicKeyDecryptionMaterial(KeyStore keystore, String a, String pwd)

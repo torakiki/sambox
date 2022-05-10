@@ -16,12 +16,21 @@
  */
 package org.sejda.sambox.pdmodel.font;
 
+import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
+
+import java.awt.geom.GeneralPath;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+
 import org.apache.fontbox.FontBoxFont;
 import org.apache.fontbox.util.BoundingBox;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.cos.COSNumber;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.ResourceCache;
@@ -33,14 +42,6 @@ import org.sejda.sambox.util.Matrix;
 import org.sejda.sambox.util.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.awt.geom.GeneralPath;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-
-import static java.util.Objects.nonNull;
-import static java.util.Optional.ofNullable;
 
 /**
  * A PostScript Type 3 Font.
@@ -227,17 +228,25 @@ public class PDType3Font extends PDSimpleFont
     {
         if (fontMatrix == null)
         {
-            COSArray array = dict.getDictionaryObject(COSName.FONT_MATRIX, COSArray.class);
-            if (nonNull(array))
-            {
-                fontMatrix = new Matrix(array);
-            }
-            else
-            {
-                return super.getFontMatrix();
-            }
+            COSArray matrix = dict.getCOSArray(COSName.FONT_MATRIX);
+            fontMatrix = checkFontMatrixValues(matrix) ? Matrix.createMatrix(
+                    matrix) : super.getFontMatrix();
         }
         return fontMatrix;
+    }
+
+    private boolean checkFontMatrixValues(COSArray matrix)
+    {
+        if (matrix == null || matrix.size() != 6)
+        {
+            return false;
+        }
+        for (COSBase element : matrix.toList())
+        {
+            if (!(element instanceof COSNumber))
+                return false;
+        }
+        return true;
     }
 
     @Override
@@ -296,34 +305,42 @@ public class PDType3Font extends PDSimpleFont
     private BoundingBox generateBoundingBox()
     {
         PDRectangle rect = getFontBBox();
-        if (rect.getLowerLeftX() == 0 && rect.getLowerLeftY() == 0 && rect.getUpperRightX() == 0
-                && rect.getUpperRightY() == 0)
+        if (nonNull(rect))
         {
-            // Plan B: get the max bounding box of the glyphs
-            COSDictionary cp = getCharProcs();
-            for (COSName name : cp.keySet())
+            if (rect.getLowerLeftX() == 0 && rect.getLowerLeftY() == 0 && rect.getUpperRightX() == 0
+                    && rect.getUpperRightY() == 0)
             {
-                COSBase base = cp.getDictionaryObject(name);
-                if (base instanceof COSStream)
+                // Plan B: get the max bounding box of the glyphs
+                COSDictionary cp = getCharProcs();
+                if (nonNull(cp))
                 {
-                    PDType3CharProc charProc = new PDType3CharProc(this, (COSStream) base);
-                    PDRectangle glyphBBox = charProc.getGlyphBBox();
-                    if (nonNull(glyphBBox))
+                    for (COSName name : cp.keySet())
                     {
-                        rect.setLowerLeftX(
-                                Math.min(rect.getLowerLeftX(), glyphBBox.getLowerLeftX()));
-                        rect.setLowerLeftY(
-                                Math.min(rect.getLowerLeftY(), glyphBBox.getLowerLeftY()));
-                        rect.setUpperRightX(
-                                Math.max(rect.getUpperRightX(), glyphBBox.getUpperRightX()));
-                        rect.setUpperRightY(
-                                Math.max(rect.getUpperRightY(), glyphBBox.getUpperRightY()));
+                        COSStream stream = cp.getDictionaryObject(name, COSStream.class);
+                        if (nonNull(stream))
+                        {
+                            PDType3CharProc charProc = new PDType3CharProc(this, stream);
+                            PDRectangle glyphBBox = charProc.getGlyphBBox();
+                            if (nonNull(glyphBBox))
+                            {
+                                rect.setLowerLeftX(
+                                        Math.min(rect.getLowerLeftX(), glyphBBox.getLowerLeftX()));
+                                rect.setLowerLeftY(
+                                        Math.min(rect.getLowerLeftY(), glyphBBox.getLowerLeftY()));
+                                rect.setUpperRightX(Math.max(rect.getUpperRightX(),
+                                        glyphBBox.getUpperRightX()));
+                                rect.setUpperRightY(Math.max(rect.getUpperRightY(),
+                                        glyphBBox.getUpperRightY()));
+                            }
+                        }
                     }
                 }
             }
+            return new BoundingBox(rect.getLowerLeftX(), rect.getLowerLeftY(),
+                    rect.getUpperRightX(), rect.getUpperRightY());
         }
-        return new BoundingBox(rect.getLowerLeftX(), rect.getLowerLeftY(), rect.getUpperRightX(),
-                rect.getUpperRightY());
+        LOG.warn("FontBBox missing, returning empty rectangle");
+        return new BoundingBox();
     }
 
     /**
@@ -348,10 +365,15 @@ public class PDType3Font extends PDSimpleFont
      */
     public PDType3CharProc getCharProc(int code)
     {
-        String name = getEncoding().getName(code);
-        return ofNullable(getCharProcs()).map(
-                        d -> d.getDictionaryObject(COSName.getPDFName(name), COSStream.class))
-                .map(s -> new PDType3CharProc(this, s)).orElse(null);
+        Encoding encoding = getEncoding();
+        if (nonNull(encoding))
+        {
+            String name = encoding.getName(code);
+            return ofNullable(getCharProcs()).map(
+                            d -> d.getDictionaryObject(COSName.getPDFName(name), COSStream.class))
+                    .map(s -> new PDType3CharProc(this, s)).orElse(null);
+        }
+        return null;
     }
 
     @Override

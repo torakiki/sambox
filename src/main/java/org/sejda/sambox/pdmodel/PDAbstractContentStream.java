@@ -16,6 +16,18 @@
  */
 package org.sejda.sambox.pdmodel;
 
+import static org.sejda.io.CountingWritableByteChannel.from;
+
+import java.awt.Color;
+import java.awt.geom.AffineTransform;
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.text.NumberFormat;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.Locale;
+
 import org.apache.fontbox.util.Charsets;
 import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.cos.COSArray;
@@ -45,18 +57,6 @@ import org.sejda.sambox.util.Matrix;
 import org.sejda.sambox.util.NumberFormatUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.awt.Color;
-import java.awt.geom.AffineTransform;
-import java.io.Closeable;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.text.NumberFormat;
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.Locale;
-
-import static org.sejda.io.CountingWritableByteChannel.from;
 
 /**
  * Provides the ability to write to a content stream.
@@ -789,7 +789,7 @@ abstract class PDAbstractContentStream implements Closeable
     }
 
     /**
-     * Set the non-stroking color in the DeviceRGB color space. Range is 0..255.
+     * Set the non-stroking color in the DeviceRGB color space. Range is 0..1.
      *
      * @param r The red value.
      * @param g The green value.

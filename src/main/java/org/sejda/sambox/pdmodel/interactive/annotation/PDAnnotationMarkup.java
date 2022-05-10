@@ -16,6 +16,11 @@
  */
 package org.sejda.sambox.pdmodel.interactive.annotation;
 
+import static java.util.Optional.ofNullable;
+
+import java.io.IOException;
+import java.util.Calendar;
+
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
@@ -27,17 +32,13 @@ import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.graphics.color.PDColor;
 import org.sejda.sambox.pdmodel.interactive.annotation.handlers.PDAppearanceHandler;
 import org.sejda.sambox.pdmodel.interactive.annotation.handlers.PDCaretAppearanceHandler;
+import org.sejda.sambox.pdmodel.interactive.annotation.handlers.PDFileAttachmentAppearanceHandler;
 import org.sejda.sambox.pdmodel.interactive.annotation.handlers.PDFreeTextAppearanceHandler;
 import org.sejda.sambox.pdmodel.interactive.annotation.handlers.PDInkAppearanceHandler;
 import org.sejda.sambox.pdmodel.interactive.annotation.handlers.PDPolygonAppearanceHandler;
 import org.sejda.sambox.pdmodel.interactive.annotation.handlers.PDPolylineAppearanceHandler;
 import org.sejda.sambox.pdmodel.interactive.annotation.handlers.PDSoundAppearanceHandler;
 import org.sejda.sambox.pdmodel.interactive.form.PDVariableText;
-
-import java.io.IOException;
-import java.util.Calendar;
-
-import static java.util.Optional.ofNullable;
 
 /**
  * This class represents the additonal fields of a Markup type Annotation. See section 12.5.6 of
@@ -869,6 +870,10 @@ public class PDAnnotationMarkup extends PDAnnotation
             else if (SUB_TYPE_SOUND.equals(getSubtype()))
             {
                 appearanceHandler = new PDSoundAppearanceHandler(this);
+            }
+            else if (PDAnnotationFileAttachment.SUB_TYPE.equals(getSubtype()))
+            {
+                appearanceHandler = new PDFileAttachmentAppearanceHandler(this);
             }
 
             if (appearanceHandler != null)

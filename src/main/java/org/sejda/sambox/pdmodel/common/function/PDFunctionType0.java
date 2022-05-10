@@ -16,6 +16,9 @@
  */
 package org.sejda.sambox.pdmodel.common.function;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSInteger;
@@ -23,11 +26,8 @@ import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.common.PDRange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.MemoryCacheImageInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * This class represents a type 0 function in a PDF document.
@@ -416,7 +416,7 @@ public class PDFunctionType0 extends PDFunction
     }
 
     @Override
-    public float[] eval(float[] input)
+    public float[] eval(float[] input) throws IOException
     {
         // This involves linear interpolation based on a set of sample points.
         // Theoretically it's not that difficult ... see section 3.9.1 of the PDF Reference.
@@ -449,6 +449,10 @@ public class PDFunctionType0 extends PDFunction
         {
             PDRange range = getRangeForOutput(i);
             PDRange decodeValues = getDecodeForParameter(i);
+            if (decodeValues == null)
+            {
+                throw new IOException("Range missing in function /Decode entry");
+            }
             outputValues[i] = interpolate(outputValues[i], 0, maxSample, decodeValues.getMin(),
                     decodeValues.getMax());
             outputValues[i] = clipToRange(outputValues[i], range.getMin(), range.getMax());

@@ -18,11 +18,11 @@ package org.sejda.sambox.input;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -56,10 +56,14 @@ public class LazyIndirectObjectsProviderTest
     @Before
     public void setUp() throws IOException
     {
-
         victim = new LazyIndirectObjectsProvider();
-        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(
-                getClass().getResourceAsStream("/sambox/simple_test.pdf")), victim);
+    }
+
+    private void initialize(String name) throws IOException
+    {
+        parser = new COSParser(
+                SeekableSources.inMemorySeekableSourceFrom(getClass().getResourceAsStream(name)),
+                victim);
         victim.initializeWith(parser);
         XrefParser xrefParser = new XrefParser(parser);
         xrefParser.parse();
@@ -73,40 +77,32 @@ public class LazyIndirectObjectsProviderTest
     }
 
     @Test
-    public void get()
+    public void get() throws IOException
     {
+        initialize("/sambox/simple_test.pdf");
         COSBase dictionary = victim.get(new COSObjectKey(4, 0));
         assertThat(dictionary, is(instanceOf(COSDictionary.class)));
         assertNotNull(((COSDictionary) dictionary).getItem(COSName.ANNOTS));
     }
 
     @Test
-    public void getNotExisting()
+    public void getNotExisting() throws IOException
     {
+        initialize("/sambox/simple_test.pdf");
         assertNull(victim.get(new COSObjectKey(30, 0)));
     }
 
     @Test
     public void getCompressed() throws IOException
     {
-        victim = new LazyIndirectObjectsProvider();
-        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(
-                getClass().getResourceAsStream("/sambox/simple_test_objstm.pdf")), victim);
-        victim.initializeWith(parser);
-        XrefParser xrefParser = new XrefParser(parser);
-        xrefParser.parse();
+        initialize("/sambox/simple_test_objstm.pdf");
         assertNotNull(victim.get(new COSObjectKey(6, 0)));
     }
 
     @Test
     public void getCompressedWrongOwningStream() throws IOException
     {
-        victim = new LazyIndirectObjectsProvider();
-        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(
-                getClass().getResourceAsStream("/sambox/simple_test_objstm.pdf")), victim);
-        victim.initializeWith(parser);
-        XrefParser xrefParser = new XrefParser(parser);
-        xrefParser.parse();
+        initialize("/sambox/simple_test_objstm.pdf");
         victim.addEntry(CompressedXrefEntry.compressedEntry(6, 8, 1));
         assertNull(victim.get(new COSObjectKey(6, 0)));
     }
@@ -114,12 +110,7 @@ public class LazyIndirectObjectsProviderTest
     @Test
     public void getCompressedWrongOwningStreamCompressed() throws IOException
     {
-        victim = new LazyIndirectObjectsProvider();
-        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(
-                getClass().getResourceAsStream("/sambox/simple_test_objstm.pdf")), victim);
-        victim.initializeWith(parser);
-        XrefParser xrefParser = new XrefParser(parser);
-        xrefParser.parse();
+        initialize("/sambox/simple_test_objstm.pdf");
         victim.addEntry(CompressedXrefEntry.compressedEntry(6, 4, 1));
         assertNull(victim.get(new COSObjectKey(6, 0)));
     }
@@ -127,24 +118,14 @@ public class LazyIndirectObjectsProviderTest
     @Test
     public void selfIndirectRef() throws IOException
     {
-        victim = new LazyIndirectObjectsProvider();
-        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(
-                getClass().getResourceAsStream("/sambox/self_indirect_ref.pdf")), victim);
-        victim.initializeWith(parser);
-        XrefParser xrefParser = new XrefParser(parser);
-        xrefParser.parse();
+        initialize("/sambox/self_indirect_ref.pdf");
         assertEquals(COSNull.NULL, victim.get(new COSObjectKey(9, 0)).getCOSObject());
     }
 
     @Test
     public void getCompressedNullContainingStream() throws IOException
     {
-        victim = new LazyIndirectObjectsProvider();
-        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(
-                getClass().getResourceAsStream("/sambox/simple_test_objstm.pdf")), victim);
-        victim.initializeWith(parser);
-        XrefParser xrefParser = new XrefParser(parser);
-        xrefParser.parse();
+        initialize("/sambox/simple_test_objstm.pdf");
         victim.addEntry(CompressedXrefEntry.compressedEntry(6, 1404, 1));
         assertNull(victim.get(new COSObjectKey(6, 0)));
     }
@@ -152,31 +133,21 @@ public class LazyIndirectObjectsProviderTest
     @Test
     public void fallbackDoesntWorkForObjStm() throws IOException
     {
-        victim = new LazyIndirectObjectsProvider();
-        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(
-                getClass().getResourceAsStream("/sambox/bad_objstm.pdf")), victim);
-        victim.initializeWith(parser);
-        XrefParser xrefParser = new XrefParser(parser);
-        xrefParser.parse();
+        initialize("/sambox/bad_objstm.pdf");
         assertNull(victim.get(new COSObjectKey(6, 0)));
     }
 
     @Test
     public void fallbackKicksIn() throws IOException
     {
-        victim = new LazyIndirectObjectsProvider();
-        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(getClass()
-                .getResourceAsStream("/sambox/test_multiple_xref_tables_wrong_obj_offset.pdf")),
-                victim);
-        victim.initializeWith(parser);
-        XrefParser xrefParser = new XrefParser(parser);
-        xrefParser.parse();
+        initialize("/sambox/test_multiple_xref_tables_wrong_obj_offset.pdf");
         assertNotNull(victim.get(new COSObjectKey(1, 0)));
     }
 
     @Test
-    public void release()
+    public void release() throws IOException
     {
+        initialize("/sambox/simple_test.pdf");
         COSObjectKey key = new COSObjectKey(1, 0);
         COSBase dictionary = victim.get(key);
         assertEquals(dictionary, victim.get(key));
@@ -223,11 +194,22 @@ public class LazyIndirectObjectsProviderTest
     @Test
     public void emptyObj() throws IOException
     {
-        victim = new LazyIndirectObjectsProvider();
         parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(
                 getClass().getResourceAsStream("/sambox/empty_obj.txt")), victim);
         victim.initializeWith(parser);
         victim.addEntry(XrefEntry.inUseEntry(10, 3, 0));
         assertEquals(COSNull.NULL, victim.get(new COSObjectKey(10, 0)));
+    }
+
+    @Test
+    public void selfPointingStreamLength() throws IOException
+    {
+        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/self_poiting_stream_length.txt")), victim);
+        victim.initializeWith(parser);
+        victim.addEntry(XrefEntry.inUseEntry(3, 0, 0));
+        COSBase stream = victim.get(new COSObjectKey(3, 0));
+        assertThat(stream, is(instanceOf(COSStream.class)));
+        assertEquals(5, ((COSStream) stream).getLong(COSName.LENGTH));
     }
 }

@@ -16,16 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.graphics.state;
 
-import org.sejda.sambox.cos.COSBase;
-import org.sejda.sambox.pdmodel.common.PDRectangle;
-import org.sejda.sambox.pdmodel.graphics.PDLineDashPattern;
-import org.sejda.sambox.pdmodel.graphics.blend.BlendComposite;
-import org.sejda.sambox.pdmodel.graphics.blend.BlendMode;
-import org.sejda.sambox.pdmodel.graphics.color.PDColor;
-import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
-import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
-import org.sejda.sambox.util.Matrix;
-
 import java.awt.BasicStroke;
 import java.awt.Composite;
 import java.awt.geom.Area;
@@ -36,6 +26,16 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.sejda.sambox.cos.COSBase;
+import org.sejda.sambox.pdmodel.common.PDRectangle;
+import org.sejda.sambox.pdmodel.graphics.PDLineDashPattern;
+import org.sejda.sambox.pdmodel.graphics.blend.BlendComposite;
+import org.sejda.sambox.pdmodel.graphics.blend.BlendMode;
+import org.sejda.sambox.pdmodel.graphics.color.PDColor;
+import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
+import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
+import org.sejda.sambox.util.Matrix;
+
 /**
  * The current state of the graphics parameters when executing a content stream.
  *
@@ -44,7 +44,7 @@ import java.util.Map;
 public class PDGraphicsState implements Cloneable
 {
     private boolean isClippingPathDirty;
-    private List<Path2D> clippingPaths = new ArrayList<>();
+    private List<Path2D> clippingPaths = new ArrayList<>(1);
     private Map<Path2D, Area> clippingCache = new IdentityHashMap<>();
     private Matrix currentTransformationMatrix = new Matrix();
     private PDColor strokingColor = PDDeviceGray.INSTANCE.getInitialColor();
@@ -612,7 +612,7 @@ public class PDGraphicsState implements Cloneable
         }
         // Replace the list of individual clipping paths with the intersection, and add it to the cache.
         Path2D newPath = new Path2D.Double(clippingArea);
-        clippingPaths = new ArrayList<Path2D>();
+        clippingPaths = new ArrayList<>(1);
         clippingPaths.add(newPath);
         clippingCache.put(newPath, clippingArea);
         return clippingArea;

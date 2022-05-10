@@ -22,8 +22,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 
-import javax.imageio.stream.MemoryCacheImageOutputStream;
-
 import org.sejda.commons.FastByteArrayOutputStream;
 import org.sejda.io.SeekableSource;
 import org.sejda.io.SeekableSources;
@@ -34,6 +32,7 @@ import org.sejda.sambox.filter.FilterFactory;
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
+import javax.imageio.stream.MemoryCacheImageOutputStream;
 
 /**
  * Factory for creating a PDImageXObject containing a CCITT Fax compressed TIFF image.
@@ -197,7 +196,7 @@ public final class CCITTFactory
         }
 
         // Relocate to the first set of tags
-        int address = readlong(endianess, source);
+        long address = readlong(endianess, source);
         source.position(address);
 
         // If some higher page number is required, skip this page's tags,
@@ -209,7 +208,7 @@ public final class CCITTFactory
             {
                 throw new IOException("Not a valid tiff file");
             }
-            source.position(address + 2 + numtags * 12);
+            source.position(address + 2 + numtags * 12L);
             address = readlong(endianess, source);
             if (address == 0)
             {

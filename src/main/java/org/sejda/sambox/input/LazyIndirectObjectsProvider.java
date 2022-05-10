@@ -16,7 +16,6 @@
  */
 package org.sejda.sambox.input;
 
-import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
@@ -30,6 +29,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -53,28 +53,28 @@ import org.slf4j.LoggerFactory;
  * underlying source on demand (ie. when the {@link IndirectObjectsProvider#get(COSObjectKey)} method is called). Parsed
  * objects are stored in a cache to be reused. If for given a {@link COSObjectKey} no entry is found in the xref, a
  * fallback mechanism is activated performing a full scan of the document to retrieve all the objects defined in it.
- * 
+ *
  * @author Andrea Vacondio
  */
 class LazyIndirectObjectsProvider implements IndirectObjectsProvider
 {
     private static final Logger LOG = LoggerFactory.getLogger(LazyIndirectObjectsProvider.class);
 
-    private Xref xref = new Xref();
+    private final Xref xref = new Xref();
     private ObjectsFullScanner scanner;
     // TODO references that the GC can claim
-    private Map<COSObjectKey, COSBase> store = new ConcurrentHashMap<>();
+    private final Map<COSObjectKey, COSBase> store = new ConcurrentHashMap<>();
+    private final Set<COSObjectKey> currentlyParsing = ConcurrentHashMap.newKeySet();
     private SecurityHandler securityHandler = null;
     private COSParser parser;
 
     @Override
     public COSBase get(COSObjectKey key)
     {
-        if (isNull(store.get(key)))
-        {
+        return ofNullable(store.get(key)).orElseGet(() -> {
             parseObject(key);
-        }
-        return store.get(key);
+            return store.get(key);
+        });
     }
 
     @Override
@@ -147,7 +147,7 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
 
     private void doParseFallbackObject(COSObjectKey key)
     {
-        LOG.info("Trying fallback strategy for " + key);
+        LOG.info("Trying fallback strategy for {}", key);
         XrefEntry xrefEntry = scanner.entries().get(key);
         if (nonNull(xrefEntry))
         {
@@ -162,7 +162,7 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
         }
         else
         {
-            LOG.warn("Unable to find fallback xref entry for " + key);
+            LOG.warn("Unable to find fallback xref entry for {}", key);
         }
     }
 
@@ -182,46 +182,70 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
 
     private void parseInUseEntry(XrefEntry xrefEntry) throws IOException
     {
-        parser.position(xrefEntry.getByteOffset());
-        parser.skipExpectedIndirectObjectDefinition(xrefEntry.key());
-        parser.skipSpaces();
-        COSBase found = parser.nextParsedToken();
-        parser.skipSpaces();
-        if (parser.isNextToken(STREAM))
+        try
         {
-            requireIOCondition(found instanceof COSDictionary,
-                    "Found stream with missing dictionary");
-            found = parser.nextStream((COSDictionary) found);
-            if (parser.skipTokenIfValue(ENDSTREAM))
+            if (!currentlyParsing.contains(xrefEntry.key()))
             {
-                LOG.warn("Found double 'endstream' token for {}", xrefEntry);
-            }
-        }
-        if (securityHandler != null)
-        {
-            LOG.trace("Decrypting entry {}", xrefEntry);
-            securityHandler.decrypt(found, xrefEntry.getObjectNumber(),
-                    xrefEntry.getGenerationNumber());
-        }
-        if (!parser.skipTokenIfValue(ENDOBJ))
-        {
-            LOG.warn("Missing 'endobj' token for {}", xrefEntry);
-        }
+                currentlyParsing.add(xrefEntry.key());
+                parser.position(xrefEntry.getByteOffset());
+                parser.skipExpectedIndirectObjectDefinition(xrefEntry.key());
+                parser.skipSpaces();
+                COSBase found = parser.nextParsedToken();
+                parser.skipSpaces();
+                if (parser.isNextToken(STREAM))
+                {
+                    requireIOCondition(found instanceof COSDictionary,
+                            "Found stream with missing dictionary");
+                    found = parser.nextStream((COSDictionary) found);
+                    if (parser.skipTokenIfValue(ENDSTREAM))
+                    {
+                        LOG.warn("Found double 'endstream' token for {}", xrefEntry);
+                    }
+                }
+                if (securityHandler != null)
+                {
+                    LOG.trace("Decrypting entry {}", xrefEntry);
+                    securityHandler.decrypt(found, xrefEntry.getObjectNumber(),
+                            xrefEntry.getGenerationNumber());
+                }
+                if (!parser.skipTokenIfValue(ENDOBJ))
+                {
+                    LOG.warn("Missing 'endobj' token for {}", xrefEntry);
+                }
 
-        if (found instanceof ExistingIndirectCOSObject)
-        {
-            ExistingIndirectCOSObject existingIndirectCOSObject = (ExistingIndirectCOSObject) found;
-            // does this point to itself? it would cause a StackOverflowError. Example:
-            // 9 0 obj
-            // 9 0 R
-            // endobj
-            if (existingIndirectCOSObject.id().objectIdentifier.equals(xrefEntry.key()))
+                if (found instanceof ExistingIndirectCOSObject)
+                {
+                    ExistingIndirectCOSObject existingIndirectCOSObject = (ExistingIndirectCOSObject) found;
+                    // does this point to itself? it would cause a StackOverflowError. Example:
+                    // 9 0 obj
+                    // 9 0 R
+                    // endobj
+                    if (existingIndirectCOSObject.id().objectIdentifier.equals(xrefEntry.key()))
+                    {
+                        LOG.warn("Found indirect object definition pointing to itself, for {}",
+                                xrefEntry);
+                        found = COSNull.NULL;
+                    }
+                }
+                store.put(xrefEntry.key(), ofNullable(found).orElse(COSNull.NULL));
+            }
+            else
             {
-                LOG.warn("Found indirect object definition pointing to itself, for {}", xrefEntry);
-                found = COSNull.NULL;
+                //for some reason we are parsing the same entry while still in the parsing process. Example:
+                //3 0 obj
+                //<< /Length 3 0 R
+                //   /Filter /FlateDecode
+                //>>
+                //stream
+                //...
+                //endstream
+                LOG.warn("Found a loop while parsing object definition {}", xrefEntry);
             }
         }
-        store.put(xrefEntry.key(), ofNullable(found).orElse(COSNull.NULL));
+        finally
+        {
+            currentlyParsing.remove(xrefEntry.key());
+        }
     }
 
     private void parseCompressedEntry(XrefEntry xrefEntry) throws IOException

@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.input;
 
+import static java.util.Objects.isNull;
 import static org.sejda.sambox.util.CharUtils.isCarriageReturn;
 import static org.sejda.sambox.util.CharUtils.isLineFeed;
 import static org.sejda.sambox.util.CharUtils.isSpace;
@@ -79,8 +80,8 @@ abstract class BaseCOSParser extends SourceReader
         {
             if (c != '/')
             {
-                LOG.warn("Invalid dictionary key, expected '/' but was '" + (char) c + "' at "
-                        + position());
+                LOG.warn("Invalid dictionary key, expected '/' but was '{}' around position {}",
+                        (char) c, position());
                 if (!consumeInvalidDictionaryKey())
                 {
                     return dictionary;
@@ -90,9 +91,10 @@ abstract class BaseCOSParser extends SourceReader
             {
                 COSName key = nextName();
                 COSBase value = nextParsedToken();
-                if (value == null)
+                if (isNull(key) || key.getName().isEmpty() || isNull(value))
                 {
-                    LOG.warn("Bad dictionary declaration for key '{}'", key);
+                    LOG.warn("Bad dictionary declaration for key '{}' around position {}", key,
+                            position());
                 }
                 else
                 {
@@ -273,17 +275,17 @@ abstract class BaseCOSParser extends SourceReader
     }
 
     /**
-     * This will read a COSStream from the input stream using length attribute within dictionary. If length attribute is
-     * a indirect reference it is first resolved to get the stream length. This means we copy stream data without
-     * testing for 'endstream' or 'endobj' and thus it is no problem if these keywords occur within stream. We require
-     * 'endstream' to be found after stream data is read.
-     * 
-     * @param dic dictionary that goes with this stream.
-     * 
+     * This will read a COSStream from the input stream using length attribute within dictionary. If
+     * length attribute is a indirect reference it is first resolved to get the stream length. This
+     * means we copy stream data without testing for 'endstream' or 'endobj' and thus it is no
+     * problem if these keywords occur within stream. We require 'endstream' to be found after
+     * stream data is read.
+     *
+     * @param streamDictionary dictionary that goes with this stream.
      * @return parsed pdf stream.
-     * 
-     * @throws IOException if an error occurred reading the stream, like problems with reading length attribute, stream
-     * does not end with 'endstream' after data read, stream too short etc.
+     * @throws IOException if an error occurred reading the stream, like problems with reading
+     *                     length attribute, stream does not end with 'endstream' after data read,
+     *                     stream too short etc.
      */
     public COSStream nextStream(COSDictionary streamDictionary) throws IOException
     {

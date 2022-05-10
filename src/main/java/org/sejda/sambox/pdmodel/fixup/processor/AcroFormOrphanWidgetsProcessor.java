@@ -16,6 +16,12 @@
  */
 package org.sejda.sambox.pdmodel.fixup.processor;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.fontbox.ttf.TrueTypeFont;
@@ -36,12 +42,6 @@ import org.sejda.sambox.pdmodel.interactive.form.PDField;
 import org.sejda.sambox.pdmodel.interactive.form.PDFieldFactory;
 import org.sejda.sambox.pdmodel.interactive.form.PDVariableText;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 /**
  *  Generate field entries from page level widget annotations
  *  if there AcroForm /Fields entry is empty.
@@ -53,8 +53,8 @@ public class AcroFormOrphanWidgetsProcessor extends AbstractProcessor
     private static final Log LOG = LogFactory.getLog(AcroFormOrphanWidgetsProcessor.class);
 
     public AcroFormOrphanWidgetsProcessor(PDDocument document)
-    { 
-        super(document); 
+    {
+        super(document);
     }
 
     @Override
@@ -70,9 +70,9 @@ public class AcroFormOrphanWidgetsProcessor extends AbstractProcessor
         PDAcroForm acroForm = document.getDocumentCatalog().getAcroForm(null);
 
         if (acroForm != null)
-        {            
+        {
             resolveFieldsFromWidgets(acroForm);
-        } 
+        }
     }
 
     private void resolveFieldsFromWidgets(PDAcroForm acroForm)
@@ -91,7 +91,8 @@ public class AcroFormOrphanWidgetsProcessor extends AbstractProcessor
         Map<String, PDField> nonTerminalFieldsMap = new HashMap<String, PDField>();
         for (PDPage page : document.getPages())
         {
-            handleAnnotations(acroForm, resources, fields, page.getAnnotations(), nonTerminalFieldsMap);
+            handleAnnotations(acroForm, resources, fields, page.getAnnotations(),
+                    nonTerminalFieldsMap);
         }
 
         acroForm.setFields(fields);
@@ -135,7 +136,7 @@ public class AcroFormOrphanWidgetsProcessor extends AbstractProcessor
     /**
      * Add font resources from the widget to the AcroForm to make sure embedded fonts are being used
      * and not added by ensureFontResources potentially using a fallback font.
-     * 
+     *
      * @param acroFormResources AcroForm default resources, should not be null.
      * @param annotation annotation, should not be null.
      */
@@ -189,7 +190,7 @@ public class AcroFormOrphanWidgetsProcessor extends AbstractProcessor
                 return null;
             }
         }
-        
+
         if (nonTerminalFieldsMap.get(parent.getString(COSName.T)) == null)
         {
             PDField field = PDFieldFactory.createField(acroForm, parent, null);
@@ -205,10 +206,10 @@ public class AcroFormOrphanWidgetsProcessor extends AbstractProcessor
     }
 
     /*
-     *  Lookup the font used in the default appearance and if this is 
+     *  Lookup the font used in the default appearance and if this is
      *  not available try to find a suitable font and use that.
      *  This may not be the original font but a similar font replacement
-     * 
+     *
      *  TODO: implement a font lookup similar as discussed in PDFBOX-2661 so that already existing
      *        font resources might be accepatble.
      *        In such case this must be implemented in PDDefaultAppearanceString too!
@@ -223,7 +224,8 @@ public class AcroFormOrphanWidgetsProcessor extends AbstractProcessor
             {
                 if (defaultResources.getFont(fontName) == null)
                 {
-                    LOG.debug("trying to add missing font resource for field " + field.getFullyQualifiedName());
+                    LOG.debug("Trying to add missing font resource for field "
+                            + field.getFullyQualifiedName());
                     FontMapper mapper = FontMappers.instance();
                     FontMapping<TrueTypeFont> fontMapping = mapper.getTrueTypeFont(fontName.getName() , null);
                     if (fontMapping != null)

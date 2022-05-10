@@ -16,6 +16,46 @@
  */
 package org.sejda.sambox.rendering;
 
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsDevice;
+import java.awt.Image;
+import java.awt.Paint;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
+import java.awt.Shape;
+import java.awt.Stroke;
+import java.awt.TexturePaint;
+import java.awt.Transparency;
+import java.awt.color.ColorSpace;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Area;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
+import java.awt.geom.PathIterator;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.ComponentColorModel;
+import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferByte;
+import java.awt.image.Raster;
+import java.awt.image.WritableRaster;
+import java.io.IOException;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.sejda.sambox.contentstream.PDFGraphicsStreamEngine;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
@@ -66,47 +106,6 @@ import org.sejda.sambox.util.Matrix;
 import org.sejda.sambox.util.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.GraphicsConfiguration;
-import java.awt.GraphicsDevice;
-import java.awt.Image;
-import java.awt.Paint;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.Shape;
-import java.awt.Stroke;
-import java.awt.TexturePaint;
-import java.awt.Transparency;
-import java.awt.color.ColorSpace;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Area;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.Path2D;
-import java.awt.geom.PathIterator;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
-import java.awt.image.ComponentColorModel;
-import java.awt.image.DataBuffer;
-import java.awt.image.DataBufferByte;
-import java.awt.image.Raster;
-import java.awt.image.WritableRaster;
-import java.io.IOException;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
 
 /**
  * Paints a page in a PDF document to a Graphics context. May be subclassed to provide custom
@@ -164,8 +163,6 @@ public class PageDrawer extends PDFGraphicsStreamEngine
 
     private final RenderDestination destination;
     private final RenderingHints renderingHints;
-
-    static final int JAVA_VERSION = PageDrawer.getJavaVersion();
 
     /**
      * Default annotations filter, returns all annotations
@@ -831,32 +828,21 @@ public class PageDrawer extends PDFGraphicsStreamEngine
                 return null;
             }
         }
-        if (JAVA_VERSION < 10)
+        for (int i = 0; i < dashArray.length; ++i)
         {
-            for (int i = 0; i < dashArray.length; ++i)
+            // apply the CTM
+            float w = transformWidth(dashArray[i]);
+            // minimum line dash width avoids JVM crash,
+            // see PDFBOX-2373, PDFBOX-2929, PDFBOX-3204, PDFBOX-3813
+            // also avoid 0 in array like "[ 0 1000 ] 0 d", see PDFBOX-3724
+            if (xformScalingFactorX < 0.5f)
             {
-                // apply the CTM
-                float w = transformWidth(dashArray[i]);
-                // minimum line dash width avoids JVM crash,
-                // see PDFBOX-2373, PDFBOX-2929, PDFBOX-3204, PDFBOX-3813
-                // also avoid 0 in array like "[ 0 1000 ] 0 d", see PDFBOX-3724
-                if (xformScalingFactorX < 0.5f)
-                {
-                    // PDFBOX-4492
-                    dashArray[i] = Math.max(w, 0.2f);
-                }
-                else
-                {
-                    dashArray[i] = Math.max(w, 0.062f);
-                }
+                // PDFBOX-4492
+                dashArray[i] = Math.max(w, 0.2f);
             }
-        }
-        else
-        {
-            for (int i = 0; i < dashArray.length; ++i)
+            else
             {
-                // apply the CTM
-                dashArray[i] = transformWidth(dashArray[i]);
+                dashArray[i] = Math.max(w, 0.062f);
             }
         }
         return dashArray;
@@ -1105,8 +1091,10 @@ public class PageDrawer extends PDFGraphicsStreamEngine
             // only when scaled up do we use nearest neighbour, eg PDFBOX-2302 / mori-cvpr01.pdf
             // PDFBOX-4930: we use the sizes of the ARGB image. These can be different
             // than the original sizes of the base image, when the mask is bigger.
-            boolean isScaledUp = pdImage.getImage().getWidth() < Math.round(at.getScaleX())
-                    || pdImage.getImage().getHeight() < Math.round(at.getScaleY());
+            BufferedImage bim = pdImage.getImage();
+            Matrix m = new Matrix(at);
+            boolean isScaledUp = bim.getWidth() < Math.abs(Math.round(m.getScalingFactorX()))
+                    || bim.getHeight() < Math.abs(Math.round(m.getScalingFactorY()));
             if (isScaledUp)
             {
                 graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
@@ -2029,28 +2017,6 @@ public class PageDrawer extends PDFGraphicsStreamEngine
             }
         }
         return true;
-    }
-
-    private static int getJavaVersion()
-    {
-        // strategy from lucene-solr/lucene/core/src/java/org/apache/lucene/util/Constants.java
-        String version = System.getProperty("java.specification.version");
-        final StringTokenizer st = new StringTokenizer(version, ".");
-        try
-        {
-            int major = Integer.parseInt(st.nextToken());
-            int minor = 0;
-            if (st.hasMoreTokens())
-            {
-                minor = Integer.parseInt(st.nextToken());
-            }
-            return major == 1 ? minor : major;
-        }
-        catch (NumberFormatException nfe)
-        {
-            // maybe some new numbering scheme in the 22nd century
-            return 0;
-        }
     }
 
     public boolean isTextContentRendered()

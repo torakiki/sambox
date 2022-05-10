@@ -17,8 +17,21 @@
 
 package org.sejda.sambox.pdmodel.font;
 
+import static java.util.Objects.nonNull;
+import static org.sejda.sambox.pdmodel.font.UniUtil.getUniNameOfCodePoint;
+
+import java.awt.geom.AffineTransform;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Point2D;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.fontbox.EncodedFont;
 import org.apache.fontbox.FontBoxFont;
+import org.apache.fontbox.cff.CFFFont;
 import org.apache.fontbox.cff.CFFParser;
 import org.apache.fontbox.cff.CFFType1Font;
 import org.apache.fontbox.util.BoundingBox;
@@ -32,18 +45,6 @@ import org.sejda.sambox.pdmodel.font.encoding.Type1Encoding;
 import org.sejda.sambox.util.Matrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.awt.geom.AffineTransform;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.Point2D;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static java.util.Objects.nonNull;
-import static org.sejda.sambox.pdmodel.font.UniUtil.getUniNameOfCodePoint;
 
 /**
  * Type 1-equivalent CFF font.
@@ -102,7 +103,17 @@ public class PDType1CFont extends PDSimpleFont
             {
                 // note: this could be an OpenType file, fortunately CFFParser can handle that
                 CFFParser cffParser = new CFFParser();
-                cffEmbedded = (CFFType1Font) cffParser.parse(bytes, new FF3ByteSource()).get(0);
+                CFFFont parsedCffFont = cffParser.parse(bytes, new FF3ByteSource()).get(0);
+                if (parsedCffFont instanceof CFFType1Font)
+                {
+                    cffEmbedded = (CFFType1Font) parsedCffFont;
+                }
+                else
+                {
+                    LOG.error("Expected CFFType1Font, got {}",
+                            parsedCffFont.getClass().getSimpleName());
+                    fontIsDamaged = true;
+                }
             }
         }
         catch (IOException e)

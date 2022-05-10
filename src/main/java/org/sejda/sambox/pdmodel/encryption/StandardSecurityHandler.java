@@ -16,6 +16,20 @@
  */
 package org.sejda.sambox.pdmodel.encryption;
 
+import static java.util.Objects.nonNull;
+import static org.bouncycastle.util.Arrays.copyOf;
+import static org.sejda.commons.util.RequireUtils.requireIOCondition;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
+import java.security.MessageDigest;
+import java.util.Arrays;
+
 import org.bouncycastle.crypto.BufferedBlockCipher;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
@@ -27,23 +41,9 @@ import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.security.GeneralSecurityException;
-import java.security.MessageDigest;
-import java.util.Arrays;
-
-import static java.util.Objects.nonNull;
-import static org.bouncycastle.util.Arrays.copyOf;
-import static org.sejda.commons.util.RequireUtils.requireIOCondition;
 
 /**
  * The standard security handler. This security handler protects document with password.
@@ -140,11 +140,33 @@ public final class StandardSecurityHandler extends SecurityHandler
                 {
                     dicLength = 128 / 8;
                     setAES(true);
+                    if (encryption.getCOSObject().containsKey(COSName.LENGTH))
+                    {
+                        // PDFBOX-5345
+                        int newLength = encryption.getLength() / 8;
+                        if (newLength < dicLength)
+                        {
+                            LOG.warn("Using {} bytes key length instead of {} in AESV2 encryption",
+                                    newLength, dicLength);
+                            dicLength = newLength;
+                        }
+                    }
                 }
                 if (COSName.AESV3.equals(cryptFilterMethod))
                 {
                     dicLength = 256 / 8;
                     setAES(true);
+                    if (encryption.getCOSObject().containsKey(COSName.LENGTH))
+                    {
+                        // PDFBOX-5345
+                        int newLength = encryption.getLength() / 8;
+                        if (newLength < dicLength)
+                        {
+                            LOG.warn("Using {} bytes key length instead of {} in AESV3 encryption",
+                                    newLength, dicLength);
+                            dicLength = newLength;
+                        }
+                    }
                 }
             }
         }

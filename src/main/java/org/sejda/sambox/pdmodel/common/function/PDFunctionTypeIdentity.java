@@ -15,6 +15,7 @@
  */
 package org.sejda.sambox.pdmodel.common.function;
 
+import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 
 /**
@@ -43,9 +44,12 @@ public class PDFunctionTypeIdentity extends PDFunction
         return input;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
+    protected COSArray getRangeValues()
+    {
+        return null;
+    }
+
     @Override
     public String toString()
     {

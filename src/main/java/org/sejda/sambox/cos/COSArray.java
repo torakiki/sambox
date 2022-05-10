@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.cos;
 
+import static java.util.Optional.ofNullable;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,8 +27,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Objects;
 import java.util.Optional;
-
-import static java.util.Optional.ofNullable;
 
 /**
  * An array of PDFBase objects as part of the PDF document.
@@ -455,7 +455,7 @@ public class COSArray extends COSBase implements List<COSBase>
     public float[] toFloatArray()
     {
         float[] retval = new float[size()];
-        for (int i = 0; i < size(); i++)
+        for (int i = 0; i < retval.length; i++)
         {
             retval[i] = ofNullable(getObject(i, COSNumber.class)).map(COSNumber::floatValue)
                     .orElse(0f);

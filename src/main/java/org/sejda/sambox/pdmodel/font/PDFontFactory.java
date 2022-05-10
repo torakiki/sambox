@@ -77,7 +77,7 @@ public final class PDFontFactory
             }
             return new PDType1Font(dictionary);
         }
-        else if (COSName.MM_TYPE1.equals(subType))
+        if (COSName.MM_TYPE1.equals(subType))
         {
             COSBase fd = dictionary.getDictionaryObject(COSName.FONT_DESC);
             if (fd instanceof COSDictionary && ((COSDictionary) fd).containsKey(COSName.FONT_FILE3))
@@ -86,40 +86,37 @@ public final class PDFontFactory
             }
             return new PDMMType1Font(dictionary);
         }
-        else if (COSName.TRUE_TYPE.equals(subType))
+        if (COSName.TRUE_TYPE.equals(subType))
         {
             return new PDTrueTypeFont(dictionary);
         }
-        else if (COSName.TYPE3.equals(subType))
+        if (COSName.TYPE3.equals(subType))
         {
             return new PDType3Font(dictionary, resourceCache);
         }
-        else if (COSName.TYPE0.equals(subType))
+        if (COSName.TYPE0.equals(subType))
         {
             return new PDType0Font(dictionary);
         }
-        else if (COSName.CID_FONT_TYPE0.equals(subType))
+        if (COSName.CID_FONT_TYPE0.equals(subType))
         {
-            throw new IllegalArgumentException("Type 0 descendant font not allowed");
+            throw new IOException("Type 0 descendant font not allowed");
         }
-        else if (COSName.CID_FONT_TYPE2.equals(subType))
+        if (COSName.CID_FONT_TYPE2.equals(subType))
         {
-            throw new IllegalArgumentException("Type 2 descendant font not allowed");
+            throw new IOException("Type 2 descendant font not allowed");
         }
-        else
-        {
-            // assuming Type 1 font (see PDFBOX-1988) because it seems that Adobe Reader does this
-            // however, we may need more sophisticated logic perhaps looking at the FontFile
-            LOG.warn("Invalid font subtype '" + subType + "'");
+        // assuming Type 1 font (see PDFBOX-1988) because it seems that Adobe Reader does this
+        // however, we may need more sophisticated logic perhaps looking at the FontFile
+        LOG.warn("Invalid font subtype '" + subType + "'");
 
-            try
-            {
-                return new PDType1Font(dictionary);
-            }
-            catch (FontFileMismatchException iae)
-            {
-                return new PDType1CFont(dictionary);
-            }
+        try
+        {
+            return new PDType1Font(dictionary);
+        }
+        catch (FontFileMismatchException iae)
+        {
+            return new PDType1CFont(dictionary);
         }
     }
 
@@ -136,8 +133,7 @@ public final class PDFontFactory
         COSName type = dictionary.getCOSName(COSName.TYPE, COSName.FONT);
         if (!COSName.FONT.equals(type))
         {
-            throw new IllegalArgumentException(
-                    "Expected 'Font' dictionary but found '" + type.getName() + "'");
+            throw new IOException("Expected 'Font' dictionary but found '" + type.getName() + "'");
         }
 
         COSName subType = dictionary.getCOSName(COSName.SUBTYPE);
@@ -145,14 +141,11 @@ public final class PDFontFactory
         {
             return new PDCIDFontType0(dictionary, parent);
         }
-        else if (COSName.CID_FONT_TYPE2.equals(subType))
+        if (COSName.CID_FONT_TYPE2.equals(subType))
         {
             return new PDCIDFontType2(dictionary, parent);
         }
-        else
-        {
-            throw new IOException("Invalid font type: " + type);
-        }
+        throw new IOException("Invalid font type: " + type);
     }
 
     /**

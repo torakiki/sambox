@@ -16,6 +16,14 @@
  */
 package org.sejda.sambox.pdmodel.font;
 
+import static java.util.Objects.isNull;
+
+import java.awt.geom.GeneralPath;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.fontbox.FontBoxFont;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
@@ -28,14 +36,6 @@ import org.sejda.sambox.pdmodel.font.encoding.StandardEncoding;
 import org.sejda.sambox.pdmodel.font.encoding.WinAnsiEncoding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.awt.geom.GeneralPath;
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import static java.util.Objects.isNull;
 
 /**
  * A simple font. Simple fonts use a PostScript encoding vector.
@@ -118,7 +118,7 @@ public abstract class PDSimpleFont extends PDFont
             }
             this.encoding = new DictionaryEncoding(encodingDict, !symbolic, builtIn);
         }
-        else if (encodingBase == null)
+        else
         {
             this.encoding = readEncodingFromFont();
         }

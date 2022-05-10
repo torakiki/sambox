@@ -16,6 +16,29 @@
  */
 package org.sejda.sambox.pdmodel;
 
+import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toList;
+import static org.sejda.sambox.cos.COSName.DECODE_PARMS;
+import static org.sejda.sambox.cos.COSName.DL;
+import static org.sejda.sambox.cos.COSName.F;
+import static org.sejda.sambox.cos.COSName.FILTER;
+import static org.sejda.sambox.cos.COSName.F_DECODE_PARMS;
+import static org.sejda.sambox.cos.COSName.F_FILTER;
+import static org.sejda.sambox.cos.COSName.LENGTH;
+
+import java.awt.Point;
+import java.awt.geom.Point2D;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.SequenceInputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+
 import org.sejda.sambox.contentstream.PDContentStream;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSArrayList;
@@ -38,29 +61,6 @@ import org.sejda.sambox.pdmodel.interactive.pagenavigation.PDTransition;
 import org.sejda.sambox.util.Matrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.awt.Point;
-import java.awt.geom.Point2D;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.SequenceInputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-
-import static java.util.Objects.nonNull;
-import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.toList;
-import static org.sejda.sambox.cos.COSName.DECODE_PARMS;
-import static org.sejda.sambox.cos.COSName.DL;
-import static org.sejda.sambox.cos.COSName.F;
-import static org.sejda.sambox.cos.COSName.FILTER;
-import static org.sejda.sambox.cos.COSName.F_DECODE_PARMS;
-import static org.sejda.sambox.cos.COSName.F_FILTER;
-import static org.sejda.sambox.cos.COSName.LENGTH;
 
 /**
  * A page in a PDF document.
@@ -156,7 +156,7 @@ public class PDPage implements COSObjectable, PDContentStream
         {
             streams.add(new PDStream((COSStream) base));
         }
-        else if (base instanceof COSArray && ((COSArray) base).size() > 0)
+        else if (base instanceof COSArray)
         {
             COSArray array = (COSArray) base;
             for (int i = 0; i < array.size(); i++)

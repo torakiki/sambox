@@ -298,6 +298,14 @@ public class COSParserTest
         assertNull(result.getItem(COSName.R));
     }
 
+    @Test
+    public void nextDictionaryBadKey() throws IOException
+    {
+        victim = new COSParser(inMemorySeekableSourceFrom("<< / 10 >>".getBytes()));
+        COSDictionary result = victim.nextDictionary();
+        assertNull(result.getItem(COSName.R));
+    }
+
     @Test(expected = IOException.class)
     public void nextDictionaryTrunkatedEOF() throws IOException
     {

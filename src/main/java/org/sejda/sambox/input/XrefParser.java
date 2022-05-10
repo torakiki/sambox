@@ -173,20 +173,20 @@ class XrefParser
                     }
                 };
                 // and we consider it more reliable compared to what was found in the somehow broken xrefs
-                objectsFullScanner.entries().values().stream().forEach(parser.provider()::addEntry);
+                objectsFullScanner.entries().values().forEach(parser.provider()::addEntry);
             }
             trailer.setFallbackScanStatus(xrefScanStatus.name());
         }
     }
 
     /**
-     * Looks for the startxref keyword within the latest {@link #DEFAULT_TRAIL_BYTECOUNT} bytes of the source. If found
-     * it returns the Long read after the keyword, if not it returns -1.
-     * 
+     * Looks for the startxref keyword within the latest {@link #DEFAULT_TRAIL_BYTECOUNT} bytes of
+     * the source. If found it returns the Long read after the keyword, if not it returns -1.
+     *
      * @return the xref offset or -1 if the startxref keyword is not found
      * @throws IOException If something went wrong.
      */
-    private final long findXrefOffset() throws IOException
+    private long findXrefOffset() throws IOException
     {
         int chunkSize = (int) Math.min(parser.length(), DEFAULT_TRAIL_BYTECOUNT);
         long startPosition = parser.length() - chunkSize;

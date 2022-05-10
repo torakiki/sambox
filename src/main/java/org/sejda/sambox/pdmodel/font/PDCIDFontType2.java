@@ -16,6 +16,16 @@
  */
 package org.sejda.sambox.pdmodel.font;
 
+import static java.util.Objects.nonNull;
+
+import java.awt.geom.GeneralPath;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.fontbox.cff.Type2CharString;
 import org.apache.fontbox.cmap.CMap;
 import org.apache.fontbox.ttf.CmapLookup;
@@ -31,16 +41,6 @@ import org.sejda.sambox.pdmodel.common.PDStream;
 import org.sejda.sambox.util.Matrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.awt.geom.GeneralPath;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import static java.util.Objects.nonNull;
 
 /**
  * Type 2 CIDFont (TrueType).
@@ -333,7 +333,7 @@ public class PDCIDFontType2 extends PDCIDFont
     public float getWidthFromFont(int code) throws IOException
     {
         int gid = codeToGID(code);
-        int width = ttf.getAdvanceWidth(gid);
+        float width = ttf.getAdvanceWidth(gid);
         int unitsPerEM = ttf.getUnitsPerEm();
         if (unitsPerEM != 1000)
         {

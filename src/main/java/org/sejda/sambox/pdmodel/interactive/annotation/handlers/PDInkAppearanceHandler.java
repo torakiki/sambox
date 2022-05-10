@@ -16,6 +16,8 @@
 
 package org.sejda.sambox.pdmodel.interactive.annotation.handlers;
 
+import java.io.IOException;
+
 import org.sejda.sambox.pdmodel.PDAppearanceContentStream;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.graphics.color.PDColor;
@@ -23,8 +25,6 @@ import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotation;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationMarkup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 
 /**
  * Handler to generate the ink annotations appearance.
@@ -79,6 +79,10 @@ public class PDInkAppearanceHandler extends PDAbstractAppearanceHandler
             }
         }
         PDRectangle rect = ink.getRectangle();
+        if (rect == null)
+        {
+            return;
+        }
         rect.setLowerLeftX(Math.min(minX - ab.width * 2, rect.getLowerLeftX()));
         rect.setLowerLeftY(Math.min(minY - ab.width * 2, rect.getLowerLeftY()));
         rect.setUpperRightX(Math.max(maxX + ab.width * 2, rect.getUpperRightX()));

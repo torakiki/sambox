@@ -1,0 +1,8 @@
+3 0 obj
+<< /Length 3 0 R
+   /Filter /FlateDecode
+>>
+stream
+ABCDE
+endstream
+endobj

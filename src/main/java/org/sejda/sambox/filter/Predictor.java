@@ -15,13 +15,13 @@
  */
 package org.sejda.sambox.filter;
 
-import org.sejda.sambox.cos.COSDictionary;
-import org.sejda.sambox.cos.COSName;
-
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
+
+import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSName;
 
 /**
  * Helper class to contain predictor decoding used by Flate and LZW filter. To see the history, look
@@ -75,7 +75,7 @@ public final class Predictor
             }
             if (bitsPerComponent == 16)
             {
-                for (int p = bytesPerPixel; p < rowlength; p += 2)
+                for (int p = bytesPerPixel; p < rowlength - 1; p += 2)
                 {
                     int sub = ((actline[p] & 0xff) << 8) + (actline[p + 1] & 0xff);
                     int left = (((actline[p - bytesPerPixel] & 0xff) << 8) + (

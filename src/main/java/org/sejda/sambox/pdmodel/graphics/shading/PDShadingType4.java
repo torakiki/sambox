@@ -16,16 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.graphics.shading;
 
-import org.sejda.sambox.cos.COSDictionary;
-import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.cos.COSStream;
-import org.sejda.sambox.pdmodel.common.PDRange;
-import org.sejda.sambox.util.Matrix;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.imageio.stream.ImageInputStream;
-import javax.imageio.stream.MemoryCacheImageInputStream;
 import java.awt.Paint;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
@@ -34,6 +24,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.cos.COSStream;
+import org.sejda.sambox.pdmodel.common.PDRange;
+import org.sejda.sambox.util.Matrix;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import javax.imageio.stream.ImageInputStream;
+import javax.imageio.stream.MemoryCacheImageInputStream;
 
 /**
  * Resources for a shading type 4 (Free-Form Gouraud-Shaded Triangle Mesh).
@@ -96,15 +96,19 @@ public class PDShadingType4 extends PDTriangleBasedShadingType
         }
         PDRange rangeX = getDecodeForParameter(0);
         PDRange rangeY = getDecodeForParameter(1);
-        if (Float.compare(rangeX.getMin(), rangeX.getMax()) == 0
+        if (rangeX == null || rangeY == null || Float.compare(rangeX.getMin(), rangeX.getMax()) == 0
                 || Float.compare(rangeY.getMin(), rangeY.getMax()) == 0)
         {
             return Collections.emptyList();
         }
         PDRange[] colRange = new PDRange[getNumberOfColorComponents()];
-        for (int i = 0; i < getNumberOfColorComponents(); ++i)
+        for (int i = 0; i < colRange.length; ++i)
         {
             colRange[i] = getDecodeForParameter(2 + i);
+            if (colRange[i] == null)
+            {
+                throw new IOException("Range missing in shading /Decode entry");
+            }
         }
         List<ShadedTriangle> list = new ArrayList<ShadedTriangle>();
         long maxSrcCoord = (long) Math.pow(2, getBitsPerCoordinate()) - 1;

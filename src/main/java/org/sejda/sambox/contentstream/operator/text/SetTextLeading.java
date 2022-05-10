@@ -16,8 +16,10 @@
  */
 package org.sejda.sambox.contentstream.operator.text;
 
+import java.io.IOException;
 import java.util.List;
 
+import org.sejda.sambox.contentstream.operator.MissingOperandException;
 import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.contentstream.operator.OperatorProcessor;
@@ -32,9 +34,18 @@ import org.sejda.sambox.cos.COSNumber;
 public class SetTextLeading extends OperatorProcessor
 {
     @Override
-    public void process(Operator operator, List<COSBase> arguments)
+    public void process(Operator operator, List<COSBase> arguments) throws IOException
     {
-        COSNumber leading = (COSNumber)arguments.get( 0 );
+        if (arguments.isEmpty())
+        {
+            throw new MissingOperandException(operator, arguments);
+        }
+        COSBase base = arguments.get(0);
+        if (!(base instanceof COSNumber))
+        {
+            return;
+        }
+        COSNumber leading = (COSNumber) base;
         getContext().getGraphicsState().getTextState().setLeading(leading.floatValue());
     }
 

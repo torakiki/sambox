@@ -16,6 +16,21 @@
  */
 package org.sejda.sambox.pdmodel.font;
 
+import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
+import static org.sejda.sambox.pdmodel.font.UniUtil.getUniNameOfCodePoint;
+
+import java.awt.geom.AffineTransform;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Point2D;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.apache.fontbox.EncodedFont;
 import org.apache.fontbox.FontBoxFont;
 import org.apache.fontbox.type1.DamagedFontException;
@@ -36,21 +51,6 @@ import org.sejda.sambox.pdmodel.font.encoding.ZapfDingbatsEncoding;
 import org.sejda.sambox.util.Matrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.awt.geom.AffineTransform;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.Point2D;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import static java.util.Objects.nonNull;
-import static java.util.Optional.ofNullable;
-import static org.sejda.sambox.pdmodel.font.UniUtil.getUniNameOfCodePoint;
 
 /**
  * A PostScript Type 1 Font.
@@ -566,7 +566,7 @@ public class PDType1Font extends PDSimpleFont
     // @Override
     public String codeToName(int code) throws IOException
     {
-        String name = getEncoding().getName(code);
+        String name = ofNullable(getEncoding()).map(e -> e.getName(code)).orElse(".notdef");
         return getNameInFont(name);
     }
 

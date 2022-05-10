@@ -16,22 +16,7 @@
  */
 package org.sejda.sambox.pdmodel.font;
 
-import org.apache.fontbox.FontBoxFont;
-import org.apache.fontbox.cff.CFFCIDFont;
-import org.apache.fontbox.cff.CFFFont;
-import org.apache.fontbox.ttf.NamingTable;
-import org.apache.fontbox.ttf.OS2WindowsMetricsTable;
-import org.apache.fontbox.ttf.OTFParser;
-import org.apache.fontbox.ttf.OpenTypeFont;
-import org.apache.fontbox.ttf.TTFParser;
-import org.apache.fontbox.ttf.TrueTypeCollection;
-import org.apache.fontbox.ttf.TrueTypeCollection.TrueTypeFontProcessor;
-import org.apache.fontbox.ttf.TrueTypeFont;
-import org.apache.fontbox.type1.Type1Font;
-import org.apache.fontbox.util.autodetect.FontFileFinder;
-import org.sejda.commons.util.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.util.Objects.nonNull;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -49,7 +34,22 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static java.util.Objects.nonNull;
+import org.apache.fontbox.FontBoxFont;
+import org.apache.fontbox.cff.CFFCIDFont;
+import org.apache.fontbox.cff.CFFFont;
+import org.apache.fontbox.ttf.NamingTable;
+import org.apache.fontbox.ttf.OS2WindowsMetricsTable;
+import org.apache.fontbox.ttf.OTFParser;
+import org.apache.fontbox.ttf.OpenTypeFont;
+import org.apache.fontbox.ttf.TTFParser;
+import org.apache.fontbox.ttf.TrueTypeCollection;
+import org.apache.fontbox.ttf.TrueTypeCollection.TrueTypeFontProcessor;
+import org.apache.fontbox.ttf.TrueTypeFont;
+import org.apache.fontbox.type1.Type1Font;
+import org.apache.fontbox.util.autodetect.FontFileFinder;
+import org.sejda.commons.util.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A FontProvider which searches for fonts on the local filesystem.
@@ -337,21 +337,24 @@ final class FileSystemFontProvider extends FontProvider
                 files.add(new File(font));
             }
 
-            LOG.trace("Found " + files.size() + " fonts on the local system");
+            LOG.trace("Found {} fonts on the local system", files.size());
 
-            // load cached FontInfo objects
-            List<FSFontInfo> cachedInfos = loadDiskCache(files);
-            if (cachedInfos != null && !cachedInfos.isEmpty())
+            if (!files.isEmpty())
             {
-                fontInfoList.addAll(cachedInfos);
-            }
-            else
-            {
-                LOG.warn("Building on-disk font cache, this may take a while");
-                scanFonts(files);
-                saveDiskCache();
-                LOG.warn("Finished building on-disk font cache, found " + fontInfoList.size()
-                        + " fonts");
+                // load cached FontInfo objects
+                List<FSFontInfo> cachedInfos = loadDiskCache(files);
+                if (cachedInfos != null && !cachedInfos.isEmpty())
+                {
+                    fontInfoList.addAll(cachedInfos);
+                }
+                else
+                {
+                    LOG.warn("Building on-disk font cache, this may take a while");
+                    scanFonts(files);
+                    saveDiskCache();
+                    LOG.warn("Finished building on-disk font cache, found {} fonts",
+                            fontInfoList.size());
+                }
             }
         }
         catch (AccessControlException e)

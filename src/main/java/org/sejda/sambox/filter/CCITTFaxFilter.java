@@ -16,14 +16,14 @@
  */
 package org.sejda.sambox.filter;
 
-import org.sejda.commons.util.IOUtils;
-import org.sejda.sambox.cos.COSDictionary;
-import org.sejda.sambox.cos.COSName;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PushbackInputStream;
+
+import org.sejda.commons.util.IOUtils;
+import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSName;
 
 /**
  * Decodes image data that has been encoded using either Group 3 or Group 4 CCITT facsimile (fax)
@@ -70,18 +70,18 @@ final class CCITTFaxFilter extends Filter
         {
             type = TIFFExtension.COMPRESSION_CCITT_T4; // Group 3 1D
             byte[] streamData = new byte[20];
+            int bytesRead = encoded.read(streamData);
             PushbackInputStream pushbackInputStream = new PushbackInputStream(encoded,
                     streamData.length);
-            pushbackInputStream.unread(streamData);
+            pushbackInputStream.unread(streamData, 0, bytesRead);
             encoded = pushbackInputStream;
-            ((PushbackInputStream) encoded).unread(streamData);
             if (streamData[0] != 0 || (streamData[1] >> 4 != 1 && streamData[1] != 1))
             {
                 // leading EOL (0b000000000001) not found, search further and try RLE if not
                 // found
                 type = TIFFExtension.COMPRESSION_CCITT_MODIFIED_HUFFMAN_RLE;
                 short b = (short) (((streamData[0] << 8) + streamData[1]) >> 4);
-                for (int i = 12; i < 160; i++)
+                for (int i = 12; i < bytesRead * 8; i++)
                 {
                     b = (short) ((b << 1) + ((streamData[(i / 8)] >> (7 - (i % 8))) & 0x01));
                     if ((b & 0xFFF) == 1)

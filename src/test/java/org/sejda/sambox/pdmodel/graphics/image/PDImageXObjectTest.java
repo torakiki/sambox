@@ -1,11 +1,9 @@
 package org.sejda.sambox.pdmodel.graphics.image;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.sejda.io.SeekableSource;
-import org.sejda.io.SeekableSources;
-import org.sejda.sambox.util.filetypedetector.FileType;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,10 +11,12 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.sejda.io.SeekableSource;
+import org.sejda.io.SeekableSources;
+import org.sejda.sambox.util.filetypedetector.FileType;
 
 public class PDImageXObjectTest
 {
@@ -28,6 +28,14 @@ public class PDImageXObjectTest
     {
         File outFile = tempFileFromResource("/org/sejda/sambox/resources/images/sample.png");
         PDImageXObject.createFromFile(outFile.getPath());
+    }
+
+    @Test
+    public void testTiffWithLZWCompression() throws IOException
+    {
+        File outFile = tempFileFromResource("/org/sejda/sambox/resources/images/lzw.tif");
+        PDImageXObject object = PDImageXObject.createFromFile(outFile.getPath());
+        assertEquals(object.getHeight(), 287);
     }
 
     @Test

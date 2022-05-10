@@ -16,12 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.graphics.color;
 
-import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSBase;
-import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.cos.COSNull;
-import org.sejda.sambox.pdmodel.common.function.PDFunction;
-
 import java.awt.Point;
 import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
@@ -31,6 +25,12 @@ import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.sejda.sambox.cos.COSArray;
+import org.sejda.sambox.cos.COSBase;
+import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.cos.COSNull;
+import org.sejda.sambox.pdmodel.common.function.PDFunction;
 
 /**
  * A Separation color space used to specify either additional colorants or for isolating the control
@@ -87,6 +87,15 @@ public class PDSeparation extends PDSpecialColorSpace
         array = separation;
         alternateColorSpace = PDColorSpace.create(array.getObject(ALTERNATE_CS));
         tintTransform = PDFunction.create(array.getObject(TINT_TRANSFORM));
+        int numberOfOutputParameters = tintTransform.getNumberOfOutputParameters();
+        if (numberOfOutputParameters > 0
+                && numberOfOutputParameters < alternateColorSpace.getNumberOfComponents())
+        {
+            throw new IOException("The tint transform function has less output parameters ("
+                    + tintTransform.getNumberOfOutputParameters()
+                    + ") than the alternate colorspace " + alternateColorSpace + " ("
+                    + alternateColorSpace.getNumberOfComponents() + ")");
+        }
     }
 
     @Override
