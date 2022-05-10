@@ -553,8 +553,8 @@ public class PDType1Font extends PDSimpleFont
         if (getFontDescriptor() != null)
         {
             PDRectangle bbox = getFontDescriptor().getFontBoundingBox();
-            if (nonNull(bbox) && bbox.getLowerLeftX() != 0 || bbox.getLowerLeftY() != 0
-                    || bbox.getUpperRightX() != 0 || bbox.getUpperRightY() != 0)
+            if (nonNull(bbox) && (bbox.getLowerLeftX() != 0 || bbox.getLowerLeftY() != 0
+                    || bbox.getUpperRightX() != 0 || bbox.getUpperRightY() != 0))
             {
                 return new BoundingBox(bbox.getLowerLeftX(), bbox.getLowerLeftY(),
                         bbox.getUpperRightX(), bbox.getUpperRightY());
