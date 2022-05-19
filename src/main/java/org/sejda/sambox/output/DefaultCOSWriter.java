@@ -22,6 +22,7 @@ import static org.sejda.sambox.util.CharUtils.isDigit;
 import static org.sejda.sambox.util.CharUtils.isLetter;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.Map;
@@ -176,11 +177,14 @@ class DefaultCOSWriter implements COSWriter
             writer.write(STREAM);
             writer.write(CRLF);
             long streamStartingPosition = writer.offset();
-            writer.write(value.getFilteredStream());
+            try (InputStream stream = value.getFilteredStream())
+            {
+                writer.write(stream);
+            }
             if (length instanceof IndirectCOSObjectReference)
             {
-                ((IndirectCOSObjectReference) length)
-                        .setValue(new COSInteger(writer.offset() - streamStartingPosition));
+                ((IndirectCOSObjectReference) length).setValue(
+                        new COSInteger(writer.offset() - streamStartingPosition));
             }
             writer.write(CRLF);
             writer.write(ENDSTREAM);
