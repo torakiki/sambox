@@ -16,48 +16,49 @@
  */
 package org.sejda.sambox.contentstream.operator;
 
+import static java.util.Optional.ofNullable;
 import static org.sejda.sambox.contentstream.operator.OperatorConsumer.NO_OP;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 import org.sejda.sambox.contentstream.PDFStreamEngine;
 import org.sejda.sambox.cos.COSBase;
 
 /**
  * decorator for an {@link OperatorProcessor}
- * 
+ *
  * @author Andrea Vacondio
  */
 public class OperatorProcessorDecorator extends OperatorProcessor
 {
-    private OperatorProcessor delegate;
-    private Optional<OperatorConsumer> consumer;
+    private final OperatorProcessor delegate;
+    private OperatorConsumer consumer;
 
     /**
-     * Decorates the given {@link OperatorProcessor} with the given {@link OperatorConsumer} function
-     * 
+     * Decorates the given {@link OperatorProcessor} with the given {@link OperatorConsumer}
+     * function
+     *
      * @param delegate
      * @param consumer
      */
     public OperatorProcessorDecorator(OperatorProcessor delegate, OperatorConsumer consumer)
     {
         this.delegate = delegate;
-        this.consumer = Optional.ofNullable(consumer);
+        this.consumer = consumer;
     }
 
     public OperatorProcessorDecorator(OperatorProcessor delegate)
     {
         this.delegate = delegate;
-        this.consumer = Optional.empty();
+        this.consumer = null;
     }
 
     @Override
     public void process(Operator operator, List<COSBase> operands) throws IOException
     {
         delegate.process(operator, operands);
-        consumer.orElse(NO_OP).apply(operator, operands);
+        ofNullable(consumer).orElse(NO_OP).apply(operator, operands);
     }
 
     @Override
@@ -80,11 +81,12 @@ public class OperatorProcessorDecorator extends OperatorProcessor
 
     /**
      * Set the consumer that decorates this OperatorProcessor
-     * 
+     *
      * @param consumer
      */
     public void setConsumer(OperatorConsumer consumer)
     {
-        this.consumer = Optional.ofNullable(consumer);
+        this.consumer = consumer;
     }
+
 }
