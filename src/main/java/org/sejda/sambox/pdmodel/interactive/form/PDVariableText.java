@@ -26,6 +26,8 @@ import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.cos.COSString;
 import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.font.PDFont;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Base class for fields which use "Variable Text". These fields construct an appearance stream dynamically at viewing
@@ -38,6 +40,8 @@ public abstract class PDVariableText extends PDTerminalField
     public static final int QUADDING_LEFT = 0;
     public static final int QUADDING_CENTERED = 1;
     public static final int QUADDING_RIGHT = 2;
+
+    private static final Logger LOG = LoggerFactory.getLogger(PDVariableText.class);
 
     private PDFont appearanceOverrideFont = null;
 
@@ -177,12 +181,19 @@ public abstract class PDVariableText extends PDTerminalField
     public int getQ()
     {
         int retval = 0;
-
-        COSNumber number = (COSNumber) getInheritableAttribute(COSName.Q);
-
-        if (number != null)
+        
+        try 
         {
-            retval = number.intValue();
+            COSNumber number = (COSNumber) getInheritableAttribute(COSName.Q);
+
+            if (number != null) 
+            {
+                retval = number.intValue();
+            }
+        }
+        catch (Exception ex)
+        {
+            LOG.warn("Error parsing Q attribute, using default");
         }
         return retval;
     }
