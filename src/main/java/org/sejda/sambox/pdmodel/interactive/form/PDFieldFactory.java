@@ -83,6 +83,12 @@ public final class PDFieldFactory
         return new PDNonTerminalField(form, field, parent);
     }
 
+    public static PDField createNonTerminalField(PDAcroForm form, COSDictionary field,
+                                      PDNonTerminalField parent)
+    {
+        return new PDNonTerminalField(form, field, parent);
+    }
+
     private static PDField createChoiceSubType(PDAcroForm form, COSDictionary field,
             PDNonTerminalField parent)
     {
