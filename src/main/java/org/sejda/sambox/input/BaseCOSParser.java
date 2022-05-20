@@ -91,7 +91,8 @@ abstract class BaseCOSParser extends SourceReader
             {
                 COSName key = nextName();
                 COSBase value = nextParsedToken();
-                if (isNull(key) || key.getName().isEmpty() || isNull(value))
+                // empty key string is valid
+                if (isNull(key) || isNull(value))
                 {
                     LOG.warn("Bad dictionary declaration for key '{}' around position {}", key,
                             position());

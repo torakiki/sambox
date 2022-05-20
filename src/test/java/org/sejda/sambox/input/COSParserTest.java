@@ -314,6 +314,14 @@ public class COSParserTest
     }
 
     @Test
+    public void nextDictionaryEmptyKey() throws IOException
+    {
+        victim = new COSParser(inMemorySeekableSourceFrom("<</ 10>>".getBytes()));
+        COSDictionary result = victim.nextDictionary();
+        assertEquals(10, result.getInt(COSName.getPDFName("")));
+    }
+
+    @Test
     public void nextNumberOrIndirectReference() throws IOException
     {
         victim = new COSParser(inMemorySeekableSourceFrom("1.23".getBytes()));
