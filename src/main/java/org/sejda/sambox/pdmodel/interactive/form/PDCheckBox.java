@@ -70,7 +70,7 @@ public final class PDCheckBox extends PDButton
 
         return getOnValues().contains(getValue()) ||
                 // no appearances
-                COSName.YES.getName().equals(getValue());
+                getOnValue().equals(getValue());
     }
 
     /**
@@ -124,6 +124,6 @@ public final class PDCheckBox extends PDButton
                 }
             }
         }
-        return "Yes";
+        return "";
     }
 }

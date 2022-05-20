@@ -571,15 +571,14 @@ public class PDButtonTest
 
             assertNull(checkBox.getWidgets().get(0).getAppearance());
             assertEquals(checkBox.getWidgets().size(), 1);
-            assertEquals(checkBox.getOnValue(), "Yes");
+            assertEquals(checkBox.getOnValue(), "");
 
             checkBox.setIgnoreExportOptions(true);
 
             checkBox.check();
             
             assertTrue(checkBox.isChecked());
-            assertEquals(COSName.YES, checkBox.getWidgets().get(0).getCOSObject().getCOSName(COSName.AS));
-            assertEquals(COSName.YES, checkBox.getCOSObject().getCOSName(COSName.V));
+            assertFieldV_widgetAS(checkBox, "", "");
             
             checkBox.unCheck();
 
@@ -659,6 +658,20 @@ public class PDButtonTest
 
             field.setValue("No");
             assertFieldV_widgetAS(field, "No", "Off", "Off", "No", "No");
+        }
+    }
+
+    @Test
+    public void checkboxOnlyWithOffNormalAppearance() throws IOException {
+        try (PDDocument document = parseDoc("/org/sejda/sambox/pdmodel/interactive/form/checkbox_normal_appearances_only_off.pdf"))
+        {
+            PDAcroForm acroForm = document.getDocumentCatalog().getAcroForm();
+            PDCheckBox field = (PDCheckBox) acroForm.getField("checkbox_test");
+
+            field.setIgnoreExportOptions(true);
+            
+            field.setValue("");
+            assertFieldV_widgetAS(field, "", "");
         }
     }
 

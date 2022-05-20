@@ -499,7 +499,8 @@ public abstract class PDButton extends PDTerminalField
             // FIX scenario: checkboxes with a malformed normal appearance (eg: stream instead of sub-dictionary with entries)
             // see forms-malformed-checkbox-normal-appearances.pdf
             // otherwise these checkboxes are not rendered at all in Adobe Reader
-            if (entries.isEmpty())
+            // FIX scenario: checkbox that only has an "Off" entry in normal appearances
+            if (entries.isEmpty() || (entries.size() == 1 && entries.contains("Off")))
             {
                 if(this instanceof PDCheckBox)
                 {
