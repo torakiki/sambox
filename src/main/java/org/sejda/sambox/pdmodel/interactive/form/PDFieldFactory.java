@@ -83,7 +83,7 @@ public final class PDFieldFactory
         return new PDNonTerminalField(form, field, parent);
     }
 
-    public static PDField createNonTerminalField(PDAcroForm form, COSDictionary field,
+    public static PDNonTerminalField createNonTerminalField(PDAcroForm form, COSDictionary field,
                                       PDNonTerminalField parent)
     {
         return new PDNonTerminalField(form, field, parent);
