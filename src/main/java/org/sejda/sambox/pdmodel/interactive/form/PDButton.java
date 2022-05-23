@@ -415,7 +415,7 @@ public abstract class PDButton extends PDTerminalField
     /*
      * Get the on value for an individual widget.
      */
-    private String getOnValueForWidget(PDAnnotationWidget widget)
+    public String getOnValueForWidget(PDAnnotationWidget widget)
     {
         PDAppearanceDictionary apDictionary = widget.getAppearance();
         if (apDictionary != null)
