@@ -25,6 +25,7 @@ import org.sejda.sambox.cos.COSString;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceDictionary;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceEntry;
+import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -425,11 +426,21 @@ public abstract class PDButton extends PDTerminalField
             {
                 // SAMBOX specific: there can be more than one entry, besides "Off"
                 // pick the first one alphabetically, so it's consistently returning the same value each time
-                SortedSet<COSName> entries = new TreeSet<>(normalAppearance.getSubDictionary().keySet());
+                Map<COSName, PDAppearanceStream> subDictionary = normalAppearance.getSubDictionary();
+                SortedSet<COSName> entries = new TreeSet<>(subDictionary.keySet());
                 for (COSName entry : entries)
                 {
                     if (COSName.Off.compareTo(entry) != 0)
                     {
+                        // SAMBOX: there could be invalid entries in the dict, for example /Bla: String
+                        // skip the ones where the value is not a content stream
+                        if (entries.size() > 2) // Hm, maybe do this always?
+                        {
+                            if(subDictionary.get(entry) == null)
+                            {
+                                continue;
+                            }
+                        }
                         return entry.getName();
                     }
                 }

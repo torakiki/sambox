@@ -691,6 +691,25 @@ public class PDButtonTest
             assertFieldV_widgetAS(field, "Value3", "Off", "Off", "Value3", "Off", "Off");
         }
     }
+    
+    
+
+    @Test
+    public void radioExtraDictItemsInNormalAppearance() throws IOException {
+        try(PDDocument doc = parseDoc("/org/sejda/sambox/pdmodel/interactive/form/radio-field-extra-dict-items-normal-appearance.pdf")) {
+
+            PDRadioButton radio = (PDRadioButton) doc.getDocumentCatalog().getAcroForm().getField("radio_group_test");
+
+            radio.setIgnoreExportOptions(true);
+
+            assertEquals(new HashSet<>(Arrays.asList("1")), radio.getOnValues());
+
+            radio.setValue("1");
+
+            assertEquals(radio.getValue(), "1");
+            assertFieldV_widgetAS(radio, "1", "1");
+        }
+    }
 
     @After
     public void tearDown() throws IOException
