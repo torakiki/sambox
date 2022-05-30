@@ -287,8 +287,7 @@ public abstract class SecurityHandler
         }
         if (ivSize != iv.length)
         {
-            // SAMBOX specific: IOException is caught up, we want to fail in this case
-            throw new RuntimeException("AES initialization vector not fully read: only " + ivSize
+            throw new IOException("AES initialization vector not fully read: only " + ivSize
                     + " bytes read instead of " + iv.length);
         }
 
@@ -313,8 +312,7 @@ public abstract class SecurityHandler
         }
         catch (InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException | NoSuchAlgorithmException | NoSuchPaddingException e)
         {
-            // SAMBOX specific: IOException is caught up, we want to fail in this case
-            throw new RuntimeException(e);
+            throw new IOException(e);
         }
     }
 
@@ -503,8 +501,6 @@ public abstract class SecurityHandler
             {
                 LOG.error("Failed to decrypt COSString of length " + string.getBytes().length
                         + " in object " + objNum + ": " + ex.getMessage());
-                // SAMBOX specific: IOException is caught up, we want to fail in this case
-                throw new RuntimeException(ex);
             }
         }
     }
