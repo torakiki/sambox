@@ -21,9 +21,11 @@ import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceDictionary;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceEntry;
+import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceStream;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -114,9 +116,15 @@ public final class PDCheckBox extends PDButton
             PDAppearanceEntry normalAppearance = apDictionary.getNormalAppearance();
             if (normalAppearance != null && normalAppearance.isSubDictionary())
             {
-                Set<COSName> entries = normalAppearance.getSubDictionary().keySet();
+                Map<COSName, PDAppearanceStream> subDict = normalAppearance.getSubDictionary();
+                Set<COSName> entries = subDict.keySet();
                 for (COSName entry : entries)
                 {
+                    if (subDict.get(entry) == null)
+                    {
+                        continue;
+                    }
+                    
                     if (COSName.Off.compareTo(entry) != 0)
                     {
                         return entry.getName();

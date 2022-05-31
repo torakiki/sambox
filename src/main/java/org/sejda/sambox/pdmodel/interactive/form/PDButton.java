@@ -430,17 +430,15 @@ public abstract class PDButton extends PDTerminalField
                 SortedSet<COSName> entries = new TreeSet<>(subDictionary.keySet());
                 for (COSName entry : entries)
                 {
+                    // SAMBOX: there could be invalid entries in the dict, for example /Bla: String
+                    // skip the ones where the value is not a content stream
+                    if(subDictionary.get(entry) == null)
+                    {
+                        continue;
+                    }
+                    
                     if (COSName.Off.compareTo(entry) != 0)
                     {
-                        // SAMBOX: there could be invalid entries in the dict, for example /Bla: String
-                        // skip the ones where the value is not a content stream
-                        if (entries.size() > 2) // Hm, maybe do this always?
-                        {
-                            if(subDictionary.get(entry) == null)
-                            {
-                                continue;
-                            }
-                        }
                         return entry.getName();
                     }
                 }

@@ -676,6 +676,20 @@ public class PDButtonTest
     }
 
     @Test
+    public void checkboxOnlyWithNullNormalAppearance() throws IOException {
+        try (PDDocument document = parseDoc("/org/sejda/sambox/pdmodel/interactive/form/checkbox_normal_appearances_only_null.pdf"))
+        {
+            PDAcroForm acroForm = document.getDocumentCatalog().getAcroForm();
+            PDCheckBox field = (PDCheckBox) acroForm.getField("checkbox_test");
+
+            field.setIgnoreExportOptions(true);
+            
+            assertEquals(field.getOnValue(), "");
+            assertEquals(field.getOnValues(), new HashSet<>());
+        }
+    }
+
+    @Test
     public void multipleRadiosSameName() throws IOException {
         try (PDDocument document = parseDoc("/org/sejda/sambox/pdmodel/interactive/form/multiple-radios-same-name.pdf"))
         {
