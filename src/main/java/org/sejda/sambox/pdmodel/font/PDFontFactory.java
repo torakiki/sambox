@@ -145,7 +145,7 @@ public final class PDFontFactory
         {
             return new PDCIDFontType2(dictionary, parent);
         }
-        throw new IOException("Invalid font type: " + type);
+        throw new IOException("Invalid font type: " + subType);
     }
 
     /**
