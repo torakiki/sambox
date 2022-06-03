@@ -120,11 +120,6 @@ public final class PDCheckBox extends PDButton
                 Set<COSName> entries = subDict.keySet();
                 for (COSName entry : entries)
                 {
-                    if (subDict.get(entry) == null)
-                    {
-                        continue;
-                    }
-                    
                     if (COSName.Off.compareTo(entry) != 0)
                     {
                         return entry.getName();

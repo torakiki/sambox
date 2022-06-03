@@ -684,8 +684,8 @@ public class PDButtonTest
 
             field.setIgnoreExportOptions(true);
             
-            assertEquals(field.getOnValue(), "");
-            assertEquals(field.getOnValues(), new HashSet<>());
+            assertEquals(field.getOnValue(), "1");
+            assertEquals(field.getOnValues(), new HashSet<>(Arrays.asList("1")));
         }
     }
 

@@ -20,11 +20,7 @@ package org.sejda.sambox.pdmodel.interactive.annotation;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.sejda.sambox.cos.COSBase;
-import org.sejda.sambox.cos.COSDictionary;
-import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.cos.COSObjectable;
-import org.sejda.sambox.cos.COSStream;
+import org.sejda.sambox.cos.*;
 import org.sejda.sambox.pdmodel.common.COSDictionaryMap;
 
 /**
@@ -108,9 +104,12 @@ public class PDAppearanceEntry implements COSObjectable
             // form fields with NeedsAppearances = true  might have an empty dictionary here instead of a stream
             // in order to define the field valid values for example
             // so adding an entry without a stream
-            else
+            else 
             {
-                map.put(name, null);
+                if (value instanceof COSNull || value == null)
+                {
+                    map.put(name, null);    
+                }
             }
         }
 
