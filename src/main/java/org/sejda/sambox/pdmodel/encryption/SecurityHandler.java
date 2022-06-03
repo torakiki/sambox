@@ -51,11 +51,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.IdentityHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A security handler as described in the PDF specifications. A security handler is responsible of
@@ -433,7 +429,7 @@ public abstract class SecurityHandler
             }
             catch (IOException e)
             {
-                LOG.error("An error occurred decrypting object {} {}", objNum, genNum);
+                logErrorOnce("Failed to decrypt COSStream object " + objNum + " " + genNum + ": " + e.getMessage(), objNum);
                 throw e;
             }
         }
@@ -499,10 +495,21 @@ public abstract class SecurityHandler
             }
             catch (IOException ex)
             {
-                LOG.error("Failed to decrypt COSString of length " + string.getBytes().length
-                        + " in object " + objNum + ": " + ex.getMessage());
+                logErrorOnce("Failed to decrypt COSString object " + objNum + " " + genNum + ": " + ex.getMessage(), objNum);
             }
         }
+    }
+
+    private final Map<Long, Boolean> logOnceCache = new HashMap<>();
+    private void logErrorOnce(String message, long key)
+    {
+        if(logOnceCache.containsKey(key))
+        {
+            return;
+        }
+        
+        logOnceCache.put(key, null);
+        LOG.error(message);
     }
 
     /**
