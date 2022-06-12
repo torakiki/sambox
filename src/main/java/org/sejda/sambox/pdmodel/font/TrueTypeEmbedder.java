@@ -17,8 +17,23 @@
 
 package org.sejda.sambox.pdmodel.font;
 
+import static java.util.Objects.nonNull;
+import static org.sejda.commons.util.RequireUtils.requireIOCondition;
+import static org.sejda.sambox.pdmodel.font.FontUtils.getTag;
+import static org.sejda.sambox.pdmodel.font.FontUtils.isEmbeddingPermitted;
+import static org.sejda.sambox.pdmodel.font.FontUtils.isSubsettingPermitted;
+
+import java.awt.geom.GeneralPath;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.fontbox.ttf.CmapLookup;
-import org.apache.fontbox.ttf.CmapSubtable;
 import org.apache.fontbox.ttf.HeaderTable;
 import org.apache.fontbox.ttf.HorizontalHeaderTable;
 import org.apache.fontbox.ttf.OS2WindowsMetricsTable;
@@ -31,22 +46,6 @@ import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.common.PDStream;
-
-import java.awt.geom.GeneralPath;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import static java.util.Objects.nonNull;
-import static org.sejda.commons.util.RequireUtils.requireIOCondition;
-import static org.sejda.sambox.pdmodel.font.FontUtils.getTag;
-import static org.sejda.sambox.pdmodel.font.FontUtils.isEmbeddingPermitted;
-import static org.sejda.sambox.pdmodel.font.FontUtils.isSubsettingPermitted;
 /**
  * Common functionality for embedding TrueType fonts.
  *
@@ -60,9 +59,6 @@ abstract class TrueTypeEmbedder implements Subsetter
 
     protected TrueTypeFont ttf;
     protected PDFontDescriptor fontDescriptor;
-    @Deprecated
-    protected final CmapSubtable cmap;
-
     protected final CmapLookup cmapLookup;
     private final Set<Integer> subsetCodePoints = new HashSet<>();
     private final boolean embedSubset;
@@ -110,8 +106,6 @@ abstract class TrueTypeEmbedder implements Subsetter
 
         dict.setName(COSName.BASE_FONT, ttf.getName());
 
-        // choose a Unicode "cmap"
-        cmap = ttf.getUnicodeCmap();
         cmapLookup = ttf.getUnicodeCmapLookup();
     }
 

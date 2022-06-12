@@ -16,11 +16,13 @@
  */
 package org.sejda.sambox.pdmodel.font;
 
-import org.apache.fontbox.ttf.OS2WindowsMetricsTable;
-import org.apache.fontbox.ttf.TrueTypeFont;
+import static java.util.Optional.ofNullable;
 
 import java.io.IOException;
 import java.util.Map;
+
+import org.apache.fontbox.ttf.OS2WindowsMetricsTable;
+import org.apache.fontbox.ttf.TrueTypeFont;
 
 /**
  * @author Andrea Vacondio
@@ -50,7 +52,7 @@ public final class FontUtils
                 // restricted License embedding
                 return false;
             }
-            else if ((fsType & OS2WindowsMetricsTable.FSTYPE_BITMAP_ONLY)
+            if ((fsType & OS2WindowsMetricsTable.FSTYPE_BITMAP_ONLY)
                     == OS2WindowsMetricsTable.FSTYPE_BITMAP_ONLY)
             {
                 // bitmap embedding only
@@ -115,5 +117,16 @@ public final class FontUtils
             sb.append((char) (Math.random() * 26 + 'A'));
         }
         return sb.append('+').toString();
+    }
+
+    /**
+     * @param name a font name
+     * @return true if the name denotes a subset font Ex. ABCDEF+Verdana
+     */
+    public static boolean isSubsetFontName(String name)
+    {
+        String[] nameFragments = ofNullable(name).map(String::trim).map(s -> s.split("\\+"))
+                .orElseGet(() -> new String[0]);
+        return (nameFragments.length == 2 && nameFragments[0].length() == 6);
     }
 }
