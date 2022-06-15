@@ -725,6 +725,31 @@ public class PDButtonTest
         }
     }
 
+    @Test
+    public void removeWidget() throws IOException
+    {
+        try (PDDocument document = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                this.getClass().getResourceAsStream(
+                        "/org/sejda/sambox/pdmodel/interactive/form/simple_form.pdf"))))
+        {
+
+            PDRadioButton radioButton = (PDRadioButton) document.getDocumentCatalog().getAcroForm()
+                    .getField("Choice_Caption_0wUBrGuJDKIWD9g7kWcKpg");
+
+            radioButton.setIgnoreExportOptions(true);
+            
+            radioButton.setValue("1");
+            assertFieldV_widgetAS(radioButton, "1", "Off", "1");
+            assertEquals(2, radioButton.getWidgets().size());
+            
+            PDAnnotationWidget widget = radioButton.getWidgets().get(0);
+            radioButton.removeWidget(widget);
+
+            assertFieldV_widgetAS(radioButton, "1", "1");
+            assertEquals(1, radioButton.getWidgets().size());
+        }
+    }
+
     @After
     public void tearDown() throws IOException
     {

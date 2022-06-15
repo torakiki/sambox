@@ -20,8 +20,7 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -108,11 +107,15 @@ public abstract class PDTerminalField extends PDField
     public List<PDAnnotationWidget> getWidgets()
     {
         COSArray kids = getCOSObject().getDictionaryObject(COSName.KIDS, COSArray.class);
+        List<PDAnnotationWidget> result = new ArrayList<>();
+        
         if (isNull(kids))
         {
             // the field itself is a widget
-            return Arrays.asList(new PDAnnotationWidget(getCOSObject()));
+            result.add(new PDAnnotationWidget(getCOSObject()));
+            return result;
         }
+        
         if (kids.size() > 0)
         {
             return kids.stream().filter(k -> nonNull(k)).map(k -> k.getCOSObject())
@@ -121,7 +124,20 @@ public abstract class PDTerminalField extends PDField
                     .collect(Collectors.toList());
 
         }
-        return Collections.emptyList();
+        
+        return result;
+    }
+    
+    public boolean removeWidget(PDAnnotationWidget widget)
+    {
+        List<PDAnnotationWidget> widgets = getWidgets();
+        boolean removed = widgets.remove(widget);
+        
+        if(removed){
+            setWidgets(widgets);
+        }
+        
+        return removed;
     }
 
     /**
