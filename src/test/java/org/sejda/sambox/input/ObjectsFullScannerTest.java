@@ -81,7 +81,7 @@ public class ObjectsFullScannerTest
     }
 
     @Test
-    public void scanMultipleObjectOnTheSameLine() throws IOException
+    public void scanMultipleObjectsOnTheSameLine() throws IOException
     {
         try (SourceReader reader = new SourceReader(SeekableSources.inMemorySeekableSourceFrom(
                 getClass().getResourceAsStream("/sambox/multiple-objs-same-line.txt"))))
@@ -95,6 +95,23 @@ public class ObjectsFullScannerTest
             assertEquals(646, xref.get(new COSObjectKey(6, 0)).getByteOffset());
             assertEquals(911, xref.get(new COSObjectKey(15, 0)).getByteOffset());
             assertEquals(1190, xref.get(new COSObjectKey(17, 0)).getByteOffset());
+        }
+    }
+
+    @Test
+    public void scanMultipleObjectsBrokenUpOnMultipleLines() throws IOException
+    {
+        try (SourceReader reader = new SourceReader(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream(
+                        "/sambox/obj-definition-multiple-objs-multiple-lines.txt"))))
+        {
+            ObjectsFullScanner victim = new ObjectsFullScanner(reader);
+            Xref xref = victim.entries();
+            assertEquals(4, xref.values().size());
+            assertEquals(0, xref.get(new COSObjectKey(1, 0)).getByteOffset());
+            assertEquals(51, xref.get(new COSObjectKey(2, 0)).getByteOffset());
+            assertEquals(96, xref.get(new COSObjectKey(3, 0)).getByteOffset());
+            assertEquals(150, xref.get(new COSObjectKey(4, 0)).getByteOffset());
         }
     }
 

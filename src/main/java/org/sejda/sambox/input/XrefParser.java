@@ -36,11 +36,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Component responsible for finding and parsing the xref chain (either tables and streams). In case of errors while
- * parsing the xref chain (Ex. invalid offset, bad dictionaries etc) it has a fallback mechanism performing a document
- * full scan searching for xrefs. When parsing the document, xref info are passed to the {@link COSParser} which will
- * use them to retrieve COS objects on demand.
- * 
+ * Component responsible for finding and parsing the xref chain (either tables and streams). In case
+ * of errors while parsing the xref chain (Ex. invalid offset, bad dictionaries etc) it has a
+ * fallback mechanism performing a document full scan searching for xrefs. When parsing the
+ * document, xref info are passed to the {@link COSParser} which will use them to retrieve COS
+ * objects on demand.
+ *
  * @author Andrea Vacondio
  * @see XrefFullScanner
  */
@@ -94,7 +95,7 @@ class XrefParser
 
     /**
      * parse the xref using the given parser.
-     * 
+     *
      * @throws IOException
      */
     public void parse() throws IOException
@@ -140,17 +141,7 @@ class XrefParser
                                 {
                                     // we do our best to make sure we have a catalog even in corrupted docs
                                     LOG.debug("Parsing potential Catalog at {}", lastObjectOffset);
-                                    parser.position(lastObjectOffset);
-                                    parser.skipIndirectObjectDefinition();
-                                    parser.skipSpaces();
-                                    COSDictionary possibleCatalog = parser.nextDictionary();
-                                    if (COSName.CATALOG
-                                            .equals(possibleCatalog.getCOSName(COSName.TYPE)))
-                                    {
-                                        trailer.getCOSObject().putIfAbsent(COSName.ROOT,
-                                                possibleCatalog);
-                                    }
-                                    parser.skipSpaces();
+                                    onPotentialCatalog();
                                 }
                                 catch (IOException e)
                                 {
@@ -168,8 +159,40 @@ class XrefParser
 
                     @Override
                     protected void onObjectDefinitionLine(long offset, String line)
+                            throws IOException
                     {
                         lastObjectOffset = offset;
+                        if (line.contains(COSName.CATALOG.getName()))
+                        {
+                            long position = parser.position();
+                            try
+                            {
+                                // we do our best to make sure we have a catalog even in corrupted docs
+                                LOG.debug("Parsing potential Catalog at {}", lastObjectOffset);
+                                onPotentialCatalog();
+                            }
+                            catch (IOException e)
+                            {
+                                LOG.warn("Unable to parse potential Catalog", e);
+                            }
+                            finally
+                            {
+                                parser.position(position);
+                            }
+                        }
+                    }
+
+                    private void onPotentialCatalog() throws IOException
+                    {
+                        parser.position(lastObjectOffset);
+                        parser.skipIndirectObjectDefinition();
+                        parser.skipSpaces();
+                        COSDictionary possibleCatalog = parser.nextDictionary();
+                        if (COSName.CATALOG.equals(possibleCatalog.getCOSName(COSName.TYPE)))
+                        {
+                            trailer.getCOSObject().putIfAbsent(COSName.ROOT, possibleCatalog);
+                        }
+                        parser.skipSpaces();
                     }
                 };
                 // and we consider it more reliable compared to what was found in the somehow broken xrefs

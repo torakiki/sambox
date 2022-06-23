@@ -1,0 +1,15 @@
+1 0 obj <</Title (ABDEFGHILMN) /Author (Torakiki)>>2 0 obj<</Pages 3 0 R /Type /Catalog>>endobj 3 0 obj <</Kids [4 0 R] /Count 1 /Type /Pages>>endobj 4 0 obj
+<<
+/Parent 3 0 R
+/MediaBox [0 0 200 50]
+/Resources
+<<
+/Font
+<<
+/F1 5 0 R
+>>
+>>
+/Contents 6 0 R
+/Type /Page
+>>
+endobj

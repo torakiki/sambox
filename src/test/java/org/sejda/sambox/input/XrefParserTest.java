@@ -16,14 +16,16 @@
  */
 package org.sejda.sambox.input;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.IOException;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.sejda.commons.util.IOUtils;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSDictionary;
@@ -40,11 +42,12 @@ public class XrefParserTest
     private XrefParser victim;
     private COSParser parser;
 
-    @After
+    @AfterEach
     public void tearDown() throws IOException
     {
         IOUtils.close(parser);
     }
+
     @Test
     public void scanStream() throws IOException
     {
@@ -281,5 +284,77 @@ public class XrefParserTest
         victim.parse();
         assertNotNull(victim.trailer().getCOSObject().getDictionaryObject(COSName.ROOT));
         assertEquals(-1, victim.trailer().xrefOffset());
+    }
+
+    @Test
+    @DisplayName("ObjectsFullScanner finds the catalog if objs on multiple lines")
+    public void fullScanFindsCatalog() throws IOException
+    {
+        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/obj-full-scan-missing-catalog.pdf")));
+        victim = new XrefParser(parser);
+        victim.parse();
+        assertEquals(-1, victim.trailer().xrefOffset());
+        assertNotNull(victim.trailer().getCOSObject().getDictionaryObject(COSName.ROOT));
+        for (int i = 1; i < 7; i++)
+        {
+            assertNotNull(parser.provider().get(new COSObjectKey(i, 0)),
+                    "Missing expected scanned object " + i);
+        }
+    }
+
+    @Test
+    @DisplayName("ObjectsFullScanner finds the catalog if multiple objs on the same lines")
+    public void fullScanFindsCatalogSameLine() throws IOException
+    {
+        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream(
+                        "/sambox/obj-full-scan-missing-catalog-multiple-objs-same-line.pdf")));
+        victim = new XrefParser(parser);
+        victim.parse();
+        assertEquals(-1, victim.trailer().xrefOffset());
+        assertNotNull(victim.trailer().getCOSObject().getDictionaryObject(COSName.ROOT));
+        for (int i = 1; i < 7; i++)
+        {
+            assertNotNull(parser.provider().get(new COSObjectKey(i, 0)),
+                    "Missing expected scanned object " + i);
+        }
+    }
+
+    @Test
+    @DisplayName("ObjectsFullScanner finds the catalog if dictionary is split into 2 lines")
+    public void fullScanFindsCatalogBrokenInto2Lines() throws IOException
+    {
+        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream(
+                        "/sambox/obj-full-scan-missing-catalog-dic-split.pdf")));
+        victim = new XrefParser(parser);
+        victim.parse();
+        assertEquals(-1, victim.trailer().xrefOffset());
+        assertNotNull(victim.trailer().getCOSObject().getDictionaryObject(COSName.ROOT));
+        for (int i = 1; i < 7; i++)
+        {
+            assertNotNull(parser.provider().get(new COSObjectKey(i, 0)),
+                    "Missing expected scanned object " + i);
+        }
+    }
+
+    @Test
+    @DisplayName("ObjectsFullScanner finds the catalog if dictionary is split into 2 lines with multiple objs definition")
+    @Disabled("We don't cover this edge case yet")
+    public void fullScanFindsCatalogBrokenInto2LinesWithMultipleObjs() throws IOException
+    {
+        parser = new COSParser(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream(
+                        "/sambox/obj-full-scan-missing-catalog-multiple-objs-multiple-line.pdf")));
+        victim = new XrefParser(parser);
+        victim.parse();
+        assertEquals(-1, victim.trailer().xrefOffset());
+        assertNotNull(victim.trailer().getCOSObject().getDictionaryObject(COSName.ROOT));
+        for (int i = 1; i < 7; i++)
+        {
+            assertNotNull(parser.provider().get(new COSObjectKey(i, 0)),
+                    "Missing expected scanned object " + i);
+        }
     }
 }
