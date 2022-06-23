@@ -28,16 +28,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Component performing a full scan of the document and retrieving objects definition and the corresponding offset. This
- * implementation is lazy and the full scan is performed the first time the entries are accessed.
- * 
+ * Component performing a full scan of the document and retrieving objects definition and the
+ * corresponding offset. This implementation is lazy and the full scan is performed the first time
+ * the entries are accessed.
+ *
  * @author Andrea Vacondio
  */
 class ObjectsFullScanner
 {
     private static final Logger LOG = LoggerFactory.getLogger(ObjectsFullScanner.class);
-    private static final Pattern OBJECT_DEF_PATTERN = Pattern
-            .compile("^(\\d+)[\\s]+(\\d+)[\\s]+obj");
+    private static final Pattern OBJECT_DEF_PATTERN = Pattern.compile(
+            "(\\d+)[\\s]+(\\d+)[\\s]+obj");
 
     private Xref xref = new Xref();
     private SourceReader reader;
@@ -74,13 +75,18 @@ class ObjectsFullScanner
     private void addEntryIfObjectDefinition(long offset, String line) throws IOException
     {
         Matcher matcher = OBJECT_DEF_PATTERN.matcher(line);
-        if (matcher.find())
+        //TODO when we switch to jdk 9+
+        // long count = countEmailMatcher.results().count();
+        boolean found = false;
+        while (matcher.find())
         {
-            xref.add(XrefEntry.inUseEntry(Long.parseUnsignedLong(matcher.group(1)), offset,
+            long entryOffset = offset + matcher.start();
+            xref.add(XrefEntry.inUseEntry(Long.parseUnsignedLong(matcher.group(1)), entryOffset,
                     Integer.parseUnsignedInt(matcher.group(2))));
-            onObjectDefinitionLine(offset, line);
+            onObjectDefinitionLine(entryOffset, line);
+            found = true;
         }
-        else
+        if (!found)
         {
             onNonObjectDefinitionLine(offset, line);
         }
@@ -88,7 +94,7 @@ class ObjectsFullScanner
 
     /**
      * Called when the the scanner has read a line which is not an object definition
-     * 
+     *
      * @param originalOffset offset from where the line was read
      * @param line
      * @throws IOException
@@ -100,7 +106,7 @@ class ObjectsFullScanner
 
     /**
      * Called when the the scanner has read a line which is an object definition
-     * 
+     *
      * @param originalOffset offset from where the line was read
      * @param line
      * @throws IOException
