@@ -16,26 +16,10 @@
  */
 package org.sejda.sambox.input;
 
-import org.sejda.commons.FastByteArrayOutputStream;
-import org.sejda.commons.Pool;
-import org.sejda.commons.util.IOUtils;
-import org.sejda.io.SeekableSource;
-import org.sejda.sambox.SAMBox;
-import org.sejda.sambox.cos.COSObjectKey;
-import org.sejda.sambox.util.CharUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.Closeable;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.charset.CharacterCodingException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-
 import static java.util.Arrays.asList;
 import static org.sejda.commons.util.RequireUtils.requireIOCondition;
 import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
+import static org.sejda.io.SeekableSources.asOffsettable;
 import static org.sejda.sambox.util.CharUtils.ASCII_BACKSPACE;
 import static org.sejda.sambox.util.CharUtils.ASCII_CARRIAGE_RETURN;
 import static org.sejda.sambox.util.CharUtils.ASCII_FORM_FEED;
@@ -49,6 +33,24 @@ import static org.sejda.sambox.util.CharUtils.isHexDigit;
 import static org.sejda.sambox.util.CharUtils.isLineFeed;
 import static org.sejda.sambox.util.CharUtils.isOctalDigit;
 import static org.sejda.sambox.util.CharUtils.isWhitespace;
+
+import java.io.Closeable;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+
+import org.sejda.commons.FastByteArrayOutputStream;
+import org.sejda.commons.Pool;
+import org.sejda.commons.util.IOUtils;
+import org.sejda.io.OffsettableSeekableSource;
+import org.sejda.io.SeekableSource;
+import org.sejda.sambox.SAMBox;
+import org.sejda.sambox.cos.COSObjectKey;
+import org.sejda.sambox.util.CharUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Component responsible for reading a {@link SeekableSource}. Methods to read expected kind of tokens are available as
@@ -98,8 +100,25 @@ class SourceReader implements Closeable
     }
 
     /**
+     * adds an offset to the source
+     *
+     * @param offset
+     * @throws IOException
+     * @see {@link OffsettableSeekableSource#offset(long)}
+     */
+    public void offset(long offset) throws IOException
+    {
+        if (offset > 0)
+        {
+            OffsettableSeekableSource offsettable = asOffsettable(source);
+            offsettable.offset(offset);
+            this.source = offsettable;
+        }
+    }
+
+    /**
      * seeks to the given offset
-     * 
+     *
      * @param offset the new offset
      * @throws IOException
      * @see {@link SeekableSource#position(long)}

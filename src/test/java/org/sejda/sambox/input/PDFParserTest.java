@@ -64,6 +64,26 @@ public class PDFParserTest
                 getClass().getResourceAsStream("/sambox/simple_test.pdf"))));
     }
 
+    @Test
+    public void headerWithOffset() throws IOException
+    {
+        PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/garbage-before-header.pdf")));
+        assertNotNull(doc);
+        assertTrue(doc.isOpen());
+        assertFalse(doc.hasParseErrors());
+    }
+
+    @Test
+    public void headerWithOffsetOnMultipleLines() throws IOException
+    {
+        PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/garbage-before-header-multilines.pdf")));
+        assertNotNull(doc);
+        assertTrue(doc.isOpen());
+        assertFalse(doc.hasParseErrors());
+    }
+
     @Test(expected = IOException.class)
     public void notAPdf() throws IOException
     {

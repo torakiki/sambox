@@ -167,19 +167,26 @@ public class PDFParser
         parser.position(0);
         int headerIndex = -1;
         String header = parser.readLine();
+        int headerOffset = 0;
         while ((headerIndex = header.indexOf(PDF_HEADER)) < 0)
         {
-            // we seach the header up to a certain point, then we fail
+            // we search the header up to a certain point, then we fail
             requireIOCondition(parser.position() <= 1024, "Unable to find expected file header");
+            headerOffset += parser.position();
             header = parser.readLine();
         }
-
+        headerOffset += headerIndex;
+        if (headerOffset > 0)
+        {
+            LOG.debug("Adding source offset of {} bytes", headerOffset);
+            parser.offset(headerOffset);
+        }
         final String trimmedLeftHeader = header.substring(headerIndex, header.length())
                 .replaceAll("\\s", "");
 
         // some documents have the header without the version: '%PDF-'
 
-        LOG.debug("Found header " + trimmedLeftHeader);
+        LOG.debug("Found header {}", trimmedLeftHeader);
         return parseHeaderString(trimmedLeftHeader);
     }
 }

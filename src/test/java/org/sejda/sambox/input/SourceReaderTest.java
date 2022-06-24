@@ -109,6 +109,15 @@ public class SourceReaderTest
     }
 
     @Test
+    public void offset() throws IOException
+    {
+        victim = new SourceReader(inMemorySeekableSourceFrom("XXXChuck Norris".getBytes()));
+        victim.offset(3);
+        assertTrue(victim.skipTokenIfValue("Segal", "Chuck"));
+        assertEquals(5, victim.position());
+    }
+
+    @Test
     public void skipTokenFailing() throws IOException
     {
         victim = new SourceReader(inMemorySeekableSourceFrom("Chuck Norris".getBytes()));
