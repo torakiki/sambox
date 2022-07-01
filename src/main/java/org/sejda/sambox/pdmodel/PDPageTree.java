@@ -148,6 +148,13 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
 
         COSDictionary parent = node.getDictionaryObject(COSName.PARENT, COSName.P,
                 COSDictionary.class);
+        
+        // prevent infinite recursion
+        if (parent == node)
+        {
+            return null;
+        }
+        
         if (parent != null)
         {
             return getInheritableAttribute(parent, key);
