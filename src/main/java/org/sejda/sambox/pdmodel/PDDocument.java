@@ -680,5 +680,10 @@ public class PDDocument implements Closeable
     {
         return this.document.getTrailer().getFallbackScanStatus() != null;
     }
+    
+    public void assertNumberOfPagesIsAccurate()
+    {
+        this.getPages().iterator();
+    }
 
 }

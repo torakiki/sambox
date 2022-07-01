@@ -169,7 +169,15 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
     @Override
     public Iterator<PDPage> iterator()
     {
-        return new PageIterator(root);
+        PageIterator iterator = new PageIterator(root);
+        // there's a problem when the expected number of pages is different than the actual number of pages loaded
+        // because iterating on PDPageTree.iterator() will silently skip broken pages that could not be loaded
+        if(iterator.size() != document.getNumberOfPages())
+        {
+            throw new InvalidNumberOfPagesException(iterator.size(), document.getNumberOfPages());
+        }
+        
+        return iterator;
     }
 
     /**
@@ -252,6 +260,11 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
 
             ResourceCache resourceCache = document != null ? document.getResourceCache() : null;
             return new PDPage(next, resourceCache);
+        }
+        
+        public int size()
+        {
+            return queue.size();
         }
 
         @Override
