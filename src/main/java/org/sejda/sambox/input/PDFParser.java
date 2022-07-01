@@ -167,12 +167,12 @@ public class PDFParser
         parser.position(0);
         int headerIndex = -1;
         String header = parser.readLine();
-        int headerOffset = 0;
+        long headerOffset = 0;
         while ((headerIndex = header.indexOf(PDF_HEADER)) < 0)
         {
             // we search the header up to a certain point, then we fail
             requireIOCondition(parser.position() <= 1024, "Unable to find expected file header");
-            headerOffset += parser.position();
+            headerOffset = parser.position();
             header = parser.readLine();
         }
         headerOffset += headerIndex;
