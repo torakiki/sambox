@@ -172,8 +172,14 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
         PageIterator iterator = new PageIterator(root);
         // there's a problem when the expected number of pages is different than the actual number of pages loaded
         // because iterating on PDPageTree.iterator() will silently skip broken pages that could not be loaded
-        if(iterator.size() != document.getNumberOfPages())
-        {
+        if(iterator.size() != document.getNumberOfPages()) {
+            // try to throw a specific PageNotFound exception, identify which page is missing
+            for (int i = 0; i < document.getNumberOfPages(); i++)
+            {
+                get(i);
+            }
+            
+            // throw a generic "something's wrong" exception
             throw new InvalidNumberOfPagesException(iterator.size(), document.getNumberOfPages());
         }
         

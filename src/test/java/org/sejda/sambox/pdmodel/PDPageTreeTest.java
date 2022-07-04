@@ -84,7 +84,7 @@ public class PDPageTreeTest
         }
     }
 
-    @Test(expected = InvalidNumberOfPagesException.class)
+    @Test(expected = PageNotFoundException.class)
     public void wrongMultipleLevel() throws IOException
     {
         try (PDDocument doc = parse(SeekableSources.inMemorySeekableSourceFrom(PDPageTreeTest.class
