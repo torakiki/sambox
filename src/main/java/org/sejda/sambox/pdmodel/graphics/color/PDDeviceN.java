@@ -308,6 +308,8 @@ public class PDDeviceN extends PDSpecialColorSpace
                 {
                     keyBuilder.append('#').append(src[s]);
                 }
+                key = keyBuilder.toString();
+                keyBuilder.setLength(0);
                 int[] pxl = map1.get(key);
                 if (pxl != null)
                 {
