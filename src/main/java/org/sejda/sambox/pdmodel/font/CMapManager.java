@@ -16,21 +16,21 @@
  */
 package org.sejda.sambox.pdmodel.font;
 
-import org.apache.fontbox.cmap.CMap;
-import org.apache.fontbox.cmap.CMapParser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.fontbox.cmap.CMap;
+import org.apache.fontbox.cmap.CMapParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * CMap resource loader and cache.
  */
-final class CMapManager
+public final class CMapManager
 {
     static Map<String, CMap> cMapCache = Collections.synchronizedMap(new HashMap<String, CMap>());
 
@@ -70,19 +70,18 @@ final class CMapManager
      */
     public static CMap parseCMap(InputStream cMapStream) throws IOException
     {
-        CMap targetCmap = null;
         if (cMapStream != null)
         {
             try
             {
                 // parse CMap using strict mode
-                targetCmap = new CMapParser(true).parse(cMapStream);
+                return new CMapParser(true).parse(cMapStream);
             }
             catch (IOException e)
             {
                 LOG.warn("Failed to parse CMap for font", e);
             }
         }
-        return targetCmap;
+        return null;
     }
 }

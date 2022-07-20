@@ -270,8 +270,9 @@ abstract class TrueTypeEmbedder implements Subsetter
 
         // PDF spec required tables (if present), all others will be removed
         // set the GIDs to subset
-        TTFSubsetter subsetter = new TTFSubsetter(ttf, Arrays.asList("head", "hhea", "loca", "maxp",
-                "cvt", "prep", "glyf", "hmtx", "fpgm", "gasp"));
+        TTFSubsetter subsetter = new TTFSubsetter(ttf,
+                Arrays.asList("head", "hhea", "loca", "maxp", "cvt ", "prep", "glyf", "hmtx",
+                        "fpgm", "gasp"));
         subsetter.addAll(subsetCodePoints);
 
         // calculate deterministic tag based on the chosen subset
