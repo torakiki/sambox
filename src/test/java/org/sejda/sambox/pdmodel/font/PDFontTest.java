@@ -283,7 +283,7 @@ public class PDFontTest
             PDPage page = testPdf.getPage(0);
             PDFont font = page.getResources().getFont(COSName.getPDFName("F70"));
             assertTrue(font.isDamaged());
-            assertEquals(0f, font.getBoundingBox().getHeight());
+            assertEquals(0f, font.getHeight(0));
             assertEquals(0f, font.getStringWidth("Pa"));
         }
 
