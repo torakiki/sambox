@@ -16,25 +16,11 @@
  */
 package org.sejda.sambox.text;
 
-import difflib.ChangeDelta;
-import difflib.DeleteDelta;
-import difflib.DiffUtils;
-import difflib.InsertDelta;
-import difflib.Patch;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.fontbox.util.BoundingBox;
-import org.junit.Before;
-import org.junit.Test;
-import org.sejda.io.SeekableSources;
-import org.sejda.sambox.input.PDFParser;
-import org.sejda.sambox.pdmodel.PDDocument;
-import org.sejda.sambox.pdmodel.font.PDFont;
-import org.sejda.sambox.pdmodel.font.PDFontDescriptor;
-import org.sejda.sambox.pdmodel.font.PDType3Font;
-import org.sejda.sambox.pdmodel.interactive.documentnavigation.destination.PDPageDestination;
-import org.sejda.sambox.pdmodel.interactive.documentnavigation.outline.PDDocumentOutline;
-import org.sejda.sambox.pdmodel.interactive.documentnavigation.outline.PDOutlineItem;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -54,11 +40,22 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import com.github.difflib.DiffUtils;
+import com.github.difflib.patch.Patch;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.fontbox.util.BoundingBox;
+import org.junit.Before;
+import org.junit.Test;
+import org.sejda.io.SeekableSources;
+import org.sejda.sambox.input.PDFParser;
+import org.sejda.sambox.pdmodel.PDDocument;
+import org.sejda.sambox.pdmodel.font.PDFont;
+import org.sejda.sambox.pdmodel.font.PDFontDescriptor;
+import org.sejda.sambox.pdmodel.font.PDType3Font;
+import org.sejda.sambox.pdmodel.interactive.documentnavigation.destination.PDPageDestination;
+import org.sejda.sambox.pdmodel.interactive.documentnavigation.outline.PDDocumentOutline;
+import org.sejda.sambox.pdmodel.interactive.documentnavigation.outline.PDOutlineItem;
 
 /**
  * Test suite for PDFTextStripper.
@@ -132,7 +129,7 @@ public class TestTextStripper
         {
             return true;
         }
-        else if (expected != null && actual != null)
+        if (expected != null && actual != null)
         {
             expected = expected.trim();
             actual = actual.trim();
@@ -340,38 +337,12 @@ public class TestTextStripper
             List<String> revised = fileToLines(outFile);
 
             // Compute diff. Get the Patch object. Patch is the container for computed deltas.
-            Patch patch = DiffUtils.diff(original, revised);
+            Patch<String> patch = DiffUtils.diff(original, revised);
 
-            PrintStream diffPS = new PrintStream(diffFile, ENCODING);
-            for (Object delta : patch.getDeltas())
+            try (PrintStream diffPS = new PrintStream(diffFile, ENCODING))
             {
-                if (delta instanceof ChangeDelta)
-                {
-                    ChangeDelta cdelta = (ChangeDelta) delta;
-                    diffPS.println("Org: " + cdelta.getOriginal());
-                    diffPS.println("New: " + cdelta.getRevised());
-                    diffPS.println();
-                }
-                else if (delta instanceof DeleteDelta)
-                {
-                    DeleteDelta ddelta = (DeleteDelta) delta;
-                    diffPS.println("Org: " + ddelta.getOriginal());
-                    diffPS.println("New: " + ddelta.getRevised());
-                    diffPS.println();
-                }
-                else if (delta instanceof InsertDelta)
-                {
-                    InsertDelta idelta = (InsertDelta) delta;
-                    diffPS.println("Org: " + idelta.getOriginal());
-                    diffPS.println("New: " + idelta.getRevised());
-                    diffPS.println();
-                }
-                else
-                {
-                    diffPS.println(delta);
-                }
+                patch.getDeltas().forEach(diffPS::println);
             }
-            diffPS.close();
         }
     }
 

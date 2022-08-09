@@ -7,7 +7,7 @@ An [Apache PDFBox](https://github.com/apache/pdfbox) fork intended to be used as
 
 What's different from PDFBox?
 ---------
-+ Requires JDK8
++ Requires JDK 17
 + Lazy loading/parsing of PDF objects. Only the document xref table(s)/stream(s) is(are) initially parsed and information to lookup objects are retrieved, when later a PDF object is requested, the object is retrieve/parsed using the lookup information. This allows minimal memory footprint when you only need part of the document (Ex. you only need the information dictionary or the number of pages of the document).
 + Multiple I/O implementations to read from. SAMBox uses [Sejda-io](https://github.com/torakiki/sejda-io) allowing to use one of the provided implementation based on `java.nio.channels.FileChannel`, `java.io.InputStream` and `java.nio.MappedByteBuffer` (buffered or not).
 + Minimized GC through the use of a pool of `java.lang.StringBuilder`.

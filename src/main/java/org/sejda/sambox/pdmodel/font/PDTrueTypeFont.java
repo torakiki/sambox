@@ -16,6 +16,17 @@
  */
 package org.sejda.sambox.pdmodel.font;
 
+import static java.util.Objects.nonNull;
+import static java.util.Objects.requireNonNull;
+import static org.sejda.sambox.pdmodel.font.UniUtil.getUniNameOfCodePoint;
+
+import java.awt.geom.GeneralPath;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.fontbox.FontBoxFont;
 import org.apache.fontbox.ttf.CmapSubtable;
 import org.apache.fontbox.ttf.CmapTable;
@@ -39,16 +50,6 @@ import org.sejda.sambox.pdmodel.font.encoding.Type1Encoding;
 import org.sejda.sambox.pdmodel.font.encoding.WinAnsiEncoding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.awt.geom.GeneralPath;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
-
-import static java.util.Objects.nonNull;
-import static org.sejda.sambox.pdmodel.font.UniUtil.getUniNameOfCodePoint;
 
 /**
  * TrueType font.
@@ -118,7 +119,7 @@ public class PDTrueTypeFont extends PDSimpleFont implements PDVectorFont
      *
      * <p>
      * <b>Note:</b> Simple fonts only support 256 characters. For Unicode support, use
-     * {@link PDType0Font#load(InputStream)} instead.
+     * {@link PDType0Font#load(PDDocument, InputStream)} instead.
      * </p>
      *
      * @param ttf      A true type font
@@ -201,6 +202,15 @@ public class PDTrueTypeFont extends PDSimpleFont implements PDVectorFont
         readEncoding();
     }
 
+    public PDTrueTypeFont(COSDictionary fontDictionary, TrueTypeFont ttf) throws IOException
+    {
+        super(fontDictionary);
+        this.ttf = requireNonNull(ttf);
+        this.isEmbedded = true;
+        this.isDamaged = false;
+        readEncoding();
+    }
+
     /**
      * Returns the PostScript name of the font.
      */
@@ -237,7 +247,7 @@ public class PDTrueTypeFont extends PDSimpleFont implements PDVectorFont
 
         // synthesize an encoding, so that getEncoding() is always usable
         PostScriptTable post = ttf.getPostScript();
-        Map<Integer, String> codeToName = new HashMap<Integer, String>();
+        Map<Integer, String> codeToName = new HashMap<>();
         for (int code = 0; code <= 256; code++)
         {
             int gid = codeToGID(code);
@@ -417,7 +427,7 @@ public class PDTrueTypeFont extends PDSimpleFont implements PDVectorFont
             return gidToCode;
         }
 
-        gidToCode = new HashMap<Integer, Integer>();
+        gidToCode = new HashMap<>();
         for (int code = 0; code <= 255; code++)
         {
             int gid = codeToGID(code);

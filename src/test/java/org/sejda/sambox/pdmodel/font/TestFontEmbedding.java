@@ -17,6 +17,16 @@
 
 package org.sejda.sambox.pdmodel.font;
 
+import static java.util.Objects.nonNull;
+import static org.mockito.BDDMockito.given;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashSet;
+import java.util.Set;
+
 import junit.framework.TestCase;
 import org.apache.fontbox.ttf.OS2WindowsMetricsTable;
 import org.apache.fontbox.ttf.TrueTypeFont;
@@ -32,16 +42,6 @@ import org.sejda.sambox.pdmodel.PDPage;
 import org.sejda.sambox.pdmodel.PDPageContentStream;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.text.PDFTextStripper;
-
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashSet;
-import java.util.Set;
-
-import static java.util.Objects.nonNull;
-import static org.mockito.BDDMockito.given;
 
 /**
  * Tests font embedding.
@@ -238,9 +238,8 @@ public class TestFontEmbedding extends TestCase
         {
             PDPage page = new PDPage();
             doc.addPage(page);
-            PDType0Font font = PDType0Font.load(doc, PDType0Font.class.getClassLoader()
-                    .getResourceAsStream(
-                            "org/sejda/sambox/resources/ttf/LiberationSans-Regular.ttf"));
+            PDType0Font font = PDType0Font.load(doc, PDType0Font.class.getResourceAsStream(
+                    "/org/sejda/sambox/resources/ttf/LiberationSans-Regular.ttf"));
 
             try (PDPageContentStream formContents = new PDPageContentStream(doc, page))
             {

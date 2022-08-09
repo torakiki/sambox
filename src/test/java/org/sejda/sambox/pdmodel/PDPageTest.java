@@ -149,9 +149,8 @@ public class PDPageTest
         try (PDDocument doc = new PDDocument())
         {
             PDPage page = new PDPage();
-            PDType0Font font = PDType0Font.load(doc,
-                    PDType0Font.class.getClassLoader().getResourceAsStream(
-                            "org/sejda/sambox/resources/ttf/LiberationSans-Regular.ttf"));
+            PDType0Font font = PDType0Font.load(doc, PDPageTest.class.getResourceAsStream(
+                    "/org/sejda/sambox/resources/ttf/LiberationSans-Regular.ttf"));
 
             try (PDPageContentStream formContents = new PDPageContentStream(doc, page))
             {
@@ -187,14 +186,17 @@ public class PDPageTest
     @Test
     public void invalidDocument() throws IOException
     {
-        PDDocument document = new PDDocument();
-        PDPage page = new PDPage();
-        document.addPage(page);
+        File tempFile;
+        try (PDDocument document = new PDDocument())
+        {
+            PDPage page = new PDPage();
+            document.addPage(page);
 
-        page.getCOSObject().setItem(COSName.CONTENTS, new COSArray(COSName.TYPE));
+            page.getCOSObject().setItem(COSName.CONTENTS, new COSArray(COSName.TYPE));
 
-        File tempFile = Files.createTempFile("invalid-document", ".pdf").toFile();
-        document.writeTo(tempFile);
+            tempFile = Files.createTempFile("invalid-document", ".pdf").toFile();
+            document.writeTo(tempFile);
+        }
 
         PDDocument read = PDFParser.parse(SeekableSources.seekableSourceFrom(tempFile));
         assertFalse("", read.getPage(0).getContentStreams().hasNext());

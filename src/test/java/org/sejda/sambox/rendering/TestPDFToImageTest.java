@@ -16,28 +16,26 @@
  */
 package org.sejda.sambox.rendering;
 
+import static org.junit.Assert.fail;
+
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.sejda.commons.util.IOUtils;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.ParallelParameterized;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import static org.junit.Assert.fail;
 
 /**
  * Test suite for rendering.
@@ -98,10 +96,8 @@ public class TestPDFToImageTest
      * Test class constructor.
      *
      * @param filename The name of the test class.
-     *
-     * @throws IOException If there is an error creating the test.
      */
-    public TestPDFToImageTest(String filename) throws IOException
+    public TestPDFToImageTest(String filename)
     {
         this.filename = filename;
     }
@@ -138,13 +134,11 @@ public class TestPDFToImageTest
      */
     public boolean doTestFile(final File file, String inDir, String outDir) throws IOException
     {
-        PDDocument document = null;
         boolean failed = false;
 
         LOG.info("Opening: " + file.getName());
-        try
+        try (PDDocument document = PDFParser.parse(SeekableSources.seekableSourceFrom(file)))
         {
-            document = PDFParser.parse(SeekableSources.seekableSourceFrom(file));
             String outputPrefix = file.getName() + "-";
             int numPages = document.getNumberOfPages();
             if (numPages < 1)
@@ -176,10 +170,6 @@ public class TestPDFToImageTest
             failed = true;
             LOG.error("Error converting file " + file.getName(), e);
             throw e;
-        }
-        finally
-        {
-            IOUtils.close(document);
         }
 
         LOG.info("Comparing: " + file.getName());

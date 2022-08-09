@@ -27,18 +27,18 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UncheckedIOException;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.sejda.commons.FastByteArrayOutputStream;
 import org.sejda.commons.util.IOUtils;
 import org.sejda.io.SeekableSource;
-import org.sejda.io.SeekableSourceSupplier;
 import org.sejda.sambox.filter.DecodeResult;
 import org.sejda.sambox.filter.Filter;
 import org.sejda.sambox.filter.FilterFactory;
@@ -52,7 +52,7 @@ import org.slf4j.LoggerFactory;
  */
 public class COSStream extends COSDictionary implements Closeable, Encryptable
 {
-    private static final List<COSName> CAN_COMPRESS = Arrays.asList(COSName.ASCII_HEX_DECODE,
+    private static final Set<COSName> CAN_COMPRESS = Set.of(COSName.ASCII_HEX_DECODE,
             COSName.ASCII_HEX_DECODE_ABBREVIATION, COSName.ASCII85_DECODE,
             COSName.ASCII85_DECODE_ABBREVIATION);
 
@@ -526,9 +526,9 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
         {
             return CAN_COMPRESS.contains(filters);
         }
-        if (filters instanceof COSArray)
+        if (filters instanceof COSArray filtersArray)
         {
-            return ((COSArray) filters).stream().allMatch(CAN_COMPRESS::contains);
+            return CAN_COMPRESS.containsAll(filtersArray);
 
         }
         return true;
@@ -673,17 +673,24 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
     {
         private WeakReference<SeekableSource> sourceRef;
         private long length;
-        private SeekableSourceSupplier<SeekableSource> supplier;
+        private Supplier<SeekableSource> supplier;
         private SeekableSource view;
 
         public LazySeekableSourceViewHolder(SeekableSource source, long startingPosition,
                 long length)
         {
             this.supplier = () -> {
-                return Optional.ofNullable(this.sourceRef.get()).filter(SeekableSource::isOpen)
-                        .orElseThrow(() -> new IllegalStateException(
-                                "The original SeekableSource has been closed"))
-                        .view(startingPosition, length);
+                try
+                {
+                    return Optional.ofNullable(this.sourceRef.get()).filter(SeekableSource::isOpen)
+                            .orElseThrow(() -> new IllegalStateException(
+                                    "The original SeekableSource has been closed"))
+                            .view(startingPosition, length);
+                }
+                catch (IOException e)
+                {
+                    throw new UncheckedIOException(e);
+                }
             };
             this.sourceRef = new WeakReference<>(source);
             this.length = length;
