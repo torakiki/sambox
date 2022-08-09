@@ -41,7 +41,7 @@ public class COSDictionary extends COSBase
      * The name-value pairs of this dictionary. The pairs are kept in the order they were added to
      * the dictionary.
      */
-    private Map<COSName, COSBase> items = new LinkedHashMap<>();
+    private final Map<COSName, COSBase> items = new LinkedHashMap<>();
 
     public COSDictionary()
     {
@@ -179,7 +179,7 @@ public class COSDictionary extends COSBase
     public <T extends COSBase> T getDictionaryObject(COSName key, Class<T> clazz)
     {
         return ofNullable(items.get(key)).map(COSBase::getCOSObject)
-                .filter(i -> clazz.isInstance(i)).map(clazz::cast).orElse(null);
+                .filter(clazz::isInstance).map(clazz::cast).orElse(null);
     }
 
     /**

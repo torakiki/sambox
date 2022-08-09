@@ -115,12 +115,7 @@ final class DCTFilter extends Filter
                     {
                         transform = getAdobeTransform(reader.getImageMetadata(0));
                     }
-                    catch (IIOException e)
-                    {
-                        // we really tried asking nicely, now we're using brute force.
-                        transform = getAdobeTransformByBruteForce(iis);
-                    }
-                    catch (NegativeArraySizeException e)
+                    catch (IIOException | NegativeArraySizeException e)
                     {
                         // we really tried asking nicely, now we're using brute force.
                         transform = getAdobeTransformByBruteForce(iis);

@@ -396,7 +396,7 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
         {
             return filters.equals(filter);
         }
-        else if (filters instanceof COSArray)
+        if (filters instanceof COSArray)
         {
             return ((COSArray) filters).contains(filter);
         }
@@ -425,9 +425,7 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
         unfiltered = null;
         existing = null;
         filtered = null;
-        return new MyByteArrayOutputStream(bytes -> {
-            this.filtered = bytes;
-        });
+        return new MyByteArrayOutputStream(bytes -> this.filtered = bytes);
     }
 
     /**
@@ -458,11 +456,10 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
         {
             try (InputStream in = getUnfilteredStream())
             {
-                try (MyByteArrayOutputStream out = new MyByteArrayOutputStream(bytes -> {
-                    this.unfiltered = bytes;
-                }))
+                try (MyByteArrayOutputStream out = new MyByteArrayOutputStream(
+                        bytes -> this.unfiltered = bytes))
                 {
-                    IOUtils.copy(in, out);
+                    in.transferTo(out);
                 }
 
             }
@@ -558,9 +555,7 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
         IOUtils.closeQuietly(existing);
         existing = null;
         unfiltered = null;
-        return new MyByteArrayOutputStream(bytes -> {
-            this.unfiltered = bytes;
-        });
+        return new MyByteArrayOutputStream(bytes -> this.unfiltered = bytes);
     }
 
     public boolean isEmpty() throws IOException
@@ -569,9 +564,8 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
         {
             return existing.get().size() <= 0;
         }
-        return ofNullable(filtered).map(f -> (f.length <= 0)).orElseGet(() -> {
-            return ofNullable(unfiltered).map(u -> (u.length <= 0)).orElse(true);
-        });
+        return ofNullable(filtered).map(f -> (f.length <= 0))
+                .orElseGet(() -> ofNullable(unfiltered).map(u -> (u.length <= 0)).orElse(true));
     }
 
     /**
@@ -635,7 +629,7 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
 
     static class MyByteArrayOutputStream extends FastByteArrayOutputStream
     {
-        private Optional<Consumer<byte[]>> onClose;
+        private final Optional<Consumer<byte[]>> onClose;
 
         MyByteArrayOutputStream()
         {
@@ -672,8 +666,8 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
     private static class LazySeekableSourceViewHolder implements Closeable
     {
         private WeakReference<SeekableSource> sourceRef;
-        private long length;
-        private Supplier<SeekableSource> supplier;
+        private final long length;
+        private final Supplier<SeekableSource> supplier;
         private SeekableSource view;
 
         public LazySeekableSourceViewHolder(SeekableSource source, long startingPosition,

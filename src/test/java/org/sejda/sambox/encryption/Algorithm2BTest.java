@@ -23,19 +23,19 @@ import org.junit.Test;
 
 /**
  * @author Andrea Vacondio
- *
  */
 public class Algorithm2BTest
 {
-    private byte[] key = new byte[] { -91, 100, 117, 33, 83, 54, -34, -59, 87, -94, -94, 18, -113,
-            -77, -60, 105, 95, -3, 70, -110, 19, -44, -15, 104, 44, 1, 31, 17, -97, 107, 59, 5 };
-    private byte[] userValidationSalt = new byte[] { 34, 67, -1, -34, 1, 87, 3, 65 };
-    private byte[] userKeySalt = new byte[] { 23, 56, -12, 45, 91, -34, 2, 12 };
-    private byte[] ownerValidationSalt = new byte[] { 8, 45, -16, -34, 4, 76, 3, -7 };
-    private byte[] ownerKeySalt = new byte[] { 98, 101, -32, -55, 33, 1, 54, 78 };
-    private byte[] u = new byte[] { -122, -13, -23, -33, -37, -9, 107, -124, 48, 124, -24, 116,
-            -126, 8, 16, -12, 44, 114, 66, -96, -128, 82, -65, -71, 110, -74, -41, 15, 68, 51, -11,
-            24, 34, 67, -1, -34, 1, 87, 3, 65, 23, 56, -12, 45, 91, -34, 2, 12 };
+    private final byte[] key = new byte[] { -91, 100, 117, 33, 83, 54, -34, -59, 87, -94, -94, 18,
+            -113, -77, -60, 105, 95, -3, 70, -110, 19, -44, -15, 104, 44, 1, 31, 17, -97, 107, 59,
+            5 };
+    private final byte[] userValidationSalt = new byte[] { 34, 67, -1, -34, 1, 87, 3, 65 };
+    private final byte[] userKeySalt = new byte[] { 23, 56, -12, 45, 91, -34, 2, 12 };
+    private final byte[] ownerValidationSalt = new byte[] { 8, 45, -16, -34, 4, 76, 3, -7 };
+    private final byte[] ownerKeySalt = new byte[] { 98, 101, -32, -55, 33, 1, 54, 78 };
+    private final byte[] u = new byte[] { -122, -13, -23, -33, -37, -9, 107, -124, 48, 124, -24,
+            116, -126, 8, 16, -12, 44, 114, 66, -96, -128, 82, -65, -71, 110, -74, -41, 15, 68, 51,
+            -11, 24, 34, 67, -1, -34, 1, 87, 3, 65, 23, 56, -12, 45, 91, -34, 2, 12 };
 
     @Test
     public void testComputeUHash()

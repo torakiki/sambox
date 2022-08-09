@@ -44,7 +44,7 @@ public class COSArray extends COSBase implements List<COSBase>
 
     public COSArray(COSBase... items)
     {
-        Arrays.stream(items).forEach(objects::add);
+        objects.addAll(Arrays.asList(items));
     }
 
     /**

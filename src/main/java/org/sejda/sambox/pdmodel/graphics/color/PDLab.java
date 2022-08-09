@@ -144,10 +144,7 @@ public final class PDLab extends PDCIEDictionaryBasedColorSpace
         {
             return x * x * x;
         }
-        else
-        {
-            return (108f / 841f) * (x - (4f / 29f));
-        }
+        return (108f / 841f) * (x - (4f / 29f));
     }
 
     @Override

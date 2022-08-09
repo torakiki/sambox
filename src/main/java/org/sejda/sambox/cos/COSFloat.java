@@ -64,7 +64,6 @@ public class COSFloat extends COSNumber
                 aFloat = aFloat.substring(0, dot + 1)
                         + DOTS.matcher(aFloat.substring(dot + 1)).replaceAll("0");
 
-                ;
             }
             aFloat = EXP_END.matcher(aFloat).replaceAll("");
             value = new BigDecimal(aFloat);

@@ -349,7 +349,7 @@ public class PDFTextStripper extends PDFTextStreamEngine
                     }
                     else
                     {
-                        charactersByArticle.add(new ArrayList<TextPosition>());
+                        charactersByArticle.add(new ArrayList<>());
                     }
                 }
             }
@@ -513,7 +513,7 @@ public class PDFTextStripper extends PDFTextStreamEngine
             // Now cycle through to print the text.
             // We queue up a line at a time before we print so that we can convert
             // the line from presentation form to logical form (if needed).
-            List<LineItem> line = new ArrayList<LineItem>();
+            List<LineItem> line = new ArrayList<>();
 
             Iterator<TextPosition> textIter = textList.iterator();
             // PDF files don't always store spaces. We will need to guess where we should add
@@ -795,7 +795,7 @@ public class PDFTextStripper extends PDFTextStreamEngine
                     textCharacter);
             if (sameTextCharacters == null)
             {
-                sameTextCharacters = new TreeMap<Float, TreeSet<Float>>();
+                sameTextCharacters = new TreeMap<>();
                 characterListMapping.put(textCharacter, sameTextCharacters);
             }
             // RDD - Here we compute the value that represents the end of the rendered
@@ -827,7 +827,7 @@ public class PDFTextStripper extends PDFTextStreamEngine
                 TreeSet<Float> ySet = sameTextCharacters.get(textX);
                 if (ySet == null)
                 {
-                    ySet = new TreeSet<Float>();
+                    ySet = new TreeSet<>();
                     sameTextCharacters.put(textX, ySet);
                 }
                 ySet.add(textY);

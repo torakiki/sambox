@@ -181,8 +181,7 @@ public class PDFParser
             LOG.debug("Adding source offset of {} bytes", headerOffset);
             parser.offset(headerOffset);
         }
-        final String trimmedLeftHeader = header.substring(headerIndex, header.length())
-                .replaceAll("\\s", "");
+        final String trimmedLeftHeader = header.substring(headerIndex).replaceAll("\\s", "");
 
         // some documents have the header without the version: '%PDF-'
 

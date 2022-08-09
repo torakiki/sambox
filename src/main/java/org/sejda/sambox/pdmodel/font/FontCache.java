@@ -31,7 +31,7 @@ import org.apache.fontbox.FontBoxFont;
  */
 public final class FontCache
 {
-    private final Map<FontInfo, SoftReference<FontBoxFont>> cache = new ConcurrentHashMap<FontInfo, SoftReference<FontBoxFont>>();
+    private final Map<FontInfo, SoftReference<FontBoxFont>> cache = new ConcurrentHashMap<>();
 
     /**
      * Adds the given FontBox font to the cache.

@@ -90,7 +90,7 @@ public class PDShadingType4 extends PDTriangleBasedShadingType
     {
         int bitsPerFlag = getBitsPerFlag();
         COSDictionary dict = getCOSObject();
-        if (!(dict instanceof COSStream))
+        if (!(dict instanceof COSStream stream))
         {
             return Collections.emptyList();
         }
@@ -110,10 +110,9 @@ public class PDShadingType4 extends PDTriangleBasedShadingType
                 throw new IOException("Range missing in shading /Decode entry");
             }
         }
-        List<ShadedTriangle> list = new ArrayList<ShadedTriangle>();
+        List<ShadedTriangle> list = new ArrayList<>();
         long maxSrcCoord = (long) Math.pow(2, getBitsPerCoordinate()) - 1;
         long maxSrcColor = (long) Math.pow(2, getBitsPerComponent()) - 1;
-        COSStream stream = (COSStream) dict;
 
         try (ImageInputStream mciis = new MemoryCacheImageInputStream(stream.getUnfilteredStream()))
         {

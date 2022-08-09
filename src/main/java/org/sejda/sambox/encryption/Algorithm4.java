@@ -24,7 +24,7 @@ package org.sejda.sambox.encryption;
  */
 class Algorithm4 implements PasswordAlgorithm
 {
-    private ARC4Engine engine = new ARC4Engine();
+    private final ARC4Engine engine = new ARC4Engine();
 
     @Override
     public byte[] computePassword(EncryptionContext context)

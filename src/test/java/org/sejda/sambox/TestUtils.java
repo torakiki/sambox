@@ -53,12 +53,7 @@ public final class TestUtils
             field.setAccessible(true);
             field.set(instance, propertyValue);
         }
-        catch (NoSuchFieldException e)
-        {
-            throw new IllegalStateException(String.format("Unable to set field %s", propertyName),
-                    e);
-        }
-        catch (IllegalAccessException e)
+        catch (NoSuchFieldException | IllegalAccessException e)
         {
             throw new IllegalStateException(String.format("Unable to set field %s", propertyName),
                     e);

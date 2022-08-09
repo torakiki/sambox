@@ -124,10 +124,7 @@ public final class PDPattern extends PDSpecialColorSpace
         {
             throw new IOException("pattern " + color.getPatternName() + " was not found");
         }
-        else
-        {
-            return pattern;
-        }
+        return pattern;
     }
 
     /**

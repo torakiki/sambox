@@ -16,17 +16,17 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
+import static org.junit.Assert.assertEquals;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.PDDocument;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-
-import static org.junit.Assert.assertEquals;
 
 /**
  * @author Andrea Vacondio
@@ -68,7 +68,7 @@ public class PDFieldTreeTest
             g.addChild(i);
             i.addChild(h);
             f.addChild(g);
-            form.addFields(Arrays.asList(f));
+            form.addFields(List.of(f));
         }
     }
 

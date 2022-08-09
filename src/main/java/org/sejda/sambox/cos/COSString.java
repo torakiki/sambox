@@ -116,7 +116,7 @@ public final class COSString extends COSBase implements Encryptable
                 // UTF-16BE
                 return new String(bytes, 2, bytes.length - 2, StandardCharsets.UTF_16BE);
             }
-            else if ((bytes[0] & 0xff) == 0xFF && (bytes[1] & 0xff) == 0xFE)
+            if ((bytes[0] & 0xff) == 0xFF && (bytes[1] & 0xff) == 0xFE)
             {
                 // UTF-16LE - not in the PDF spec!
                 return new String(bytes, 2, bytes.length - 2, StandardCharsets.UTF_16LE);
@@ -164,9 +164,8 @@ public final class COSString extends COSBase implements Encryptable
     @Override
     public boolean equals(Object obj)
     {
-        if (obj instanceof COSString)
+        if (obj instanceof COSString strObj)
         {
-            COSString strObj = (COSString) obj;
             return getString().equals(strObj.getString()) && forceHexForm == strObj.forceHexForm;
         }
         return false;

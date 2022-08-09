@@ -63,11 +63,10 @@ public final class COSObjectKey implements Comparable<COSObjectKey>
         {
             return true;
         }
-        if (!(obj instanceof COSObjectKey))
+        if (!(obj instanceof COSObjectKey other))
         {
             return false;
         }
-        COSObjectKey other = (COSObjectKey) obj;
 
         return (number == other.number && generation == other.generation);
     }

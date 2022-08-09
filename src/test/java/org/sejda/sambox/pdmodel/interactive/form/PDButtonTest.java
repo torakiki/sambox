@@ -16,6 +16,22 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,16 +42,9 @@ import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.PDPage;
-import org.sejda.sambox.pdmodel.interactive.annotation.*;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.*;
+import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
+import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceDictionary;
+import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceEntry;
 
 /**
  * Test for the PDButton class.
@@ -82,7 +91,7 @@ public class PDButtonTest
         appearance.setNormalAppearance(new PDAppearanceEntry(new COSDictionary()));
         widget.setAppearance(appearance);
 
-        checkbox.setWidgets(Arrays.asList(widget));
+        checkbox.setWidgets(List.of(widget));
 
         checkbox.check();
         checkbox.unCheck();
@@ -171,8 +180,8 @@ public class PDButtonTest
             
             assertEquals(widget.getAppearance().getNormalAppearance().getSubDictionary().keySet(), 
                     new HashSet<>(Arrays.asList(COSName.getPDFName("On"), COSName.Off, COSName.YES)));
-            
-            assertEquals(field.getNormalAppearanceValues(), Arrays.asList("On"));
+
+            assertEquals(field.getNormalAppearanceValues(), List.of("On"));
         }
     }
 
@@ -240,8 +249,8 @@ public class PDButtonTest
             
             checkbox.setIgnoreExportOptions(true);
 
-            RuntimeException thrown = Assertions.assertThrows(
-                    RuntimeException.class, () -> checkbox.check());
+            RuntimeException thrown = Assertions.assertThrows(RuntimeException.class,
+                    checkbox::check);
 
             assertThat(thrown.getMessage(), containsString(
                     "Check/radio has a single normal appearance, might look the same when checked or not"));
@@ -349,7 +358,7 @@ public class PDButtonTest
     {
         PDCheckBox checkbox = (PDCheckBox) acrobatAcroForm.getField("Checkbox");
         checkbox.setExportValues(Collections.singletonList("exportValue1"));
-        assertEquals(checkbox.getExportValues(), Arrays.asList("exportValue1"));
+        assertEquals(checkbox.getExportValues(), List.of("exportValue1"));
 
         checkbox.setIgnoreExportOptions(true);
 
@@ -363,10 +372,10 @@ public class PDButtonTest
 
         checkbox.setIgnoreExportOptions(false);
         assertEquals(checkbox.getOnValues(), new HashSet<>(Arrays.asList("Yes", "exportValue1")));
-        
+
         checkbox.setIgnoreExportOptions(true);
-        assertEquals(checkbox.getOnValues(), new HashSet<>(Arrays.asList("Yes")));
-        assertEquals(checkbox.getOnValues(), new HashSet<>(Arrays.asList("Yes")));
+        assertEquals(checkbox.getOnValues(), new HashSet<>(List.of("Yes")));
+        assertEquals(checkbox.getOnValues(), new HashSet<>(List.of("Yes")));
     }
 
     @Test
@@ -683,9 +692,9 @@ public class PDButtonTest
             PDCheckBox field = (PDCheckBox) acroForm.getField("checkbox_test");
 
             field.setIgnoreExportOptions(true);
-            
+
             assertEquals(field.getOnValue(), "1");
-            assertEquals(field.getOnValues(), new HashSet<>(Arrays.asList("1")));
+            assertEquals(field.getOnValues(), new HashSet<>(List.of("1")));
         }
     }
 
@@ -716,7 +725,7 @@ public class PDButtonTest
 
             radio.setIgnoreExportOptions(true);
 
-            assertEquals(new HashSet<>(Arrays.asList("1")), radio.getOnValues());
+            assertEquals(new HashSet<>(List.of("1")), radio.getOnValues());
 
             radio.setValue("1");
 
@@ -757,16 +766,14 @@ public class PDButtonTest
         acrobatDocument.close();
     }
     
-    private PDDocument parseDoc(String res) throws IOException {
-        if (new File(res).exists()) 
+    private PDDocument parseDoc(String res) throws IOException
+    {
+        if (new File(res).exists())
         {
-            return PDFParser.parse(SeekableSources.seekableSourceFrom(
-                    new File(res)));
-        } else 
-        {
-            return PDFParser.parse(SeekableSources.onTempFileSeekableSourceFrom(
-                    getClass().getResourceAsStream(res)));
+            return PDFParser.parse(SeekableSources.seekableSourceFrom(new File(res)));
         }
+        return PDFParser.parse(
+                SeekableSources.onTempFileSeekableSourceFrom(getClass().getResourceAsStream(res)));
     }
     
     private void assertFieldV_widgetAS(PDField field, String expectedV, String... expectedASs)

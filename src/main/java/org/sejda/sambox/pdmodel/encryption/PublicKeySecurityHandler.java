@@ -87,7 +87,7 @@ public final class PublicKeySecurityHandler extends SecurityHandler
     public void prepareForDecryption(PDEncryption encryption, COSArray documentIDArray,
             DecryptionMaterial decryptionMaterial) throws IOException
     {
-        if (!(decryptionMaterial instanceof PublicKeyDecryptionMaterial))
+        if (!(decryptionMaterial instanceof PublicKeyDecryptionMaterial material))
         {
             throw new IOException(
                     "Provided decryption material is not compatible with the document");
@@ -104,8 +104,6 @@ public final class PublicKeySecurityHandler extends SecurityHandler
             setKeyLength(encryption.getLength());
             setDecryptMetadata(encryption.isEncryptMetaData());
         }
-
-        PublicKeyDecryptionMaterial material = (PublicKeyDecryptionMaterial) decryptionMaterial;
 
         try
         {
@@ -180,7 +178,7 @@ public final class PublicKeySecurityHandler extends SecurityHandler
             {
                 throw new IOException(
                         "The certificate matches none of " + array.size() + " recipient entries"
-                                + extraInfo.toString());
+                                + extraInfo);
             }
             if (envelopedData.length != 24)
             {

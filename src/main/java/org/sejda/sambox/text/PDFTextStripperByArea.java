@@ -119,7 +119,7 @@ public class PDFTextStripperByArea extends PDFTextStripper
             // reset the stored text for the region so this class
             // can be reused.
             ArrayList<List<TextPosition>> regionCharactersByArticle = new ArrayList<>();
-            regionCharactersByArticle.add(new ArrayList<TextPosition>());
+            regionCharactersByArticle.add(new ArrayList<>());
             regionCharacterList.put(region, regionCharactersByArticle);
             regionText.put(region, new StringWriter());
         }

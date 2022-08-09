@@ -54,15 +54,10 @@ public class AcroFormGenerateAppearancesProcessor extends AbstractProcessor
                 acroForm.refreshAppearances();
                  acroForm.setNeedAppearances(false);
             }
-            catch (IOException ioe)
+            catch (IOException | IllegalArgumentException ioe)
             {
                 LOG.debug("couldn't generate appearance stream for some fields - check output");
                 LOG.debug(ioe.getMessage());
-            }
-            catch (IllegalArgumentException iae)
-            {
-                LOG.debug("couldn't generate appearance stream for some fields - check output");
-                LOG.debug(iae.getMessage());
             }
         } 
     }

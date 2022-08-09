@@ -64,7 +64,7 @@ abstract class PatchMeshesShadingContext extends TriangleBasedShadingContext
     @Override
     protected Map<Point, Integer> calcPixelTable(Rectangle deviceBounds) throws IOException
     {
-        Map<Point, Integer> map = new HashMap<Point, Integer>();
+        Map<Point, Integer> map = new HashMap<>();
         for (Patch it : patchList)
         {
             super.calcPixelTable(it.listOfTriangles, map, deviceBounds);

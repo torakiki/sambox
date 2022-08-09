@@ -135,9 +135,8 @@ public abstract class PDColorSpace implements COSObjectable
         }
 
         colorSpace = colorSpace.getCOSObject();
-        if (colorSpace instanceof COSName)
+        if (colorSpace instanceof COSName name)
         {
-            COSName name = (COSName) colorSpace;
 
             // default color spaces
             if (resources != null)
@@ -192,19 +191,17 @@ public abstract class PDColorSpace implements COSObjectable
             }
             throw new MissingResourceException("Unknown color space: " + name.getName());
         }
-        if (colorSpace instanceof COSArray)
+        if (colorSpace instanceof COSArray array)
         {
-            COSArray array = (COSArray) colorSpace;
             if (array.size() == 0)
             {
                 throw new IOException("Colorspace array is empty");
             }
             COSBase base = array.getObject(0);
-            if (!(base instanceof COSName))
+            if (!(base instanceof COSName name))
             {
                 throw new IOException("First element in colorspace array must be a name");
             }
-            COSName name = (COSName) base;
 
             // TODO cache these returned color spaces?
 
@@ -252,9 +249,8 @@ public abstract class PDColorSpace implements COSObjectable
             }
             throw new IOException("Invalid color space kind: " + name);
         }
-        if (colorSpace instanceof COSDictionary)
+        if (colorSpace instanceof COSDictionary csAsDic)
         {
-            COSDictionary csAsDic = (COSDictionary) colorSpace;
             if (csAsDic.containsKey(COSName.COLORSPACE))
             {
                 LOG.warn("Found invalid color space defined as dictionary {}", csAsDic);

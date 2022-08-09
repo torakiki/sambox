@@ -19,6 +19,7 @@ package org.sejda.sambox.cos;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -589,11 +590,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
         if (aName != null)
         {
             COSName cosName = COMMON_NAMES.get(aName);
-            if (cosName != null)
-            {
-                return cosName;
-            }
-            return getCustom(aName);
+            return Objects.requireNonNullElseGet(cosName, () -> getCustom(aName));
         }
         return null;
     }

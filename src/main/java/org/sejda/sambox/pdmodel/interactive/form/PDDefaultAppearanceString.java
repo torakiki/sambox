@@ -175,7 +175,7 @@ class PDDefaultAppearanceString
 
         COSBase base0 = operands.get(0);
         COSBase base1 = operands.get(1);
-        if (!(base0 instanceof COSName))
+        if (!(base0 instanceof COSName fontName))
         {
             return;
         }
@@ -183,7 +183,6 @@ class PDDefaultAppearanceString
         {
             return;
         }
-        COSName fontName = (COSName) base0;
 
         PDFont font = defaultResources.getFont(fontName);
         float fontSize = ((COSNumber) base1).floatValue();

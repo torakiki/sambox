@@ -179,10 +179,7 @@ public class PDDeviceN extends PDSpecialColorSpace
         {
             return toRGBWithAttributes(raster);
         }
-        else
-        {
-            return toRGBWithTintTransform(raster);
-        }
+        return toRGBWithTintTransform(raster);
     }
 
     //
@@ -283,7 +280,7 @@ public class PDDeviceN extends PDSpecialColorSpace
     private BufferedImage toRGBWithTintTransform(WritableRaster raster) throws IOException
     {
         // cache color mappings
-        Map<String, int[]> map1 = new HashMap<String, int[]>();
+        Map<String, int[]> map1 = new HashMap<>();
         String key = null;
         StringBuilder keyBuilder = new StringBuilder();
 
@@ -350,10 +347,7 @@ public class PDDeviceN extends PDSpecialColorSpace
         {
             return toRGBWithAttributes(value);
         }
-        else
-        {
-            return toRGBWithTintTransform(value);
-        }
+        return toRGBWithTintTransform(value);
     }
 
     private float[] toRGBWithAttributes(float[] value) throws IOException

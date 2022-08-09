@@ -37,7 +37,7 @@ public class COSDocument extends COSBase
 {
 
     private String headerVersion;
-    private FileTrailer trailer;
+    private final FileTrailer trailer;
 
     public COSDocument()
     {

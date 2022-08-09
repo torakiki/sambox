@@ -27,17 +27,18 @@ import org.sejda.sambox.cos.DisposableCOSObject;
 import org.sejda.sambox.cos.IndirectCOSObjectIdentifier;
 
 /**
- * An indirect object belonging to an existing pdf document. Indirect objects are defined in Chap 7.3.10 of PDF
- * 32000-1:2008. The {@link COSBase} wrapped by an {@link ExistingIndirectCOSObject} is loaded on demand by querying the
- * associated {@link IndirectObjectsProvider} when the {@link ExistingIndirectCOSObject#getCOSObject()} is called.
- * 
+ * An indirect object belonging to an existing pdf document. Indirect objects are defined in Chap
+ * 7.3.10 of PDF 32000-1:2008. The {@link COSBase} wrapped by an {@link ExistingIndirectCOSObject}
+ * is loaded on demand by querying the associated {@link IndirectObjectsProvider} when the
+ * {@link ExistingIndirectCOSObject#getCOSObject()} is called.
+ *
  * @author Andrea Vacondio
  */
 public class ExistingIndirectCOSObject extends COSBase implements DisposableCOSObject
 {
 
-    private IndirectCOSObjectIdentifier id;
-    private IndirectObjectsProvider provider;
+    private final IndirectCOSObjectIdentifier id;
+    private final IndirectObjectsProvider provider;
 
     ExistingIndirectCOSObject(long objectNumber, int generationNumber,
             IndirectObjectsProvider provider)

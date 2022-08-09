@@ -304,9 +304,9 @@ public abstract class PDButton extends PDTerminalField
             array.add(((COSString) value).getString());
             return array;
         }
-        else if (value instanceof COSArray)
+        if (value instanceof COSArray)
         {
-            return COSArrayList.convertCOSStringCOSArrayToList((COSArray)value);
+            return COSArrayList.convertCOSStringCOSArrayToList((COSArray) value);
         }
         return Collections.emptyList();
     }
@@ -504,9 +504,8 @@ public abstract class PDButton extends PDTerminalField
             // FIX scenario: checkbox that only has an "Off" entry in normal appearances
             if (entries.isEmpty() || (entries.size() == 1 && entries.contains("Off")))
             {
-                if(this instanceof PDCheckBox)
+                if(this instanceof PDCheckBox checkBox)
                 {
-                    PDCheckBox checkBox = (PDCheckBox) this;
                     if (checkBox.getOnValue().equals(value)) {
                         // checkbox is being checked
                         widget.setAppearanceState(value);

@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Locale;
 
@@ -65,9 +66,9 @@ public class TestPDDocument
         // Verify content
         byte[] pdf = baos.toByteArray();
         assertTrue(pdf.length > 200);
-        assertEquals("%PDF-1.4", new String(Arrays.copyOfRange(pdf, 0, 8), "UTF-8"));
-        assertEquals("%%EOF\n",
-                new String(Arrays.copyOfRange(pdf, pdf.length - 6, pdf.length), "UTF-8"));
+        assertEquals("%PDF-1.4", new String(Arrays.copyOfRange(pdf, 0, 8), StandardCharsets.UTF_8));
+        assertEquals("%%EOF\n", new String(Arrays.copyOfRange(pdf, pdf.length - 6, pdf.length),
+                StandardCharsets.UTF_8));
 
         // Load
         try (PDDocument loadDoc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(pdf)))
@@ -98,9 +99,9 @@ public class TestPDDocument
         byte[] pdf = IOUtils.toByteArray(in);
         in.close();
         assertTrue(pdf.length > 200);
-        assertEquals("%PDF-1.4", new String(Arrays.copyOfRange(pdf, 0, 8), "UTF-8"));
-        assertEquals("%%EOF\n",
-                new String(Arrays.copyOfRange(pdf, pdf.length - 6, pdf.length), "UTF-8"));
+        assertEquals("%PDF-1.4", new String(Arrays.copyOfRange(pdf, 0, 8), StandardCharsets.UTF_8));
+        assertEquals("%%EOF\n", new String(Arrays.copyOfRange(pdf, pdf.length - 6, pdf.length),
+                StandardCharsets.UTF_8));
 
         // Load
         try (PDDocument loadDoc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(pdf)))

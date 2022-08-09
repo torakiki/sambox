@@ -116,7 +116,9 @@ final class ASCII85OutputStream extends FilterOutputStream
      */
     private void transformASCII85()
     {
-        long word = ((((indata[0] << 8) | (indata[1] & 0xFF)) << 16) | ((indata[2] & 0xFF) << 8) | (indata[3] & 0xFF)) & 0xFFFFFFFFL;
+        long word =
+                (((long) ((indata[0] << 8) | (indata[1] & 0xFF)) << 16) | ((indata[2] & 0xFF) << 8)
+                        | (indata[3] & 0xFF)) & 0xFFFFFFFFL;
 
         if (word == 0)
         {

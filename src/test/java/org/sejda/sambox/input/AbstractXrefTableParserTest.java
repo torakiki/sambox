@@ -151,7 +151,6 @@ public class AbstractXrefTableParserTest
     @Test(expected = IOException.class)
     public void parseInvalidRow() throws IOException
     {
-        Set<XrefEntry> found = new HashSet<>();
         AbstractXrefTableParser victim = new AbstractXrefTableParser(
                 new COSParser(inMemorySeekableSourceFrom(
                         getClass().getResourceAsStream("/sambox/xref_table_invalid_row.txt"))))
@@ -166,7 +165,6 @@ public class AbstractXrefTableParserTest
             void onEntryFound(XrefEntry entry)
             {
                 assertNotNull(entry);
-                found.add(entry);
             }
         };
         victim.parse(15);
@@ -235,7 +233,6 @@ public class AbstractXrefTableParserTest
     @Test
     public void parseNegativeGeneration() throws IOException
     {
-        Set<XrefEntry> found = new HashSet<>();
         AbstractXrefTableParser victim = new AbstractXrefTableParser(
                 new COSParser(inMemorySeekableSourceFrom(
                         getClass().getResourceAsStream("/sambox/xref_table_negative.txt"))))
@@ -250,7 +247,6 @@ public class AbstractXrefTableParserTest
             void onEntryFound(XrefEntry entry)
             {
                 assertNotNull(entry);
-                found.add(entry);
             }
         };
         victim.parse(15);

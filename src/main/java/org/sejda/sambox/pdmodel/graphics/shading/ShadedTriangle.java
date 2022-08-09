@@ -99,7 +99,7 @@ class ShadedTriangle
      */
     private int calcDeg(Point2D[] p)
     {
-        Set<Point> set = new HashSet<Point>();
+        Set<Point> set = new HashSet<>();
         for (Point2D itp : p)
         {
             Point np = new Point((int) Math.round(itp.getX() * 1000),
@@ -159,7 +159,7 @@ class ShadedTriangle
         {
             return overlaps(corner[0], p) || overlaps(corner[1], p) || overlaps(corner[2], p);
         }
-        else if (degree == 2)
+        if (degree == 2)
         {
             Point tp = new Point((int) Math.round(p.getX()), (int) Math.round(p.getY()));
             return line.linePoints.contains(tp);

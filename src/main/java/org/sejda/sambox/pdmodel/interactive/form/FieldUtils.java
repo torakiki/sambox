@@ -171,7 +171,7 @@ public final class FieldUtils
             array.add(((COSString) items).getString());
             return array;
         }
-        else if (items instanceof COSArray)
+        if (items instanceof COSArray)
         {
             List<String> entryList = new ArrayList<>();
             for (COSBase entry : (COSArray) items)

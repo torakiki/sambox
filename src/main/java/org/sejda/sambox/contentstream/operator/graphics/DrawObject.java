@@ -50,20 +50,18 @@ public final class DrawObject extends GraphicsOperatorProcessor
             throw new MissingOperandException(operator, operands);
         }
         COSBase base0 = operands.get(0);
-        if (!(base0 instanceof COSName))
+        if (!(base0 instanceof COSName objectName))
         {
             return;
         }
-        COSName objectName = (COSName) base0;
         PDXObject xobject = getContext().getResources().getXObject(objectName);
 
         if (xobject == null)
         {
             throw new MissingResourceException("Missing XObject: " + objectName.getName());
         }
-        if (xobject instanceof PDImageXObject)
+        if (xobject instanceof PDImageXObject image)
         {
-            PDImageXObject image = (PDImageXObject) xobject;
             getContext().drawImage(image);
         }
         else if (xobject instanceof PDFormXObject)

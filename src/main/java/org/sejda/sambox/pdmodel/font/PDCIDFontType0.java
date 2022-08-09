@@ -263,7 +263,7 @@ public class PDCIDFontType0 extends PDCIDFont
         {
             return cidFont;
         }
-        else if (t1Font instanceof CFFType1Font)
+        if (t1Font instanceof CFFType1Font)
         {
             return (CFFType1Font) t1Font;
         }
@@ -295,14 +295,11 @@ public class PDCIDFontType0 extends PDCIDFont
         {
             return cidFont.getType2CharString(cid);
         }
-        else if (t1Font instanceof CFFType1Font)
+        if (t1Font instanceof CFFType1Font)
         {
             return ((CFFType1Font) t1Font).getType2CharString(cid);
         }
-        else
-        {
-            return null;
-        }
+        return null;
     }
 
     /**
@@ -333,14 +330,11 @@ public class PDCIDFontType0 extends PDCIDFont
         {
             return charstring.getPath();
         }
-        else if (isEmbedded && t1Font instanceof CFFType1Font)
+        if (isEmbedded && t1Font instanceof CFFType1Font)
         {
             return ((CFFType1Font) t1Font).getType2CharString(cid).getPath();
         }
-        else
-        {
-            return t1Font.getPath(getGlyphName(code));
-        }
+        return t1Font.getPath(getGlyphName(code));
     }
 
     @Override
@@ -352,14 +346,11 @@ public class PDCIDFontType0 extends PDCIDFont
         {
             return charstring.getGID() != 0;
         }
-        else if (isEmbedded && t1Font instanceof CFFType1Font)
+        if (isEmbedded && t1Font instanceof CFFType1Font)
         {
             return ((CFFType1Font) t1Font).getType2CharString(cid).getGID() != 0;
         }
-        else
-        {
-            return t1Font.hasGlyph(getGlyphName(code));
-        }
+        return t1Font.hasGlyph(getGlyphName(code));
     }
 
     /**

@@ -307,7 +307,7 @@ public class PDDocument implements Closeable
      */
     public AccessPermission getCurrentAccessPermission()
     {
-        return ofNullable(securityHandler).map(s -> s.getCurrentAccessPermission())
+        return ofNullable(securityHandler).map(SecurityHandler::getCurrentAccessPermission)
                 .orElseGet(AccessPermission::getOwnerAccessPermission);
     }
 
@@ -627,7 +627,7 @@ public class PDDocument implements Closeable
      * @author Andrea Vacondio
      */
     @FunctionalInterface
-    public static interface OnClose
+    public interface OnClose
     {
         /**
          * Sets an action to be performed right before this {@link PDDocument} is closed.
@@ -648,7 +648,7 @@ public class PDDocument implements Closeable
      * Action to be performed right before this {@link PDDocument} is written to a file.
      */
     @FunctionalInterface
-    public static interface OnBeforeWrite
+    public interface OnBeforeWrite
     {
         void onBeforeWrite() throws IOException;
 

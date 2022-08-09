@@ -16,6 +16,12 @@
  */
 package org.sejda.sambox.pdmodel.font;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
 import org.apache.fontbox.afm.FontMetrics;
 import org.apache.fontbox.pfb.PfbParser;
 import org.apache.fontbox.type1.Type1Font;
@@ -30,11 +36,6 @@ import org.sejda.sambox.pdmodel.common.PDStream;
 import org.sejda.sambox.pdmodel.font.encoding.Encoding;
 import org.sejda.sambox.pdmodel.font.encoding.GlyphList;
 import org.sejda.sambox.pdmodel.font.encoding.Type1Encoding;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Embedded PDType1Font builder. Helper class to populate a PDType1Font from a PFB and AFM.
@@ -64,14 +65,8 @@ class PDType1FontEmbedder
         PfbParser pfbParser = new PfbParser(pfbBytes);
         type1 = Type1Font.createWithPFB(pfbBytes);
 
-        if (encoding == null)
-        {
-            fontEncoding = Type1Encoding.fromFontBox(type1.getEncoding());
-        }
-        else
-        {
-            fontEncoding = encoding;
-        }
+        fontEncoding = Objects.requireNonNullElseGet(encoding,
+                () -> Type1Encoding.fromFontBox(type1.getEncoding()));
 
         // build font descriptor
         PDFontDescriptor fd = buildFontDescriptor(type1);

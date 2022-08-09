@@ -110,7 +110,7 @@ public final class EncryptionContext
                         {
                             return Algorithm1.withARC4Engine(encryptionKey);
                         }
-                        else if (COSName.AESV2.equals(cryptFilterMethod))
+                        if (COSName.AESV2.equals(cryptFilterMethod))
                         {
                             return Algorithm1.withAESEngine(encryptionKey);
                         }

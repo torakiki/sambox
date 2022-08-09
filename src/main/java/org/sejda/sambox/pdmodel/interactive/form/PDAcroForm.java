@@ -638,7 +638,7 @@ public final class PDAcroForm extends PDDictionaryWrapper
     private Map<COSDictionary, Set<COSDictionary>> buildPagesWidgetsMap(List<PDField> fields)
             throws IOException
     {
-        Map<COSDictionary, Set<COSDictionary>> pagesAnnotationsMap = new HashMap<COSDictionary, Set<COSDictionary>>();
+        Map<COSDictionary, Set<COSDictionary>> pagesAnnotationsMap = new HashMap<>();
         boolean hasMissingPageRef = false;
 
         for (PDField field : fields)
@@ -687,7 +687,7 @@ public final class PDAcroForm extends PDDictionaryWrapper
     {
         if (pagesAnnotationsMap.get(page.getCOSObject()) == null)
         {
-            Set<COSDictionary> widgetsForPage = new HashSet<COSDictionary>();
+            Set<COSDictionary> widgetsForPage = new HashSet<>();
             widgetsForPage.add(widget.getCOSObject());
             pagesAnnotationsMap.put(page.getCOSObject(), widgetsForPage);
         }

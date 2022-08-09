@@ -32,7 +32,7 @@ import org.sejda.sambox.cos.COSString;
 
 /**
  * Algorithm 1 defined in Chapter 7.6.2 (General Encryption Algorithm) PDF 32100-1:2008
- * 
+ *
  * @author Andrea Vacondio
  *
  */
@@ -41,11 +41,11 @@ class Algorithm1 implements GeneralEncryptionAlgorithm
 
     private static final byte[] AES_SALT = { (byte) 0x73, (byte) 0x41, (byte) 0x6c, (byte) 0x54 };
 
-    private EncryptionAlgorithmEngine engine;
-    private MessageDigest digest = MessageDigests.md5();
-    private Function<COSObjectKey, byte[]> keyCalculator;
+    private final EncryptionAlgorithmEngine engine;
+    private final MessageDigest digest = MessageDigests.md5();
+    private final Function<COSObjectKey, byte[]> keyCalculator;
     private Function<byte[], byte[]> md5Initializer;
-    private Function<byte[], byte[]> md5ToKey;
+    private final Function<byte[], byte[]> md5ToKey;
     private COSObjectKey currentCOSObjectKey;
 
     private Algorithm1(EncryptionAlgorithmEngine engine, byte[] key)
@@ -68,9 +68,7 @@ class Algorithm1 implements GeneralEncryptionAlgorithm
             digest.update(newKey);
             return newKey;
         };
-        md5ToKey = (newKey) -> {
-            return Arrays.copyOf(digest.digest(), Math.min(newKey.length, 16));
-        };
+        md5ToKey = (newKey) -> Arrays.copyOf(digest.digest(), Math.min(newKey.length, 16));
     }
 
     @Override

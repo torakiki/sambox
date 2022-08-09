@@ -41,7 +41,7 @@ public class PDPropertyList implements COSObjectable
         {
             return new PDOptionalContentGroup(dict);
         }
-        else if (COSName.OCMD.equals(dict.getItem(COSName.TYPE)))
+        if (COSName.OCMD.equals(dict.getItem(COSName.TYPE)))
         {
             return new PDOptionalContentMembershipDictionary(dict);
         }

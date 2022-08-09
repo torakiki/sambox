@@ -18,7 +18,6 @@ package org.sejda.sambox.pdmodel;
 
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.toList;
 import static org.sejda.sambox.cos.COSName.DECODE_PARMS;
 import static org.sejda.sambox.cos.COSName.DL;
 import static org.sejda.sambox.cos.COSName.F;
@@ -156,15 +155,13 @@ public class PDPage implements COSObjectable, PDContentStream
         {
             streams.add(new PDStream((COSStream) base));
         }
-        else if (base instanceof COSArray)
+        else if (base instanceof COSArray array)
         {
-            COSArray array = (COSArray) base;
             for (int i = 0; i < array.size(); i++)
             {
                 COSBase baseObject = array.getObject(i);
-                if (baseObject instanceof COSStream)
+                if (baseObject instanceof COSStream stream)
                 {
-                    COSStream stream = (COSStream) baseObject;
                     if (nonNull(stream))
                     {
                         streams.add(new PDStream(stream));
@@ -187,7 +184,7 @@ public class PDPage implements COSObjectable, PDContentStream
         {
             return ((COSStream) base).getUnfilteredStream();
         }
-        else if (base instanceof COSArray && ((COSArray) base).size() > 0)
+        if (base instanceof COSArray && ((COSArray) base).size() > 0)
         {
             COSArray streams = (COSArray) base;
             byte[] delimiter = new byte[] { '\n' };
@@ -217,7 +214,7 @@ public class PDPage implements COSObjectable, PDContentStream
         {
             return ((COSStream) contents).size() > 0;
         }
-        else if (contents instanceof COSArray)
+        if (contents instanceof COSArray)
         {
             return ((COSArray) contents).size() > 0;
         }
@@ -747,14 +744,7 @@ public class PDPage implements COSObjectable, PDContentStream
      */
     public List<PDAnnotation> getAnnotations()
     {
-        return getAnnotations(new AnnotationFilter()
-        {
-            @Override
-            public boolean accept(PDAnnotation annotation)
-            {
-                return true;
-            }
-        });
+        return getAnnotations(annotation -> true);
     }
 
     /**
@@ -861,11 +851,10 @@ public class PDPage implements COSObjectable, PDContentStream
     public List<PDViewportDictionary> getViewports()
     {
         COSBase base = page.getDictionaryObject(COSName.VP);
-        if (!(base instanceof COSArray))
+        if (!(base instanceof COSArray array))
         {
             return null;
         }
-        COSArray array = (COSArray) base;
         List<PDViewportDictionary> viewports = new ArrayList<>();
         for (int i = 0; i < array.size(); ++i)
         {
@@ -938,7 +927,7 @@ public class PDPage implements COSObjectable, PDContentStream
         getContentStreams().forEachRemaining(s -> {
             COSStream stream = s.getCOSObject();
             List<COSName> invalid = stream.keySet().stream()
-                    .filter(k -> !VALID_STREAM_KEYS.contains(k)).collect(toList());
+                    .filter(k -> !VALID_STREAM_KEYS.contains(k)).toList();
             invalid.forEach(stream::removeItem);
         });
     }

@@ -197,19 +197,19 @@ public class ValidateXImage
         {
             return "png";
         }
-        else if (filters.contains(COSName.DCT_DECODE))
+        if (filters.contains(COSName.DCT_DECODE))
         {
             return "jpg";
         }
-        else if (filters.contains(COSName.JPX_DECODE))
+        if (filters.contains(COSName.JPX_DECODE))
         {
             return "jpx";
         }
-        else if (filters.contains(COSName.CCITTFAX_DECODE))
+        if (filters.contains(COSName.CCITTFAX_DECODE))
         {
             return "tiff";
         }
-        else if (filters.contains(COSName.FLATE_DECODE) || filters.contains(COSName.LZW_DECODE)
+        if (filters.contains(COSName.FLATE_DECODE) || filters.contains(COSName.LZW_DECODE)
                 || filters.contains(COSName.RUN_LENGTH_DECODE))
         {
             return "png";

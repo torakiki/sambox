@@ -91,14 +91,11 @@ public abstract class PDField extends PDDictionaryWrapper
         {
             return getCOSObject().getDictionaryObject(key);
         }
-        else if (parent != null)
+        if (parent != null)
         {
             return parent.getInheritableAttribute(key);
         }
-        else
-        {
-            return acroForm.getCOSObject().getDictionaryObject(key);
-        }
+        return acroForm.getCOSObject().getDictionaryObject(key);
     }
 
     /**

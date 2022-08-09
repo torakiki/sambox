@@ -22,10 +22,12 @@ import static java.util.Objects.nonNull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSArrayList;
+import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
@@ -118,7 +120,7 @@ public abstract class PDTerminalField extends PDField
         
         if (kids.size() > 0)
         {
-            return kids.stream().filter(k -> nonNull(k)).map(k -> k.getCOSObject())
+            return kids.stream().filter(Objects::nonNull).map(COSBase::getCOSObject)
                     .filter(k -> k instanceof COSDictionary)
                     .map(k -> new PDAnnotationWidget((COSDictionary) k))
                     .collect(Collectors.toList());

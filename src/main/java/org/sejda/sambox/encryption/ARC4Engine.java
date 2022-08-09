@@ -32,7 +32,7 @@ import org.bouncycastle.crypto.params.KeyParameter;
 class ARC4Engine implements EncryptionAlgorithmEngine
 {
 
-    private StreamCipher cipher;
+    private final StreamCipher cipher;
 
     public ARC4Engine()
     {

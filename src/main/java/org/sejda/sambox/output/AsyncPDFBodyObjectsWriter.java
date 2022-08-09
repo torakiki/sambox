@@ -41,16 +41,10 @@ class AsyncPDFBodyObjectsWriter implements PDFBodyObjectsWriter
 
     private static final Logger LOG = LoggerFactory.getLogger(AsyncPDFBodyObjectsWriter.class);
 
-    private ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactory()
-    {
-        @Override
-        public Thread newThread(Runnable target)
-        {
-            return new Thread(null, target, "pdf-writer-thread", 0);
-        }
-    });
-    private AtomicReference<IOException> executionException = new AtomicReference<>();
-    private IndirectObjectsWriter writer;
+    private final ExecutorService executor = Executors.newSingleThreadExecutor(
+            target -> new Thread(null, target, "pdf-writer-thread", 0));
+    private final AtomicReference<IOException> executionException = new AtomicReference<>();
+    private final IndirectObjectsWriter writer;
 
     AsyncPDFBodyObjectsWriter(IndirectObjectsWriter writer)
     {

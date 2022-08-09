@@ -16,12 +16,19 @@
  */
 package org.sejda.sambox.pdmodel.common;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSObjectable;
 import org.sejda.sambox.input.PDFParser;
@@ -32,9 +39,7 @@ import org.sejda.sambox.pdmodel.PDEmbeddedFilesNameTreeNode;
 import org.sejda.sambox.pdmodel.common.filespecification.PDComplexFileSpecification;
 import org.sejda.sambox.pdmodel.common.filespecification.PDEmbeddedFile;
 
-import junit.framework.TestCase;
-
-public class TestEmbeddedFiles extends TestCase
+public class TestEmbeddedFiles
 {
     @Test
     public void testNullEmbeddedFile() throws IOException
@@ -47,7 +52,7 @@ public class TestEmbeddedFiles extends TestCase
 
             PDDocumentCatalog catalog = doc.getDocumentCatalog();
             PDDocumentNameDictionary names = catalog.getNames();
-            assertEquals("expected two files", 2, names.getEmbeddedFiles().getNames().size());
+            assertEquals(2, names.getEmbeddedFiles().getNames().size());
             PDEmbeddedFilesNameTreeNode embeddedFiles = names.getEmbeddedFiles();
 
             PDComplexFileSpecification spec = embeddedFiles.getNames()
@@ -60,12 +65,12 @@ public class TestEmbeddedFiles extends TestCase
             }
             // now test for actual attachment
             spec = embeddedFiles.getNames().get("My first attachment");
-            assertNotNull("one attachment actually exists", spec);
-            assertEquals("existing file length", 17660, spec.getEmbeddedFile().getLength());
+            assertNotNull(spec, "one attachment actually exists");
+            assertEquals(17660, spec.getEmbeddedFile().getLength(), "existing file length");
             spec = embeddedFiles.getNames().get("non-existent-file.docx");
         }
-        assertTrue("Was able to get file without exception", ok);
-        assertNull("EmbeddedFile was correctly null", embeddedFile);
+        assertTrue(ok, "Was able to get file without exception");
+        assertNull(embeddedFile, "EmbeddedFile was correctly null");
     }
 
     @Test
@@ -95,22 +100,22 @@ public class TestEmbeddedFiles extends TestCase
                 unixFile = spec.getEmbeddedFileUnix();
             }
 
-            assertTrue("non os specific",
-                    byteArrayContainsLC("non os specific", nonOSFile.toByteArray(), "ISO-8859-1"));
+            assertTrue(byteArrayContainsLC("non os specific", nonOSFile.toByteArray(),
+                    StandardCharsets.ISO_8859_1), "non os specific");
 
-            assertTrue("mac",
-                    byteArrayContainsLC("mac embedded", macFile.toByteArray(), "ISO-8859-1"));
+            assertTrue(byteArrayContainsLC("mac embedded", macFile.toByteArray(),
+                    StandardCharsets.ISO_8859_1), "mac");
 
-            assertTrue("dos",
-                    byteArrayContainsLC("dos embedded", dosFile.toByteArray(), "ISO-8859-1"));
+            assertTrue(byteArrayContainsLC("dos embedded", dosFile.toByteArray(),
+                    StandardCharsets.ISO_8859_1), "dos");
 
-            assertTrue("unix",
-                    byteArrayContainsLC("unix embedded", unixFile.toByteArray(), "ISO-8859-1"));
+            assertTrue(byteArrayContainsLC("unix embedded", unixFile.toByteArray(),
+                    StandardCharsets.ISO_8859_1), "unix");
         }
 
     }
 
-    private boolean byteArrayContainsLC(String target, byte[] bytes, String encoding)
+    private boolean byteArrayContainsLC(String target, byte[] bytes, Charset encoding)
             throws UnsupportedEncodingException
     {
         String s = new String(bytes, encoding);

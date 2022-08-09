@@ -82,10 +82,9 @@ public final class PDXFAResource implements COSObjectable
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream())
         {
             // handle the case if the XFA is split into individual parts
-            if (this.getCOSObject() instanceof COSArray)
+            if (this.getCOSObject() instanceof COSArray cosArray)
             {
                 xfaBytes = new byte[BUFFER_SIZE];
-                COSArray cosArray = (COSArray) this.getCOSObject();
                 for (int i = 1; i < cosArray.size(); i += 2)
                 {
                     COSBase cosObj = cosArray.getObject(i);

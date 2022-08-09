@@ -42,5 +42,5 @@ public enum WriteOption
     /**
      * Does not automatically update metadata modified date and producer when saving
      */
-    NO_METADATA_PRODUCER_MODIFIED_DATE_UPDATE;
+    NO_METADATA_PRODUCER_MODIFIED_DATE_UPDATE
 }

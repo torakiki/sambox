@@ -407,10 +407,7 @@ public final class PDICCBased extends PDCIEBasedColorSpace
             }
             return decode;
         }
-        else
-        {
-            return alternateColorSpace.getDefaultDecode(bitsPerComponent);
-        }
+        return alternateColorSpace.getDefaultDecode(bitsPerComponent);
     }
 
     @Override

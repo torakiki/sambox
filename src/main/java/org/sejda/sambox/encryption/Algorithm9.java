@@ -24,16 +24,16 @@ import static org.sejda.commons.util.RequireUtils.requireArg;
 
 /**
  * Algorithm 9 as defined in Chap 7.6.3.4.7 of ISO 32000-2
- * 
+ *
  * @author Andrea Vacondio
  */
 public class Algorithm9 implements PasswordAlgorithm
 {
-    private byte[] ownerValidationSalt;
-    private byte[] ownerKeySalt;
-    private byte[] u;
-    private Algorithm2AHash hashAlgo;
-    private AESEngineNoPadding engine = AESEngineNoPadding.cbc();
+    private final byte[] ownerValidationSalt;
+    private final byte[] ownerKeySalt;
+    private final byte[] u;
+    private final Algorithm2AHash hashAlgo;
+    private final AESEngineNoPadding engine = AESEngineNoPadding.cbc();
 
     Algorithm9(Algorithm2AHash hashAlgo, byte[] u, byte[] ownerValidationSalt, byte[] ownerKeySalt)
     {

@@ -80,7 +80,7 @@ class PDFBodyWriter implements COSVisitor, Closeable
         requireState(open, "The writer is closed");
         document.newIndirects().forEach(o -> stack.add(context.getOrCreateIndirectReferenceFor(o)));
         document.trailer().getCOSObject().accept(this);
-        document.replacements().forEach(stack::add);
+        stack.addAll(document.replacements());
         startWriting();
     }
 

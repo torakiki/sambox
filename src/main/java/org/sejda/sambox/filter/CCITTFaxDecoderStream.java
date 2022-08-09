@@ -206,7 +206,7 @@ final class CCITTFaxDecoderStream extends FilterInputStream
                 {
                     continue mode;
                 }
-                else if (n.isLeaf)
+                if (n.isLeaf)
                 {
                     switch (n.value)
                     {

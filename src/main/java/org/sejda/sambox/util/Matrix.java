@@ -139,11 +139,10 @@ public final class Matrix implements Cloneable
      */
     public static Matrix createMatrix(COSBase base)
     {
-        if (!(base instanceof COSArray))
+        if (!(base instanceof COSArray array))
         {
             return new Matrix();
         }
-        COSArray array = (COSArray) base;
         if (array.size() < 6)
         {
             return new Matrix();
@@ -368,11 +367,8 @@ public final class Matrix implements Cloneable
         {
             return new Matrix(c);
         }
-        else
-        {
-            result.single = c;
-            return result;
-        }
+        result.single = c;
+        return result;
     }
 
     private static boolean isFinite(float f)

@@ -42,11 +42,10 @@ public class SetTextHorizontalScaling extends OperatorProcessor
         }
 
         COSBase base = arguments.get(0);
-        if (!(base instanceof COSNumber))
+        if (!(base instanceof COSNumber scaling))
         {
             return;
         }
-        COSNumber scaling = (COSNumber) base;
         getContext().getGraphicsState().getTextState().setHorizontalScaling(scaling.floatValue());
     }
 

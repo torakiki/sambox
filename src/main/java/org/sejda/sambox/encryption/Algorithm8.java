@@ -23,17 +23,16 @@ import static org.sejda.sambox.encryption.EncryptUtils.rnd;
 
 /**
  * Algorithm 8 as defined in Chap 7.6.3.4.6 of ISO 32000-2
- * 
- * @author Andrea Vacondio
  *
+ * @author Andrea Vacondio
  */
 class Algorithm8 implements PasswordAlgorithm
 {
 
-    private byte[] userValidationSalt;
-    private byte[] userKeySalt;
-    private Algorithm2AHash hashAlgo;
-    private AESEngineNoPadding engine = AESEngineNoPadding.cbc();
+    private final byte[] userValidationSalt;
+    private final byte[] userKeySalt;
+    private final Algorithm2AHash hashAlgo;
+    private final AESEngineNoPadding engine = AESEngineNoPadding.cbc();
 
     Algorithm8(Algorithm2AHash hashAlgo)
     {

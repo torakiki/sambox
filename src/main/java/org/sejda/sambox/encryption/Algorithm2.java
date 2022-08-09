@@ -21,16 +21,15 @@ import java.util.Arrays;
 
 /**
  * Algorithm 2 as defined in Chap 7.6.3.3 of PDF 32000-1:2008
- * 
- * @author Andrea Vacondio
  *
+ * @author Andrea Vacondio
  */
 class Algorithm2
 {
     private static final byte[] NO_METADATA = { (byte) 255, (byte) 255, (byte) 255, (byte) 255 };
 
-    private MessageDigest digest = MessageDigests.md5();
-    private Algorithm3 algo = new Algorithm3();
+    private final MessageDigest digest = MessageDigests.md5();
+    private final Algorithm3 algo = new Algorithm3();
 
     byte[] computeEncryptionKey(EncryptionContext context)
     {

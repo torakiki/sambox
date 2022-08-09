@@ -152,10 +152,7 @@ public final class Parser
             {
                 return EOT;
             }
-            else
-            {
-                return currentChar();
-            }
+            return currentChar();
         }
 
         private char peek()
@@ -164,10 +161,7 @@ public final class Parser
             {
                 return input.charAt(index + 1);
             }
-            else
-            {
-                return EOT;
-            }
+            return EOT;
         }
 
         private State nextState()

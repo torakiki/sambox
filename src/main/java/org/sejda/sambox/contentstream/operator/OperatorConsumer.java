@@ -30,7 +30,7 @@ import org.sejda.sambox.cos.COSBase;
 @FunctionalInterface
 public interface OperatorConsumer
 {
-    public static final OperatorConsumer NO_OP = (operator, operands) -> {
+    OperatorConsumer NO_OP = (operator, operands) -> {
         // no op
     };
 

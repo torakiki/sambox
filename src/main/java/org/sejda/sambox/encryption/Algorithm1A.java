@@ -33,7 +33,7 @@ class Algorithm1A implements GeneralEncryptionAlgorithm
 {
 
     private AESEncryptionAlgorithmEngine engine = new ConcatenatingAESEngine();
-    private byte[] key;
+    private final byte[] key;
 
     Algorithm1A(byte[] key, AESEncryptionAlgorithmEngine engine)
     {

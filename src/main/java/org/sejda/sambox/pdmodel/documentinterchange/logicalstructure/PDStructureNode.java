@@ -180,10 +180,9 @@ public abstract class PDStructureNode implements COSObjectable
             // currently no kid: set new kid as kids
             this.getCOSObject().setItem(COSName.K, object);
         }
-        else if (k instanceof COSArray)
+        else if (k instanceof COSArray array)
         {
             // currently more than one kid: add new kid to existing array
-            COSArray array = (COSArray) k;
             array.add(object);
         }
         else
@@ -244,9 +243,8 @@ public abstract class PDStructureNode implements COSObjectable
         {
             refKidBase = ((COSObjectable) refKid).getCOSObject();
         }
-        if (k instanceof COSArray)
+        if (k instanceof COSArray array)
         {
-            COSArray array = (COSArray) k;
             int refIndex = array.indexOfObject(refKidBase);
             array.add(refIndex, newKid.getCOSObject());
         }
@@ -312,7 +310,7 @@ public abstract class PDStructureNode implements COSObjectable
             // no kids: objectable is not a kid
             return false;
         }
-        else if (k instanceof COSArray)
+        if (k instanceof COSArray)
         {
             // currently more than one kid: remove kid from existing array
             COSArray array = (COSArray) k;
@@ -324,17 +322,14 @@ public abstract class PDStructureNode implements COSObjectable
             }
             return removed;
         }
-        else
+        // currently one kid: if current kid equals given object, remove kids entry
+        boolean onlyKid = k.equals(object.getCOSObject());
+        if (onlyKid)
         {
-            // currently one kid: if current kid equals given object, remove kids entry
-            boolean onlyKid = k.equals(object.getCOSObject());
-            if (onlyKid)
-            {
-                this.getCOSObject().removeItem(COSName.K);
-                return true;
-            }
-            return false;
+            this.getCOSObject().removeItem(COSName.K);
+            return true;
         }
+        return false;
     }
 
     /**
@@ -361,7 +356,7 @@ public abstract class PDStructureNode implements COSObjectable
         {
             return createObjectFromDic(kidDic);
         }
-        else if (kid instanceof COSInteger)
+        if (kid instanceof COSInteger)
         {
             // An integer marked-content identifier denoting a marked-content sequence
             COSInteger mcid = (COSInteger) kid;
@@ -378,12 +373,12 @@ public abstract class PDStructureNode implements COSObjectable
             // A structure element dictionary denoting another structure element
             return new PDStructureElement(kidDic);
         }
-        else if (PDObjectReference.TYPE.equals(type))
+        if (PDObjectReference.TYPE.equals(type))
         {
             // An object reference dictionary denoting a PDF object
             return new PDObjectReference(kidDic);
         }
-        else if (PDMarkedContentReference.TYPE.equals(type))
+        if (PDMarkedContentReference.TYPE.equals(type))
         {
             // A marked-content reference dictionary denoting a marked-content sequence
             return new PDMarkedContentReference(kidDic);

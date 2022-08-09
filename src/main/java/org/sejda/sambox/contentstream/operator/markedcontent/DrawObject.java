@@ -50,11 +50,10 @@ public class DrawObject extends OperatorProcessor
             throw new MissingOperandException(operator, arguments);
         }
         COSBase base0 = arguments.get(0);
-        if (!(base0 instanceof COSName))
+        if (!(base0 instanceof COSName name))
         {
             return;
         }
-        COSName name = (COSName) base0;
         PDXObject xobject = getContext().getResources().getXObject(name);
         ((PDFMarkedContentExtractor) getContext()).xobject(xobject);
 

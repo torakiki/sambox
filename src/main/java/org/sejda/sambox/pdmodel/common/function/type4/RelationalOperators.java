@@ -46,10 +46,8 @@ class RelationalOperators
         protected boolean isEqual(Object op1, Object op2)
         {
             boolean result = false;
-            if (op1 instanceof Number && op2 instanceof Number)
+            if (op1 instanceof Number num1 && op2 instanceof Number num2)
             {
-                Number num1 = (Number) op1;
-                Number num2 = (Number) op2;
                 result = num1.floatValue() == num2.floatValue();
             }
             else

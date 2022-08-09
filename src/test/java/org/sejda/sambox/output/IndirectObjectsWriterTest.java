@@ -70,7 +70,7 @@ public class IndirectObjectsWriterTest
     @Test
     public void writerObject() throws IOException
     {
-        when(writer.offset()).thenReturn(12345l);
+        when(writer.offset()).thenReturn(12345L);
         IndirectCOSObjectReference ref = new IndirectCOSObjectReference(123, 0,
                 COSInteger.get(100));
         InOrder inOrder = Mockito.inOrder(writer);
@@ -91,7 +91,7 @@ public class IndirectObjectsWriterTest
     @Test
     public void writerObjectOffsetIsSet() throws IOException
     {
-        when(writer.offset()).thenReturn(12345l);
+        when(writer.offset()).thenReturn(12345L);
         IndirectCOSObjectReference ref = new IndirectCOSObjectReference(123, 0,
                 COSInteger.get(100));
         victim.writeObjectIfNotWritten(ref);

@@ -125,10 +125,7 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
         {
             return result;
         }
-        else
-        {
-            return null;
-        }
+        return null;
     }
 
     /**

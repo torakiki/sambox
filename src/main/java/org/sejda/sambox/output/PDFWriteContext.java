@@ -273,7 +273,7 @@ class PDFWriteContext
                 }
                 else
                 {
-                    group = new LinkedList<>(Arrays.asList(current));
+                    group = new LinkedList<>(List.of(current));
                     contiguous.add(group);
                 }
             }

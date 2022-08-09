@@ -165,9 +165,8 @@ public abstract class PDStandardAttributeObject extends PDAttributeObject
     protected Object getNameOrArrayOfName(String name, String defaultValue)
     {
         COSBase v = this.getCOSObject().getDictionaryObject(name);
-        if (v instanceof COSArray)
+        if (v instanceof COSArray array)
         {
-            COSArray array = (COSArray) v;
             String[] names = new String[array.size()];
             for (int i = 0; i < array.size(); i++)
             {
@@ -304,9 +303,8 @@ public abstract class PDStandardAttributeObject extends PDAttributeObject
     protected Object getNumberOrArrayOfNumber(String name, float defaultValue)
     {
         COSBase v = this.getCOSObject().getDictionaryObject(name);
-        if (v instanceof COSArray)
+        if (v instanceof COSArray array)
         {
-            COSArray array = (COSArray) v;
             float[] values = new float[array.size()];
             for (int i = 0; i < array.size(); i++)
             {
@@ -411,7 +409,7 @@ public abstract class PDStandardAttributeObject extends PDAttributeObject
             // only one colour
             return new PDGamma(array);
         }
-        else if (array.size() == 4)
+        if (array.size() == 4)
         {
             return new PDFourColours(array);
         }

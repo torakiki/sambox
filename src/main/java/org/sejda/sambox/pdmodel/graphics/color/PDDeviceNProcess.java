@@ -85,7 +85,7 @@ public class PDDeviceNProcess
      */
     public List<String> getComponents()
     {
-        List<String> components = new ArrayList<String>();
+        List<String> components = new ArrayList<>();
         COSArray cosComponents = dictionary.getDictionaryObject(COSName.COMPONENTS, COSArray.class);
         if (cosComponents == null)
         {

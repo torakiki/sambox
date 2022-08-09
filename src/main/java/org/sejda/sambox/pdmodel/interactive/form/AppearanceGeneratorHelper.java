@@ -804,7 +804,7 @@ public class AppearanceGeneratorHelper
         if (!values.isEmpty() && !options.isEmpty() && indexEntries.isEmpty())
         {
             // create indexEntries from options
-            indexEntries = new ArrayList<Integer>(values.size());
+            indexEntries = new ArrayList<>(values.size());
             for (String v : values)
             {
                 indexEntries.add(options.indexOf(v));
@@ -1015,14 +1015,13 @@ public class AppearanceGeneratorHelper
     private float resolveGlyphHeight(PDFont font, int code) throws IOException
     {
         GeneralPath path = null;
-        if (font instanceof PDType3Font)
+        if (font instanceof PDType3Font t3Font)
         {
             // It is difficult to calculate the real individual glyph bounds for type 3
             // fonts
             // because these are not vector fonts, the content stream could contain almost
             // anything
             // that is found in page content streams.
-            PDType3Font t3Font = (PDType3Font) font;
             PDType3CharProc charProc = t3Font.getCharProc(code);
             if (charProc != null)
             {
@@ -1043,14 +1042,12 @@ public class AppearanceGeneratorHelper
                 }
             }
         }
-        else if (font instanceof PDVectorFont)
+        else if (font instanceof PDVectorFont vectorFont)
         {
-            PDVectorFont vectorFont = (PDVectorFont) font;
             path = vectorFont.getPath(code);
         }
-        else if (font instanceof PDSimpleFont)
+        else if (font instanceof PDSimpleFont simpleFont)
         {
-            PDSimpleFont simpleFont = (PDSimpleFont) font;
 
             // these two lines do not always work, e.g. for the TT fonts in file 032431.pdf
             // which is why PDVectorFont is tried first.

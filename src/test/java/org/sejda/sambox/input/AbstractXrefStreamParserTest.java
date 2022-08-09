@@ -65,7 +65,7 @@ public class AbstractXrefStreamParserTest
         {
             if (entry.getType() == XrefType.COMPRESSED)
             {
-                assertEquals(2l, ((CompressedXrefEntry) entry).getObjectStreamNumber());
+                assertEquals(2L, ((CompressedXrefEntry) entry).getObjectStreamNumber());
             }
         }
     }

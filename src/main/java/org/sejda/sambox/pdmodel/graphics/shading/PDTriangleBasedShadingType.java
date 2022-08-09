@@ -15,6 +15,13 @@
  */
 package org.sejda.sambox.pdmodel.graphics.shading;
 
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+import java.io.IOException;
+import java.util.List;
+import java.util.Objects;
+
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
@@ -22,13 +29,7 @@ import org.sejda.sambox.pdmodel.common.PDRange;
 import org.sejda.sambox.util.Matrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import javax.imageio.stream.ImageInputStream;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
-import java.io.IOException;
-import java.util.List;
 
 /**
  * Common resources for shading types 4,5,6 and 7
@@ -241,12 +242,8 @@ abstract class PDTriangleBasedShadingType extends PDShading
             bounds.add(shadedTriangle.corner[1]);
             bounds.add(shadedTriangle.corner[2]);
         }
-        if (bounds == null)
-        {
-            // Speeds up files where triangles are empty, e.g. ghostscript file 690425
-            return new Rectangle2D.Float();
-        }
-        return bounds;
+        // Speeds up files where triangles are empty, e.g. ghostscript file 690425
+        return Objects.requireNonNullElseGet(bounds, Rectangle2D.Float::new);
     }
 
 }

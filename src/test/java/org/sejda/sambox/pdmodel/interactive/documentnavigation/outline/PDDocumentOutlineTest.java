@@ -113,8 +113,7 @@ public class PDDocumentOutlineTest
     private String asString(PDOutlineNode node, int level)
     {
         StringBuilder sb = new StringBuilder();
-        if(node instanceof PDOutlineItem) {
-            PDOutlineItem item = (PDOutlineItem) node;
+        if(node instanceof PDOutlineItem item) {
             sb.append(item.getTitle());
         }
         

@@ -80,9 +80,8 @@ public class PDActionEmbeddedGoTo extends PDAction
      */
     public void setDestination(PDDestination d)
     {
-        if (d instanceof PDPageDestination)
+        if (d instanceof PDPageDestination pageDest)
         {
-            PDPageDestination pageDest = (PDPageDestination) d;
             COSArray destArray = pageDest.getCOSObject();
             if (destArray.size() >= 1)
             {
@@ -127,9 +126,8 @@ public class PDActionEmbeddedGoTo extends PDAction
      */
     public OpenMode getOpenInNewWindow()
     {
-        if (getCOSObject().getDictionaryObject(COSName.NEW_WINDOW) instanceof COSBoolean)
+        if (getCOSObject().getDictionaryObject(COSName.NEW_WINDOW) instanceof COSBoolean b)
         {
-            COSBoolean b = (COSBoolean) getCOSObject().getDictionaryObject(COSName.NEW_WINDOW);
             return b.getValue() ? OpenMode.NEW_WINDOW : OpenMode.SAME_WINDOW;
         }
         return OpenMode.USER_PREFERENCE;

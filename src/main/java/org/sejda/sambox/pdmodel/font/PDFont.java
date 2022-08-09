@@ -116,7 +116,7 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
         {
             return new PDFontDescriptor(fd);
         }
-        else if (afmStandard14 != null)
+        if (afmStandard14 != null)
         {
             // build font descriptor from the AFM
             return PDType1FontEmbedder.buildFontDescriptor(afmStandard14);
@@ -196,7 +196,7 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
             String name = ((COSName) base).getName();
             return CMapManager.getPredefinedCMap(name);
         }
-        else if (base instanceof COSStream)
+        if (base instanceof COSStream)
         {
             // embedded CMap
             InputStream input = null;
@@ -210,10 +210,7 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
                 IOUtils.closeQuietly(input);
             }
         }
-        else
-        {
-            throw new IOException("Expected Name or Stream");
-        }
+        throw new IOException("Expected Name or Stream");
     }
 
     @Override
@@ -512,7 +509,7 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
                 // code->Unicode maps. See sample_fonts_solidconvertor.pdf for an example.
                 // PDFBOX-3123: do this only if the /ToUnicode entry is a name
                 // PDFBOX-4322: identity streams are OK too
-                return new String(new char[] { (char) code });
+                return String.valueOf((char) code);
             }
             // proceed as normal
             return toUnicodeCMap.toUnicode(code);

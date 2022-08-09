@@ -49,7 +49,7 @@ public class PDOptionalContentProperties extends PDDictionaryWrapper
 
         private final COSName name;
 
-        private BaseState(COSName value)
+        BaseState(COSName value)
         {
             this.name = value;
         }
@@ -180,7 +180,7 @@ public class PDOptionalContentProperties extends PDDictionaryWrapper
      */
     public Collection<PDOptionalContentGroup> getOptionalContentGroups()
     {
-        Collection<PDOptionalContentGroup> coll = new java.util.ArrayList<PDOptionalContentGroup>();
+        Collection<PDOptionalContentGroup> coll = new java.util.ArrayList<>();
         COSArray ocgs = getOCGs();
         for (COSBase base : ocgs)
         {

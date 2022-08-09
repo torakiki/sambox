@@ -23,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 import org.junit.Test;
 import org.sejda.sambox.TestUtils;
@@ -88,7 +89,7 @@ public class COSStringTest
         String stringAscii = COSString.parseLiteral(textAscii).getString();
         assertTrue(stringAscii.equals(textAscii));
         // should be stored as ISO-8859-1 because they only contain chars in the range 0..255
-        assertEquals(textAscii, new String(stringAscii.getBytes(), "ISO-8859-1"));
+        assertEquals(textAscii, new String(stringAscii.getBytes(), StandardCharsets.ISO_8859_1));
     }
 
     @Test
@@ -98,7 +99,7 @@ public class COSStringTest
         String text8Bit = "En fran\u00e7ais o\u00f9 les choses sont accentu\u00e9s. En espa\u00f1ol, as\u00ed";
         COSString string8Bit = COSString.parseLiteral(text8Bit);
         assertTrue(string8Bit.getString().equals(text8Bit));
-        assertEquals(text8Bit, new String(string8Bit.getBytes(), "ISO-8859-1"));
+        assertEquals(text8Bit, new String(string8Bit.getBytes(), StandardCharsets.ISO_8859_1));
     }
 
     @Test
@@ -156,6 +157,7 @@ public class COSStringTest
      * 
      * @throws IOException
      */
+    @Test
     public void testEmptyStringWithBOM() throws IOException
     {
         assertTrue(COSString.parseHex("FEFF").getString().isEmpty());

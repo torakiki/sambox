@@ -101,11 +101,9 @@ public final class JPXFilter extends Filter
     {
         ImageReader reader = findImageReader("JPEG2000",
                 "Java Advanced Imaging (JAI) Image I/O Tools are not installed");
-        ImageInputStream iis = null;
-        try
+        try (ImageInputStream iis = new MemoryCacheImageInputStream(input))
         {
             // PDFBOX-4121: ImageIO.createImageInputStream() is much slower
-            iis = new MemoryCacheImageInputStream(input);
 
             reader.setInput(iis, true, true);
 
@@ -142,20 +140,22 @@ public final class JPXFilter extends Filter
             // extract embedded color space
             if (!parameters.containsKey(COSName.COLORSPACE))
             {
-                if (image.getSampleModel() instanceof MultiPixelPackedSampleModel &&
-                        image.getColorModel().getPixelSize() == 1 &&
-                        image.getRaster().getNumBands() == 1 &&
-                        image.getColorModel() instanceof IndexColorModel)
+                if (image.getSampleModel() instanceof MultiPixelPackedSampleModel
+                        && image.getColorModel().getPixelSize() == 1
+                        && image.getRaster().getNumBands() == 1
+                        && image.getColorModel() instanceof IndexColorModel)
                 {
                     // PDFBOX-4326:
                     // force CS_GRAY colorspace because colorspace in IndexColorModel
                     // has 3 colors despite that there is only 1 color per pixel
                     // in raster
-                    result.setColorSpace(new PDJPXColorSpace(ColorSpace.getInstance(ColorSpace.CS_GRAY)));
+                    result.setColorSpace(
+                            new PDJPXColorSpace(ColorSpace.getInstance(ColorSpace.CS_GRAY)));
                 }
                 else
                 {
-                    result.setColorSpace(new PDJPXColorSpace(image.getColorModel().getColorSpace()));
+                    result.setColorSpace(
+                            new PDJPXColorSpace(image.getColorModel().getColorSpace()));
                 }
             }
 
@@ -163,10 +163,6 @@ public final class JPXFilter extends Filter
         }
         finally
         {
-            if (iis != null)
-            {
-                iis.close();
-            }
             reader.dispose();
         }
     }

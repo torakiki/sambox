@@ -112,12 +112,11 @@ public abstract class PDFunction implements COSObjectable
         }
 
         COSBase base = function.getCOSObject();
-        if (!(base instanceof COSDictionary))
+        if (!(base instanceof COSDictionary functionDictionary))
         {
             throw new IOException(
                     "Unexpected type for function, expected COSDictionary but was: " + base);
         }
-        COSDictionary functionDictionary = (COSDictionary) base;
         int functionType = functionDictionary.getInt(COSName.FUNCTION_TYPE);
         switch (functionType)
         {
@@ -316,7 +315,7 @@ public abstract class PDFunction implements COSObjectable
         {
             return rangeMin;
         }
-        else if (x > rangeMax)
+        if (x > rangeMax)
         {
             return rangeMax;
         }

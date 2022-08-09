@@ -41,11 +41,10 @@ public class SetTextLeading extends OperatorProcessor
             throw new MissingOperandException(operator, arguments);
         }
         COSBase base = arguments.get(0);
-        if (!(base instanceof COSNumber))
+        if (!(base instanceof COSNumber leading))
         {
             return;
         }
-        COSNumber leading = (COSNumber) base;
         getContext().getGraphicsState().getTextState().setLeading(leading.floatValue());
     }
 

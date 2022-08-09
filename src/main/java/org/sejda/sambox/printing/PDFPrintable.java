@@ -311,10 +311,7 @@ public final class PDFPrintable implements Printable
             return new PDRectangle(cropBox.getLowerLeftY(), cropBox.getLowerLeftX(),
                     cropBox.getHeight(), cropBox.getWidth());
         }
-        else
-        {
-            return cropBox;
-        }
+        return cropBox;
     }
 
     /**
@@ -332,9 +329,6 @@ public final class PDFPrintable implements Printable
             return new PDRectangle(mediaBox.getLowerLeftY(), mediaBox.getLowerLeftX(),
                     mediaBox.getHeight(), mediaBox.getWidth());
         }
-        else
-        {
-            return mediaBox;
-        }
+        return mediaBox;
     }
 }

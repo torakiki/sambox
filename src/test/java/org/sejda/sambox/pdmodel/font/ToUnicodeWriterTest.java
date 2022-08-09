@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.AbstractMap;
 import java.util.Map;
 
@@ -42,7 +43,7 @@ class ToUnicodeWriterTest
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         toUnicodeWriter.writeTo(baos);
-        String output = baos.toString("ISO-8859-1");
+        String output = baos.toString(StandardCharsets.ISO_8859_1);
         assertTrue(output.contains("4 beginbfrange"));
         assertTrue(output.contains("<0402> <0402> <00660066>"));
         assertTrue(output.contains("<0403> <0403> <00660069>"));
@@ -59,7 +60,7 @@ class ToUnicodeWriterTest
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         toUnicodeWriter.writeTo(baos);
-        String output = baos.toString("ISO-8859-1");
+        String output = baos.toString(StandardCharsets.ISO_8859_1);
 
         assertTrue(output.contains("2 beginbfrange"));
         assertTrue(output.contains("<03FF> <03FF> <0036>"));
@@ -80,7 +81,7 @@ class ToUnicodeWriterTest
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         toUnicodeWriter.writeTo(baos);
-        String output = baos.toString("ISO-8859-1");
+        String output = baos.toString(StandardCharsets.ISO_8859_1);
 
         assertTrue(output.contains("2 beginbfrange"));
         assertTrue(output.contains("<03FF> <03FF> <04FF>"));
@@ -100,7 +101,7 @@ class ToUnicodeWriterTest
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         toUnicodeWriter.writeTo(baos);
-        String output = baos.toString("ISO-8859-1");
+        String output = baos.toString(StandardCharsets.ISO_8859_1);
 
         assertTrue(output.contains("3 beginbfrange"));
         assertTrue(output.contains("<0300> <0300> <D87EDC74>"));

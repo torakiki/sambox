@@ -85,7 +85,7 @@ public class PDShadingType5 extends PDTriangleBasedShadingType
     List<ShadedTriangle> collectTriangles(AffineTransform xform, Matrix matrix) throws IOException
     {
         COSDictionary dict = getCOSObject();
-        if (!(dict instanceof COSStream))
+        if (!(dict instanceof COSStream cosStream))
         {
             return Collections.emptyList();
         }
@@ -106,10 +106,9 @@ public class PDShadingType5 extends PDTriangleBasedShadingType
                 throw new IOException("Range missing in shading /Decode entry");
             }
         }
-        List<Vertex> vlist = new ArrayList<Vertex>();
+        List<Vertex> vlist = new ArrayList<>();
         long maxSrcCoord = (long) Math.pow(2, getBitsPerCoordinate()) - 1;
         long maxSrcColor = (long) Math.pow(2, getBitsPerComponent()) - 1;
-        COSStream cosStream = (COSStream) dict;
 
         try (ImageInputStream mciis = new MemoryCacheImageInputStream(
                 cosStream.getUnfilteredStream()))
@@ -153,7 +152,7 @@ public class PDShadingType5 extends PDTriangleBasedShadingType
     {
         Point2D[] ps = new Point2D[3]; // array will be shallow-cloned in ShadedTriangle constructor
         float[][] cs = new float[3][];
-        List<ShadedTriangle> list = new ArrayList<ShadedTriangle>();
+        List<ShadedTriangle> list = new ArrayList<>();
         for (int i = 0; i < rowNum - 1; i++)
         {
             for (int j = 0; j < numPerRow - 1; j++)

@@ -52,12 +52,9 @@ public final class FontUtils
                 // restricted License embedding
                 return false;
             }
-            if ((fsType & OS2WindowsMetricsTable.FSTYPE_BITMAP_ONLY)
-                    == OS2WindowsMetricsTable.FSTYPE_BITMAP_ONLY)
-            {
-                // bitmap embedding only
-                return false;
-            }
+            // bitmap embedding only
+            return (fsType & OS2WindowsMetricsTable.FSTYPE_BITMAP_ONLY)
+                    != OS2WindowsMetricsTable.FSTYPE_BITMAP_ONLY;
         }
         return true;
     }
@@ -70,11 +67,8 @@ public final class FontUtils
         if (ttf.getOS2Windows() != null)
         {
             int fsType = ttf.getOS2Windows().getFsType();
-            if ((fsType & OS2WindowsMetricsTable.FSTYPE_NO_SUBSETTING)
-                    == OS2WindowsMetricsTable.FSTYPE_NO_SUBSETTING)
-            {
-                return false;
-            }
+            return (fsType & OS2WindowsMetricsTable.FSTYPE_NO_SUBSETTING)
+                    != OS2WindowsMetricsTable.FSTYPE_NO_SUBSETTING;
         }
         return true;
     }
@@ -111,7 +105,7 @@ public final class FontUtils
      */
     public static String getTag()
     {
-        StringBuilder sb = new StringBuilder("");
+        StringBuilder sb = new StringBuilder();
         for (int k = 0; k < 6; ++k)
         {
             sb.append((char) (Math.random() * 26 + 'A'));

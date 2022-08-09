@@ -57,6 +57,7 @@ import org.sejda.sambox.cos.IndirectCOSObjectReference;
 import org.sejda.sambox.output.IncrementablePDDocumentWriter;
 import org.sejda.sambox.output.WriteOption;
 import org.sejda.sambox.pdmodel.PDDocument;
+import org.sejda.sambox.pdmodel.encryption.SecurityHandler;
 import org.sejda.sambox.xref.FileTrailer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -196,7 +197,7 @@ public class IncrementablePDDocument implements Closeable
      */
     public byte[] encryptionKey()
     {
-        return ofNullable(incremented.getSecurityHandler()).map(s -> s.getEncryptionKey())
+        return ofNullable(incremented.getSecurityHandler()).map(SecurityHandler::getEncryptionKey)
                 .orElse(null);
     }
 

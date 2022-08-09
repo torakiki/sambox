@@ -22,6 +22,7 @@ import java.awt.geom.GeneralPath;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.apache.fontbox.FontBoxFont;
@@ -86,9 +87,8 @@ public abstract class PDSimpleFont extends PDFont
     protected void readEncoding() throws IOException
     {
         COSBase encodingBase = dict.getDictionaryObject(COSName.ENCODING);
-        if (encodingBase instanceof COSName)
+        if (encodingBase instanceof COSName encodingName)
         {
-            COSName encodingName = (COSName) encodingBase;
             this.encoding = Encoding.getInstance(encodingName);
             if (this.encoding == null)
             {
@@ -96,9 +96,8 @@ public abstract class PDSimpleFont extends PDFont
                 this.encoding = readEncodingFromFont(); // fallback
             }
         }
-        else if (encodingBase instanceof COSDictionary)
+        else if (encodingBase instanceof COSDictionary encodingDict)
         {
-            COSDictionary encodingDict = (COSDictionary) encodingBase;
             Encoding builtIn = null;
             Boolean symbolic = getSymbolicFlag();
 
@@ -160,15 +159,8 @@ public abstract class PDSimpleFont extends PDFont
         if (isSymbolic == null)
         {
             Boolean result = isFontSymbolic();
-            if (result != null)
-            {
-                isSymbolic = result;
-            }
-            else
-            {
-                // unless we can prove that the font is symbolic, we assume that it is not
-                isSymbolic = true;
-            }
+            // unless we can prove that the font is symbolic, we assume that it is not
+            isSymbolic = Objects.requireNonNullElse(result, true);
         }
         return isSymbolic;
     }
@@ -184,54 +176,48 @@ public abstract class PDSimpleFont extends PDFont
         {
             return result;
         }
-        else if (isStandard14())
+        if (isStandard14())
         {
             String mappedName = Standard14Fonts.getMappedFontName(getName());
             return mappedName.equals("Symbol") || mappedName.equals("ZapfDingbats");
         }
-        else
+        if (encoding == null)
         {
-            if (encoding == null)
+            // sanity check, should never happen
+            if (!(this instanceof PDTrueTypeFont))
             {
-                // sanity check, should never happen
-                if (!(this instanceof PDTrueTypeFont))
-                {
-                    throw new IllegalStateException("Encoding should not be null!");
-                }
+                throw new IllegalStateException("Encoding should not be null!");
+            }
 
-                // TTF without its non-symbolic flag set must be symbolic
-                return true;
-            }
-            else if (encoding instanceof WinAnsiEncoding || encoding instanceof MacRomanEncoding
-                    || encoding instanceof StandardEncoding)
-            {
-                return false;
-            }
-            else if (encoding instanceof DictionaryEncoding)
-            {
-                // each name in Differences array must also be in the latin character set
-                for (String name : ((DictionaryEncoding) encoding).getDifferences().values())
-                {
-                    if (".notdef".equals(name))
-                    {
-                        // skip
-                    }
-                    else if (!(WinAnsiEncoding.INSTANCE.contains(name)
-                            && MacRomanEncoding.INSTANCE.contains(name)
-                            && StandardEncoding.INSTANCE.contains(name)))
-                    {
-                        return true;
-                    }
-
-                }
-                return false;
-            }
-            else
-            {
-                // we don't know
-                return null;
-            }
+            // TTF without its non-symbolic flag set must be symbolic
+            return true;
         }
+        if (encoding instanceof WinAnsiEncoding || encoding instanceof MacRomanEncoding
+                || encoding instanceof StandardEncoding)
+        {
+            return false;
+        }
+        if (encoding instanceof DictionaryEncoding)
+        {
+            // each name in Differences array must also be in the latin character set
+            for (String name : ((DictionaryEncoding) encoding).getDifferences().values())
+            {
+                if (".notdef".equals(name))
+                {
+                    // skip
+                }
+                else if (!(WinAnsiEncoding.INSTANCE.contains(name)
+                        && MacRomanEncoding.INSTANCE.contains(name)
+                        && StandardEncoding.INSTANCE.contains(name)))
+                {
+                    return true;
+                }
+
+            }
+            return false;
+        }
+        // we don't know
+        return null;
     }
 
     /**
@@ -353,9 +339,8 @@ public abstract class PDSimpleFont extends PDFont
     {
         // this logic is based on Acrobat's behaviour, see see PDFBOX-2372
         // the Encoding entry cannot have Differences if we want "standard 14" font handling
-        if (getEncoding() instanceof DictionaryEncoding)
+        if (getEncoding() instanceof DictionaryEncoding dictionary)
         {
-            DictionaryEncoding dictionary = (DictionaryEncoding) getEncoding();
             if (dictionary.getDifferences().size() > 0)
             {
                 // we also require that the differences are actually different, see PDFBOX-1900 with
@@ -423,10 +408,7 @@ public abstract class PDSimpleFont extends PDFont
         if (dict.containsKey(COSName.WIDTHS))
         {
             int firstChar = dict.getInt(COSName.FIRST_CHAR, -1);
-            if (code >= firstChar && code - firstChar < getWidths().size())
-            {
-                return true;
-            }
+            return code >= firstChar && code - firstChar < getWidths().size();
         }
         return false;
     }

@@ -628,10 +628,7 @@ public class PDType1Font extends PDSimpleFont
         {
             return new GeneralPath();
         }
-        else
-        {
-            return genericFont.getPath(getNameInFont(name));
-        }
+        return genericFont.getPath(getNameInFont(name));
     }
 
     @Override

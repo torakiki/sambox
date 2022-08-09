@@ -18,6 +18,7 @@ package org.sejda.sambox.pdmodel.common.function;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 
 import org.sejda.commons.util.IOUtils;
 import org.sejda.sambox.cos.COSArray;
@@ -44,7 +45,7 @@ public class TestPDFunctionType4 extends TestCase
         stream.setItem("Range", rangeArray);
 
         OutputStream out = stream.createUnfilteredStream();
-        byte[] data = function.getBytes("US-ASCII");
+        byte[] data = function.getBytes(StandardCharsets.US_ASCII);
         out.write(data, 0, data.length);
         IOUtils.close(out);
 

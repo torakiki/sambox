@@ -26,7 +26,7 @@ import java.util.Stack;
 public class InstructionSequence
 {
 
-    private final List<Object> instructions = new java.util.ArrayList<Object>();
+    private final List<Object> instructions = new java.util.ArrayList<>();
 
     /**
      * Add a name (ex. an operator)
@@ -82,9 +82,8 @@ public class InstructionSequence
         Stack<Object> stack = context.getStack();
         for (Object o : instructions)
         {
-            if (o instanceof String)
+            if (o instanceof String name)
             {
-                String name = (String)o;
                 Operator cmd = context.getOperators().getOperator(name);
                 if (cmd != null)
                 {

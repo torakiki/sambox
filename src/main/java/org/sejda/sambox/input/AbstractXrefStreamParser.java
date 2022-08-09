@@ -46,7 +46,7 @@ abstract class AbstractXrefStreamParser
 {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractXrefStreamParser.class);
 
-    private COSParser parser;
+    private final COSParser parser;
 
     AbstractXrefStreamParser(COSParser parser)
     {

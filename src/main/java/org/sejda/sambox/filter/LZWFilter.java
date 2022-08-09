@@ -240,7 +240,7 @@ public class LZWFilter extends Filter
                     // we already found pattern with size > 1
                     return foundCode;
                 }
-                else if (pattern.length > 1)
+                if (pattern.length > 1)
                 {
                     // we won't find anything here anyway
                     return -1;

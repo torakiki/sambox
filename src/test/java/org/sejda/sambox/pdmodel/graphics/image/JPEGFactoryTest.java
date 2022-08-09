@@ -32,8 +32,6 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
-import javax.imageio.ImageIO;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -45,6 +43,7 @@ import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceRGB;
+import javax.imageio.ImageIO;
 
 /**
  * Unit tests for JPEGFactory
@@ -208,6 +207,7 @@ public class JPEGFactoryTest
      * 
      * @throws java.io.IOException
      */
+    @Test
     public void testCreateFromImageUSHORT_555_RGB() throws IOException
     {
         // workaround Open JDK bug

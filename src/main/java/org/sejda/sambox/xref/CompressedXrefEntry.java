@@ -19,16 +19,15 @@ package org.sejda.sambox.xref;
 import static org.sejda.commons.util.RequireUtils.requireArg;
 
 /**
- * An xref entry for a cross reference stream which represent a compressed objects (i.e. an object part of an object
- * stream). See table 18 PDF32000:2008-1
- * 
- * @author Andrea Vacondio
+ * An xref entry for a cross reference stream which represent a compressed objects (i.e. an object
+ * part of an object stream). See table 18 PDF32000:2008-1
  *
+ * @author Andrea Vacondio
  */
 public final class CompressedXrefEntry extends XrefEntry
 {
-    private long objectStreamNumber;
-    private long index;
+    private final long objectStreamNumber;
+    private final long index;
 
     private CompressedXrefEntry(XrefType type, long objectNumber, long byteOffset,
             int generationNumber, long objectStreamNumber, long index)

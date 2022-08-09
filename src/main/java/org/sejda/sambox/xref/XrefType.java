@@ -18,11 +18,12 @@ package org.sejda.sambox.xref;
 
 /**
  * Possible types of xref entry
- * 
- * @author Andrea Vacondio
  *
+ * @author Andrea Vacondio
  */
 public enum XrefType
 {
-    FREE, IN_USE, COMPRESSED;
+    FREE,
+    IN_USE,
+    COMPRESSED
 }

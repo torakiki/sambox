@@ -29,6 +29,8 @@ import org.sejda.sambox.cos.COSDocument;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.encryption.EncryptionContext;
 import org.sejda.sambox.pdmodel.PDDocument;
+import org.sejda.sambox.pdmodel.common.PDDictionaryWrapper;
+import org.sejda.sambox.pdmodel.common.PDStream;
 import org.sejda.sambox.util.SpecVersionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,14 +73,14 @@ public class PDDocumentWriter implements Closeable
         {
             document.requireMinVersion(SpecVersionUtils.V1_5);
         }
-        ofNullable(document.getDocument().getTrailer()).map(t -> t.getCOSObject())
+        ofNullable(document.getDocument().getTrailer()).map(PDDictionaryWrapper::getCOSObject)
                 .ifPresent(t -> t.removeItem(COSName.ENCRYPT));
 
         encryptionContext.ifPresent(c -> {
             document.getDocument()
                     .setEncryptionDictionary(c.security.encryption.generateEncryptionDictionary(c));
             LOG.debug("Generated encryption dictionary");
-            ofNullable(document.getDocumentCatalog().getMetadata()).map(m -> m.getCOSObject())
+            ofNullable(document.getDocumentCatalog().getMetadata()).map(PDStream::getCOSObject)
                     .ifPresent(str -> str.encryptable(c.security.encryptMetadata));
         });
 

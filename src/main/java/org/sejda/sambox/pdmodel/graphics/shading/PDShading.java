@@ -366,9 +366,8 @@ public abstract class PDShading implements COSObjectable
                 functionArray = new PDFunction[1];
                 functionArray[0] = PDFunction.create(functionObject);
             }
-            else if (functionObject instanceof COSArray)
+            else if (functionObject instanceof COSArray functionCOSArray)
             {
-                COSArray functionCOSArray = (COSArray) functionObject;
                 int numberOfFunctions = functionCOSArray.size();
                 functionArray = new PDFunction[numberOfFunctions];
                 for (int i = 0; i < numberOfFunctions; i++)

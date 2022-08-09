@@ -42,7 +42,7 @@ public class PDFMarkedContentExtractor extends PDFTextStreamEngine
 {
     private boolean suppressDuplicateOverlappingText = true;
     private final List<PDMarkedContent> markedContents = new ArrayList<>();
-    private final Deque<PDMarkedContent> currentMarkedContents = new ArrayDeque<PDMarkedContent>();
+    private final Deque<PDMarkedContent> currentMarkedContents = new ArrayDeque<>();
     private final Map<String, List<TextPosition>> characterListMapping = new HashMap<>();
 
     /**
@@ -156,7 +156,7 @@ public class PDFMarkedContentExtractor extends PDFTextStreamEngine
             List<TextPosition> sameTextCharacters = this.characterListMapping.get(textCharacter);
             if (sameTextCharacters == null)
             {
-                sameTextCharacters = new ArrayList<TextPosition>();
+                sameTextCharacters = new ArrayList<>();
                 this.characterListMapping.put(textCharacter, sameTextCharacters);
             }
 

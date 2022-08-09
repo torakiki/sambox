@@ -33,7 +33,7 @@ final class Type1Glyph2D implements Glyph2D
 {
     private static final Logger LOG = LoggerFactory.getLogger(Type1Glyph2D.class);
 
-    private final Map<Integer, GeneralPath> cache = new HashMap<Integer, GeneralPath>();
+    private final Map<Integer, GeneralPath> cache = new HashMap<>();
     private final PDSimpleFont font;
 
     /**

@@ -565,7 +565,7 @@ public class PDGraphicsState implements Cloneable
         if (!isClippingPathDirty)
         {
             // shallow copy
-            clippingPaths = new ArrayList<Path2D>(clippingPaths);
+            clippingPaths = new ArrayList<>(clippingPaths);
 
             isClippingPathDirty = true;
         }

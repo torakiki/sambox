@@ -41,7 +41,7 @@ abstract class AbstractXrefTableParser
     static final String TRAILER = "trailer";
     static final String XREF = "xref";
 
-    private COSParser parser;
+    private final COSParser parser;
 
     AbstractXrefTableParser(COSParser parser)
     {

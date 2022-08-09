@@ -215,20 +215,21 @@ class XrefFullScanner
 
     /**
      * possible outcome of the xref full scan
-     * 
-     * @author Andrea Vacondio
      *
+     * @author Andrea Vacondio
      */
-    public static enum XrefScanOutcome
+    public enum XrefScanOutcome
     {
-        NOT_FOUND, FOUND, WITH_ERRORS
-        {
-            @Override
-            XrefScanOutcome moveTo(XrefScanOutcome newState)
-            {
-                return this;
-            }
-        };
+        NOT_FOUND,
+        FOUND,
+        WITH_ERRORS
+                {
+                    @Override
+                    XrefScanOutcome moveTo(XrefScanOutcome newState)
+                    {
+                        return this;
+                    }
+                };
 
         XrefScanOutcome moveTo(XrefScanOutcome newState)
         {

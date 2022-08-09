@@ -45,11 +45,10 @@ public final class IndirectCOSObjectIdentifier
         {
             return true;
         }
-        if (!(obj instanceof IndirectCOSObjectIdentifier))
+        if (!(obj instanceof IndirectCOSObjectIdentifier other))
         {
             return false;
         }
-        IndirectCOSObjectIdentifier other = (IndirectCOSObjectIdentifier) obj;
 
         return (objectIdentifier.equals(other.objectIdentifier)
                 && ownerIdentifier.equals(other.ownerIdentifier));

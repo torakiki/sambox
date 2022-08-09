@@ -16,6 +16,15 @@
  */
 package org.sejda.sambox.pdmodel;
 
+import static java.util.Optional.ofNullable;
+
+import java.io.IOException;
+import java.lang.ref.SoftReference;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
@@ -35,15 +44,6 @@ import org.sejda.sambox.pdmodel.graphics.optionalcontent.PDOptionalContentGroup;
 import org.sejda.sambox.pdmodel.graphics.pattern.PDAbstractPattern;
 import org.sejda.sambox.pdmodel.graphics.shading.PDShading;
 import org.sejda.sambox.pdmodel.graphics.state.PDExtendedGraphicsState;
-
-import java.io.IOException;
-import java.lang.ref.SoftReference;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
-import static java.util.Optional.ofNullable;
 
 /**
  * A set of resources available at the page/pages/stream level.
@@ -428,10 +428,9 @@ public final class PDResources implements COSObjectable
         if (xobject instanceof PDImageXObject)
         {
             COSBase colorSpace = xobject.getCOSObject().getDictionaryObject(COSName.COLORSPACE);
-            if (colorSpace instanceof COSName)
+            if (colorSpace instanceof COSName colorSpaceName)
             {
                 // don't cache if it might use page resources, see PDFBOX-2370 and PDFBOX-3484
-                COSName colorSpaceName = (COSName) colorSpace;
                 if (colorSpaceName.equals(COSName.DEVICECMYK) && hasColorSpace(
                         COSName.DEFAULT_CMYK))
                 {
@@ -446,10 +445,7 @@ public final class PDResources implements COSObjectable
                 {
                     return false;
                 }
-                if (hasColorSpace(colorSpaceName))
-                {
-                    return false;
-                }
+                return !hasColorSpace(colorSpaceName);
             }
         }
         return true;

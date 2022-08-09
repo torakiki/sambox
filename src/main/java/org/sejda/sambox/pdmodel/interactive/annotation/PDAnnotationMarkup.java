@@ -199,7 +199,7 @@ public class PDAnnotationMarkup extends PDAnnotation
         {
             return ((COSString) base).getString();
         }
-        else if (base instanceof COSStream)
+        if (base instanceof COSStream)
         {
             return ((COSStream) base).asTextString();
         }
@@ -445,10 +445,7 @@ public class PDAnnotationMarkup extends PDAnnotation
         {
             return new PDBorderEffectDictionary(be);
         }
-        else
-        {
-            return null;
-        }
+        return null;
     }
 
     /**
@@ -484,9 +481,8 @@ public class PDAnnotationMarkup extends PDAnnotation
     public float[][] getInkList()
     {
         COSBase base = getCOSObject().getDictionaryObject(COSName.INKLIST);
-        if (base instanceof COSArray)
+        if (base instanceof COSArray array)
         {
-            COSArray array = (COSArray) base;
             float[][] inkList = new float[array.size()][];
             for (int i = 0; i < array.size(); ++i)
             {
@@ -810,9 +806,8 @@ public class PDAnnotationMarkup extends PDAnnotation
     public float[][] getPath()
     {
         COSBase base = getCOSObject().getDictionaryObject(COSName.PATH);
-        if (base instanceof COSArray)
+        if (base instanceof COSArray array)
         {
-            COSArray array = (COSArray) base;
             float[][] pathArray = new float[array.size()][];
             for (int i = 0; i < array.size(); ++i)
             {

@@ -78,9 +78,8 @@ public class PDStructureElementTest
                 checkElement(base2.getCOSObject(), attributeSet);
             }
         }
-        else if (base instanceof COSDictionary)
+        else if (base instanceof COSDictionary kdict)
         {
-            COSDictionary kdict = (COSDictionary) base;
             if (kdict.containsKey(COSName.PG))
             {
                 PDStructureElement structureElement = new PDStructureElement(kdict);

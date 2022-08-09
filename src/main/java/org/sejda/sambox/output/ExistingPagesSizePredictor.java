@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  * Component that tries to predict the size of a resulting document if {@link PDPage}s and {@link COSObjectable}s are
  * added to it. The component does its best to return exact predicted values and it does that by simulating an actual
  * write, despite that, the predicted values should be considered rough estimations and not a byte precision ones.
- * 
+ *
  * @author Andrea Vacondio
  */
 public class ExistingPagesSizePredictor extends PDFBodyWriter
@@ -45,8 +45,8 @@ public class ExistingPagesSizePredictor extends PDFBodyWriter
 
     // stream, endstream and 2x CRLF
     private static final int STREAM_WRAPPING_SIZE = 19;
-    private CountingWritableByteChannel channel;
-    private IndirectObjectsWriter writer;
+    private final CountingWritableByteChannel channel;
+    private final IndirectObjectsWriter writer;
 
     private long pages;
 
@@ -115,7 +115,7 @@ public class ExistingPagesSizePredictor extends PDFBodyWriter
     public long predictedXrefTableSize()
     {
         // each entry is 21 bytes plus the xref keyword and section header
-        return (21 * (context().written() + 1)) + 10;
+        return (21L * (context().written() + 1)) + 10;
     }
 
     /**
@@ -166,8 +166,8 @@ public class ExistingPagesSizePredictor extends PDFBodyWriter
     private static class BodyObjectsWriter implements PDFBodyObjectsWriter
     {
         long streamsSize;
-        private PDFWriteContext context;
-        private IndirectObjectsWriter writer;
+        private final PDFWriteContext context;
+        private final IndirectObjectsWriter writer;
 
         public BodyObjectsWriter(PDFWriteContext context, IndirectObjectsWriter writer)
         {
@@ -181,9 +181,8 @@ public class ExistingPagesSizePredictor extends PDFBodyWriter
             if (!context.hasWritten(ref.xrefEntry()))
             {
                 COSBase wrapped = ref.getCOSObject().getCOSObject();
-                if (wrapped instanceof COSStream)
+                if (wrapped instanceof COSStream stream)
                 {
-                    COSStream stream = (COSStream) wrapped;
                     // we don't simulate the write of the whole stream, we just save the expected size and simulate the
                     // dictionary write
                     streamsSize += stream.getFilteredLength();

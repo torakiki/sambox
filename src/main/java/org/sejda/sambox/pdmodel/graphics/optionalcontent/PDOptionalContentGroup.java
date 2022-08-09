@@ -66,7 +66,7 @@ public class PDOptionalContentGroup extends PDPropertyList
 
         private final COSName name;
 
-        private RenderState(COSName value)
+        RenderState(COSName value)
         {
             this.name = value;
         }

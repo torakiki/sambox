@@ -163,7 +163,7 @@ class PlainText
             float wordWidth = 0f;
             float whitespaceWidth = 0f;
 
-            List<Line> textLines = new ArrayList<Line>();
+            List<Line> textLines = new ArrayList<>();
             Line textLine = new Line();
 
             while (end != BreakIterator.DONE)
@@ -239,7 +239,7 @@ class PlainText
      */
     static class Line
     {
-        private List<Word> words = new ArrayList<Word>();
+        private List<Word> words = new ArrayList<>();
         private float lineWidth;
 
         float getWidth()

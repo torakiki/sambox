@@ -56,15 +56,12 @@ public final class PDSoftMask implements COSObjectable
             LOG.warn("Invalid SMask " + dictionary);
             return null;
         }
-        else if (dictionary instanceof COSDictionary)
+        if (dictionary instanceof COSDictionary)
         {
             return new PDSoftMask((COSDictionary) dictionary);
         }
-        else
-        {
-            LOG.warn("Invalid SMask " + dictionary);
-            return null;
-        }
+        LOG.warn("Invalid SMask " + dictionary);
+        return null;
     }
 
     private final COSDictionary dictionary;

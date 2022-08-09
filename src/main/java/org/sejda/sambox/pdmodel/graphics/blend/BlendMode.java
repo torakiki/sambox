@@ -225,9 +225,8 @@ public abstract class BlendMode
         {
             result = BLEND_MODES.get(cosBlendMode);
         }
-        else if (cosBlendMode instanceof COSArray)
+        else if (cosBlendMode instanceof COSArray cosBlendModeArray)
         {
-            COSArray cosBlendModeArray = (COSArray) cosBlendMode;
             for (int i = 0; i < cosBlendModeArray.size(); i++)
             {
                 result = BLEND_MODES.get(cosBlendModeArray.getObject(i));

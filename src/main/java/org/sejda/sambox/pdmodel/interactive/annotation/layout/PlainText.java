@@ -16,15 +16,14 @@
  */
 package org.sejda.sambox.pdmodel.interactive.annotation.layout;
 
-import org.sejda.sambox.pdmodel.font.PDFont;
-
 import java.io.IOException;
 import java.text.AttributedCharacterIterator.Attribute;
 import java.text.AttributedString;
 import java.text.BreakIterator;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+
+import org.sejda.sambox.pdmodel.font.PDFont;
 
 /**
  * A block of text.
@@ -49,9 +48,8 @@ public class PlainText
      */
     public PlainText(String textValue)
     {
-        List<String> parts = Arrays.asList(
-                textValue.replace("\t", " ").split("\\r\\n|\\n|\\r|\\u2028|\\u2029"));
-        paragraphs = new ArrayList<Paragraph>();
+        String[] parts = textValue.replace("\t", " ").split("\\r\\n|\\n|\\r|\\u2028|\\u2029");
+        paragraphs = new ArrayList<>();
         for (String part : parts)
         {
             // Acrobat prints a space for an empty paragraph
@@ -73,7 +71,7 @@ public class PlainText
      */
     public PlainText(List<String> listValue)
     {
-        paragraphs = new ArrayList<Paragraph>();
+        paragraphs = new ArrayList<>();
         for (String part : listValue)
         {
             paragraphs.add(new Paragraph(part));
@@ -161,7 +159,7 @@ public class PlainText
             int end = iterator.next();
             float lineWidth = 0;
 
-            List<Line> textLines = new ArrayList<Line>();
+            List<Line> textLines = new ArrayList<>();
             Line textLine = new Line();
 
             while (end != BreakIterator.DONE)
@@ -206,7 +204,7 @@ public class PlainText
      */
     static class Line
     {
-        private final List<Word> words = new ArrayList<Word>();
+        private final List<Word> words = new ArrayList<>();
         private float lineWidth;
 
         float getWidth()

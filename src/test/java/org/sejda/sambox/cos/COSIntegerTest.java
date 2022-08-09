@@ -18,10 +18,9 @@ package org.sejda.sambox.cos;
 
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Test;
-
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
+import org.junit.Test;
 
 /**
  * @author Andrea Vacondio
@@ -52,7 +51,7 @@ public class COSIntegerTest
     @Test
     public void longValue()
     {
-        assertEquals(2l, COSInteger.get(2).longValue());
+        assertEquals(2L, COSInteger.get(2).longValue());
     }
 
     @Test

@@ -167,14 +167,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
     /**
      * Default annotations filter, returns all annotations
      */
-    private AnnotationFilter annotationFilter = new AnnotationFilter()
-    {
-        @Override
-        public boolean accept(PDAnnotation annotation)
-        {
-            return true;
-        }
-    };
+    private AnnotationFilter annotationFilter = annotation -> true;
 
     private boolean textContentRendered = true;
 
@@ -348,7 +341,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
             //TODO better solution needs to be found for all occurences where toRGB is called
             return new Color(0, 0, 0, 0);
         }
-        else if (!(colorSpace instanceof PDPattern))
+        if (!(colorSpace instanceof PDPattern))
         {
             float[] rgb = colorSpace.toRGB(color.getComponents());
             return new Color(clampColor(rgb[0]), clampColor(rgb[1]), clampColor(rgb[2]));
@@ -588,32 +581,27 @@ public class PageDrawer extends PDFGraphicsStreamEngine
             return glyph2D;
         }
 
-        if (font instanceof PDTrueTypeFont)
+        if (font instanceof PDTrueTypeFont ttfFont)
         {
-            PDTrueTypeFont ttfFont = (PDTrueTypeFont) font;
             glyph2D = new TTFGlyph2D(ttfFont); // TTF is never null
         }
-        else if (font instanceof PDType1Font)
+        else if (font instanceof PDType1Font pdType1Font)
         {
-            PDType1Font pdType1Font = (PDType1Font) font;
             glyph2D = new Type1Glyph2D(pdType1Font); // T1 is never null
         }
-        else if (font instanceof PDType1CFont)
+        else if (font instanceof PDType1CFont type1CFont)
         {
-            PDType1CFont type1CFont = (PDType1CFont) font;
             glyph2D = new Type1Glyph2D(type1CFont);
         }
-        else if (font instanceof PDType0Font)
+        else if (font instanceof PDType0Font type0Font)
         {
-            PDType0Font type0Font = (PDType0Font) font;
             if (type0Font.getDescendantFont() instanceof PDCIDFontType2)
             {
                 glyph2D = new TTFGlyph2D(type0Font); // TTF is never null
             }
-            else if (type0Font.getDescendantFont() instanceof PDCIDFontType0)
+            else if (type0Font.getDescendantFont() instanceof PDCIDFontType0 cidType0Font)
             {
                 // a Type0 CIDFont contains CFF font
-                PDCIDFontType0 cidType0Font = (PDCIDFontType0) type0Font.getDescendantFont();
                 glyph2D = new CIDType0Glyph2D(
                         cidType0Font); // todo: could be null (need incorporate fallback)
             }
@@ -772,14 +760,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         float[] dashArray = dashPattern.getDashArray();
         if (isAllZeroDash(dashArray))
         {
-            return new Stroke()
-            {
-                @Override
-                public Shape createStrokedShape(Shape p)
-                {
-                    return new Area();
-                }
-            };
+            return p -> new Area();
         }
         float phaseStart = dashPattern.getPhase();
         dashArray = getDashArray(dashPattern);
@@ -1293,11 +1274,10 @@ public class PageDrawer extends PDFGraphicsStreamEngine
 
         // prepare transfer functions (either one per color or one for all)
         // and maps (actually arrays[256] to be faster) to avoid calculating values several times
-        Integer rMap[], gMap[], bMap[];
+        Integer[] rMap, gMap, bMap;
         PDFunction rf, gf, bf;
-        if (transfer instanceof COSArray)
+        if (transfer instanceof COSArray ar)
         {
-            COSArray ar = (COSArray) transfer;
             rf = PDFunction.create(ar.getObject(0));
             gf = PDFunction.create(ar.getObject(1));
             bf = PDFunction.create(ar.getObject(2));
@@ -1666,7 +1646,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
 
             boolean needsBackdrop =
                     !isSoftMask && !form.getGroup().isIsolated() && hasBlendMode(form,
-                            new HashSet<COSBase>());
+                            new HashSet<>());
             BufferedImage backdropImage = null;
             // Position of this group in parent group's coordinates
             int backdropX = 0;
@@ -1934,18 +1914,14 @@ public class PageDrawer extends PDFGraphicsStreamEngine
 
     private boolean isHiddenOCG(PDPropertyList propertyList)
     {
-        if (propertyList instanceof PDOptionalContentGroup)
+        if (propertyList instanceof PDOptionalContentGroup group)
         {
-            PDOptionalContentGroup group = (PDOptionalContentGroup) propertyList;
             RenderState printState = group.getRenderState(destination);
             if (printState == null)
             {
-                if (!getRenderer().isGroupEnabled(group))
-                {
-                    return true;
-                }
+                return !getRenderer().isGroupEnabled(group);
             }
-            else if (RenderState.OFF.equals(printState))
+            if (RenderState.OFF.equals(printState))
             {
                 return true;
             }

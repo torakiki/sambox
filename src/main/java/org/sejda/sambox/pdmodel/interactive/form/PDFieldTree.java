@@ -112,7 +112,7 @@ public class PDFieldTree implements Iterable<PDField>
     /**
      * Iterator which walks all the fields pre order
      */
-    private final class PreOrderIterator implements Iterator<PDField>
+    private static final class PreOrderIterator implements Iterator<PDField>
     {
         private final Deque<PDField> queue = new ArrayDeque<>();
 

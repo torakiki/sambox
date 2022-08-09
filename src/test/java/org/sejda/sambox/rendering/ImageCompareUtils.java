@@ -105,20 +105,17 @@ public class ImageCompareUtils {
 
         // There are 255 values of pixels in total
         double percentage = 100 - (avgDifferentPixels / 255) * 100d;
-        
+
         // Tests on jdk8 fail, be more lenient when it comes to image compare
-        double threshold = System.getProperty("java.version").startsWith("1.8") ? 99.45d: 99.5d;
-        
+        double threshold = System.getProperty("java.version").startsWith("1.8") ? 99.45d : 99.5d;
+
         if (percentage < threshold)
         {
             LOG.warn("Similarity percentage: " + percentage + "%");
             return bim3;
         }
-        else
-        {
-            LOG.info("Similarity percentage: " + percentage + "%");
-            return null;
-        }
+        LOG.info("Similarity percentage: " + percentage + "%");
+        return null;
     }
 
     /**
@@ -163,9 +160,8 @@ public class ImageCompareUtils {
                 return false;
             }
 
-            FileInputStream lin = new FileInputStream(left);
-            FileInputStream rin = new FileInputStream(right);
-            try
+            try (FileInputStream lin = new FileInputStream(
+                    left); FileInputStream rin = new FileInputStream(right))
             {
                 byte[] lbuffer = new byte[4096];
                 byte[] rbuffer = new byte[lbuffer.length];
@@ -187,17 +183,9 @@ public class ImageCompareUtils {
                     }
                 }
             }
-            finally
-            {
-                lin.close();
-                rin.close();
-            }
             return true;
         }
-        else
-        {
-            return false;
-        }
+        return false;
     }
     
     public static void assertSameContents(File expected, File actual) throws IOException {

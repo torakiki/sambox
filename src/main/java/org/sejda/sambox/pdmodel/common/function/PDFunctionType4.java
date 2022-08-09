@@ -17,6 +17,7 @@
 package org.sejda.sambox.pdmodel.common.function;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.pdmodel.common.PDRange;
@@ -48,7 +49,7 @@ public class PDFunctionType4 extends PDFunction
     {
         super(functionStream);
         byte[] bytes = getPDStream().toByteArray();
-        String string = new String(bytes, "ISO-8859-1");
+        String string = new String(bytes, StandardCharsets.ISO_8859_1);
         this.instructions = InstructionSequenceBuilder.parse(string);
     }
 

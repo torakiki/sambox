@@ -32,7 +32,7 @@ import org.junit.Test;
 public class PDFDocEncodingTest
 {
 
-    static List<String> deviations = new ArrayList<String>();
+    static List<String> deviations = new ArrayList<>();
 
     static
     {

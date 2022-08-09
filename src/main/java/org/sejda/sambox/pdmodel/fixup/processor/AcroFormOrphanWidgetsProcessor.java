@@ -87,8 +87,8 @@ public class AcroFormOrphanWidgetsProcessor extends AbstractProcessor
             return;
         }
 
-        List<PDField> fields = new ArrayList<PDField>();
-        Map<String, PDField> nonTerminalFieldsMap = new HashMap<String, PDField>();
+        List<PDField> fields = new ArrayList<>();
+        Map<String, PDField> nonTerminalFieldsMap = new HashMap<>();
         for (PDPage page : document.getPages())
         {
             handleAnnotations(acroForm, resources, fields, page.getAnnotations(),

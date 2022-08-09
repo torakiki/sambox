@@ -43,7 +43,7 @@ public class PDTextAppearanceHandler extends PDAbstractAppearanceHandler
 {
     private static final Logger LOG = LoggerFactory.getLogger(PDTextAppearanceHandler.class);
 
-    private static final Set<String> SUPPORTED_NAMES = new HashSet<String>();
+    private static final Set<String> SUPPORTED_NAMES = new HashSet<>();
 
     static
     {

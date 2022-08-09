@@ -198,7 +198,7 @@ public class PDInlineImageTest extends TestCase
 
     public void testShortCCITT1() throws IOException
     {
-        byte ba[] = new byte[] { 8, 0x10, 0x20, 0x40, (byte) 0x81, 2, 4, 8, 0x10, 0, 0x40, 4, 0,
+        byte[] ba = new byte[] { 8, 0x10, 0x20, 0x40, (byte) 0x81, 2, 4, 8, 0x10, 0, 0x40, 4, 0,
                 0x40, 4, 0, 0x40, 4 };
         doInlineCcittImage(23, 10, ba);
     }

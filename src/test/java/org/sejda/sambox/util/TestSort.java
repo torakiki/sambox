@@ -34,7 +34,7 @@ public class TestSort
     <T extends Comparable<T>> void doTest(T[] input, T[] expected)
     {
         List<T> list = Arrays.asList(input);
-        IterativeMergeSort.sort(list, new Comparator<T>()
+        IterativeMergeSort.sort(list, new Comparator<>()
         {
             @Override
             public int compare(T comparable, T o)

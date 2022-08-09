@@ -186,14 +186,13 @@ public class PDStream implements COSObjectable
     public List<COSName> getFilters()
     {
         COSBase filters = stream.getFilters();
-        if (filters instanceof COSName)
+        if (filters instanceof COSName name)
         {
-            COSName name = (COSName) filters;
             return new COSArrayList<>(name, name, stream, COSName.FILTER);
         }
-        if (filters instanceof COSArray)
+        if (filters instanceof COSArray filtersArray)
         {
-            return (List<COSName>) ((COSArray) filters).toList();
+            return (List<COSName>) filtersArray.toList();
         }
         return null;
     }
@@ -232,9 +231,8 @@ public class PDStream implements COSObjectable
             Map<?, ?> map = COSDictionaryMap.convertBasicTypesToMap((COSDictionary) dp);
             retval = new COSArrayList<>(map, dp, stream, COSName.DECODE_PARMS);
         }
-        else if (dp instanceof COSArray)
+        else if (dp instanceof COSArray array)
         {
-            COSArray array = (COSArray) dp;
             List<Object> actuals = new ArrayList<>();
             for (int i = 0; i < array.size(); i++)
             {
@@ -287,9 +285,8 @@ public class PDStream implements COSObjectable
     public List<String> getFileFilters()
     {
         COSBase filters = stream.getDictionaryObject(COSName.F_FILTER);
-        if (filters instanceof COSName)
+        if (filters instanceof COSName name)
         {
-            COSName name = (COSName) filters;
             return new COSArrayList<>(name.getName(), name, stream, COSName.F_FILTER);
         }
         if (filters instanceof COSArray)
@@ -325,9 +322,8 @@ public class PDStream implements COSObjectable
             Map<?, ?> map = COSDictionaryMap.convertBasicTypesToMap((COSDictionary) dp);
             return new COSArrayList<>(map, dp, stream, COSName.F_DECODE_PARMS);
         }
-        if (dp instanceof COSArray)
+        if (dp instanceof COSArray array)
         {
-            COSArray array = (COSArray) dp;
             List<Object> actuals = new ArrayList<>();
             for (int i = 0; i < array.size(); i++)
             {

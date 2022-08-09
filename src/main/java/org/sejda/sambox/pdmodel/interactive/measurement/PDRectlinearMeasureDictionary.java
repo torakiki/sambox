@@ -151,7 +151,7 @@ public class PDRectlinearMeasureDictionary extends PDMeasureDictionary
      */
     public PDNumberFormatDictionary[] getDistances()
     {
-        COSArray d = (COSArray)this.getCOSObject().getDictionaryObject("D");
+        COSArray d = this.getCOSObject().getDictionaryObject("D", COSArray.class);
         if (d != null)
         {
             PDNumberFormatDictionary[] retval =
@@ -188,7 +188,7 @@ public class PDRectlinearMeasureDictionary extends PDMeasureDictionary
      */
     public PDNumberFormatDictionary[] getAreas()
     {
-        COSArray a = (COSArray)this.getCOSObject().getDictionaryObject(COSName.A);
+        COSArray a = this.getCOSObject().getDictionaryObject(COSName.A, COSArray.class);
         if (a != null)
         {
             PDNumberFormatDictionary[] retval =
@@ -225,7 +225,7 @@ public class PDRectlinearMeasureDictionary extends PDMeasureDictionary
      */
     public PDNumberFormatDictionary[] getAngles()
     {
-        COSArray t = (COSArray)this.getCOSObject().getDictionaryObject("T");
+        COSArray t = this.getCOSObject().getDictionaryObject("T", COSArray.class);
         if (t != null)
         {
             PDNumberFormatDictionary[] retval =

@@ -36,7 +36,7 @@ import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
  */
 public class ConcatenatingAESEngine extends AESEngineNoPadding
 {
-    private SecureRandom random;
+    private final SecureRandom random;
 
     ConcatenatingAESEngine()
     {

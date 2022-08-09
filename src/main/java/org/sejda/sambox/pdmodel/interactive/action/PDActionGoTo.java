@@ -76,9 +76,8 @@ public class PDActionGoTo extends PDAction
      */
     public void setDestination(PDDestination d)
     {
-        if (d instanceof PDPageDestination)
+        if (d instanceof PDPageDestination pageDest)
         {
-            PDPageDestination pageDest = (PDPageDestination) d;
             COSArray destArray = pageDest.getCOSObject();
             if (destArray.size() >= 1)
             {

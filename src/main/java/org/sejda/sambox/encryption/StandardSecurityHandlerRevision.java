@@ -31,7 +31,7 @@ public enum StandardSecurityHandlerRevision
     public final int length;
     public final int revisionNumber;
 
-    private StandardSecurityHandlerRevision(int length, int revisionNumber)
+    StandardSecurityHandlerRevision(int length, int revisionNumber)
     {
         this.length = length;
         this.revisionNumber = revisionNumber;

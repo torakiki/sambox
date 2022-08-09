@@ -50,10 +50,9 @@ public class SetNonStrokingColorSpace extends OperatorProcessor
         
         COSBase base = arguments.get(0);
 
-        if (base instanceof COSName) 
+        if (base instanceof COSName name)
         {
-            COSName name = (COSName) base;
-            try 
+            try
             {
                 PDColorSpace cs = getContext().getResources().getColorSpace(name);
                 getContext().getGraphicsState().setNonStrokingColorSpace(cs);

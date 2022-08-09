@@ -61,23 +61,23 @@ public abstract class PDAttributeObject extends PDDictionaryWrapper
         {
             return new PDUserAttributeObject(dictionary);
         }
-        else if (PDListAttributeObject.OWNER_LIST.equals(owner))
+        if (PDListAttributeObject.OWNER_LIST.equals(owner))
         {
             return new PDListAttributeObject(dictionary);
         }
-        else if (PDPrintFieldAttributeObject.OWNER_PRINT_FIELD.equals(owner))
+        if (PDPrintFieldAttributeObject.OWNER_PRINT_FIELD.equals(owner))
         {
             return new PDPrintFieldAttributeObject(dictionary);
         }
-        else if (PDTableAttributeObject.OWNER_TABLE.equals(owner))
+        if (PDTableAttributeObject.OWNER_TABLE.equals(owner))
         {
             return new PDTableAttributeObject(dictionary);
         }
-        else if (PDLayoutAttributeObject.OWNER_LAYOUT.equals(owner))
+        if (PDLayoutAttributeObject.OWNER_LAYOUT.equals(owner))
         {
             return new PDLayoutAttributeObject(dictionary);
         }
-        else if (PDExportFormatAttributeObject.OWNER_XML_1_00.equals(owner)
+        if (PDExportFormatAttributeObject.OWNER_XML_1_00.equals(owner)
                 || PDExportFormatAttributeObject.OWNER_HTML_3_20.equals(owner)
                 || PDExportFormatAttributeObject.OWNER_HTML_4_01.equals(owner)
                 || PDExportFormatAttributeObject.OWNER_OEB_1_00.equals(owner)

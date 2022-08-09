@@ -73,8 +73,7 @@ public class IndirectCOSObjectReference extends COSBase implements DisposableCOS
     @Override
     public String toString()
     {
-        return Long.toString(xrefEntry().key().objectNumber()) + " "
-                + Integer.toString(xrefEntry().key().generation()) + " R";
+        return xrefEntry().key().objectNumber() + " " + xrefEntry().key().generation() + " R";
     }
 
 }

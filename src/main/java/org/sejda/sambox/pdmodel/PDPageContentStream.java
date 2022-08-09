@@ -71,7 +71,7 @@ public final class PDPageContentStream implements Closeable
     /**
      * This is to choose what to do with the stream: overwrite, append or prepend.
      */
-    public static enum AppendMode
+    public enum AppendMode
     {
         /**
          * Overwrite the existing page content streams.

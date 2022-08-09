@@ -209,7 +209,7 @@ public class MultilineFieldsTest
 
         Object token = parser.nextParsedToken();
 
-        List<String> lines = new ArrayList<String>();
+        List<String> lines = new ArrayList<>();
 
         while (token != null)
         {

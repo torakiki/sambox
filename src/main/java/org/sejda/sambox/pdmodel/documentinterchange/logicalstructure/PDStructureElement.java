@@ -166,9 +166,8 @@ public class PDStructureElement extends PDStructureNode
         Revisions<PDAttributeObject> attributes =
                 new Revisions<>();
         COSBase a = this.getCOSObject().getDictionaryObject(COSName.A);
-        if (a instanceof COSArray)
+        if (a instanceof COSArray aa)
         {
-            COSArray aa = (COSArray) a;
             Iterator<COSBase> it = aa.iterator();
             PDAttributeObject ao = null;
             while (it.hasNext())
@@ -265,9 +264,8 @@ public class PDStructureElement extends PDStructureNode
     {
         COSName key = COSName.A;
         COSBase a = this.getCOSObject().getDictionaryObject(key);
-        if (a instanceof COSArray)
+        if (a instanceof COSArray array)
         {
-            COSArray array = (COSArray) a;
             array.remove(attributeObject.getCOSObject());
             if ((array.size() == 2) && (array.getInt(1) == 0))
             {
@@ -293,9 +291,8 @@ public class PDStructureElement extends PDStructureNode
     {
         COSName key = COSName.A;
         COSBase a = this.getCOSObject().getDictionaryObject(key);
-        if (a instanceof COSArray)
+        if (a instanceof COSArray array)
         {
-            COSArray array = (COSArray) a;
             for (int i = 0; i < array.size(); i++)
             {
                 COSBase entry = array.getObject(i);
@@ -332,9 +329,8 @@ public class PDStructureElement extends PDStructureNode
         {
             classNames.addObject(((COSName) c).getName(), 0);
         }
-        if (c instanceof COSArray)
+        if (c instanceof COSArray array)
         {
-            COSArray array = (COSArray) c;
             Iterator<COSBase> it = array.iterator();
             String className = null;
             while (it.hasNext())
@@ -434,9 +430,8 @@ public class PDStructureElement extends PDStructureNode
         COSName key = COSName.C;
         COSBase c = this.getCOSObject().getDictionaryObject(key);
         COSName name = COSName.getPDFName(className);
-        if (c instanceof COSArray)
+        if (c instanceof COSArray array)
         {
-            COSArray array = (COSArray) c;
             array.remove(name);
             if ((array.size() == 2) && (array.getInt(1) == 0))
             {

@@ -107,7 +107,7 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
         PDAnnotation annotation = createAnnotation(dictionary);
         if (nonNull(annotation))
         {
-            return of(annotation).filter(i -> expectedType.isInstance(i)).map(expectedType::cast)
+            return of(annotation).filter(expectedType::isInstance).map(expectedType::cast)
                     .orElseGet(() -> {
                         LOG.warn("Expected annotation type {} but got {}", expectedType,
                                 annotation.getClass());
@@ -132,32 +132,32 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
         {
             return new PDAnnotationFileAttachment(annotDic);
         }
-        else if (PDAnnotationLine.SUB_TYPE.equals(subtype))
+        if (PDAnnotationLine.SUB_TYPE.equals(subtype))
         {
             return new PDAnnotationLine(annotDic);
         }
-        else if (PDAnnotationLink.SUB_TYPE.equals(subtype))
+        if (PDAnnotationLink.SUB_TYPE.equals(subtype))
         {
             return new PDAnnotationLink(annotDic);
         }
-        else if (PDAnnotationPopup.SUB_TYPE.equals(subtype))
+        if (PDAnnotationPopup.SUB_TYPE.equals(subtype))
         {
             return new PDAnnotationPopup(annotDic);
         }
-        else if (PDAnnotationRubberStamp.SUB_TYPE.equals(subtype))
+        if (PDAnnotationRubberStamp.SUB_TYPE.equals(subtype))
         {
             return new PDAnnotationRubberStamp(annotDic);
         }
-        else if (PDAnnotationSquareCircle.SUB_TYPE_SQUARE.equals(subtype)
+        if (PDAnnotationSquareCircle.SUB_TYPE_SQUARE.equals(subtype)
                 || PDAnnotationSquareCircle.SUB_TYPE_CIRCLE.equals(subtype))
         {
             return new PDAnnotationSquareCircle(annotDic);
         }
-        else if (PDAnnotationText.SUB_TYPE.equals(subtype))
+        if (PDAnnotationText.SUB_TYPE.equals(subtype))
         {
             return new PDAnnotationText(annotDic);
         }
-        else if (PDAnnotationTextMarkup.SUB_TYPE_HIGHLIGHT.equals(subtype)
+        if (PDAnnotationTextMarkup.SUB_TYPE_HIGHLIGHT.equals(subtype)
                 || PDAnnotationTextMarkup.SUB_TYPE_UNDERLINE.equals(subtype)
                 || PDAnnotationTextMarkup.SUB_TYPE_SQUIGGLY.equals(subtype)
                 || PDAnnotationTextMarkup.SUB_TYPE_STRIKEOUT.equals(subtype))
@@ -165,11 +165,11 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
             // see 12.5.6.10 Text Markup Annotations
             return new PDAnnotationTextMarkup(annotDic);
         }
-        else if (COSName.WIDGET.getName().equals(subtype))
+        if (COSName.WIDGET.getName().equals(subtype))
         {
             return new PDAnnotationWidget(annotDic);
         }
-        else if (PDAnnotationMarkup.SUB_TYPE_FREETEXT.equals(subtype)
+        if (PDAnnotationMarkup.SUB_TYPE_FREETEXT.equals(subtype)
                 || PDAnnotationMarkup.SUB_TYPE_POLYGON.equals(subtype)
                 || PDAnnotationMarkup.SUB_TYPE_POLYLINE.equals(subtype)
                 || PDAnnotationMarkup.SUB_TYPE_CARET.equals(subtype)

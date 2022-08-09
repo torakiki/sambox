@@ -143,7 +143,7 @@ public class TextPosition
     // normalization.
     private static Map<Integer, String> createDiacritics()
     {
-        Map<Integer, String> map = new HashMap<Integer, String>(31);
+        Map<Integer, String> map = new HashMap<>(31);
         map.put(0x0060, "\u0300");
         map.put(0x02CB, "\u0300");
         map.put(0x0027, "\u0301");
@@ -280,15 +280,15 @@ public class TextPosition
         {
             return textMatrix.getTranslateX();
         }
-        else if (rotation == 90)
+        if (rotation == 90)
         {
             return textMatrix.getTranslateY();
         }
-        else if (rotation == 180)
+        if (rotation == 180)
         {
             return pageWidth - textMatrix.getTranslateX();
         }
-        else if (rotation == 270)
+        if (rotation == 270)
         {
             return pageHeight - textMatrix.getTranslateY();
         }
@@ -342,15 +342,15 @@ public class TextPosition
         {
             return textMatrix.getTranslateY();
         }
-        else if (rotation == 90)
+        if (rotation == 90)
         {
             return pageWidth - textMatrix.getTranslateX();
         }
-        else if (rotation == 180)
+        if (rotation == 180)
         {
             return pageHeight - textMatrix.getTranslateY();
         }
-        else if (rotation == 270)
+        if (rotation == 270)
         {
             return textMatrix.getTranslateX();
         }
@@ -561,13 +561,13 @@ public class TextPosition
         // we're going to calculate the percentage of overlap, if its less than a 15% x-coordinate
         // overlap then we'll return false because its negligible, .15 was determined by trial and
         // error in the regression test files
-        else if (tp2Xstart > thisXstart && tp2Xend > thisXend)
+        if (tp2Xstart > thisXstart && tp2Xend > thisXend)
         {
             double overlap = thisXend - tp2Xstart;
             double overlapPercent = overlap / thisWidth;
             return overlapPercent > .15;
         }
-        else if (tp2Xstart < thisXstart && tp2Xend < thisXend)
+        if (tp2Xstart < thisXstart && tp2Xend < thisXend)
         {
             double overlap = tp2Xend - thisXstart;
             double overlapPercent = overlap / thisWidth;
@@ -835,12 +835,10 @@ public class TextPosition
         {
             return true;
         }
-        if (!(o instanceof TextPosition))
+        if (!(o instanceof TextPosition that))
         {
             return false;
         }
-
-        TextPosition that = (TextPosition) o;
 
         if (Float.compare(that.endX, endX) != 0)
         {

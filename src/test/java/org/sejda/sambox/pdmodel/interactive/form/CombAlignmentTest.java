@@ -18,16 +18,16 @@ package org.sejda.sambox.pdmodel.interactive.form;
  * limitations under the License.
  */
 
-import org.junit.Assert;
+import java.io.File;
+import java.io.IOException;
+
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.rendering.TestPDFToImageTest;
-
-import java.io.File;
-import java.io.IOException;
 
 /**
  * @author Andrea Vacondio
@@ -68,7 +68,7 @@ public class CombAlignmentTest
         if (!testPDFToImage.doTestFile(outFile, IN_DIR.getAbsolutePath(),
                 OUT_DIR.getAbsolutePath()))
         {
-            Assert.fail("Rendering of " + outFile
+            Assertions.fail("Rendering of " + outFile
                     + " failed or is not identical to expected rendering in " + IN_DIR
                     + " directory");
         }

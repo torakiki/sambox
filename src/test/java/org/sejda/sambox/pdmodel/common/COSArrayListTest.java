@@ -79,7 +79,7 @@ public class COSArrayListTest
         annotationsList.add(txtLink2);
         assertEquals(4, annotationsList.size());
 
-        tbcAnnotationsList = new ArrayList<PDAnnotation>();
+        tbcAnnotationsList = new ArrayList<>();
         tbcAnnotationsList.add(txtMark);
         tbcAnnotationsList.add(txtLink);
         tbcAnnotationsList.add(aCircle);
@@ -138,7 +138,7 @@ public class COSArrayListTest
     @Test
     public void addToList() throws Exception
     {
-        COSArrayList<PDAnnotation> cosArrayList = new COSArrayList<PDAnnotation>(annotationsList,
+        COSArrayList<PDAnnotation> cosArrayList = new COSArrayList<>(annotationsList,
                 annotationsArray);
 
         // add new annotation
@@ -162,7 +162,7 @@ public class COSArrayListTest
     @Test
     public void removeFromListByIndex() throws Exception
     {
-        COSArrayList<PDAnnotation> cosArrayList = new COSArrayList<PDAnnotation>(annotationsList,
+        COSArrayList<PDAnnotation> cosArrayList = new COSArrayList<>(annotationsList,
                 annotationsArray);
 
         int positionToRemove = 2;
@@ -185,7 +185,7 @@ public class COSArrayListTest
     @Test
     public void removeUniqueFromListByObject() throws Exception
     {
-        COSArrayList<PDAnnotation> cosArrayList = new COSArrayList<PDAnnotation>(annotationsList,
+        COSArrayList<PDAnnotation> cosArrayList = new COSArrayList<>(annotationsList,
                 annotationsArray);
 
         int positionToRemove = 2;
@@ -218,7 +218,7 @@ public class COSArrayListTest
     @Test
     public void removeAllUniqueFromListByObject() throws Exception
     {
-        COSArrayList<PDAnnotation> cosArrayList = new COSArrayList<PDAnnotation>(annotationsList,
+        COSArrayList<PDAnnotation> cosArrayList = new COSArrayList<>(annotationsList,
                 annotationsArray);
 
         int positionToRemove = 2;
@@ -241,7 +241,7 @@ public class COSArrayListTest
     @Test
     public void removeAllMultipleFromListByObject() throws Exception
     {
-        COSArrayList<PDAnnotation> cosArrayList = new COSArrayList<PDAnnotation>(annotationsList,
+        COSArrayList<PDAnnotation> cosArrayList = new COSArrayList<>(annotationsList,
                 annotationsArray);
 
         int positionToRemove = 1;
@@ -263,14 +263,7 @@ public class COSArrayListTest
     {
         // retrieve all annotations from page but the link annotation
         // which is 2nd in list - see above setup
-        AnnotationFilter annotsFilter = new AnnotationFilter()
-        {
-            @Override
-            public boolean accept(PDAnnotation annotation)
-            {
-                return !(annotation instanceof PDAnnotationLink);
-            }
-        };
+        AnnotationFilter annotsFilter = annotation -> !(annotation instanceof PDAnnotationLink);
 
         COSArrayList<PDAnnotation> cosArrayList = (COSArrayList<PDAnnotation>) pdPage.getAnnotations(
                 annotsFilter);
@@ -284,14 +277,7 @@ public class COSArrayListTest
     {
         // retrieve all annotations from page but the link annotation
         // which is 2nd in list - see above setup
-        AnnotationFilter annotsFilter = new AnnotationFilter()
-        {
-            @Override
-            public boolean accept(PDAnnotation annotation)
-            {
-                return !(annotation instanceof PDAnnotationLink);
-            }
-        };
+        AnnotationFilter annotsFilter = annotation -> !(annotation instanceof PDAnnotationLink);
 
         COSArrayList<PDAnnotation> cosArrayList = (COSArrayList<PDAnnotation>) pdPage.getAnnotations(
                 annotsFilter);
@@ -315,7 +301,7 @@ public class COSArrayListTest
         PDPage page = new PDPage();
         pdf.addPage(page);
 
-        ArrayList<PDAnnotation> pageAnnots = new ArrayList<PDAnnotation>();
+        ArrayList<PDAnnotation> pageAnnots = new ArrayList<>();
         PDAnnotationTextMarkup txtMark = new PDAnnotationTextMarkup(
                 PDAnnotationTextMarkup.SUB_TYPE_HIGHLIGHT);
         PDAnnotationLink txtLink = new PDAnnotationLink();
@@ -362,7 +348,7 @@ public class COSArrayListTest
         PDPage page = new PDPage();
         pdf.addPage(page);
 
-        ArrayList<PDAnnotation> pageAnnots = new ArrayList<PDAnnotation>();
+        ArrayList<PDAnnotation> pageAnnots = new ArrayList<>();
         PDAnnotationTextMarkup txtMark = new PDAnnotationTextMarkup(
                 PDAnnotationTextMarkup.SUB_TYPE_HIGHLIGHT);
         PDAnnotationLink txtLink = new PDAnnotationLink();
@@ -411,7 +397,7 @@ public class COSArrayListTest
         PDPage page = new PDPage();
         pdf.addPage(page);
 
-        ArrayList<PDAnnotation> pageAnnots = new ArrayList<PDAnnotation>();
+        ArrayList<PDAnnotation> pageAnnots = new ArrayList<>();
         PDAnnotationTextMarkup txtMark = new PDAnnotationTextMarkup(
                 PDAnnotationTextMarkup.SUB_TYPE_HIGHLIGHT);
         PDAnnotationLink txtLink = new PDAnnotationLink();
@@ -438,7 +424,7 @@ public class COSArrayListTest
         assertTrue("The size of the internal COSArray shall be 2",
                 annotations.getCOSArray().size() == 2);
 
-        ArrayList<PDAnnotation> toBeRemoved = new ArrayList<PDAnnotation>();
+        ArrayList<PDAnnotation> toBeRemoved = new ArrayList<>();
 
         toBeRemoved.add(annotations.get(0));
         annotations.removeAll(toBeRemoved);
@@ -457,7 +443,7 @@ public class COSArrayListTest
         PDPage page = new PDPage();
         pdf.addPage(page);
 
-        ArrayList<PDAnnotation> pageAnnots = new ArrayList<PDAnnotation>();
+        ArrayList<PDAnnotation> pageAnnots = new ArrayList<>();
         PDAnnotationTextMarkup txtMark = new PDAnnotationTextMarkup(
                 PDAnnotationTextMarkup.SUB_TYPE_HIGHLIGHT);
         PDAnnotationLink txtLink = new PDAnnotationLink();
@@ -480,7 +466,7 @@ public class COSArrayListTest
         assertTrue("The size of the internal COSArray shall be 2",
                 annotations.getCOSArray().size() == 2);
 
-        ArrayList<PDAnnotation> toBeRemoved = new ArrayList<PDAnnotation>();
+        ArrayList<PDAnnotation> toBeRemoved = new ArrayList<>();
         toBeRemoved.add(annotations.get(0));
 
         annotations.removeAll(toBeRemoved);
@@ -499,7 +485,7 @@ public class COSArrayListTest
         PDPage page = new PDPage();
         pdf.addPage(page);
 
-        ArrayList<PDAnnotation> pageAnnots = new ArrayList<PDAnnotation>();
+        ArrayList<PDAnnotation> pageAnnots = new ArrayList<>();
         PDAnnotationTextMarkup txtMark = new PDAnnotationTextMarkup(
                 PDAnnotationTextMarkup.SUB_TYPE_HIGHLIGHT);
         PDAnnotationLink txtLink = new PDAnnotationLink();
@@ -528,7 +514,7 @@ public class COSArrayListTest
         assertEquals("The size of the internal COSArray shall be 4", 4,
                 annotations.getCOSArray().size());
 
-        ArrayList<PDAnnotation> toBeRetained = new ArrayList<PDAnnotation>();
+        ArrayList<PDAnnotation> toBeRetained = new ArrayList<>();
 
         toBeRetained.add(annotations.get(0));
         annotations.retainAll(toBeRetained);
@@ -547,7 +533,7 @@ public class COSArrayListTest
         PDPage page = new PDPage();
         pdf.addPage(page);
 
-        ArrayList<PDAnnotation> pageAnnots = new ArrayList<PDAnnotation>();
+        ArrayList<PDAnnotation> pageAnnots = new ArrayList<>();
         PDAnnotationTextMarkup txtMark = new PDAnnotationTextMarkup(
                 PDAnnotationTextMarkup.SUB_TYPE_HIGHLIGHT);
         PDAnnotationLink txtLink = new PDAnnotationLink();
@@ -576,7 +562,7 @@ public class COSArrayListTest
         assertEquals("The size of the internal COSArray shall be 4", 4,
                 annotations.getCOSArray().size());
 
-        ArrayList<PDAnnotation> toBeRetained = new ArrayList<PDAnnotation>();
+        ArrayList<PDAnnotation> toBeRetained = new ArrayList<>();
 
         toBeRetained.add(annotations.get(0));
         annotations.retainAll(toBeRetained);
@@ -594,7 +580,7 @@ public class COSArrayListTest
         PDPage page = new PDPage();
         pdf.addPage(page);
 
-        ArrayList<PDAnnotation> pageAnnots = new ArrayList<PDAnnotation>();
+        ArrayList<PDAnnotation> pageAnnots = new ArrayList<>();
         PDAnnotationTextMarkup txtMark = new PDAnnotationTextMarkup(
                 PDAnnotationTextMarkup.SUB_TYPE_HIGHLIGHT);
         PDAnnotationLink txtLink = new PDAnnotationLink();

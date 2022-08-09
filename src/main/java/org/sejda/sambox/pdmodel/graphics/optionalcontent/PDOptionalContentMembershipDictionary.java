@@ -62,15 +62,14 @@ public class PDOptionalContentMembershipDictionary extends PDPropertyList
      */
     public List<PDPropertyList> getOCGs()
     {
-        List<PDPropertyList> list = new ArrayList<PDPropertyList>();
+        List<PDPropertyList> list = new ArrayList<>();
         COSBase base = dict.getDictionaryObject(COSName.OCGS);
         if (base instanceof COSDictionary)
         {
             list.add(PDPropertyList.create((COSDictionary) base));
         }
-        else if (base instanceof COSArray)
+        else if (base instanceof COSArray ar)
         {
-            COSArray ar = (COSArray) base;
             for (int i = 0; i < ar.size(); ++i)
             {
                 COSBase elem = ar.getObject(i);

@@ -441,7 +441,7 @@ class CloudyBorder
     private Point2D.Double[] getIntermediateCurlTemplate(double angleCur, double r)
             throws IOException
     {
-        ArrayList<Point2D.Double> points = new ArrayList<Point2D.Double>();
+        ArrayList<Point2D.Double> points = new ArrayList<>();
         double a = angleCur + ANGLE_180_DEG;
 
         getArcSegment(a + ANGLE_34_DEG, a + ANGLE_12_DEG, 0, 0, r, r, points, false);
@@ -687,7 +687,7 @@ class CloudyBorder
         final double flatness = 0.50;
         PathIterator iterator = ellipse.getPathIterator(null, flatness);
         double[] coords = new double[6];
-        ArrayList<Point2D.Double> points = new ArrayList<Point2D.Double>();
+        ArrayList<Point2D.Double> points = new ArrayList<>();
 
         while (!iterator.isDone())
         {

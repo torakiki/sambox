@@ -257,7 +257,7 @@ public abstract class PDVariableText extends PDTerminalField
         {
             return ((COSString) base).getString();
         }
-        else if (base instanceof COSStream)
+        if (base instanceof COSStream)
         {
             return ((COSStream) base).asTextString();
         }

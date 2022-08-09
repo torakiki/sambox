@@ -92,16 +92,16 @@ class BitwiseOperators
             Stack<Object> stack = context.getStack();
             int shift = (Integer) stack.pop();
             int int1 = (Integer) stack.pop();
+            int result;
             if (shift < 0)
             {
-                int result = int1 >> Math.abs(shift);
-                stack.push(result);
+                result = int1 >> Math.abs(shift);
             }
             else
             {
-                int result = int1 << shift;
-                stack.push(result);
+                result = int1 << shift;
             }
+            stack.push(result);
         }
 
     }

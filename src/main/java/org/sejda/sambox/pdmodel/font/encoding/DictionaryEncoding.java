@@ -1,5 +1,4 @@
 /*
-/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -17,17 +16,17 @@
  */
 package org.sejda.sambox.pdmodel.font.encoding;
 
+import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSNumber;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static java.util.Objects.nonNull;
-import static java.util.Optional.ofNullable;
 
 /**
  * This will perform the encoding from a dictionary.
@@ -143,9 +142,8 @@ public class DictionaryEncoding extends Encoding
                 {
                     currentIndex = ((COSNumber) next).intValue();
                 }
-                else if (next instanceof COSName)
+                else if (next instanceof COSName name)
                 {
-                    COSName name = (COSName) next;
                     overwrite(currentIndex, name.getName());
                     this.differences.put(currentIndex, name.getName());
                     currentIndex++;

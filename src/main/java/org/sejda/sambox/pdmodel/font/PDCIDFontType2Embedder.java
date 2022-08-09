@@ -241,14 +241,7 @@ final class PDCIDFontType2Embedder extends TrueTypeEmbedder
         for (int i = 0; i <= cidMax; i++)
         {
             int gid;
-            if (cidToGid.containsKey(i))
-            {
-                gid = cidToGid.get(i);
-            }
-            else
-            {
-                gid = 0;
-            }
+            gid = cidToGid.getOrDefault(i, 0);
             out.write(new byte[] { (byte) (gid >> 8 & 0xff), (byte) (gid & 0xff) });
         }
 
@@ -365,7 +358,7 @@ final class PDCIDFontType2Embedder extends TrueTypeEmbedder
         COSArray w2 = new COSArray();
         int prev = Integer.MIN_VALUE;
         // Use a sorted list to get an optimal width array
-        Set<Integer> keys = new TreeSet<Integer>(cidToGid.keySet());
+        Set<Integer> keys = new TreeSet<>(cidToGid.keySet());
         for (int cid : keys)
         {
             // Unlike buildWidths, we look up with cid (not gid) here because this is

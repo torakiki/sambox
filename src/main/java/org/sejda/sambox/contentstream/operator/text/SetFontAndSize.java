@@ -52,7 +52,7 @@ public class SetFontAndSize extends OperatorProcessor
 
         COSBase base0 = arguments.get(0);
         COSBase base1 = arguments.get(1);
-        if (!(base0 instanceof COSName))
+        if (!(base0 instanceof COSName fontName))
         {
             return;
         }
@@ -60,7 +60,6 @@ public class SetFontAndSize extends OperatorProcessor
         {
             return;
         }
-        COSName fontName = (COSName) base0;
         float fontSize = ((COSNumber) base1).floatValue();
         getContext().getGraphicsState().getTextState().setFontSize(fontSize);
         PDFont font = getContext().getResources().getFont(fontName);

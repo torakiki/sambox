@@ -58,7 +58,7 @@ import java.util.List;
  */
 public final class PublicKeyProtectionPolicy extends ProtectionPolicy
 {
-    public final List<PublicKeyRecipient> recipients = new ArrayList<PublicKeyRecipient>();
+    public final List<PublicKeyRecipient> recipients = new ArrayList<>();
     private X509Certificate decryptionCertificate;
 
     /**

@@ -27,7 +27,7 @@ import java.util.Optional;
 public final class DirectCOSObject extends COSBase
 {
 
-    private COSBase baseObject;
+    private final COSBase baseObject;
 
     private DirectCOSObject(COSBase wrapped)
     {

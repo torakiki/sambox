@@ -19,7 +19,23 @@
 
 package org.sejda.sambox.pdmodel.font;
 
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.fontbox.ttf.TTFParser;
 import org.apache.fontbox.ttf.TrueTypeCollection;
 import org.apache.fontbox.ttf.TrueTypeFont;
@@ -38,29 +54,15 @@ import org.sejda.sambox.pdmodel.font.encoding.WinAnsiEncoding;
 import org.sejda.sambox.rendering.PDFRenderer;
 import org.sejda.sambox.text.PDFTextStripper;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * @author adam
  * @author Tilman Hausherr
  */
-public class PDFontTest extends TestCase
+public class PDFontTest
 {
 
     private static final File OUT_DIR = new File("target/test-output");
 
-    @Override
     @Before
     public void setUp() throws Exception
     {
@@ -240,7 +242,7 @@ public class PDFontTest extends TestCase
             return;
         }
 
-        final List<String> names = new ArrayList<String>();
+        final List<String> names = new ArrayList<>();
         ttc.processAllFonts(new TrueTypeCollection.TrueTypeFontProcessor()
         {
             @Override
@@ -281,7 +283,7 @@ public class PDFontTest extends TestCase
             PDPage page = testPdf.getPage(0);
             PDFont font = page.getResources().getFont(COSName.getPDFName("F70"));
             assertTrue(font.isDamaged());
-            assertEquals(0f, font.getHeight(0));
+            assertEquals(0f, font.getBoundingBox().getHeight());
             assertEquals(0f, font.getStringWidth("Pa"));
         }
 

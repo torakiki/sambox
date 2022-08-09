@@ -91,7 +91,7 @@ public class PDAcroFormFromAnnotsTest
         int numFormFieldsByAcrobat = 0;
 
         // will build the expected fields using the acrobat source document
-        Map<String, PDField> fieldsByName = new HashMap<String, PDField>();
+        Map<String, PDField> fieldsByName = new HashMap<>();
 
         try (PDDocument testPdf = PDFParser.parse(SeekableSources.seekableSourceFrom(
                 new File("target/pdfs/merge-test-na-acrobat.pdf"))))
@@ -146,7 +146,7 @@ public class PDAcroFormFromAnnotsTest
     {
 
         // will build the expected font respurce names and font decriptor names using the acrobat source document
-        Map<String, String> fontNames = new HashMap<String, String>();
+        Map<String, String> fontNames = new HashMap<>();
         try (PDDocument testPdf = PDFParser.parse(SeekableSources.seekableSourceFrom(
                 new File("target/pdfs/merge-test-na-acrobat.pdf"))))
         {

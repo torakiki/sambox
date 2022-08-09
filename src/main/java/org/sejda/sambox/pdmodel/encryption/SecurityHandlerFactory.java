@@ -130,22 +130,8 @@ public final class SecurityHandlerFactory
                     handlerClass.getDeclaredConstructor(argsClasses);
             return ctor.newInstance(args);
         }
-        catch(NoSuchMethodException e)
-        {
-            // should not happen in normal operation
-            throw new RuntimeException(e);
-        }
-        catch(IllegalAccessException e)
-        {
-            // should not happen in normal operation
-            throw new RuntimeException(e);
-        }
-        catch(InstantiationException e)
-        {
-            // should not happen in normal operation
-            throw new RuntimeException(e);
-        }
-        catch(InvocationTargetException e)
+        catch(NoSuchMethodException | InvocationTargetException | InstantiationException |
+              IllegalAccessException e)
         {
             // should not happen in normal operation
             throw new RuntimeException(e);

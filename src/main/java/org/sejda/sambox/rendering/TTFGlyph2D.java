@@ -46,7 +46,7 @@ final class TTFGlyph2D implements Glyph2D
     private PDVectorFont vectorFont;
     private float scale = 1.0f;
     private boolean hasScaling;
-    private final Map<Integer, GeneralPath> glyphs = new HashMap<Integer, GeneralPath>();
+    private final Map<Integer, GeneralPath> glyphs = new HashMap<>();
     private final boolean isCIDFont;
 
     /**

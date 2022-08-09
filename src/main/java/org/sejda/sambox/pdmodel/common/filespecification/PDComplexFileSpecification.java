@@ -16,14 +16,14 @@
  */
 package org.sejda.sambox.pdmodel.common.filespecification;
 
+import static java.util.Optional.ofNullable;
+
+import java.util.Optional;
+
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSStream;
-
-import java.util.Optional;
-
-import static java.util.Optional.ofNullable;
 
 /**
  * This represents a file specification.
@@ -396,15 +396,11 @@ public class PDComplexFileSpecification implements PDFileSpecification
      */
     public PDEmbeddedFile getBestEmbeddedFile()
     {
-        return ofNullable(getEmbeddedFileUnicode()).orElseGet(() -> {
-            return ofNullable(getEmbeddedFileDos()).orElseGet(() -> {
-                return ofNullable(getEmbeddedFileMac()).orElseGet(() -> {
-                    return ofNullable(getEmbeddedFileUnix()).orElseGet(() -> {
-                        return getEmbeddedFile();
-                    });
-                });
-            });
-        });
+        return ofNullable(getEmbeddedFileUnicode()).orElseGet(
+                () -> ofNullable(getEmbeddedFileDos()).orElseGet(
+                        () -> ofNullable(getEmbeddedFileMac()).orElseGet(
+                                () -> ofNullable(getEmbeddedFileUnix()).orElseGet(
+                                        this::getEmbeddedFile))));
     }
 
     /**

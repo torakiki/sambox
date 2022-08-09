@@ -213,9 +213,8 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
                     LOG.warn("Missing 'endobj' token for {}", xrefEntry);
                 }
 
-                if (found instanceof ExistingIndirectCOSObject)
+                if (found instanceof ExistingIndirectCOSObject existingIndirectCOSObject)
                 {
-                    ExistingIndirectCOSObject existingIndirectCOSObject = (ExistingIndirectCOSObject) found;
                     // does this point to itself? it would cause a StackOverflowError. Example:
                     // 9 0 obj
                     // 9 0 R

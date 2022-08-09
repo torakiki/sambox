@@ -61,7 +61,7 @@ public class PDCIDFontType2 extends PDCIDFont
     private final CmapLookup cmap; // may be null
     private Matrix fontMatrix;
     private BoundingBox fontBBox;
-    private final Set<Integer> noMapping = new HashSet<Integer>();
+    private final Set<Integer> noMapping = new HashSet<>();
 
     /**
      * Constructor.

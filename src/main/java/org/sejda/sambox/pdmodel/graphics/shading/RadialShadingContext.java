@@ -336,10 +336,7 @@ public class RadialShadingContext extends ShadingContext implements PaintContext
         {
             return new float[] { root1, root2 };
         }
-        else
-        {
-            return new float[] { root2, root1 };
-        }
+        return new float[] { root2, root1 };
     }
 
     /**

@@ -95,13 +95,13 @@ public class DefaultPDFWriterTest
         IndirectCOSObjectReference ref3 = new IndirectCOSObjectReference(3, 0, COSInteger.get(300));
         IndirectCOSObjectReference ref4 = new IndirectCOSObjectReference(8, 0, COSInteger.get(400));
         InOrder inOrder = Mockito.inOrder(writer);
-        when(writer.offset()).thenReturn(1l);
+        when(writer.offset()).thenReturn(1L);
         objectWriter.writeObject(ref);
-        when(writer.offset()).thenReturn(2l);
+        when(writer.offset()).thenReturn(2L);
         objectWriter.writeObject(ref2);
-        when(writer.offset()).thenReturn(3l);
+        when(writer.offset()).thenReturn(3L);
         objectWriter.writeObject(ref3);
-        when(writer.offset()).thenReturn(4l);
+        when(writer.offset()).thenReturn(4L);
         objectWriter.writeObject(ref4);
         assertEquals(4, victim.writeXrefTable());
         inOrder.verify(writer).write("xref");
@@ -208,7 +208,7 @@ public class DefaultPDFWriterTest
     {
         COSDictionary existingTrailer = new COSDictionary();
         IndirectCOSObjectReference ref = new IndirectCOSObjectReference(1, 0, COSInteger.get(100));
-        when(writer.offset()).thenReturn(12345l);
+        when(writer.offset()).thenReturn(12345L);
         objectWriter.writeObject(ref);
         InOrder inOrder = Mockito.inOrder(writer);
         victim.writeXrefStream(existingTrailer);
@@ -230,7 +230,7 @@ public class DefaultPDFWriterTest
     {
         COSDictionary existingTrailer = new COSDictionary();
         IndirectCOSObjectReference ref = new IndirectCOSObjectReference(1, 0, COSInteger.get(100));
-        when(writer.offset()).thenReturn(12345l);
+        when(writer.offset()).thenReturn(12345L);
         objectWriter.writeObject(ref);
         victim.writeXrefStream(existingTrailer, 123);
         assertEquals(123, existingTrailer.getLong(COSName.PREV));
@@ -250,7 +250,7 @@ public class DefaultPDFWriterTest
         existingTrailer.setInt(COSName.LENGTH, 10);
         existingTrailer.setName(COSName.ENCRYPT, "value");
         IndirectCOSObjectReference ref = new IndirectCOSObjectReference(1, 0, COSInteger.get(100));
-        when(writer.offset()).thenReturn(12345l);
+        when(writer.offset()).thenReturn(12345L);
         objectWriter.writeObject(ref);
         victim.writeXrefStream(existingTrailer);
         assertFalse(existingTrailer.containsKey(COSName.PREV));

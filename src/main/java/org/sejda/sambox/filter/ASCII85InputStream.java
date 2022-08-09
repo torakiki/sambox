@@ -95,7 +95,7 @@ final class ASCII85InputStream extends FilterInputStream
                 n = 0;
                 return -1;
             }
-            else if (z == Z)
+            if (z == Z)
             {
                 b[0] = b[1] = b[2] = b[3] = 0;
                 n = 4;

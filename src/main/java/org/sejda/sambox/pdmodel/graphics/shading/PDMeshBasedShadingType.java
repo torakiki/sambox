@@ -63,7 +63,7 @@ abstract class PDMeshBasedShadingType extends PDShadingType4
             throws IOException
     {
         COSDictionary dict = getCOSObject();
-        if (!(dict instanceof COSStream))
+        if (!(dict instanceof COSStream cosStream))
         {
             return Collections.emptyList();
         }
@@ -84,10 +84,9 @@ abstract class PDMeshBasedShadingType extends PDShadingType4
                 throw new IOException("Range missing in shading /Decode entry");
             }
         }
-        List<Patch> list = new ArrayList<Patch>();
+        List<Patch> list = new ArrayList<>();
         long maxSrcCoord = (long) Math.pow(2, getBitsPerCoordinate()) - 1;
         long maxSrcColor = (long) Math.pow(2, getBitsPerComponent()) - 1;
-        COSStream cosStream = (COSStream) dict;
 
         try (ImageInputStream mciis = new MemoryCacheImageInputStream(
                 cosStream.getUnfilteredStream()))

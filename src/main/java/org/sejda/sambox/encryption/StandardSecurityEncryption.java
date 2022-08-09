@@ -125,7 +125,7 @@ public enum StandardSecurityEncryption
     public final int version;
     public final StandardSecurityHandlerRevision revision;
 
-    private StandardSecurityEncryption(StandardSecurityHandlerRevision revision, int version)
+    StandardSecurityEncryption(StandardSecurityHandlerRevision revision, int version)
     {
         this.revision = revision;
         this.version = version;

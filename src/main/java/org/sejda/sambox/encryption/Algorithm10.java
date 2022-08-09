@@ -23,7 +23,7 @@ package org.sejda.sambox.encryption;
  */
 class Algorithm10
 {
-    private AESEngineNoPadding engine = AESEngineNoPadding.ecb();
+    private final AESEngineNoPadding engine = AESEngineNoPadding.ecb();
 
     byte[] computePerms(EncryptionContext context)
     {

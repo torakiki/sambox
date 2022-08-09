@@ -47,13 +47,12 @@ public class SetGraphicsStateParameters extends OperatorProcessor
             throw new MissingOperandException(operator, arguments);
         }
         COSBase base0 = arguments.get(0);
-        if (!(base0 instanceof COSName))
+        if (!(base0 instanceof COSName graphicsName))
         {
             return;
         }
 
         // set parameters from graphics state parameter dictionary
-        COSName graphicsName = (COSName) base0;
         PDExtendedGraphicsState gs = getContext().getResources().getExtGState(graphicsName);
         if (gs == null)
         {

@@ -47,7 +47,7 @@ class DefaultPDFWriter implements Closeable
 
     byte COMMENT = '%';
     byte[] GARBAGE = new byte[] { (byte) 0xA7, (byte) 0xE3, (byte) 0xF1, (byte) 0xF1 };
-    private IndirectObjectsWriter writer;
+    private final IndirectObjectsWriter writer;
 
     public DefaultPDFWriter(IndirectObjectsWriter writer)
     {

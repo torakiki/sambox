@@ -38,7 +38,7 @@ import org.bouncycastle.crypto.params.ParametersWithIV;
  */
 class AESEngineNoPadding implements AESEncryptionAlgorithmEngine
 {
-    private BufferedBlockCipher cipher;
+    private final BufferedBlockCipher cipher;
 
     AESEngineNoPadding(BufferedBlockCipher cipher)
     {

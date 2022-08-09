@@ -283,10 +283,9 @@ public class PDType0Font extends PDFont implements PDVectorFont
     private void readEncoding() throws IOException
     {
         COSBase encoding = dict.getDictionaryObject(COSName.ENCODING);
-        if (encoding instanceof COSName)
+        if (encoding instanceof COSName encodingName)
         {
             // predefined CMap
-            COSName encodingName = (COSName) encoding;
             cMap = CMapManager.getPredefinedCMap(encodingName.getName());
             isCMapPredefined = true;
         }

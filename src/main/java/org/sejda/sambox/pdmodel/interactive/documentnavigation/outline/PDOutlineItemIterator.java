@@ -52,12 +52,8 @@ class PDOutlineItemIterator implements Iterator<PDOutlineItem>
         PDOutlineItem next = currentItem.getNextSibling();
         if (next != null)
         {
-            if (startingItem.equals(currentItem.getNextSibling()) || visited.contains(next))
-            {
-                // infinite loop detected
-                return false;
-            }
-            return true;
+            // infinite loop detected
+            return !startingItem.equals(currentItem.getNextSibling()) && !visited.contains(next);
         }
 
         return false;

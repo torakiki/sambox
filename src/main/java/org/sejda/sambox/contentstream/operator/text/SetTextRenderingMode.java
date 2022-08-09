@@ -42,9 +42,8 @@ public class SetTextRenderingMode extends OperatorProcessor
             throw new MissingOperandException(operator, arguments);
         }
         COSBase base0 = arguments.get(0);
-        if (base0 instanceof COSNumber)
+        if (base0 instanceof COSNumber mode)
         {
-            COSNumber mode = (COSNumber) base0;
             int val = mode.intValue();
             if (val >= 0 && val < RenderingMode.values().length)
             {

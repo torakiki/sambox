@@ -364,13 +364,6 @@ public abstract class PDOutlineNode extends PDDictionaryWrapper
      */
     public Iterable<PDOutlineItem> children()
     {
-        return new Iterable<PDOutlineItem>()
-        {
-            @Override
-            public Iterator<PDOutlineItem> iterator()
-            {
-                return new PDOutlineItemIterator(getFirstChild());
-            }
-        };
+        return () -> new PDOutlineItemIterator(getFirstChild());
     }
 }

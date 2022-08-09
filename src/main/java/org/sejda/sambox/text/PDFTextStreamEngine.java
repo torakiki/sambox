@@ -95,7 +95,7 @@ public class PDFTextStreamEngine extends PDFStreamEngine
     private PDRectangle cropBox;
     private Matrix translateMatrix;
     private static final GlyphList GLYPHLIST;
-    private final Map<COSDictionary, Float> fontHeightMap = new WeakHashMap<COSDictionary, Float>();
+    private final Map<COSDictionary, Float> fontHeightMap = new WeakHashMap<>();
 
     static
     {
@@ -308,21 +308,8 @@ public class PDFTextStreamEngine extends PDFStreamEngine
         // this, which is why we leave it until this point in PDFTextStreamEngine.
         if (unicode == null)
         {
-            if (font instanceof PDSimpleFont)
-            {
-                char c = (char) code;
-                unicode = new String(new char[] { c });
-            }
-            else
-            {
-                // Acrobat doesn't seem to coerce composite font's character codes, instead it
-                // skips them. See the "allah2.pdf" TestTextStripper file.
-                // return;
-
-                // this seems to work better though
-                char c = (char) code;
-                unicode = new String(new char[] { c });
-            }
+            char c = (char) code;
+            unicode = String.valueOf(c);
         }
         // adjust for cropbox if needed
         Matrix translatedTextRenderingMatrix;

@@ -15,19 +15,16 @@
  */
 package org.sejda.sambox.pdmodel.graphics.image;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.sejda.io.SeekableSources;
-import org.sejda.sambox.input.PDFParser;
-import org.sejda.sambox.pdmodel.PDDocument;
-import org.sejda.sambox.pdmodel.PDPage;
-import org.sejda.sambox.pdmodel.PDPageContentStream;
-import org.sejda.sambox.pdmodel.PDPageContentStream.AppendMode;
-import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
-import org.sejda.sambox.pdmodel.graphics.color.PDDeviceRGB;
-import org.sejda.sambox.rendering.PDFRenderer;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.sejda.sambox.pdmodel.graphics.image.ValidateXImage.checkIdent;
+import static org.sejda.sambox.pdmodel.graphics.image.ValidateXImage.colorCount;
+import static org.sejda.sambox.pdmodel.graphics.image.ValidateXImage.doWritePDF;
+import static org.sejda.sambox.pdmodel.graphics.image.ValidateXImage.validate;
 
-import javax.imageio.ImageIO;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -49,15 +46,18 @@ import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.sejda.sambox.pdmodel.graphics.image.ValidateXImage.checkIdent;
-import static org.sejda.sambox.pdmodel.graphics.image.ValidateXImage.colorCount;
-import static org.sejda.sambox.pdmodel.graphics.image.ValidateXImage.doWritePDF;
-import static org.sejda.sambox.pdmodel.graphics.image.ValidateXImage.validate;
+import org.junit.Before;
+import org.junit.Test;
+import org.sejda.io.SeekableSources;
+import org.sejda.sambox.input.PDFParser;
+import org.sejda.sambox.pdmodel.PDDocument;
+import org.sejda.sambox.pdmodel.PDPage;
+import org.sejda.sambox.pdmodel.PDPageContentStream;
+import org.sejda.sambox.pdmodel.PDPageContentStream.AppendMode;
+import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
+import org.sejda.sambox.pdmodel.graphics.color.PDDeviceRGB;
+import org.sejda.sambox.rendering.PDFRenderer;
+import javax.imageio.ImageIO;
 
 /**
  * Unit tests for LosslessFactory
@@ -265,6 +265,7 @@ public class LosslessFactoryTest
      *
      * @throws java.io.IOException
      */
+    @Test
     public void testCreateLosslessFromImageUSHORT_555_RGB() throws IOException
     {
         PDDocument document = new PDDocument();
@@ -333,6 +334,7 @@ public class LosslessFactoryTest
      *
      * @throws java.io.IOException
      */
+    @Test
     public void testCreateLosslessFromTransparent1BitGIF() throws IOException
     {
         PDDocument document = new PDDocument();
@@ -577,13 +579,14 @@ public class LosslessFactoryTest
     /**
      * Test lossless encoding of CMYK images
      */
+    @Test
     public void testCreateLosslessFromImageCMYK() throws IOException
     {
         PDDocument document = new PDDocument();
         BufferedImage image = ImageIO.read(this.getClass().getResourceAsStream("png.png"));
 
         final ColorSpace targetCS = new ICC_ColorSpace(ICC_Profile.getInstance(this.getClass()
-                .getResourceAsStream("/org/apache/pdfbox/resources/icc/ISOcoated_v2_300_bas.icc")));
+                .getResourceAsStream("/org/sejda/sambox/resources/icc/ISOcoated_v2_300_bas.icc")));
         ColorConvertOp op = new ColorConvertOp(image.getColorModel().getColorSpace(), targetCS,
                 null);
         BufferedImage imageCMYK = op.filter(image, null);
@@ -597,6 +600,7 @@ public class LosslessFactoryTest
         // checkIdent(imageCMYK, ximage.getImage());
     }
 
+    @Test
     public void testCreateLosslessFrom16Bit() throws IOException
     {
         PDDocument document = new PDDocument();
@@ -621,6 +625,7 @@ public class LosslessFactoryTest
         doWritePDF(document, ximage, testResultsDir, "misc-16bit.pdf");
     }
 
+    @Test
     public void testCreateLosslessFromImageINT_BGR() throws IOException
     {
 
@@ -637,6 +642,7 @@ public class LosslessFactoryTest
         checkIdent(image, ximage.getImage());
     }
 
+    @Test
     public void testCreateLosslessFromImageINT_RGB() throws IOException
     {
 
@@ -653,6 +659,7 @@ public class LosslessFactoryTest
         checkIdent(image, ximage.getImage());
     }
 
+    @Test
     public void testCreateLosslessFromImageBYTE_3BGR() throws IOException
     {
         BufferedImage image = ImageIO.read(this.getClass().getResourceAsStream("png.png"));
@@ -668,6 +675,7 @@ public class LosslessFactoryTest
         checkIdent(image, ximage.getImage());
     }
 
+    @Test
     public void testCreateLosslessFrom16BitPNG() throws IOException
     {
         PDDocument document = new PDDocument();
@@ -687,7 +695,7 @@ public class LosslessFactoryTest
         checkIdent(image, ximage.getImage());
         checkIdentRGB(image, ximage.getOpaqueImage());
         checkIdentRaw(image, ximage);
-        
+
         assertNotNull(ximage.getSoftMask());
         validate(ximage.getSoftMask(), 16, w, h, "png", PDDeviceGray.INSTANCE.getName());
         assertEquals(35, colorCount(ximage.getSoftMask().getImage()));

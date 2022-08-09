@@ -81,7 +81,7 @@ public class PDActionJavaScript extends PDAction
         {
             return ((COSString) base).getString();
         }
-        else if (base instanceof COSStream)
+        if (base instanceof COSStream)
         {
             return ((COSStream) base).asTextString();
         }

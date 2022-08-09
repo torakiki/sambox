@@ -206,9 +206,6 @@ public class PDDeviceCMYK extends PDDeviceColorSpace
             }
             return dest;
         }
-        else
-        {
-            return super.toRGBImageAWT(raster, colorSpace);
-        }
+        return super.toRGBImageAWT(raster, colorSpace);
     }
 }

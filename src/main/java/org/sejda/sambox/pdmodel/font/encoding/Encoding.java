@@ -63,12 +63,12 @@ public abstract class Encoding implements COSObjectable
     /**
      * code-to-name map. Derived classes should not modify the map after class construction.
      */
-    protected final Map<Integer, String> codeToName = new HashMap<Integer, String>(250);
+    protected final Map<Integer, String> codeToName = new HashMap<>(250);
 
     /**
      * name-to-code map. Derived classes should not modify the map after class construction.
      */
-    protected final Map<String, Integer> inverted = new HashMap<String, Integer>(250);
+    protected final Map<String, Integer> inverted = new HashMap<>(250);
 
     /**
      * Returns an unmodifiable view of the code -&gt; name mapping.

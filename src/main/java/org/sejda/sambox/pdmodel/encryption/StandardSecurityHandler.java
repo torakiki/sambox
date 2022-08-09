@@ -102,7 +102,7 @@ public final class StandardSecurityHandler extends SecurityHandler
     public void prepareForDecryption(PDEncryption encryption, COSArray documentIDArray,
             DecryptionMaterial decryptionMaterial) throws InvalidPasswordException, IOException
     {
-        if (!(decryptionMaterial instanceof StandardDecryptionMaterial))
+        if (!(decryptionMaterial instanceof StandardDecryptionMaterial material))
         {
             throw new IOException("Decryption material is not compatible with the document");
         }
@@ -115,7 +115,6 @@ public final class StandardSecurityHandler extends SecurityHandler
         }
 
         setDecryptMetadata(encryption.isEncryptMetaData());
-        StandardDecryptionMaterial material = (StandardDecryptionMaterial) decryptionMaterial;
 
         String password = material.getPassword();
         if (password == null)
@@ -334,12 +333,9 @@ public final class StandardSecurityHandler extends SecurityHandler
 
             return Arrays.equals(hash, oHash);
         }
-        else
-        {
-            byte[] userPassword = getUserPassword(ownerPassword, owner, encRevision, length);
-            return isUserPassword(userPassword, user, owner, permissions, id, encRevision, length,
-                    encryptMetadata);
-        }
+        byte[] userPassword = getUserPassword(ownerPassword, owner, encRevision, length);
+        return isUserPassword(userPassword, user, owner, permissions, id, encRevision, length,
+                encryptMetadata);
     }
 
     /**
@@ -408,11 +404,8 @@ public final class StandardSecurityHandler extends SecurityHandler
         {
             return computeEncryptedKeyRev56(password, isOwnerPassword, o, u, oe, ue, encRevision);
         }
-        else
-        {
-            return computeEncryptedKeyRev234(password, o, permissions, id, encryptMetadata, length,
-                    encRevision);
-        }
+        return computeEncryptedKeyRev234(password, o, permissions, id, encryptMetadata, length,
+                encRevision);
     }
 
     private byte[] computeEncryptedKeyRev234(byte[] password, byte[] o, int permissions, byte[] id,
@@ -670,14 +663,14 @@ public final class StandardSecurityHandler extends SecurityHandler
                     encRevision, length, encryptMetadata);
             return Arrays.equals(user, passwordBytes);
         }
-        else if (encRevision == 3 || encRevision == 4)
+        if (encRevision == 3 || encRevision == 4)
         {
             byte[] passwordBytes = computeUserPassword(password, owner, permissions, id,
                     encRevision, length, encryptMetadata);
             // compare first 16 bytes only
             return Arrays.equals(Arrays.copyOf(user, 16), Arrays.copyOf(passwordBytes, 16));
         }
-        else if (encRevision == 6 || encRevision == 5)
+        if (encRevision == 6 || encRevision == 5)
         {
             byte[] truncatedPassword = truncate127(password);
 
@@ -698,10 +691,7 @@ public final class StandardSecurityHandler extends SecurityHandler
 
             return Arrays.equals(hash, uHash);
         }
-        else
-        {
-            throw new IOException("Unknown Encryption Revision " + encRevision);
-        }
+        throw new IOException("Unknown Encryption Revision " + encRevision);
     }
 
     /**
@@ -726,11 +716,8 @@ public final class StandardSecurityHandler extends SecurityHandler
             return isUserPassword(password.getBytes(StandardCharsets.UTF_8), user, owner,
                     permissions, id, encRevision, length, encryptMetadata);
         }
-        else
-        {
-            return isUserPassword(password.getBytes(StandardCharsets.ISO_8859_1), user, owner,
-                    permissions, id, encRevision, length, encryptMetadata);
-        }
+        return isUserPassword(password.getBytes(StandardCharsets.ISO_8859_1), user, owner,
+                permissions, id, encRevision, length, encryptMetadata);
     }
 
     /**

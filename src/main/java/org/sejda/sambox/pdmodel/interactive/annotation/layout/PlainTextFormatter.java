@@ -44,7 +44,7 @@ public class PlainTextFormatter
 
         private final int alignment;
 
-        private TextAlign(int alignment)
+        TextAlign(int alignment)
         {
             this.alignment = alignment;
         }

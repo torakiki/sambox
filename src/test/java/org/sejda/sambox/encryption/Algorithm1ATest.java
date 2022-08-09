@@ -37,8 +37,8 @@ import org.sejda.sambox.cos.COSString;
 public class Algorithm1ATest
 {
 
-    private byte[] key = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1,
-            2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2 };
+    private final byte[] key = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2 };
 
     private Algorithm1A victim;
     private AESEncryptionAlgorithmEngine engine;

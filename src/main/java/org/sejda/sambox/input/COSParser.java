@@ -36,7 +36,7 @@ class COSParser extends BaseCOSParser
 {
     private static final Logger LOG = LoggerFactory.getLogger(COSParser.class);
 
-    private IndirectObjectsProvider provider;
+    private final IndirectObjectsProvider provider;
 
     COSParser(SeekableSource source)
     {

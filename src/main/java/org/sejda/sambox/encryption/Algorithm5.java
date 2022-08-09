@@ -24,14 +24,13 @@ import org.bouncycastle.util.Arrays;
 
 /**
  * Algorithm 5 as defined in Chap 7.6.3.4 of PDF 32000-1:2008
- * 
- * @author Andrea Vacondio
  *
+ * @author Andrea Vacondio
  */
 class Algorithm5 implements PasswordAlgorithm
 {
-    private MessageDigest digest = MessageDigests.md5();
-    private ARC4Engine engine = new ARC4Engine();
+    private final MessageDigest digest = MessageDigests.md5();
+    private final ARC4Engine engine = new ARC4Engine();
 
     @Override
     public byte[] computePassword(EncryptionContext context)

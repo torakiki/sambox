@@ -29,7 +29,7 @@ import org.bouncycastle.util.Arrays;
 class Algorithm2BExtensionLevel3 implements Algorithm2AHash
 {
 
-    private MessageDigest digest = MessageDigests.sha256();
+    private final MessageDigest digest = MessageDigests.sha256();
 
     @Override
     public byte[] computeHash(byte[] input, byte[] password)

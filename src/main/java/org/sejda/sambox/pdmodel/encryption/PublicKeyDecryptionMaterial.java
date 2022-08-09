@@ -73,20 +73,17 @@ public class PublicKeyDecryptionMaterial extends DecryptionMaterial
 
     public X509Certificate getCertificate() throws KeyStoreException
     {
-        if(keyStore.size() == 1)
+        if (keyStore.size() == 1)
         {
             Enumeration<String> aliases = keyStore.aliases();
             String keyStoreAlias = aliases.nextElement();
-            return (X509Certificate)keyStore.getCertificate(keyStoreAlias);
+            return (X509Certificate) keyStore.getCertificate(keyStoreAlias);
         }
-        else
+        if (keyStore.containsAlias(alias))
         {
-            if(keyStore.containsAlias(alias))
-            {
-                return (X509Certificate)keyStore.getCertificate(alias);
-            }
-            throw new KeyStoreException("the keystore does not contain the given alias");
+            return (X509Certificate) keyStore.getCertificate(alias);
         }
+        throw new KeyStoreException("the keystore does not contain the given alias");
     }
 
     /**
@@ -109,20 +106,17 @@ public class PublicKeyDecryptionMaterial extends DecryptionMaterial
     {
         try
         {
-            if(keyStore.size() == 1)
+            if (keyStore.size() == 1)
             {
                 Enumeration<String> aliases = keyStore.aliases();
                 String keyStoreAlias = aliases.nextElement();
                 return keyStore.getKey(keyStoreAlias, password.toCharArray());
             }
-            else
+            if (keyStore.containsAlias(alias))
             {
-                if(keyStore.containsAlias(alias))
-                {
-                    return keyStore.getKey(alias, password.toCharArray());
-                }
-                throw new KeyStoreException("the keystore does not contain the given alias");
+                return keyStore.getKey(alias, password.toCharArray());
             }
+            throw new KeyStoreException("the keystore does not contain the given alias");
         }
         catch(UnrecoverableKeyException ex)
         {

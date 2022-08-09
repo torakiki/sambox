@@ -185,13 +185,12 @@ public class PDNumberTreeNode implements COSObjectable
             for (int i = 0; i + 1 < numbersArray.size(); i += 2)
             {
                 COSBase base = numbersArray.getObject(i);
-                if (!(base instanceof COSInteger))
+                if (!(base instanceof COSInteger key))
                 {
                     LOG.error("page labels ignored, index {} should be a number, but is {}", i,
                             base);
                     return null;
                 }
-                COSInteger key = (COSInteger) base;
                 COSBase cosValue = numbersArray.getObject(i + 1);
                 indices.put(key.intValue(), cosValue == null ? null : convertCOSToPD(cosValue));
             }

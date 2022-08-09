@@ -94,9 +94,8 @@ public abstract class Filter
             // but tests show that Adobe means "one filter name object".
             return (COSDictionary) dp;
         }
-        if (filter instanceof COSArray && dp instanceof COSArray)
+        if (filter instanceof COSArray && dp instanceof COSArray array)
         {
-            COSArray array = (COSArray) dp;
             if (index < array.size())
             {
                 COSBase params = Optional.ofNullable(array.getObject(index))

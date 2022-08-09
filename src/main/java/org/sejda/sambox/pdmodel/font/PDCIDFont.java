@@ -16,6 +16,13 @@
  */
 package org.sejda.sambox.pdmodel.font;
 
+import static java.util.Objects.nonNull;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.sejda.commons.util.IOUtils;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
@@ -27,13 +34,6 @@ import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.util.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
-
-import static java.util.Objects.nonNull;
 
 /**
  * A CIDFont. A CIDFont is a PDF object that contains information about a CIDFont program. Although
@@ -85,16 +85,14 @@ public abstract class PDCIDFont implements COSObjectable, PDFontLike, PDVectorFo
             while (counter < size)
             {
                 COSBase firstCodeBase = wArray.getObject(counter++);
-                if (!(firstCodeBase instanceof COSNumber))
+                if (!(firstCodeBase instanceof COSNumber firstCode))
                 {
                     LOG.warn("Expected a number array member, got {}", firstCodeBase);
                     continue;
                 }
-                COSNumber firstCode = (COSNumber) firstCodeBase;
                 COSBase next = wArray.getObject(counter++);
-                if (next instanceof COSArray)
+                if (next instanceof COSArray array)
                 {
-                    COSArray array = (COSArray) next;
                     int startRange = firstCode.intValue();
                     int arraySize = array.size();
                     for (int i = 0; i < arraySize; i++)
@@ -105,17 +103,13 @@ public abstract class PDCIDFont implements COSObjectable, PDFontLike, PDVectorFo
                 }
                 else
                 {
-                    COSBase secondCodeBase = next;
                     COSBase rangeWidthBase = wArray.getObject(counter++);
-                    if (!(secondCodeBase instanceof COSNumber)
-                            || !(rangeWidthBase instanceof COSNumber))
+                    if (!(next instanceof COSNumber secondCode)
+                            || !(rangeWidthBase instanceof COSNumber rangeWidth))
                     {
-                        LOG.warn("Expected two numbers, got {} and {}", secondCodeBase,
-                                rangeWidthBase);
+                        LOG.warn("Expected two numbers, got {} and {}", next, rangeWidthBase);
                         continue;
                     }
-                    COSNumber secondCode = (COSNumber) secondCodeBase;
-                    COSNumber rangeWidth = (COSNumber) rangeWidthBase;
                     int startRange = firstCode.intValue();
                     int endRange = secondCode.intValue();
                     float width = rangeWidth.floatValue();
@@ -153,9 +147,8 @@ public abstract class PDCIDFont implements COSObjectable, PDFontLike, PDVectorFo
             {
                 COSNumber c = (COSNumber) w2Array.getObject(i);
                 COSBase next = w2Array.getObject(++i);
-                if (next instanceof COSArray)
+                if (next instanceof COSArray array)
                 {
-                    COSArray array = (COSArray) next;
                     for (int j = 0; j < array.size(); j++)
                     {
                         int cid = c.intValue() + j / 3;
@@ -394,9 +387,8 @@ public abstract class PDCIDFont implements COSObjectable, PDFontLike, PDVectorFo
     {
         int[] cid2gid = null;
         COSBase map = dict.getDictionaryObject(COSName.CID_TO_GID_MAP);
-        if (map instanceof COSStream)
+        if (map instanceof COSStream stream)
         {
-            COSStream stream = (COSStream) map;
 
             InputStream is = stream.getUnfilteredStream();
             byte[] mapAsBytes = IOUtils.toByteArray(is);

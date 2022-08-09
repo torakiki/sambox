@@ -315,26 +315,23 @@ public class PDFunctionType0 extends PDFunction
                 }
                 return resultSample;
             }
-            else
-            {
-                // branch
+            // branch
 
-                if (inPrev[step] == inNext[step])
-                {
-                    coord[step] = inPrev[step];
-                    return rinterpol(coord, step + 1);
-                }
+            if (inPrev[step] == inNext[step])
+            {
                 coord[step] = inPrev[step];
-                float[] sample1 = rinterpol(coord, step + 1);
-                coord[step] = inNext[step];
-                float[] sample2 = rinterpol(coord, step + 1);
-                for (int i = 0; i < numberOfOutputValues; ++i)
-                {
-                    resultSample[i] = interpolate(in[step], inPrev[step], inNext[step], sample1[i],
-                            sample2[i]);
-                }
-                return resultSample;
+                return rinterpol(coord, step + 1);
             }
+            coord[step] = inPrev[step];
+            float[] sample1 = rinterpol(coord, step + 1);
+            coord[step] = inNext[step];
+            float[] sample2 = rinterpol(coord, step + 1);
+            for (int i = 0; i < numberOfOutputValues; ++i)
+            {
+                resultSample[i] = interpolate(in[step], inPrev[step], inNext[step], sample1[i],
+                        sample2[i]);
+            }
+            return resultSample;
         }
 
         /**

@@ -45,11 +45,10 @@ public class DrawObject extends OperatorProcessor
             throw new MissingOperandException(operator, arguments);
         }
         COSBase base0 = arguments.get(0);
-        if (!(base0 instanceof COSName))
+        if (!(base0 instanceof COSName name))
         {
             return;
         }
-        COSName name = (COSName) base0;
         if (getContext().getResources().isImageXObject(name))
         {
             // we're done here, don't decode images when doing text extraction

@@ -52,14 +52,7 @@ public class PDFRenderer
     /**
      * Default annotations filter, returns all annotations
      */
-    private AnnotationFilter annotationFilter = new AnnotationFilter()
-    {
-        @Override
-        public boolean accept(PDAnnotation annotation)
-        {
-            return true;
-        }
-    };
+    private AnnotationFilter annotationFilter = annotation -> true;
 
     private boolean subsamplingAllowed = false;
 

@@ -38,7 +38,7 @@ public final class PDCalGray extends PDCIEDictionaryBasedColorSpace
     // PDFBOX-4119: cache the results for much improved performance
     // cached values MUST be cloned, because they are modified by the caller.
     // this can be observed in rendering of PDFBOX-1724
-    private final Map<Float, float[]> map1 = new HashMap<Float, float[]>();
+    private final Map<Float, float[]> map1 = new HashMap<>();
 
     /**
      * Create a new CalGray color space.
@@ -100,10 +100,7 @@ public final class PDCalGray extends PDCIEDictionaryBasedColorSpace
             map1.put(a, result.clone());
             return result;
         }
-        else
-        {
-            return new float[] { value[0], value[0], value[0] };
-        }
+        return new float[] { value[0], value[0], value[0] };
     }
 
     /**

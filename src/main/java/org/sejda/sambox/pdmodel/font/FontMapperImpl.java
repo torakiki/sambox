@@ -16,12 +16,8 @@
  */
 package org.sejda.sambox.pdmodel.font;
 
-import org.apache.fontbox.FontBoxFont;
-import org.apache.fontbox.ttf.OpenTypeFont;
-import org.apache.fontbox.ttf.TTFParser;
-import org.apache.fontbox.ttf.TrueTypeFont;
-import org.apache.fontbox.type1.Type1Font;
-import org.sejda.sambox.SAMBox;
+import static java.util.Optional.ofNullable;
+import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -37,8 +33,12 @@ import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
 
-import static java.util.Optional.ofNullable;
-import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
+import org.apache.fontbox.FontBoxFont;
+import org.apache.fontbox.ttf.OpenTypeFont;
+import org.apache.fontbox.ttf.TTFParser;
+import org.apache.fontbox.ttf.TrueTypeFont;
+import org.apache.fontbox.type1.Type1Font;
+import org.sejda.sambox.SAMBox;
 
 /**
  * Font mapper, locates non-embedded fonts via a pluggable FontProvider.
@@ -146,10 +146,7 @@ final class FontMapperImpl implements FontMapper
             {
                 return new NoopFontProvider();
             }
-            else
-            {
-                return new FileSystemFontProvider(fontCache);
-            }
+            return new FileSystemFontProvider(fontCache);
         }
     }
 
@@ -230,7 +227,7 @@ final class FontMapperImpl implements FontMapper
     {
         if (!substitutes.containsKey(match))
         {
-            substitutes.put(match, new ArrayList<String>());
+            substitutes.put(match, new ArrayList<>());
         }
         substitutes.get(match).add(replace);
     }
@@ -397,13 +394,7 @@ final class FontMapperImpl implements FontMapper
             return ttf;
         }
 
-        OpenTypeFont otf = (OpenTypeFont) findFont(FontFormat.OTF, postScriptName);
-        if (otf != null)
-        {
-            return otf;
-        }
-
-        return null;
+        return findFont(FontFormat.OTF, postScriptName);
     }
 
     /**
@@ -533,7 +524,7 @@ final class FontMapperImpl implements FontMapper
                     {
                         return new CIDFontMapping((OpenTypeFont) font, null, true);
                     }
-                    else if (font != null)
+                    if (font != null)
                     {
                         return new CIDFontMapping(null, font, true);
                     }
@@ -682,22 +673,19 @@ final class FontMapperImpl implements FontMapper
         {
             return true;
         }
-        else if (cidSystemInfo.getOrdering().equals("CNS1")
+        if (cidSystemInfo.getOrdering().equals("CNS1")
                 && (codePageRange & CHINESE_TRADITIONAL) == CHINESE_TRADITIONAL)
         {
             return true;
         }
-        else if (cidSystemInfo.getOrdering().equals("Japan1")
+        if (cidSystemInfo.getOrdering().equals("Japan1")
                 && (codePageRange & JIS_JAPAN) == JIS_JAPAN)
         {
             return true;
         }
-        else
-        {
-            return cidSystemInfo.getOrdering().equals("Korea1") && (
-                    (codePageRange & KOREAN_WANSUNG) == KOREAN_WANSUNG
-                            || (codePageRange & KOREAN_JOHAB) == KOREAN_JOHAB);
-        }
+        return cidSystemInfo.getOrdering().equals("Korea1") && (
+                (codePageRange & KOREAN_WANSUNG) == KOREAN_WANSUNG
+                        || (codePageRange & KOREAN_JOHAB) == KOREAN_JOHAB);
     }
 
     /**

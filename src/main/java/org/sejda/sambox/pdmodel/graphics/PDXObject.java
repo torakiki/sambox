@@ -55,19 +55,18 @@ public class PDXObject implements COSObjectable
             return null;
         }
 
-        if (!(base instanceof COSStream))
+        if (!(base instanceof COSStream stream))
         {
             throw new IOException("Unexpected object type: " + base.getClass().getName());
         }
 
-        COSStream stream = (COSStream) base;
         String subtype = stream.getNameAsString(COSName.SUBTYPE);
 
         if (COSName.IMAGE.getName().equals(subtype))
         {
             return new PDImageXObject(new PDStream(stream), resources);
         }
-        else if (COSName.FORM.getName().equals(subtype))
+        if (COSName.FORM.getName().equals(subtype))
         {
             ResourceCache cache = resources != null ? resources.getResourceCache() : null;
             COSDictionary group = stream.getDictionaryObject(COSName.GROUP, COSDictionary.class);
@@ -77,14 +76,11 @@ public class PDXObject implements COSObjectable
             }
             return new PDFormXObject(stream, cache);
         }
-        else if (COSName.PS.getName().equals(subtype))
+        if (COSName.PS.getName().equals(subtype))
         {
             return new PDPostScriptXObject(stream);
         }
-        else
-        {
-            throw new IOException("Invalid XObject Subtype: " + subtype);
-        }
+        throw new IOException("Invalid XObject Subtype: " + subtype);
     }
 
     /**

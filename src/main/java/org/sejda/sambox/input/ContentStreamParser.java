@@ -47,8 +47,8 @@ import static org.sejda.sambox.util.CharUtils.isWhitespace;
  */
 public class ContentStreamParser extends SourceReader
 {
-    private ContentStreamCOSParser cosParser;
-    private List<Object> tokens = new ArrayList<>();
+    private final ContentStreamCOSParser cosParser;
+    private final List<Object> tokens = new ArrayList<>();
 
     public ContentStreamParser(PDContentStream stream) throws IOException
     {

@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class CMapManager
 {
-    static Map<String, CMap> cMapCache = Collections.synchronizedMap(new HashMap<String, CMap>());
+    static Map<String, CMap> cMapCache = Collections.synchronizedMap(new HashMap<>());
 
     private static final Logger LOG = LoggerFactory.getLogger(CMapManager.class);
 

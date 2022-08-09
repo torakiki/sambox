@@ -397,9 +397,8 @@ public class PDExtendedGraphicsState implements COSObjectable
     {
         PDFontSetting setting = null;
         COSBase base = dict.getDictionaryObject(COSName.FONT);
-        if (base instanceof COSArray)
+        if (base instanceof COSArray font)
         {
-            COSArray font = (COSArray) base;
             setting = new PDFontSetting(font);
         }
         return setting;

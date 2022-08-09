@@ -121,12 +121,8 @@ public final class LosslessFactory
         {
             return true;
         }
-        if (image.getType() == BufferedImage.TYPE_BYTE_BINARY
-                && image.getColorModel().getPixelSize() == 1)
-        {
-            return true;
-        }
-        return false;
+        return image.getType() == BufferedImage.TYPE_BYTE_BINARY
+                && image.getColorModel().getPixelSize() == 1;
     }
 
     // grayscale images need one color per sample

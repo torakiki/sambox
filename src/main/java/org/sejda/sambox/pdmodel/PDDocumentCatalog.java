@@ -293,7 +293,7 @@ public class PDDocumentCatalog implements COSObjectable
             {
                 return PDActionFactory.createAction((COSDictionary) openAction);
             }
-            else if (openAction instanceof COSArray)
+            if (openAction instanceof COSArray)
             {
                 return PDDestination.create(openAction);
             }

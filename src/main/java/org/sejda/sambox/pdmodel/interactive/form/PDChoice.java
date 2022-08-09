@@ -449,9 +449,9 @@ public abstract class PDChoice extends PDVariableText
             array.add(((COSString) value).getString());
             return array;
         }
-        else if (value instanceof COSArray)
+        if (value instanceof COSArray)
         {
-            return COSArrayList.convertCOSStringCOSArrayToList((COSArray)value);
+            return COSArrayList.convertCOSStringCOSArrayToList((COSArray) value);
         }
         return Collections.emptyList();
     }

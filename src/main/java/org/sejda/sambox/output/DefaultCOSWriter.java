@@ -66,7 +66,7 @@ class DefaultCOSWriter implements COSWriter
     private static final byte RIGHT_SQUARE_BRACKET = 0x5D;
     private static final byte[] STREAM = "stream".getBytes(StandardCharsets.US_ASCII);
     private static final byte[] ENDSTREAM = "endstream".getBytes(StandardCharsets.US_ASCII);
-    private BufferedCountingChannelWriter writer;
+    private final BufferedCountingChannelWriter writer;
 
     public DefaultCOSWriter(CountingWritableByteChannel channel)
     {

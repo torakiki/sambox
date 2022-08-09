@@ -52,19 +52,15 @@ public class TextPositionComparator implements Comparator<TextPosition>
         float yDifference = Math.abs(pos1YBottom - pos2YBottom);
 
         // we will do a simple tolerance comparison
-        if (yDifference < .1 ||
-            pos2YBottom >= pos1YTop && pos2YBottom <= pos1YBottom ||
-            pos1YBottom >= pos2YTop && pos1YBottom <= pos2YBottom)
+        if (yDifference < .1 || pos2YBottom >= pos1YTop && pos2YBottom <= pos1YBottom
+                || pos1YBottom >= pos2YTop && pos1YBottom <= pos2YBottom)
         {
             return Float.compare(x1, x2);
         }
-        else if (pos1YBottom < pos2YBottom)
+        if (pos1YBottom < pos2YBottom)
         {
             return -1;
         }
-        else
-        {
-            return 1;
-        }
+        return 1;
     }
 }

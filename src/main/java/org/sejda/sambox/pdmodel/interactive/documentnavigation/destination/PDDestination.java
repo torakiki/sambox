@@ -55,10 +55,9 @@ public abstract class PDDestination implements PDDestinationOrAction
             {
                 return new PDNamedDestination((COSName) base);
             }
-            if (base instanceof COSArray && ((COSArray) base).size() > 1
+            if (base instanceof COSArray array && ((COSArray) base).size() > 1
                     && ((COSArray) base).getObject(1) instanceof COSName)
             {
-                COSArray array = (COSArray) base;
                 String typeString = ((COSName) array.getObject(1)).getName();
                 if (typeString.equals(PDPageFitDestination.TYPE)
                         || typeString.equals(PDPageFitDestination.TYPE_BOUNDED))

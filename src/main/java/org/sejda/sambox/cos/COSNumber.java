@@ -50,7 +50,7 @@ public abstract class COSNumber extends COSBase
      */
     public abstract long longValue();
 
-    private static Pattern NUMBER = Pattern.compile("(E|e|\\+|\\-|\\.|\\d)+");
+    private static final Pattern NUMBER = Pattern.compile("(E|e|\\+|\\-|\\.|\\d)+");
 
     /**
      * This factory method will get the appropriate number object.

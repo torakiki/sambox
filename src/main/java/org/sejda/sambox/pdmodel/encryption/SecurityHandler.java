@@ -407,7 +407,7 @@ public abstract class SecurityHandler
             }
             if (COSName.METADATA.equals(type))
             {
-                byte buf[] = new byte[10];
+                byte[] buf = new byte[10];
                 // PDFBOX-3229 check case where metadata is not encrypted despite /EncryptMetadata missing
                 try (InputStream is = stream.getUnfilteredStream())
                 {

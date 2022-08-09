@@ -71,9 +71,8 @@ public class PDStructureTreeRoot extends PDStructureNode
     public COSArray getKArray()
     {
         COSBase k = this.getCOSObject().getDictionaryObject(COSName.K);
-        if (k instanceof COSDictionary)
+        if (k instanceof COSDictionary kdict)
         {
-            COSDictionary kdict = (COSDictionary) k;
             k = kdict.getDictionaryObject(COSName.K);
             if (k instanceof COSArray)
             {

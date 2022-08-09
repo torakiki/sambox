@@ -128,16 +128,13 @@ public final class PDInlineImage implements PDImage
         {
             return createColorSpace(cs);
         }
-        else if (isStencil())
+        if (isStencil())
         {
             // stencil mask color space must be gray, it is often missing
             return PDDeviceGray.INSTANCE;
         }
-        else
-        {
-            // an image without a color space is always broken
-            throw new IOException("could not determine inline image color space");
-        }
+        // an image without a color space is always broken
+        throw new IOException("could not determine inline image color space");
     }
 
     // deliver the long name of a device colorspace, or the parameter
@@ -165,9 +162,8 @@ public final class PDInlineImage implements PDImage
             return PDColorSpace.create(toLongName(cs), resources);
         }
 
-        if (cs instanceof COSArray && ((COSArray) cs).size() > 1)
+        if (cs instanceof COSArray srcArray && ((COSArray) cs).size() > 1)
         {
-            COSArray srcArray = (COSArray) cs;
             COSBase csType = srcArray.get(0);
             if (COSName.I.equals(csType) || COSName.INDEXED.equals(csType))
             {
@@ -241,9 +237,8 @@ public final class PDInlineImage implements PDImage
     {
         List<String> names = null;
         COSBase filters = parameters.getDictionaryObject(COSName.F, COSName.FILTER);
-        if (filters instanceof COSName)
+        if (filters instanceof COSName name)
         {
-            COSName name = (COSName) filters;
             names = new COSArrayList<>(name.getName(), name, parameters, COSName.FILTER);
         }
         else if (filters instanceof COSArray)

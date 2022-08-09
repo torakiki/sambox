@@ -387,9 +387,8 @@ public class PDFreeTextAppearanceHandler extends PDAbstractAppearanceHandler
             Object token = null;
             while ((token = parser.nextParsedToken()) != null)
             {
-                if (token instanceof Operator)
+                if (token instanceof Operator op)
                 {
-                    Operator op = (Operator) token;
                     String name = op.getName();
                     if (OperatorName.NON_STROKING_GRAY.equals(name)
                             || OperatorName.NON_STROKING_RGB.equals(name)
@@ -453,9 +452,8 @@ public class PDFreeTextAppearanceHandler extends PDAbstractAppearanceHandler
             Object token = null;
             while ((token = parser.nextParsedToken()) != null)
             {
-                if (token instanceof Operator)
+                if (token instanceof Operator op)
                 {
-                    Operator op = (Operator) token;
                     String name = op.getName();
                     if (OperatorName.SET_FONT_AND_SIZE.equals(name))
                     {

@@ -594,14 +594,7 @@ final class FileSystemFontProvider extends FontProvider
     {
         try (TrueTypeCollection ttc = new TrueTypeCollection(ttcFile))
         {
-            ttc.processAllFonts(new TrueTypeFontProcessor()
-            {
-                @Override
-                public void process(TrueTypeFont ttf) throws IOException
-                {
-                    addTrueTypeFontImpl(ttf, ttcFile);
-                }
-            });
+            ttc.processAllFonts(ttf -> addTrueTypeFontImpl(ttf, ttcFile));
         }
     }
 
@@ -668,9 +661,8 @@ final class FileSystemFontProvider extends FontProvider
                     format = "OTF";
                     CFFFont cff = ((OpenTypeFont) ttf).getCFF().getFont();
                     CIDSystemInfo ros = null;
-                    if (cff instanceof CFFCIDFont)
+                    if (cff instanceof CFFCIDFont cidFont)
                     {
-                        CFFCIDFont cidFont = (CFFCIDFont) cff;
                         String registry = cidFont.getRegistry();
                         String ordering = cidFont.getOrdering();
                         int supplement = cidFont.getSupplement();

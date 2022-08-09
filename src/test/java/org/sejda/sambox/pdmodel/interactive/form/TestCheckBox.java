@@ -63,7 +63,7 @@ public class TestCheckBox
             assertNotNull(checkBox.getValue());
             
             // Test setting/getting option values - the dictionaries Opt entry
-            List<String> options = new ArrayList<String>();
+            List<String> options = new ArrayList<>();
             options.add("Value01");
             options.add("Value02");
             checkBox.setExportValues(options);
@@ -109,7 +109,7 @@ public class TestCheckBox
         PDAcroForm acroForm = new PDAcroForm(doc);
         acroForm.setNeedAppearances(true); // need this or it won't appear on Adobe Reader
         doc.getDocumentCatalog().setAcroForm(acroForm);
-        List<PDField> fields = new ArrayList<PDField>();
+        List<PDField> fields = new ArrayList<>();
         PDCheckBox checkBox = new PDCheckBox(acroForm);
         checkBox.setPartialName("checkbox");
         PDAnnotationWidget widget = checkBox.getWidgets().get(0);

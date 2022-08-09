@@ -111,14 +111,11 @@ public final class PDFieldFactory
         {
             return new PDRadioButton(form, field, parent);
         }
-        else if ((flags & PDButton.FLAG_PUSHBUTTON) != 0)
+        if ((flags & PDButton.FLAG_PUSHBUTTON) != 0)
         {
             return new PDPushButton(form, field, parent);
         }
-        else
-        {
-            return new PDCheckBox(form, field, parent);
-        }
+        return new PDCheckBox(form, field, parent);
     }
 
     private static String findFieldType(COSDictionary dic)

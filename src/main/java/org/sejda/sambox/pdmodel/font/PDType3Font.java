@@ -80,9 +80,8 @@ public class PDType3Font extends PDSimpleFont
     protected final void readEncoding()
     {
         COSBase encodingBase = dict.getDictionaryObject(COSName.ENCODING);
-        if (encodingBase instanceof COSName)
+        if (encodingBase instanceof COSName encodingName)
         {
-            COSName encodingName = (COSName) encodingBase;
             encoding = Encoding.getInstance(encodingName);
             if (encoding == null)
             {

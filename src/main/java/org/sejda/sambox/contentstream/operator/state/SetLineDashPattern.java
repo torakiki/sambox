@@ -45,7 +45,7 @@ public class SetLineDashPattern extends OperatorProcessor
             throw new MissingOperandException(operator, arguments);
         }
         COSBase base0 = arguments.get(0);
-        if (!(base0 instanceof COSArray))
+        if (!(base0 instanceof COSArray dashArray))
         {
             return;
         }
@@ -54,14 +54,12 @@ public class SetLineDashPattern extends OperatorProcessor
         {
             return;
         }
-        COSArray dashArray = (COSArray) base0;
         int dashPhase = ((COSNumber) base1).intValue();
 
         for (COSBase base : dashArray)
         {
-            if (base instanceof COSNumber)
+            if (base instanceof COSNumber num)
             {
-                COSNumber num = (COSNumber) base;
                 if (num.floatValue() != 0)
                 {
                     break;

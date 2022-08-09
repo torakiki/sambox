@@ -244,7 +244,7 @@ public class PDDocumentInformation extends PDDictionaryWrapper
      */
     public Set<String> getMetadataKeys()
     {
-        Set<String> keys = new TreeSet<String>();
+        Set<String> keys = new TreeSet<>();
         for (COSName key : getCOSObject().keySet())
         {
             keys.add(key.getName());

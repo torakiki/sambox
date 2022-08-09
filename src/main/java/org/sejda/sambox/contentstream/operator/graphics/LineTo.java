@@ -45,18 +45,16 @@ public class LineTo extends GraphicsOperatorProcessor
             throw new MissingOperandException(operator, operands);
         }
         COSBase base0 = operands.get(0);
-        if (!(base0 instanceof COSNumber))
+        if (!(base0 instanceof COSNumber x))
         {
             return;
         }
         COSBase base1 = operands.get(1);
-        if (!(base1 instanceof COSNumber))
+        if (!(base1 instanceof COSNumber y))
         {
             return;
         }
         // append straight line segment from the current point to the point
-        COSNumber x = (COSNumber) base0;
-        COSNumber y = (COSNumber) base1;
 
         Point2D.Float pos = getContext().transformedPoint(x.floatValue(), y.floatValue());
 

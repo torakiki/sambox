@@ -45,7 +45,7 @@ class Algorithm2B implements Algorithm2AHash
         HASHES.put(2, MessageDigests.sha512());
     }
 
-    private AESEncryptionAlgorithmEngine aes128 = AESEngineNoPadding.cbc();
+    private final AESEncryptionAlgorithmEngine aes128 = AESEngineNoPadding.cbc();
     private final byte[] u;
 
     Algorithm2B(byte[] u)

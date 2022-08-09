@@ -80,8 +80,7 @@ public class IncrementablePDDocumentWriter implements Closeable
         sanitizeWriteOptions(document);
         this.context = new PDFWriteContext(document.highestExistingReference().objectNumber(),
                 encryptionAlgorithmFromEncryptionDictionary(document.encryptionDictionary(),
-                        document.encryptionKey()),
-                options.stream().toArray(WriteOption[]::new));
+                        document.encryptionKey()), options.toArray(WriteOption[]::new));
         this.writer = new DefaultPDFWriter(new IndirectObjectsWriter(channel, context));
 
         try (InputStream stream = document.incrementedAsStream())

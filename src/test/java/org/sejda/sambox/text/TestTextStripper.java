@@ -349,7 +349,7 @@ public class TestTextStripper
     // Helper method for get the file content
     private static List<String> fileToLines(File file) throws IOException
     {
-        List<String> lines = new LinkedList<String>();
+        List<String> lines = new LinkedList<>();
         String line;
 
         BufferedReader in = new BufferedReader(
@@ -410,12 +410,23 @@ public class TestTextStripper
             String textFull = stripper.getText(doc);
             assertFalse(textFull.isEmpty());
 
-            String expectedTextFull =
-                    "First level 1\n" + "First level 2\n" + "Fist level 3\n" + "Some content\n"
-                            + "Some other content\n" + "Second at level 1\n" + "Second level 2\n"
-                            + "Content\n" + "Third level 1\n" + "Third level 2\n"
-                            + "Third level 3\n" + "Content\n" + "Fourth level 1\n" + "Content\n"
-                            + "Content\n";
+            String expectedTextFull = """
+                    First level 1
+                    First level 2
+                    Fist level 3
+                    Some content
+                    Some other content
+                    Second at level 1
+                    Second level 2
+                    Content
+                    Third level 1
+                    Third level 2
+                    Third level 3
+                    Content
+                    Fourth level 1
+                    Content
+                    Content
+                    """;
             assertEquals(expectedTextFull, textFull.replaceAll("\r", ""));
 
             // this should grab 0-based pages 2 and 3, i.e. 1-based pages 3 and 4
@@ -426,9 +437,15 @@ public class TestTextStripper
             assertFalse(textoi23.isEmpty());
             assertNotEquals(textoi23, textFull);
 
-            String expectedTextoi23 =
-                    "Second at level 1\n" + "Second level 2\n" + "Content\n" + "Third level 1\n"
-                            + "Third level 2\n" + "Third level 3\n" + "Content\n";
+            String expectedTextoi23 = """
+                    Second at level 1
+                    Second level 2
+                    Content
+                    Third level 1
+                    Third level 2
+                    Third level 3
+                    Content
+                    """;
             assertEquals(expectedTextoi23, textoi23.replaceAll("\r", ""));
 
             // this should grab 0-based pages 2 and 3, i.e. 1-based pages 3 and 4
@@ -451,7 +468,11 @@ public class TestTextStripper
             assertNotEquals(textoi2, textoi23);
             assertNotEquals(textoi23, textFull);
 
-            String expectedTextoi2 = "Second at level 1\n" + "Second level 2\n" + "Content\n";
+            String expectedTextoi2 = """
+                    Second at level 1
+                    Second level 2
+                    Content
+                    """;
             assertEquals(expectedTextoi2, textoi2.replaceAll("\r", ""));
 
             // this should grab 0-based page 2, i.e. 1-based page 3
@@ -561,7 +582,7 @@ public class TestTextStripper
         assertFalse(bFail);
     }
 
-    private class PDFTabulaTextStripper extends PDFTextStripper
+    private static class PDFTabulaTextStripper extends PDFTextStripper
     {
         PDFTabulaTextStripper() throws IOException
         {
