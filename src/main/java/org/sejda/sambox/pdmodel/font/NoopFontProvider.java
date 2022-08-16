@@ -20,10 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NoopFontProvider extends FontProvider {
-    @Override
-    public String toDebugString() {
-        return "";
-    }
 
     @Override
     public List<? extends FontInfo> getFontInfo() {

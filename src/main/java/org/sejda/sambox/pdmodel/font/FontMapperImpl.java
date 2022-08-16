@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import org.apache.fontbox.FontBoxFont;
 import org.apache.fontbox.ttf.OpenTypeFont;
@@ -47,9 +48,7 @@ import org.sejda.sambox.SAMBox;
  */
 final class FontMapperImpl implements FontMapper
 {
-    private static final FontCache fontCache = new FontCache(); // todo: static cache isn't ideal
-    private FontProvider fontProvider;
-    private Map<String, FontInfo> fontInfoByName;
+    private final CompletableFuture<Map<String, FontInfo>> fontInfoByName;
     private final TrueTypeFont lastResortFont;
 
     /**
@@ -59,6 +58,13 @@ final class FontMapperImpl implements FontMapper
 
     FontMapperImpl()
     {
+        fontInfoByName = CompletableFuture.supplyAsync(() -> {
+            Map<String, FontInfo> map = new LinkedHashMap<>();
+            provider().getFontInfo().forEach(
+                    info -> getPostScriptNames(info.getPostScriptName()).forEach(
+                            name -> map.put(name, info)));
+            return map;
+        });
         // substitutes for standard 14 fonts
         substitutes.put("Courier", new ArrayList<>(
                 Arrays.asList("CourierNew", "CourierNewPSMT", "LiberationMono",
@@ -135,62 +141,13 @@ final class FontMapperImpl implements FontMapper
         return lastResortFont;
     }
 
-    // lazy thread safe singleton
-    private static class DefaultFontProvider
+    private FontProvider provider()
     {
-        private static final FontProvider INSTANCE = initializeFontProvider();
-
-        private static FontProvider initializeFontProvider()
+        if ("noop".equalsIgnoreCase(System.getProperty(SAMBox.FONT_PROVIDER_PROPERTY)))
         {
-            if ("noop".equalsIgnoreCase(System.getProperty(SAMBox.FONT_PROVIDER_PROPERTY)))
-            {
-                return new NoopFontProvider();
-            }
-            return new FileSystemFontProvider(fontCache);
+            return new NoopFontProvider();
         }
-    }
-
-    /**
-     * Sets the font service provider.
-     */
-    public synchronized void setProvider(FontProvider fontProvider)
-    {
-        fontInfoByName = createFontInfoByName(fontProvider.getFontInfo());
-        this.fontProvider = fontProvider;
-    }
-
-    /**
-     * Returns the font service provider. Defaults to using FileSystemFontProvider.
-     */
-    public synchronized FontProvider getProvider()
-    {
-        if (fontProvider == null)
-        {
-            setProvider(DefaultFontProvider.INSTANCE);
-        }
-        return fontProvider;
-    }
-
-    /**
-     * Returns the font cache associated with this FontMapper. This method is needed by FontProvider
-     * subclasses.
-     */
-    public FontCache getFontCache()
-    {
-        return fontCache;
-    }
-
-    private Map<String, FontInfo> createFontInfoByName(List<? extends FontInfo> fontInfoList)
-    {
-        Map<String, FontInfo> map = new LinkedHashMap<>();
-        for (FontInfo info : fontInfoList)
-        {
-            for (String name : getPostScriptNames(info.getPostScriptName()))
-            {
-                map.put(name, info);
-            }
-        }
-        return map;
+        return new FileSystemFontProvider();
     }
 
     /**
@@ -410,12 +367,6 @@ final class FontMapperImpl implements FontMapper
             return null;
         }
 
-        // make sure the font provider is initialized
-        if (fontProvider == null)
-        {
-            getProvider();
-        }
-
         // first try to match the PostScript name
         FontInfo info = getFont(format, postScriptName);
         if (info != null)
@@ -470,7 +421,7 @@ final class FontMapperImpl implements FontMapper
         }
 
         // look up the PostScript name
-        FontInfo info = fontInfoByName.get(postScriptName);
+        FontInfo info = fontInfoByName.join().get(postScriptName);
         if (info != null && info.getFormat() == format)
         {
             return info;
@@ -547,8 +498,7 @@ final class FontMapperImpl implements FontMapper
             PDCIDSystemInfo cidSystemInfo)
     {
         PriorityQueue<FontMatch> queue = new PriorityQueue<>(20);
-
-        for (FontInfo info : fontInfoByName.values())
+        for (FontInfo info : fontInfoByName.join().values())
         {
             // filter by CIDSystemInfo, if given
             if (cidSystemInfo != null && !isCharSetMatch(cidSystemInfo, info))

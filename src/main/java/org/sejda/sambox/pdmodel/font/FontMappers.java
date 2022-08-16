@@ -23,35 +23,21 @@ package org.sejda.sambox.pdmodel.font;
  */
 public final class FontMappers
 {
-    private static FontMapper instance;
+    private static FontMapper INSTANCE;
 
     private FontMappers()
     {
     }
 
-    // lazy thread safe singleton
-    private static class DefaultFontMapper
-    {
-        private static final FontMapper INSTANCE = new FontMapperImpl();
-    }
-
     /**
-     * Returns the singleton FontMapper instance.
+     * @return the singleton FontMapper instance.
      */
     public static FontMapper instance()
     {
-        if (instance == null)
+        if (INSTANCE == null)
         {
-            instance = DefaultFontMapper.INSTANCE;
+            INSTANCE = new FontMapperImpl();
         }
-        return instance;
-    }
-
-    /**
-     * Sets the singleton FontMapper instance.
-     */
-    public static synchronized void set(FontMapper fontMapper)
-    {
-        instance = fontMapper;
+        return INSTANCE;
     }
 }
