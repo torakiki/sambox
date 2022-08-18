@@ -341,18 +341,16 @@ public class PageDrawer extends PDFGraphicsStreamEngine
             //TODO better solution needs to be found for all occurences where toRGB is called
             return new Color(0, 0, 0, 0);
         }
-        if (!(colorSpace instanceof PDPattern))
+        if (!(colorSpace instanceof PDPattern patternSpace))
         {
             float[] rgb = colorSpace.toRGB(color.getComponents());
             return new Color(clampColor(rgb[0]), clampColor(rgb[1]), clampColor(rgb[2]));
         }
         else
         {
-            PDPattern patternSpace = (PDPattern) colorSpace;
             PDAbstractPattern pattern = patternSpace.getPattern(color);
-            if (pattern instanceof PDTilingPattern)
+            if (pattern instanceof PDTilingPattern tilingPattern)
             {
-                PDTilingPattern tilingPattern = (PDTilingPattern) pattern;
 
                 if (tilingPattern.getPaintType() == PDTilingPattern.PAINT_COLORED)
                 {

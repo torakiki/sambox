@@ -599,11 +599,13 @@ class SourceReader implements Closeable
                 char c = (char) i;
                 switch (c)
                 {
-                case '(':
+                case '(' ->
+                {
                     bracesCounter++;
                     builder.append(c);
-                    break;
-                case ')':
+                }
+                case ')' ->
+                {
                     bracesCounter--;
                     // TODO PDFBox 276
                     // this differs from the PDFBox 2.0.0 impl.
@@ -612,43 +614,23 @@ class SourceReader implements Closeable
                     {
                         builder.append(c);
                     }
-                    break;
-                case '\\':
+                }
+                case '\\' ->
                 {
                     char next = (char) source.read();
                     switch (next)
                     {
-                    case 'n':
-                        builder.append((char) ASCII_LINE_FEED);
-                        break;
-                    case 'r':
-                        builder.append((char) ASCII_CARRIAGE_RETURN);
-                        break;
-                    case 't':
-                        builder.append((char) ASCII_HORIZONTAL_TAB);
-                        break;
-                    case 'b':
-                        builder.append((char) ASCII_BACKSPACE);
-                        break;
-                    case 'f':
-                        builder.append((char) ASCII_FORM_FEED);
-                        break;
-                    case ')':
-                        // TODO PDFBox 276
-                        // this differs from the PDFBox 2.0.0 impl.
-                        // consider if we want to take care of this. Maybe investigate Acrobat to see how they do it
-                    case '(':
-                    case '\\':
-                        builder.append(next);
-                        break;
-                    case '0':
-                    case '1':
-                    case '2':
-                    case '3':
-                    case '4':
-                    case '5':
-                    case '6':
-                    case '7':
+                    case 'n' -> builder.append((char) ASCII_LINE_FEED);
+                    case 'r' -> builder.append((char) ASCII_CARRIAGE_RETURN);
+                    case 't' -> builder.append((char) ASCII_HORIZONTAL_TAB);
+                    case 'b' -> builder.append((char) ASCII_BACKSPACE);
+                    case 'f' -> builder.append((char) ASCII_FORM_FEED);
+
+                    // TODO PDFBox 276
+                    // this differs from the PDFBox 2.0.0 impl.
+                    // consider if we want to take care of this. Maybe investigate Acrobat to see how they do it
+                    case ')', '(', '\\' -> builder.append(next);
+                    case '0', '1', '2', '3', '4', '5', '6', '7' ->
                     {
                         StringBuilder octal = pool.borrow();
                         try
@@ -681,8 +663,7 @@ class SourceReader implements Closeable
                         }
                         break;
                     }
-                    case ASCII_LINE_FEED:
-                    case ASCII_CARRIAGE_RETURN:
+                    case ASCII_LINE_FEED, ASCII_CARRIAGE_RETURN ->
                     {
                         // this is a break in the line so ignore it and the newline and continue
                         while ((c = (char) source.read()) != -1 && isEOL(c))
@@ -692,16 +673,14 @@ class SourceReader implements Closeable
                         unreadIfValid(c);
                         break;
                     }
-                    default:
+                    default ->
                         // dropping the backslash
-                        unreadIfValid(c);
+                            unreadIfValid(c);
                     }
                     break;
                 }
-                case ASCII_LINE_FEED:
-                    builder.append((char) ASCII_LINE_FEED);
-                    break;
-                case ASCII_CARRIAGE_RETURN:
+                case ASCII_LINE_FEED -> builder.append((char) ASCII_LINE_FEED);
+                case ASCII_CARRIAGE_RETURN ->
                 {
                     builder.append((char) ASCII_LINE_FEED);
                     if (!CharUtils.isLineFeed(source.read()))
@@ -710,8 +689,7 @@ class SourceReader implements Closeable
                     }
                     break;
                 }
-                default:
-                    builder.append(c);
+                default -> builder.append(c);
                 }
             }
             unreadIfValid(i);

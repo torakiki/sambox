@@ -128,7 +128,7 @@ public final class FieldUtils
      */
     static void sortByValue(List<KeyValue> pairs)
     {
-        Collections.sort(pairs, new FieldUtils.KeyValueValueComparator());
+        pairs.sort(new KeyValueValueComparator());
     }
 
     /**
@@ -138,7 +138,7 @@ public final class FieldUtils
      */
     static void sortByKey(List<KeyValue> pairs)
     {
-        Collections.sort(pairs, new FieldUtils.KeyValueKeyComparator());
+        pairs.sort(new KeyValueKeyComparator());
     }
 
     /**
@@ -180,11 +180,10 @@ public final class FieldUtils
                 {
                     entryList.add(((COSString) entry).getString());
                 }
-                else if (entry instanceof COSArray)
+                else if (entry instanceof COSArray cosArray)
                 {
-                    COSArray cosArray = (COSArray) entry;
-                    if (cosArray.size() >= pairIdx + 1
-                            && cosArray.get(pairIdx) instanceof COSString)
+                    if (cosArray.size() >= pairIdx + 1 && cosArray.get(
+                            pairIdx) instanceof COSString)
                     {
                         entryList.add(((COSString) cosArray.get(pairIdx)).getString());
                     }

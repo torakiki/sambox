@@ -16,14 +16,13 @@
  */
 package org.sejda.sambox.util;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Uwe Pachler
@@ -34,14 +33,7 @@ public class TestSort
     <T extends Comparable<T>> void doTest(T[] input, T[] expected)
     {
         List<T> list = Arrays.asList(input);
-        IterativeMergeSort.sort(list, new Comparator<>()
-        {
-            @Override
-            public int compare(T comparable, T o)
-            {
-                return comparable.compareTo(o);
-            }
-        });
+        IterativeMergeSort.sort(list, Comparable::compareTo);
         assertArrayEquals(list.toArray(new Object[input.length]), expected);
     }
 

@@ -310,10 +310,9 @@ public abstract class PDStructureNode implements COSObjectable
             // no kids: objectable is not a kid
             return false;
         }
-        if (k instanceof COSArray)
+        if (k instanceof COSArray array)
         {
             // currently more than one kid: remove kid from existing array
-            COSArray array = (COSArray) k;
             boolean removed = array.removeObject(object);
             // if now only one kid: set remaining kid as kids
             if (array.size() == 1)
@@ -356,10 +355,9 @@ public abstract class PDStructureNode implements COSObjectable
         {
             return createObjectFromDic(kidDic);
         }
-        if (kid instanceof COSInteger)
+        if (kid instanceof COSInteger mcid)
         {
             // An integer marked-content identifier denoting a marked-content sequence
-            COSInteger mcid = (COSInteger) kid;
             return mcid.intValue();
         }
         return null;

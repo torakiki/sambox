@@ -16,18 +16,19 @@
  */
 package org.sejda.sambox.text;
 
+import java.awt.geom.Rectangle2D;
+import java.text.Normalizer;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
 import org.sejda.sambox.pdmodel.font.PDFont;
 import org.sejda.sambox.pdmodel.graphics.color.PDColor;
 import org.sejda.sambox.pdmodel.graphics.state.RenderingMode;
 import org.sejda.sambox.util.Matrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.awt.geom.Rectangle2D;
-import java.text.Normalizer;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * This represents a string and a position on the screen of those characters.
@@ -884,7 +885,7 @@ public class TextPosition
         {
             return false;
         }
-        if (textMatrix != null ? !textMatrix.equals(that.textMatrix) : that.textMatrix != null)
+        if (!Objects.equals(textMatrix, that.textMatrix))
         {
             return false;
         }
@@ -892,16 +893,15 @@ public class TextPosition
         {
             return false;
         }
-        if (renderingMode != null ? !renderingMode.equals(that.renderingMode) :
-                that.renderingMode != null)
+        if (!Objects.equals(renderingMode, that.renderingMode))
         {
             return false;
         }
-        if (color != null ? !color.equals(that.color) : that.color != null)
+        if (!Objects.equals(color, that.color))
         {
             return false;
         }
-        return font != null ? font.equals(that.font) : that.font == null;
+        return Objects.equals(font, that.font);
 
         // If changing this method, do not compare mutable fields (PDFBOX-4701)
 

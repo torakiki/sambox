@@ -72,6 +72,7 @@ public class PDFontTest
     /**
      * Test of the error reported in PDFBox-988
      */
+    @Test
     public void testPDFBox988() throws Exception
     {
         try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(

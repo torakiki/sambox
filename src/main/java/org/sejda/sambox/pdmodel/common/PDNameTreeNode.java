@@ -16,15 +16,9 @@
  */
 package org.sejda.sambox.pdmodel.common;
 
-import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSArrayList;
-import org.sejda.sambox.cos.COSBase;
-import org.sejda.sambox.cos.COSDictionary;
-import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.cos.COSObjectable;
-import org.sejda.sambox.cos.COSString;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,9 +28,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
-import static java.util.Optional.ofNullable;
+import org.sejda.sambox.cos.COSArray;
+import org.sejda.sambox.cos.COSArrayList;
+import org.sejda.sambox.cos.COSBase;
+import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.cos.COSObjectable;
+import org.sejda.sambox.cos.COSString;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class represents a node in a name tree.
@@ -187,7 +187,7 @@ public abstract class PDNameTreeNode<T extends COSObjectable> implements COSObje
                     if (names != null && names.size() > 0)
                     {
                         Set<String> strings = names.keySet();
-                        String[] keys = strings.toArray(new String[strings.size()]);
+                        String[] keys = strings.toArray(new String[0]);
                         String lowerLimit = keys[0];
                         setLowerLimit(lowerLimit);
                         String upperLimit = keys[keys.length - 1];

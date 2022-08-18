@@ -16,6 +16,13 @@
  */
 package org.sejda.sambox.text;
 
+import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Map;
+import java.util.WeakHashMap;
+
 import org.apache.fontbox.ttf.TrueTypeFont;
 import org.apache.fontbox.util.BoundingBox;
 import org.sejda.sambox.contentstream.PDFStreamEngine;
@@ -60,7 +67,6 @@ import org.sejda.sambox.pdmodel.font.PDCIDFont;
 import org.sejda.sambox.pdmodel.font.PDCIDFontType2;
 import org.sejda.sambox.pdmodel.font.PDFont;
 import org.sejda.sambox.pdmodel.font.PDFontDescriptor;
-import org.sejda.sambox.pdmodel.font.PDSimpleFont;
 import org.sejda.sambox.pdmodel.font.PDTrueTypeFont;
 import org.sejda.sambox.pdmodel.font.PDType0Font;
 import org.sejda.sambox.pdmodel.font.PDType3Font;
@@ -72,13 +78,6 @@ import org.sejda.sambox.util.Matrix;
 import org.sejda.sambox.util.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Map;
-import java.util.WeakHashMap;
-
-import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
 
 /**
  * PDFStreamEngine subclass for advanced processing of text via TextPosition.

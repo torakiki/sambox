@@ -150,18 +150,11 @@ abstract class AbstractXrefStreamParser
                 }
                 switch (type)
                 {
-                case 0:
-                    onEntryFound(XrefEntry.freeEntry(objectId, field2));
-                    break;
-                case 1:
-                    onEntryFound(XrefEntry.inUseEntry(objectId, field1, field2));
-                    break;
-                case 2:
-                    onEntryFound(CompressedXrefEntry.compressedEntry(objectId, field1, field2));
-                    break;
-                default:
-                    LOG.warn("Unknown xref entry type " + type);
-                    break;
+                case 0 -> onEntryFound(XrefEntry.freeEntry(objectId, field2));
+                case 1 -> onEntryFound(XrefEntry.inUseEntry(objectId, field1, field2));
+                case 2 ->
+                        onEntryFound(CompressedXrefEntry.compressedEntry(objectId, field1, field2));
+                default -> LOG.warn("Unknown xref entry type " + type);
                 }
             }
         }

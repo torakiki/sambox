@@ -20,15 +20,14 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
-
-import javax.imageio.IIOException;
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
-import javax.imageio.metadata.IIOMetadata;
-import javax.imageio.metadata.IIOMetadataNode;
-import javax.imageio.stream.ImageInputStream;
 
 import org.sejda.commons.util.IOUtils;
 import org.sejda.sambox.cos.COSDictionary;
@@ -36,6 +35,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+import javax.imageio.IIOException;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.metadata.IIOMetadata;
+import javax.imageio.metadata.IIOMetadataNode;
+import javax.imageio.stream.ImageInputStream;
 
 /**
  * Decompresses data encoded using a DCT (discrete cosine transform) technique based on the JPEG standard.
@@ -55,10 +60,8 @@ final class DCTFilter extends Filter
     {
         ImageReader reader = findImageReader("JPEG",
                 "a suitable JAI I/O image filter is not installed");
-        ImageInputStream iis = null;
-        try
+        try (ImageInputStream iis = ImageIO.createImageInputStream(encoded))
         {
-            iis = ImageIO.createImageInputStream(encoded);
 
             // skip one LF if there
             if (iis.read() != 0x0A)
@@ -146,20 +149,20 @@ final class DCTFilter extends Filter
 
                 DataBufferByte dataBuffer = (DataBufferByte) raster.getDataBuffer();
                 byte[] bytes = dataBuffer.getData();
-                
+
                 // optimization for lower memory footprint starts here
                 // if we are dealing with more than 100Mb of data then
-                // instead of copying the data in memory from one array to another, 
-                // we write/read to file, using half the memory 
-                if(bytes.length > 100000000) 
+                // instead of copying the data in memory from one array to another,
+                // we write/read to file, using half the memory
+                if (bytes.length > 100000000)
                 {
                     File tmpFile = Files.createTempFile("rasterdatabuffer", ".tmp").toFile();
                     OutputStream fout = new BufferedOutputStream(new FileOutputStream(tmpFile));
-                    try 
+                    try
                     {
                         fout.write(bytes);
-                    } 
-                    finally 
+                    }
+                    finally
                     {
                         IOUtils.closeQuietly(fout);
                     }
@@ -169,21 +172,21 @@ final class DCTFilter extends Filter
                     dataBuffer = null;
 
                     FileInputStream fin = new FileInputStream(tmpFile);
-                    try 
+                    try
                     {
                         IOUtils.copy(fin, decoded);
-                    } 
-                    finally 
+                    }
+                    finally
                     {
                         IOUtils.closeQuietly(fin);
                         tmpFile.delete();
                     }
-                } 
-                else 
+                }
+                else
                 {
                     decoded.write(bytes);
                 }
-                
+
             }
             finally
             {
@@ -192,10 +195,6 @@ final class DCTFilter extends Filter
         }
         finally
         {
-            if (iis != null)
-            {
-                iis.close();
-            }
             reader.dispose();
         }
         return new DecodeResult(parameters);

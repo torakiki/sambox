@@ -101,18 +101,15 @@ public class XrefEntry
      */
     public String toXrefTableEntry()
     {
-        switch (type)
-        {
-        case IN_USE:
-            return String.format(Locale.US, XREFTABLE_ENTRY_FORMAT, getByteOffset(),
-                    getGenerationNumber(), 'n');
-        case FREE:
-            return String.format(Locale.US, XREFTABLE_ENTRY_FORMAT, getObjectNumber(),
-                    getGenerationNumber(), 'f');
-        default:
-            throw new IllegalArgumentException(
-                    "Only in_use and free entries can be written to an xref table");
-        }
+        return switch (type)
+                {
+                    case IN_USE -> String.format(Locale.US, XREFTABLE_ENTRY_FORMAT, getByteOffset(),
+                            getGenerationNumber(), 'n');
+                    case FREE -> String.format(Locale.US, XREFTABLE_ENTRY_FORMAT, getObjectNumber(),
+                            getGenerationNumber(), 'f');
+                    default -> throw new IllegalArgumentException(
+                            "Only in_use and free entries can be written to an xref table");
+                };
     }
 
     /**

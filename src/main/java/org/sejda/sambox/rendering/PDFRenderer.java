@@ -36,7 +36,6 @@ import org.sejda.sambox.pdmodel.graphics.optionalcontent.PDOptionalContentGroup;
 import org.sejda.sambox.pdmodel.graphics.optionalcontent.PDOptionalContentProperties;
 import org.sejda.sambox.pdmodel.graphics.state.PDExtendedGraphicsState;
 import org.sejda.sambox.pdmodel.interactive.annotation.AnnotationFilter;
-import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotation;
 
 /**
  * Renders a PDF document to an AWT BufferedImage. This class may be overridden in order to perform

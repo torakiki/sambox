@@ -263,16 +263,14 @@ abstract class BaseCOSParser extends SourceReader
     public COSString nextString() throws IOException
     {
         char next = (char) source().peek();
-        switch (next)
-        {
-        case '(':
-            return nextLiteralString();
-        case '<':
-            return nextHexadecimalString();
-        default:
-            throw new IOException(String.format("Expected '(' or '<' at offset %d but was '%c'",
-                    position(), next));
-        }
+        return switch (next)
+                {
+                    case '(' -> nextLiteralString();
+                    case '<' -> nextHexadecimalString();
+                    default -> throw new IOException(
+                            String.format("Expected '(' or '<' at offset %d but was '%c'",
+                                    position(), next));
+                };
     }
 
     /**
