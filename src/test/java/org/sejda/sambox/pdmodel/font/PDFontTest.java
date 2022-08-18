@@ -231,30 +231,19 @@ public class PDFontTest
             if (uri.getPath().endsWith(".ttc"))
             {
                 File file = new File(uri);
-                System.out.println("TrueType collection file: " + file);
                 ttc = new TrueTypeCollection(file);
                 break;
             }
         }
         if (ttc == null)
         {
-            System.out.println("testFullEmbeddingTTC skipped, no .ttc files available");
             return;
         }
 
         final List<String> names = new ArrayList<>();
-        ttc.processAllFonts(new TrueTypeCollection.TrueTypeFontProcessor()
-        {
-            @Override
-            public void process(TrueTypeFont ttf) throws IOException
-            {
-                System.out.println("TrueType font in collection: " + ttf.getName());
-                names.add(ttf.getName());
-            }
-        });
+        ttc.processAllFonts(ttf -> names.add(ttf.getName()));
 
         TrueTypeFont ttf = ttc.getFontByName(names.get(0)); // take the first one
-        System.out.println("TrueType font used for test: " + ttf.getName());
 
         try
         {
