@@ -69,7 +69,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Andrea Vacondio
  */
-abstract class BaseTTFSubsetter implements Function<String, COSStream>
+public abstract class BaseTTFSubsetter implements Function<String, COSStream>
 {
 
     private static final Logger LOG = LoggerFactory.getLogger(BaseTTFSubsetter.class);
