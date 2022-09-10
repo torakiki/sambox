@@ -145,7 +145,7 @@ public abstract class BaseTTFSubsetter implements Function<String, COSStream>
         return null;
     }
 
-    TrueTypeFont getFont() throws IOException
+    public TrueTypeFont getFont() throws IOException
     {
         if (Objects.isNull(font))
         {
@@ -159,12 +159,12 @@ public abstract class BaseTTFSubsetter implements Function<String, COSStream>
         return Collections.unmodifiableSortedSet(glyphIds);
     }
 
-    abstract COSStream doSubset(String subsetFontName) throws IOException;
+    public abstract COSStream doSubset(String subsetFontName) throws IOException;
 
     /**
      * Initialize the subsetter before performing a subset
      */
-    void setNumberOfGlyphs(int numberOfGlyphs)
+    public void setNumberOfGlyphs(int numberOfGlyphs)
     {
         this.numberOfGlyphs = numberOfGlyphs;
     }
@@ -785,7 +785,7 @@ public abstract class BaseTTFSubsetter implements Function<String, COSStream>
         return toUInt32(tagbytes) + checksum + checksum + offset + bytes.length;
     }
 
-    void writeTableBody(OutputStream os, byte[] bytes) throws IOException
+    public void writeTableBody(OutputStream os, byte[] bytes) throws IOException
     {
         int n = bytes.length;
         os.write(bytes);

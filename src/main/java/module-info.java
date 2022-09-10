@@ -81,5 +81,6 @@ module org.sejda.sambox {
     exports org.sejda.sambox.util;
     exports org.sejda.sambox.util.filetypedetector;
     exports org.sejda.sambox.xref;
+    opens org.sejda.sambox.resources.ttf;
 
 }
