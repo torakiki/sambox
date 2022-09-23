@@ -198,7 +198,8 @@ public class AppearanceGeneratorHelper
         {
             // avoid java.lang.IllegalArgumentException: U+00A0 ('nbspace') is not available in this font XYZ
             // TODO: generic way of handling any character which is not supported by the font?
-            value = value.replaceAll("\\u00A0", " ");
+            value = value.replaceAll("\\u00A0", " "); // non-breaking space
+            value = value.replaceAll("\\u0009", "   "); // tab
         }
 
         // Treat multiline field values in single lines as single lime values.
