@@ -61,7 +61,7 @@
         <slf4j.version>2.0.0</slf4j.version>
         <diffutils.version>4.12</diffutils.version>
         <mockito.version>4.6.1</mockito.version>
-        <logback.version>1.4.0</logback.version>
+        <tinylog.version>2.5.0</tinylog.version>
         <archunit.version>0.23.1</archunit.version>
         <hamcrest.version>2.2</hamcrest.version>
         <junit.version>5.9.0</junit.version>
@@ -1579,16 +1579,22 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>${logback.version}</version>
+            <groupId>org.tinylog</groupId>
+            <artifactId>slf4j-tinylog</artifactId>
+            <version>${tinylog.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-core</artifactId>
-            <version>${logback.version}</version>
+            <groupId>org.tinylog</groupId>
+            <artifactId>tinylog-impl</artifactId>
+            <version>${tinylog.version}</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>animal-sniffer-annotations</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
