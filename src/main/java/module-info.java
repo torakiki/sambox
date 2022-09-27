@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 module org.sejda.sambox {
-    requires org.apache.commons.logging;
     requires org.bouncycastle.pkix;
     requires org.bouncycastle.provider;
     requires org.bouncycastle.util;

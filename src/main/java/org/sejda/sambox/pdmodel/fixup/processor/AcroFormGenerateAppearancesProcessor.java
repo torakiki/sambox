@@ -16,25 +16,27 @@
  */
 package org.sejda.sambox.pdmodel.fixup.processor;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.io.IOException;
+
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.interactive.form.PDAcroForm;
-
-import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AcroFormGenerateAppearancesProcessor extends AbstractProcessor
 {
-    
-    private static final Log LOG = LogFactory.getLog(AcroFormGenerateAppearancesProcessor.class);
+
+    private static final Logger LOG = LoggerFactory.getLogger(
+            AcroFormGenerateAppearancesProcessor.class);
 
     public AcroFormGenerateAppearancesProcessor(PDDocument document)
-    { 
-        super(document); 
+    {
+        super(document);
     }
 
     @Override
-    public void process() {
+    public void process()
+    {
         /*
          * Get the AcroForm in it's current state.
          *
@@ -47,18 +49,19 @@ public class AcroFormGenerateAppearancesProcessor extends AbstractProcessor
         // PDFBOX-4985
         // build the visual appearance as there is none for the widgets
         if (acroForm != null && acroForm.isNeedAppearances())
-        {            
+        {
             try
             {
-                LOG.debug("trying to generate appearance streams for fields as NeedAppearances is true()");
+                LOG.debug(
+                        "trying to generate appearance streams for fields as NeedAppearances is true()");
                 acroForm.refreshAppearances();
-                 acroForm.setNeedAppearances(false);
+                acroForm.setNeedAppearances(false);
             }
             catch (IOException | IllegalArgumentException ioe)
             {
                 LOG.debug("couldn't generate appearance stream for some fields - check output");
                 LOG.debug(ioe.getMessage());
             }
-        } 
+        }
     }
 } 

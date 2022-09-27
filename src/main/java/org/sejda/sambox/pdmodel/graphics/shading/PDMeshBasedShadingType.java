@@ -25,12 +25,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.pdmodel.common.PDRange;
 import org.sejda.sambox.util.Matrix;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.MemoryCacheImageInputStream;
 
@@ -40,7 +40,7 @@ import javax.imageio.stream.MemoryCacheImageInputStream;
 abstract class PDMeshBasedShadingType extends PDShadingType4
 {
 
-    private static final Log LOG = LogFactory.getLog(PDMeshBasedShadingType.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PDMeshBasedShadingType.class);
 
     PDMeshBasedShadingType(COSDictionary shadingDictionary)
     {
@@ -101,7 +101,7 @@ abstract class PDMeshBasedShadingType extends PDShadingType4
             }
             catch (EOFException ex)
             {
-                LOG.error(ex);
+                LOG.error("Unexpected error", ex);
                 return list;
             }
 

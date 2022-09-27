@@ -22,8 +22,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.fontbox.ttf.TrueTypeFont;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
@@ -41,6 +39,8 @@ import org.sejda.sambox.pdmodel.interactive.form.PDAcroForm;
 import org.sejda.sambox.pdmodel.interactive.form.PDField;
 import org.sejda.sambox.pdmodel.interactive.form.PDFieldFactory;
 import org.sejda.sambox.pdmodel.interactive.form.PDVariableText;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *  Generate field entries from page level widget annotations
@@ -49,8 +49,8 @@ import org.sejda.sambox.pdmodel.interactive.form.PDVariableText;
  */
 public class AcroFormOrphanWidgetsProcessor extends AbstractProcessor
 {
-    
-    private static final Log LOG = LogFactory.getLog(AcroFormOrphanWidgetsProcessor.class);
+
+    private static final Logger LOG = LoggerFactory.getLogger(AcroFormOrphanWidgetsProcessor.class);
 
     public AcroFormOrphanWidgetsProcessor(PDDocument document)
     {
