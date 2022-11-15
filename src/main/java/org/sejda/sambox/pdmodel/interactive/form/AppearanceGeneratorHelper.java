@@ -194,6 +194,8 @@ public class AppearanceGeneratorHelper
     {
         value = getFormattedValue(apValue);
 
+        value = value.replaceAll("\\u3000", " "); // ideographicspace
+
         if (field instanceof PDTextField)
         {
             // avoid java.lang.IllegalArgumentException: U+00A0 ('nbspace') is not available in this font XYZ
