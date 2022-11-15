@@ -64,6 +64,8 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
     private float avgFontWidth;
     private float fontWidthOfSpace = -1f;
     private final Map<Integer, Float> codeToWidthMap;
+    // sambox specific, transient metadata, does not get serialized to the document
+    private final Map<String, String> transientMetadata = new HashMap<>();
 
     PDFont()
     {
@@ -654,5 +656,9 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
     protected CMap getToUnicodeCMap()
     {
         return toUnicodeCMap;
+    }
+    
+    public Map<String, String> getTransientMetadata() {
+        return transientMetadata;
     }
 }
