@@ -676,6 +676,16 @@ public class PDDocument implements Closeable
         return PDFParser.parse(SeekableSources.seekableSourceFrom(file));
     }
 
+    public static PDDocument load(String path) throws IOException
+    {
+        return load(new File(path));
+    }
+
+    public void save(String path) throws IOException
+    {
+        writeTo(new File(path), WriteOption.COMPRESS_STREAMS);
+    }
+
     public boolean hasParseErrors()
     {
         return this.document.getTrailer().getFallbackScanStatus() != null;
