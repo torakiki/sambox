@@ -24,7 +24,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,7 +34,6 @@ import java.util.Arrays;
 import java.util.Locale;
 
 import org.apache.fontbox.ttf.TrueTypeFont;
-import org.junit.Before;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -49,13 +47,6 @@ import org.sejda.sambox.util.SpecVersionUtils;
 
 public class TestPDDocument
 {
-    private File testResultsDir = new File("target/test-output");
-
-    @Before
-    public void setUp()
-    {
-        testResultsDir.mkdirs();
-    }
 
     /**
      * Test document save/load using a stream.
@@ -93,9 +84,9 @@ public class TestPDDocument
      * @throws IOException if something went wrong
      */
     @Test
-    public void testSaveLoadFile() throws IOException
+    public void testSaveLoadFile(@TempDir Path tmp) throws IOException
     {
-        File targetFile = new File(testResultsDir, "pddocument-saveloadfile.pdf");
+        var targetFile = Files.createTempFile(tmp, "pddocument-saveloadfile", ".pdf").toFile();
         // Create PDF with one blank page
         try (PDDocument document = new PDDocument())
         {
@@ -125,7 +116,7 @@ public class TestPDDocument
      * default.
      */
     @Test
-    public void testSaveArabicLocale() throws IOException
+    public void testSaveArabicLocale(@TempDir Path tmp) throws IOException
     {
         Locale defaultLocale = Locale.getDefault();
         try
@@ -133,8 +124,8 @@ public class TestPDDocument
             Locale arabicLocale = new Locale.Builder().setLanguageTag("ar-EG-u-nu-arab")
                     .build();
             Locale.setDefault(arabicLocale);
-
-            File targetFile = new File(testResultsDir, "pddocument-savearabicfile.pdf");
+            var targetFile = Files.createTempFile(tmp, "pddocument-savearabicfile", ".pdf")
+                    .toFile();
 
             // Create PDF with one blank page
             try (PDDocument document = new PDDocument())
