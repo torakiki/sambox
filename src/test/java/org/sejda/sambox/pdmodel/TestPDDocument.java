@@ -33,6 +33,7 @@ import java.util.Arrays;
 import java.util.Locale;
 
 import org.junit.Before;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.sejda.commons.util.IOUtils;
@@ -210,6 +211,7 @@ public class TestPDDocument
     }
 
     @Test
+    @DisplayName("Multiple close() don't yield multiple onClose action runs")
     public void closeOnce() throws IOException
     {
 
@@ -224,12 +226,12 @@ public class TestPDDocument
             }
         };
 
-        try (PDDocument document = new PDDocument())
-        {
-            document.setOnCloseAction(onClose);
-            document.addPage(new PDPage());
-            document.writeTo(new ByteArrayOutputStream());
-        }
+        var document = new PDDocument();
+        document.setOnCloseAction(onClose);
+        document.addPage(new PDPage());
+        document.writeTo(new ByteArrayOutputStream());
+        document.close();
+        document.close();
     }
 
     @Test
