@@ -18,6 +18,7 @@ package org.sejda.sambox.pdmodel;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
@@ -26,14 +27,19 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Locale;
 
 import org.junit.Before;
-import org.junit.Test;
-import org.sejda.commons.util.IOUtils; 
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.sejda.commons.util.IOUtils;
 import org.sejda.io.SeekableSources;
+import org.sejda.sambox.SAMBox;
 import org.sejda.sambox.input.PDFParser;
+import org.sejda.sambox.output.WriteOption;
 import org.sejda.sambox.pdmodel.PDDocument.OnClose;
 import org.sejda.sambox.util.SpecVersionUtils;
 
@@ -49,7 +55,7 @@ public class TestPDDocument
 
     /**
      * Test document save/load using a stream.
-     * 
+     *
      * @throws IOException if something went wrong
      */
     @Test
@@ -79,7 +85,7 @@ public class TestPDDocument
 
     /**
      * Test document save/load using a file.
-     * 
+     *
      * @throws IOException if something went wrong
      */
     @Test
@@ -111,7 +117,8 @@ public class TestPDDocument
     }
 
     /**
-     * PDFBOX-3481: Test whether XRef generation results in unusable PDFs if Arab numbering is default.
+     * PDFBOX-3481: Test whether XRef generation results in unusable PDFs if Arab numbering is
+     * default.
      */
     @Test
     public void testSaveArabicLocale() throws IOException
@@ -119,7 +126,8 @@ public class TestPDDocument
         Locale defaultLocale = Locale.getDefault();
         try
         {
-            Locale arabicLocale = new Locale.Builder().setLanguageTag("ar-EG-u-nu-arab").build();
+            Locale arabicLocale = new Locale.Builder().setLanguageTag("ar-EG-u-nu-arab")
+                    .build();
             Locale.setDefault(arabicLocale);
 
             File targetFile = new File(testResultsDir, "pddocument-savearabicfile.pdf");
@@ -132,8 +140,8 @@ public class TestPDDocument
             }
 
             // Load
-            try (PDDocument loadDoc = PDFParser
-                    .parse(SeekableSources.seekableSourceFrom(targetFile)))
+            try (PDDocument loadDoc = PDFParser.parse(
+                    SeekableSources.seekableSourceFrom(targetFile)))
             {
                 assertEquals(1, loadDoc.getNumberOfPages());
             }
@@ -193,10 +201,12 @@ public class TestPDDocument
         }
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void requiredNotBlankVersion()
     {
-        new PDDocument().getDocument().setHeaderVersion(" ");
+        assertThrows(IllegalArgumentException.class,
+                () -> new PDDocument().getDocument().setHeaderVersion(" "));
+
     }
 
     @Test
@@ -219,6 +229,36 @@ public class TestPDDocument
             document.setOnCloseAction(onClose);
             document.addPage(new PDPage());
             document.writeTo(new ByteArrayOutputStream());
+        }
+    }
+
+    @Test
+    public void testWriteWithMetadata(@TempDir Path tmp) throws IOException
+    {
+        var output = Files.createTempFile(tmp, "", ".pdf").toFile();
+        try (var document = new PDDocument())
+        {
+            document.addPage(new PDPage());
+            document.writeTo(output);
+        }
+        try (var outputDoc = PDFParser.parse(SeekableSources.seekableSourceFrom(output)))
+        {
+            assertEquals(SAMBox.PRODUCER, outputDoc.getDocumentInformation().getProducer());
+        }
+    }
+
+    @Test
+    public void testWriteNoMetadata(@TempDir Path tmp) throws IOException
+    {
+        var output = Files.createTempFile(tmp, "", ".pdf").toFile();
+        try (var document = new PDDocument())
+        {
+            document.addPage(new PDPage());
+            document.writeTo(output, WriteOption.NO_METADATA_PRODUCER_MODIFIED_DATE_UPDATE);
+        }
+        try (var outputDoc = PDFParser.parse(SeekableSources.seekableSourceFrom(output)))
+        {
+            assertNull(outputDoc.getDocumentInformation().getProducer());
         }
     }
 }

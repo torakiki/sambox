@@ -16,6 +16,30 @@
  */
 package org.sejda.sambox.pdmodel;
 
+import static java.util.Optional.ofNullable;
+import static org.sejda.commons.util.RequireUtils.requireNotBlank;
+import static org.sejda.io.CountingWritableByteChannel.from;
+import static org.sejda.sambox.cos.DirectCOSObject.asDirectObject;
+import static org.sejda.sambox.util.SpecVersionUtils.V1_4;
+import static org.sejda.sambox.util.SpecVersionUtils.isAtLeast;
+
+import java.awt.Point;
+import java.awt.image.DataBuffer;
+import java.awt.image.Raster;
+import java.io.Closeable;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.channels.WritableByteChannel;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+
 import org.apache.fontbox.ttf.TrueTypeFont;
 import org.sejda.commons.util.IOUtils;
 import org.sejda.io.CountingWritableByteChannel;
@@ -43,30 +67,6 @@ import org.sejda.sambox.pdmodel.font.Subsettable;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceRGB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.awt.Point;
-import java.awt.image.DataBuffer;
-import java.awt.image.Raster;
-import java.io.Closeable;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.channels.WritableByteChannel;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-
-import static java.util.Optional.ofNullable;
-import static org.sejda.commons.util.RequireUtils.requireNotBlank;
-import static org.sejda.io.CountingWritableByteChannel.from;
-import static org.sejda.sambox.cos.DirectCOSObject.asDirectObject;
-import static org.sejda.sambox.util.SpecVersionUtils.V1_4;
-import static org.sejda.sambox.util.SpecVersionUtils.isAtLeast;
 
 /**
  * This is the in-memory representation of the PDF document.
@@ -559,12 +559,9 @@ public class PDDocument implements Closeable
         requireOpen();
 
         if (Arrays.stream(options)
-                .anyMatch(i -> i == WriteOption.NO_METADATA_PRODUCER_MODIFIED_DATE_UPDATE))
+                .noneMatch(i -> i == WriteOption.NO_METADATA_PRODUCER_MODIFIED_DATE_UPDATE))
         {
-            // does not update producer and last modification date
-        }
-        else
-        {
+            // update producer and last modification date only if the write option doesn't state otherwise
             getDocumentInformation().setProducer(SAMBox.PRODUCER);
             getDocumentInformation().setModificationDate(Calendar.getInstance());
         }
