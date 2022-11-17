@@ -115,7 +115,7 @@ public class PDFParser
         requireNonNull(source);
         COSParser parser = new COSParser(source);
         PDDocument document = doParse(decryptionMaterial, parser);
-        document.setOnCloseAction(() -> {
+        document.addOnCloseAction(() -> {
             IOUtils.close(parser.provider());
             IOUtils.close(parser);
         });

@@ -16,10 +16,12 @@
  */
 package org.sejda.sambox.pdmodel;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -32,6 +34,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Locale;
 
+import org.apache.fontbox.ttf.TrueTypeFont;
 import org.junit.Before;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -220,18 +223,33 @@ public class TestPDDocument
             private int count = 0;
 
             @Override
-            public void onClose() throws IOException
+            public void onClose()
             {
                 assertTrue(++count <= 1);
             }
         };
 
         var document = new PDDocument();
-        document.setOnCloseAction(onClose);
+        document.addOnCloseAction(onClose);
         document.addPage(new PDPage());
         document.writeTo(new ByteArrayOutputStream());
         document.close();
         document.close();
+    }
+
+    @Test
+    public void onCloseComposition() throws IOException
+    {
+        var onefont = mock(TrueTypeFont.class);
+        var anotherfont = mock(TrueTypeFont.class);
+
+        var document = new PDDocument();
+        document.registerTrueTypeFontForClosing(onefont);
+        document.registerTrueTypeFontForClosing(anotherfont);
+        document.addPage(new PDPage());
+        document.writeTo(new ByteArrayOutputStream());
+        verify(onefont).close();
+        verify(anotherfont).close();
     }
 
     @Test

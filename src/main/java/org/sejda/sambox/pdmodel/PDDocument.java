@@ -263,7 +263,7 @@ public class PDDocument implements Closeable
      */
     public void registerTrueTypeFontForClosing(TrueTypeFont ttf)
     {
-        onClose.andThen(() -> IOUtils.closeQuietly(ttf));
+        addOnCloseAction(() -> IOUtils.closeQuietly(ttf));
     }
 
     /**
@@ -372,11 +372,24 @@ public class PDDocument implements Closeable
     }
 
     /**
-     * Sets an action to be performed right before this {@link PDDocument} is closed.
+     * Deprecated since the name suggests a setter while we actually have {@link OnClose} actions
+     * composition (we don't set the action, we add it to existing actions).
      *
      * @param onClose
      */
+    @Deprecated
     public void setOnCloseAction(OnClose onClose)
+    {
+        addOnCloseAction(onClose);
+    }
+
+    /**
+     * Adds the given {@link OnClose} to the set of actions to be executed right before this
+     * {@link PDDocument} is closed.
+     *
+     * @param onClose
+     */
+    public void addOnCloseAction(OnClose onClose)
     {
         requireOpen();
         this.onClose = onClose.andThen(this.onClose);
@@ -687,7 +700,7 @@ public class PDDocument implements Closeable
     {
         return this.document.getTrailer().getFallbackScanStatus() != null;
     }
-    
+
     public void assertNumberOfPagesIsAccurate()
     {
         this.getPages().iterator();
