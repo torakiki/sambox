@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.pdmodel.interactive.action;
 
+import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSObjectable;
 /**
@@ -99,11 +100,11 @@ public class PDFormFieldAdditionalActions implements COSObjectable
      */
     public PDAction getF()
     {
-        COSDictionary f = (COSDictionary)actions.getDictionaryObject( "F" );
+        COSBase f = actions.getDictionaryObject( "F" );
         PDAction retval = null;
-        if( f != null )
+        if(f instanceof COSDictionary)
         {
-            retval = PDActionFactory.createAction( f );
+            retval = PDActionFactory.createAction((COSDictionary) f);
         }
         return retval;
     }
