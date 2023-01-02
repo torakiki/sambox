@@ -14,7 +14,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /*
- * Copyright 2022 Sober Lemur S.a.s. di Vacondio Andrea
+ * Copyright 2022 Sober Lemur S.r.l.
  * Copyright 2022 Sejda BV
  *
  * Created 08/04/22

@@ -9,7 +9,7 @@ import org.sejda.sambox.pdmodel.PDDocument;
 import java.io.IOException;
 
 /*
- * Copyright 2022 Sober Lemur S.a.s. di Vacondio Andrea
+ * Copyright 2022 Sober Lemur S.r.l.
  * Copyright 2022 Sejda BV
  *
  * Created 31/03/22

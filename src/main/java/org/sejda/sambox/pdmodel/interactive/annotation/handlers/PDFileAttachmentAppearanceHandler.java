@@ -1,6 +1,6 @@
 package org.sejda.sambox.pdmodel.interactive.annotation.handlers;
 /*
- * Copyright 2022 Sober Lemur S.a.s. di Vacondio Andrea
+ * Copyright 2022 Sober Lemur S.r.l.
  * Copyright 2022 Sejda BV
  *
  * Created 04/05/22
