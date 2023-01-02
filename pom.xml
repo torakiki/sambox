@@ -5,7 +5,7 @@
     <artifactId>sambox</artifactId>
     <packaging>jar</packaging>
     <name>sambox</name>
-    <version>3.0.0.M7-SNapshot</version>
+    <version>3.0.0.M7-SNAPSHOT</version>
 
     <description>An Apache PDFBox fork intended to be used as PDF processor for Sejda and PDFsam
         related projects
