@@ -225,6 +225,13 @@ public abstract class PDFStreamEngine
         PDResources parent = pushResources(group);
         Deque<PDGraphicsState> savedStack = saveGraphicsStack();
 
+        // sambox specific (currently)
+        // save text matrices (stream may contain BT/ET, see PDFBOX-2137)
+        Matrix textMatrixOld = textMatrix;
+        textMatrix = new Matrix();
+        Matrix textLineMatrixOld = textLineMatrix;
+        textLineMatrix = new Matrix();
+
         PDGraphicsState graphicsState = getGraphicsState();
         Matrix parentMatrix = initialMatrix;
 
@@ -252,6 +259,11 @@ public abstract class PDFStreamEngine
         finally
         {
             initialMatrix = parentMatrix;
+
+            // sambox specific (currently)
+            // restore text matrices
+            textMatrix = textMatrixOld;
+            textLineMatrix = textLineMatrixOld;
 
             restoreGraphicsStack(savedStack);
             popResources(parent);
