@@ -168,10 +168,12 @@ public abstract class PDOutlineNode extends PDDictionaryWrapper
         if(hasChildren()) {
             int currentIndex = 0;
             Iterator<PDOutlineItem> iterator = children().iterator();
+            PDOutlineItem prev = null;
             PDOutlineItem current = iterator.next();
 
             while (currentIndex < index && iterator.hasNext()) {
                 currentIndex++;
+                prev = current;
                 current = iterator.next();
             }
             
@@ -180,7 +182,9 @@ public abstract class PDOutlineNode extends PDDictionaryWrapper
                 // newChild is inserted before current
                 // newChild becomes index
                 // current becomes index + 1
-                PDOutlineItem prev = current.getPreviousSibling();
+                
+                // Unreliable, some outlines are broken, use the iterated reference 
+                //PDOutlineItem prev = current.getPreviousSibling();
 
                 current.setPreviousSibling(newChild);
 
