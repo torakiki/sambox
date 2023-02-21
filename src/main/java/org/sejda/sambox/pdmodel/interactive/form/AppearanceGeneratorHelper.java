@@ -43,11 +43,7 @@ import org.sejda.sambox.output.ContentStreamWriter;
 import org.sejda.sambox.pdmodel.PDPageContentStream;
 import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
-import org.sejda.sambox.pdmodel.font.PDFont;
-import org.sejda.sambox.pdmodel.font.PDSimpleFont;
-import org.sejda.sambox.pdmodel.font.PDType3CharProc;
-import org.sejda.sambox.pdmodel.font.PDType3Font;
-import org.sejda.sambox.pdmodel.font.PDVectorFont;
+import org.sejda.sambox.pdmodel.font.*;
 import org.sejda.sambox.pdmodel.graphics.color.PDColor;
 import org.sejda.sambox.pdmodel.interactive.action.PDAction;
 import org.sejda.sambox.pdmodel.interactive.action.PDActionJavaScript;
@@ -531,8 +527,8 @@ public class AppearanceGeneratorHelper
         // callers might have determined that the default font does not support rendering the field's value
         // so the font was substituted to another one, which has better unicode support
         // see PDVariableText.setAppearanceOverrideFont()
-        PDFont font = ofNullable(field.getAppearanceFont()).orElseGet(
-                () -> defaultAppearance.getFont());
+        PDFont font = ofNullable(field.getAppearanceFont()).or(
+                () -> ofNullable(defaultAppearance.getFont())).orElse(PDType1Font.HELVETICA);
 
         requireNotNullArg(font, "font is null, check whether /DA entry is incomplete or incorrect");
         if (font.getName().contains("+"))
