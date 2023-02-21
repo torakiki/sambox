@@ -51,6 +51,27 @@ public abstract class COSNumber extends COSBase
     public abstract long longValue();
 
     private static final Pattern NUMBER = Pattern.compile("(E|e|\\+|\\-|\\.|\\d)+");
+    
+    private static boolean isNumber(String s)
+    {
+        try
+        {
+            return NUMBER.matcher(s).matches();
+        }
+        catch (StackOverflowError soe)
+        {
+            // fallback method
+            try
+            {
+                Double.parseDouble(s);
+                return true;
+            }
+            catch (NumberFormatException nfex)
+            {
+                return false;
+            }
+        }
+    }
 
     /**
      * This factory method will get the appropriate number object.
@@ -62,7 +83,8 @@ public abstract class COSNumber extends COSBase
     public static COSNumber get(String number) throws IOException
     {
         requireNotNullArg(number, "Number cannot be null");
-        requireArg(NUMBER.matcher(number).matches(), "Invalid number " + number);
+        requireArg(isNumber(number), "Invalid number " + number);
+        
         if (number.length() == 1)
         {
             char digit = number.charAt(0);
