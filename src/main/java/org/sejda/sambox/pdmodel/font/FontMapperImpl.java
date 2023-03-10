@@ -40,6 +40,8 @@ import org.apache.fontbox.ttf.TTFParser;
 import org.apache.fontbox.ttf.TrueTypeFont;
 import org.apache.fontbox.type1.Type1Font;
 import org.sejda.sambox.SAMBox;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Font mapper, locates non-embedded fonts via a pluggable FontProvider.
@@ -50,6 +52,8 @@ final class FontMapperImpl implements FontMapper
 {
     private final CompletableFuture<Map<String, FontInfo>> fontInfoByName;
     private final TrueTypeFont lastResortFont;
+
+    private static final Logger LOG = LoggerFactory.getLogger(FontMapperImpl.class);
 
     /**
      * Map of PostScript name substitutes, in priority order.
@@ -104,10 +108,10 @@ final class FontMapperImpl implements FontMapper
                         "TimesNewRoman-BoldItalic", "LiberationSerif-BoldItalic",
                         "NimbusRomNo9L-MediItal")));
         substitutes.put("Symbol",
-                new ArrayList<>(Arrays.asList("Symbol", "SymbolMT", "StandardSymL")));
+                new ArrayList<>(Arrays.asList("Symbol", "SymbolMT", "StandardSymL", "ChromSymbolOTF")));
         substitutes.put("ZapfDingbats", new ArrayList<>(
                 Arrays.asList("ZapfDingbatsITCbyBT-Regular", "ZapfDingbatsITC", "Dingbats",
-                        "MS-Gothic")));
+                        "MS-Gothic", "ChromDingbatsOTF")));
 
         // Acrobat also uses alternative names for Standard 14 fonts, which we map to those above
         // these include names such as "Arial" and "TimesNewRoman"
@@ -143,10 +147,24 @@ final class FontMapperImpl implements FontMapper
 
     private FontProvider provider()
     {
-        if ("noop".equalsIgnoreCase(System.getProperty(SAMBox.FONT_PROVIDER_PROPERTY)))
+        String configuredFontProvider = System.getProperty(SAMBox.FONT_PROVIDER_PROPERTY); 
+        if ("noop".equalsIgnoreCase(configuredFontProvider))
         {
             return new NoopFontProvider();
         }
+        else if(configuredFontProvider != null && !configuredFontProvider.isEmpty())
+        {
+            try
+            {
+                LOG.debug("Trying to use {} as font provider...", configuredFontProvider);
+                return (FontProvider) Class.forName(configuredFontProvider).getDeclaredConstructor().newInstance();
+            }
+            catch (Exception ex)
+            {
+                LOG.error("Failed loading custom font provider", ex);
+            }
+        }
+        
         return new FileSystemFontProvider();
     }
 

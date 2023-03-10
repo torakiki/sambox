@@ -34,6 +34,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 import org.apache.fontbox.FontBoxFont;
 import org.apache.fontbox.cff.CFFCIDFont;
@@ -56,7 +57,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author John Hewson
  */
-final class FileSystemFontProvider extends FontProvider
+public class FileSystemFontProvider extends FontProvider
 {
     private static final FontCache FONT_CACHE = new FontCache(); // todo: static cache isn't ideal
     private static final String FONT_CACHE_SEPARATOR = "|";
@@ -299,6 +300,11 @@ final class FileSystemFontProvider extends FontProvider
         }
 
     }
+    
+    protected List<File> findFontFiles()
+    {
+        return new FontFileFinder().find().stream().map(File::new).collect(Collectors.toList());
+    }
 
 
     private void initialize()
@@ -309,12 +315,8 @@ final class FileSystemFontProvider extends FontProvider
 
             // scan the local system for font files
             List<File> files = new ArrayList<>();
-            FontFileFinder fontFileFinder = new FontFileFinder();
-            List<URI> fonts = fontFileFinder.find();
-            for (URI font : fonts)
-            {
-                files.add(new File(font));
-            }
+            List<File> fonts = findFontFiles();
+            files.addAll(fonts);
 
             LOG.trace("Found {} fonts on the local system", files.size());
 
@@ -372,7 +374,7 @@ final class FileSystemFontProvider extends FontProvider
         }
     }
 
-    private File getDiskCacheFile()
+    protected File getDiskCacheFile()
     {
         String path = System.getProperty("org.sambox.fontcache");
         if (path == null || !new File(path).isDirectory() || !new File(path).canWrite())
