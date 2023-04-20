@@ -39,13 +39,7 @@ import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
-import java.awt.image.ComponentColorModel;
-import java.awt.image.DataBuffer;
-import java.awt.image.DataBufferByte;
-import java.awt.image.Raster;
-import java.awt.image.WritableRaster;
+import java.awt.image.*;
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -163,6 +157,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
 
     private final RenderDestination destination;
     private final RenderingHints renderingHints;
+    private LookupTable invTable = null;
 
     /**
      * Default annotations filter, returns all annotations
@@ -482,6 +477,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         at.concatenate(font.getFontMatrix().createAffineTransform());
 
         Glyph2D glyph2D = createGlyph2D(font);
+        // SAMBOX specific: we don't want to swallow exceptions here and just print an error message to the log
         drawGlyph2D(glyph2D, font, code, displacement, at);
     }
 
@@ -1102,21 +1098,8 @@ public class PageDrawer extends PDFGraphicsStreamEngine
                 Paint paint = getNonStrokingPaint();
                 Rectangle2D unitRect = new Rectangle2D.Float(0, 0, 1, 1);
                 Rectangle2D bounds = at.createTransformedShape(unitRect).getBounds2D();
-                GraphicsConfiguration deviceConfiguration = graphics.getDeviceConfiguration();
-                int w;
-                int h;
-                if (deviceConfiguration != null && deviceConfiguration.getBounds() != null)
-                {
-                    // PDFBOX-4690: bounds doesn't need to be larger than device bounds (OOM risk)
-                    Rectangle deviceBounds = deviceConfiguration.getBounds();
-                    w = (int) Math.ceil(Math.min(bounds.getWidth(), deviceBounds.getWidth()));
-                    h = (int) Math.ceil(Math.min(bounds.getHeight(), deviceBounds.getHeight()));
-                }
-                else
-                {
-                    w = (int) Math.ceil(bounds.getWidth());
-                    h = (int) Math.ceil(bounds.getHeight());
-                }
+                int w = (int) Math.ceil(bounds.getWidth());
+                int h = (int) Math.ceil(bounds.getHeight());
                 BufferedImage renderedPaint = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
                 Graphics2D g = (Graphics2D) renderedPaint.getGraphics();
                 g.translate(-bounds.getMinX(), -bounds.getMinY());
@@ -1127,19 +1110,65 @@ public class PageDrawer extends PDFGraphicsStreamEngine
 
                 // draw the mask
                 BufferedImage mask = pdImage.getImage();
-                BufferedImage renderedMask = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
-                g = (Graphics2D) renderedMask.getGraphics();
-                g.translate(-bounds.getMinX(), -bounds.getMinY());
                 AffineTransform imageTransform = new AffineTransform(at);
                 imageTransform.scale(1.0 / mask.getWidth(), -1.0 / mask.getHeight());
                 imageTransform.translate(0, -mask.getHeight());
+                AffineTransform full = new AffineTransform(g.getTransform());
+                full.concatenate(imageTransform);
+                Matrix m = new Matrix(full);
+                double scaleX = Math.abs(m.getScalingFactorX());
+                double scaleY = Math.abs(m.getScalingFactorY());
+
+                boolean smallMask = mask.getWidth() <= 8 && mask.getHeight() <= 8;
+                if (!smallMask)
+                {
+                    // PDFBOX-5403:
+                    // The mask is copied to RGB because this supports a smooth scaling, so we
+                    // get a mask with 255 values instead of just 0 and 255.
+                    // Inverting is done because when we don't do it, the getScaledInstance() call
+                    // produces a black line in many masks. With the inversion we have a white line
+                    // which is neutral. Because of the inversion we don't have to substract from 255
+                    // in the "apply the mask" segment when rasterPixel[3] is assigned.
+
+                    // The inversion is not done for very small ones, because of
+                    // PDFBOX-2171-002-002710-p14.pdf where the "New Harmony Consolidated" and
+                    // "Sailor Springs" patterns became almost invisible.
+                    // (We may have to decide this differently in the future, e.g. on b/w relationship)
+                    BufferedImage tmp = new BufferedImage(mask.getWidth(), mask.getHeight(), BufferedImage.TYPE_INT_RGB);
+                    mask = new LookupOp(getInvLookupTable(), graphics.getRenderingHints()).filter(mask, tmp);
+                }
+
+                BufferedImage renderedMask = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+                g = (Graphics2D) renderedMask.getGraphics();
+                g.translate(-bounds.getMinX(), -bounds.getMinY());
                 g.setRenderingHints(graphics.getRenderingHints());
-                g.drawImage(mask, imageTransform, null);
+
+                if (smallMask)
+                {
+                    g.drawImage(mask, imageTransform, null);
+                }
+                else
+                {
+                    while (scaleX < 0.25)
+                    {
+                        scaleX *= 2.0;
+                    }
+                    while (scaleY < 0.25)
+                    {
+                        scaleY *= 2.0;
+                    }
+                    int w2 = (int) Math.round(mask.getWidth() * scaleX);
+                    int h2 = (int) Math.round(mask.getHeight() * scaleY);
+
+                    Image scaledMask = mask.getScaledInstance(w2, h2, Image.SCALE_SMOOTH);
+                    imageTransform.scale(1f / Math.abs(scaleX), 1f / Math.abs(scaleY));
+                    g.drawImage(scaledMask, imageTransform, null);
+                }
                 g.dispose();
 
                 // apply the mask
-                final int[] transparent = new int[4];
                 int[] alphaPixel = null;
+                int[] rasterPixel = null;
                 WritableRaster raster = renderedPaint.getRaster();
                 WritableRaster alpha = renderedMask.getRaster();
                 for (int y = 0; y < h; y++)
@@ -1147,10 +1176,9 @@ public class PageDrawer extends PDFGraphicsStreamEngine
                     for (int x = 0; x < w; x++)
                     {
                         alphaPixel = alpha.getPixel(x, y, alphaPixel);
-                        if (alphaPixel[0] == 255)
-                        {
-                            raster.setPixel(x, y, transparent);
-                        }
+                        rasterPixel = raster.getPixel(x, y, rasterPixel);
+                        rasterPixel[3] = alphaPixel[0];
+                        raster.setPixel(x, y, rasterPixel);
                     }
                 }
 
@@ -1180,6 +1208,20 @@ public class PageDrawer extends PDFGraphicsStreamEngine
             // the setRenderingHint method, so we re-set all hints, see PDFBOX-2302
             setRenderingHints();
         }
+    }
+
+    private LookupTable getInvLookupTable()
+    {
+        if (invTable == null)
+        {
+            byte[] inv = new byte[256];
+            for (int i = 0; i < inv.length; i++)
+            {
+                inv[i] = (byte) (255 - i);
+            }
+            invTable = new ByteLookupTable(0, inv);
+        }
+        return invTable;
     }
 
     private void drawBufferedImage(BufferedImage image, AffineTransform at) throws IOException
@@ -1598,7 +1640,15 @@ public class PageDrawer extends PDFGraphicsStreamEngine
             Matrix transform = Matrix.concatenate(ctm, form.getMatrix());
 
             // transform the bbox
-            GeneralPath transformedBox = form.getBBox().transform(transform);
+            PDRectangle formBBox = form.getBBox();
+            if (formBBox == null)
+            {
+                // PDFBOX-5471
+                // check done here and not in caller to avoid getBBox() creating rectangle twice
+                LOG.warn("transparency group ignored because BBox is null");
+                formBBox = new PDRectangle();
+            }
+            GeneralPath transformedBox = formBBox.transform(transform);
 
             // clip the bbox to prevent giant bboxes from consuming all memory
             Area transformed = new Area(transformedBox);
@@ -1883,11 +1933,11 @@ public class PageDrawer extends PDFGraphicsStreamEngine
             nestedHiddenOCGCount++;
             return;
         }
-        if (tag == null || getPage().getResources() == null)
+        if (tag == null || getResources() == null)
         {
             return;
         }
-        if (isHiddenOCG(getPage().getResources().getProperties(tag)))
+        if (isHiddenOCG(getResources().getProperties(tag)))
         {
             nestedHiddenOCGCount = 1;
         }

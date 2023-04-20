@@ -19,13 +19,10 @@ package org.sejda.sambox.text;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
+import org.sejda.commons.util.IOUtils;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.PDDocument;
@@ -36,79 +33,67 @@ import org.sejda.sambox.pdmodel.PDDocument;
  */
 public class BidiTest
 {
-    private static final String ENCODING = "UTF-8";
-
-    private PDDocument document;
-    private PDFTextStripper stripper;
-
-    @Before
-    public void setUp() throws IOException
+    @Test
+    public void testBidiSample() throws IOException
     {
-        document = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
-                getClass().getResourceAsStream("/org/sejda/sambox/text/BidiSample.pdf")));
-        stripper = new PDFTextStripper();
-        stripper.setLineSeparator("\n");
+        testSortedAndNotSorted("BidiSample.pdf");
     }
 
     @Test
-    public void testSorted() throws IOException
+    public void testPDFBOX4531Ligature1() throws IOException
     {
-        stripper.setSortByPosition(true);
-        String extractedText = stripper.getText(document);
-
-        try (BufferedReader bufferedCompareTextReader = new BufferedReader(new InputStreamReader(
-                getClass().getResourceAsStream("/org/sejda/sambox/text/BidiSample.pdf-sorted.txt"),
-                ENCODING)))
-        {
-
-            StringBuilder compareTextBuilder = new StringBuilder();
-
-            String line = bufferedCompareTextReader.readLine();
-
-            while (line != null)
-            {
-                compareTextBuilder.append(line);
-                compareTextBuilder.append('\n');
-                line = bufferedCompareTextReader.readLine();
-            }
-
-            bufferedCompareTextReader.close();
-
-            assertEquals(extractedText, compareTextBuilder.toString());
-        }
+        testSortedAndNotSorted("PDFBOX-4531-bidi-ligature-1.pdf");
     }
 
     @Test
-    public void testNotSorted() throws IOException
+    public void testPDFBOX4531Ligature2() throws IOException
     {
-        stripper.setSortByPosition(false);
-        String extractedText = stripper.getText(document);
+        testSortedAndNotSorted("PDFBOX-4531-bidi-ligature-2.pdf");
+    }
+    
+    private void testSortedAndNotSorted(String input) throws IOException {
+        testSorted(input);
+        testNotSorted(input);
+    }
 
-        try (BufferedReader bufferedCompareTextReader = new BufferedReader(new InputStreamReader(
-                getClass().getResourceAsStream("/org/sejda/sambox/text/BidiSample.pdf.txt"),
-                ENCODING)))
+    private void testSorted(String input) throws IOException
+    {
+        try (PDDocument document = parseInput(input))
         {
+            PDFTextStripper stripper = new PDFTextStripper();
+            stripper.setLineSeparator("\n");
+            
+            stripper.setSortByPosition(true);
+            
+            String actualText = stripper.getText(document);
+            String expectedText = readExpectedFile(input + "-sorted.txt");
 
-        StringBuilder compareTextBuilder = new StringBuilder();
-        String line = bufferedCompareTextReader.readLine();
-
-        while (line != null)
-        {
-            compareTextBuilder.append(line);
-            compareTextBuilder.append('\n');
-            line = bufferedCompareTextReader.readLine();
-        }
-
-        bufferedCompareTextReader.close();
-
-        assertEquals(extractedText, compareTextBuilder.toString());
+            assertEquals(expectedText, actualText);
         }
     }
 
-    @After
-    public void tearDown() throws IOException
+    private void testNotSorted(String input) throws IOException
     {
-        document.close();
-    }
+        try (PDDocument document = parseInput(input)) 
+        {
+            PDFTextStripper stripper = new PDFTextStripper();
+            stripper.setLineSeparator("\n");
 
+            stripper.setSortByPosition(false);
+            
+            String actualText = stripper.getText(document);
+            String expectedText = readExpectedFile(input + ".txt");
+
+            assertEquals(expectedText, actualText);
+        }
+    }
+    
+    private String readExpectedFile(String name) throws IOException {
+        return new String(IOUtils.toByteArray(getClass().getResourceAsStream("/org/sejda/sambox/text/" + name)));
+    }
+    
+    private PDDocument parseInput(String name) throws IOException {
+        return PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+            getClass().getResourceAsStream("/org/sejda/sambox/text/" + name)));
+    }
 }

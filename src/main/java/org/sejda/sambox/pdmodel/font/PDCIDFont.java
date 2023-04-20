@@ -82,7 +82,7 @@ public abstract class PDCIDFont implements COSObjectable, PDFontLike, PDVectorFo
         {
             int size = wArray.size();
             int counter = 0;
-            while (counter < size)
+            while (counter < size - 1)
             {
                 COSBase firstCodeBase = wArray.getObject(counter++);
                 if (!(firstCodeBase instanceof COSNumber firstCode))
@@ -103,6 +103,11 @@ public abstract class PDCIDFont implements COSObjectable, PDFontLike, PDVectorFo
                 }
                 else
                 {
+                    if (counter >= size)
+                    {
+                        LOG.warn("premature end of widths array");
+                        break;
+                    }
                     COSBase rangeWidthBase = wArray.getObject(counter++);
                     if (!(next instanceof COSNumber secondCode)
                             || !(rangeWidthBase instanceof COSNumber rangeWidth))

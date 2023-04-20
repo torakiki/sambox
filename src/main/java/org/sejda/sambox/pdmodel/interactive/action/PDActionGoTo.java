@@ -85,7 +85,7 @@ public class PDActionGoTo extends PDAction
                 if (!(page instanceof COSDictionary))
                 {
                     throw new IllegalArgumentException(
-                            "Destination of a GoTo action must be " + "a page dictionary object");
+                            "Destination of a GoTo action must be a page dictionary object");
                 }
             }
         }

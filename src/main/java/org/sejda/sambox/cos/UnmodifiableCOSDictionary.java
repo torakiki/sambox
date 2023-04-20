@@ -16,7 +16,7 @@
  */
 package org.sejda.sambox.cos;
 
-import java.util.Calendar;
+import java.util.Collections;
 
 /**
  * An unmodifiable COSDictionary.
@@ -25,188 +25,12 @@ import java.util.Calendar;
  */
 final class UnmodifiableCOSDictionary extends COSDictionary
 {
+    /**
+     * {@inheritDoc}
+     */
     UnmodifiableCOSDictionary(COSDictionary dict)
     {
-        super(dict);
-    }
-
-    @Override
-    public void clear()
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setItem(COSName key, COSBase value)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setItem(COSName key, COSObjectable value)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setItem(String key, COSObjectable value)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setBoolean(String key, boolean value)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setBoolean(COSName key, boolean value)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setItem(String key, COSBase value)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setName(String key, String value)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setName(COSName key, String value)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setDate(String key, Calendar date)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setDate(COSName key, Calendar date)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setEmbeddedDate(String embedded, String key, Calendar date)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setEmbeddedDate(String embedded, COSName key, Calendar date)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setString(String key, String value)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setString(COSName key, String value)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setEmbeddedString(String embedded, String key, String value)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setEmbeddedString(String embedded, COSName key, String value)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setInt(String key, int value)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setInt(COSName key, int value)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setLong(String key, long value)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setLong(COSName key, long value)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setEmbeddedInt(String embeddedDictionary, String key, long value)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setEmbeddedInt(String embeddedDictionary, COSName key, long value)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setFloat(String key, float value)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setFloat(COSName key, float value)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void removeItem(COSName key)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void addAll(COSDictionary dic)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void mergeWithoutOverwriting(COSDictionary dic)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void merge(COSDictionary dic)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setFlag(COSName field, int bitFlag, boolean value)
-    {
-        throw new UnsupportedOperationException();
+        super();
+        items = Collections.unmodifiableMap(dict.items);
     }
 }

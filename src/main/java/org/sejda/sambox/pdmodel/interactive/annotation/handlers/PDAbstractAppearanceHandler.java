@@ -65,6 +65,14 @@ public abstract class PDAbstractAppearanceHandler implements PDAppearanceHandler
         this.annotation = annotation;
     }
 
+    @Override
+    public void generateAppearanceStreams()
+    {
+        generateNormalAppearance();
+        generateRolloverAppearance();
+        generateDownAppearance();
+    }
+
     PDAnnotation getAnnotation()
     {
         return annotation;

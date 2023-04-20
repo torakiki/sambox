@@ -18,11 +18,7 @@ package org.sejda.sambox.pdmodel.interactive.action;
 
 import java.io.IOException;
 
-import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSBase;
-import org.sejda.sambox.cos.COSBoolean;
-import org.sejda.sambox.cos.COSDictionary;
-import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.cos.*;
 import org.sejda.sambox.pdmodel.common.filespecification.PDFileSpecification;
 import org.sejda.sambox.pdmodel.interactive.documentnavigation.destination.PDDestination;
 import org.sejda.sambox.pdmodel.interactive.documentnavigation.destination.PDPageDestination;
@@ -86,10 +82,10 @@ public class PDActionEmbeddedGoTo extends PDAction
             if (destArray.size() >= 1)
             {
                 COSBase page = destArray.getObject(0);
-                if (!(page instanceof COSDictionary))
+                if (!(page instanceof COSInteger))
                 {
-                    throw new IllegalArgumentException("Destination of a GoToE action must be "
-                            + "a page dictionary object");
+                    throw new IllegalArgumentException(
+                            "Destination of a GoToE action must be an integer");
                 }
             }
         }

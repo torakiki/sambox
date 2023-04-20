@@ -44,7 +44,7 @@ public class PDPanose
      */
     public int getFamilyClass()
     {
-        return bytes[0] << 8 | bytes[1];
+        return bytes[0] << 8 | (bytes[1] & 0xff);
     }
 
     /**

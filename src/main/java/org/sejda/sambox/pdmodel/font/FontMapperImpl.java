@@ -22,16 +22,7 @@ import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.PriorityQueue;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 import org.apache.fontbox.FontBoxFont;
@@ -59,57 +50,62 @@ final class FontMapperImpl implements FontMapper
      * Map of PostScript name substitutes, in priority order.
      */
     private final Map<String, List<String>> substitutes = new HashMap<>();
-
+    
     FontMapperImpl()
+    {
+        this(loadFontProvider());
+    }
+
+    FontMapperImpl(FontProvider fontProvider)
     {
         fontInfoByName = CompletableFuture.supplyAsync(() -> {
             Map<String, FontInfo> map = new LinkedHashMap<>();
-            provider().getFontInfo().forEach(
+            fontProvider.getFontInfo().forEach(
                     info -> getPostScriptNames(info.getPostScriptName()).forEach(
-                            name -> map.put(name, info)));
+                            name -> map.put(name.toLowerCase(Locale.ENGLISH), info)));
             return map;
         });
         // substitutes for standard 14 fonts
-        substitutes.put("Courier", new ArrayList<>(
+        addSubstitutes("Courier", new ArrayList<>(
                 Arrays.asList("CourierNew", "CourierNewPSMT", "LiberationMono",
                         "NimbusMonL-Regu")));
-        substitutes.put("Courier-Bold", new ArrayList<>(
+        addSubstitutes("Courier-Bold", new ArrayList<>(
                 Arrays.asList("CourierNewPS-BoldMT", "CourierNew-Bold", "LiberationMono-Bold",
                         "NimbusMonL-Bold")));
-        substitutes.put("Courier-Oblique", new ArrayList<>(
+        addSubstitutes("Courier-Oblique", new ArrayList<>(
                 Arrays.asList("CourierNewPS-ItalicMT", "CourierNew-Italic", "LiberationMono-Italic",
                         "NimbusMonL-ReguObli")));
-        substitutes.put("Courier-BoldOblique", new ArrayList<>(
+        addSubstitutes("Courier-BoldOblique", new ArrayList<>(
                 Arrays.asList("CourierNewPS-BoldItalicMT", "CourierNew-BoldItalic",
                         "LiberationMono-BoldItalic", "NimbusMonL-BoldObli")));
-        substitutes.put("Helvetica", new ArrayList<>(
+        addSubstitutes("Helvetica", new ArrayList<>(
                 Arrays.asList("ArialMT", "Arial", "LiberationSans", "NimbusSanL-Regu")));
-        substitutes.put("Helvetica-Bold", new ArrayList<>(
+        addSubstitutes("Helvetica-Bold", new ArrayList<>(
                 Arrays.asList("Arial-BoldMT", "Arial-Bold", "LiberationSans-Bold",
                         "NimbusSanL-Bold")));
-        substitutes.put("Helvetica-Oblique", new ArrayList<>(
+        addSubstitutes("Helvetica-Oblique", new ArrayList<>(
                 Arrays.asList("Arial-ItalicMT", "Arial-Italic", "Helvetica-Italic",
                         "LiberationSans-Italic", "NimbusSanL-ReguItal")));
-        substitutes.put("Helvetica-BoldOblique", new ArrayList<>(
+        addSubstitutes("Helvetica-BoldOblique", new ArrayList<>(
                 Arrays.asList("Arial-BoldItalicMT", "Helvetica-BoldItalic",
                         "LiberationSans-BoldItalic", "NimbusSanL-BoldItal")));
-        substitutes.put("Times-Roman", new ArrayList<>(
+        addSubstitutes("Times-Roman", new ArrayList<>(
                 Arrays.asList("TimesNewRomanPSMT", "TimesNewRoman", "TimesNewRomanPS",
                         "LiberationSerif", "NimbusRomNo9L-Regu")));
-        substitutes.put("Times-Bold", new ArrayList<>(
+        addSubstitutes("Times-Bold", new ArrayList<>(
                 Arrays.asList("TimesNewRomanPS-BoldMT", "TimesNewRomanPS-Bold",
                         "TimesNewRoman-Bold", "LiberationSerif-Bold", "NimbusRomNo9L-Medi")));
-        substitutes.put("Times-Italic", new ArrayList<>(
+        addSubstitutes("Times-Italic", new ArrayList<>(
                 Arrays.asList("TimesNewRomanPS-ItalicMT", "TimesNewRomanPS-Italic",
                         "TimesNewRoman-Italic", "LiberationSerif-Italic",
                         "NimbusRomNo9L-ReguItal")));
-        substitutes.put("Times-BoldItalic", new ArrayList<>(
+        addSubstitutes("Times-BoldItalic", new ArrayList<>(
                 Arrays.asList("TimesNewRomanPS-BoldItalicMT", "TimesNewRomanPS-BoldItalic",
                         "TimesNewRoman-BoldItalic", "LiberationSerif-BoldItalic",
                         "NimbusRomNo9L-MediItal")));
-        substitutes.put("Symbol",
+        addSubstitutes("Symbol",
                 new ArrayList<>(Arrays.asList("Symbol", "SymbolMT", "StandardSymL", "ChromSymbolOTF")));
-        substitutes.put("ZapfDingbats", new ArrayList<>(
+        addSubstitutes("ZapfDingbats", new ArrayList<>(
                 Arrays.asList("ZapfDingbatsITCbyBT-Regular", "ZapfDingbatsITC", "Dingbats",
                         "MS-Gothic", "ChromDingbatsOTF")));
 
@@ -117,35 +113,40 @@ final class FontMapperImpl implements FontMapper
         // these include names such as "Arial" and "TimesNewRoman"
         for (String baseName : Standard14Fonts.getNames())
         {
-            if (!substitutes.containsKey(baseName))
+            if (getSubstitutes(baseName).isEmpty())
             {
                 String mappedName = Standard14Fonts.getMappedFontName(baseName);
-                substitutes.put(baseName, copySubstitutes(mappedName));
+                addSubstitutes(baseName, copySubstitutes(mappedName.toLowerCase(Locale.ENGLISH)));
             }
         }
 
         // -------------------------
 
-        try
-        {
-            InputStream stream = FontMapperImpl.class.getResourceAsStream(
-                    "/org/sejda/sambox/resources/ttf/LiberationSans-Regular.ttf");
-            requireNotNullArg(stream,
-                    "Unable to load org/sejda/sambox/resources/ttf/LiberationSans-Regular.ttf");
-            lastResortFont = new TTFParser().parse(new BufferedInputStream(stream));
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException(e);
-        }
+        lastResortFont = loadLastResortFont();
     }
 
     public TrueTypeFont getLastResortFont()
     {
         return lastResortFont;
     }
-
-    private FontProvider provider()
+    
+    public static TrueTypeFont loadLastResortFont()
+    {
+        try
+        {
+            InputStream stream = FontMapperImpl.class.getResourceAsStream(
+                    "/org/sejda/sambox/resources/ttf/LiberationSans-Regular.ttf");
+            requireNotNullArg(stream,
+                    "Unable to load org/sejda/sambox/resources/ttf/LiberationSans-Regular.ttf");
+            return new TTFParser().parse(new BufferedInputStream(stream));
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    public static FontProvider loadFontProvider()
     {
         String configuredFontProvider = System.getProperty(SAMBox.FONT_PROVIDER_PROPERTY); 
         if ("noop".equalsIgnoreCase(configuredFontProvider))
@@ -200,11 +201,17 @@ final class FontMapperImpl implements FontMapper
      */
     public void addSubstitute(String match, String replace)
     {
-        if (!substitutes.containsKey(match))
+        String lowerCaseMatch = match.toLowerCase(Locale.ENGLISH);
+        if (!substitutes.containsKey(lowerCaseMatch))
         {
-            substitutes.put(match, new ArrayList<>());
+            substitutes.put(lowerCaseMatch, new ArrayList<>());
         }
-        substitutes.get(match).add(replace);
+        substitutes.get(lowerCaseMatch).add(replace);
+    }
+
+    private void addSubstitutes(String match, List<String> replacements)
+    {
+        substitutes.put(match.toLowerCase(Locale.ENGLISH), replacements);
     }
 
     /**
@@ -212,7 +219,7 @@ final class FontMapperImpl implements FontMapper
      */
     private List<String> getSubstitutes(String postScriptName)
     {
-        List<String> subs = substitutes.get(postScriptName.replace(" ", ""));
+        List<String> subs = substitutes.get(postScriptName.replace(" ", "").toLowerCase(Locale.ENGLISH));
         if (subs != null)
         {
             return subs;
@@ -439,7 +446,7 @@ final class FontMapperImpl implements FontMapper
         }
 
         // look up the PostScript name
-        FontInfo info = fontInfoByName.join().get(postScriptName);
+        FontInfo info = fontInfoByName.join().get(postScriptName.toLowerCase(Locale.ENGLISH));
         if (info != null && info.getFormat() == format)
         {
             return info;

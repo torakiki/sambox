@@ -41,17 +41,15 @@ public class PDFileAttachmentAppearanceHandler extends PDAbstractAppearanceHandl
     }
 
     @Override
-    public void generateAppearanceStreams()
-    {
-        generateNormalAppearance();
-        generateRolloverAppearance();
-        generateDownAppearance();
-    }
-
-    @Override
     public void generateNormalAppearance()
     {
         PDAnnotationFileAttachment annotation = (PDAnnotationFileAttachment) getAnnotation();
+
+        PDRectangle rect = getRectangle();
+        if (rect == null)
+        {
+            return;
+        }
 
         try (PDAppearanceContentStream contentStream = getNormalAppearanceAsContentStream())
         {
@@ -59,7 +57,6 @@ public class PDFileAttachmentAppearanceHandler extends PDAbstractAppearanceHandl
 
             // minimum code of PDTextAppearanceHandler.adjustRectAndBBox()
             int size = 18;
-            PDRectangle rect = getRectangle();
             rect.setUpperRightX(rect.getLowerLeftX() + size);
             rect.setLowerLeftY(rect.getUpperRightY() - size);
             annotation.setRectangle(rect);

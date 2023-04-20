@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.pdmodel.documentinterchange.markedcontent;
 
+import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSObjectable;
@@ -37,11 +38,12 @@ public class PDPropertyList implements COSObjectable
      */
     public static PDPropertyList create(COSDictionary dict)
     {
-        if (COSName.OCG.equals(dict.getItem(COSName.TYPE)))
+        COSBase item = dict.getItem(COSName.TYPE);
+        if (COSName.OCG.equals(item))
         {
             return new PDOptionalContentGroup(dict);
         }
-        if (COSName.OCMD.equals(dict.getItem(COSName.TYPE)))
+        else if (COSName.OCMD.equals(item))
         {
             return new PDOptionalContentMembershipDictionary(dict);
         }

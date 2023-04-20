@@ -29,6 +29,7 @@ import org.sejda.sambox.pdmodel.PDPageContentStream.AppendMode;
 import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.common.PDDictionaryWrapper;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
+import org.sejda.sambox.pdmodel.font.PDFont;
 import org.sejda.sambox.pdmodel.graphics.form.PDFormXObject;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotation;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
@@ -40,6 +41,7 @@ import org.slf4j.LoggerFactory;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
+import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -69,6 +71,7 @@ public final class PDAcroForm extends PDDictionaryWrapper
 
     private final PDDocument document;
     private ScriptingHandler scriptingHandler;
+    private final Map<COSName, SoftReference<PDFont>> directFontCache = new HashMap<>();
 
     /**
      * @param document The document that this form is part of.
@@ -449,7 +452,7 @@ public final class PDAcroForm extends PDDictionaryWrapper
     public PDResources getDefaultResources()
     {
         return ofNullable(getCOSObject().getDictionaryObject(COSName.DR, COSDictionary.class)).map(
-                dr -> new PDResources(dr, document.getResourceCache())).orElse(null);
+                dr -> new PDResources(dr, document.getResourceCache(), directFontCache)).orElse(null);
     }
 
     /**
@@ -685,15 +688,15 @@ public final class PDAcroForm extends PDDictionaryWrapper
     private void fillPagesAnnotationMap(Map<COSDictionary, Set<COSDictionary>> pagesAnnotationsMap,
             PDPage page, PDAnnotationWidget widget)
     {
-        if (pagesAnnotationsMap.get(page.getCOSObject()) == null)
+        Set<COSDictionary> widgetsForPage = pagesAnnotationsMap.get(page.getCOSObject());
+        if (widgetsForPage == null)
         {
-            Set<COSDictionary> widgetsForPage = new HashSet<>();
+            widgetsForPage = new HashSet<>();
             widgetsForPage.add(widget.getCOSObject());
             pagesAnnotationsMap.put(page.getCOSObject(), widgetsForPage);
         }
         else
         {
-            Set<COSDictionary> widgetsForPage = pagesAnnotationsMap.get(page.getCOSObject());
             widgetsForPage.add(widget.getCOSObject());
         }
     }

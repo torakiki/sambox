@@ -41,7 +41,7 @@ public class COSDictionary extends COSBase
      * The name-value pairs of this dictionary. The pairs are kept in the order they were added to
      * the dictionary.
      */
-    private final Map<COSName, COSBase> items = new LinkedHashMap<>();
+    protected Map<COSName, COSBase> items = new LinkedHashMap<>();
 
     public COSDictionary()
     {

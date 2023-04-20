@@ -305,12 +305,12 @@ public class PDPage implements COSObjectable, PDContentStream
             if (base instanceof COSArray)
             {
                 mediaBox = new PDRectangle((COSArray) base);
+            } 
+            else 
+            {
+                LOG.debug("Can't find MediaBox, will use U.S. Letter");
+                mediaBox = PDRectangle.LETTER;
             }
-        }
-        if (mediaBox == null)
-        {
-            LOG.debug("Can't find MediaBox, will use U.S. Letter");
-            mediaBox = PDRectangle.LETTER;
         }
         return mediaBox;
     }
@@ -812,7 +812,11 @@ public class PDPage implements COSObjectable, PDContentStream
     }
 
     /**
-     * This will set the list of annotations.
+     * This will set the list of annotations. Although this is optional, you should take care that
+     * any newly created annotations link back to this page by calling
+     * {@link PDAnnotation#setPage(org.sejda.sambox.pdmodel.PDPage)}. Not doing it
+     * <a href="https://stackoverflow.com/questions/74836898/">can cause trouble when PDFs get
+     * signed</a>.
      *
      * @param annotations The new list of annotations.
      */

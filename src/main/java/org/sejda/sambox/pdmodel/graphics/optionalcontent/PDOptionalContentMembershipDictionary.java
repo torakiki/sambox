@@ -17,6 +17,7 @@
 package org.sejda.sambox.pdmodel.graphics.optionalcontent;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.sejda.sambox.cos.COSArray;
@@ -62,14 +63,14 @@ public class PDOptionalContentMembershipDictionary extends PDPropertyList
      */
     public List<PDPropertyList> getOCGs()
     {
-        List<PDPropertyList> list = new ArrayList<>();
         COSBase base = dict.getDictionaryObject(COSName.OCGS);
         if (base instanceof COSDictionary)
         {
-            list.add(PDPropertyList.create((COSDictionary) base));
+            return Collections.singletonList(PDPropertyList.create((COSDictionary) base));
         }
         else if (base instanceof COSArray ar)
         {
+            List<PDPropertyList> list = new ArrayList<>();
             for (int i = 0; i < ar.size(); ++i)
             {
                 COSBase elem = ar.getObject(i);
@@ -78,8 +79,9 @@ public class PDOptionalContentMembershipDictionary extends PDPropertyList
                     list.add(PDPropertyList.create((COSDictionary) elem));
                 }
             }
+            return list;
         }
-        return list;
+        return Collections.emptyList();
     }
 
     /**

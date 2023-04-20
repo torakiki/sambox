@@ -680,6 +680,7 @@ public abstract class PDFStreamEngine
             }
             else
             {
+                // SAMBOX specific: we want to be less lenient here and throw an exception
                 throw new IOException("Unknown type " + obj.getClass().getSimpleName()
                         + " in array for TJ operation:" + obj);
             }

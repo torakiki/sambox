@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.fontbox.cmap.CMap;
 import org.apache.fontbox.cmap.CMapParser;
@@ -32,7 +33,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class CMapManager
 {
-    static Map<String, CMap> cMapCache = Collections.synchronizedMap(new HashMap<>());
+    private static final Map<String, CMap> CMAP_CACHE = new ConcurrentHashMap<>();
 
     private static final Logger LOG = LoggerFactory.getLogger(CMapManager.class);
 
@@ -49,7 +50,7 @@ public final class CMapManager
      */
     public static CMap getPredefinedCMap(String cMapName) throws IOException
     {
-        CMap cmap = cMapCache.get(cMapName);
+        CMap cmap = CMAP_CACHE.get(cMapName);
         if (cmap != null)
         {
             return cmap;
@@ -58,7 +59,7 @@ public final class CMapManager
         CMap targetCmap = new CMapParser().parsePredefined(cMapName);
 
         // limit the cache to predefined CMaps
-        cMapCache.put(targetCmap.getName(), targetCmap);
+        CMAP_CACHE.put(targetCmap.getName(), targetCmap);
         return targetCmap;
     }
 

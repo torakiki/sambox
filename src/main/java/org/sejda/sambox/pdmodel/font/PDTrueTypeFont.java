@@ -35,6 +35,7 @@ import org.apache.fontbox.ttf.PostScriptTable;
 import org.apache.fontbox.ttf.TTFParser;
 import org.apache.fontbox.ttf.TrueTypeFont;
 import org.apache.fontbox.util.BoundingBox;
+import org.sejda.commons.util.IOUtils;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.PDDocument;
@@ -163,21 +164,25 @@ public class PDTrueTypeFont extends PDSimpleFont implements PDVectorFont
             PDStream ff2Stream = fd.getFontFile2();
             if (ff2Stream != null)
             {
+                InputStream is = null;
                 try
                 {
                     // embedded
                     TTFParser ttfParser = new TTFParser(true);
-                    ttfFont = ttfParser.parse(ff2Stream.createInputStream());
+                    is = ff2Stream.createInputStream();
+                    ttfFont = ttfParser.parse(is);
                 }
                 catch (NullPointerException e) // TTF parser is buggy
                 {
                     LOG.warn("Could not read embedded TTF for font " + getBaseFont(), e);
                     fontIsDamaged = true;
+                    IOUtils.closeQuietly(is);
                 }
                 catch (IOException e)
                 {
                     LOG.warn("Could not read embedded TTF for font " + getBaseFont(), e);
                     fontIsDamaged = true;
+                    IOUtils.closeQuietly(is);
                 }
             }
         }
@@ -657,6 +662,12 @@ public class PDTrueTypeFont extends PDSimpleFont implements PDVectorFont
                         && CmapTable.ENCODING_UNICODE_1_0 == cmap.getPlatformEncodingId())
                 {
                     // PDFBOX-4755 / PDF.js #5501
+                    cmapWinUnicode = cmap;
+                }
+                else if (CmapTable.PLATFORM_UNICODE == cmap.getPlatformId()
+                        && CmapTable.ENCODING_UNICODE_2_0_BMP == cmap.getPlatformEncodingId())
+                {
+                    // PDFBOX-5484
                     cmapWinUnicode = cmap;
                 }
             }

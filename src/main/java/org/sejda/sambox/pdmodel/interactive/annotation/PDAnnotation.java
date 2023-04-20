@@ -749,7 +749,9 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
     }
 
     /**
-     * This will set the corresponding page for this annotation.
+     * This will set the corresponding page for this annotation. This is optional but recommended.
+     * Not doing it <a href="https://stackoverflow.com/questions/74836898/">can cause trouble when
+     * PDFs get signed</a>.
      *
      * @param page is the corresponding page
      */

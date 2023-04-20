@@ -130,7 +130,7 @@ public final class PDDeviceNAttributes extends PDDictionaryWrapper
         PDDeviceNProcess process = getProcess();
         if (process != null)
         {
-            sb.append(getProcess());
+            sb.append(process);
             sb.append(' ');
         }
 

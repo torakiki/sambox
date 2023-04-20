@@ -229,7 +229,7 @@ public class PDDocumentCatalog implements COSObjectable
             array = new COSArray();
             root.setItem(COSName.THREADS, array);
         }
-        List<PDThread> pdObjects = new ArrayList<>();
+        List<PDThread> pdObjects = new ArrayList<>(array.size());
         for (int i = 0; i < array.size(); i++)
         {
             pdObjects.add(new PDThread((COSDictionary) array.getObject(i)));
@@ -465,7 +465,7 @@ public class PDDocumentCatalog implements COSObjectable
     public PageLayout getPageLayout()
     {
         String mode = root.getNameAsString(COSName.PAGE_LAYOUT);
-        if (mode != null)
+        if (mode != null && !mode.isEmpty())
         {
             try
             {
@@ -473,7 +473,7 @@ public class PDDocumentCatalog implements COSObjectable
             }
             catch (IllegalArgumentException ex)
             {
-                LOG.debug(String.format("Unrecognized page layout %s", mode));
+                LOG.debug(String.format("Unrecognized page layout %s - returning PageLayout.SINGLE_PAGE", mode));
             }
         }
         return PageLayout.SINGLE_PAGE;

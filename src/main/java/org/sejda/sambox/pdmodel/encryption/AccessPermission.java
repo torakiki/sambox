@@ -55,7 +55,7 @@ public class AccessPermission
     private static final int FILL_IN_FORM_BIT = 9;
     private static final int EXTRACT_FOR_ACCESSIBILITY_BIT = 10;
     private static final int ASSEMBLE_DOCUMENT_BIT = 11;
-    private static final int DEGRADED_PRINT_BIT = 12;
+    private static final int FAITHFUL_PRINT_BIT = 12;
 
     private int bytes;
 
@@ -129,7 +129,7 @@ public class AccessPermission
     {
         return (this.canAssembleDocument() && this.canExtractContent()
                 && this.canExtractForAccessibility() && this.canFillInForm() && this.canModify()
-                && this.canModifyAnnotations() && this.canPrint() && this.canPrintDegraded());
+                && this.canModifyAnnotations() && this.canPrint() && this.canPrintFaithful());
     }
 
     /**
@@ -148,7 +148,7 @@ public class AccessPermission
         ret.setCanModify(true);
         ret.setCanModifyAnnotations(true);
         ret.setCanPrint(true);
-        ret.setCanPrintDegraded(true);
+        ret.setCanPrintFaithful(true);
         return ret;
     }
 
@@ -374,31 +374,45 @@ public class AccessPermission
             setPermissionBit(ASSEMBLE_DOCUMENT_BIT, allowAssembly);
         }
     }
+    
+    @Deprecated
+    public boolean canPrintDegraded()
+    {
+        return canPrintFaithful();
+    }
 
     /**
-     * This will tell if the user can print the document in a degraded format.
+     * This will tell if the user can print the document in a faithful format or in a degraded
+     * format (if print is enabled).
      *
      * @return true If supplied with the user password they are allowed to print the document in a
      * degraded format.
      */
-    public boolean canPrintDegraded()
+    public boolean canPrintFaithful()
     {
-        return isPermissionBitOn(DEGRADED_PRINT_BIT);
+        return isPermissionBitOn(FAITHFUL_PRINT_BIT);
+    }
+
+    @Deprecated
+    public void setCanPrintDegraded(boolean canPrintDegraded)
+    {
+        setCanPrintFaithful(canPrintDegraded);
     }
 
     /**
-     * Set if the user can print the document in a degraded format.
+     * Set if the user can print the document in a faithful format or in a degraded format (if print
+     * is enabled). The PDF version must be 1.5 or higher.
      * <p>
-     * This method will have no effect if the object is in read only mode
+     * This method will have no effect if the object is in read only mode.
      *
-     * @param canPrintDegraded A boolean determining if the user can print the document in a
-     *                         degraded format.
+     * @param canPrintFaithful A boolean determining if the user can print the document in a
+     * degraded format.
      */
-    public void setCanPrintDegraded(boolean canPrintDegraded)
+    public void setCanPrintFaithful(boolean canPrintFaithful)
     {
         if (!readOnly)
         {
-            setPermissionBit(DEGRADED_PRINT_BIT, canPrintDegraded);
+            setPermissionBit(FAITHFUL_PRINT_BIT, canPrintFaithful);
         }
     }
 
@@ -442,6 +456,6 @@ public class AccessPermission
         {
             return true;
         }
-        return canPrintDegraded();
+        return canPrintFaithful();
     }
 }
