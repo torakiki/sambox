@@ -23,6 +23,8 @@ import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A signature field is a form field that contains a digital signature.
@@ -33,12 +35,14 @@ import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
 // TODO this is currently just an empty shell to distinguish the type of a field
 public class PDSignatureField extends PDTerminalField
 {
+
+    private static final Logger LOG = LoggerFactory.getLogger(PDSignatureField.class);
+
     /**
-     * @see PDTerminalField#PDTerminalField(PDAcroForm)
-     *
      * @param acroForm The acroForm for this field.
-     * @throws IOException If there is an error while resolving partial name for the signature field or getting the
-     * widget object.
+     * @throws IOException If there is an error while resolving partial name for the signature field
+     *                     or getting the widget object.
+     * @see PDTerminalField#PDTerminalField(PDAcroForm)
      */
     public PDSignatureField(PDAcroForm acroForm)
     {
@@ -83,8 +87,7 @@ public class PDSignatureField extends PDTerminalField
                 return;
             }
 
-            // TODO: implement appearance generation for signatures
-            throw new UnsupportedOperationException("not implemented");
+            LOG.warn("Signature field appearance not implemented");
         }
     }
 
