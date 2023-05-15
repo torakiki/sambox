@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.pdmodel;
 
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 
 import java.io.IOException;
@@ -166,7 +167,7 @@ public final class PDResources implements COSObjectable
         }
 
         PDFont font = null;
-        COSDictionary dict = (COSDictionary) get(COSName.FONT, name);
+        COSDictionary dict = get(COSName.FONT, name, COSDictionary.class);
         if (dict != null)
         {
             font = PDFontFactory.createFont(dict, cache);
@@ -266,20 +267,14 @@ public final class PDResources implements COSObjectable
 
         // get the instance
         PDExtendedGraphicsState extGState = null;
-        COSBase base = get(COSName.EXT_G_STATE, name);
-        COSDictionary dict = null;
-
-        if (base instanceof COSDictionary)
-        {
-            dict = (COSDictionary) base;
-        }
+        COSDictionary dict = get(COSName.EXT_G_STATE, name, COSDictionary.class);
 
         if (dict != null)
         {
             extGState = new PDExtendedGraphicsState(dict);
         }
 
-        if (cache != null)
+        if (nonNull(cache) && nonNull(key))
         {
             cache.put(key, extGState);
         }
@@ -306,13 +301,13 @@ public final class PDResources implements COSObjectable
 
         // get the instance
         PDShading shading = null;
-        COSDictionary dict = (COSDictionary) get(COSName.SHADING, name);
+        COSDictionary dict = get(COSName.SHADING, name, COSDictionary.class);
         if (dict != null)
         {
             shading = PDShading.create(dict);
         }
 
-        if (cache != null)
+        if (nonNull(cache) && nonNull(key))
         {
             cache.put(key, shading);
         }
@@ -339,13 +334,13 @@ public final class PDResources implements COSObjectable
 
         // get the instance
         PDAbstractPattern pattern = null;
-        COSDictionary dict = (COSDictionary) get(COSName.PATTERN, name);
+        COSDictionary dict = get(COSName.PATTERN, name, COSDictionary.class);
         if (dict != null)
         {
             pattern = PDAbstractPattern.create(dict, getResourceCache());
         }
 
-        if (cache != null)
+        if (nonNull(cache) && nonNull(key))
         {
             cache.put(key, pattern);
         }
@@ -371,13 +366,13 @@ public final class PDResources implements COSObjectable
 
         // get the instance
         PDPropertyList propertyList = null;
-        COSDictionary dict = (COSDictionary) get(COSName.PROPERTIES, name);
+        COSDictionary dict = get(COSName.PROPERTIES, name, COSDictionary.class);
         if (dict != null)
         {
             propertyList = PDPropertyList.create(dict);
         }
 
-        if (cache != null)
+        if (nonNull(cache) && nonNull(key))
         {
             cache.put(key, propertyList);
         }
@@ -485,26 +480,30 @@ public final class PDResources implements COSObjectable
         COSBase found = Optional.ofNullable(
                         resources.getDictionaryObject(kind, COSDictionary.class)).map(d -> d.getItem(name))
                 .orElse(null);
-        if (found instanceof ExistingIndirectCOSObject)
+        if (found instanceof ExistingIndirectCOSObject indirect)
         {
-            return ((ExistingIndirectCOSObject) found).id().objectIdentifier;
+            return indirect.id().objectIdentifier;
         }
 
-        if (found != null && found.id() != null)
-        {
-            return found.id().objectIdentifier;
-        }
-
-        return null;
+        return ofNullable(found).map(COSBase::id).map(id -> id.objectIdentifier).orElse(null);
     }
 
     /**
-     * Returns the resource with the given name and kind, or null.
+     * @returns the resource with the given name and kind, or null.
      */
     private COSBase get(COSName kind, COSName name)
     {
         return ofNullable(resources.getDictionaryObject(kind, COSDictionary.class)).map(
                 d -> d.getDictionaryObject(name)).orElse(null);
+    }
+
+    /**
+     * @returns the resource of type clazz with the given name and kind, or null.
+     */
+    private <T extends COSBase> T get(COSName kind, COSName name, Class<T> clazz)
+    {
+        return ofNullable(resources.getDictionaryObject(kind, COSDictionary.class)).map(
+                d -> d.getDictionaryObject(name, clazz)).orElse(null);
     }
 
     /**
