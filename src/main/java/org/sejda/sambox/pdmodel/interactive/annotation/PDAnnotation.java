@@ -324,7 +324,13 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
             COSName state = getAppearanceState();
             return normalAppearance.getSubDictionary().get(state);
         }
-        return normalAppearance.getAppearanceStream();
+        
+        if (normalAppearance.isStream()) 
+        {
+            return normalAppearance.getAppearanceStream();
+        }
+        
+        return null;
     }
 
     /**

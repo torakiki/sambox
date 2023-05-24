@@ -52,7 +52,7 @@ public class PDAppearanceEntry implements COSObjectable
      */
     public boolean isSubDictionary()
     {
-        return !(this.entry instanceof COSStream);
+        return !(this.entry instanceof COSStream) && (this.entry instanceof COSDictionary);
     }
 
     /**
