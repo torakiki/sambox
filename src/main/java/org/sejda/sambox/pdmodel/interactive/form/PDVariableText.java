@@ -80,7 +80,13 @@ public abstract class PDVariableText extends PDTerminalField
     public String getDefaultAppearance()
     {
         try {
-            return DefaultAppearanceHelper.getDefaultAppearance(this).getString();
+            COSString da = DefaultAppearanceHelper.getDefaultAppearance(this);
+            
+            if(da != null) {
+                return da.getString();
+            }
+            
+            return null;
         } catch (IOException e) {
             return null;
         }
