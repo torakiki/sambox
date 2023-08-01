@@ -16,6 +16,13 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.sejda.io.SeekableSources;
@@ -23,14 +30,7 @@ import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.rendering.PDFRenderer;
 import org.sejda.sambox.rendering.TestPDFToImageTest;
-
 import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Test flatten different forms and compare with rendering of original (before-flatten) document.
@@ -247,7 +247,7 @@ public class PDAcroFormFlattenTest
     @Test
     public void testFlattenPDFBox4889() throws IOException
     {
-        flattenAndCompare("f1040sb%20test.pdf");
+        flattenAndCompare("f1040sb test.pdf");
     }
 
     /**
