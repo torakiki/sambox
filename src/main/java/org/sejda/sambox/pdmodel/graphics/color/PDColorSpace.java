@@ -133,6 +133,11 @@ public abstract class PDColorSpace implements COSObjectable
         {
             throw new IOException("Could not create color space, infinite recursion detected");
         }
+        
+        if (colorSpace == null)
+        {
+            throw new IOException("Invalid color space (null)");
+        }
 
         colorSpace = colorSpace.getCOSObject();
         if (colorSpace instanceof COSName name)
