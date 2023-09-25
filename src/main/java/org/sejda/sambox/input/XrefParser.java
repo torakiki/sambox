@@ -92,6 +92,8 @@ class XrefParser
             }
         };
     }
+    
+    private HashSet<Long> catalogSeenOffsets = new HashSet<>();
 
     /**
      * parse the xref using the given parser.
@@ -139,9 +141,14 @@ class XrefParser
                                 long position = parser.position();
                                 try
                                 {
-                                    // we do our best to make sure we have a catalog even in corrupted docs
-                                    LOG.debug("Parsing potential Catalog at {}", lastObjectOffset);
-                                    onPotentialCatalog();
+                                    if(catalogSeenOffsets.contains(lastObjectOffset)){
+                                        LOG.debug("Already parsed potential Catalog at {}, skipping", lastObjectOffset);
+                                    } else {
+                                        catalogSeenOffsets.add(lastObjectOffset);
+                                        // we do our best to make sure we have a catalog even in corrupted docs
+                                        LOG.debug("Parsing potential Catalog at {}", lastObjectOffset);
+                                        onPotentialCatalog();    
+                                    }
                                 }
                                 catch (IOException e)
                                 {
@@ -200,6 +207,9 @@ class XrefParser
             }
             trailer.setFallbackScanStatus(xrefScanStatus.name());
         }
+        
+        // cleanup
+        catalogSeenOffsets.clear();
     }
 
     /**
