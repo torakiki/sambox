@@ -93,7 +93,7 @@ class ObjectsFullScanner
     }
 
     /**
-     * Called when the the scanner has read a line which is not an object definition
+     * Called when the scanner has read a line which is not an object definition
      *
      * @param originalOffset offset from where the line was read
      * @param line
@@ -105,7 +105,7 @@ class ObjectsFullScanner
     }
 
     /**
-     * Called when the the scanner has read a line which is an object definition
+     * Called when the scanner has read a line which is an object definition
      *
      * @param originalOffset offset from where the line was read
      * @param line
