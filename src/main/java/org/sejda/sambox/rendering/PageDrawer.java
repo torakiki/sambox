@@ -1159,10 +1159,17 @@ public class PageDrawer extends PDFGraphicsStreamEngine
                     }
                     int w2 = (int) Math.round(mask.getWidth() * scaleX);
                     int h2 = (int) Math.round(mask.getHeight() * scaleY);
-
-                    Image scaledMask = mask.getScaledInstance(w2, h2, Image.SCALE_SMOOTH);
-                    imageTransform.scale(1f / Math.abs(scaleX), 1f / Math.abs(scaleY));
-                    g.drawImage(scaledMask, imageTransform, null);
+                    
+                    if(w2 == 0 || h2 == 0) 
+                    {
+                        LOG.warn("Skipping mask image with 0 dimensions, width: " + w2 + ", height: "+ h2);    
+                    }
+                    else 
+                    {
+                        Image scaledMask = mask.getScaledInstance(w2, h2, Image.SCALE_SMOOTH);
+                        imageTransform.scale(1f / Math.abs(scaleX), 1f / Math.abs(scaleY));
+                        g.drawImage(scaledMask, imageTransform, null);
+                    }
                 }
                 g.dispose();
 
