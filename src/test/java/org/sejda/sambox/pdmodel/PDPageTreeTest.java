@@ -19,16 +19,17 @@ package org.sejda.sambox.pdmodel;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.endsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import static org.sejda.sambox.input.PDFParser.parse;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 
 import org.junit.Test;
 import org.sejda.io.SeekableSources;
+import org.sejda.sambox.cos.COSBase;
+import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.interactive.documentnavigation.outline.PDDocumentOutline;
 import org.sejda.sambox.pdmodel.interactive.documentnavigation.outline.PDOutlineItem;
@@ -334,6 +335,38 @@ public class PDPageTreeTest
                 PDPageTreeTest.class.getResourceAsStream("loop_in_page_tree.pdf"))))
         {
             doc.getPage(0);
+        }
+    }
+    
+    @Test
+    public void getInheritableAttribute_recursive() throws IOException {
+        PDDocument doc = new PDDocument();
+        PDPage page = new PDPage();
+        
+        doc.addPage(page);
+        
+        COSDictionary dic1 = page.getCOSObject();
+        COSDictionary dic2 = new COSDictionary();
+        COSDictionary dic3 = new COSDictionary();
+        
+        dic1.setItem(COSName.PARENT, dic2);
+        dic2.setItem(COSName.PARENT, dic3);
+        dic3.setItem(COSName.PARENT, dic1);
+
+        File tempFile = Files.createTempFile("sambox_getInheritableAttribute_recursive", ".pdf").toFile();
+        tempFile.deleteOnExit();
+        
+        doc.save(tempFile.getAbsolutePath());
+
+        try (PDDocument doc2 = parse(SeekableSources.seekableSourceFrom(tempFile)))
+        {
+            PDPage p = doc.getPage(0);
+            COSBase value = PDPageTree.getInheritableAttribute(p.getCOSObject(), COSName.D);
+            assertNull(value);
+        }
+        finally 
+        {
+            tempFile.delete();
         }
     }
 }

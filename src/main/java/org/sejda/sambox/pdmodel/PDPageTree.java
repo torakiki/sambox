@@ -44,6 +44,7 @@ import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.COSObjectable;
+import org.sejda.sambox.util.ObjectIdUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -137,6 +138,11 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
      */
     public static COSBase getInheritableAttribute(COSDictionary node, COSName key)
     {
+        return getInheritableAttribute(node, key, new HashSet<>());
+    }
+    
+    public static COSBase getInheritableAttribute(COSDictionary node, COSName key, Set<String> visitedObjectIds)
+    {
         COSBase value = node.getDictionaryObject(key);
         if (value != null)
         {
@@ -154,7 +160,15 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
         
         if (parent != null)
         {
-            return getInheritableAttribute(parent, key);
+            String objId = ObjectIdUtils.getObjectIdOf(node);
+            if(!objId.isBlank() && visitedObjectIds.contains(objId))
+            {
+                // prevent infinite recursion
+                return null;
+            }
+            
+            visitedObjectIds.add(objId);
+            return getInheritableAttribute(parent, key, visitedObjectIds);
         }
 
         return null;
