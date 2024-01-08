@@ -26,8 +26,11 @@ import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -49,6 +52,11 @@ public class ContentStreamParser extends SourceReader
 {
     private final ContentStreamCOSParser cosParser;
     private final List<Object> tokens = new ArrayList<>();
+
+    private static final Logger LOG = LoggerFactory.getLogger(ContentStreamParser.class);
+
+    private static final int MAX_BIN_CHAR_TEST_LENGTH = 10;
+    private final byte[] binCharTestArr = new byte[MAX_BIN_CHAR_TEST_LENGTH];
 
     public ContentStreamParser(PDContentStream stream) throws IOException
     {
@@ -165,7 +173,7 @@ public class ContentStreamParser extends SourceReader
         {
             current = source().read();
             // if not a EI we restore the position and go on
-            if (current == 'I' && (isEndOfImage() || isEOF(source().peek())))
+            if (current == 'I' && (isEndOfImage() || isEOF(source().peek())) && hasNoFollowingBinData())
             {
                 return true;
             }
@@ -216,6 +224,87 @@ public class ContentStreamParser extends SourceReader
         finally
         {
             source().position(currentPosition);
+        }
+    }
+
+    /**
+     * Looks up an amount of bytes if they contain only ASCII characters (no
+     * control sequences etc.), and that these ASCII characters begin with a
+     * sequence of 1-3 non-blank characters between blanks
+     *
+     * @return <code>true</code> if next bytes are probably printable ASCII
+     * characters starting with a PDF operator, otherwise <code>false</code>
+     */
+    private boolean hasNoFollowingBinData() throws IOException
+    {
+        long originalPosition = source().position();
+
+        try {
+            // as suggested in PDFBOX-1164
+            final int readBytes = source().read(ByteBuffer.wrap(binCharTestArr));
+            boolean noBinData = true;
+            int startOpIdx = -1;
+            int endOpIdx = -1;
+
+            if (readBytes > 0) 
+            {
+                for (int bIdx = 0; bIdx < readBytes; bIdx++) 
+                {
+                    final byte b = binCharTestArr[bIdx];
+                    if (b != 0 && b < 0x09 || b > 0x0a && b < 0x20 && b != 0x0d) 
+                    {
+                        // control character or > 0x7f -> we have binary data
+                        noBinData = false;
+                        break;
+                    }
+                    // find the start of a PDF operator
+                    if (startOpIdx == -1 && !(b == 0 || b == 9 || b == 0x20 || b == 0x0a || b == 0x0d)) 
+                    {
+                        startOpIdx = bIdx;
+                    } else if (startOpIdx != -1 && endOpIdx == -1 &&
+                            (b == 0 || b == 9 || b == 0x20 || b == 0x0a || b == 0x0d)) 
+                    {
+                        endOpIdx = bIdx;
+                    }
+                }
+
+                // PDFBOX-3742: just assuming that 1-3 non blanks is a PDF operator isn't enough
+                if (endOpIdx != -1 && startOpIdx != -1) 
+                {
+                    // usually, the operator here is Q, sometimes EMC (PDFBOX-2376), S (PDFBOX-3784).
+                    String s = new String(binCharTestArr, startOpIdx, endOpIdx - startOpIdx);
+                    if (!"q".equals(s) && !"Q".equals(s) && !"EMC".equals(s) && !"S".equals(s)) 
+                    {
+                        noBinData = false;
+                    }
+                }
+
+                // only if not close to eof
+                if (readBytes == MAX_BIN_CHAR_TEST_LENGTH) 
+                {
+                    // a PDF operator is 1-3 bytes long
+                    if (startOpIdx != -1 && endOpIdx == -1) 
+                    {
+                        endOpIdx = MAX_BIN_CHAR_TEST_LENGTH;
+                    }
+                    if (endOpIdx != -1 && startOpIdx != -1 && endOpIdx - startOpIdx > 3) 
+                    {
+                        noBinData = false;
+                    }
+                }
+            }
+            
+            if (!noBinData) 
+            {
+                LOG.warn("ignoring 'EI' assumed to be in the middle of inline image at stream offset " + originalPosition);
+            }
+            
+            return noBinData;
+
+        } 
+        finally 
+        {
+            source().position(originalPosition);
         }
     }
 
