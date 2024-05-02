@@ -88,7 +88,16 @@ class XrefParser
             @Override
             void onEntryFound(XrefEntry entry)
             {
-                parser().provider().addEntryIfAbsent(entry);
+                if(entry.getByteOffset() < XrefEntry.UNKNOWN_OFFSET)
+                {
+                    LOG.warn("Ignoring xrefEntry inUse with byteOffset: {}", entry);
+                }
+                else
+                {
+                    parser().provider().addEntryIfAbsent(entry);
+                }
+                
+                
             }
         };
     }

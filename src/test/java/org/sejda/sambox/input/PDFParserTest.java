@@ -512,6 +512,18 @@ public class PDFParserTest
         }
     }
 
+    @Test
+    public void testNegativeOffsetXrefEntry() throws IOException
+    {
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/test_multiple_xref_tables_negative_offset.pdf"))))
+        {
+
+            PDFTextStripper textStripper = new PDFTextStripper();
+            textStripper.getText(doc);
+        }
+    }
+
     //https://lists.apache.org/thread/rmvn7t4bj4d8wsln722kdk39k4fc0ff7
     @Test
     public void noLoopOrOOM() throws IOException
