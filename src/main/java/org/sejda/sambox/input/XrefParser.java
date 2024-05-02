@@ -90,7 +90,7 @@ class XrefParser
             {
                 if(entry.getByteOffset() < XrefEntry.UNKNOWN_OFFSET)
                 {
-                    LOG.warn("Ignoring xrefEntry inUse with byteOffset: {}", entry);
+                    LOG.warn("Ignoring xrefEntry with negative byteOffset: {}", entry);
                 }
                 else
                 {
