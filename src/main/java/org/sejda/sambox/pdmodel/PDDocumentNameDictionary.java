@@ -18,7 +18,6 @@ package org.sejda.sambox.pdmodel;
 
 import static java.util.Optional.ofNullable;
 
-import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSObjectable;
@@ -37,23 +36,12 @@ public class PDDocumentNameDictionary implements COSObjectable
      */
     public PDDocumentNameDictionary(PDDocumentCatalog cat)
     {
-        COSBase names = cat.getCOSObject().getDictionaryObject(COSName.NAMES);
-        if (names != null)
-        {
-            nameDictionary = (COSDictionary) names;
-        }
-        else
-        {
-            nameDictionary = new COSDictionary();
-            cat.getCOSObject().setItem(COSName.NAMES, nameDictionary);
-        }
+        nameDictionary = ofNullable(cat.getCOSObject()
+                .getDictionaryObject(COSName.NAMES, COSDictionary.class)).orElseGet(
+                COSDictionary::new);
+        cat.getCOSObject().putIfAbsent(COSName.NAMES, nameDictionary);
     }
 
-    /**
-     * Constructor.
-     *
-     * @param names The names dictionary.
-     */
     public PDDocumentNameDictionary(COSDictionary names)
     {
         nameDictionary = names;
@@ -71,14 +59,16 @@ public class PDDocumentNameDictionary implements COSObjectable
     }
 
     /**
-     * Get the destination named tree node. The value in this name tree will be PDDestination objects.
+     * Get the destination named tree node. The value in this name tree will be PDDestination
+     * objects.
      *
      * @return The destination name tree node.
      */
     public PDDestinationNameTreeNode getDests()
     {
-        return ofNullable(nameDictionary.getDictionaryObject(COSName.DESTS, COSDictionary.class))
-                .map(PDDestinationNameTreeNode::new).orElse(null);
+        return ofNullable(
+                nameDictionary.getDictionaryObject(COSName.DESTS, COSDictionary.class)).map(
+                PDDestinationNameTreeNode::new).orElse(null);
     }
 
     /**
@@ -92,23 +82,16 @@ public class PDDocumentNameDictionary implements COSObjectable
     }
 
     /**
-     * Get the embedded files named tree node. The value in this name tree will be PDComplexFileSpecification objects.
+     * Get the embedded files named tree node. The value in this name tree will be
+     * PDComplexFileSpecification objects.
      *
      * @return The embedded files name tree node.
      */
     public PDEmbeddedFilesNameTreeNode getEmbeddedFiles()
     {
-        PDEmbeddedFilesNameTreeNode retval = null;
+        return ofNullable(nameDictionary.getDictionaryObject(COSName.EMBEDDED_FILES,
+                COSDictionary.class)).map(PDEmbeddedFilesNameTreeNode::new).orElse(null);
 
-        COSDictionary dic = (COSDictionary) nameDictionary
-                .getDictionaryObject(COSName.EMBEDDED_FILES);
-
-        if (dic != null)
-        {
-            retval = new PDEmbeddedFilesNameTreeNode(dic);
-        }
-
-        return retval;
     }
 
     /**
@@ -129,8 +112,8 @@ public class PDDocumentNameDictionary implements COSObjectable
     public PDJavascriptNameTreeNode getJavaScript()
     {
         return ofNullable(
-                nameDictionary.getDictionaryObject(COSName.JAVA_SCRIPT, COSDictionary.class))
-                        .map(PDJavascriptNameTreeNode::new).orElse(null);
+                nameDictionary.getDictionaryObject(COSName.JAVA_SCRIPT, COSDictionary.class)).map(
+                PDJavascriptNameTreeNode::new).orElse(null);
     }
 
     /**
