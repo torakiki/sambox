@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.output;
 
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
 import static org.sejda.commons.util.RequireUtils.requireState;
@@ -168,7 +169,7 @@ class PDFBodyWriter implements COSVisitor, Closeable
             value.addCompression();
         }
         // with encrypted docs we write length as an indirect ref
-        value.indirectLength(context.encryptor.isPresent());
+        value.indirectLength(nonNull(context.encryptor()));
         if (value.indirectLength())
         {
             IndirectCOSObjectReference length = context

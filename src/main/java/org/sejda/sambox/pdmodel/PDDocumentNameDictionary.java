@@ -32,14 +32,14 @@ public class PDDocumentNameDictionary implements COSObjectable
     private final COSDictionary nameDictionary;
 
     /**
-     * @param cat The document catalog that this dictionary is part of.
+     * @param catalog The document catalog that this dictionary is part of.
      */
-    public PDDocumentNameDictionary(PDDocumentCatalog cat)
+    public PDDocumentNameDictionary(PDDocumentCatalog catalog)
     {
-        nameDictionary = ofNullable(cat.getCOSObject()
+        nameDictionary = ofNullable(catalog.getCOSObject()
                 .getDictionaryObject(COSName.NAMES, COSDictionary.class)).orElseGet(
                 COSDictionary::new);
-        cat.getCOSObject().putIfAbsent(COSName.NAMES, nameDictionary);
+        catalog.getCOSObject().putIfAbsent(COSName.NAMES, nameDictionary);
     }
 
     public PDDocumentNameDictionary(COSDictionary names)
