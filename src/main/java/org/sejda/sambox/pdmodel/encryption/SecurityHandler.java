@@ -17,6 +17,22 @@
 
 package org.sejda.sambox.pdmodel.encryption;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.Map;
+import java.util.Set;
+
 import org.bouncycastle.crypto.engines.AESFastEngine;
 import org.bouncycastle.crypto.io.CipherInputStream;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
@@ -34,7 +50,6 @@ import org.sejda.sambox.cos.COSString;
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -42,16 +57,6 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.*;
 
 /**
  * A security handler as described in the PDF specifications. A security handler is responsible of
@@ -336,7 +341,7 @@ public abstract class SecurityHandler
                     + " bytes read instead of " + iv.length);
         }
         PaddedBufferedBlockCipher cipher = new PaddedBufferedBlockCipher(
-                new CBCBlockCipher(new AESFastEngine()));
+                CBCBlockCipher.newInstance(new AESFastEngine()));
         cipher.init(false, new ParametersWithIV(new KeyParameter(encryptionKey), iv));
         try (CipherInputStream cis = new CipherInputStream(data, cipher))
         {

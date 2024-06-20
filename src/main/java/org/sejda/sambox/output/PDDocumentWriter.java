@@ -16,12 +16,12 @@
  */
 package org.sejda.sambox.output;
 
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.Optional;
 
 import org.sejda.commons.util.IOUtils;
 import org.sejda.io.CountingWritableByteChannel;
@@ -36,9 +36,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Writer for a {@link PDDocument}. This component provides methods to write a {@link PDDocument} to a
- * {@link CountingWritableByteChannel}.
- * 
+ * Writer for a {@link PDDocument}. This component provides methods to write a {@link PDDocument} to
+ * a {@link CountingWritableByteChannel}.
+ *
  * @author Andrea Vacondio
  */
 public class PDDocumentWriter implements Closeable
@@ -46,43 +46,45 @@ public class PDDocumentWriter implements Closeable
     private static final Logger LOG = LoggerFactory.getLogger(PDDocumentWriter.class);
     private DefaultPDFWriter writer;
     private PDFWriteContext context;
-    private Optional<EncryptionContext> encryptionContext;
+    private EncryptionContext encryptionContext;
 
     public PDDocumentWriter(CountingWritableByteChannel channel,
-            Optional<EncryptionContext> encryptionContext, WriteOption... options)
+            EncryptionContext encryptionContext, WriteOption... options)
     {
         requireNotNullArg(channel, "Cannot write to a null channel");
-        this.encryptionContext = ofNullable(encryptionContext).orElseGet(Optional::empty);
+        this.encryptionContext = encryptionContext;
         this.context = new PDFWriteContext(
-                this.encryptionContext.map(EncryptionContext::encryptionAlgorithm).orElse(null),
-                options);
+                ofNullable(this.encryptionContext).map(EncryptionContext::encryptionAlgorithm)
+                        .orElse(null), options);
         this.writer = new DefaultPDFWriter(new IndirectObjectsWriter(channel, context));
     }
 
     /**
      * Writes the {@link PDDocument}.
-     * 
+     *
      * @param document
      * @throws IOException
      */
     public void write(PDDocument document) throws IOException
     {
         requireNotNullArg(document, "PDDocument cannot be null");
-        if (context.hasWriteOption(WriteOption.XREF_STREAM)
-                || context.hasWriteOption(WriteOption.OBJECT_STREAMS))
+        if (context.hasWriteOption(WriteOption.XREF_STREAM) || context.hasWriteOption(
+                WriteOption.OBJECT_STREAMS))
         {
             document.requireMinVersion(SpecVersionUtils.V1_5);
         }
         ofNullable(document.getDocument().getTrailer()).map(PDDictionaryWrapper::getCOSObject)
                 .ifPresent(t -> t.removeItem(COSName.ENCRYPT));
 
-        encryptionContext.ifPresent(c -> {
-            document.getDocument()
-                    .setEncryptionDictionary(c.security.encryption.generateEncryptionDictionary(c));
+        if (nonNull(encryptionContext))
+        {
+            document.getDocument().setEncryptionDictionary(
+                    encryptionContext.security.encryption.generateEncryptionDictionary(
+                            encryptionContext));
             LOG.debug("Generated encryption dictionary");
             ofNullable(document.getDocumentCatalog().getMetadata()).map(PDStream::getCOSObject)
-                    .ifPresent(str -> str.encryptable(c.security.encryptMetadata));
-        });
+                    .ifPresent(str -> str.encryptable(encryptionContext.security.encryptMetadata));
+        }
 
         writer.writeHeader(document.getDocument().getHeaderVersion());
         writeBody(document.getDocument());
@@ -103,7 +105,7 @@ public class PDDocumentWriter implements Closeable
     {
         if (context.hasWriteOption(WriteOption.ASYNC_BODY_WRITE))
         {
-            return new AsyncPDFBodyObjectsWriter(writer.writer());    
+            return new AsyncPDFBodyObjectsWriter(writer.writer());
         }
         return new SyncPDFBodyObjectsWriter(writer.writer());
     }
@@ -119,8 +121,8 @@ public class PDDocumentWriter implements Closeable
 
     private void writeXref(PDDocument document) throws IOException
     {
-        if (context.hasWriteOption(WriteOption.XREF_STREAM)
-                || context.hasWriteOption(WriteOption.OBJECT_STREAMS))
+        if (context.hasWriteOption(WriteOption.XREF_STREAM) || context.hasWriteOption(
+                WriteOption.OBJECT_STREAMS))
         {
             writer.writeXrefStream(document.getDocument().getTrailer().getCOSObject());
         }

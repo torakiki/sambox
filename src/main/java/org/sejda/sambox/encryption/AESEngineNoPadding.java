@@ -23,6 +23,7 @@ import java.io.InputStream;
 
 import org.bouncycastle.crypto.BufferedBlockCipher;
 import org.bouncycastle.crypto.DataLengthException;
+import org.bouncycastle.crypto.DefaultBufferedBlockCipher;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.engines.AESFastEngine;
 import org.bouncycastle.crypto.io.CipherInputStream;
@@ -100,7 +101,7 @@ class AESEngineNoPadding implements AESEncryptionAlgorithmEngine
     static AESEngineNoPadding cbc()
     {
         return new AESEngineNoPadding(
-                new BufferedBlockCipher(new CBCBlockCipher(new AESFastEngine())));
+                new DefaultBufferedBlockCipher(CBCBlockCipher.newInstance(new AESFastEngine())));
     }
 
     /**
@@ -108,6 +109,6 @@ class AESEngineNoPadding implements AESEncryptionAlgorithmEngine
      */
     static AESEngineNoPadding ecb()
     {
-        return new AESEngineNoPadding(new BufferedBlockCipher(new AESFastEngine()));
+        return new AESEngineNoPadding(new DefaultBufferedBlockCipher(new AESFastEngine()));
     }
 }

@@ -32,6 +32,7 @@ import java.util.Arrays;
 
 import org.bouncycastle.crypto.BufferedBlockCipher;
 import org.bouncycastle.crypto.DataLengthException;
+import org.bouncycastle.crypto.DefaultBufferedBlockCipher;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.engines.AESFastEngine;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
@@ -260,7 +261,7 @@ public final class StandardSecurityHandler extends SecurityHandler
     {
         try
         {
-            BufferedBlockCipher cipher = new BufferedBlockCipher(new AESFastEngine());
+            BufferedBlockCipher cipher = new DefaultBufferedBlockCipher(new AESFastEngine());
             cipher.init(false, new KeyParameter(getEncryptionKey()));
 
             byte[] buf = new byte[cipher.getOutputSize(encryption.getPerms().length)];
@@ -492,8 +493,8 @@ public final class StandardSecurityHandler extends SecurityHandler
         }
         try
         {
-            BufferedBlockCipher cipher = new BufferedBlockCipher(
-                    new CBCBlockCipher(new AESFastEngine()));
+            BufferedBlockCipher cipher = new DefaultBufferedBlockCipher(
+                    CBCBlockCipher.newInstance(new AESFastEngine()));
             cipher.init(false, new KeyParameter(hash));
             byte[] buf = new byte[cipher.getOutputSize(fileKeyEnc.length)];
             int len = cipher.processBytes(fileKeyEnc, 0, fileKeyEnc.length, buf, 0);

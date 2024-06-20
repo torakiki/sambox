@@ -40,7 +40,7 @@ public class ConcatenatingAESEngine extends AESEngineNoPadding
 
     ConcatenatingAESEngine()
     {
-        super(new PaddedBufferedBlockCipher(new CBCBlockCipher(new AESFastEngine())));
+        super(new PaddedBufferedBlockCipher(CBCBlockCipher.newInstance(new AESFastEngine())));
         random = new SecureRandom();
     }
 

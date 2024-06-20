@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.pdmodel;
 
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static org.sejda.commons.util.RequireUtils.requireNotBlank;
 import static org.sejda.io.CountingWritableByteChannel.from;
@@ -37,7 +38,6 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 
 import org.apache.fontbox.ttf.TrueTypeFont;
@@ -416,10 +416,13 @@ public class PDDocument implements Closeable
      * @param md5Update
      * @param encContext
      */
-    private void generateFileIdentifier(byte[] md5Update, Optional<EncryptionContext> encContext)
+    private void generateFileIdentifier(byte[] md5Update, EncryptionContext encContext)
     {
         COSString id = generateFileIdentifier(md5Update);
-        encContext.ifPresent(c -> c.documentId(id.getBytes()));
+        if (nonNull(encContext))
+        {
+            encContext.documentId(id.getBytes());
+        }
         DirectCOSObject directId = asDirectObject(id);
         getDocument().getTrailer().getCOSObject()
                 .setItem(COSName.ID, asDirectObject(new COSArray(directId, directId)));
@@ -591,8 +594,8 @@ public class PDDocument implements Closeable
             }
         }
         fontsToSubset.clear();
-        Optional<EncryptionContext> encryptionContext = ofNullable(
-                ofNullable(security).map(EncryptionContext::new).orElse(null));
+        EncryptionContext encryptionContext = ofNullable(security).map(EncryptionContext::new)
+                .orElse(null);
         generateFileIdentifier(output.toString().getBytes(StandardCharsets.ISO_8859_1),
                 encryptionContext);
         try (PDDocumentWriter writer = new PDDocumentWriter(output, encryptionContext, options))
