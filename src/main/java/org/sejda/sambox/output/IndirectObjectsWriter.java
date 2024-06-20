@@ -95,8 +95,6 @@ class IndirectObjectsWriter implements Closeable
 
     /**
      * Called when the input indirect references has just been written
-     * 
-     * @param object
      */
     protected void onWritten(IndirectCOSObjectReference ref)
     {

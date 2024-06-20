@@ -1,21 +1,22 @@
 /*
  * Created on 27/ago/2015
  * Copyright 2010 by Andrea Vacondio (andrea.vacondio@gmail.com).
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); 
- * you may not use this file except in compliance with the License. 
- * You may obtain a copy of the License at 
- * 
- * http://www.apache.org/licenses/LICENSE-2.0 
- * 
- * Unless required by applicable law or agreed to in writing, software 
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
- * See the License for the specific language governing permissions and 
- * limitations under the License. 
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.sejda.sambox.output;
 
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 
 import java.util.ArrayList;
@@ -23,7 +24,6 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.SortedMap;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -42,47 +42,45 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Context that contains and keeps track of all the information needed during the process of writing a PDF document. It
- * creates indirect references for {@link COSBase} instances and provide lookup methods to be able to retrieve these
- * data and know what's the indirect reference created by the context for a given {@link COSBase}. I keeps track of what
- * object numbers have been written.
- * 
+ * Context that contains and keeps track of all the information needed during the process of writing
+ * a PDF document. It creates indirect references for {@link COSBase} instances and provide lookup
+ * methods to be able to retrieve these data and know what's the indirect reference created by the
+ * context for a given {@link COSBase}. I keeps track of what object numbers have been written.
+ *
  * @author Andrea Vacondio
  */
 class PDFWriteContext
 {
     private static final Logger LOG = LoggerFactory.getLogger(PDFWriteContext.class);
 
-    private String contextId = UUID.randomUUID().toString();
-    private IndirectReferenceProvider referencesProvider = new IndirectReferenceProvider();
-    private Map<IndirectCOSObjectIdentifier, IndirectCOSObjectReference> lookupNewRef = new ConcurrentHashMap<>();
-    private List<WriteOption> opts;
-    private SortedMap<Long, XrefEntry> written = new ConcurrentSkipListMap<>();
-    public final Optional<GeneralEncryptionAlgorithm> encryptor;
+    private final String contextId = UUID.randomUUID().toString();
+    private final IndirectReferenceProvider referencesProvider;
+    private final Map<IndirectCOSObjectIdentifier, IndirectCOSObjectReference> lookupNewRef = new ConcurrentHashMap<>();
+    private final List<WriteOption> opts;
+    private final SortedMap<Long, XrefEntry> written = new ConcurrentSkipListMap<>();
+    private final GeneralEncryptionAlgorithm encryptor;
 
     PDFWriteContext(GeneralEncryptionAlgorithm encryptor, WriteOption... options)
     {
-        this.encryptor = ofNullable(encryptor);
-        this.opts = Arrays.asList(options);
-        this.referencesProvider = new IndirectReferenceProvider();
+        this(0, encryptor, options);
     }
 
     PDFWriteContext(long highestExistingReferenceNumber, GeneralEncryptionAlgorithm encryptor,
             WriteOption... options)
     {
-        this.encryptor = ofNullable(encryptor);
-        this.encryptor.ifPresent(e -> LOG.debug("Encryptor: {}", e));
+        this.encryptor = encryptor;
         this.opts = Arrays.asList(options);
         this.referencesProvider = new IndirectReferenceProvider(highestExistingReferenceNumber);
-        LOG.debug("PDFWriteContext created with highest object reference number {}",
-                highestExistingReferenceNumber);
+        LOG.debug(
+                "PDFWriteContext created with highest object reference number {} and encryptor {}",
+                highestExistingReferenceNumber, encryptor);
     }
 
     /**
-     * Creates a new {@link IndirectCOSObjectReference} for the given item. We store the association between the item id
-     * and the reference so that if we meet the same id later, we can retrieve the reference that was previously
-     * written.
-     * 
+     * Creates a new {@link IndirectCOSObjectReference} for the given item. We store the association
+     * between the item id and the reference so that if we meet the same id later, we can retrieve
+     * the reference that was previously written.
+     *
      * @param item
      * @return the created reference
      */
@@ -92,10 +90,10 @@ class PDFWriteContext
     }
 
     /**
-     * Creates a new {@link NonStorableInObjectStreams} for the given item. We store the association between the item id
-     * and the reference so that if we meet the same id later, we can retrieve the reference that was previously
-     * written.
-     * 
+     * Creates a new {@link NonStorableInObjectStreams} for the given item. We store the association
+     * between the item id and the reference so that if we meet the same id later, we can retrieve
+     * the reference that was previously written.
+     *
      * @param item
      * @return the created reference
      */
@@ -107,7 +105,7 @@ class PDFWriteContext
 
     /**
      * Creates an empty {@link NonStorableInObjectStreams}
-     * 
+     *
      * @return the created reference
      */
     IndirectCOSObjectReference createNonStorableInObjectStreamIndirectReference()
@@ -140,16 +138,16 @@ class PDFWriteContext
     }
 
     /**
-     * Creates a new {@link IndirectCOSObjectReference} for the given item if it has not been created before, it returns
-     * the already existing reference otherwise.
-     * 
+     * Creates a new {@link IndirectCOSObjectReference} for the given item if it has not been
+     * created before, it returns the already existing reference otherwise.
+     *
      * @param item
      * @return the reference
      */
     IndirectCOSObjectReference getOrCreateIndirectReferenceFor(COSBase item)
     {
-        return ofNullable(getIndirectReferenceFor(item))
-                .orElseGet(() -> createIndirectReferenceFor(item));
+        return ofNullable(getIndirectReferenceFor(item)).orElseGet(
+                () -> createIndirectReferenceFor(item));
     }
 
     /**
@@ -167,10 +165,10 @@ class PDFWriteContext
     }
 
     /**
-     * adds the reference to the context. When later queried, the context will return the existing indirect reference an
-     * no new reference will be created. This is used during incremental updates when we don't want to create new
-     * references for existing objects
-     * 
+     * adds the reference to the context. When later queried, the context will return the existing
+     * indirect reference an no new reference will be created. This is used during incremental
+     * updates when we don't want to create new references for existing objects
+     *
      * @param existing
      */
     void addExistingReference(ExistingIndirectCOSObject existing)
@@ -182,7 +180,8 @@ class PDFWriteContext
 
     /**
      * @param item
-     * @return true if the given item has been added to the context and an indirect reference created for it.
+     * @return true if the given item has been added to the context and an indirect reference
+     * created for it.
      */
     boolean hasIndirectReferenceFor(COSBase item)
     {
@@ -217,9 +216,10 @@ class PDFWriteContext
 
     /**
      * Adds an entry to the list of the written entries
-     * 
+     *
      * @param entry
-     * @return the previous value if an entry with the same object number has been already written, null otherwise.
+     * @return the previous value if an entry with the same object number has been already written,
+     * null otherwise.
      */
     XrefEntry addWritten(XrefEntry entry)
     {
@@ -283,11 +283,19 @@ class PDFWriteContext
 
     /**
      * Informs the context of the object is about the written
-     * 
+     *
      * @param key
      */
     void writing(COSObjectKey key)
     {
-        encryptor.ifPresent(e -> e.setCurrentCOSObjectKey(key));
+        if (nonNull(encryptor))
+        {
+            encryptor.setCurrentCOSObjectKey(key);
+        }
+    }
+
+    GeneralEncryptionAlgorithm encryptor()
+    {
+        return encryptor;
     }
 }

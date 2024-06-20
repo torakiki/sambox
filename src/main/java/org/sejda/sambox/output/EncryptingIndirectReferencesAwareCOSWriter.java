@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.output;
 
+import static java.util.Objects.nonNull;
+
 import java.io.IOException;
 
 import org.sejda.io.BufferedCountingChannelWriter;
@@ -48,9 +50,9 @@ class EncryptingIndirectReferencesAwareCOSWriter extends IndirectReferencesAware
     @Override
     public void visit(COSStream value) throws IOException
     {
-        if (context.encryptor.isPresent())
+        if (nonNull(context.encryptor()))
         {
-            context.encryptor.get().visit(value);
+            context.encryptor().visit(value);
         }
         super.visit(value);
     }
@@ -58,9 +60,9 @@ class EncryptingIndirectReferencesAwareCOSWriter extends IndirectReferencesAware
     @Override
     public void visit(COSString value) throws IOException
     {
-        if (context.encryptor.isPresent())
+        if (nonNull(context.encryptor()))
         {
-            context.encryptor.get().visit(value);
+            context.encryptor().visit(value);
             value.setForceHexForm(true);
         }
         super.visit(value);

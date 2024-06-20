@@ -34,11 +34,11 @@ class IndirectReferenceProvider
 
     IndirectReferenceProvider()
     {
-        referencesCounter = new AtomicLong(0);
+        this(0);
     }
 
     /**
-     * @param next reference number will be highestAlreadyExisting+1
+     * @param highestAlreadyExisting reference number will be highestAlreadyExisting+1
      */
     IndirectReferenceProvider(long highestAlreadyExisting)
     {
