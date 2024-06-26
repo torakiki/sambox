@@ -16,21 +16,20 @@
  */
 package org.sejda.sambox.pdmodel.interactive.documentnavigation.outline;
 
-import org.junit.Test;
+import static java.util.stream.StreamSupport.stream;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Spliterator;
 import java.util.Spliterators;
-import java.util.stream.StreamSupport;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import org.junit.Test;
 
 /**
  * @author Andrea Vacondio
- *
  */
 public class PDDocumentOutlineTest
 {
@@ -73,36 +72,37 @@ public class PDDocumentOutlineTest
     {
         return createOutlineItem(title, new ArrayList<>());
     }
-    
+
     private PDOutlineItem createOutlineItem(String title, List<String> children)
     {
         PDOutlineItem item = new PDOutlineItem();
         item.setTitle(title);
         item.openNode();
-        
-        for(String child: children) {
+
+        for (String child : children)
+        {
             item.addLast(createOutlineItem(child));
         }
-        
+
         return item;
     }
-    
+
     private PDDocumentOutline createTestOutline()
     {
         PDDocumentOutline outline = new PDDocumentOutline();
-        outline.addLast(createOutlineItem("Europe", Arrays.asList("Netherlands", "Italy", "France")));
+        outline.addLast(
+                createOutlineItem("Europe", Arrays.asList("Netherlands", "Italy", "France")));
         outline.addLast(createOutlineItem("Asia", Arrays.asList("Japan", "India", "Korea")));
         outline.addLast(createOutlineItem("Antarctica"));
-        
+
         return outline;
     }
 
     private PDOutlineItem find(PDDocumentOutline outline, String title)
     {
-        return StreamSupport.stream(
-                        Spliterators.spliteratorUnknownSize(new PDOutlineTreeIterator(outline),
-                                Spliterator.ORDERED | Spliterator.NONNULL), false)
-                .filter(item -> title.equals(item.getTitle())).findFirst().orElse(null);
+        return stream(Spliterators.spliteratorUnknownSize(new PDOutlineTreeIterator(outline),
+                Spliterator.ORDERED | Spliterator.NONNULL), false).filter(
+                item -> title.equals(item.getTitle())).findFirst().orElse(null);
     }
 
     private String asString(PDOutlineNode node)
@@ -113,14 +113,17 @@ public class PDDocumentOutlineTest
     private String asString(PDOutlineNode node, int level)
     {
         StringBuilder sb = new StringBuilder();
-        if(node instanceof PDOutlineItem item) {
+        if (node instanceof PDOutlineItem item)
+        {
             sb.append(item.getTitle());
         }
-        
-        if(node.hasChildren()) {
+
+        if (node.hasChildren())
+        {
             sb.append(" [");
 
-            for (PDOutlineItem child: node.children()){
+            for (PDOutlineItem child : node.children())
+            {
                 sb.append(asString(child, level + 1)).append(" ");
             }
 
@@ -129,12 +132,12 @@ public class PDDocumentOutlineTest
 
         return sb.toString();
     }
-    
+
     private void assertOutline(PDDocumentOutline outline, String expected)
     {
         assertEquals(expected.trim(), asString(outline).trim());
     }
-    
+
     private void assertOpenCount(PDDocumentOutline outline, String title, int expected)
     {
         assertEquals(expected, find(outline, title).getOpenCount());
@@ -144,21 +147,23 @@ public class PDDocumentOutlineTest
     {
         assertEquals(expected, outline.getOpenCount());
     }
-    
+
     @Test
-    public void deleteTopLevelItem() {
+    public void deleteTopLevelItem()
+    {
         PDDocumentOutline outline = createTestOutline();
         assertOpenCount(outline, 3);
-        
+
         find(outline, "Antarctica").delete();
 
         assertOutline(outline, "[Europe [Netherlands Italy France ] Asia [Japan India Korea ] ]");
         assertOpenCount(outline, 2);
-        
+
     }
 
     @Test
-    public void deleteTopLevelItemWithChildren() {
+    public void deleteTopLevelItemWithChildren()
+    {
         PDDocumentOutline outline = createTestOutline();
         find(outline, "Antarctica").delete();
         find(outline, "Asia").delete();
@@ -169,7 +174,8 @@ public class PDDocumentOutlineTest
     }
 
     @Test
-    public void deleteFirstChild() {
+    public void deleteFirstChild()
+    {
         PDDocumentOutline outline = createTestOutline();
         find(outline, "Netherlands").delete();
 
@@ -177,60 +183,80 @@ public class PDDocumentOutlineTest
     }
 
     @Test
-    public void deleteMiddleChild() {
+    public void deleteMiddleChild()
+    {
         PDDocumentOutline outline = createTestOutline();
         find(outline, "Italy").delete();
 
-        assertOutline(outline, "[Europe [Netherlands France ] Asia [Japan India Korea ] Antarctica ]");
+        assertOutline(outline,
+                "[Europe [Netherlands France ] Asia [Japan India Korea ] Antarctica ]");
         assertOpenCount(outline, "Europe", -2);
     }
 
     @Test
-    public void deleteLastChild() {
+    public void deleteLastChild()
+    {
         PDDocumentOutline outline = createTestOutline();
         find(outline, "France").delete();
 
-        assertOutline(outline, "[Europe [Netherlands Italy ] Asia [Japan India Korea ] Antarctica ]");
+        assertOutline(outline,
+                "[Europe [Netherlands Italy ] Asia [Japan India Korea ] Antarctica ]");
     }
 
     @Test
-    public void insertFirstChild() {
+    public void insertFirstChild()
+    {
         PDDocumentOutline outline = createTestOutline();
         find(outline, "Europe").addAtPosition(createOutlineItem("Spain"), 0);
 
-        assertOutline(outline, "[Europe [Spain Netherlands Italy France ] Asia [Japan India Korea ] Antarctica ]");
+        assertOutline(outline,
+                "[Europe [Spain Netherlands Italy France ] Asia [Japan India Korea ] Antarctica ]");
         assertOpenCount(outline, "Europe", -4);
     }
 
     @Test
-    public void insertLastChild() {
+    public void insertLastChild()
+    {
         PDDocumentOutline outline = createTestOutline();
         find(outline, "Europe").addAtPosition(createOutlineItem("Spain"), 3);
 
-        assertOutline(outline, "[Europe [Netherlands Italy France Spain ] Asia [Japan India Korea ] Antarctica ]");
+        assertOutline(outline,
+                "[Europe [Netherlands Italy France Spain ] Asia [Japan India Korea ] Antarctica ]");
     }
 
     @Test
-    public void insertLastChildIndexLargerThanLast() {
+    public void insertLastChildIndexLargerThanLast()
+    {
         PDDocumentOutline outline = createTestOutline();
         find(outline, "Europe").addAtPosition(createOutlineItem("Spain"), 300);
 
-        assertOutline(outline, "[Europe [Netherlands Italy France Spain ] Asia [Japan India Korea ] Antarctica ]");
+        assertOutline(outline,
+                "[Europe [Netherlands Italy France Spain ] Asia [Japan India Korea ] Antarctica ]");
     }
 
     @Test
-    public void insertSecondChild() {
+    public void insertSecondChild()
+    {
         PDDocumentOutline outline = createTestOutline();
         find(outline, "Europe").addAtPosition(createOutlineItem("Spain"), 1);
 
-        assertOutline(outline, "[Europe [Netherlands Spain Italy France ] Asia [Japan India Korea ] Antarctica ]");
+        assertOutline(outline,
+                "[Europe [Netherlands Spain Italy France ] Asia [Japan India Korea ] Antarctica ]");
     }
 
     @Test
-    public void insertThirdChild() {
+    public void insertThirdChild()
+    {
         PDDocumentOutline outline = createTestOutline();
         find(outline, "Europe").addAtPosition(createOutlineItem("Spain"), 2);
 
-        assertOutline(outline, "[Europe [Netherlands Italy Spain France ] Asia [Japan India Korea ] Antarctica ]");
+        assertOutline(outline,
+                "[Europe [Netherlands Italy Spain France ] Asia [Japan India Korea ] Antarctica ]");
+    }
+
+    @Test
+    public void exploresAllNodes()
+    {
+        assertEquals(9, stream(createTestOutline().nodes().spliterator(), false).count());
     }
 }

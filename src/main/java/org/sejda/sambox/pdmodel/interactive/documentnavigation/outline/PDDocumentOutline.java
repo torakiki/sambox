@@ -60,4 +60,12 @@ public final class PDDocumentOutline extends PDOutlineNode
     {
         // The root of the outline hierarchy is not an OutlineItem and cannot be opened or closed
     }
+
+    /**
+     * @return An {@link Iterable} view of the whole outline nodesn
+     */
+    public Iterable<PDOutlineItem> nodes()
+    {
+        return () -> new PDOutlineTreeIterator(this);
+    }
 }
