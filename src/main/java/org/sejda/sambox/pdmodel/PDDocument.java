@@ -59,6 +59,7 @@ import org.sejda.sambox.encryption.MessageDigests;
 import org.sejda.sambox.encryption.StandardSecurity;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.output.PDDocumentWriter;
+import org.sejda.sambox.output.PreSaveCOSTransformer;
 import org.sejda.sambox.output.WriteOption;
 import org.sejda.sambox.pdmodel.encryption.AccessPermission;
 import org.sejda.sambox.pdmodel.encryption.PDEncryption;
@@ -109,6 +110,7 @@ public class PDDocument implements Closeable
     private boolean open = true;
     private OnClose onClose = () -> LOG.debug("Closing document");
     private OnBeforeWrite onBeforeWrite = () -> LOG.trace("About to write document");
+    private PreSaveCOSTransformer preSaveCOSTransformer;
     private ResourceCache resourceCache = new DefaultResourceCache();
 
     // fonts to subset before saving
@@ -138,8 +140,7 @@ public class PDDocument implements Closeable
     /**
      * Constructor that uses an existing document. The COSDocument that is passed in must be valid.
      *
-     * @param document        The COSDocument that this document wraps.
-     * @param securityHandler
+     * @param document The COSDocument that this document wraps.
      */
     public PDDocument(COSDocument document, SecurityHandler securityHandler)
     {
@@ -258,8 +259,6 @@ public class PDDocument implements Closeable
      * For internal PDFBox use when creating PDF documents: register a TrueTypeFont to make sure it
      * is closed when the PDDocument is closed to avoid memory leaks. Users don't have to call this
      * method, it is done by the appropriate PDFont classes.
-     *
-     * @param ttf
      */
     public void registerTrueTypeFontForClosing(TrueTypeFont ttf)
     {
@@ -267,7 +266,7 @@ public class PDDocument implements Closeable
     }
 
     /**
-     * @return the list of fonts which will be subset before the document is saved.
+     * @return the {@link Set} of fonts which will be subset before the document is saved.
      */
     public Set<Subsettable> getFontsToSubset()
     {
@@ -359,8 +358,6 @@ public class PDDocument implements Closeable
     /**
      * If the document is not at the given version or above, it sets the version of the PDF
      * specification to which the document conforms.
-     *
-     * @param version
      */
     public void requireMinVersion(String version)
     {
@@ -374,8 +371,6 @@ public class PDDocument implements Closeable
     /**
      * Deprecated since the name suggests a setter while we actually have {@link OnClose} actions
      * composition (we don't set the action, we add it to existing actions).
-     *
-     * @param onClose
      */
     @Deprecated
     public void setOnCloseAction(OnClose onClose)
@@ -386,8 +381,6 @@ public class PDDocument implements Closeable
     /**
      * Adds the given {@link OnClose} to the set of actions to be executed right before this
      * {@link PDDocument} is closed.
-     *
-     * @param onClose
      */
     public void addOnCloseAction(OnClose onClose)
     {
@@ -412,9 +405,6 @@ public class PDDocument implements Closeable
     /**
      * Generates file identifier as defined in the chap 14.4 PDF 32000-1:2008 and sets it as first
      * and second value for the ID array in the document trailer.
-     *
-     * @param md5Update
-     * @param encContext
      */
     private void generateFileIdentifier(byte[] md5Update, EncryptionContext encContext)
     {
@@ -429,7 +419,6 @@ public class PDDocument implements Closeable
     }
 
     /**
-     * @param md5Update
      * @return a newly generated ID based on the input bytes, current timestamp and some other
      * information, to be used as value of the ID array in the document trailer.
      */
@@ -454,9 +443,6 @@ public class PDDocument implements Closeable
     /**
      * Writes the document to the given {@link File}. The document is closed once written.
      *
-     * @param file
-     * @param options
-     * @throws IOException
      * @see PDDocument#close()
      */
     public void writeTo(File file, WriteOption... options) throws IOException
@@ -468,9 +454,6 @@ public class PDDocument implements Closeable
      * Writes the document to the file corresponding the given file name. The document is closed
      * once written.
      *
-     * @param filename
-     * @param options
-     * @throws IOException
      * @see PDDocument#close()
      */
     public void writeTo(String filename, WriteOption... options) throws IOException
@@ -482,9 +465,6 @@ public class PDDocument implements Closeable
      * Writes the document to the given {@link WritableByteChannel}. The document is closed once
      * written.
      *
-     * @param channel
-     * @param options
-     * @throws IOException
      * @see PDDocument#close()
      */
     public void writeTo(WritableByteChannel channel, WriteOption... options) throws IOException
@@ -495,9 +475,6 @@ public class PDDocument implements Closeable
     /**
      * Writes the document to the given {@link OutputStream}. The document is closed once written.
      *
-     * @param out
-     * @param options
-     * @throws IOException
      * @see PDDocument#close()
      */
     public void writeTo(OutputStream out, WriteOption... options) throws IOException
@@ -509,10 +486,6 @@ public class PDDocument implements Closeable
      * Writes the document to the given {@link File} encrypting it using the given security. The
      * document is closed once written.
      *
-     * @param file
-     * @param security
-     * @param options
-     * @throws IOException
      * @see PDDocument#close()
      */
     public void writeTo(File file, StandardSecurity security, WriteOption... options)
@@ -525,10 +498,6 @@ public class PDDocument implements Closeable
      * Writes the document to the file corresponding the given file name encrypting it using the
      * given security. The document is closed once written.
      *
-     * @param filename
-     * @param security
-     * @param options
-     * @throws IOException
      * @see PDDocument#close()
      */
     public void writeTo(String filename, StandardSecurity security, WriteOption... options)
@@ -541,10 +510,6 @@ public class PDDocument implements Closeable
      * Writes the document to the given {@link WritableByteChannel} encrypting it using the given
      * security. The document is closed once written.
      *
-     * @param channel
-     * @param security
-     * @param options
-     * @throws IOException
      * @see PDDocument#close()
      */
     public void writeTo(WritableByteChannel channel, StandardSecurity security,
@@ -557,10 +522,6 @@ public class PDDocument implements Closeable
      * Writes the document to the given {@link OutputStream} encrypting it using the given security.
      * The document is closed once written.
      *
-     * @param out
-     * @param security
-     * @param options
-     * @throws IOException
      * @see PDDocument#close()
      */
     public void writeTo(OutputStream out, StandardSecurity security, WriteOption... options)
@@ -598,7 +559,8 @@ public class PDDocument implements Closeable
                 .orElse(null);
         generateFileIdentifier(output.toString().getBytes(StandardCharsets.ISO_8859_1),
                 encryptionContext);
-        try (PDDocumentWriter writer = new PDDocumentWriter(output, encryptionContext, options))
+        try (PDDocumentWriter writer = new PDDocumentWriter(output, encryptionContext,
+                preSaveCOSTransformer, options))
         {
             onBeforeWrite.onBeforeWrite();
             writer.write(this);
@@ -607,6 +569,17 @@ public class PDDocument implements Closeable
         {
             IOUtils.close(this);
         }
+    }
+
+    /**
+     * Sets the {@link PreSaveCOSTransformer} for this PDDocument object. This transformer is
+     * responsible for visiting COSBase objects before they are written to the output. The intended
+     * use is {@code document.withPreSaveTransformer(processor).writeTo(file, options);}
+     */
+    public PDDocument withPreSaveTransformer(PreSaveCOSTransformer transformer)
+    {
+        this.preSaveCOSTransformer = transformer;
+        return this;
     }
 
     /**

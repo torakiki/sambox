@@ -89,7 +89,7 @@ public class IncrementalPDFBodyWriterTest
                         getClass().getResourceAsStream("/sambox/simple_test.pdf"))))
         {
             victim = new IncrementalPDFBodyWriter(new PDFWriteContext(
-                    incrementable.highestExistingReference().objectNumber(), null), writer);
+                    incrementable.highestExistingReference().objectNumber(), null, null), writer);
             PDAnnotationText annot = new PDAnnotationText();
             annot.setContents("My Annot");
             annot.setRectangle(new PDRectangle(266, 116, 430, 204));

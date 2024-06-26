@@ -111,7 +111,7 @@ class IndirectObjectsWriter implements Closeable
         writer.writer().write(SPACE);
         writer.writer().write(OBJ);
         writer.writer().writeEOL();
-        object.getCOSObject().accept(writer);
+        context.maybeTransform(object.getCOSObject()).accept(writer);
         writer.writer().writeEOL();
         writer.writer().write(ENDOBJ);
         writer.writer().writeEOL();

@@ -43,7 +43,6 @@ import org.sejda.sambox.pdmodel.PDDocument;
 
 /**
  * @author Andrea Vacondio
- *
  */
 public class PDFBodyWriterTest
 {
@@ -56,7 +55,7 @@ public class PDFBodyWriterTest
     @Before
     public void setUp()
     {
-        context = spy(new PDFWriteContext(null, WriteOption.COMPRESS_STREAMS));
+        context = spy(new PDFWriteContext(null, null, WriteOption.COMPRESS_STREAMS));
         writer = mock(PDFBodyObjectsWriter.class);
         document = new PDDocument();
         document.getDocumentInformation().setAuthor("Chuck Norris");
@@ -122,7 +121,7 @@ public class PDFBodyWriterTest
     @Test
     public void writeUncompressedStream() throws IOException
     {
-        victim = new PDFBodyWriter(new PDFWriteContext(null), writer);
+        victim = new PDFBodyWriter(new PDFWriteContext(null, null), writer);
         byte[] data = new byte[] { (byte) 0x41, (byte) 0x42, (byte) 0x43 };
         COSStream stream = new COSStream();
         stream.setInt(COSName.B, 2);

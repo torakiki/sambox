@@ -44,18 +44,19 @@ import org.slf4j.LoggerFactory;
 public class PDDocumentWriter implements Closeable
 {
     private static final Logger LOG = LoggerFactory.getLogger(PDDocumentWriter.class);
-    private DefaultPDFWriter writer;
-    private PDFWriteContext context;
-    private EncryptionContext encryptionContext;
+    private final DefaultPDFWriter writer;
+    private final PDFWriteContext context;
+    private final EncryptionContext encryptionContext;
 
     public PDDocumentWriter(CountingWritableByteChannel channel,
-            EncryptionContext encryptionContext, WriteOption... options)
+            EncryptionContext encryptionContext, PreSaveCOSTransformer preSaveCOSTransformer,
+            WriteOption... options)
     {
         requireNotNullArg(channel, "Cannot write to a null channel");
         this.encryptionContext = encryptionContext;
         this.context = new PDFWriteContext(
                 ofNullable(this.encryptionContext).map(EncryptionContext::encryptionAlgorithm)
-                        .orElse(null), options);
+                        .orElse(null), preSaveCOSTransformer, options);
         this.writer = new DefaultPDFWriter(new IndirectObjectsWriter(channel, context));
     }
 
@@ -121,15 +122,16 @@ public class PDDocumentWriter implements Closeable
 
     private void writeXref(PDDocument document) throws IOException
     {
+        var trailer = context.maybeTransform(document.getDocument().getTrailer().getCOSObject());
         if (context.hasWriteOption(WriteOption.XREF_STREAM) || context.hasWriteOption(
                 WriteOption.OBJECT_STREAMS))
         {
-            writer.writeXrefStream(document.getDocument().getTrailer().getCOSObject());
+            writer.writeXrefStream(trailer);
         }
         else
         {
             long startxref = writer.writeXrefTable();
-            writer.writeTrailer(document.getDocument().getTrailer().getCOSObject(), startxref);
+            writer.writeTrailer(trailer, startxref);
         }
     }
 

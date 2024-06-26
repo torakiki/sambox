@@ -19,6 +19,7 @@ package org.sejda.sambox.output;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -45,7 +46,7 @@ import org.slf4j.LoggerFactory;
  * Context that contains and keeps track of all the information needed during the process of writing
  * a PDF document. It creates indirect references for {@link COSBase} instances and provide lookup
  * methods to be able to retrieve these data and know what's the indirect reference created by the
- * context for a given {@link COSBase}. I keeps track of what object numbers have been written.
+ * context for a given {@link COSBase}. It keeps track of what object numbers have been written.
  *
  * @author Andrea Vacondio
  */
@@ -59,21 +60,24 @@ class PDFWriteContext
     private final List<WriteOption> opts;
     private final SortedMap<Long, XrefEntry> written = new ConcurrentSkipListMap<>();
     private final GeneralEncryptionAlgorithm encryptor;
+    private PreSaveCOSTransformer preSaveCOSTransformer;
 
-    PDFWriteContext(GeneralEncryptionAlgorithm encryptor, WriteOption... options)
+    PDFWriteContext(GeneralEncryptionAlgorithm encryptor,
+            PreSaveCOSTransformer preSaveCOSTransformer, WriteOption... options)
     {
-        this(0, encryptor, options);
+        this(0, encryptor, preSaveCOSTransformer, options);
     }
 
     PDFWriteContext(long highestExistingReferenceNumber, GeneralEncryptionAlgorithm encryptor,
-            WriteOption... options)
+            PreSaveCOSTransformer preSaveCOSTransformer, WriteOption... options)
     {
         this.encryptor = encryptor;
+        this.preSaveCOSTransformer = preSaveCOSTransformer;
         this.opts = Arrays.asList(options);
         this.referencesProvider = new IndirectReferenceProvider(highestExistingReferenceNumber);
-        LOG.debug(
-                "PDFWriteContext created with highest object reference number {} and encryptor {}",
-                highestExistingReferenceNumber, encryptor);
+        LOG.debug("PDFWriteContext created with highest object reference number {}",
+                highestExistingReferenceNumber);
+        LOG.trace("PDFWriteContext created with Encryption algorithm: {}", encryptor);
     }
 
     /**
@@ -247,7 +251,6 @@ class PDFWriteContext
     }
 
     /**
-     * @param objectNumber
      * @return the written entry with the given object number if any, null otherwise.
      */
     XrefEntry getWritten(Long objectNumber)
@@ -283,8 +286,6 @@ class PDFWriteContext
 
     /**
      * Informs the context of the object is about the written
-     *
-     * @param key
      */
     void writing(COSObjectKey key)
     {
@@ -297,5 +298,19 @@ class PDFWriteContext
     GeneralEncryptionAlgorithm encryptor()
     {
         return encryptor;
+    }
+
+    /**
+     * Applies a transformation to the given COSBase entity if a pre-save transformer is set.
+     *
+     * @throws IOException if an I/O exception occurs during the transformation
+     */
+    <T extends COSBase> T maybeTransform(T cosEntity) throws IOException
+    {
+        if (nonNull(preSaveCOSTransformer))
+        {
+            cosEntity.accept(preSaveCOSTransformer);
+        }
+        return cosEntity;
     }
 }

@@ -37,7 +37,6 @@ import org.sejda.sambox.xref.CompressedXrefEntry;
 
 /**
  * @author Andrea Vacondio
- *
  */
 public class ObjectsStreamPDFBodyObjectsWriterTest
 {
@@ -49,7 +48,7 @@ public class ObjectsStreamPDFBodyObjectsWriterTest
     public void setUp()
     {
         this.delegate = mock(PDFBodyObjectsWriter.class);
-        context = new PDFWriteContext(null);
+        context = new PDFWriteContext(null, null);
         this.victim = new ObjectsStreamPDFBodyObjectsWriter(context, delegate);
     }
 

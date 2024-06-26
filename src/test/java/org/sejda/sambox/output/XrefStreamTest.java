@@ -17,9 +17,9 @@
 package org.sejda.sambox.output;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.IOException;
 
@@ -45,7 +45,7 @@ public class XrefStreamTest
     @Before
     public void setUp()
     {
-        context = new PDFWriteContext(null);
+        context = new PDFWriteContext(null, null);
         context.addWritten(CompressedXrefEntry.compressedEntry(2, 4, 1));
         context.addWritten(XrefEntry.inUseEntry(4, 256, 0));
     }

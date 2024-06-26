@@ -151,7 +151,7 @@ public class ExistingPagesSizePredictor extends PDFBodyWriter
     {
         CountingWritableByteChannel channel = CountingWritableByteChannel
                 .from(new DevNullWritableByteChannel());
-        PDFWriteContext context = new PDFWriteContext(null, opts);
+        PDFWriteContext context = new PDFWriteContext(null, null, opts);
         IndirectObjectsWriter writer = new IndirectObjectsWriter(channel, context)
         {
             @Override

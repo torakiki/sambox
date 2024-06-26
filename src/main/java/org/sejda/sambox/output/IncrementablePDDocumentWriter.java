@@ -65,7 +65,6 @@ public class IncrementablePDDocumentWriter implements Closeable
      * Writes the {@link PDDocument}.
      * 
      * @param document
-     * @param standardSecurity
      * @throws IOException
      */
     public void write(IncrementablePDDocument document) throws IOException
@@ -80,7 +79,7 @@ public class IncrementablePDDocumentWriter implements Closeable
         sanitizeWriteOptions(document);
         this.context = new PDFWriteContext(document.highestExistingReference().objectNumber(),
                 encryptionAlgorithmFromEncryptionDictionary(document.encryptionDictionary(),
-                        document.encryptionKey()), options.toArray(WriteOption[]::new));
+                        document.encryptionKey()), null, options.toArray(WriteOption[]::new));
         this.writer = new DefaultPDFWriter(new IndirectObjectsWriter(channel, context));
 
         try (InputStream stream = document.incrementedAsStream())

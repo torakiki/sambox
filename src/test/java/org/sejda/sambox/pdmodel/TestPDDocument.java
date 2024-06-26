@@ -40,7 +40,10 @@ import org.junit.jupiter.api.io.TempDir;
 import org.sejda.commons.util.IOUtils;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.SAMBox;
+import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.input.PDFParser;
+import org.sejda.sambox.output.PreSaveCOSTransformer;
 import org.sejda.sambox.output.WriteOption;
 import org.sejda.sambox.pdmodel.PDDocument.OnClose;
 import org.sejda.sambox.util.SpecVersionUtils;
@@ -270,6 +273,34 @@ public class TestPDDocument
         try (var outputDoc = PDFParser.parse(SeekableSources.seekableSourceFrom(output)))
         {
             assertNull(outputDoc.getDocumentInformation().getProducer());
+        }
+    }
+
+    @Test
+    public void testPreSaveTransformer(@TempDir Path tmp) throws IOException
+    {
+        var output = Files.createTempFile(tmp, "", ".pdf").toFile();
+        try (var document = new PDDocument())
+        {
+            document.addPage(new PDPage());
+            document.getDocumentCatalog().setPageLayout(PageLayout.SINGLE_PAGE);
+            document.withPreSaveTransformer(new PreSaveCOSTransformer()
+            {
+                @Override
+                public void visit(COSDictionary value) throws IOException
+                {
+                    if (COSName.CATALOG.equals(value.getCOSName(COSName.TYPE)))
+                    {
+                        value.removeItem(COSName.PAGE_LAYOUT);
+                    }
+                }
+            }).writeTo(output);
+        }
+
+        try (var outputDoc = PDFParser.parse(SeekableSources.seekableSourceFrom(output)))
+        {
+            assertNull(
+                    outputDoc.getDocumentCatalog().getCOSObject().getCOSName(COSName.PAGE_LAYOUT));
         }
     }
 }

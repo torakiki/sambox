@@ -1,28 +1,28 @@
 /*
  * Created on 28/ago/2015
  * Copyright 2010 by Andrea Vacondio (andrea.vacondio@gmail.com).
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); 
- * you may not use this file except in compliance with the License. 
- * You may obtain a copy of the License at 
- * 
- * http://www.apache.org/licenses/LICENSE-2.0 
- * 
- * Unless required by applicable law or agreed to in writing, software 
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
- * See the License for the specific language governing permissions and 
- * limitations under the License. 
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.sejda.sambox.output;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -48,7 +48,6 @@ import org.sejda.sambox.xref.XrefEntry;
 
 /**
  * @author Andrea Vacondio
- *
  */
 public class PDFWriteContextTest
 {
@@ -59,13 +58,13 @@ public class PDFWriteContextTest
     @Before
     public void setUp()
     {
-        context = new PDFWriteContext(null);
+        context = new PDFWriteContext(null, null);
     }
 
     @Test
     public void hasWriteOption()
     {
-        PDFWriteContext context = new PDFWriteContext(null, WriteOption.OBJECT_STREAMS);
+        PDFWriteContext context = new PDFWriteContext(null, null, WriteOption.OBJECT_STREAMS);
         assertTrue(context.hasWriteOption(WriteOption.OBJECT_STREAMS));
         assertFalse(context.hasWriteOption(WriteOption.ASYNC_BODY_WRITE));
     }
@@ -78,8 +77,8 @@ public class PDFWriteContextTest
         IndirectCOSObjectReference ref2 = context.createIndirectReferenceFor(dic);
         assertNotEquals(ref, ref2);
         ExistingIndirectCOSObject existing = mock(ExistingIndirectCOSObject.class);
-        when(existing.id())
-                .thenReturn(new IndirectCOSObjectIdentifier(new COSObjectKey(10, 0), "Source"));
+        when(existing.id()).thenReturn(
+                new IndirectCOSObjectIdentifier(new COSObjectKey(10, 0), "Source"));
         IndirectCOSObjectReference ref3 = context.createIndirectReferenceFor(existing);
         assertEquals(existing, ref3.getCOSObject());
     }
@@ -87,16 +86,16 @@ public class PDFWriteContextTest
     @Test
     public void highestExisting()
     {
-        context = new PDFWriteContext(50, null);
-        IndirectCOSObjectReference ref = context
-                .getOrCreateIndirectReferenceFor(new COSDictionary());
+        context = new PDFWriteContext(50, null, null);
+        IndirectCOSObjectReference ref = context.getOrCreateIndirectReferenceFor(
+                new COSDictionary());
         assertEquals(51, ref.xrefEntry().getObjectNumber());
     }
 
     @Test
     public void highestObjectNumber()
     {
-        context = new PDFWriteContext(50, null);
+        context = new PDFWriteContext(50, null, null);
         assertEquals(50, context.highestObjectNumber());
         context.getOrCreateIndirectReferenceFor(new COSDictionary());
         assertEquals(51, context.highestObjectNumber());
@@ -140,8 +139,8 @@ public class PDFWriteContextTest
     @Test
     public void createNonStorableInObjectStreamIndirectReferenceFor()
     {
-        IndirectCOSObjectReference ref = context
-                .createNonStorableInObjectStreamIndirectReferenceFor(new COSDictionary());
+        IndirectCOSObjectReference ref = context.createNonStorableInObjectStreamIndirectReferenceFor(
+                new COSDictionary());
         assertThat(ref, instanceOf(NonStorableInObjectStreams.class));
     }
 
@@ -273,7 +272,8 @@ public class PDFWriteContextTest
     @Test
     public void hasIndirectReferenceFor()
     {
-        PDFWriteContext anotherContext = new PDFWriteContext(null, WriteOption.OBJECT_STREAMS);
+        PDFWriteContext anotherContext = new PDFWriteContext(null, null,
+                WriteOption.OBJECT_STREAMS);
         COSDictionary dic = new COSDictionary();
         COSDictionary anotherDic = new COSDictionary();
         anotherContext.createIndirectReferenceFor(anotherDic);
@@ -287,8 +287,8 @@ public class PDFWriteContextTest
     public void addExisting()
     {
         ExistingIndirectCOSObject existing = mock(ExistingIndirectCOSObject.class);
-        when(existing.id())
-                .thenReturn(new IndirectCOSObjectIdentifier(new COSObjectKey(10, 0), "Source"));
+        when(existing.id()).thenReturn(
+                new IndirectCOSObjectIdentifier(new COSObjectKey(10, 0), "Source"));
         when(existing.hasId()).thenReturn(Boolean.TRUE);
         context.addExistingReference(existing);
         assertTrue(context.hasIndirectReferenceFor(existing));
@@ -332,7 +332,7 @@ public class PDFWriteContextTest
     public void writing()
     {
         GeneralEncryptionAlgorithm encryptor = mock(GeneralEncryptionAlgorithm.class);
-        PDFWriteContext victim = new PDFWriteContext(encryptor);
+        PDFWriteContext victim = new PDFWriteContext(encryptor, null);
         COSObjectKey key = new COSObjectKey(10, 0);
         victim.writing(key);
         verify(encryptor).setCurrentCOSObjectKey(key);

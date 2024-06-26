@@ -47,7 +47,7 @@ public class ObjectsStreamTest
     @Before
     public void setUp()
     {
-        context = new PDFWriteContext(null);
+        context = new PDFWriteContext(null, null);
         victim = new ObjectsStream(context);
     }
 

@@ -36,7 +36,6 @@ import org.sejda.sambox.xref.FileTrailer;
 
 /**
  * @author Andrea Vacondio
- *
  */
 public class PDDocumentWriterTest
 {
@@ -51,18 +50,18 @@ public class PDDocumentWriterTest
         this.writer = mock(DefaultPDFWriter.class);
         this.objectsWriter = mock(IndirectObjectsWriter.class);
         when(writer.writer()).thenReturn(objectsWriter);
-        this.victim = new PDDocumentWriter(from(new DevNullWritableByteChannel()), null);
+        this.victim = new PDDocumentWriter(from(new DevNullWritableByteChannel()), null, null);
         TestUtils.setProperty(victim, "writer", this.writer);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void nullConstructor()
     {
-        new PDDocumentWriter(null, null);
+        new PDDocumentWriter(null, null, null);
     }
 
     @Test
-    public void writeHaader() throws Exception
+    public void writeHeader() throws Exception
     {
         PDDocument document = new PDDocument();
         victim.write(document);
@@ -77,7 +76,7 @@ public class PDDocumentWriterTest
         FileTrailer trailer = new FileTrailer();
         when(document.getDocument()).thenReturn(cosDoc);
         when(cosDoc.getTrailer()).thenReturn(trailer);
-        this.victim = new PDDocumentWriter(from(new DevNullWritableByteChannel()), null);
+        this.victim = new PDDocumentWriter(from(new DevNullWritableByteChannel()), null, null);
         TestUtils.setProperty(victim, "writer", this.writer);
         ArgumentCaptor<PDFBodyWriter> bodyWriter = ArgumentCaptor.forClass(PDFBodyWriter.class);
         victim.write(document);
@@ -93,7 +92,7 @@ public class PDDocumentWriterTest
         FileTrailer trailer = new FileTrailer();
         when(document.getDocument()).thenReturn(cosDoc);
         when(cosDoc.getTrailer()).thenReturn(trailer);
-        this.victim = new PDDocumentWriter(from(new DevNullWritableByteChannel()), null,
+        this.victim = new PDDocumentWriter(from(new DevNullWritableByteChannel()), null, null,
                 WriteOption.OBJECT_STREAMS);
         TestUtils.setProperty(victim, "writer", this.writer);
         ArgumentCaptor<PDFBodyWriter> bodyWriter = ArgumentCaptor.forClass(PDFBodyWriter.class);
@@ -111,7 +110,7 @@ public class PDDocumentWriterTest
         FileTrailer trailer = new FileTrailer();
         when(document.getDocument()).thenReturn(cosDoc);
         when(cosDoc.getTrailer()).thenReturn(trailer);
-        this.victim = new PDDocumentWriter(from(new DevNullWritableByteChannel()), null,
+        this.victim = new PDDocumentWriter(from(new DevNullWritableByteChannel()), null, null,
                 WriteOption.ASYNC_BODY_WRITE);
         TestUtils.setProperty(victim, "writer", this.writer);
         ArgumentCaptor<PDFBodyWriter> bodyWriter = ArgumentCaptor.forClass(PDFBodyWriter.class);
@@ -138,7 +137,7 @@ public class PDDocumentWriterTest
     {
         try (PDDocument document = new PDDocument())
         {
-            this.victim = new PDDocumentWriter(from(new DevNullWritableByteChannel()), null,
+            this.victim = new PDDocumentWriter(from(new DevNullWritableByteChannel()), null, null,
                     WriteOption.XREF_STREAM);
             TestUtils.setProperty(victim, "writer", this.writer);
             victim.write(document);
@@ -154,4 +153,5 @@ public class PDDocumentWriterTest
         victim.close();
         verify(writer).close();
     }
+
 }
