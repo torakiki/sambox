@@ -526,9 +526,8 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
         if (filters instanceof COSArray filtersArray)
         {
             return CAN_COMPRESS.containsAll(filtersArray);
-
         }
-        return true;
+        return !COSName.METADATA.equals(getCOSName(COSName.TYPE));
     }
 
     @Override
