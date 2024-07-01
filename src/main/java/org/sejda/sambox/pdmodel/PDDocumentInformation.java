@@ -16,22 +16,28 @@
  */
 package org.sejda.sambox.pdmodel;
 
+import static java.util.Optional.ofNullable;
+
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.UUID;
+
+import org.apache.xmpbox.XMPMetadata;
+import org.apache.xmpbox.schema.AdobePDFSchema;
+import org.apache.xmpbox.schema.DublinCoreSchema;
+import org.apache.xmpbox.schema.XMPBasicSchema;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.common.PDDictionaryWrapper;
 
-import java.util.Calendar;
-import java.util.Set;
-import java.util.TreeSet;
-
 /**
- * This is the document metadata.  Each getXXX method will return the entry if
- * it exists or null if it does not exist.  If you pass in null for the setXXX
- * method then it will clear the value.
+ * This is the document metadata.  Each getXXX method will return the entry if it exists or null if
+ * it does not exist.  If you pass in null for the setXXX method then it will clear the value.
  *
  * @author Ben Litchfield
  * @author Gerardo Ortiz
- *
  */
 public class PDDocumentInformation extends PDDictionaryWrapper
 {
@@ -42,7 +48,7 @@ public class PDDocumentInformation extends PDDictionaryWrapper
 
     /**
      * Creates a new instance with a given COS dictionary.
-     * 
+     *
      * @param dictionary the dictionary
      */
     public PDDocumentInformation(COSDictionary dictionary)
@@ -53,17 +59,16 @@ public class PDDocumentInformation extends PDDictionaryWrapper
     /**
      * Return the properties String value.
      * <p>
-     * Allows to retrieve the
-     * low level date for validation purposes.
-     * </p> 
-     * 
+     * Allows to retrieve the low level date for validation purposes.
+     * </p>
+     *
      * @param propertyKey the dictionaries key
      * @return the properties value
      */
-     public Object getPropertyStringValue(String propertyKey)
-     {
+    public Object getPropertyStringValue(String propertyKey)
+    {
         return getCOSObject().getString(propertyKey);
-     }    
+    }
 
     /**
      * This will get the title of the document.  This will return null if no title exists.
@@ -80,7 +85,7 @@ public class PDDocumentInformation extends PDDictionaryWrapper
      *
      * @param title The new title for the document.
      */
-    public void setTitle( String title )
+    public void setTitle(String title)
     {
         getCOSObject().setString(COSName.TITLE, title);
     }
@@ -100,7 +105,7 @@ public class PDDocumentInformation extends PDDictionaryWrapper
      *
      * @param author The new author for the document.
      */
-    public void setAuthor( String author )
+    public void setAuthor(String author)
     {
         getCOSObject().setString(COSName.AUTHOR, author);
     }
@@ -120,7 +125,7 @@ public class PDDocumentInformation extends PDDictionaryWrapper
      *
      * @param subject The new subject for the document.
      */
-    public void setSubject( String subject )
+    public void setSubject(String subject)
     {
         getCOSObject().setString(COSName.SUBJECT, subject);
     }
@@ -140,7 +145,7 @@ public class PDDocumentInformation extends PDDictionaryWrapper
      *
      * @param keywords The new keywords for the document.
      */
-    public void setKeywords( String keywords )
+    public void setKeywords(String keywords)
     {
         getCOSObject().setString(COSName.KEYWORDS, keywords);
     }
@@ -160,7 +165,7 @@ public class PDDocumentInformation extends PDDictionaryWrapper
      *
      * @param creator The new creator for the document.
      */
-    public void setCreator( String creator )
+    public void setCreator(String creator)
     {
         getCOSObject().setString(COSName.CREATOR, creator);
     }
@@ -180,13 +185,14 @@ public class PDDocumentInformation extends PDDictionaryWrapper
      *
      * @param producer The new producer for the document.
      */
-    public void setProducer( String producer )
+    public void setProducer(String producer)
     {
         getCOSObject().setString(COSName.PRODUCER, producer);
     }
 
     /**
-     * This will get the creation date of the document.  This will return null if no creation date exists.
+     * This will get the creation date of the document.  This will return null if no creation date
+     * exists.
      *
      * @return The creation date of the document.
      */
@@ -200,13 +206,14 @@ public class PDDocumentInformation extends PDDictionaryWrapper
      *
      * @param date The new creation date for the document.
      */
-    public void setCreationDate( Calendar date )
+    public void setCreationDate(Calendar date)
     {
         getCOSObject().setDate(COSName.CREATION_DATE, date);
     }
 
     /**
-     * This will get the modification date of the document.  This will return null if no modification date exists.
+     * This will get the modification date of the document.  This will return null if no
+     * modification date exists.
      *
      * @return The modification date of the document.
      */
@@ -220,14 +227,13 @@ public class PDDocumentInformation extends PDDictionaryWrapper
      *
      * @param date The new modification date for the document.
      */
-    public void setModificationDate( Calendar date )
+    public void setModificationDate(Calendar date)
     {
         getCOSObject().setDate(COSName.MOD_DATE, date);
     }
 
     /**
-     * This will get the trapped value for the document.
-     * This will return null if one is not found.
+     * This will get the trapped value for the document. This will return null if one is not found.
      *
      * @return The trapped value for the document.
      */
@@ -253,11 +259,10 @@ public class PDDocumentInformation extends PDDictionaryWrapper
     }
 
     /**
-     * This will get the value of a custom metadata getCOSObject()rmation field for the document. This will return null
-     * if one is not found.
+     * This will get the value of a custom metadata getCOSObject()rmation field for the document.
+     * This will return null if one is not found.
      *
      * @param fieldName Name of custom metadata field from pdf document.
-     *
      * @return String Value of metadata field
      */
     public String getCustomMetadataValue(String fieldName)
@@ -268,36 +273,71 @@ public class PDDocumentInformation extends PDDictionaryWrapper
     /**
      * Set the custom metadata value.
      *
-     * @param fieldName The name of the custom metadata field.
+     * @param fieldName  The name of the custom metadata field.
      * @param fieldValue The value to the custom metadata field.
      */
-    public void setCustomMetadataValue( String fieldName, String fieldValue )
+    public void setCustomMetadataValue(String fieldName, String fieldValue)
     {
         getCOSObject().setString(fieldName, fieldValue);
     }
-    
+
     public void removeMetadataField(String fieldName)
     {
         getCOSObject().removeItem(COSName.getPDFName(fieldName));
     }
 
     /**
-     * This will set the trapped of the document.  This will be
-     * 'True', 'False', or 'Unknown'.
+     * This will set the trapped of the document.  This will be 'True', 'False', or 'Unknown'.
      *
      * @param value The new trapped value for the document.
      */
-    public void setTrapped( String value )
+    public void setTrapped(String value)
     {
-        if( value != null &&
-            !value.equals( "True" ) &&
-            !value.equals( "False" ) &&
-            !value.equals( "Unknown" ) )
+        if (value != null && !value.equals("True") && !value.equals("False") && !value.equals(
+                "Unknown"))
         {
             throw new IllegalArgumentException(
                     "Valid values for trapped are " + "'True', 'False', or 'Unknown'");
         }
 
         getCOSObject().setName(COSName.TRAPPED, value);
+    }
+
+    /**
+     * @param metadata the metadata to update. If null a new empty {@link XMPMetadata} is created.
+     * @return and updated version of the input metadata where all the properties corresponding to
+     * the info dictionary have their values updated with the current value of the info dictionary.
+     */
+    public XMPMetadata toXMPMetadata(XMPMetadata metadata, String pdfVersion)
+    {
+        metadata = ofNullable(metadata).orElseGet(XMPMetadata::createXMPMetadata);
+        AdobePDFSchema pdfSchema = ofNullable(metadata.getAdobePDFSchema()).orElseGet(
+                metadata::createAndAddAdobePDFSchema);
+        pdfSchema.setPDFVersion(pdfVersion);
+        ofNullable(getKeywords()).ifPresent(pdfSchema::setKeywords);
+        ofNullable(getProducer()).map(p -> pdfSchema.getMetadata().getTypeMapping()
+                        .createAgentName(pdfSchema.getNamespace(), pdfSchema.getPrefix(), "Producer", p))
+                .ifPresent(pdfSchema::addProperty);
+        pdfSchema.addProperty(pdfSchema.getMetadata().getTypeMapping()
+                .createBoolean(pdfSchema.getNamespace(), pdfSchema.getPrefix(), "Trapped",
+                        getCOSObject().getBoolean(COSName.TRAPPED, false)));
+
+        XMPBasicSchema basicSchema = ofNullable(metadata.getXMPBasicSchema()).orElseGet(
+                metadata::createAndAddXMPBasicSchema);
+        basicSchema.addIdentifier(UUID.randomUUID().toString());
+        basicSchema.setMetadataDate(new GregorianCalendar());
+        ofNullable(getModificationDate()).ifPresent(basicSchema::setModifyDate);
+        ofNullable(getCreator()).ifPresent(basicSchema::setCreatorTool);
+        ofNullable(getCreationDate()).ifPresent(basicSchema::setCreateDate);
+
+        DublinCoreSchema dcSchema = ofNullable(metadata.getDublinCoreSchema()).orElseGet(
+                metadata::createAndAddDublinCoreSchema);
+        dcSchema.setFormat("application/pdf");
+        ofNullable(getTitle()).ifPresent(dcSchema::setTitle);
+        ofNullable(getSubject()).ifPresent(dcSchema::setDescription);
+        ofNullable(getAuthor()).filter(
+                        a -> ofNullable(dcSchema.getCreators()).map(l -> !l.contains(a)).orElse(true))
+                .ifPresent(dcSchema::addCreator);
+        return metadata;
     }
 }

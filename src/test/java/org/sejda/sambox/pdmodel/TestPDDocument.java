@@ -17,6 +17,7 @@
 package org.sejda.sambox.pdmodel;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -30,10 +31,14 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Locale;
 
 import org.apache.fontbox.ttf.TrueTypeFont;
+import org.apache.xmpbox.XMPMetadata;
+import org.apache.xmpbox.xml.DomXmpParser;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -42,6 +47,7 @@ import org.sejda.io.SeekableSources;
 import org.sejda.sambox.SAMBox;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.output.PreSaveCOSTransformer;
 import org.sejda.sambox.output.WriteOption;
@@ -273,6 +279,139 @@ public class TestPDDocument
         try (var outputDoc = PDFParser.parse(SeekableSources.seekableSourceFrom(output)))
         {
             assertNull(outputDoc.getDocumentInformation().getProducer());
+        }
+    }
+
+    @Test
+    public void testWriteWithXMPMetadata(@TempDir Path tmp) throws Exception
+    {
+        var output = Files.createTempFile(tmp, "", ".pdf").toFile();
+        try (PDDocument document = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/simple_test.pdf"))))
+        {
+            document.setVersion(SpecVersionUtils.V1_7);
+            document.getDocumentInformation().setTitle("Chick Norris");
+            document.writeTo(output, WriteOption.UPSERT_DOCUMENT_METADATA_STREAM);
+        }
+        try (var outputDoc = PDFParser.parse(SeekableSources.seekableSourceFrom(output)))
+        {
+            try (var metadata = outputDoc.getDocumentCatalog().getCOSObject()
+                    .getDictionaryObject(COSName.METADATA, COSStream.class))
+            {
+                assertNotNull(metadata);
+                DomXmpParser parser = new DomXmpParser();
+                parser.setStrictParsing(false);
+                XMPMetadata meta = parser.parse(metadata.getUnfilteredStream());
+                var dublinCoreSchema = meta.getDublinCoreSchema();
+                assertNotNull(dublinCoreSchema);
+                assertEquals("Chick Norris", dublinCoreSchema.getTitle());
+                var basicSchema = meta.getXMPBasicSchema();
+                assertNotNull(basicSchema);
+                assertNotNull(basicSchema.getMetadataDate());
+                assertNotNull(basicSchema.getIdentifiers());
+                assertEquals(1, basicSchema.getIdentifiers().size());
+                var adobeSchema = meta.getAdobePDFSchema();
+                assertNotNull(adobeSchema);
+                assertEquals(SpecVersionUtils.V1_7, adobeSchema.getPDFVersion());
+                assertNotNull(adobeSchema.getProducer());
+            }
+        }
+    }
+
+    @Test
+    public void metadataNotCompressed(@TempDir Path tmp) throws Exception
+    {
+        var output = Files.createTempFile(tmp, "", ".pdf").toFile();
+        try (PDDocument document = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/simple_test.pdf"))))
+        {
+            document.setVersion(SpecVersionUtils.V1_7);
+            document.getDocumentInformation().setTitle("Chick Norris");
+            document.writeTo(output, WriteOption.UPSERT_DOCUMENT_METADATA_STREAM,
+                    WriteOption.COMPRESS_STREAMS);
+        }
+        try (var outputDoc = PDFParser.parse(SeekableSources.seekableSourceFrom(output)))
+        {
+            var metadata = outputDoc.getDocumentCatalog().getCOSObject()
+                    .getDictionaryObject(COSName.METADATA, COSStream.class);
+            assertNull(metadata.getCOSName(COSName.FILTER));
+        }
+    }
+
+    @Test
+    public void testWriteWithExistingXMPMetadata(@TempDir Path tmp) throws Exception
+    {
+        var output = Files.createTempFile(tmp, "", ".pdf").toFile();
+        try (PDDocument document = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/simple_test_with_meta.pdf"))))
+        {
+            document.getDocumentInformation().setTitle("Steven Segal");
+            document.writeTo(output, WriteOption.UPSERT_DOCUMENT_METADATA_STREAM);
+        }
+        try (var outputDoc = PDFParser.parse(SeekableSources.seekableSourceFrom(output)))
+        {
+            try (var metadata = outputDoc.getDocumentCatalog().getCOSObject()
+                    .getDictionaryObject(COSName.METADATA, COSStream.class))
+            {
+                assertNotNull(metadata);
+                var parser = new DomXmpParser();
+                parser.setStrictParsing(false);
+                XMPMetadata meta = parser.parse(metadata.getUnfilteredStream());
+                var dublinCoreSchema = meta.getDublinCoreSchema();
+                assertNotNull(dublinCoreSchema);
+                assertEquals("Steven Segal", dublinCoreSchema.getTitle());
+            }
+        }
+    }
+
+    @Test
+    // malformed xmp are not fixed nor replaced. We currently leave them as they are this can be
+    // changed in the future with some more advanced logic even though it seems hard to try to catch
+    // all possible errors. Maybe we should look at Acrobat and see what it does
+    public void testWriteWithExistingMalformedXMPMetadata(@TempDir Path tmp) throws Exception
+    {
+        var output = Files.createTempFile(tmp, "", ".pdf").toFile();
+        try (PDDocument document = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/xmp_metadata_missing_rdf_namespace.pdf"))))
+        {
+            document.writeTo(output, WriteOption.UPSERT_DOCUMENT_METADATA_STREAM);
+        }
+        try (var outputDoc = PDFParser.parse(SeekableSources.seekableSourceFrom(output)))
+        {
+            try (var metadata = outputDoc.getDocumentCatalog().getCOSObject()
+                    .getDictionaryObject(COSName.METADATA, COSStream.class))
+            {
+                assertNotNull(metadata);
+            }
+        }
+    }
+
+    @Test
+    public void testWriteMetadataNoProducerModifyDate(@TempDir Path tmp) throws Exception
+    {
+        var output = Files.createTempFile(tmp, "", ".pdf").toFile();
+        try (PDDocument document = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/simple_test.pdf"))))
+        {
+            document.writeTo(output, WriteOption.UPSERT_DOCUMENT_METADATA_STREAM,
+                    WriteOption.NO_METADATA_PRODUCER_MODIFIED_DATE_UPDATE);
+        }
+        try (var outputDoc = PDFParser.parse(SeekableSources.seekableSourceFrom(output)))
+        {
+            try (var metadata = outputDoc.getDocumentCatalog().getCOSObject()
+                    .getDictionaryObject(COSName.METADATA, COSStream.class))
+            {
+                assertNotNull(metadata);
+                var parser = new DomXmpParser();
+                parser.setStrictParsing(false);
+                XMPMetadata meta = parser.parse(metadata.getUnfilteredStream());
+                var basicSchema = meta.getXMPBasicSchema();
+                assertTrue(ZonedDateTime.of(2020, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC).plusYears(1)
+                        .toInstant().isAfter(basicSchema.getModifyDate().toInstant()));
+                var adobeSchema = meta.getAdobePDFSchema();
+                assertEquals("SAMBox 1.0.64.RELEASE-SNAPSHOT (www.sejda.org)",
+                        adobeSchema.getProducer());
+            }
         }
     }
 

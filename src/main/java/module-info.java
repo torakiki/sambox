@@ -27,6 +27,7 @@ module org.sejda.sambox {
     requires transitive java.xml;
     requires transitive org.apache.fontbox;
     requires transitive org.sejda.io;
+    requires transitive org.apache.xmpbox;
 
     exports org.sejda.sambox;
     exports org.sejda.sambox.contentstream;

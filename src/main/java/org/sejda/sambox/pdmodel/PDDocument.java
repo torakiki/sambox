@@ -27,6 +27,8 @@ import static org.sejda.sambox.util.SpecVersionUtils.isAtLeast;
 import java.awt.Point;
 import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -41,6 +43,10 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.apache.fontbox.ttf.TrueTypeFont;
+import org.apache.xmpbox.XMPMetadata;
+import org.apache.xmpbox.xml.DomXmpParser;
+import org.apache.xmpbox.xml.XmpParsingException;
+import org.apache.xmpbox.xml.XmpSerializer;
 import org.sejda.commons.util.IOUtils;
 import org.sejda.io.CountingWritableByteChannel;
 import org.sejda.io.SeekableSources;
@@ -61,6 +67,7 @@ import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.output.PDDocumentWriter;
 import org.sejda.sambox.output.PreSaveCOSTransformer;
 import org.sejda.sambox.output.WriteOption;
+import org.sejda.sambox.pdmodel.common.PDMetadata;
 import org.sejda.sambox.pdmodel.encryption.AccessPermission;
 import org.sejda.sambox.pdmodel.encryption.PDEncryption;
 import org.sejda.sambox.pdmodel.encryption.SecurityHandler;
@@ -68,6 +75,7 @@ import org.sejda.sambox.pdmodel.font.Subsettable;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceRGB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import javax.xml.transform.TransformerException;
 
 /**
  * This is the in-memory representation of the PDF document.
@@ -535,26 +543,9 @@ public class PDDocument implements Closeable
     {
         requireOpen();
 
-        if (Arrays.stream(options)
-                .noneMatch(i -> i == WriteOption.NO_METADATA_PRODUCER_MODIFIED_DATE_UPDATE))
-        {
-            // update producer and last modification date only if the write option doesn't state otherwise
-            getDocumentInformation().setProducer(SAMBox.PRODUCER);
-            getDocumentInformation().setModificationDate(Calendar.getInstance());
-        }
+        updateMetadata(options);
+        subsetFonts();
 
-        for (Subsettable font : fontsToSubset)
-        {
-            try
-            {
-                font.subset();
-            }
-            catch (Exception e)
-            {
-                LOG.warn("Exception occurred while subsetting font: " + font, e);
-            }
-        }
-        fontsToSubset.clear();
         EncryptionContext encryptionContext = ofNullable(security).map(EncryptionContext::new)
                 .orElse(null);
         generateFileIdentifier(output.toString().getBytes(StandardCharsets.ISO_8859_1),
@@ -569,6 +560,73 @@ public class PDDocument implements Closeable
         {
             IOUtils.close(this);
         }
+    }
+
+    private void subsetFonts()
+    {
+        for (Subsettable font : fontsToSubset)
+        {
+            try
+            {
+                font.subset();
+            }
+            catch (Exception e)
+            {
+                LOG.warn("Exception occurred while subsetting font: " + font, e);
+            }
+        }
+        fontsToSubset.clear();
+    }
+
+    private void updateMetadata(WriteOption[] options)
+    {
+        if (Arrays.stream(options)
+                .noneMatch(i -> i == WriteOption.NO_METADATA_PRODUCER_MODIFIED_DATE_UPDATE))
+        {
+            // update producer and last modification date only if the write option doesn't state otherwise
+            getDocumentInformation().setProducer(SAMBox.PRODUCER);
+            getDocumentInformation().setModificationDate(Calendar.getInstance());
+        }
+        if (Arrays.stream(options).anyMatch(o -> o == WriteOption.UPSERT_DOCUMENT_METADATA_STREAM))
+        {
+            requireMinVersion(V1_4);
+            var metadataStream = new PDMetadata();
+            try (var metadataOutputStream = new BufferedOutputStream(
+                    metadataStream.getCOSObject().createUnfilteredStream()))
+            {
+                new XmpSerializer().serialize(
+                        getDocumentInformation().toXMPMetadata(getOrCreateXmpMetadata(),
+                                getVersion()), metadataOutputStream, true);
+                getDocumentCatalog().setMetadata(metadataStream);
+            }
+            catch (IOException | TransformerException e)
+            {
+                LOG.warn("Unable to set xmp document metadata", e);
+            }
+            catch (XmpParsingException e)
+            {
+                LOG.warn("Unable to parse existing document level xmp metadata", e);
+            }
+        }
+    }
+
+    private XMPMetadata getOrCreateXmpMetadata() throws XmpParsingException, IOException
+    {
+        var metadata = getDocumentCatalog().getMetadata();
+        if (nonNull(metadata))
+        {
+            try
+            {
+                var parser = new DomXmpParser();
+                parser.setStrictParsing(false);
+                return parser.parse(new BufferedInputStream(metadata.createInputStream()));
+            }
+            finally
+            {
+                metadata.getCOSObject().unDecode();
+            }
+        }
+        return XMPMetadata.createXMPMetadata();
     }
 
     /**

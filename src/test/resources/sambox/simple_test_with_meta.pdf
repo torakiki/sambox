@@ -1,0 +1,128 @@
+%PDF-1.7
+%§ãññ
+1 0 obj
+<<
+/Type /Catalog
+/Pages 3 0 R
+/Version /1#2E7
+/Metadata 4 0 R
+>>
+endobj
+2 0 obj
+<<
+/Producer (SAMBox 4.0.0-SNAPSHOT)
+/ModDate (D:20240701104823+02'00')
+/Title (Chick Norris)
+>>
+endobj
+3 0 obj
+<<
+/Type /Pages
+/Kids [5 0 R]
+/Count 1
+>>
+endobj
+4 0 obj
+<<
+/Type /Metadata
+/Subtype /XML
+/Length 1102
+>>
+stream
+<?xpacket begin="ï»¿" id="W5M0MpCehiHzreSzNTczkc9d"?><x:xmpmeta xmlns:x="adobe:ns:meta/">
+  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <rdf:Description xmlns:pdf="http://ns.adobe.com/pdf/1.3/" rdf:about="">
+      <pdf:PDFVersion>1.7</pdf:PDFVersion>
+      <pdf:Producer>SAMBox 4.0.0-SNAPSHOT</pdf:Producer>
+      <pdf:Trapped>False</pdf:Trapped>
+    </rdf:Description>
+    <rdf:Description xmlns:xmp="http://ns.adobe.com/xap/1.0/" rdf:about="">
+      <xmp:Identifier>
+        <rdf:Bag>
+          <rdf:li>1356bf0a-9dab-4790-b591-d5f548d44e1c</rdf:li>
+        </rdf:Bag>
+      </xmp:Identifier>
+      <xmp:MetadataDate>2024-07-01T10:48:23+02:00</xmp:MetadataDate>
+      <xmp:ModifyDate>2024-07-01T10:48:23+02:00</xmp:ModifyDate>
+    </rdf:Description>
+    <rdf:Description xmlns:dc="http://purl.org/dc/elements/1.1/" rdf:about="">
+      <dc:format>application/pdf</dc:format>
+      <dc:title>
+        <rdf:Alt>
+          <rdf:li xml:lang="x-default">Chick Norris</rdf:li>
+        </rdf:Alt>
+      </dc:title>
+    </rdf:Description>
+  </rdf:RDF>
+</x:xmpmeta><?xpacket end="w"?>
+
+endstream
+endobj
+5 0 obj
+<<
+/Type /Page
+/Parent 3 0 R
+/Resources 6 0 R
+/MediaBox [0 0 500 800]
+/Contents 7 0 R
+/Annots [8 0 R]
+>>
+endobj
+6 0 obj
+<<
+/Font 9 0 R
+>>
+endobj
+7 0 obj
+<<
+/Length 44
+>>
+stream
+BT /F1 24 Tf 175 720 Td (Hello World!)Tj ET
+
+endstream
+endobj
+8 0 obj
+<<
+/Type /Annot
+/Subtype /Text
+/Rect [175 720 175 720]
+/Contents (Hello Annotation!)
+/Open true
+>>
+endobj
+9 0 obj
+<<
+/F1 10 0 R
+>>
+endobj
+10 0 obj
+<<
+/Type /Font
+/Subtype /Type1
+/BaseFont /Helvetica
+>>
+endobj
+xref
+0 11
+0000000000 65535 f
+0000000015 00000 n
+0000000096 00000 n
+0000000208 00000 n
+0000000265 00000 n
+0000001451 00000 n
+0000001571 00000 n
+0000001604 00000 n
+0000001700 00000 n
+0000001814 00000 n
+0000001846 00000 n
+trailer
+<<
+/Root 1 0 R
+/ID [<7778436850996AC56581BBAC878A8BAB> <7778436850996AC56581BBAC878A8BAB>]
+/Size 11
+/Info 2 0 R
+>>
+startxref
+1917
+%%EOF
