@@ -15,11 +15,11 @@
  */
 package org.sejda.sambox.pdmodel.graphics.image;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.sejda.sambox.pdmodel.graphics.image.ValidateXImage.colorCount;
 import static org.sejda.sambox.pdmodel.graphics.image.ValidateXImage.doWritePDF;
 import static org.sejda.sambox.pdmodel.graphics.image.ValidateXImage.validate;
@@ -30,17 +30,19 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.sejda.commons.util.IOUtils;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.PDDocument;
+import org.sejda.sambox.pdmodel.graphics.color.PDDeviceCMYK;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceRGB;
 import javax.imageio.ImageIO;
@@ -52,45 +54,57 @@ import javax.imageio.ImageIO;
  */
 public class JPEGFactoryTest
 {
-    private final File testResultsDir = new File("target/test-output/graphics");
+    private static final File TESTRESULTSDIR = new File("target/test-output/graphics");
 
-    @Rule
-    public TemporaryFolder folder = new TemporaryFolder();
-
-    @Before
-    public void setUp()
+    @BeforeAll
+    static void setUp()
     {
-        testResultsDir.mkdirs();
+        TESTRESULTSDIR.mkdirs();
     }
 
     @Test
-    public void testCreateFromFile() throws IOException
+    public void testCreateFromFile(@TempDir Path tempDir) throws IOException
     {
         try (InputStream stream = JPEGFactoryTest.class.getResourceAsStream("jpeg.jpg"))
         {
-            File file = folder.newFile();
-            Files.copy(stream, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            PDImageXObject ximage = JPEGFactory.createFromFile(file);
+            var file = Files.createTempFile(tempDir, "test-jpg", ".jpg");
+            Files.copy(stream, file, StandardCopyOption.REPLACE_EXISTING);
+            PDImageXObject ximage = JPEGFactory.createFromFile(file.toFile());
             validate(ximage, 8, 344, 287, "jpg", PDDeviceRGB.INSTANCE.getName());
 
-            doWritePDF(new PDDocument(), ximage, testResultsDir, "jpegrgbstream.pdf");
-            checkJpegStream(testResultsDir, "jpegrgbstream.pdf",
+            doWritePDF(new PDDocument(), ximage, TESTRESULTSDIR, "jpegrgbstream.pdf");
+            checkJpegStream(TESTRESULTSDIR, "jpegrgbstream.pdf",
                     JPEGFactoryTest.class.getResourceAsStream("jpeg.jpg"));
         }
     }
 
     @Test
-    public void testCreateFromFile256() throws IOException
+    void testCreateFromStreamCMYK() throws IOException
+    {
+        try (InputStream stream = JPEGFactoryTest.class.getResourceAsStream("jpegcmyk.jpg"))
+        {
+            PDImageXObject ximage = JPEGFactory.createFromSeekableSource(
+                    SeekableSources.inMemorySeekableSourceFrom(stream));
+            validate(ximage, 8, 343, 287, "jpg", PDDeviceCMYK.INSTANCE.getName());
+
+            doWritePDF(new PDDocument(), ximage, TESTRESULTSDIR, "jpegcmykstream.pdf");
+            checkJpegStream(TESTRESULTSDIR, "jpegcmykstream.pdf",
+                    JPEGFactoryTest.class.getResourceAsStream("jpegcmyk.jpg"));
+        }
+    }
+
+    @Test
+    public void testCreateFromFile256(@TempDir Path tempDir) throws IOException
     {
         try (InputStream stream = JPEGFactoryTest.class.getResourceAsStream("jpeg256.jpg"))
         {
-            File file = folder.newFile();
-            Files.copy(stream, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            PDImageXObject ximage = JPEGFactory.createFromFile(file);
+            var file = Files.createTempFile(tempDir, "test-jpg", ".jpg");
+            Files.copy(stream, file, StandardCopyOption.REPLACE_EXISTING);
+            PDImageXObject ximage = JPEGFactory.createFromFile(file.toFile());
             validate(ximage, 8, 344, 287, "jpg", PDDeviceGray.INSTANCE.getName());
 
-            doWritePDF(new PDDocument(), ximage, testResultsDir, "jpeg256stream.pdf");
-            checkJpegStream(testResultsDir, "jpeg256stream.pdf",
+            doWritePDF(new PDDocument(), ximage, TESTRESULTSDIR, "jpeg256stream.pdf");
+            checkJpegStream(TESTRESULTSDIR, "jpeg256stream.pdf",
                     JPEGFactoryTest.class.getResourceAsStream("jpeg256.jpg"));
         }
     }
@@ -104,20 +118,20 @@ public class JPEGFactoryTest
         PDImageXObject ximage = JPEGFactory.createFromImage(image);
         validate(ximage, 8, 344, 287, "jpg", PDDeviceRGB.INSTANCE.getName());
 
-        doWritePDF(document, ximage, testResultsDir, "jpegrgb.pdf");
+        doWritePDF(document, ximage, TESTRESULTSDIR, "jpegrgb.pdf");
     }
 
     @Test
     public void testCreateFromImage256() throws IOException
     {
         PDDocument document = new PDDocument();
-        BufferedImage image = ImageIO
-                .read(JPEGFactoryTest.class.getResourceAsStream("jpeg256.jpg"));
+        BufferedImage image = ImageIO.read(
+                JPEGFactoryTest.class.getResourceAsStream("jpeg256.jpg"));
         assertEquals(1, image.getColorModel().getNumComponents());
         PDImageXObject ximage = JPEGFactory.createFromImage(image);
         validate(ximage, 8, 344, 287, "jpg", PDDeviceGray.INSTANCE.getName());
 
-        doWritePDF(document, ximage, testResultsDir, "jpeg256.pdf");
+        doWritePDF(document, ximage, TESTRESULTSDIR, "jpeg256.pdf");
     }
 
     @Test
@@ -125,8 +139,8 @@ public class JPEGFactoryTest
     {
         // workaround Open JDK bug
         // http://bugs.java.com/bugdatabase/view_bug.do?bug_id=7044758
-        if (System.getProperty("java.runtime.name").equals("OpenJDK Runtime Environment")
-                && (System.getProperty("java.specification.version").equals("1.6")
+        if (System.getProperty("java.runtime.name").equals("OpenJDK Runtime Environment") && (
+                System.getProperty("java.specification.version").equals("1.6")
                         || System.getProperty("java.specification.version").equals("1.7")
                         || System.getProperty("java.specification.version").equals("1.8")))
         {
@@ -158,7 +172,7 @@ public class JPEGFactoryTest
         validate(ximage.getSoftMask(), 8, width, height, "jpg", PDDeviceGray.INSTANCE.getName());
         assertTrue(colorCount(ximage.getSoftMask().getImage()) > image.getHeight() / 10);
 
-        doWritePDF(document, ximage, testResultsDir, "jpeg-intargb.pdf");
+        doWritePDF(document, ximage, TESTRESULTSDIR, "jpeg-intargb.pdf");
     }
 
     @Test
@@ -166,8 +180,8 @@ public class JPEGFactoryTest
     {
         // workaround Open JDK bug
         // http://bugs.java.com/bugdatabase/view_bug.do?bug_id=7044758
-        if (System.getProperty("java.runtime.name").equals("OpenJDK Runtime Environment")
-                && (System.getProperty("java.specification.version").equals("1.6")
+        if (System.getProperty("java.runtime.name").equals("OpenJDK Runtime Environment") && (
+                System.getProperty("java.specification.version").equals("1.6")
                         || System.getProperty("java.specification.version").equals("1.7")
                         || System.getProperty("java.specification.version").equals("1.8")))
         {
@@ -199,12 +213,13 @@ public class JPEGFactoryTest
         validate(ximage.getSoftMask(), 8, width, height, "jpg", PDDeviceGray.INSTANCE.getName());
         assertTrue(colorCount(ximage.getSoftMask().getImage()) > image.getHeight() / 10);
 
-        doWritePDF(document, ximage, testResultsDir, "jpeg-4bargb.pdf");
+        doWritePDF(document, ximage, TESTRESULTSDIR, "jpeg-4bargb.pdf");
     }
 
     /**
-     * Tests USHORT_555_RGB JPEGFactory#createFromImage(PDDocument document, BufferedImage image), see also PDFBOX-4674.
-     * 
+     * Tests USHORT_555_RGB JPEGFactory#createFromImage(PDDocument document, BufferedImage image),
+     * see also PDFBOX-4674.
+     *
      * @throws java.io.IOException
      */
     @Test
@@ -212,8 +227,8 @@ public class JPEGFactoryTest
     {
         // workaround Open JDK bug
         // http://bugs.java.com/bugdatabase/view_bug.do?bug_id=7044758
-        if (System.getProperty("java.runtime.name").equals("OpenJDK Runtime Environment")
-                && (System.getProperty("java.specification.version").equals("1.6")
+        if (System.getProperty("java.runtime.name").equals("OpenJDK Runtime Environment") && (
+                System.getProperty("java.specification.version").equals("1.6")
                         || System.getProperty("java.specification.version").equals("1.7")
                         || System.getProperty("java.specification.version").equals("1.8")))
         {
@@ -244,7 +259,27 @@ public class JPEGFactoryTest
         validate(ximage, 8, width, height, "jpg", PDDeviceRGB.INSTANCE.getName());
         assertNull(ximage.getSoftMask());
 
-        doWritePDF(document, ximage, testResultsDir, "jpeg-ushort555rgb.pdf");
+        doWritePDF(document, ximage, TESTRESULTSDIR, "jpeg-ushort555rgb.pdf");
+    }
+
+    /**
+     * PDFBOX-5137 and PDFBOX-5196: check that numFrameComponents and not numScanComponents is used
+     * to determine the color space.
+     *
+     * @throws IOException
+     */
+    @Test
+    void testPDFBox5137() throws IOException
+    {
+        PDImageXObject ximage = JPEGFactory.createFromSeekableSource(
+                SeekableSources.seekableSourceFrom(
+                        Paths.get("target/imgs", "PDFBOX-5196-lotus.jpg")));
+
+        validate(ximage, 8, 500, 500, "jpg", PDDeviceRGB.INSTANCE.getName());
+
+        doWritePDF(new PDDocument(), ximage, TESTRESULTSDIR, "PDFBOX-5196-lotus.pdf");
+        checkJpegStream(TESTRESULTSDIR, "PDFBOX-5196-lotus.pdf",
+                Files.newInputStream(Paths.get("target/imgs", "PDFBOX-5196-lotus.jpg")));
     }
 
     @Test
@@ -252,23 +287,23 @@ public class JPEGFactoryTest
     {
         try (InputStream stream = JPEGFactoryTest.class.getResourceAsStream("jpeg.jpg"))
         {
-            PDImageXObject ximage = JPEGFactory
-                    .createFromSeekableSource(SeekableSources.onTempFileSeekableSourceFrom(stream));
+            PDImageXObject ximage = JPEGFactory.createFromSeekableSource(
+                    SeekableSources.onTempFileSeekableSourceFrom(stream));
             validate(ximage, 8, 344, 287, "jpg", PDDeviceRGB.INSTANCE.getName());
 
-            doWritePDF(new PDDocument(), ximage, testResultsDir, "jpegrgbstream.pdf");
-            checkJpegStream(testResultsDir, "jpegrgbstream.pdf",
+            doWritePDF(new PDDocument(), ximage, TESTRESULTSDIR, "jpegrgbstream.pdf");
+            checkJpegStream(TESTRESULTSDIR, "jpegrgbstream.pdf",
                     JPEGFactoryTest.class.getResourceAsStream("jpeg.jpg"));
         }
     }
 
     // check whether it is possible to extract the jpeg stream exactly
     // as it was passed to createFromStream
-    private void checkJpegStream(File testResultsDir, String filename, InputStream resourceStream)
+    private void checkJpegStream(File TESTRESULTSDIR, String filename, InputStream resourceStream)
             throws IOException
     {
-        try (PDDocument doc = PDFParser
-                .parse(SeekableSources.seekableSourceFrom(new File(testResultsDir, filename))))
+        try (PDDocument doc = PDFParser.parse(
+                SeekableSources.seekableSourceFrom(new File(TESTRESULTSDIR, filename))))
         {
             PDImageXObject img = (PDImageXObject) doc.getPage(0).getResources()
                     .getXObject(COSName.getPDFName("Im1"));

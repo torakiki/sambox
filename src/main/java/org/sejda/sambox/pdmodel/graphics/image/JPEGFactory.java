@@ -16,16 +16,39 @@
  */
 package org.sejda.sambox.pdmodel.graphics.image;
 
+import static java.util.Objects.nonNull;
+import static org.sejda.commons.util.RequireUtils.requireIOCondition;
+import static org.sejda.sambox.cos.COSInteger.ONE;
+import static org.sejda.sambox.cos.COSInteger.ZERO;
+
+import java.awt.Transparency;
+import java.awt.color.ColorSpace;
+import java.awt.color.ICC_ColorSpace;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorConvertOp;
+import java.awt.image.Raster;
+import java.awt.image.WritableRaster;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.StreamSupport;
+
 import org.sejda.commons.FastByteArrayOutputStream;
 import org.sejda.io.SeekableSource;
 import org.sejda.io.SeekableSources;
+import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceCMYK;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceRGB;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
-
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -35,20 +58,9 @@ import javax.imageio.ImageWriter;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
-import java.awt.Transparency;
-import java.awt.color.ColorSpace;
-import java.awt.color.ICC_ColorSpace;
-import java.awt.image.BufferedImage;
-import java.awt.image.ColorConvertOp;
-import java.awt.image.WritableRaster;
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.util.Iterator;
-
-import static java.util.Objects.nonNull;
-import static org.sejda.commons.util.RequireUtils.requireIOCondition;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 
 /**
  * Factory for creating a PDImageXObject containing a JPEG compressed image.
@@ -57,6 +69,9 @@ import static org.sejda.commons.util.RequireUtils.requireIOCondition;
  */
 public final class JPEGFactory
 {
+
+    private static final Logger LOG = LoggerFactory.getLogger(JPEGFactory.class);
+
     private JPEGFactory()
     {
     }
@@ -80,53 +95,102 @@ public final class JPEGFactory
 
     public static PDImageXObject createFromSeekableSource(SeekableSource source) throws IOException
     {
-        // read image
-        BufferedImage awtImage = readJpeg(source.asNewInputStream());
+        var dimensions = retrieveDimensions(source.asNewInputStream());
+
+        PDColorSpace colorSpace = switch (dimensions.numComponents())
+        {
+            case 1 -> PDDeviceGray.INSTANCE;
+            case 3 -> PDDeviceRGB.INSTANCE;
+            case 4 -> PDDeviceCMYK.INSTANCE;
+            default -> throw new UnsupportedOperationException(
+                    "number of data elements not supported: " + dimensions.numComponents());
+        };
 
         // create Image XObject from stream
         PDImageXObject pdImage = new PDImageXObject(
                 new BufferedInputStream(source.asNewInputStream()), COSName.DCT_DECODE,
-                awtImage.getWidth(), awtImage.getHeight(),
-                awtImage.getColorModel().getComponentSize(0), getColorSpaceFromAWT(awtImage));
+                dimensions.width(), dimensions.height(), 8, colorSpace);
 
-        // no alpha
-        if (awtImage.getColorModel().hasAlpha())
+        if (colorSpace instanceof PDDeviceCMYK)
         {
-            throw new UnsupportedOperationException("alpha channel not implemented");
+            pdImage.setDecode(new COSArray(ONE, ZERO, ONE, ZERO, ONE, ZERO, ONE, ZERO));
         }
 
         return pdImage;
     }
 
+    @Deprecated
+    //Use ImageIO directly if you need File -> BufferedImage
     public static BufferedImage readJpegFile(File file) throws IOException
     {
-        return readJpeg(file);
+        var image = ImageIO.read(file);
+        requireIOCondition(nonNull(image), "Cannot read JPEG image");
+        return image;
     }
 
-    private static BufferedImage readJpeg(Object fileOrStream) throws IOException
+    public record Dimensions(int width, int height, int numComponents)
     {
-        Iterator<ImageReader> readers = ImageIO.getImageReadersByFormatName("JPEG");
-        ImageReader reader = null;
-        while (readers.hasNext())
-        {
-            reader = readers.next();
-            if (reader.canReadRaster())
-            {
-                break;
-            }
-        }
+    }
+
+    private static Dimensions retrieveDimensions(InputStream stream) throws IOException
+    {
+        ImageReader reader = StreamSupport.stream(
+                        Spliterators.spliteratorUnknownSize(ImageIO.getImageReadersByFormatName("JPEG"),
+                                Spliterator.ORDERED), false).filter(ImageReader::canReadRaster).findFirst()
+                .orElse(null);
         requireIOCondition(nonNull(reader), "Cannot find an ImageIO reader for JPEG image");
 
-        try (ImageInputStream iis = ImageIO.createImageInputStream(fileOrStream))
+        try (ImageInputStream iis = ImageIO.createImageInputStream(stream))
         {
             reader.setInput(iis);
+
+            // PDFBOX-4691: get from image metadata (faster because no decoding)
+            int components = getNumComponentsFromImageMetadata(reader);
+            if (components != 0)
+            {
+                return new Dimensions(reader.getWidth(0), reader.getHeight(0), components);
+            }
+            LOG.warn("No image metadata, will decode image and use raster size");
+
+            // Old method: get from raster (slower)
             ImageIO.setUseCache(false);
-            return reader.read(0);
+            Raster raster = reader.readRaster(0, null);
+            return new Dimensions(reader.getWidth(0), reader.getHeight(0),
+                    raster.getNumDataElements());
         }
         finally
         {
             reader.dispose();
         }
+    }
+
+    private static int getNumComponentsFromImageMetadata(ImageReader reader)
+    {
+        try
+        {
+            IIOMetadata imageMetadata = reader.getImageMetadata(0);
+            if (nonNull(imageMetadata))
+            {
+                if (imageMetadata.getAsTree("javax_imageio_jpeg_image_1.0") instanceof Element root)
+                {
+
+                    XPath xpath = XPathFactory.newInstance().newXPath();
+                    String numFrameComponents = xpath.evaluate(
+                            "markerSequence/sof/@numFrameComponents", root);
+                    if (!numFrameComponents.isEmpty())
+                    {
+                        return Integer.parseInt(numFrameComponents);
+                    }
+                }
+
+            }
+        }
+        catch (IOException | NumberFormatException | XPathExpressionException ex)
+        {
+            LOG.warn("An error occurred while getting the number of components from image metadata",
+                    ex);
+        }
+        return 0;
     }
 
     /**
