@@ -308,19 +308,20 @@ public class PDDocumentInformation extends PDDictionaryWrapper
      * @return and updated version of the input metadata where all the properties corresponding to
      * the info dictionary have their values updated with the current value of the info dictionary.
      */
-    public XMPMetadata toXMPMetadata(XMPMetadata metadata, String pdfVersion)
+    public XMPMetadata toXMPMetadata(XMPMetadata metadata)
     {
         metadata = ofNullable(metadata).orElseGet(XMPMetadata::createXMPMetadata);
         AdobePDFSchema pdfSchema = ofNullable(metadata.getAdobePDFSchema()).orElseGet(
                 metadata::createAndAddAdobePDFSchema);
-        pdfSchema.setPDFVersion(pdfVersion);
         ofNullable(getKeywords()).ifPresent(pdfSchema::setKeywords);
         ofNullable(getProducer()).map(p -> pdfSchema.getMetadata().getTypeMapping()
                         .createAgentName(pdfSchema.getNamespace(), pdfSchema.getPrefix(), "Producer", p))
                 .ifPresent(pdfSchema::addProperty);
-        pdfSchema.addProperty(pdfSchema.getMetadata().getTypeMapping()
-                .createBoolean(pdfSchema.getNamespace(), pdfSchema.getPrefix(), "Trapped",
-                        getCOSObject().getBoolean(COSName.TRAPPED, false)));
+        ofNullable(getTrapped()).ifPresent(t -> {
+            pdfSchema.addProperty(pdfSchema.getMetadata().getTypeMapping()
+                    .createBoolean(pdfSchema.getNamespace(), pdfSchema.getPrefix(), "Trapped",
+                            Boolean.parseBoolean(t)));
+        });
 
         XMPBasicSchema basicSchema = ofNullable(metadata.getXMPBasicSchema()).orElseGet(
                 metadata::createAndAddXMPBasicSchema);

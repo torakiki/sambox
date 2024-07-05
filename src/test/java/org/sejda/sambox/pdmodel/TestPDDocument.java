@@ -291,6 +291,7 @@ public class TestPDDocument
         {
             document.setVersion(SpecVersionUtils.V1_7);
             document.getDocumentInformation().setTitle("Chick Norris");
+            document.getDocumentInformation().setSubject("This is the subject");
             document.writeTo(output, WriteOption.UPSERT_DOCUMENT_METADATA_STREAM);
         }
         try (var outputDoc = PDFParser.parse(SeekableSources.seekableSourceFrom(output)))
@@ -305,6 +306,7 @@ public class TestPDDocument
                 var dublinCoreSchema = meta.getDublinCoreSchema();
                 assertNotNull(dublinCoreSchema);
                 assertEquals("Chick Norris", dublinCoreSchema.getTitle());
+                assertEquals("This is the subject", dublinCoreSchema.getDescription());
                 var basicSchema = meta.getXMPBasicSchema();
                 assertNotNull(basicSchema);
                 assertNotNull(basicSchema.getMetadataDate());

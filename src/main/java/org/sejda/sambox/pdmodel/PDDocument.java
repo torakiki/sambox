@@ -44,6 +44,7 @@ import java.util.Set;
 
 import org.apache.fontbox.ttf.TrueTypeFont;
 import org.apache.xmpbox.XMPMetadata;
+import org.apache.xmpbox.schema.AdobePDFSchema;
 import org.apache.xmpbox.xml.DomXmpParser;
 import org.apache.xmpbox.xml.XmpParsingException;
 import org.apache.xmpbox.xml.XmpSerializer;
@@ -594,9 +595,11 @@ public class PDDocument implements Closeable
             try (var metadataOutputStream = new BufferedOutputStream(
                     metadataStream.getCOSObject().createUnfilteredStream()))
             {
-                new XmpSerializer().serialize(
-                        getDocumentInformation().toXMPMetadata(getOrCreateXmpMetadata(),
-                                getVersion()), metadataOutputStream, true);
+                var meta = getDocumentInformation().toXMPMetadata(getOrCreateXmpMetadata());
+                AdobePDFSchema pdfSchema = ofNullable(meta.getAdobePDFSchema()).orElseGet(
+                        meta::createAndAddAdobePDFSchema);
+                pdfSchema.setPDFVersion(getVersion());
+                new XmpSerializer().serialize(meta, metadataOutputStream, true);
                 getDocumentCatalog().setMetadata(metadataStream);
             }
             catch (IOException | TransformerException e)
