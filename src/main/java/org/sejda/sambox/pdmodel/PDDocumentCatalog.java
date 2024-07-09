@@ -16,6 +16,14 @@
  */
 package org.sejda.sambox.pdmodel;
 
+import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
+import static org.sejda.sambox.util.SpecVersionUtils.V1_5;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSArrayList;
 import org.sejda.sambox.cos.COSBase;
@@ -45,14 +53,6 @@ import org.sejda.sambox.pdmodel.interactive.pagenavigation.PDThread;
 import org.sejda.sambox.pdmodel.interactive.viewerpreferences.PDViewerPreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import static java.util.Objects.nonNull;
-import static java.util.Optional.ofNullable;
-import static org.sejda.sambox.util.SpecVersionUtils.V1_5;
 
 /**
  * The Document Catalog of a PDF.
@@ -383,17 +383,13 @@ public class PDDocumentCatalog implements COSObjectable
      */
     public List<PDOutputIntent> getOutputIntents()
     {
-        List<PDOutputIntent> retval = new ArrayList<>();
-        COSArray array = root.getDictionaryObject(COSName.OUTPUT_INTENTS, COSArray.class);
-        if (array != null)
+        var intents = root.getDictionaryObject(COSName.OUTPUT_INTENTS, COSArray.class);
+        if (nonNull(intents))
         {
-            for (COSBase cosBase : array)
-            {
-                PDOutputIntent oi = new PDOutputIntent((COSDictionary) cosBase.getCOSObject());
-                retval.add(oi);
-            }
+            return intents.stream().filter(e -> e instanceof COSDictionary)
+                    .map(e -> (COSDictionary) e).map(PDOutputIntent::new).toList();
         }
-        return retval;
+        return new ArrayList<>();
     }
 
     /**
