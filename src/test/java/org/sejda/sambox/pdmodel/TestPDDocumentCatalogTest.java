@@ -16,6 +16,10 @@
  */
 package org.sejda.sambox.pdmodel;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -28,8 +32,6 @@ import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.graphics.color.PDOutputIntent;
 import org.sejda.sambox.pdmodel.interactive.documentnavigation.destination.PDNamedDestination;
-
-import static org.junit.Assert.*;
 
 /**
  * Test PDDocument Catalog functionality.
@@ -81,7 +83,7 @@ public class TestPDDocumentCatalogTest
             colorProfile = TestPDDocumentCatalogTest.class
                     .getResourceAsStream("sRGB.icc");
             // create output intent
-            PDOutputIntent oi = new PDOutputIntent(doc, colorProfile);
+            PDOutputIntent oi = new PDOutputIntent(colorProfile);
             oi.setInfo("sRGB IEC61966-2.1");
             oi.setOutputCondition("sRGB IEC61966-2.1");
             oi.setOutputConditionIdentifier("sRGB IEC61966-2.1");

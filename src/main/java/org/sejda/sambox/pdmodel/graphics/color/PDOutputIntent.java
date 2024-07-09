@@ -21,92 +21,82 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.cos.COSObjectable;
 import org.sejda.sambox.cos.COSStream;
-import org.sejda.sambox.pdmodel.PDDocument;
+import org.sejda.sambox.pdmodel.common.PDDictionaryWrapper;
 import org.sejda.sambox.pdmodel.common.PDStream;
 
 /**
- * An Output Intent describes the colour reproduction characteristics of a possible output device or production
- * condition. Output intents provide a means for matching the colour characteristics of a PDF document with those of a
- * target output device or production environment in which the document will be printed.
+ * An Output Intent describes the colour reproduction characteristics of a possible output device or
+ * production condition. Output intents provide a means for matching the colour characteristics of a
+ * PDF document with those of a target output device or production environment in which the document
+ * will be printed.
  *
  * @author Guillaume Bailleul
  */
-public final class PDOutputIntent implements COSObjectable
+public final class PDOutputIntent extends PDDictionaryWrapper
 {
-    private final COSDictionary dictionary;
 
-    public PDOutputIntent(PDDocument doc, InputStream colorProfile) throws IOException
+    public PDOutputIntent(InputStream colorProfile) throws IOException
     {
-        dictionary = new COSDictionary();
-        dictionary.setItem(COSName.TYPE, COSName.OUTPUT_INTENT);
-        dictionary.setItem(COSName.S, COSName.GTS_PDFA1);
-        PDStream destOutputIntent = configureOutputProfile(colorProfile);
-        dictionary.setItem(COSName.DEST_OUTPUT_PROFILE, destOutputIntent);
+        super();
+        getCOSObject().setItem(COSName.TYPE, COSName.OUTPUT_INTENT);
+        getCOSObject().setItem(COSName.S, COSName.GTS_PDFA1);
+        getCOSObject().setItem(COSName.DEST_OUTPUT_PROFILE, configureOutputProfile(colorProfile));
     }
 
     public PDOutputIntent(COSDictionary dictionary)
     {
-        this.dictionary = dictionary;
-    }
-
-    @Override
-    public COSBase getCOSObject()
-    {
-        return dictionary;
+        super(dictionary);
     }
 
     public COSStream getDestOutputIntent()
     {
-        return (COSStream) dictionary.getItem(COSName.DEST_OUTPUT_PROFILE);
+        return getCOSObject().getDictionaryObject(COSName.DEST_OUTPUT_PROFILE, COSStream.class);
     }
 
     public String getInfo()
     {
-        return dictionary.getString(COSName.INFO);
+        return getCOSObject().getString(COSName.INFO);
     }
 
     public void setInfo(String value)
     {
-        dictionary.setString(COSName.INFO, value);
+        getCOSObject().setString(COSName.INFO, value);
     }
 
     public String getOutputCondition()
     {
-        return dictionary.getString(COSName.OUTPUT_CONDITION);
+        return getCOSObject().getString(COSName.OUTPUT_CONDITION);
     }
 
     public void setOutputCondition(String value)
     {
-        dictionary.setString(COSName.OUTPUT_CONDITION, value);
+        getCOSObject().setString(COSName.OUTPUT_CONDITION, value);
     }
 
     public String getOutputConditionIdentifier()
     {
-        return dictionary.getString(COSName.OUTPUT_CONDITION_IDENTIFIER);
+        return getCOSObject().getString(COSName.OUTPUT_CONDITION_IDENTIFIER);
     }
 
     public void setOutputConditionIdentifier(String value)
     {
-        dictionary.setString(COSName.OUTPUT_CONDITION_IDENTIFIER, value);
+        getCOSObject().setString(COSName.OUTPUT_CONDITION_IDENTIFIER, value);
     }
 
     public String getRegistryName()
     {
-        return dictionary.getString(COSName.REGISTRY_NAME);
+        return getCOSObject().getString(COSName.REGISTRY_NAME);
     }
 
     public void setRegistryName(String value)
     {
-        dictionary.setString(COSName.REGISTRY_NAME, value);
+        getCOSObject().setString(COSName.REGISTRY_NAME, value);
     }
 
-    private PDStream configureOutputProfile(InputStream colorProfile)
-            throws IOException
+    private PDStream configureOutputProfile(InputStream colorProfile) throws IOException
     {
         ICC_Profile icc = ICC_Profile.getInstance(colorProfile);
         PDStream stream = new PDStream(new ByteArrayInputStream(icc.getData()),
