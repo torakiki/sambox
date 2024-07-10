@@ -21,6 +21,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.sejda.sambox.cos.COSDictionary.of;
 
 import java.awt.Point;
 import java.awt.geom.Point2D;
@@ -45,7 +46,6 @@ import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationLink;
 
 /**
  * @author Andrea Vacondio
- *
  */
 public class PDPageTest
 {
@@ -160,16 +160,16 @@ public class PDPageTest
                 formContents.showText("Chuck Norris");
                 formContents.endText();
             }
-            COSStream stream = page.getCOSObject().getDictionaryObject(COSName.CONTENTS,
-                    COSStream.class);
+            COSStream stream = page.getCOSObject()
+                    .getDictionaryObject(COSName.CONTENTS, COSStream.class);
             stream.setItem(COSName.ANNOTS, new COSDictionary());
-            assertTrue(nonNull(
-                    page.getCOSObject().getDictionaryObject(COSName.CONTENTS, COSStream.class)
-                            .getItem(COSName.ANNOTS)));
+            assertTrue(nonNull(page.getCOSObject()
+                    .getDictionaryObject(COSName.CONTENTS, COSStream.class)
+                    .getItem(COSName.ANNOTS)));
             page.sanitizeDictionary();
-            assertFalse(nonNull(
-                    page.getCOSObject().getDictionaryObject(COSName.CONTENTS, COSStream.class)
-                            .getItem(COSName.ANNOTS)));
+            assertFalse(nonNull(page.getCOSObject()
+                    .getDictionaryObject(COSName.CONTENTS, COSStream.class)
+                    .getItem(COSName.ANNOTS)));
         }
     }
 
@@ -205,8 +205,7 @@ public class PDPageTest
     @Test
     public void invalidPageResources()
     {
-        COSDictionary dictionary = new COSDictionary();
-        dictionary.setItem(COSName.RESOURCES, new COSArray());
+        COSDictionary dictionary = of(COSName.RESOURCES, new COSArray());
         PDPage page = new PDPage(dictionary);
         assertNotNull(page.getResources());
     }
@@ -221,8 +220,9 @@ public class PDPageTest
 
         page.getCOSObject().setItem(COSName.ART_BOX,
                 new COSArray(COSInteger.ZERO, COSInteger.ZERO, COSInteger.get(500), COSName.AFTER));
-        assertEquals(new PDRectangle(new COSArray(COSInteger.ZERO, COSInteger.ZERO,
-                COSInteger.get(500), COSInteger.ZERO)), page.getArtBox());
+        assertEquals(new PDRectangle(
+                new COSArray(COSInteger.ZERO, COSInteger.ZERO, COSInteger.get(500),
+                        COSInteger.ZERO)), page.getArtBox());
     }
 
     @Test
@@ -235,8 +235,9 @@ public class PDPageTest
 
         page.getCOSObject().setItem(COSName.BLEED_BOX,
                 new COSArray(COSInteger.ZERO, COSInteger.ZERO, COSInteger.get(500), COSName.AFTER));
-        assertEquals(new PDRectangle(new COSArray(COSInteger.ZERO, COSInteger.ZERO,
-                COSInteger.get(500), COSInteger.ZERO)), page.getBleedBox());
+        assertEquals(new PDRectangle(
+                new COSArray(COSInteger.ZERO, COSInteger.ZERO, COSInteger.get(500),
+                        COSInteger.ZERO)), page.getBleedBox());
     }
 
     @Test
@@ -249,8 +250,9 @@ public class PDPageTest
 
         page.getCOSObject().setItem(COSName.TRIM_BOX,
                 new COSArray(COSInteger.ZERO, COSInteger.ZERO, COSInteger.get(500), COSName.AFTER));
-        assertEquals(new PDRectangle(new COSArray(COSInteger.ZERO, COSInteger.ZERO,
-                COSInteger.get(500), COSInteger.ZERO)), page.getTrimBox());
+        assertEquals(new PDRectangle(
+                new COSArray(COSInteger.ZERO, COSInteger.ZERO, COSInteger.get(500),
+                        COSInteger.ZERO)), page.getTrimBox());
     }
 
 }

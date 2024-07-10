@@ -46,8 +46,7 @@ public class PDExtendedGraphicsState implements COSObjectable
      */
     public PDExtendedGraphicsState()
     {
-        dict = new COSDictionary();
-        dict.setItem(COSName.TYPE, COSName.EXT_G_STATE);
+        dict = COSDictionary.of(COSName.TYPE, COSName.EXT_G_STATE);
     }
 
     /**

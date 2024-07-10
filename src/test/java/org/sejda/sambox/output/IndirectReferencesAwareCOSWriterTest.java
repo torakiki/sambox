@@ -18,6 +18,7 @@ package org.sejda.sambox.output;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
+import static org.sejda.sambox.cos.COSDictionary.of;
 
 import org.junit.After;
 import org.junit.Before;
@@ -28,6 +29,7 @@ import org.sejda.commons.util.IOUtils;
 import org.sejda.io.BufferedCountingChannelWriter;
 import org.sejda.io.CountingWritableByteChannel;
 import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSString;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
@@ -73,10 +75,9 @@ public class IndirectReferencesAwareCOSWriterTest
     @Test
     public void visitCOSDictionary() throws Exception
     {
-        COSDictionary dictionary = new COSDictionary();
+
         COSString string = COSString.parseLiteral("Chuck");
-        dictionary.setItem(COSName.A, string);
-        dictionary.setInt(COSName.C, 151);
+        COSDictionary dictionary = of(COSName.A, string, COSName.C, COSInteger.get(151));
         IndirectCOSObjectReference ref = context.getOrCreateIndirectReferenceFor(string);
         InOrder inOrder = Mockito.inOrder(writer);
         victim.visit(dictionary);

@@ -16,24 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
-import org.junit.Test;
-import org.junit.jupiter.api.Assertions;
-import org.sejda.io.SeekableSources;
-import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSDictionary;
-import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.input.PDFParser;
-import org.sejda.sambox.pdmodel.PDDocument;
-import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
-import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceDictionary;
-import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceEntry;
-import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceStream;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -42,6 +24,26 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.sejda.sambox.cos.COSDictionary.of;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.sejda.io.SeekableSources;
+import org.sejda.sambox.cos.COSArray;
+import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSInteger;
+import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.input.PDFParser;
+import org.sejda.sambox.pdmodel.PDDocument;
+import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
+import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceDictionary;
+import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceEntry;
+import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceStream;
 
 /**
  * This will test the functionality of Radio Buttons in PDFBox.
@@ -80,6 +82,7 @@ public class TestRadioButtons
             for (String option : options)
             {
                 PDAnnotationWidget widget = new PDAnnotationWidget();
+                COSDictionary streamDictionary = of(COSName.LENGTH, COSInteger.get(63));
                 COSDictionary apNDict = new COSDictionary();
                 apNDict.setItem(COSName.Off, new PDAppearanceStream());
                 apNDict.setItem(option, new PDAppearanceStream());

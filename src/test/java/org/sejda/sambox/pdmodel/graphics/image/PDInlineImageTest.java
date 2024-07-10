@@ -15,6 +15,8 @@
  */
 package org.sejda.sambox.pdmodel.graphics.image;
 
+import static org.sejda.sambox.cos.COSDictionary.of;
+
 import java.awt.Color;
 import java.awt.Paint;
 import java.awt.image.BufferedImage;
@@ -26,6 +28,7 @@ import java.io.IOException;
 import junit.framework.TestCase;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSArray;
+import org.sejda.sambox.cos.COSBoolean;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
@@ -55,16 +58,16 @@ public class PDInlineImageTest extends TestCase
     }
 
     /**
-     * Tests PDInlineImage#PDInlineImage(COSDictionary parameters, byte[] data, Map<String, PDColorSpace> colorSpaces)
+     * Tests PDInlineImage#PDInlineImage(COSDictionary parameters, byte[] data, Map<String,
+     * PDColorSpace> colorSpaces)
      */
     public void testInlineImage() throws IOException
     {
-        COSDictionary dict = new COSDictionary();
-        dict.setBoolean(COSName.IM, true);
+
         int width = 31;
         int height = 27;
-        dict.setInt(COSName.W, width);
-        dict.setInt(COSName.H, height);
+        COSDictionary dict = of(COSName.IM, COSBoolean.TRUE, COSName.W, COSInteger.get(width),
+                COSName.H, COSInteger.get(height));
         dict.setInt(COSName.BPC, 1);
         int rowbytes = width / 8;
         if (rowbytes * 8 < width)
@@ -219,18 +222,13 @@ public class PDInlineImageTest extends TestCase
 
     private void doInlineCcittImage(int width, int height, byte[] ba) throws IOException
     {
-        COSDictionary dict = new COSDictionary();
-        dict.setInt(COSName.W, width);
-        dict.setInt(COSName.H, height);
-        dict.setInt(COSName.BPC, 1);
-        COSArray array = new COSArray();
-        array.add(COSInteger.ONE);
-        array.add(COSInteger.ZERO);
+        COSDictionary dict = of(COSName.W, COSInteger.get(width), COSName.H, COSInteger.get(height),
+                COSName.BPC, COSInteger.ONE);
+        COSArray array = new COSArray(COSInteger.ONE, COSInteger.ZERO);
         dict.setItem(COSName.D, array);
         dict.setBoolean(COSName.IM, true);
         dict.setItem(COSName.F, COSName.CCITTFAX_DECODE_ABBREVIATION);
-        COSDictionary dict2 = new COSDictionary();
-        dict2.setInt(COSName.COLUMNS, dict.getInt(COSName.W));
+        COSDictionary dict2 = of(COSName.COLUMNS, COSInteger.get(dict.getInt(COSName.W)));
         dict.setItem(COSName.DP, dict2);
         PDInlineImage inlineImage = new PDInlineImage(dict, ba, null);
         assertTrue(inlineImage.isStencil());

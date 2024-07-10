@@ -22,6 +22,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.sejda.io.SeekableSources.inMemorySeekableSourceFrom;
+import static org.sejda.sambox.cos.COSDictionary.of;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -43,7 +44,6 @@ import org.sejda.sambox.cos.IndirectCOSObjectIdentifier;
 
 /**
  * @author Andrea Vacondio
- *
  */
 public class COSParserTest
 {
@@ -130,8 +130,8 @@ public class COSParserTest
     public void nextHexString() throws IOException
     {
         victim = new COSParser(inMemorySeekableSourceFrom("<436875636B204E6f72726973>".getBytes()));
-        COSString expected = COSString
-                .newInstance("Chuck Norris".getBytes(StandardCharsets.ISO_8859_1));
+        COSString expected = COSString.newInstance(
+                "Chuck Norris".getBytes(StandardCharsets.ISO_8859_1));
         expected.setForceHexForm(true);
         assertEquals(expected, victim.nextHexadecimalString());
     }
@@ -144,8 +144,8 @@ public class COSParserTest
         assertEquals(COSString.newInstance("Chuck Norris".getBytes(StandardCharsets.ISO_8859_1)),
                 victim.nextString());
         victim.skipSpaces();
-        COSString expected = COSString
-                .newInstance("Chuck Norris".getBytes(StandardCharsets.ISO_8859_1));
+        COSString expected = COSString.newInstance(
+                "Chuck Norris".getBytes(StandardCharsets.ISO_8859_1));
         expected.setForceHexForm(true);
         assertEquals(expected, victim.nextString());
     }
@@ -382,8 +382,7 @@ public class COSParserTest
     {
         victim = new COSParser(
                 inMemorySeekableSourceFrom(getClass().getResourceAsStream("/sambox/stream.txt")));
-        COSDictionary streamDictionary = new COSDictionary();
-        streamDictionary.setInt(COSName.LENGTH, 63);
+        COSDictionary streamDictionary = of(COSName.LENGTH, COSInteger.get(63));
         try (COSStream result = victim.nextStream(streamDictionary))
         {
             assertEquals(63, result.getFilteredLength());
@@ -407,8 +406,7 @@ public class COSParserTest
     {
         victim = new COSParser(inMemorySeekableSourceFrom(
                 getClass().getResourceAsStream("/sambox/stream_spaced.txt")));
-        COSDictionary streamDictionary = new COSDictionary();
-        streamDictionary.setInt(COSName.LENGTH, 63);
+        COSDictionary streamDictionary = of(COSName.LENGTH, COSInteger.get(63));
         try (COSStream result = victim.nextStream(streamDictionary))
         {
             assertEquals(63, result.getFilteredLength());
@@ -420,8 +418,7 @@ public class COSParserTest
     {
         victim = new COSParser(inMemorySeekableSourceFrom(
                 getClass().getResourceAsStream("/sambox/stream_missing_linefeed.txt")));
-        COSDictionary streamDictionary = new COSDictionary();
-        streamDictionary.setInt(COSName.LENGTH, 63);
+        COSDictionary streamDictionary = of(COSName.LENGTH, COSInteger.get(63));
         try (COSStream result = victim.nextStream(streamDictionary))
         {
             assertEquals(63, result.getFilteredLength());
@@ -433,8 +430,7 @@ public class COSParserTest
     {
         victim = new COSParser(inMemorySeekableSourceFrom(
                 getClass().getResourceAsStream("/sambox/stream_cr_lf.txt")));
-        COSDictionary streamDictionary = new COSDictionary();
-        streamDictionary.setInt(COSName.LENGTH, 63);
+        COSDictionary streamDictionary = of(COSName.LENGTH, COSInteger.get(63));
         try (COSStream result = victim.nextStream(streamDictionary))
         {
             assertEquals(63, result.getFilteredLength());
@@ -446,8 +442,7 @@ public class COSParserTest
     {
         victim = new COSParser(inMemorySeekableSourceFrom(
                 getClass().getResourceAsStream("/sambox/stream_cr_alone.txt")));
-        COSDictionary streamDictionary = new COSDictionary();
-        streamDictionary.setInt(COSName.LENGTH, 63);
+        COSDictionary streamDictionary = of(COSName.LENGTH, COSInteger.get(63));
         try (COSStream result = victim.nextStream(streamDictionary))
         {
             assertEquals(63, result.getFilteredLength());
@@ -459,8 +454,7 @@ public class COSParserTest
     {
         victim = new COSParser(inMemorySeekableSourceFrom(
                 getClass().getResourceAsStream("/sambox/stream_endobj.txt")));
-        COSDictionary streamDictionary = new COSDictionary();
-        streamDictionary.setInt(COSName.LENGTH, 63);
+        COSDictionary streamDictionary = of(COSName.LENGTH, COSInteger.get(63));
         try (COSStream result = victim.nextStream(streamDictionary))
         {
             assertEquals(63, result.getFilteredLength());
@@ -472,8 +466,7 @@ public class COSParserTest
     {
         victim = new COSParser(inMemorySeekableSourceFrom(
                 getClass().getResourceAsStream("/sambox/stream_cr_alone.txt")));
-        COSDictionary streamDictionary = new COSDictionary();
-        streamDictionary.setItem(COSName.LENGTH, COSNull.NULL);
+        COSDictionary streamDictionary = of(COSName.LENGTH, COSNull.NULL);
         try (COSStream result = victim.nextStream(streamDictionary))
         {
             assertEquals(63, result.getFilteredLength());
@@ -485,8 +478,7 @@ public class COSParserTest
     {
         victim = new COSParser(
                 inMemorySeekableSourceFrom(getClass().getResourceAsStream("/sambox/stream.txt")));
-        COSDictionary streamDictionary = new COSDictionary();
-        streamDictionary.setInt(COSName.LENGTH, 163);
+        COSDictionary streamDictionary = of(COSName.LENGTH, COSInteger.get(163));
         try (COSStream result = victim.nextStream(streamDictionary))
         {
             assertEquals(63, result.getFilteredLength());
@@ -554,8 +546,7 @@ public class COSParserTest
     {
         victim = new COSParser(inMemorySeekableSourceFrom(
                 getClass().getResourceAsStream("/sambox/stream_empty.txt")));
-        COSDictionary streamDictionary = new COSDictionary();
-        streamDictionary.setInt(COSName.LENGTH, 0);
+        COSDictionary streamDictionary = of(COSName.LENGTH, COSInteger.ZERO);
         try (COSStream result = victim.nextStream(streamDictionary))
         {
             assertEquals(0, result.getFilteredLength());
@@ -567,9 +558,8 @@ public class COSParserTest
     {
         victim = new COSParser(inMemorySeekableSourceFrom(
                 getClass().getResourceAsStream("/sambox/stream_empty.txt")));
-        COSDictionary streamDictionary = new COSDictionary();
-        streamDictionary.setInt(COSName.LENGTH, 0);
-        streamDictionary.setItem(COSName.FILTER, COSName.JPX_DECODE);
+        COSDictionary streamDictionary = of(COSName.LENGTH, COSInteger.ZERO, COSName.FILTER,
+                COSName.JPX_DECODE);
         try (COSStream result = victim.nextStream(streamDictionary))
         {
             assertEquals(0, result.getFilteredLength());
@@ -580,13 +570,12 @@ public class COSParserTest
     public void nextParsedToken() throws IOException
     {
         victim = new COSParser(inMemorySeekableSourceFrom(
-                "   3 true false (Chuck Norris) <436875636B204E6f72726973> [10 (A String)] null <</R 10>> +2 /R"
-                        .getBytes()));
+                "   3 true false (Chuck Norris) <436875636B204E6f72726973> [10 (A String)] null <</R 10>> +2 /R".getBytes()));
         assertEquals(COSInteger.THREE, victim.nextParsedToken());
         assertEquals(COSBoolean.TRUE, victim.nextParsedToken());
         assertEquals(COSBoolean.FALSE, victim.nextParsedToken());
-        COSString expected = COSString
-                .newInstance("Chuck Norris".getBytes(StandardCharsets.ISO_8859_1));
+        COSString expected = COSString.newInstance(
+                "Chuck Norris".getBytes(StandardCharsets.ISO_8859_1));
         assertEquals(expected, victim.nextParsedToken());
         expected.setForceHexForm(true);
         assertEquals(expected, victim.nextParsedToken());

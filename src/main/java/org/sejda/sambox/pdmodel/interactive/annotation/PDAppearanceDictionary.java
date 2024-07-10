@@ -37,9 +37,8 @@ public class PDAppearanceDictionary implements COSObjectable
      */
     public PDAppearanceDictionary()
     {
-        dictionary = new COSDictionary();
+        dictionary = COSDictionary.of(COSName.N, new COSDictionary());
         // the N entry is required.
-        dictionary.setItem(COSName.N, new COSDictionary());
     }
 
     /**

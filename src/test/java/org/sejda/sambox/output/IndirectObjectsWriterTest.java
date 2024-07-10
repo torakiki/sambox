@@ -22,6 +22,7 @@ import static org.mockito.AdditionalMatchers.aryEq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.sejda.sambox.cos.COSDictionary.of;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -147,8 +148,7 @@ public class IndirectObjectsWriterTest
     @Test
     public void writerCOSDictionary() throws IOException
     {
-        var cosDictionary = new COSDictionary();
-        cosDictionary.setInt(COSName.SIZE, 1000);
+        var cosDictionary = of(COSName.SIZE, COSInteger.get(1000));
         IndirectCOSObjectReference ref = new IndirectCOSObjectReference(123, 0, cosDictionary);
         victim.writeObjectIfNotWritten(ref);
         verify(transformer).visit(cosDictionary);

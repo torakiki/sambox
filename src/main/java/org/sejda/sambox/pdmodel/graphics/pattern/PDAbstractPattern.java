@@ -16,6 +16,9 @@
  */
 package org.sejda.sambox.pdmodel.graphics.pattern;
 
+import java.awt.geom.AffineTransform;
+import java.io.IOException;
+
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSFloat;
@@ -23,9 +26,6 @@ import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSObjectable;
 import org.sejda.sambox.pdmodel.ResourceCache;
 import org.sejda.sambox.util.Matrix;
-
-import java.awt.geom.AffineTransform;
-import java.io.IOException;
 
 /**
  * A Pattern dictionary from a page's resources.
@@ -86,8 +86,7 @@ public abstract class PDAbstractPattern implements COSObjectable
      */
     public PDAbstractPattern()
     {
-        patternDictionary = new COSDictionary();
-        patternDictionary.setName(COSName.TYPE, COSName.PATTERN.getName());
+        patternDictionary = COSDictionary.of(COSName.TYPE, COSName.PATTERN);
     }
 
     /**

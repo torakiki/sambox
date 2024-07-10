@@ -21,10 +21,9 @@ import static org.sejda.sambox.cos.DirectCOSObject.asDirectObject;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSString;
-
 /**
  * Available standard security encryptions
- * 
+ *
  * @author Andrea Vacondio
  *
  */
@@ -133,7 +132,7 @@ public enum StandardSecurityEncryption
 
     /**
      * Generates the encryption dictionary for this standard encryption
-     * 
+     *
      * @param context
      * @return
      */

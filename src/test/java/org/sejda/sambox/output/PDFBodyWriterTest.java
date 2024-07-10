@@ -25,6 +25,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.sejda.sambox.cos.COSDictionary.of;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -34,6 +35,7 @@ import org.junit.Test;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSObjectKey;
 import org.sejda.sambox.cos.COSStream;
@@ -59,8 +61,7 @@ public class PDFBodyWriterTest
         writer = mock(PDFBodyObjectsWriter.class);
         document = new PDDocument();
         document.getDocumentInformation().setAuthor("Chuck Norris");
-        COSDictionary someDic = new COSDictionary();
-        someDic.setInt(COSName.SIZE, 4);
+        COSDictionary someDic = of(COSName.SIZE, COSInteger.get(4));
         document.getDocument().getCatalog().setItem(COSName.G, someDic);
         document.getDocument().getCatalog().setItem(COSName.H, someDic);
         victim = new PDFBodyWriter(context, writer);

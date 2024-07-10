@@ -129,11 +129,10 @@ public class PDDocument implements Closeable
     {
         document = new COSDocument();
         document.getCatalog().setItem(COSName.VERSION, COSName.getPDFName("1.4"));
-        COSDictionary pages = new COSDictionary();
+        COSDictionary pages = COSDictionary.of(COSName.TYPE, COSName.PAGES, COSName.KIDS,
+                new COSArray(), COSName.COUNT, COSInteger.ZERO);
         document.getCatalog().setItem(COSName.PAGES, pages);
-        pages.setItem(COSName.TYPE, COSName.PAGES);
-        pages.setItem(COSName.KIDS, new COSArray());
-        pages.setItem(COSName.COUNT, COSInteger.ZERO);
+
     }
 
     /**

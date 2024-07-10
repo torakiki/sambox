@@ -17,6 +17,7 @@
 package org.sejda.sambox.pdmodel.interactive.pagenavigation;
 
 import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSObjectable;
 import org.sejda.sambox.pdmodel.PDDocumentInformation;
 
@@ -40,14 +41,9 @@ public class PDThread implements COSObjectable
         thread = t;
     }
 
-    /**
-     * Default constructor.
-     *
-     */
     public PDThread()
     {
-        thread = new COSDictionary();
-        thread.setName("Type", "Thread");
+        thread = COSDictionary.of(COSName.TYPE, COSName.getPDFName("Thread"));
     }
 
     /**

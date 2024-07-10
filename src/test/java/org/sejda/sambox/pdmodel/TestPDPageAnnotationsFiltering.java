@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.pdmodel;
 
+import static org.sejda.sambox.cos.COSDictionary.of;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -23,7 +25,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.interactive.annotation.AnnotationFilter;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotation;
@@ -32,11 +33,9 @@ import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationRubberStamp;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationSquareCircle;
 
 /**
- * This unit test validates the correct working behavior of PDPage annotations
- * filtering
+ * This unit test validates the correct working behavior of PDPage annotations filtering
  *
  * @author <a href="mailto:maxime.veron.pro@gmail.com">Maxime Veron</a>
- *
  */
 public class TestPDPageAnnotationsFiltering
 {
@@ -46,13 +45,11 @@ public class TestPDPageAnnotationsFiltering
     @Before
     public void initMock()
     {
-        COSDictionary mockedPageWithAnnotations = new COSDictionary();
-        COSArray annotsDictionnary = new COSArray();
-        annotsDictionnary.add(new PDAnnotationRubberStamp().getCOSObject());
-        annotsDictionnary.add(new PDAnnotationSquareCircle(PDAnnotationSquareCircle.SUB_TYPE_SQUARE).getCOSObject());
-        annotsDictionnary.add(new PDAnnotationLink().getCOSObject());
-        mockedPageWithAnnotations.setItem(COSName.ANNOTS, annotsDictionnary);
-        page = new PDPage(mockedPageWithAnnotations);
+        COSArray annotsDictionnary = new COSArray(new PDAnnotationRubberStamp().getCOSObject(),
+                new PDAnnotationSquareCircle(
+                        PDAnnotationSquareCircle.SUB_TYPE_SQUARE).getCOSObject(),
+                new PDAnnotationLink().getCOSObject());
+        page = new PDPage(of(COSName.ANNOTS, annotsDictionnary));
     }
 
     @Test
@@ -87,7 +84,8 @@ public class TestPDPageAnnotationsFiltering
             @Override
             public boolean accept(PDAnnotation annotation)
             {
-                return (annotation instanceof PDAnnotationLink || annotation instanceof PDAnnotationSquareCircle);
+                return (annotation instanceof PDAnnotationLink
+                        || annotation instanceof PDAnnotationSquareCircle);
             }
         });
         Assert.assertEquals(2, annotations.size());

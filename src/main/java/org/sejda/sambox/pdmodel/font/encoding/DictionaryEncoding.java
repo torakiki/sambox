@@ -44,9 +44,8 @@ public class DictionaryEncoding extends Encoding
      */
     public DictionaryEncoding(COSName baseEncoding, COSArray differences)
     {
-        encoding = new COSDictionary();
-        encoding.setItem(COSName.NAME, COSName.ENCODING);
-        encoding.setItem(COSName.DIFFERENCES, differences);
+        encoding = COSDictionary.of(COSName.NAME, COSName.ENCODING, COSName.DIFFERENCES,
+                differences);
         if (baseEncoding != COSName.STANDARD_ENCODING)
         {
             encoding.setItem(COSName.BASE_ENCODING, baseEncoding);
@@ -82,9 +81,9 @@ public class DictionaryEncoding extends Encoding
     /**
      * Creates a new DictionaryEncoding from a PDF.
      *
-     * @param fontEncoding The encoding dictionary.
+     * @param fontEncoding  The encoding dictionary.
      * @param isNonSymbolic True if the font is non-symbolic. False for Type 3 fonts.
-     * @param builtIn The font's built-in encoding. Null for Type 3 fonts.
+     * @param builtIn       The font's built-in encoding. Null for Type 3 fonts.
      */
     public DictionaryEncoding(COSDictionary fontEncoding, boolean isNonSymbolic, Encoding builtIn)
     {
@@ -130,8 +129,8 @@ public class DictionaryEncoding extends Encoding
 
     private void applyDifferences()
     {
-        COSArray differences = ofNullable(encoding)
-                .map(e -> e.getDictionaryObject(COSName.DIFFERENCES, COSArray.class)).orElse(null);
+        COSArray differences = ofNullable(encoding).map(
+                e -> e.getDictionaryObject(COSName.DIFFERENCES, COSArray.class)).orElse(null);
         if (nonNull(differences))
         {
             int currentIndex = -1;

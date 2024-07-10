@@ -50,8 +50,7 @@ public class PDThreadBead implements COSObjectable
      */
     public PDThreadBead()
     {
-        bead = new COSDictionary();
-        bead.setName( "Type", "Bead" );
+        bead = COSDictionary.of(COSName.TYPE, COSName.getPDFName("Bead"));
         setNextBead( this );
         setPreviousBead( this );
     }

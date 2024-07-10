@@ -17,9 +17,12 @@
 
 package org.sejda.sambox.pdmodel.font;
 
+import static org.sejda.sambox.cos.COSDictionary.of;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import junit.framework.TestCase;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
@@ -34,11 +37,8 @@ import org.sejda.sambox.pdmodel.font.encoding.MacRomanEncoding;
 import org.sejda.sambox.pdmodel.font.encoding.WinAnsiEncoding;
 import org.sejda.sambox.text.PDFTextStripper;
 
-import junit.framework.TestCase;
-
 /**
  * Tests font encoding.
- *
  */
 public class TestFontEncoding extends TestCase
 {
@@ -58,20 +58,17 @@ public class TestFontEncoding extends TestCase
     public void testOverwrite() throws Exception
     {
         // see PDFDBOX-3332
-        COSDictionary dictEncodingDict = new COSDictionary();
-        dictEncodingDict.setItem(COSName.TYPE, COSName.ENCODING);
-        dictEncodingDict.setItem(COSName.BASE_ENCODING, COSName.WIN_ANSI_ENCODING);
-        COSArray differences = new COSArray();
-        differences.add(COSInteger.get(32));
-        differences.add(COSName.getPDFName("a"));
-        dictEncodingDict.setItem(COSName.DIFFERENCES, differences);
+        COSArray differences = new COSArray(COSInteger.get(32), COSName.getPDFName("a"));
+        COSDictionary dictEncodingDict = of(COSName.TYPE, COSName.ENCODING, COSName.BASE_ENCODING,
+                COSName.WIN_ANSI_ENCODING, COSName.DIFFERENCES, differences);
         DictionaryEncoding dictEncoding = new DictionaryEncoding(dictEncodingDict, false, null);
         assertNull(dictEncoding.getNameToCodeMap().get("space"));
         assertEquals(32, dictEncoding.getNameToCodeMap().get("a").intValue());
     }
 
     /**
-     * PDFBOX-3826: Some unicodes are reached by several names in glyphlist.txt, e.g. tilde and ilde.
+     * PDFBOX-3826: Some unicodes are reached by several names in glyphlist.txt, e.g. tilde and
+     * ilde.
      *
      * @throws IOException
      */
@@ -95,8 +92,8 @@ public class TestFontEncoding extends TestCase
             doc.writeTo(baos);
         }
 
-        try (PDDocument doc = PDFParser
-                .parse(SeekableSources.inMemorySeekableSourceFrom(baos.toByteArray())))
+        try (PDDocument doc = PDFParser.parse(
+                SeekableSources.inMemorySeekableSourceFrom(baos.toByteArray())))
         {
             // verify
             PDFTextStripper stripper = new PDFTextStripper();

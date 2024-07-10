@@ -23,6 +23,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.sejda.sambox.cos.COSDictionary.of;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -52,7 +53,6 @@ import org.sejda.sambox.cos.IndirectCOSObjectReference;
 
 /**
  * @author Andrea Vacondio
- *
  */
 public class DefaultCOSWriterTest
 {
@@ -108,9 +108,7 @@ public class DefaultCOSWriterTest
     @Test
     public void visitCOSDictionary() throws Exception
     {
-        COSDictionary dictionary = new COSDictionary();
-        dictionary.setBoolean(COSName.A, true);
-        dictionary.setInt(COSName.C, 151);
+        COSDictionary dictionary = of(COSName.A, COSBoolean.TRUE, COSName.C, COSInteger.get(151));
         InOrder inOrder = Mockito.inOrder(writer);
         victim.visit(dictionary);
         inOrder.verify(writer, times(2)).write((byte) 0x3C);

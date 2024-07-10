@@ -21,6 +21,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.sejda.sambox.cos.COSDictionary.of;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -35,12 +36,12 @@ import org.sejda.io.CountingWritableByteChannel;
 import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.cos.COSArray;
+import org.sejda.sambox.cos.COSBoolean;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
-
 /**
  * @author Andrea Vacondio
  *
@@ -150,8 +151,7 @@ public class ContentStreamWriterTest
     public void writeInlineImage() throws Exception
     {
         byte[] imageDataArray = new byte[] { (byte) 0x41, (byte) 0x42, (byte) 0x43 };
-        COSDictionary imageDictionary = new COSDictionary();
-        imageDictionary.setBoolean(COSName.A, false);
+        COSDictionary imageDictionary = of(COSName.A, COSBoolean.FALSE);
         Operator image = Operator.getOperator(OperatorName.BEGIN_INLINE_IMAGE);
         image.setImageData(imageDataArray);
         image.setImageParameters(imageDictionary);

@@ -18,6 +18,7 @@ package org.sejda.sambox.filter;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.sejda.sambox.cos.COSDictionary.of;
 
 import org.junit.Test;
 import org.sejda.sambox.cos.COSArray;
@@ -27,7 +28,6 @@ import org.sejda.sambox.cos.COSName;
 
 /**
  * @author Andrea Vacondio
- *
  */
 public class IdentityFilterTest
 {
@@ -43,10 +43,8 @@ public class IdentityFilterTest
     @Test
     public void validNameDicDP()
     {
-        COSDictionary filter = new COSDictionary();
-        filter.setItem(COSName.FILTER, COSName.JBIG2_DECODE);
-        COSDictionary dp = new COSDictionary();
-        dp.setInt(COSName.A, 5);
+        COSDictionary filter = of(COSName.FILTER, COSName.JBIG2_DECODE);
+        COSDictionary dp = of(COSName.A, COSInteger.get(5));
         filter.setItem(COSName.DECODE_PARMS, dp);
         COSDictionary params = victim.getDecodeParams(filter, 0);
         assertEquals(dp, params);
@@ -55,10 +53,8 @@ public class IdentityFilterTest
     @Test
     public void validArrayArrayDP()
     {
-        COSDictionary filter = new COSDictionary();
-        filter.setItem(COSName.FILTER, new COSArray(COSName.JBIG2_DECODE));
-        COSDictionary dp = new COSDictionary();
-        dp.setInt(COSName.A, 5);
+        COSDictionary filter = of(COSName.FILTER, new COSArray(COSName.JBIG2_DECODE));
+        COSDictionary dp = of(COSName.A, COSInteger.get(5));
         filter.setItem(COSName.DECODE_PARMS, new COSArray(dp));
         COSDictionary params = victim.getDecodeParams(filter, 0);
         assertEquals(dp, params);
@@ -67,9 +63,8 @@ public class IdentityFilterTest
     @Test
     public void invalidTypeGetDecode()
     {
-        COSDictionary filter = new COSDictionary();
-        filter.setItem(COSName.FILTER, COSName.JBIG2_DECODE);
-        filter.setInt(COSName.A, 5);
+        COSDictionary filter = of(COSName.FILTER, COSName.JBIG2_DECODE, COSName.A,
+                COSInteger.get(5));
         COSDictionary params = victim.getDecodeParams(filter, 0);
         assertNotNull(params);
         assertEquals(0, params.size());
@@ -78,9 +73,8 @@ public class IdentityFilterTest
     @Test
     public void invalidTypeArrayValueGetDecode()
     {
-        COSDictionary dic = new COSDictionary();
-        COSArray array = new COSArray(COSInteger.THREE, new COSDictionary());
-        dic.setItem(COSName.DECODE_PARMS, array);
+        COSDictionary dic = of(COSName.DECODE_PARMS,
+                new COSArray(COSInteger.THREE, new COSDictionary()));
         COSDictionary params = victim.getDecodeParams(dic, 0);
         assertNotNull(params);
         assertEquals(0, params.size());
@@ -90,8 +84,7 @@ public class IdentityFilterTest
     public void arrayValueGetDecode()
     {
         COSDictionary dic = new COSDictionary();
-        COSDictionary value = new COSDictionary();
-        value.setInt(COSName.A, 213);
+        COSDictionary value = of(COSName.A, COSInteger.get(213));
         COSArray array = new COSArray(value);
         dic.setItem(COSName.DECODE_PARMS, array);
         COSDictionary params = victim.getDecodeParams(dic, 0);

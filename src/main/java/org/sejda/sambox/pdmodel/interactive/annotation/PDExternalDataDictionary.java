@@ -34,8 +34,7 @@ public class PDExternalDataDictionary implements COSObjectable
      */
     public PDExternalDataDictionary()
     {
-        this.dataDictionary = new COSDictionary();
-        this.dataDictionary.setName(COSName.TYPE, "ExData");
+        this.dataDictionary = COSDictionary.of(COSName.TYPE, COSName.getPDFName("ExData"));
     }
 
     /**

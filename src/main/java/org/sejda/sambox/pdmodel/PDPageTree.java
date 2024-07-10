@@ -22,6 +22,7 @@ import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static org.sejda.commons.util.RequireUtils.require;
 import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
+import static org.sejda.sambox.cos.COSDictionary.of;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -96,9 +97,7 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
         {
             COSArray kids = new COSArray();
             kids.add(root);
-            this.root = new COSDictionary();
-            this.root.setItem(COSName.KIDS, kids);
-            this.root.setInt(COSName.COUNT, 1);
+            this.root = of(COSName.KIDS, kids, COSName.COUNT, COSInteger.ONE);
         }
         else
         {
@@ -140,8 +139,9 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
     {
         return getInheritableAttribute(node, key, new HashSet<>());
     }
-    
-    public static COSBase getInheritableAttribute(COSDictionary node, COSName key, Set<String> visitedObjectIds)
+
+    public static COSBase getInheritableAttribute(COSDictionary node, COSName key,
+            Set<String> visitedObjectIds)
     {
         COSBase value = node.getDictionaryObject(key);
         if (value != null)
@@ -151,22 +151,22 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
 
         COSDictionary parent = node.getDictionaryObject(COSName.PARENT, COSName.P,
                 COSDictionary.class);
-        
+
         // prevent infinite recursion
         if (parent == node)
         {
             return null;
         }
-        
+
         if (parent != null)
         {
             String objId = ObjectIdUtils.getObjectIdOf(node);
-            if(!objId.isBlank() && visitedObjectIds.contains(objId))
+            if (!objId.isBlank() && visitedObjectIds.contains(objId))
             {
                 // prevent infinite recursion
                 return null;
             }
-            
+
             visitedObjectIds.add(objId);
             return getInheritableAttribute(parent, key, visitedObjectIds);
         }
@@ -183,17 +183,18 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
         PageIterator iterator = new PageIterator(root);
         // there's a problem when the expected number of pages is different than the actual number of pages loaded
         // because iterating on PDPageTree.iterator() will silently skip broken pages that could not be loaded
-        if(iterator.size() != document.getNumberOfPages()) {
+        if (iterator.size() != document.getNumberOfPages())
+        {
             // try to throw a specific PageNotFound exception, identify which page is missing
             for (int i = 0; i < document.getNumberOfPages(); i++)
             {
                 get(i);
             }
-            
+
             // throw a generic "something's wrong" exception
             throw new InvalidNumberOfPagesException(iterator.size(), document.getNumberOfPages());
         }
-        
+
         return iterator;
     }
 
@@ -278,7 +279,7 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
             ResourceCache resourceCache = document != null ? document.getResourceCache() : null;
             return new PDPage(next, resourceCache);
         }
-        
+
         public int size()
         {
             return queue.size();

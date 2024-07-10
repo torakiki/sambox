@@ -93,8 +93,7 @@ public class PDPage implements COSObjectable, PDContentStream
      */
     public PDPage(PDRectangle mediaBox)
     {
-        page = new COSDictionary();
-        page.setItem(COSName.TYPE, COSName.PAGE);
+        page = COSDictionary.of(COSName.TYPE, COSName.PAGE);
         page.setItem(COSName.MEDIA_BOX, mediaBox);
     }
 

@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.pdmodel.font;
 
+import static java.util.Optional.ofNullable;
+
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
@@ -24,8 +26,6 @@ import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.cos.COSString;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.common.PDStream;
-
-import static java.util.Optional.ofNullable;
 
 /**
  * A font descriptor.
@@ -54,8 +54,7 @@ public final class PDFontDescriptor implements COSObjectable
      */
     PDFontDescriptor()
     {
-        dic = new COSDictionary();
-        dic.setItem(COSName.TYPE, COSName.FONT_DESC);
+        dic = COSDictionary.of(COSName.TYPE, COSName.FONT_DESC);
     }
 
     /**

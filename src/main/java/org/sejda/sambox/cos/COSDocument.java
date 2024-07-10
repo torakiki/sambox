@@ -42,8 +42,7 @@ public class COSDocument extends COSBase
     public COSDocument()
     {
         this(new FileTrailer(), SpecVersionUtils.V1_4);
-        COSDictionary catalog = new COSDictionary();
-        catalog.setItem(COSName.TYPE, COSName.CATALOG);
+        COSDictionary catalog = COSDictionary.of(COSName.TYPE, COSName.CATALOG);
         trailer.getCOSObject().setItem(COSName.ROOT, catalog);
     }
 

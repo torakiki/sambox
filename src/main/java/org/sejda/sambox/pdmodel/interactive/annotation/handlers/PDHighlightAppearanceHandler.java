@@ -124,8 +124,7 @@ public class PDHighlightAppearanceHandler extends PDAbstractAppearanceHandler
                 mwfofrmCS.drawForm(frm2);
             }
             frm1.setBBox(annotation.getRectangle());
-            COSDictionary groupDict = new COSDictionary();
-            groupDict.setItem(COSName.S, COSName.TRANSPARENCY);
+            COSDictionary groupDict = COSDictionary.of(COSName.S, COSName.TRANSPARENCY);
             // TODO PDFormXObject.setGroup() is missing
             frm1.getCOSObject().setItem(COSName.GROUP, groupDict);
             cs.drawForm(frm1);

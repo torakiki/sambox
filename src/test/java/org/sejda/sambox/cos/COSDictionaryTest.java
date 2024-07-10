@@ -31,8 +31,7 @@ public class COSDictionaryTest
     @Test
     public void getDictionaryObjectMultipleKeys()
     {
-        COSDictionary victim = new COSDictionary();
-        victim.setItem(COSName.A, COSInteger.ONE);
+        COSDictionary victim = COSDictionary.of(COSName.A, COSInteger.ONE);
         assertEquals(COSInteger.ONE,
                 victim.getDictionaryObject(COSName.A, COSName.B, COSInteger.class));
         assertEquals(COSInteger.ONE,

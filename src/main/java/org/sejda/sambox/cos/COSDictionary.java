@@ -16,7 +16,8 @@
  */
 package org.sejda.sambox.cos;
 
-import org.sejda.sambox.util.DateConverter;
+import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -27,8 +28,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static java.util.Objects.nonNull;
-import static java.util.Optional.ofNullable;
+import org.sejda.sambox.util.DateConverter;
 
 /**
  * This class represents a dictionary where name/value pairs reside.
@@ -178,8 +178,8 @@ public class COSDictionary extends COSBase
      */
     public <T extends COSBase> T getDictionaryObject(COSName key, Class<T> clazz)
     {
-        return ofNullable(items.get(key)).map(COSBase::getCOSObject)
-                .filter(clazz::isInstance).map(clazz::cast).orElse(null);
+        return ofNullable(items.get(key)).map(COSBase::getCOSObject).filter(clazz::isInstance)
+                .map(clazz::cast).orElse(null);
     }
 
     /**
@@ -1333,6 +1333,37 @@ public class COSDictionary extends COSBase
     public COSDictionary duplicate()
     {
         return new COSDictionary(this);
+    }
+
+    /**
+     * Factory method for a dictionary with an item with the given key and value
+     */
+    public static COSDictionary of(COSName key, COSBase value)
+    {
+        var dictionary = new COSDictionary();
+        dictionary.setItem(key, value);
+        return dictionary;
+    }
+
+    /**
+     * Factory method for a dictionary with an item with the given keys and values
+     */
+    public static COSDictionary of(COSName key1, COSBase value1, COSName key2, COSBase value2)
+    {
+        var dictionary = of(key1, value1);
+        dictionary.setItem(key2, value2);
+        return dictionary;
+    }
+
+    /**
+     * Factory method for a dictionary with an item with the given keys and values
+     */
+    public static COSDictionary of(COSName key1, COSBase value1, COSName key2, COSBase value2,
+            COSName key3, COSBase value3)
+    {
+        var dictionary = of(key1, value1, key2, value2);
+        dictionary.setItem(key3, value3);
+        return dictionary;
     }
 
     @Override

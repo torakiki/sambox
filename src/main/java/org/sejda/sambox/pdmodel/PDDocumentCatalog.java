@@ -76,8 +76,7 @@ public class PDDocumentCatalog implements COSObjectable
     public PDDocumentCatalog(PDDocument doc)
     {
         document = doc;
-        root = new COSDictionary();
-        root.setItem(COSName.TYPE, COSName.CATALOG);
+        root = COSDictionary.of(COSName.TYPE, COSName.CATALOG);
         document.getDocument().getTrailer().getCOSObject().setItem(COSName.ROOT, root);
     }
 
@@ -310,8 +309,7 @@ public class PDDocumentCatalog implements COSObjectable
         COSDictionary addAction = root.getDictionaryObject(COSName.AA, COSDictionary.class);
         if (addAction == null)
         {
-            addAction = new COSDictionary();
-            root.setItem(COSName.AA, addAction);
+            addAction = COSDictionary.of(COSName.AA, addAction);
         }
         return new PDDocumentCatalogAdditionalActions(addAction);
     }

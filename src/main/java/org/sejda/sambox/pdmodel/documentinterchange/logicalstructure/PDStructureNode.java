@@ -46,8 +46,7 @@ public abstract class PDStructureNode implements COSObjectable
      */
     protected PDStructureNode(String type)
     {
-        this.dictionary = new COSDictionary();
-        this.dictionary.setName(COSName.TYPE, type);
+        this.dictionary = COSDictionary.of(COSName.TYPE, COSName.getPDFName(type));
     }
 
     /**
