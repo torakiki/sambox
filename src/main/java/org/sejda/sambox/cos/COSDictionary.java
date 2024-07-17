@@ -27,6 +27,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 import org.sejda.sambox.util.DateConverter;
 
@@ -201,9 +202,18 @@ public class COSDictionary extends COSBase
         }
     }
 
-    public void putIfAbsent(COSName key, COSBase value)
+    /**
+     * @see Map#putIfAbsent(Object, Object)
+     */
+    public COSBase putIfAbsent(COSName key, COSBase value)
     {
-        items.putIfAbsent(key, value);
+        return items.putIfAbsent(key, value);
+    }
+
+    public COSBase computeIfAbsent(COSName key,
+            Function<COSName, ? extends COSBase> mappingFunction)
+    {
+        return items.computeIfAbsent(key, mappingFunction);
     }
 
     /**
