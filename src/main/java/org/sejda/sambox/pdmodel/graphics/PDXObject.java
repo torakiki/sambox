@@ -18,7 +18,6 @@ package org.sejda.sambox.pdmodel.graphics;
 
 import java.io.IOException;
 
-import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSObjectable;
@@ -43,21 +42,17 @@ public class PDXObject implements COSObjectable
     /**
      * Creates a new XObject instance of the appropriate type for the COS stream.
      *
-     * @param base The stream which is wrapped by this XObject.
+     * @param stream The stream which is wrapped by this XObject.
      * @return A new XObject instance.
      * @throws java.io.IOException if there is an error creating the XObject.
      */
-    public static PDXObject createXObject(COSBase base, PDResources resources) throws IOException
+    public static PDXObject createXObject(COSStream stream, PDResources resources)
+            throws IOException
     {
-        if (base == null)
+        if (stream == null)
         {
             // TODO throw an exception?
             return null;
-        }
-
-        if (!(base instanceof COSStream stream))
-        {
-            throw new IOException("Unexpected object type: " + base.getClass().getName());
         }
 
         String subtype = stream.getNameAsString(COSName.SUBTYPE);

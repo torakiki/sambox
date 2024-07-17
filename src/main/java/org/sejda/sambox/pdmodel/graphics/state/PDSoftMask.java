@@ -23,6 +23,7 @@ import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSObjectable;
+import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.pdmodel.common.function.PDFunction;
 import org.sejda.sambox.pdmodel.graphics.PDXObject;
 import org.sejda.sambox.pdmodel.graphics.form.PDTransparencyGroup;
@@ -111,17 +112,17 @@ public final class PDSoftMask implements COSObjectable
     {
         if (group == null)
         {
-            COSBase cosGroup = getCOSObject().getDictionaryObject(COSName.G);
+            COSStream cosGroup = getCOSObject().getDictionaryObject(COSName.G, COSStream.class);
             if (cosGroup != null)
             {
                 PDXObject xObject = PDXObject.createXObject(cosGroup, null);
-                if(xObject instanceof PDTransparencyGroup) 
+                if (xObject instanceof PDTransparencyGroup tg)
                 {
-                    group = (PDTransparencyGroup) xObject;    
+                    group = tg;
                 } 
                 else 
                 {
-                    LOG.warn("Expected PDTransparencyGroup but got: " + xObject);    
+                    LOG.warn("Expected PDTransparencyGroup but got {}", xObject);
                 }
                 
             }

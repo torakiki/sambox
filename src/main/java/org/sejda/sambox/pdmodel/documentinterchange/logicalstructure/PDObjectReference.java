@@ -72,9 +72,9 @@ public class PDObjectReference extends PDDictionaryWrapper
         }
         try
         {
-            if (obj instanceof COSStream)
+            if (obj instanceof COSStream s)
             {
-                PDXObject xobject = PDXObject.createXObject(obj, null); // <-- TODO: valid?
+                PDXObject xobject = PDXObject.createXObject(s, null); // <-- TODO: valid?
                 if (xobject != null)
                 {
                     return xobject;

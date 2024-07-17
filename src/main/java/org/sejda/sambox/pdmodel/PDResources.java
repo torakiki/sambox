@@ -417,15 +417,11 @@ public final class PDResources implements COSObjectable
         }
 
         // get the instance
-        PDXObject xobject;
-        COSBase value = get(COSName.XOBJECT, name);
-        if (value == null)
+        PDXObject xobject = null;
+        COSStream value = get(COSName.XOBJECT, name, COSStream.class);
+        if (nonNull(value))
         {
-            xobject = null;
-        }
-        else
-        {
-            xobject = PDXObject.createXObject(value.getCOSObject(), this);
+            xobject = PDXObject.createXObject(value, this);
         }
 
         if (cache != null && isAllowedCache(xobject))
