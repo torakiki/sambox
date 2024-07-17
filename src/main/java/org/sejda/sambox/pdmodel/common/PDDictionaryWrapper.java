@@ -58,9 +58,9 @@ public class PDDictionaryWrapper implements COSObjectable
         {
             return true;
         }
-        if (obj instanceof PDDictionaryWrapper)
+        if (obj instanceof PDDictionaryWrapper other)
         {
-            return this.dictionary.equals(((PDDictionaryWrapper) obj).dictionary);
+            return this.dictionary.equals(other.dictionary);
         }
         return false;
     }
