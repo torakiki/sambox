@@ -266,13 +266,8 @@ public final class PDResources implements COSObjectable
         }
 
         // get the instance
-        PDExtendedGraphicsState extGState = null;
-        COSDictionary dict = get(COSName.EXT_G_STATE, name, COSDictionary.class);
-
-        if (dict != null)
-        {
-            extGState = new PDExtendedGraphicsState(dict);
-        }
+        var extGState = ofNullable(get(COSName.EXT_G_STATE, name, COSDictionary.class)).map(
+                PDExtendedGraphicsState::new).orElse(null);
 
         if (nonNull(cache) && nonNull(key))
         {
@@ -365,12 +360,8 @@ public final class PDResources implements COSObjectable
         }
 
         // get the instance
-        PDPropertyList propertyList = null;
-        COSDictionary dict = get(COSName.PROPERTIES, name, COSDictionary.class);
-        if (dict != null)
-        {
-            propertyList = PDPropertyList.create(dict);
-        }
+        var propertyList = ofNullable(get(COSName.PROPERTIES, name, COSDictionary.class)).map(
+                PDPropertyList::create).orElse(null);
 
         if (nonNull(cache) && nonNull(key))
         {
@@ -489,7 +480,7 @@ public final class PDResources implements COSObjectable
     }
 
     /**
-     * @returns the resource with the given name and kind, or null.
+     * @return the resource with the given name and kind, or null.
      */
     private COSBase get(COSName kind, COSName name)
     {
@@ -498,7 +489,7 @@ public final class PDResources implements COSObjectable
     }
 
     /**
-     * @returns the resource of type clazz with the given name and kind, or null.
+     * @return the resource of type clazz with the given name and kind, or null.
      */
     private <T extends COSBase> T get(COSName kind, COSName name, Class<T> clazz)
     {
@@ -507,7 +498,7 @@ public final class PDResources implements COSObjectable
     }
 
     /**
-     * Returns the names of the color space resources, if any.
+     * @return the names of the color space resources, if any.
      */
     public Iterable<COSName> getColorSpaceNames()
     {
@@ -515,7 +506,7 @@ public final class PDResources implements COSObjectable
     }
 
     /**
-     * Returns the names of the XObject resources, if any.
+     * @return the names of the XObject resources, if any.
      */
     public Iterable<COSName> getXObjectNames()
     {
@@ -523,7 +514,7 @@ public final class PDResources implements COSObjectable
     }
 
     /**
-     * Returns the names of the font resources, if any.
+     * @return the names of the font resources, if any.
      */
     public Iterable<COSName> getFontNames()
     {
@@ -531,7 +522,7 @@ public final class PDResources implements COSObjectable
     }
 
     /**
-     * Returns the names of the property list resources, if any.
+     * @return the names of the property list resources, if any.
      */
     public Iterable<COSName> getPropertiesNames()
     {
@@ -539,7 +530,7 @@ public final class PDResources implements COSObjectable
     }
 
     /**
-     * Returns the names of the shading resources, if any.
+     * @return the names of the shading resources, if any.
      */
     public Iterable<COSName> getShadingNames()
     {
@@ -547,7 +538,7 @@ public final class PDResources implements COSObjectable
     }
 
     /**
-     * Returns the names of the pattern resources, if any.
+     * @return the names of the pattern resources, if any.
      */
     public Iterable<COSName> getPatternNames()
     {
@@ -555,7 +546,7 @@ public final class PDResources implements COSObjectable
     }
 
     /**
-     * Returns the names of the extended graphics state resources, if any.
+     * @return the names of the extended graphics state resources, if any.
      */
     public Iterable<COSName> getExtGStateNames()
     {
@@ -563,7 +554,7 @@ public final class PDResources implements COSObjectable
     }
 
     /**
-     * Returns the resource names of the given kind.
+     * @return the resource names of the given kind.
      */
     private Iterable<COSName> getNames(COSName kind)
     {
@@ -701,7 +692,7 @@ public final class PDResources implements COSObjectable
     }
 
     /**
-     * Returns a unique key for a new resource.
+     * @return a unique key for a new resource.
      */
     private COSName createKey(COSName kind, String prefix)
     {
@@ -814,7 +805,7 @@ public final class PDResources implements COSObjectable
     }
 
     /**
-     * Returns the resource cache associated with the Resources, or null if there is none.
+     * @return the resource cache associated with the Resources, or null if there is none.
      */
     public ResourceCache getResourceCache()
     {
