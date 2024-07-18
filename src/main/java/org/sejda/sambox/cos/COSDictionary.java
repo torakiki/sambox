@@ -210,10 +210,32 @@ public class COSDictionary extends COSBase
         return items.putIfAbsent(key, value);
     }
 
+    /**
+     * @return the current (existing or computed) value associated with the specified key
+     * @see Map#computeIfAbsent(Object, Function)
+     */
     public COSBase computeIfAbsent(COSName key,
             Function<COSName, ? extends COSBase> mappingFunction)
     {
         return items.computeIfAbsent(key, mappingFunction);
+    }
+
+    /**
+     * A type safe version of {@link #computeIfAbsent(COSName, Function)}. A new value is computer
+     * if the dictionary doesn't contain a value for the given key or it contains a value of the
+     * wrong type
+     *
+     * @return the current (existing or computed) value associated with the specified key of the
+     * given type.
+     */
+    public <T extends COSBase> T computeIfAbsent(COSName key, Function<COSName, T> mappingFunction,
+            Class<T> clazz)
+    {
+        return ofNullable(getDictionaryObject(key, clazz)).orElseGet(() -> {
+            var item = mappingFunction.apply(key);
+            setItem(key, item);
+            return item;
+        });
     }
 
     /**
