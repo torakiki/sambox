@@ -521,6 +521,8 @@ public class PDFParserTest
 
             PDFTextStripper textStripper = new PDFTextStripper();
             textStripper.getText(doc);
+            
+            assertTrue(doc.hasParseErrors());
         }
     }
 

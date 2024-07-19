@@ -90,14 +90,11 @@ class XrefParser
             {
                 if(entry.getByteOffset() < XrefEntry.UNKNOWN_OFFSET)
                 {
-                    LOG.warn("Ignoring xrefEntry with negative byteOffset: {}", entry);
+                    // throw an error instead of silently skipping to force the XrefFullScanner
+                    throw new IllegalArgumentException("XrefEntry with negative byteOffset: " + entry.getByteOffset());
                 }
-                else
-                {
-                    parser().provider().addEntryIfAbsent(entry);
-                }
-                
-                
+
+                parser().provider().addEntryIfAbsent(entry);
             }
         };
     }

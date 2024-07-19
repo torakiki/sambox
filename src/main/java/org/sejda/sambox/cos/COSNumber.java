@@ -50,27 +50,18 @@ public abstract class COSNumber extends COSBase
      */
     public abstract long longValue();
 
-    private static final Pattern NUMBER = Pattern.compile("(E|e|\\+|\\-|\\.|\\d)+");
-    
-    private static boolean isNumber(String s)
-    {
-        try
-        {
-            return NUMBER.matcher(s).matches();
+    private static boolean isNumber(String s) {
+        if (s == null || s.isEmpty()) {
+            return false;
         }
-        catch (StackOverflowError soe)
-        {
-            // fallback method
-            try
-            {
-                Double.parseDouble(s);
-                return true;
-            }
-            catch (NumberFormatException nfex)
-            {
+
+        for (char c : s.toCharArray()) {
+            if (c != 'E' && c != 'e' && c != '+' && c != '-' && c != '.' && !Character.isDigit(c)) {
                 return false;
             }
         }
+        
+        return true;
     }
 
     /**
