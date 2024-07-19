@@ -85,7 +85,6 @@ class PDFWriteContext
      * between the item id and the reference so that if we meet the same id later, we can retrieve
      * the reference that was previously written.
      *
-     * @param item
      * @return the created reference
      */
     IndirectCOSObjectReference createIndirectReferenceFor(COSBase item)
@@ -98,7 +97,6 @@ class PDFWriteContext
      * between the item id and the reference so that if we meet the same id later, we can retrieve
      * the reference that was previously written.
      *
-     * @param item
      * @return the created reference
      */
     IndirectCOSObjectReference createNonStorableInObjectStreamIndirectReferenceFor(COSBase item)
@@ -145,7 +143,6 @@ class PDFWriteContext
      * Creates a new {@link IndirectCOSObjectReference} for the given item if it has not been
      * created before, it returns the already existing reference otherwise.
      *
-     * @param item
      * @return the reference
      */
     IndirectCOSObjectReference getOrCreateIndirectReferenceFor(COSBase item)
@@ -155,7 +152,6 @@ class PDFWriteContext
     }
 
     /**
-     * @param item
      * @return the {@link IndirectCOSObjectReference} for the given item or null if an
      * {@link IndirectCOSObjectReference} has not been created for the item or the item has no id.
      */
@@ -172,8 +168,6 @@ class PDFWriteContext
      * adds the reference to the context. When later queried, the context will return the existing
      * indirect reference an no new reference will be created. This is used during incremental
      * updates when we don't want to create new references for existing objects
-     *
-     * @param existing
      */
     void addExistingReference(ExistingIndirectCOSObject existing)
     {
@@ -183,7 +177,6 @@ class PDFWriteContext
     }
 
     /**
-     * @param item
      * @return true if the given item has been added to the context and an indirect reference
      * created for it.
      */
@@ -193,7 +186,6 @@ class PDFWriteContext
     }
 
     /**
-     * @param opt
      * @return true if the context has the given write option
      */
     boolean hasWriteOption(WriteOption opt)
@@ -210,7 +202,6 @@ class PDFWriteContext
     }
 
     /**
-     * @param entry
      * @return true if the given entry has been already written
      */
     boolean hasWritten(XrefEntry entry)
@@ -221,7 +212,6 @@ class PDFWriteContext
     /**
      * Adds an entry to the list of the written entries
      *
-     * @param entry
      * @return the previous value if an entry with the same object number has been already written,
      * null otherwise.
      */

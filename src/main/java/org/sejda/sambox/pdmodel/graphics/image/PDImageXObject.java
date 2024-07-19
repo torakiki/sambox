@@ -16,6 +16,27 @@
  */
 package org.sejda.sambox.pdmodel.graphics.image;
 
+import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
+import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
+
+import java.awt.Graphics2D;
+import java.awt.Paint;
+import java.awt.RenderingHints;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBuffer;
+import java.awt.image.ImagingOpException;
+import java.awt.image.WritableRaster;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.ref.SoftReference;
+import java.nio.ByteBuffer;
+import java.util.List;
+
 import org.sejda.commons.util.IOUtils;
 import org.sejda.io.SeekableSource;
 import org.sejda.io.SeekableSources;
@@ -38,28 +59,7 @@ import org.sejda.sambox.util.filetypedetector.FileType;
 import org.sejda.sambox.util.filetypedetector.FileTypeDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import javax.imageio.ImageIO;
-import java.awt.Graphics2D;
-import java.awt.Paint;
-import java.awt.RenderingHints;
-import java.awt.geom.AffineTransform;
-import java.awt.image.AffineTransformOp;
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBuffer;
-import java.awt.image.ImagingOpException;
-import java.awt.image.WritableRaster;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.lang.ref.SoftReference;
-import java.nio.ByteBuffer;
-import java.util.List;
-
-import static java.util.Objects.nonNull;
-import static java.util.Optional.ofNullable;
-import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
 
 /**
  * An Image XObject.
@@ -550,8 +550,7 @@ public final class PDImageXObject extends PDXObject implements PDImage
 
     public boolean hasMask()
     {
-        COSStream cosStream = getCOSObject().getDictionaryObject(COSName.MASK, COSStream.class);
-        return cosStream != null;
+        return nonNull(getCOSObject().getDictionaryObject(COSName.MASK, COSStream.class));
     }
 
     /**
@@ -582,8 +581,7 @@ public final class PDImageXObject extends PDXObject implements PDImage
 
     public boolean hasSoftMask()
     {
-        COSStream cosStream = getCOSObject().getDictionaryObject(COSName.SMASK, COSStream.class);
-        return cosStream != null;
+        return nonNull(getCOSObject().getDictionaryObject(COSName.SMASK, COSStream.class));
     }
 
     /**

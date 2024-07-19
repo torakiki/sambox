@@ -16,18 +16,7 @@
  */
 package org.sejda.sambox.pdmodel.graphics.color;
 
-import org.sejda.commons.util.IOUtils;
-import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSArrayList;
-import org.sejda.sambox.cos.COSBase;
-import org.sejda.sambox.cos.COSFloat;
-import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.cos.COSStream;
-import org.sejda.sambox.pdmodel.PDResources;
-import org.sejda.sambox.pdmodel.common.PDRange;
-import org.sejda.sambox.pdmodel.common.PDStream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.sejda.commons.util.RequireUtils.requireIOCondition;
 
 import java.awt.Transparency;
 import java.awt.color.CMMException;
@@ -46,7 +35,18 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import static org.sejda.commons.util.RequireUtils.requireIOCondition;
+import org.sejda.commons.util.IOUtils;
+import org.sejda.sambox.cos.COSArray;
+import org.sejda.sambox.cos.COSArrayList;
+import org.sejda.sambox.cos.COSBase;
+import org.sejda.sambox.cos.COSFloat;
+import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.cos.COSStream;
+import org.sejda.sambox.pdmodel.PDResources;
+import org.sejda.sambox.pdmodel.common.PDRange;
+import org.sejda.sambox.pdmodel.common.PDStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * ICCBased colour spaces are based on a cross-platform colour profile as defined by the
@@ -477,7 +477,8 @@ public final class PDICCBased extends PDCIEBasedColorSpace
      */
     public PDRange getRangeForComponent(int n)
     {
-        COSArray rangeArray = (COSArray) stream.getCOSObject().getDictionaryObject(COSName.RANGE);
+        COSArray rangeArray = stream.getCOSObject()
+                .getDictionaryObject(COSName.RANGE, COSArray.class);
         if (rangeArray == null || rangeArray.size() < getNumberOfComponents() * 2)
         {
             return new PDRange(); // 0..1
@@ -554,17 +555,13 @@ public final class PDICCBased extends PDCIEBasedColorSpace
     /**
      * Sets the range for this color space.
      *
-     * @param range the new range for the a component
+     * @param range the new range for the component
      * @param n     the component to set the range for
      */
     public void setRangeForComponent(PDRange range, int n)
     {
-        COSArray rangeArray = (COSArray) stream.getCOSObject().getDictionaryObject(COSName.RANGE);
-        if (rangeArray == null)
-        {
-            rangeArray = new COSArray();
-            stream.getCOSObject().setItem(COSName.RANGE, rangeArray);
-        }
+        COSArray rangeArray = stream.getCOSObject()
+                .computeIfAbsent(COSName.RANGE, k -> new COSArray(), COSArray.class);
         // extend range array with default values if needed
         while (rangeArray.size() < (n + 1) * 2)
         {
