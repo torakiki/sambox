@@ -28,15 +28,7 @@ import org.sejda.sambox.util.Matrix;
  */
 public class PDShadingType2 extends PDShading
 {
-    private COSArray coords = null;
-    private COSArray domain = null;
-    private COSArray extend = null;
 
-    /**
-     * Constructor using the given shading dictionary.
-     *
-     * @param shadingDictionary the dictionary for this shading
-     */
     public PDShadingType2(COSDictionary shadingDictionary)
     {
         super(shadingDictionary);
@@ -49,78 +41,53 @@ public class PDShadingType2 extends PDShading
     }
 
     /**
-     * This will get the optional Extend values for this shading.
-     *
-     * @return the extend values
+     * @return the optional Extend values for this shading.
      */
     public COSArray getExtend()
     {
-        if (extend == null)
-        {
-            extend = (COSArray) getCOSObject().getDictionaryObject(COSName.EXTEND);
-        }
-        return extend;
+        return getCOSObject().getDictionaryObject(COSName.EXTEND, COSArray.class);
     }
 
     /**
      * Sets the optional Extend entry for this shading.
-     *
-     * @param newExtend the extend array
      */
-    public void setExtend(COSArray newExtend)
+    public void setExtend(COSArray extend)
     {
-        extend = newExtend;
-        getCOSObject().setItem(COSName.EXTEND, newExtend);
+        getCOSObject().setItem(COSName.EXTEND, extend);
     }
 
     /**
-     * This will get the optional Domain values for this shading.
-     *
-     * @return the domain values
+     * @return the optional Domain values for this shading.
      */
     public COSArray getDomain()
     {
-        if (domain == null)
-        {
-            domain = (COSArray) getCOSObject().getDictionaryObject(COSName.DOMAIN);
-        }
-        return domain;
+        return getCOSObject().getDictionaryObject(COSName.DOMAIN, COSArray.class);
     }
 
     /**
      * Sets the optional Domain entry for this shading.
-     *
-     * @param newDomain the domain array
      */
-    public void setDomain(COSArray newDomain)
+    public void setDomain(COSArray domain)
     {
-        domain = newDomain;
-        getCOSObject().setItem(COSName.DOMAIN, newDomain);
+        getCOSObject().setItem(COSName.DOMAIN, domain);
     }
 
     /**
      * This will get the Coords values for this shading.
      *
-     * @return the coordinate values
+     * @return the Coords values for this shading.
      */
     public COSArray getCoords()
     {
-        if (coords == null)
-        {
-            coords = (COSArray) getCOSObject().getDictionaryObject(COSName.COORDS);
-        }
-        return coords;
+        return getCOSObject().getDictionaryObject(COSName.COORDS, COSArray.class);
     }
 
     /**
      * Sets the Coords entry for this shading.
-     *
-     * @param newCoords the coordinates array
      */
-    public void setCoords(COSArray newCoords)
+    public void setCoords(COSArray coords)
     {
-        coords = newCoords;
-        getCOSObject().setItem(COSName.COORDS, newCoords);
+        getCOSObject().setItem(COSName.COORDS, coords);
     }
 
     @Override

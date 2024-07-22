@@ -42,11 +42,6 @@ public class PDShadingType4 extends PDTriangleBasedShadingType
 {
     private static Logger LOG = LoggerFactory.getLogger(PDShadingType4.class);
 
-    /**
-     * Constructor using the given shading dictionary.
-     *
-     * @param shadingDictionary the dictionary for this shading
-     */
     public PDShadingType4(COSDictionary shadingDictionary)
     {
         super(shadingDictionary);

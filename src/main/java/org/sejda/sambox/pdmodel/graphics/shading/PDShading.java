@@ -16,29 +16,26 @@
  */
 package org.sejda.sambox.pdmodel.graphics.shading;
 
-import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSBase;
-import org.sejda.sambox.cos.COSDictionary;
-import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.cos.COSObjectable;
-import org.sejda.sambox.pdmodel.common.PDRectangle;
-import org.sejda.sambox.pdmodel.common.function.PDFunction;
-import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
-import org.sejda.sambox.util.Matrix;
-
 import java.awt.Paint;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 
+import org.sejda.sambox.cos.COSArray;
+import org.sejda.sambox.cos.COSBase;
+import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.pdmodel.common.PDDictionaryWrapper;
+import org.sejda.sambox.pdmodel.common.PDRectangle;
+import org.sejda.sambox.pdmodel.common.function.PDFunction;
+import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
+import org.sejda.sambox.util.Matrix;
+
 /**
  * A Shading Resource.
  */
-public abstract class PDShading implements COSObjectable
+public abstract class PDShading extends PDDictionaryWrapper
 {
-    private final COSDictionary dictionary;
-    private COSArray background = null;
-    private PDRectangle bBox = null;
     private PDColorSpace colorSpace = null;
     private PDFunction function = null;
     private PDFunction[] functionArray = null;
@@ -78,38 +75,20 @@ public abstract class PDShading implements COSObjectable
      */
     public static final int SHADING_TYPE7 = 7;
 
-    /**
-     * Default constructor.
-     */
     public PDShading()
     {
-        dictionary = new COSDictionary();
+        super();
     }
 
     /**
-     * Constructor using the given shading dictionary.
-     *
      * @param shadingDictionary the dictionary for this shading
      */
     public PDShading(COSDictionary shadingDictionary)
     {
-        dictionary = shadingDictionary;
+        super(shadingDictionary);
     }
 
     /**
-     * This will get the underlying dictionary.
-     *
-     * @return the dictionary for this shading.
-     */
-    @Override
-    public COSDictionary getCOSObject()
-    {
-        return dictionary;
-    }
-
-    /**
-     * This will return the type.
-     *
      * @return the type of object that this is
      */
     public String getType()
@@ -118,45 +97,26 @@ public abstract class PDShading implements COSObjectable
     }
 
     /**
-     * This will set the shading type.
-     *
      * @param shadingType the new shading type
      */
     public void setShadingType(int shadingType)
     {
-        dictionary.setInt(COSName.SHADING_TYPE, shadingType);
+        getCOSObject().setInt(COSName.SHADING_TYPE, shadingType);
     }
 
     /**
-     * This will return the shading type.
-     *
-     * @return the shading typ
+     * @return the shading type
      */
     public abstract int getShadingType();
 
-    /**
-     * This will set the background.
-     *
-     * @param newBackground the new background
-     */
-    public void setBackground(COSArray newBackground)
+    public void setBackground(COSArray background)
     {
-        background = newBackground;
-        dictionary.setItem(COSName.BACKGROUND, newBackground);
+        getCOSObject().setItem(COSName.BACKGROUND, background);
     }
 
-    /**
-     * This will return the background.
-     *
-     * @return the background
-     */
     public COSArray getBackground()
     {
-        if (background == null)
-        {
-            background = (COSArray) dictionary.getDictionaryObject(COSName.BACKGROUND);
-        }
-        return background;
+        return getCOSObject().getDictionaryObject(COSName.BACKGROUND, COSArray.class);
     }
 
     /**
@@ -167,42 +127,30 @@ public abstract class PDShading implements COSObjectable
      */
     public PDRectangle getBBox()
     {
-        if (bBox == null)
+        COSArray array = getCOSObject().getDictionaryObject(COSName.BBOX, COSArray.class);
+        if (array != null && array.size() >= 4)
         {
-            COSArray array = (COSArray) dictionary.getDictionaryObject(COSName.BBOX);
-            if (array != null && array.size() >= 4)
-            {
-                bBox = new PDRectangle(array);
-            }
+            return new PDRectangle(array);
         }
-        return bBox;
+        return null;
     }
 
-    /**
-     * This will set the BBox (bounding box) for this Shading.
-     *
-     * @param newBBox the new BBox
-     */
-    public void setBBox(PDRectangle newBBox)
+    public void setBBox(PDRectangle bbox)
     {
-        bBox = newBBox;
-        if (bBox == null)
+        if (bbox == null)
         {
-            dictionary.removeItem(COSName.BBOX);
+            getCOSObject().removeItem(COSName.BBOX);
         }
         else
         {
-            dictionary.setItem(COSName.BBOX, bBox.getCOSObject());
+            getCOSObject().setItem(COSName.BBOX, bbox.getCOSObject());
         }
     }
 
     /**
      * Calculate a bounding rectangle around the areas of this shading context.
      *
-     * @param xform
-     * @param matrix
      * @return Bounding rectangle or null, if not supported by this shading type.
-     * @throws java.io.IOException
      */
     public Rectangle2D getBounds(AffineTransform xform, Matrix matrix) throws IOException
     {
@@ -210,36 +158,27 @@ public abstract class PDShading implements COSObjectable
     }
 
     /**
-     * This will set the AntiAlias value.
-     *
      * @param antiAlias the new AntiAlias value
      */
     public void setAntiAlias(boolean antiAlias)
     {
-        dictionary.setBoolean(COSName.ANTI_ALIAS, antiAlias);
+        getCOSObject().setBoolean(COSName.ANTI_ALIAS, antiAlias);
     }
 
-    /**
-     * This will return the AntiAlias value.
-     *
-     * @return the AntiAlias value
-     */
     public boolean getAntiAlias()
     {
-        return dictionary.getBoolean(COSName.ANTI_ALIAS, false);
+        return getCOSObject().getBoolean(COSName.ANTI_ALIAS, false);
     }
 
     /**
-     * This will get the color space or null if none exists.
-     *
-     * @return the color space for the shading
+     * @return the color space for the shading or null if none exists.
      * @throws IOException if there is an error getting the color space
      */
     public PDColorSpace getColorSpace() throws IOException
     {
         if (colorSpace == null)
         {
-            COSBase colorSpaceDictionary = dictionary.getDictionaryObject(COSName.CS,
+            COSBase colorSpaceDictionary = getCOSObject().getDictionaryObject(COSName.CS,
                     COSName.COLORSPACE);
             if (colorSpaceDictionary != null)
             {
@@ -250,8 +189,6 @@ public abstract class PDShading implements COSObjectable
     }
 
     /**
-     * This will set the color space for the shading.
-     *
      * @param colorSpace the color space
      */
     public void setColorSpace(PDColorSpace colorSpace)
@@ -259,11 +196,11 @@ public abstract class PDShading implements COSObjectable
         this.colorSpace = colorSpace;
         if (colorSpace != null)
         {
-            dictionary.setItem(COSName.COLORSPACE, colorSpace.getCOSObject());
+            getCOSObject().setItem(COSName.COLORSPACE, colorSpace.getCOSObject());
         }
         else
         {
-            dictionary.removeItem(COSName.COLORSPACE);
+            getCOSObject().removeItem(COSName.COLORSPACE);
         }
     }
 
@@ -276,35 +213,18 @@ public abstract class PDShading implements COSObjectable
      */
     public static PDShading create(COSDictionary shadingDictionary) throws IOException
     {
-        PDShading shading = null;
         int shadingType = shadingDictionary.getInt(COSName.SHADING_TYPE, 0);
-        switch (shadingType)
+        return switch (shadingType)
         {
-        case SHADING_TYPE1:
-            shading = new PDShadingType1(shadingDictionary);
-            break;
-        case SHADING_TYPE2:
-            shading = new PDShadingType2(shadingDictionary);
-            break;
-        case SHADING_TYPE3:
-            shading = new PDShadingType3(shadingDictionary);
-            break;
-        case SHADING_TYPE4:
-            shading = new PDShadingType4(shadingDictionary);
-            break;
-        case SHADING_TYPE5:
-            shading = new PDShadingType5(shadingDictionary);
-            break;
-        case SHADING_TYPE6:
-            shading = new PDShadingType6(shadingDictionary);
-            break;
-        case SHADING_TYPE7:
-            shading = new PDShadingType7(shadingDictionary);
-            break;
-        default:
-            throw new IOException("Error: Unknown shading type " + shadingType);
-        }
-        return shading;
+            case SHADING_TYPE1 -> new PDShadingType1(shadingDictionary);
+            case SHADING_TYPE2 -> new PDShadingType2(shadingDictionary);
+            case SHADING_TYPE3 -> new PDShadingType3(shadingDictionary);
+            case SHADING_TYPE4 -> new PDShadingType4(shadingDictionary);
+            case SHADING_TYPE5 -> new PDShadingType5(shadingDictionary);
+            case SHADING_TYPE6 -> new PDShadingType6(shadingDictionary);
+            case SHADING_TYPE7 -> new PDShadingType7(shadingDictionary);
+            default -> throw new IOException("Error: Unknown shading type " + shadingType);
+        };
     }
 
     /**
@@ -385,7 +305,7 @@ public abstract class PDShading implements COSObjectable
     }
 
     /**
-     * Convert the input value using the functions of the shading dictionary.
+     * Convert the input value using the functions of the shading getCOSObject().
      *
      * @param inputValue the input value
      * @return the output values
@@ -397,7 +317,7 @@ public abstract class PDShading implements COSObjectable
     }
 
     /**
-     * Convert the input values using the functions of the shading dictionary.
+     * Convert the input values using the functions of the shading getCOSObject().
      *
      * @param input the input values
      * @return the output values

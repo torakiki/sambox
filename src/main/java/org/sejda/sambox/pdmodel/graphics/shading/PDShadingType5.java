@@ -38,11 +38,6 @@ import javax.imageio.stream.MemoryCacheImageInputStream;
  */
 public class PDShadingType5 extends PDTriangleBasedShadingType
 {
-    /**
-     * Constructor using the given shading dictionary.
-     *
-     * @param shadingDictionary the dictionary for this shading
-     */
     public PDShadingType5(COSDictionary shadingDictionary)
     {
         super(shadingDictionary);

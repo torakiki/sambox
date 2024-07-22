@@ -30,13 +30,6 @@ import org.sejda.sambox.util.Matrix;
  */
 public class PDShadingType1 extends PDShading
 {
-    private COSArray domain = null;
-
-    /**
-     * Constructor using the given shading dictionary.
-     *
-     * @param shadingDictionary the dictionary for this shading
-     */
     public PDShadingType1(COSDictionary shadingDictionary)
     {
         super(shadingDictionary);
@@ -49,9 +42,7 @@ public class PDShadingType1 extends PDShading
     }
 
     /**
-     * This will get the optional Matrix of a function based shading.
-     *
-     * @return the matrix
+     * @return the optional Matrix of a function based shading.
      */
     public Matrix getMatrix()
     {
@@ -76,28 +67,19 @@ public class PDShadingType1 extends PDShading
     }
 
     /**
-     * This will get the optional Domain values of a function based shading.
-     *
-     * @return the domain values
+     * @return the optional Domain values of a function based shading.
      */
     public COSArray getDomain()
     {
-        if (domain == null)
-        {
-            domain = (COSArray) getCOSObject().getDictionaryObject(COSName.DOMAIN);
-        }
-        return domain;
+        return getCOSObject().getDictionaryObject(COSName.DOMAIN, COSArray.class);
     }
 
     /**
      * Sets the optional Domain entry for the function based shading.
-     *
-     * @param newDomain the domain array
      */
-    public void setDomain(COSArray newDomain)
+    public void setDomain(COSArray domain)
     {
-        domain = newDomain;
-        getCOSObject().setItem(COSName.DOMAIN, newDomain);
+        getCOSObject().setItem(COSName.DOMAIN, domain);
     }
 
     @Override

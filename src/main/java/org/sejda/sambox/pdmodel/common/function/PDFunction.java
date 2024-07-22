@@ -118,19 +118,14 @@ public abstract class PDFunction implements COSObjectable
                     "Unexpected type for function, expected COSDictionary but was: " + base);
         }
         int functionType = functionDictionary.getInt(COSName.FUNCTION_TYPE);
-        switch (functionType)
+        return switch (functionType)
         {
-        case 0:
-            return new PDFunctionType0(functionDictionary);
-        case 2:
-            return new PDFunctionType2(functionDictionary);
-        case 3:
-            return new PDFunctionType3(functionDictionary);
-        case 4:
-            return new PDFunctionType4(functionDictionary);
-        default:
-            throw new IOException("Error: Unknown function type " + functionType);
-        }
+            case 0 -> new PDFunctionType0(functionDictionary);
+            case 2 -> new PDFunctionType2(functionDictionary);
+            case 3 -> new PDFunctionType3(functionDictionary);
+            case 4 -> new PDFunctionType4(functionDictionary);
+            default -> throw new IOException("Error: Unknown function type " + functionType);
+        };
     }
 
     /**

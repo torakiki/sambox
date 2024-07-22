@@ -26,11 +26,6 @@ import org.sejda.sambox.util.Matrix;
  */
 public class PDShadingType3 extends PDShadingType2
 {
-    /**
-     * Constructor using the given shading dictionary.
-     *
-     * @param shadingDictionary the dictionary for this shading
-     */
     public PDShadingType3(COSDictionary shadingDictionary)
     {
         super(shadingDictionary);

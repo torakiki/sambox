@@ -16,6 +16,16 @@
  */
 package org.sejda.sambox.pdmodel.graphics.color;
 
+import java.awt.Graphics;
+import java.awt.Transparency;
+import java.awt.color.ColorSpace;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorConvertOp;
+import java.awt.image.ColorModel;
+import java.awt.image.ComponentColorModel;
+import java.awt.image.WritableRaster;
+import java.io.IOException;
+
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
@@ -26,16 +36,6 @@ import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.ResourceCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.awt.Graphics;
-import java.awt.Transparency;
-import java.awt.color.ColorSpace;
-import java.awt.image.BufferedImage;
-import java.awt.image.ColorConvertOp;
-import java.awt.image.ColorModel;
-import java.awt.image.ComponentColorModel;
-import java.awt.image.WritableRaster;
-import java.io.IOException;
 
 /**
  * A color space specifies how the colours of graphics objects will be painted on the page.
@@ -198,7 +198,7 @@ public abstract class PDColorSpace implements COSObjectable
         }
         if (colorSpace instanceof COSArray array)
         {
-            if (array.size() == 0)
+            if (array.isEmpty())
             {
                 throw new IOException("Colorspace array is empty");
             }
@@ -271,46 +271,34 @@ public abstract class PDColorSpace implements COSObjectable
     protected COSArray array;
 
     /**
-     * Returns the name of the color space.
-     *
      * @return the name of the color space
      */
     public abstract String getName();
 
     /**
-     * Returns the number of components in this color space
-     *
      * @return the number of components in this color space
      */
     public abstract int getNumberOfComponents();
 
     /**
-     * Returns the default decode array for this color space.
-     *
      * @param bitsPerComponent the number of bits per component.
      * @return the default decode array
      */
     public abstract float[] getDefaultDecode(int bitsPerComponent);
 
     /**
-     * Returns the initial color value for this color space.
-     *
      * @return the initial color value for this color space
      */
     public abstract PDColor getInitialColor();
 
     /**
-     * Returns the RGB equivalent of the given color value.
-     *
      * @param value a color value with component values between 0 and 1
-     * @return an array of R,G,B value between 0 and 255
+     * @return the RGB equivalent of the given color value as an array of R,G,B value between 0 and 255
      * @throws IOException if the color conversion fails
      */
     public abstract float[] toRGB(float[] value) throws IOException;
 
     /**
-     * Returns the (A)RGB equivalent of the given raster.
-     *
      * @param raster the source raster
      * @return an (A)RGB buffered image
      * @throws IOException if the color conversion fails
