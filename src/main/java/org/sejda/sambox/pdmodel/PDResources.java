@@ -198,7 +198,7 @@ public final class PDResources implements COSObjectable
 
     /**
      * Returns the color space resource with the given name, or null if none exists. This method is
-     * for PDFBox internal use only, others should use {@link getColorSpace(COSName)}.
+     * for PDFBox internal use only, others should use {@link #getColorSpace(COSName)}.
      *
      * @param name       Name of the color space resource.
      * @param wasDefault if current color space was used by a default color space. This parameter is
@@ -219,16 +219,8 @@ public final class PDResources implements COSObjectable
         }
 
         // get the instance
-        PDColorSpace colorSpace;
-        COSBase object = get(COSName.COLORSPACE, name);
-        if (object != null)
-        {
-            colorSpace = PDColorSpace.create(object, this, wasDefault);
-        }
-        else
-        {
-            colorSpace = PDColorSpace.create(name, this, wasDefault);
-        }
+        var colorSpace = PDColorSpace.create(ofNullable(get(COSName.COLORSPACE, name)).orElse(name),
+                this, wasDefault);
 
         // we can't cache PDPattern, because it holds page resources, see PDFBOX-2370
         if (cache != null && !(colorSpace instanceof PDPattern))

@@ -15,12 +15,12 @@
  */
 package org.sejda.sambox.pdmodel.graphics.color;
 
+import java.awt.color.ColorSpace;
+
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSFloat;
 import org.sejda.sambox.cos.COSName;
-
-import java.awt.color.ColorSpace;
 
 /**
  * CIE-based colour spaces that use a dictionary.
@@ -59,7 +59,7 @@ public abstract class PDCIEDictionaryBasedColorSpace extends PDCIEBasedColorSpac
     protected PDCIEDictionaryBasedColorSpace(COSArray rgb)
     {
         array = rgb;
-        dictionary = (COSDictionary) array.getObject(1);
+        dictionary = array.getObject(1, COSDictionary.class);
 
         fillWhitepointCache(getWhitepoint());
     }
@@ -99,13 +99,10 @@ public abstract class PDCIEDictionaryBasedColorSpace extends PDCIEBasedColorSpac
      */
     public final PDTristimulus getWhitepoint()
     {
-        COSArray wp = (COSArray) dictionary.getDictionaryObject(COSName.WHITE_POINT);
+        COSArray wp = dictionary.getDictionaryObject(COSName.WHITE_POINT, COSArray.class);
         if (wp == null)
         {
-            wp = new COSArray();
-            wp.add(new COSFloat(1.0f));
-            wp.add(new COSFloat(1.0f));
-            wp.add(new COSFloat(1.0f));
+            wp = new COSArray(new COSFloat(1.0f), new COSFloat(1.0f), new COSFloat(1.0f));
         }
         return new PDTristimulus(wp);
     }
@@ -119,13 +116,10 @@ public abstract class PDCIEDictionaryBasedColorSpace extends PDCIEBasedColorSpac
      */
     public final PDTristimulus getBlackPoint()
     {
-        COSArray bp = (COSArray) dictionary.getDictionaryObject(COSName.BLACK_POINT);
+        COSArray bp = dictionary.getDictionaryObject(COSName.BLACK_POINT, COSArray.class);
         if (bp == null)
         {
-            bp = new COSArray();
-            bp.add(new COSFloat(0.0f));
-            bp.add(new COSFloat(0.0f));
-            bp.add(new COSFloat(0.0f));
+            bp = new COSArray(new COSFloat(0.0f), new COSFloat(0.0f), new COSFloat(0.0f));
         }
         return new PDTristimulus(bp);
     }

@@ -63,9 +63,9 @@ public class IndirectCOSObjectReference extends COSBase implements DisposableCOS
     @Override
     public void releaseCOSObject()
     {
-        if (baseObject instanceof DisposableCOSObject)
+        if (baseObject instanceof DisposableCOSObject disposable)
         {
-            ((DisposableCOSObject) baseObject).releaseCOSObject();
+            disposable.releaseCOSObject();
         }
         baseObject = null;
     }

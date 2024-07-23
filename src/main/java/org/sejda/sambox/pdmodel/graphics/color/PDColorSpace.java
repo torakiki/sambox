@@ -16,6 +16,9 @@
  */
 package org.sejda.sambox.pdmodel.graphics.color;
 
+import static java.util.Objects.nonNull;
+import static org.sejda.commons.util.RequireUtils.require;
+
 import java.awt.Graphics;
 import java.awt.Transparency;
 import java.awt.color.ColorSpace;
@@ -129,15 +132,9 @@ public abstract class PDColorSpace implements COSObjectable
     private static PDColorSpace createUncached(COSBase colorSpace, PDResources resources,
             boolean wasDefault, int recursionAccumulator) throws IOException
     {
-        if (recursionAccumulator > 4)
-        {
-            throw new IOException("Could not create color space, infinite recursion detected");
-        }
-        
-        if (colorSpace == null)
-        {
-            throw new IOException("Invalid color space (null)");
-        }
+        require(recursionAccumulator > 4,
+                () -> new IOException("Could not create color space, infinite recursion detected"));
+        require(nonNull(colorSpace), () -> new IOException("Invalid color space (null)"));
 
         colorSpace = colorSpace.getCOSObject();
         if (colorSpace instanceof COSName name)
