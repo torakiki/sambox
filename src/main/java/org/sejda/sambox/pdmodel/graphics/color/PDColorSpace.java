@@ -132,7 +132,7 @@ public abstract class PDColorSpace implements COSObjectable
     private static PDColorSpace createUncached(COSBase colorSpace, PDResources resources,
             boolean wasDefault, int recursionAccumulator) throws IOException
     {
-        require(recursionAccumulator > 4,
+        require(recursionAccumulator < 5,
                 () -> new IOException("Could not create color space, infinite recursion detected"));
         require(nonNull(colorSpace), () -> new IOException("Invalid color space (null)"));
 
