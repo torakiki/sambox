@@ -16,14 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.graphics.color;
 
-import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSArrayList;
-import org.sejda.sambox.cos.COSBase;
-import org.sejda.sambox.cos.COSDictionary;
-import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.cos.COSNull;
-import org.sejda.sambox.pdmodel.common.function.PDFunction;
-
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -35,6 +27,14 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.sejda.sambox.cos.COSArray;
+import org.sejda.sambox.cos.COSArrayList;
+import org.sejda.sambox.cos.COSBase;
+import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.cos.COSNull;
+import org.sejda.sambox.pdmodel.common.function.PDFunction;
 
 /**
  * DeviceN colour spaces may contain an arbitrary number of colour components. DeviceN represents a
@@ -93,7 +93,7 @@ public class PDDeviceN extends PDSpecialColorSpace
         if (array.size() > DEVICEN_ATTRIBUTES)
         {
             attributes = new PDDeviceNAttributes(
-                    (COSDictionary) array.getObject(DEVICEN_ATTRIBUTES));
+                    array.getObject(DEVICEN_ATTRIBUTES, COSDictionary.class));
         }
         initColorConversionCache();
 
