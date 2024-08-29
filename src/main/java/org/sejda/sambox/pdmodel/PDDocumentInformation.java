@@ -317,11 +317,6 @@ public class PDDocumentInformation extends PDDictionaryWrapper
         ofNullable(getProducer()).map(p -> pdfSchema.getMetadata().getTypeMapping()
                         .createAgentName(pdfSchema.getNamespace(), pdfSchema.getPrefix(), "Producer", p))
                 .ifPresent(pdfSchema::addProperty);
-        ofNullable(getTrapped()).ifPresent(t -> {
-            pdfSchema.addProperty(pdfSchema.getMetadata().getTypeMapping()
-                    .createBoolean(pdfSchema.getNamespace(), pdfSchema.getPrefix(), "Trapped",
-                            Boolean.parseBoolean(t)));
-        });
 
         XMPBasicSchema basicSchema = ofNullable(metadata.getXMPBasicSchema()).orElseGet(
                 metadata::createAndAddXMPBasicSchema);
