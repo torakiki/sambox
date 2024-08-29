@@ -563,6 +563,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName WIDTH = newCommonInstance("Width");
     public static final COSName WIDTHS = newCommonInstance("Widths");
     public static final COSName WIN_ANSI_ENCODING = newCommonInstance("WinAnsiEncoding");
+    public static final COSName WMODE = newCommonInstance("WMode");
     // X
     public static final COSName XFA = newCommonInstance("XFA");
     public static final COSName X_STEP = newCommonInstance("XStep");

@@ -16,9 +16,11 @@
  */
 package org.sejda.sambox.pdmodel.graphics.pattern;
 
+import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
+
 import java.io.IOException;
 
-import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.graphics.shading.PDShading;
@@ -33,19 +35,11 @@ public class PDShadingPattern extends PDAbstractPattern
     private PDExtendedGraphicsState extendedGraphicsState;
     private PDShading shading;
 
-    /**
-     * Creates a new shading pattern.
-     */
     public PDShadingPattern()
     {
-        super();
         getCOSObject().setInt(COSName.PATTERN_TYPE, PDAbstractPattern.TYPE_SHADING_PATTERN);
     }
 
-    /**
-     * Creates a new shading pattern from the given COS dictionary.
-     * @param resourceDictionary The COSDictionary for this pattern resource.
-     */
     public PDShadingPattern(COSDictionary resourceDictionary)
     {
         super(resourceDictionary);
@@ -57,56 +51,38 @@ public class PDShadingPattern extends PDAbstractPattern
         return PDAbstractPattern.TYPE_SHADING_PATTERN;
     }
 
-    /**
-     * This will get the external graphics state for this pattern.
-     * @return The extended graphics state for this pattern.
-     */
     public PDExtendedGraphicsState getExtendedGraphicsState()
     {
         if (extendedGraphicsState == null)
         {
-            COSBase base = getCOSObject().getDictionaryObject(COSName.EXT_G_STATE);
+            extendedGraphicsState = ofNullable(
+                    getCOSObject().getDictionaryObject(COSName.EXT_G_STATE,
+                            COSDictionary.class)).map(PDExtendedGraphicsState::new).orElse(null);
 
-            if(base instanceof COSDictionary)
-            {
-                extendedGraphicsState = new PDExtendedGraphicsState((COSDictionary) base);
-            }
         }
         return extendedGraphicsState;
     }
 
-    /**
-     * This will set the external graphics state for this pattern.
-     * @param extendedGraphicsState The new extended graphics state for this pattern.
-     */
     public void setExtendedGraphicsState(PDExtendedGraphicsState extendedGraphicsState)
     {
         this.extendedGraphicsState = extendedGraphicsState;
         getCOSObject().setItem(COSName.EXT_G_STATE, extendedGraphicsState);
     }
 
-    /**
-     * This will get the shading resources for this pattern.
-     * @return The shading resources for this pattern.
-     * @throws IOException if something went wrong
-     */
     public PDShading getShading() throws IOException
     {
-        if (shading == null) 
+        if (shading == null)
         {
-            COSBase base = getCOSObject().getDictionaryObject(COSName.SHADING);
-            if(base instanceof COSDictionary)
+            var shadingDictionary = getCOSObject().getDictionaryObject(COSName.SHADING,
+                    COSDictionary.class);
+            if (nonNull(shadingDictionary))
             {
-                shading = PDShading.create((COSDictionary) base);
+                shading = PDShading.create(shadingDictionary);
             }
         }
         return shading;
     }
 
-    /**
-     * This will set the shading resources for this pattern.
-     * @param shadingResources The new shading resources for this pattern.
-     */
     public void setShading( PDShading shadingResources )
     {
         shading = shadingResources;

@@ -29,7 +29,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * An array of PDFBase objects as part of the PDF document.
+ * An array of COSBase objects as part of the PDF document.
  *
  * @author Ben Litchfield
  */

@@ -939,7 +939,7 @@ public abstract class PDFStreamEngine
         {
             // todo: this too forgiving, but PDFBox has always worked this way for DrawObject
             // some careful refactoring is needed
-            LOG.warn(e.getMessage());
+            LOG.warn("An error occurred processing the Do operator", e);
         }
         else
         {
