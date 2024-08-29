@@ -71,6 +71,47 @@ public abstract class OperatorProcessor
     public abstract String getName();
 
     /**
+     * Concatenates this operator with another given operator. Creates a new operator as a result.
+     *
+     * @param other the other operator to concatenate
+     * @return the concatenated operator
+     * @throws IllegalArgumentException if the names of the two OperatorProcessor do not match
+     */
+    public OperatorProcessor andThen(OperatorProcessor other)
+    {
+        if (!this.getName().equals(other.getName()))
+        {
+            throw new IllegalArgumentException(
+                    "Cannot concatenate processors for different operators");
+        }
+
+        return new OperatorProcessor()
+        {
+            @Override
+            public void process(Operator operator, List<COSBase> operands) throws IOException
+            {
+                OperatorProcessor.this.process(operator, operands);
+                other.process(operator, operands);
+            }
+
+            @Override
+            public String getName()
+            {
+                return OperatorProcessor.this.getName();
+            }
+
+            @Override
+            public void setContext(PDFStreamEngine context)
+            {
+                super.setContext(context);
+                other.setContext(context);
+                OperatorProcessor.this.setContext(context);
+            }
+
+        };
+    }
+
+    /**
      * Check whether all operands list elements are an instance of a specific class.
      *
      * @param operands The operands list.
