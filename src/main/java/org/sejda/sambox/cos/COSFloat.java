@@ -28,6 +28,7 @@ import static org.sejda.commons.util.RequireUtils.requireIOCondition;
  * @author Ben Litchfield
  * 
  */
+// @formatter:off
 public class COSFloat extends COSNumber
 {
     private BigDecimal value;
@@ -57,15 +58,8 @@ public class COSFloat extends COSNumber
     {
         try
         {
-            int dot = aFloat.indexOf('.');
-            if (dot != aFloat.lastIndexOf('.'))
-            {
-                // 415.75.795 we replace additional dots with 0
-                aFloat = aFloat.substring(0, dot + 1)
-                        + DOTS.matcher(aFloat.substring(dot + 1)).replaceAll("0");
-
-            }
-            aFloat = EXP_END.matcher(aFloat).replaceAll("");
+            // no pre-processing! speed optimized for the vanilla scenario where we parse good floats
+            // if we encounter a problem, then we start handling edge cases, not before
             value = new BigDecimal(aFloat);
             checkMinMaxValues();
         }
@@ -73,31 +67,48 @@ public class COSFloat extends COSNumber
         {
             try
             {
-                if (NUM1.matcher(aFloat).matches())
+                int dot = aFloat.indexOf('.');
+                if (dot != aFloat.lastIndexOf('.'))
                 {
-                    // PDFBOX-3589 --242.0
-                    value = new BigDecimal(NUM2.matcher(aFloat).replaceFirst("-"));
+                    // 415.75.795 we replace additional dots with 0
+                    aFloat = aFloat.substring(0, dot + 1)
+                            + DOTS.matcher(aFloat.substring(dot + 1)).replaceAll("0");
+
                 }
-                else if (ZERO.matcher(aFloat).matches())
-                {
-                    // SAMBox 75
-                    value = BigDecimal.ZERO;
-                }
-                else
-                {
-                    // PDFBOX-2990 has 0.00000-33917698
-                    // PDFBOX-3369 has 0.00-35095424
-                    // PDFBOX-3500 has 0.-262
-                    requireIOCondition(NUM3.matcher(aFloat).matches(),
-                            "Expected floating point number but found '" + aFloat + "'");
-                    value = new BigDecimal("-" + MINUS.matcher(aFloat).replaceFirst(""));
-                }
+                aFloat = EXP_END.matcher(aFloat).replaceAll("");    
+                value = new BigDecimal(aFloat);
                 checkMinMaxValues();
             }
-            catch (NumberFormatException e2)
+            catch (NumberFormatException nfex)
             {
-                throw new IOException(
-                        "Error expected floating point number actual='" + aFloat + "'", e2);
+                try
+                {
+                    if (NUM1.matcher(aFloat).matches())
+                    {
+                        // PDFBOX-3589 --242.0
+                        value = new BigDecimal(NUM2.matcher(aFloat).replaceFirst("-"));
+                    }
+                    else if (ZERO.matcher(aFloat).matches())
+                    {
+                        // SAMBox 75
+                        value = BigDecimal.ZERO;
+                    }
+                    else
+                    {
+                        // PDFBOX-2990 has 0.00000-33917698
+                        // PDFBOX-3369 has 0.00-35095424
+                        // PDFBOX-3500 has 0.-262
+                        requireIOCondition(NUM3.matcher(aFloat).matches(),
+                                "Expected floating point number but found '" + aFloat + "'");
+                        value = new BigDecimal("-" + MINUS.matcher(aFloat).replaceFirst(""));
+                    }
+                    checkMinMaxValues();
+                }
+                catch (NumberFormatException e2)
+                {
+                    throw new IOException(
+                            "Error expected floating point number actual='" + aFloat + "'", e2);
+                }
             }
         }
     }
