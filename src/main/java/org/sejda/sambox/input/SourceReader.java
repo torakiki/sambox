@@ -495,7 +495,8 @@ class SourceReader implements Closeable
      */
     public final String readNumber() throws IOException
     {
-        StringBuilder builder = pool.borrow();
+        //StringBuilder builder = pool.borrow();
+        StringBuilder builder = new StringBuilder();
         int lastAppended = -1;
         try
         {
@@ -531,7 +532,7 @@ class SourceReader implements Closeable
         }
         finally
         {
-            pool.give(builder);
+            //pool.give(builder);
         }
     }
 
