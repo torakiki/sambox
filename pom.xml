@@ -431,7 +431,7 @@
                             <url>http://www.igs.at/downloads/PDFBOX_LCMS_Error_13.pdf</url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <sha512>
-                                3955041f4daded93206998b8aab54818f671a7c2df1bf5179d8e419c00075eebd02cbcee72c3e73ad4a7ed75d312d93c59f7f015775e22481fbcdef76f8081d0
+                                f69c892b335e7e78457929c7d800269220b16b17845c0ccb54ce506d9775c357f50fdcbcb4e2262244906d96b4577a31e09b877eb61e371c1e2a03a76b38aedf
                             </sha512>
                         </configuration>
                     </execution>
