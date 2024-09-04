@@ -15,6 +15,8 @@
  */
 package org.sejda.sambox.pdmodel.graphics.image;
 
+import static java.util.Objects.nonNull;
+
 import java.awt.Transparency;
 import java.awt.color.ColorSpace;
 import java.awt.color.ICC_ColorSpace;
@@ -33,8 +35,10 @@ import org.sejda.commons.FastByteArrayOutputStream;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.filter.Filter;
 import org.sejda.sambox.filter.FilterFactory;
+import org.sejda.sambox.pdmodel.common.PDStream;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceCMYK;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceColorSpace;
@@ -66,11 +70,11 @@ public final class LosslessFactory
      * If you created your image with a non standard ICC colorspace, it will be preserved. (If you
      * load images in java using ImageIO then no need to read this segment) However a new colorspace
      * will be created for each image. So if you create a PDF with several such images, consider
-     * replacing the colorspace with a common object to save space. This is done with {@link
-     * PDImageXObject#getColorSpace()} and {@link PDImageXObject#setColorSpace(org.sejda.sambox.pdmodel.graphics.color.PDColorSpace)
+     * replacing the colorspace with a common object to save space. This is done with
+     * {@link PDImageXObject#getColorSpace()} and
+     * {@link PDImageXObject#setColorSpace(org.sejda.sambox.pdmodel.graphics.color.PDColorSpace)
      * PDImageXObject.setColorSpace()}
      *
-     * @param document the document where the image will be created
      * @param image    the BufferedImage to embed
      * @return a new image XObject
      * @throws IOException if something goes wrong
@@ -226,7 +230,6 @@ public final class LosslessFactory
      * Create a PDImageXObject while making a decision whether not to compress, use Flate filter
      * only, or Flate and LZW filters.
      *
-     * @param document         The document.
      * @param byteArray        array with data.
      * @param width            the image width
      * @param height           the image height
@@ -238,14 +241,21 @@ public final class LosslessFactory
     static PDImageXObject prepareImageXObject(byte[] byteArray, int width, int height,
             int bitsPerComponent, PDColorSpace initColorSpace) throws IOException
     {
-        FastByteArrayOutputStream baos = new FastByteArrayOutputStream();
-
-        Filter filter = FilterFactory.INSTANCE.getFilter(COSName.FLATE_DECODE);
-        filter.encode(new ByteArrayInputStream(byteArray), baos, new COSDictionary());
-
-        ByteArrayInputStream encodedByteStream = new ByteArrayInputStream(baos.toByteArray());
-        return new PDImageXObject(encodedByteStream, COSName.FLATE_DECODE, width, height,
-                bitsPerComponent, initColorSpace);
+        var stream = new COSStream(COSDictionary.of(COSName.TYPE, COSName.IMAGE, COSName.FILTER,
+                COSName.FLATE_DECODE));
+        stream.setInt(COSName.BITS_PER_COMPONENT, bitsPerComponent);
+        stream.setInt(COSName.WIDTH, width);
+        stream.setInt(COSName.HEIGHT, height);
+        if (nonNull(initColorSpace))
+        {
+            stream.setItem(COSName.COLORSPACE, initColorSpace.getCOSObject());
+        }
+        try (var filtered = stream.createFilteredStream())
+        {
+            Filter filter = FilterFactory.INSTANCE.getFilter(COSName.FLATE_DECODE);
+            filter.encode(new ByteArrayInputStream(byteArray), filtered, new COSDictionary());
+        }
+        return new PDImageXObject(new PDStream(stream), null);
     }
 
     private static class PredictorEncoder
