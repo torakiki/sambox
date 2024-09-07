@@ -169,6 +169,12 @@ public class AppearanceGeneratorHelper
 
                     COSDictionary acroFormFontDict = acroFormResources.getCOSObject()
                             .getDictionaryObject(COSName.FONT, COSDictionary.class);
+                    
+                    if(acroFormFontDict == null){
+                        acroFormFontDict = new COSDictionary();
+                        acroFormResources.getCOSObject().setItem(COSName.FONT, acroFormFontDict);
+                    }
+                    
                     // add all missing font resources from widget to AcroForm
                     for (COSName key : missingFonts.keySet())
                     {
