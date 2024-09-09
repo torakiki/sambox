@@ -141,9 +141,9 @@ class SourceReader implements Closeable
      */
     public final void skipExpected(String expected) throws IOException
     {
-        for (char c : expected.toCharArray())
+        for (int i = 0; i < expected.length(); i++)
         {
-            skipExpected(c);
+            skipExpected(expected.charAt(i));
         }
     }
 
@@ -166,15 +166,15 @@ class SourceReader implements Closeable
     /**
      * Skips the next token if it's value is one of the given ones
      *
-     * @param values the values to skip
+     * @param value the value to skip
      * @return true if the token is found and skipped, false otherwise.
      * @throws IOException if there is an error reading from the stream
      */
-    public boolean skipTokenIfValue(String... values) throws IOException
+    public boolean skipTokenIfValue(String value) throws IOException
     {
         long pos = position();
         String token = readToken();
-        if (!asList(values).contains(token))
+        if (!value.equals(token))
         {
             source.position(pos);
             return false;

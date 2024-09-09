@@ -104,7 +104,7 @@ public class SourceReaderTest
     public void skipToken() throws IOException
     {
         victim = new SourceReader(inMemorySeekableSourceFrom("Chuck Norris".getBytes()));
-        assertTrue(victim.skipTokenIfValue("Segal", "Chuck"));
+        assertTrue(victim.skipTokenIfValue("Chuck"));
         assertEquals(5, victim.position());
     }
 
@@ -113,7 +113,7 @@ public class SourceReaderTest
     {
         victim = new SourceReader(inMemorySeekableSourceFrom("XXXChuck Norris".getBytes()));
         victim.offset(3);
-        assertTrue(victim.skipTokenIfValue("Segal", "Chuck"));
+        assertTrue(victim.skipTokenIfValue("Chuck"));
         assertEquals(5, victim.position());
     }
 
@@ -122,7 +122,7 @@ public class SourceReaderTest
     {
         victim = new SourceReader(inMemorySeekableSourceFrom("Chuck Norris".getBytes()));
         victim.position(5);
-        assertFalse(victim.skipTokenIfValue("Segal", "Van Damme"));
+        assertFalse(victim.skipTokenIfValue("Segal"));
         assertEquals(5, victim.position());
     }
 
