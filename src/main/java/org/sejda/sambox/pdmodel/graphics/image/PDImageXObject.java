@@ -175,6 +175,12 @@ public final class PDImageXObject extends PDXObject implements PDImage
     public static PDImageXObject createFromSeekableSource(SeekableSource source, String filename)
             throws IOException
     {
+        return createFromSeekableSource(source, filename, 0);
+    }
+
+    public static PDImageXObject createFromSeekableSource(SeekableSource source, String filename, int number)
+            throws IOException
+    {
         // we first try to match the first bytes to some known pattern, so we don't rely on the extension first
         FileType fileType = FileTypeDetector.detectFileType(source);
 
@@ -186,7 +192,7 @@ public final class PDImageXObject extends PDXObject implements PDImage
         {
             try
             {
-                return CCITTFactory.createFromSeekableSource(source);
+                return CCITTFactory.createFromSeekableSource(source, number);
             }
             catch (IOException ex)
             {
