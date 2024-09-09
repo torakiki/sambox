@@ -40,6 +40,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.RenderingHints;
@@ -55,6 +57,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.ref.SoftReference;
 import java.nio.ByteBuffer;
+import java.util.Iterator;
 import java.util.List;
 
 import static java.util.Objects.nonNull;
@@ -178,6 +181,32 @@ public final class PDImageXObject extends PDXObject implements PDImage
         return createFromSeekableSource(source, filename, 0);
     }
 
+    // same as ImageIO.read() but allows reading a specific image from a multi-page image (eg: tiff)
+    public static BufferedImage read(InputStream inputStream, int number) throws IOException {
+        if(number == 0)
+        {
+            return ImageIO.read(inputStream);
+        }
+        
+        BufferedImage image = null;
+        ImageInputStream iis = ImageIO.createImageInputStream(inputStream);
+        Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
+
+        if (readers.hasNext()) {
+            ImageReader reader = readers.next();
+            reader.setInput(iis);
+
+            try {
+                image = reader.read(number);
+            } finally {
+                reader.dispose();
+                iis.close();
+            }
+        }
+
+        return image;
+    }
+
     public static PDImageXObject createFromSeekableSource(SeekableSource source, String filename, int number)
             throws IOException
     {
@@ -196,7 +225,7 @@ public final class PDImageXObject extends PDXObject implements PDImage
             }
             catch (IOException ex)
             {
-                LOG.warn("Reading as TIFF failed, setting fileType to PNG", ex);
+                LOG.warn("Reading as TIFF failed using CCITTFactory, falling back to ImageIO: {}", ex.getMessage());
                 // Plan B: try reading with ImageIO
                 // common exception:
                 // First image in tiff is not CCITT T4 or T6 compressed
@@ -206,7 +235,7 @@ public final class PDImageXObject extends PDXObject implements PDImage
         BufferedImage image;
         try
         {
-            image = ImageIO.read(source.asNewInputStream());
+            image = read(source.asNewInputStream(), number);
         }
         catch (Exception e)
         {
