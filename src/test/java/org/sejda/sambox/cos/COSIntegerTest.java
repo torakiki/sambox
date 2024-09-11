@@ -55,12 +55,6 @@ public class COSIntegerTest
     }
 
     @Test
-    public void doubleValue()
-    {
-        assertEquals(2, COSInteger.get(2).doubleValue(), 0);
-    }
-
-    @Test
     public void floatValue()
     {
         assertEquals(2, COSInteger.get(2).floatValue(), 0);

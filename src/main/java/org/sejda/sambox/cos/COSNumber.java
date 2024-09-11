@@ -16,11 +16,10 @@
  */
 package org.sejda.sambox.cos;
 
-import java.io.IOException;
-import java.util.regex.Pattern;
-
 import static org.sejda.commons.util.RequireUtils.requireArg;
 import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
+
+import java.io.IOException;
 
 /**
  * This class represents an abstract number in a PDF document.
@@ -34,11 +33,6 @@ public abstract class COSNumber extends COSBase
      * @return The float value of this object.
      */
     public abstract float floatValue();
-
-    /**
-     * @return The double value of this number.
-     */
-    public abstract double doubleValue();
 
     /**
      * @return The integer value of this number.

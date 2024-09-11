@@ -42,11 +42,9 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import org.sejda.commons.FastByteArrayOutputStream;
-import org.sejda.commons.Pool;
 import org.sejda.commons.util.IOUtils;
 import org.sejda.io.OffsettableSeekableSource;
 import org.sejda.io.SeekableSource;
-import org.sejda.sambox.SAMBox;
 import org.sejda.sambox.cos.COSObjectKey;
 import org.sejda.sambox.util.CharUtils;
 import org.slf4j.Logger;
@@ -68,11 +66,6 @@ class SourceReader implements Closeable
     private static final int GENERATION_NUMBER_THRESHOLD = 65535;
     public static final String OBJ = "obj";
 
-    private final Pool<StringBuilder> pool = new Pool<>(StringBuilder::new,
-            Integer.getInteger(SAMBox.BUFFERS_POOL_SIZE_PROPERTY, 10)).onGive(b -> {
-        b.setLength(0);
-        b.trimToSize();
-    });
     private SeekableSource source;
 
     public SourceReader(SeekableSource source)
@@ -126,7 +119,7 @@ class SourceReader implements Closeable
 
     /**
      * @return the source length
-     * @see  SeekableSource#size()
+     * @see SeekableSource#size()
      */
     public long length()
     {
@@ -234,21 +227,14 @@ class SourceReader implements Closeable
     public String readToken() throws IOException
     {
         skipSpaces();
-        StringBuilder builder = pool.borrow();
-        try
+        var builder = new StringBuilder(8);
+        int c;
+        while (((c = source.read()) != -1) && !isEndOfName(c))
         {
-            int c;
-            while (((c = source.read()) != -1) && !isEndOfName(c))
-            {
-                builder.append((char) c);
-            }
-            unreadIfValid(c);
-            return builder.toString();
+            builder.append((char) c);
         }
-        finally
-        {
-            pool.give(builder);
-        }
+        unreadIfValid(c);
+        return builder.toString();
     }
 
     /**
@@ -300,24 +286,17 @@ class SourceReader implements Closeable
     {
         requireIOCondition(source.peek() != -1, "Expected line but was end of file");
 
-        StringBuilder builder = pool.borrow();
-        try
+        var builder = new StringBuilder(16);
+        int c;
+        while ((c = source.read()) != -1 && !isEOL(c))
         {
-            int c;
-            while ((c = source.read()) != -1 && !isEOL(c))
-            {
-                builder.append((char) c);
-            }
-            if (isCarriageReturn(c) && isLineFeed(source.peek()))
-            {
-                source.read();
-            }
-            return builder.toString();
+            builder.append((char) c);
         }
-        finally
+        if (isCarriageReturn(c) && isLineFeed(source.peek()))
         {
-            pool.give(builder);
+            source.read();
         }
+        return builder.toString();
     }
 
     /**
@@ -460,25 +439,18 @@ class SourceReader implements Closeable
     public final String readIntegerNumber() throws IOException
     {
         skipSpaces();
-        StringBuilder builder = pool.borrow();
-        try
+        var builder = new StringBuilder(8);
+        int c = source.read();
+        if (c != -1 && (isDigit(c) || c == '+' || c == '-'))
         {
-            int c = source.read();
-            if (c != -1 && (isDigit(c) || c == '+' || c == '-'))
+            builder.append((char) c);
+            while ((c = source.read()) != -1 && isDigit(c))
             {
                 builder.append((char) c);
-                while ((c = source.read()) != -1 && isDigit(c))
-                {
-                    builder.append((char) c);
-                }
             }
-            unreadIfValid(c);
-            return builder.toString();
         }
-        finally
-        {
-            pool.give(builder);
-        }
+        unreadIfValid(c);
+        return builder.toString();
     }
 
     /**
@@ -489,44 +461,37 @@ class SourceReader implements Closeable
      */
     public final String readNumber() throws IOException
     {
-        StringBuilder builder = pool.borrow();
+        var builder = new StringBuilder(8);
         int lastAppended = -1;
-        try
+        int c = source.read();
+        if (c != -1 && (isDigit(c) || c == '+' || c == '-' || c == '.'))
         {
-            int c = source.read();
-            if (c != -1 && (isDigit(c) || c == '+' || c == '-' || c == '.'))
+            builder.append((char) c);
+            lastAppended = c;
+
+            // Ignore double negative (this is consistent with Adobe Reader)
+            if (c == '-' && source.peek() == c)
             {
-                builder.append((char) c);
-                lastAppended = c;
+                source.read();
+            }
 
-                // Ignore double negative (this is consistent with Adobe Reader)
-                if (c == '-' && source.peek() == c)
+            while ((c = source.read()) != -1 && (isDigit(c) || c == '.' || c == 'E' || c == 'e'
+                    || c == '+' || c == '-'))
+            {
+                if (c == '-' && !(lastAppended == 'e' || lastAppended == 'E'))
                 {
-                    source.read();
+                    // PDFBOX-4064: ignore "-" in the middle of a number
+                    // but not if its a negative exponent 1e-23
                 }
-
-                while ((c = source.read()) != -1 && (isDigit(c) || c == '.' || c == 'E' || c == 'e'
-                        || c == '+' || c == '-'))
+                else
                 {
-                    if (c == '-' && !(lastAppended == 'e' || lastAppended == 'E'))
-                    {
-                        // PDFBOX-4064: ignore "-" in the middle of a number
-                        // but not if its a negative exponent 1e-23
-                    }
-                    else
-                    {
-                        builder.append((char) c);
-                        lastAppended = c;
-                    }
+                    builder.append((char) c);
+                    lastAppended = c;
                 }
             }
-            unreadIfValid(c);
-            return builder.toString();
         }
-        finally
-        {
-            pool.give(builder);
-        }
+        unreadIfValid(c);
+        return builder.toString();
     }
 
     /**
@@ -539,34 +504,27 @@ class SourceReader implements Closeable
     public final String readHexString() throws IOException
     {
         skipExpected('<');
-        StringBuilder builder = pool.borrow();
-        try
+        var builder = new StringBuilder(16);
+        int c;
+        while (((c = source.read()) != -1) && c != '>')
         {
-            int c;
-            while (((c = source.read()) != -1) && c != '>')
+            if (isHexDigit(c))
             {
-                if (isHexDigit(c))
-                {
-                    builder.append((char) c);
-                }
-                else if (!isWhitespace(c))
-                {
-                    // this differs from original PDFBox implementation. It replaces the wrong char with a default value
-                    // and goes on.
-                    LOG.warn(String.format(
-                            "Expected an hexadecimal char at offset %d but was '%c'. Replaced with default 0.",
-                            position() - 1, c));
-                    builder.append('0');
-                }
+                builder.append((char) c);
             }
-            requireIOCondition(c != -1,
-                    "Unexpected EOF. Missing closing bracket for hexadecimal string.");
-            return builder.toString();
+            else if (!isWhitespace(c))
+            {
+                // this differs from original PDFBox implementation. It replaces the wrong char with a default value
+                // and goes on.
+                LOG.warn(String.format(
+                        "Expected an hexadecimal char at offset %d but was '%c'. Replaced with default 0.",
+                        position() - 1, c));
+                builder.append('0');
+            }
         }
-        finally
-        {
-            pool.give(builder);
-        }
+        requireIOCondition(c != -1,
+                "Unexpected EOF. Missing closing bracket for hexadecimal string.");
+        return builder.toString();
     }
 
     /**
@@ -579,112 +537,98 @@ class SourceReader implements Closeable
     {
         skipExpected('(');
         int bracesCounter = 1;
-        StringBuilder builder = pool.borrow();
-        try
-        {
+        var builder = new StringBuilder(16);
 
-            int i;
-            while ((i = source.read()) != -1 && bracesCounter > 0)
+        int i;
+        while ((i = source.read()) != -1 && bracesCounter > 0)
+        {
+            char c = (char) i;
+            switch (c)
             {
-                char c = (char) i;
-                switch (c)
+            case '(' ->
+            {
+                bracesCounter++;
+                builder.append(c);
+            }
+            case ')' ->
+            {
+                bracesCounter--;
+                // TODO PDFBox 276
+                // this differs from the PDFBox 2.0.0 impl.
+                // consider if we want to take care of this. Maybe investigate Acrobat to see how they do it
+                if (bracesCounter > 0)
                 {
-                case '(' ->
-                {
-                    bracesCounter++;
                     builder.append(c);
                 }
-                case ')' ->
+            }
+            case '\\' ->
+            {
+                char next = (char) source.read();
+                switch (next)
                 {
-                    bracesCounter--;
-                    // TODO PDFBox 276
-                    // this differs from the PDFBox 2.0.0 impl.
-                    // consider if we want to take care of this. Maybe investigate Acrobat to see how they do it
-                    if (bracesCounter > 0)
-                    {
-                        builder.append(c);
-                    }
-                }
-                case '\\' ->
-                {
-                    char next = (char) source.read();
-                    switch (next)
-                    {
-                    case 'n' -> builder.append((char) ASCII_LINE_FEED);
-                    case 'r' -> builder.append((char) ASCII_CARRIAGE_RETURN);
-                    case 't' -> builder.append((char) ASCII_HORIZONTAL_TAB);
-                    case 'b' -> builder.append((char) ASCII_BACKSPACE);
-                    case 'f' -> builder.append((char) ASCII_FORM_FEED);
+                case 'n' -> builder.append((char) ASCII_LINE_FEED);
+                case 'r' -> builder.append((char) ASCII_CARRIAGE_RETURN);
+                case 't' -> builder.append((char) ASCII_HORIZONTAL_TAB);
+                case 'b' -> builder.append((char) ASCII_BACKSPACE);
+                case 'f' -> builder.append((char) ASCII_FORM_FEED);
 
-                    // TODO PDFBox 276
-                    // this differs from the PDFBox 2.0.0 impl.
-                    // consider if we want to take care of this. Maybe investigate Acrobat to see how they do it
-                    case ')', '(', '\\' -> builder.append(next);
-                    case '0', '1', '2', '3', '4', '5', '6', '7' ->
+                // TODO PDFBox 276
+                // this differs from the PDFBox 2.0.0 impl.
+                // consider if we want to take care of this. Maybe investigate Acrobat to see how they do it
+                case ')', '(', '\\' -> builder.append(next);
+                case '0', '1', '2', '3', '4', '5', '6', '7' ->
+                {
+                    var octal = new StringBuilder(8);
+
+                    octal.append(next);
+                    next = (char) source.read();
+                    if (isOctalDigit(next))
                     {
-                        StringBuilder octal = pool.borrow();
-                        try
+                        octal.append(next);
+                        next = (char) source.read();
+                        if (isOctalDigit(next))
                         {
-
                             octal.append(next);
-                            next = (char) source.read();
-                            if (isOctalDigit(next))
-                            {
-                                octal.append(next);
-                                next = (char) source.read();
-                                if (isOctalDigit(next))
-                                {
-                                    octal.append(next);
-                                }
-                                else
-                                {
-                                    unreadIfValid(next);
-                                }
-                            }
-                            else
-                            {
-                                unreadIfValid(next);
-                            }
-                            builder.append((char) Integer.parseInt(octal.toString(), 8));
                         }
-                        finally
+                        else
                         {
-                            pool.give(octal);
+                            unreadIfValid(next);
                         }
                     }
-                    case ASCII_LINE_FEED, ASCII_CARRIAGE_RETURN ->
+                    else
                     {
-                        // this is a break in the line so ignore it and the newline and continue
-                        while ((c = (char) source.read()) != -1 && isEOL(c))
-                        {
-                            // NOOP
-                        }
-                        unreadIfValid(c);
+                        unreadIfValid(next);
                     }
-                    default ->
-                        // dropping the backslash
-                            unreadIfValid(c);
-                    }
+                    builder.append((char) Integer.parseInt(octal.toString(), 8));
                 }
-                case ASCII_LINE_FEED -> builder.append((char) ASCII_LINE_FEED);
-                case ASCII_CARRIAGE_RETURN ->
+                case ASCII_LINE_FEED, ASCII_CARRIAGE_RETURN ->
                 {
-                    builder.append((char) ASCII_LINE_FEED);
-                    if (!CharUtils.isLineFeed(source.read()))
+                    // this is a break in the line so ignore it and the newline and continue
+                    while ((c = (char) source.read()) != -1 && isEOL(c))
                     {
-                        unreadIfValid(c);
+                        // NOOP
                     }
+                    unreadIfValid(c);
                 }
-                default -> builder.append(c);
+                default ->
+                    // dropping the backslash
+                        unreadIfValid(c);
                 }
             }
-            unreadIfValid(i);
-            return builder.toString();
+            case ASCII_LINE_FEED -> builder.append((char) ASCII_LINE_FEED);
+            case ASCII_CARRIAGE_RETURN ->
+            {
+                builder.append((char) ASCII_LINE_FEED);
+                if (!CharUtils.isLineFeed(source.read()))
+                {
+                    unreadIfValid(c);
+                }
+            }
+            default -> builder.append(c);
+            }
         }
-        finally
-        {
-            pool.give(builder);
-        }
+        unreadIfValid(i);
+        return builder.toString();
     }
 
     /**

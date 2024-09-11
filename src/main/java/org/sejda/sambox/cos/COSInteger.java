@@ -91,12 +91,6 @@ public final class COSInteger extends COSNumber
     }
 
     @Override
-    public double doubleValue()
-    {
-        return value;
-    }
-
-    @Override
     public int intValue()
     {
         return (int) value;

@@ -16,13 +16,13 @@
  */
 package org.sejda.sambox.cos;
 
-import org.junit.Test;
-import org.sejda.sambox.TestUtils;
+import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+import org.sejda.sambox.TestUtils;
 
 /**
  * @author Andrea Vacondio
@@ -50,12 +50,6 @@ public class COSFloatTest
     }
 
     @Test
-    public void doubleValue() throws IOException
-    {
-        assertEquals(2.04, COSFloat.get("2.04").doubleValue(), 0);
-    }
-
-    @Test
     public void floatValue() throws IOException
     {
         assertEquals(2.04f, COSFloat.get("2.04").floatValue(), 0);
@@ -76,7 +70,7 @@ public class COSFloatTest
     @Test(expected = IOException.class)
     public void invalidExponential() throws IOException
     {
-        new COSFloat("4.72856f");
+        new COSFloat("4.72856k");
     }
 
     @Test
