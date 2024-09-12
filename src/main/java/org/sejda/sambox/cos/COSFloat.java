@@ -16,11 +16,11 @@
  */
 package org.sejda.sambox.cos;
 
+import static org.sejda.commons.util.RequireUtils.requireIOCondition;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.regex.Pattern;
-
-import static org.sejda.commons.util.RequireUtils.requireIOCondition;
 
 /**
  * This class represents a floating point number in a PDF document.
@@ -28,26 +28,20 @@ import static org.sejda.commons.util.RequireUtils.requireIOCondition;
  * @author Ben Litchfield
  * 
  */
-// @formatter:off
 public class COSFloat extends COSNumber
 {
-    private BigDecimal value;
+    private float value;
     private static final Pattern DOTS = Pattern.compile("\\.");
     private static final Pattern EXP_END = Pattern.compile("[e|E]$");
     private static final Pattern NUM1 = Pattern.compile("^(-)([-|+]+)\\d+\\.\\d+");
-    private static final Pattern NUM2 = Pattern.compile("^(-)([\\-|\\+]+)");
-    private static final Pattern NUM3 = Pattern.compile("^0\\.0*\\-\\d+");
-    private static final Pattern ZERO = Pattern.compile("^0\\-(\\.|\\d+)*");
-    private static final Pattern MINUS = Pattern.compile("\\-");
+    private static final Pattern NUM2 = Pattern.compile("^(-)([\\-|+]+)");
+    private static final Pattern NUM3 = Pattern.compile("^0\\.0*-\\d+");
+    private static final Pattern ZERO = Pattern.compile("^0-(\\.|\\d+)*");
+    private static final Pattern MINUS = Pattern.compile("-");
 
-    /**
-     * @param aFloat The primitive float object that this object wraps.
-     */
-    public COSFloat(float aFloat)
+    public COSFloat(float value)
     {
-        // use a BigDecimal as intermediate state to avoid
-        // a floating point string representation of the float value
-        value = new BigDecimal(String.valueOf(aFloat));
+        this.value = value;
     }
 
     /**
@@ -60,8 +54,7 @@ public class COSFloat extends COSNumber
         {
             // no pre-processing! speed optimized for the vanilla scenario where we parse good floats
             // if we encounter a problem, then we start handling edge cases, not before
-            value = new BigDecimal(aFloat);
-            checkMinMaxValues();
+            value = Float.parseFloat(aFloat);
         }
         catch (NumberFormatException e)
         {
@@ -71,13 +64,12 @@ public class COSFloat extends COSNumber
                 if (dot != aFloat.lastIndexOf('.'))
                 {
                     // 415.75.795 we replace additional dots with 0
-                    aFloat = aFloat.substring(0, dot + 1)
-                            + DOTS.matcher(aFloat.substring(dot + 1)).replaceAll("0");
+                    aFloat = aFloat.substring(0, dot + 1) + DOTS.matcher(aFloat.substring(dot + 1))
+                            .replaceAll("0");
 
                 }
-                aFloat = EXP_END.matcher(aFloat).replaceAll("");    
-                value = new BigDecimal(aFloat);
-                checkMinMaxValues();
+                aFloat = EXP_END.matcher(aFloat).replaceAll("");
+                value = Float.parseFloat(aFloat);
             }
             catch (NumberFormatException nfex)
             {
@@ -86,12 +78,12 @@ public class COSFloat extends COSNumber
                     if (NUM1.matcher(aFloat).matches())
                     {
                         // PDFBOX-3589 --242.0
-                        value = new BigDecimal(NUM2.matcher(aFloat).replaceFirst("-"));
+                        value = Float.parseFloat(NUM2.matcher(aFloat).replaceFirst("-"));
                     }
                     else if (ZERO.matcher(aFloat).matches())
                     {
                         // SAMBox 75
-                        value = BigDecimal.ZERO;
+                        value = 0f;
                     }
                     else
                     {
@@ -100,9 +92,8 @@ public class COSFloat extends COSNumber
                         // PDFBOX-3500 has 0.-262
                         requireIOCondition(NUM3.matcher(aFloat).matches(),
                                 "Expected floating point number but found '" + aFloat + "'");
-                        value = new BigDecimal("-" + MINUS.matcher(aFloat).replaceFirst(""));
+                        value = Float.parseFloat("-" + MINUS.matcher(aFloat).replaceFirst(""));
                     }
-                    checkMinMaxValues();
                 }
                 catch (NumberFormatException e2)
                 {
@@ -111,78 +102,74 @@ public class COSFloat extends COSNumber
                 }
             }
         }
+        value = coerce(value);
     }
 
-    private void checkMinMaxValues()
+    private float coerce(float floatValue)
     {
-        float floatValue = value.floatValue();
-        double doubleValue = value.doubleValue();
-        boolean valueReplaced = false;
-        // check for huge values
-        if (floatValue == Float.NEGATIVE_INFINITY || floatValue == Float.POSITIVE_INFINITY)
+        if (floatValue == Float.POSITIVE_INFINITY)
         {
-
-            if (Math.abs(doubleValue) > Float.MAX_VALUE)
-            {
-                floatValue = Float.MAX_VALUE * (floatValue == Float.POSITIVE_INFINITY ? 1 : -1);
-                valueReplaced = true;
-            }
+            return Float.MAX_VALUE;
         }
-        // check for very small values
-        else if (floatValue == 0 && doubleValue != 0 && Math.abs(doubleValue) < Float.MIN_NORMAL)
+        if (floatValue == Float.NEGATIVE_INFINITY)
+        {
+            return -Float.MAX_VALUE;
+        }
+        if (Math.abs(floatValue) < Float.MIN_NORMAL)
         {
             // values smaller than the smallest possible float value are converted to 0
             // see PDF spec, chapter 2 of Appendix C Implementation Limits
-            valueReplaced = true;
+            return 0f;
         }
-        if (valueReplaced)
-        {
-            value = BigDecimal.valueOf(floatValue);
-        }
+        return floatValue;
     }
 
     @Override
     public float floatValue()
     {
-        return value.floatValue();
+        return value;
     }
 
     @Override
     public double doubleValue()
     {
-        return value.doubleValue();
+        return value;
     }
 
     @Override
     public long longValue()
     {
-        return value.longValue();
+        return (long) value;
     }
 
     @Override
     public int intValue()
     {
-        return value.intValue();
+        return (int) value;
     }
 
     @Override
     public boolean equals(Object o)
     {
         return o instanceof COSFloat
-                && Float.floatToIntBits(((COSFloat) o).value.floatValue()) == Float
-                        .floatToIntBits(value.floatValue());
+                && Float.floatToIntBits(((COSFloat) o).value) == Float.floatToIntBits(value);
     }
 
     @Override
     public int hashCode()
     {
-        return value.hashCode();
+        return Float.hashCode(value);
     }
 
     @Override
     public String toString()
     {
-        return value.stripTrailingZeros().toPlainString();
+        var s = String.valueOf(value);
+        if (s.indexOf('E') < 0)
+        {
+            return s;
+        }
+        return new BigDecimal(s).stripTrailingZeros().toPlainString();
     }
 
     @Override

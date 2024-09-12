@@ -42,21 +42,19 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import org.sejda.commons.FastByteArrayOutputStream;
-import org.sejda.commons.Pool;
 import org.sejda.commons.util.IOUtils;
 import org.sejda.io.OffsettableSeekableSource;
 import org.sejda.io.SeekableSource;
-import org.sejda.sambox.SAMBox;
 import org.sejda.sambox.cos.COSObjectKey;
 import org.sejda.sambox.util.CharUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Component responsible for reading a {@link SeekableSource}. Methods to read expected kind of tokens are available as
- * well as methods to skip them. This implementation uses a pool of {@link StringBuilder}s to minimize garbage
- * collection.
- * 
+ * Component responsible for reading a {@link SeekableSource}. Methods to read expected kind of
+ * tokens are available as well as methods to skip them. This implementation uses a pool of
+ * {@link StringBuilder}s to minimize garbage collection.
+ *
  * @author Andrea Vacondio
  */
 class SourceReader implements Closeable
@@ -68,11 +66,6 @@ class SourceReader implements Closeable
     private static final int GENERATION_NUMBER_THRESHOLD = 65535;
     public static final String OBJ = "obj";
 
-    private Pool<StringBuilder> pool = new Pool<>(StringBuilder::new,
-            Integer.getInteger(SAMBox.BUFFERS_POOL_SIZE_PROPERTY, 10)).onGive(b -> {
-                b.setLength(0);
-                b.trimToSize();
-            });
     private SeekableSource source;
 
     public SourceReader(SeekableSource source)
@@ -91,8 +84,7 @@ class SourceReader implements Closeable
 
     /**
      * @return the current position
-     * @throws IOException
-     * @see {@link SeekableSource#position()}
+     * @see SeekableSource#position()
      */
     public long position() throws IOException
     {
@@ -102,9 +94,7 @@ class SourceReader implements Closeable
     /**
      * adds an offset to the source
      *
-     * @param offset
-     * @throws IOException
-     * @see {@link OffsettableSeekableSource#offset(long)}
+     * @see OffsettableSeekableSource#offset(long)
      */
     public void offset(long offset) throws IOException
     {
@@ -120,8 +110,7 @@ class SourceReader implements Closeable
      * seeks to the given offset
      *
      * @param offset the new offset
-     * @throws IOException
-     * @see {@link SeekableSource#position(long)}
+     * @see SeekableSource#position(long)
      */
     public void position(long offset) throws IOException
     {
@@ -130,7 +119,7 @@ class SourceReader implements Closeable
 
     /**
      * @return the source length
-     * @see {@link SeekableSource#size()}
+     * @see SeekableSource#size()
      */
     public long length()
     {
@@ -145,9 +134,9 @@ class SourceReader implements Closeable
      */
     public final void skipExpected(String expected) throws IOException
     {
-        for (char c : expected.toCharArray())
+        for (int i = 0; i < expected.length(); i++)
         {
-            skipExpected(c);
+            skipExpected(expected.charAt(i));
         }
     }
 
@@ -170,15 +159,15 @@ class SourceReader implements Closeable
     /**
      * Skips the next token if it's value is one of the given ones
      *
-     * @param values the values to skip
+     * @param value the value to skip
      * @return true if the token is found and skipped, false otherwise.
      * @throws IOException if there is an error reading from the stream
      */
-    public boolean skipTokenIfValue(String... values) throws IOException
+    public boolean skipTokenIfValue(String value) throws IOException
     {
         long pos = position();
         String token = readToken();
-        if (!asList(values).contains(token))
+        if (!value.equals(token))
         {
             source.position(pos);
             return false;
@@ -187,8 +176,9 @@ class SourceReader implements Closeable
     }
 
     /**
-     * Skips an indirect object definition open tag (Ex. "12 0 obj") as defined in the chap 7.3.10 PDF 32000-1:2008.
-     * 
+     * Skips an indirect object definition open tag (Ex. "12 0 obj") as defined in the chap 7.3.10
+     * PDF 32000-1:2008.
+     *
      * @throws IOException if we are reading a not valid indirect object definition open tag
      */
     public void skipIndirectObjectDefinition() throws IOException
@@ -200,11 +190,12 @@ class SourceReader implements Closeable
     }
 
     /**
-     * Skips an indirect object definition open tag (Ex. "12 0 obj") as defined in the chap 7.3.10 PDF 32000-1:2008.
-     * 
+     * Skips an indirect object definition open tag (Ex. "12 0 obj") as defined in the chap 7.3.10
+     * PDF 32000-1:2008.
+     *
      * @param expected object we are expecting to find
-     * @throws IOException if we are reading a not valid indirect object definition open tag or the object number or
-     * generation number don't match the expected object
+     * @throws IOException if we are reading a not valid indirect object definition open tag or the
+     *                     object number or generation number don't match the expected object
      */
     public void skipExpectedIndirectObjectDefinition(COSObjectKey expected) throws IOException
     {
@@ -230,34 +221,24 @@ class SourceReader implements Closeable
 
     /**
      * @return The next token that was read from the stream.
-     *
      * @throws IOException If there is an error reading from the stream.
      * @see CharUtils#isEndOfName(int)
      */
     public String readToken() throws IOException
     {
         skipSpaces();
-        StringBuilder builder = pool.borrow();
-        try
+        var builder = new StringBuilder(8);
+        int c;
+        while (((c = source.read()) != -1) && !isEndOfName(c))
         {
-            int c;
-            while (((c = source.read()) != -1) && !isEndOfName(c))
-            {
-                builder.append((char) c);
-            }
-            unreadIfValid(c);
-            return builder.toString();
+            builder.append((char) c);
         }
-        finally
-        {
-            pool.give(builder);
-        }
+        unreadIfValid(c);
+        return builder.toString();
     }
 
     /**
      * Unreads white spaces
-     * 
-     * @throws IOException
      */
     public void unreadSpaces() throws IOException
     {
@@ -270,8 +251,6 @@ class SourceReader implements Closeable
 
     /**
      * Unreads characters until it finds a white space
-     * 
-     * @throws IOException
      */
     public void unreadUntilSpaces() throws IOException
     {
@@ -296,8 +275,9 @@ class SourceReader implements Closeable
     }
 
     /**
-     * Reads bytes until the first end of line marker occurs. NOTE: The EOL marker may consists of 1 (CR or LF) or 2 (CR
-     * and CL) bytes which is an important detail if one wants to unread the line.
+     * Reads bytes until the first end of line marker occurs. NOTE: The EOL marker may consists of 1
+     * (CR or LF) or 2 (CR and CL) bytes which is an important detail if one wants to unread the
+     * line.
      *
      * @return The characters between the current position and the end of the line.
      * @throws IOException If there is an error reading from the stream.
@@ -306,29 +286,22 @@ class SourceReader implements Closeable
     {
         requireIOCondition(source.peek() != -1, "Expected line but was end of file");
 
-        StringBuilder builder = pool.borrow();
-        try
+        var builder = new StringBuilder(16);
+        int c;
+        while ((c = source.read()) != -1 && !isEOL(c))
         {
-            int c;
-            while ((c = source.read()) != -1 && !isEOL(c))
-            {
-                builder.append((char) c);
-            }
-            if (isCarriageReturn(c) && isLineFeed(source.peek()))
-            {
-                source.read();
-            }
-            return builder.toString();
+            builder.append((char) c);
         }
-        finally
+        if (isCarriageReturn(c) && isLineFeed(source.peek()))
         {
-            pool.give(builder);
+            source.read();
         }
+        return builder.toString();
     }
 
     /**
-     * Reads a long and throws an {@link IOException} if the long value is negative or has more than 10 digits (i.e. :
-     * bigger than {@link #OBJECT_NUMBER_THRESHOLD})
+     * Reads a long and throws an {@link IOException} if the long value is negative or has more than
+     * 10 digits (i.e. : bigger than {@link #OBJECT_NUMBER_THRESHOLD})
      *
      * @return the object number being read.
      * @throws IOException if an I/O error occurs
@@ -345,9 +318,9 @@ class SourceReader implements Closeable
     }
 
     /**
-     * reads an integer and throws an {@link IOException} if the integer value has more than the maximum object revision
-     * (i.e. : bigger than {@link #GENERATION_NUMBER_THRESHOLD})
-     * 
+     * reads an integer and throws an {@link IOException} if the integer value has more than the
+     * maximum object revision (i.e. : bigger than {@link #GENERATION_NUMBER_THRESHOLD})
+     *
      * @return the generation number being read.
      * @throws IOException if an I/O error occurs
      */
@@ -363,7 +336,7 @@ class SourceReader implements Closeable
 
     /**
      * Reads a token conforming with PDF Name Objects chap 7.3.5 PDF 32000-1:2008.
-     * 
+     *
      * @return the generation number being read.
      * @throws IOException if an I/O error occurs
      */
@@ -432,8 +405,7 @@ class SourceReader implements Closeable
             source.back(intBuffer.getBytes(StandardCharsets.ISO_8859_1).length);
             throw new IOException(
                     String.format("Expected an integer type at offset %d but was '%s'", position(),
-                            intBuffer),
-                    e);
+                            intBuffer), e);
         }
     }
 
@@ -451,8 +423,9 @@ class SourceReader implements Closeable
         catch (NumberFormatException e)
         {
             source.back(longBuffer.getBytes(StandardCharsets.ISO_8859_1).length);
-            throw new IOException(String.format("Expected a long type at offset %d but was '%s'",
-                    position(), longBuffer), e);
+            throw new IOException(
+                    String.format("Expected a long type at offset %d but was '%s'", position(),
+                            longBuffer), e);
         }
     }
 
@@ -466,25 +439,18 @@ class SourceReader implements Closeable
     public final String readIntegerNumber() throws IOException
     {
         skipSpaces();
-        StringBuilder builder = pool.borrow();
-        try
+        var builder = new StringBuilder(8);
+        int c = source.read();
+        if (c != -1 && (isDigit(c) || c == '+' || c == '-'))
         {
-            int c = source.read();
-            if (c != -1 && (isDigit(c) || c == '+' || c == '-'))
+            builder.append((char) c);
+            while ((c = source.read()) != -1 && isDigit(c))
             {
                 builder.append((char) c);
-                while ((c = source.read()) != -1 && isDigit(c))
-                {
-                    builder.append((char) c);
-                }
             }
-            unreadIfValid(c);
-            return builder.toString();
         }
-        finally
-        {
-            pool.give(builder);
-        }
+        unreadIfValid(c);
+        return builder.toString();
     }
 
     /**
@@ -495,50 +461,42 @@ class SourceReader implements Closeable
      */
     public final String readNumber() throws IOException
     {
-        //StringBuilder builder = pool.borrow();
-        StringBuilder builder = new StringBuilder();
+        var builder = new StringBuilder(8);
         int lastAppended = -1;
-        try
+        int c = source.read();
+        if (c != -1 && (isDigit(c) || c == '+' || c == '-' || c == '.'))
         {
-            int c = source.read();
-            if (c != -1 && (isDigit(c) || c == '+' || c == '-' || c == '.'))
+            builder.append((char) c);
+            lastAppended = c;
+
+            // Ignore double negative (this is consistent with Adobe Reader)
+            if (c == '-' && source.peek() == c)
             {
-                builder.append((char) c);
-                lastAppended = c;
+                source.read();
+            }
 
-                // Ignore double negative (this is consistent with Adobe Reader)
-                if (c == '-' && source.peek() == c)
+            while ((c = source.read()) != -1 && (isDigit(c) || c == '.' || c == 'E' || c == 'e'
+                    || c == '+' || c == '-'))
+            {
+                if (c == '-' && !(lastAppended == 'e' || lastAppended == 'E'))
                 {
-                    source.read();
+                    // PDFBOX-4064: ignore "-" in the middle of a number
+                    // but not if its a negative exponent 1e-23
                 }
-
-                while ((c = source.read()) != -1
-                        && (isDigit(c) || c == '.' || c == 'E' || c == 'e' || c == '+' || c == '-'))
+                else
                 {
-                    if (c == '-' && !(lastAppended == 'e' || lastAppended == 'E'))
-                    {
-                        // PDFBOX-4064: ignore "-" in the middle of a number
-                        // but not if its a negative exponent 1e-23
-                    }
-                    else
-                    {
-                        builder.append((char) c);
-                        lastAppended = c;
-                    }
+                    builder.append((char) c);
+                    lastAppended = c;
                 }
             }
-            unreadIfValid(c);
-            return builder.toString();
         }
-        finally
-        {
-            //pool.give(builder);
-        }
+        unreadIfValid(c);
+        return builder.toString();
     }
 
     /**
-     * Reads a token conforming with PDF Hexadecimal Strings chap 7.3.4.3 PDF 32000-1:2008. Any non hexadecimal char
-     * found while parsing the token is replace with the default '0' hex char.
+     * Reads a token conforming with PDF Hexadecimal Strings chap 7.3.4.3 PDF 32000-1:2008. Any non
+     * hexadecimal char found while parsing the token is replace with the default '0' hex char.
      *
      * @return the token to parse as an hexadecimal string
      * @throws IOException If there is an error reading from the stream.
@@ -546,38 +504,27 @@ class SourceReader implements Closeable
     public final String readHexString() throws IOException
     {
         skipExpected('<');
-        StringBuilder builder = pool.borrow();
-        try
+        var builder = new StringBuilder(16);
+        int c;
+        while (((c = source.read()) != -1) && c != '>')
         {
-            int c;
-            while (((c = source.read()) != -1) && c != '>')
+            if (isHexDigit(c))
             {
-                if (isHexDigit(c))
-                {
-                    builder.append((char) c);
-                }
-                else if (isWhitespace(c))
-                {
-                    continue;
-                }
-                else
-                {
-                    // this differs from original PDFBox implementation. It replaces the wrong char with a default value
-                    // and goes on.
-                    LOG.warn(String.format(
-                            "Expected an hexadecimal char at offset %d but was '%c'. Replaced with default 0.",
-                            position() - 1, c));
-                    builder.append('0');
-                }
+                builder.append((char) c);
             }
-            requireIOCondition(c != -1,
-                    "Unexpected EOF. Missing closing bracket for hexadecimal string.");
-            return builder.toString();
+            else if (!isWhitespace(c))
+            {
+                // this differs from original PDFBox implementation. It replaces the wrong char with a default value
+                // and goes on.
+                LOG.warn(String.format(
+                        "Expected an hexadecimal char at offset %d but was '%c'. Replaced with default 0.",
+                        position() - 1, c));
+                builder.append('0');
+            }
         }
-        finally
-        {
-            pool.give(builder);
-        }
+        requireIOCondition(c != -1,
+                "Unexpected EOF. Missing closing bracket for hexadecimal string.");
+        return builder.toString();
     }
 
     /**
@@ -590,116 +537,98 @@ class SourceReader implements Closeable
     {
         skipExpected('(');
         int bracesCounter = 1;
-        StringBuilder builder = pool.borrow();
-        try
-        {
+        var builder = new StringBuilder(16);
 
-            int i;
-            while ((i = source.read()) != -1 && bracesCounter > 0)
+        int i;
+        while ((i = source.read()) != -1 && bracesCounter > 0)
+        {
+            char c = (char) i;
+            switch (c)
             {
-                char c = (char) i;
-                switch (c)
+            case '(' ->
+            {
+                bracesCounter++;
+                builder.append(c);
+            }
+            case ')' ->
+            {
+                bracesCounter--;
+                // TODO PDFBox 276
+                // this differs from the PDFBox 2.0.0 impl.
+                // consider if we want to take care of this. Maybe investigate Acrobat to see how they do it
+                if (bracesCounter > 0)
                 {
-                case '(' ->
-                {
-                    bracesCounter++;
                     builder.append(c);
                 }
-                case ')' ->
+            }
+            case '\\' ->
+            {
+                char next = (char) source.read();
+                switch (next)
                 {
-                    bracesCounter--;
-                    // TODO PDFBox 276
-                    // this differs from the PDFBox 2.0.0 impl.
-                    // consider if we want to take care of this. Maybe investigate Acrobat to see how they do it
-                    if (bracesCounter > 0)
-                    {
-                        builder.append(c);
-                    }
-                }
-                case '\\' ->
-                {
-                    char next = (char) source.read();
-                    switch (next)
-                    {
-                    case 'n' -> builder.append((char) ASCII_LINE_FEED);
-                    case 'r' -> builder.append((char) ASCII_CARRIAGE_RETURN);
-                    case 't' -> builder.append((char) ASCII_HORIZONTAL_TAB);
-                    case 'b' -> builder.append((char) ASCII_BACKSPACE);
-                    case 'f' -> builder.append((char) ASCII_FORM_FEED);
+                case 'n' -> builder.append((char) ASCII_LINE_FEED);
+                case 'r' -> builder.append((char) ASCII_CARRIAGE_RETURN);
+                case 't' -> builder.append((char) ASCII_HORIZONTAL_TAB);
+                case 'b' -> builder.append((char) ASCII_BACKSPACE);
+                case 'f' -> builder.append((char) ASCII_FORM_FEED);
 
-                    // TODO PDFBox 276
-                    // this differs from the PDFBox 2.0.0 impl.
-                    // consider if we want to take care of this. Maybe investigate Acrobat to see how they do it
-                    case ')', '(', '\\' -> builder.append(next);
-                    case '0', '1', '2', '3', '4', '5', '6', '7' ->
+                // TODO PDFBox 276
+                // this differs from the PDFBox 2.0.0 impl.
+                // consider if we want to take care of this. Maybe investigate Acrobat to see how they do it
+                case ')', '(', '\\' -> builder.append(next);
+                case '0', '1', '2', '3', '4', '5', '6', '7' ->
+                {
+                    var octal = new StringBuilder(8);
+
+                    octal.append(next);
+                    next = (char) source.read();
+                    if (isOctalDigit(next))
                     {
-                        StringBuilder octal = pool.borrow();
-                        try
+                        octal.append(next);
+                        next = (char) source.read();
+                        if (isOctalDigit(next))
                         {
-
                             octal.append(next);
-                            next = (char) source.read();
-                            if (isOctalDigit(next))
-                            {
-                                octal.append(next);
-                                next = (char) source.read();
-                                if (isOctalDigit(next))
-                                {
-                                    octal.append(next);
-                                }
-                                else
-                                {
-                                    unreadIfValid(next);
-                                }
-                            }
-                            else
-                            {
-                                unreadIfValid(next);
-                            }
-                            builder.append((char) Integer.parseInt(octal.toString(), 8));
                         }
-                        finally
+                        else
                         {
-                            pool.give(octal);
+                            unreadIfValid(next);
                         }
-                        break;
                     }
-                    case ASCII_LINE_FEED, ASCII_CARRIAGE_RETURN ->
+                    else
                     {
-                        // this is a break in the line so ignore it and the newline and continue
-                        while ((c = (char) source.read()) != -1 && isEOL(c))
-                        {
-                            // NOOP
-                        }
-                        unreadIfValid(c);
-                        break;
+                        unreadIfValid(next);
                     }
-                    default ->
-                        // dropping the backslash
-                            unreadIfValid(c);
-                    }
-                    break;
+                    builder.append((char) Integer.parseInt(octal.toString(), 8));
                 }
-                case ASCII_LINE_FEED -> builder.append((char) ASCII_LINE_FEED);
-                case ASCII_CARRIAGE_RETURN ->
+                case ASCII_LINE_FEED, ASCII_CARRIAGE_RETURN ->
                 {
-                    builder.append((char) ASCII_LINE_FEED);
-                    if (!CharUtils.isLineFeed(source.read()))
+                    // this is a break in the line so ignore it and the newline and continue
+                    while ((c = (char) source.read()) != -1 && isEOL(c))
                     {
-                        unreadIfValid(c);
+                        // NOOP
                     }
-                    break;
+                    unreadIfValid(c);
                 }
-                default -> builder.append(c);
+                default ->
+                    // dropping the backslash
+                        unreadIfValid(c);
                 }
             }
-            unreadIfValid(i);
-            return builder.toString();
+            case ASCII_LINE_FEED -> builder.append((char) ASCII_LINE_FEED);
+            case ASCII_CARRIAGE_RETURN ->
+            {
+                builder.append((char) ASCII_LINE_FEED);
+                if (!CharUtils.isLineFeed(source.read()))
+                {
+                    unreadIfValid(c);
+                }
+            }
+            default -> builder.append(c);
+            }
         }
-        finally
-        {
-            pool.give(builder);
-        }
+        unreadIfValid(i);
+        return builder.toString();
     }
 
     /**
@@ -731,9 +660,6 @@ class SourceReader implements Closeable
 
     /**
      * Unreads the given character if it's not -1
-     * 
-     * @param c
-     * @throws IOException
      */
     public void unreadIfValid(int c) throws IOException
     {
