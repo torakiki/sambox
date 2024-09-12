@@ -10,7 +10,6 @@ What's different from PDFBox?
 + Requires JDK 21
 + Lazy loading/parsing of PDF objects. Only the document xref table(s)/stream(s) is(are) initially parsed and information to lookup objects are retrieved, when later a PDF object is requested, the object is retrieve/parsed using the lookup information. This allows minimal memory footprint when you only need part of the document (Ex. you only need the information dictionary or the number of pages of the document).
 + Multiple I/O implementations to read from. SAMBox uses [Sejda-io](https://github.com/torakiki/sejda-io) allowing to use one of the provided implementation based on `java.nio.channels.FileChannel`, `java.io.InputStream` and `java.nio.MappedByteBuffer` (buffered or not).
-+ Minimized GC through the use of a pool of `java.lang.StringBuilder`.
 + PDF streams are read directly from the underlying source through the concept of bounded views.
 + Use and discard of lazy PDF objects. PDF objects can be written (sync/async) and discarded as soon as they have been written, this is particularly useful with existing documents where objects are lazy loaded, written and then discarded, keeping a low memory footprint.
 + All the I/O and parsing logic has been refactored to smaller classes which are nearly 100% unit tested. 
