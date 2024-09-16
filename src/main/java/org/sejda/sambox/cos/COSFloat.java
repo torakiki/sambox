@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.cos;
 
+import static java.util.Objects.isNull;
 import static org.sejda.commons.util.RequireUtils.requireIOCondition;
 
 import java.io.IOException;
@@ -26,11 +27,9 @@ import java.util.regex.Pattern;
  * This class represents a floating point number in a PDF document.
  *
  * @author Ben Litchfield
- * 
  */
 public class COSFloat extends COSNumber
 {
-    private float value;
     private static final Pattern DOTS = Pattern.compile("\\.");
     private static final Pattern EXP_END = Pattern.compile("[e|E]$");
     private static final Pattern NUM1 = Pattern.compile("^(-)([-|+]+)\\d+\\.\\d+");
@@ -39,9 +38,13 @@ public class COSFloat extends COSNumber
     private static final Pattern ZERO = Pattern.compile("^0-(\\.|\\d+)*");
     private static final Pattern MINUS = Pattern.compile("-");
 
+    private float value;
+    private String stringValue;
+
     public COSFloat(float value)
     {
-        this.value = value;
+        this.value = coerce(value);
+        this.stringValue = formatString();
     }
 
     /**
@@ -54,7 +57,12 @@ public class COSFloat extends COSNumber
         {
             // no pre-processing! speed optimized for the vanilla scenario where we parse good floats
             // if we encounter a problem, then we start handling edge cases, not before
-            value = Float.parseFloat(aFloat);
+            var parsedValue = Float.parseFloat(aFloat);
+            value = coerce(parsedValue);
+            if (parsedValue == value)
+            {
+                this.stringValue = aFloat;
+            }
         }
         catch (NumberFormatException e)
         {
@@ -69,7 +77,7 @@ public class COSFloat extends COSNumber
 
                 }
                 aFloat = EXP_END.matcher(aFloat).replaceAll("");
-                value = Float.parseFloat(aFloat);
+                value = coerce(Float.parseFloat(aFloat));
             }
             catch (NumberFormatException nfex)
             {
@@ -78,7 +86,7 @@ public class COSFloat extends COSNumber
                     if (NUM1.matcher(aFloat).matches())
                     {
                         // PDFBOX-3589 --242.0
-                        value = Float.parseFloat(NUM2.matcher(aFloat).replaceFirst("-"));
+                        value = coerce(Float.parseFloat(NUM2.matcher(aFloat).replaceFirst("-")));
                     }
                     else if (ZERO.matcher(aFloat).matches())
                     {
@@ -92,7 +100,8 @@ public class COSFloat extends COSNumber
                         // PDFBOX-3500 has 0.-262
                         requireIOCondition(NUM3.matcher(aFloat).matches(),
                                 "Expected floating point number but found '" + aFloat + "'");
-                        value = Float.parseFloat("-" + MINUS.matcher(aFloat).replaceFirst(""));
+                        value = coerce(
+                                Float.parseFloat("-" + MINUS.matcher(aFloat).replaceFirst("")));
                     }
                 }
                 catch (NumberFormatException e2)
@@ -102,7 +111,10 @@ public class COSFloat extends COSNumber
                 }
             }
         }
-        value = coerce(value);
+        if (isNull(this.stringValue))
+        {
+            this.stringValue = formatString();
+        }
     }
 
     private float coerce(float floatValue)
@@ -122,6 +134,16 @@ public class COSFloat extends COSNumber
             return 0f;
         }
         return floatValue;
+    }
+
+    private String formatString()
+    {
+        var s = String.valueOf(value);
+        if (s.indexOf('E') < 0)
+        {
+            return s;
+        }
+        return new BigDecimal(s).stripTrailingZeros().toPlainString();
     }
 
     @Override
@@ -145,8 +167,8 @@ public class COSFloat extends COSNumber
     @Override
     public boolean equals(Object o)
     {
-        return o instanceof COSFloat
-                && Float.floatToIntBits(((COSFloat) o).value) == Float.floatToIntBits(value);
+        return o instanceof COSFloat cosfloat
+                && Float.floatToIntBits(cosfloat.value) == Float.floatToIntBits(value);
     }
 
     @Override
@@ -158,12 +180,7 @@ public class COSFloat extends COSNumber
     @Override
     public String toString()
     {
-        var s = String.valueOf(value);
-        if (s.indexOf('E') < 0)
-        {
-            return s;
-        }
-        return new BigDecimal(s).stripTrailingZeros().toPlainString();
+        return stringValue;
     }
 
     @Override

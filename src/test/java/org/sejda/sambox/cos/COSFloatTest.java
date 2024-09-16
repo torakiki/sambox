@@ -56,6 +56,12 @@ public class COSFloatTest
     }
 
     @Test
+    public void precisionToString() throws IOException
+    {
+        assertEquals("83745.38273645", COSFloat.get("83745.38273645").toString());
+    }
+
+    @Test
     public void emptyExponentialValue() throws IOException
     {
         assertEquals(4.72856f, COSFloat.get("4.72856e").floatValue(), 0);
@@ -204,4 +210,29 @@ public class COSFloatTest
         assertEquals(-Float.MAX_VALUE, cosFloat.floatValue(), 0);
     }
 
+    @Test
+    public void floatInfinity()
+    {
+        var victim = new COSFloat(Float.POSITIVE_INFINITY);
+        assertEquals(Float.MAX_VALUE, victim.floatValue(), 0);
+        assertEquals(new BigDecimal(String.valueOf(Float.MAX_VALUE)).toPlainString(),
+                victim.toString());
+    }
+
+    @Test
+    public void floatNegativeInfinity()
+    {
+        var victim = new COSFloat(Float.NEGATIVE_INFINITY);
+        assertEquals(-Float.MAX_VALUE, victim.floatValue(), 0);
+        assertEquals(new BigDecimal(String.valueOf(-Float.MAX_VALUE)).toPlainString(),
+                victim.toString());
+    }
+
+    @Test
+    public void stringRepresentationOfInvalid() throws IOException
+    {
+        var victim = new COSFloat("0.00-35095424");
+        assertEquals(new BigDecimal("-0.0035095424").toPlainString(), victim.toString());
+
+    }
 }
