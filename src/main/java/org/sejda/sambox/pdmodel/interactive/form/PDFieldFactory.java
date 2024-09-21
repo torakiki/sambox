@@ -17,10 +17,13 @@
 
 package org.sejda.sambox.pdmodel.interactive.form;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.util.ObjectIdUtils;
 
 /**
  * A PDField factory.
@@ -120,14 +123,29 @@ public final class PDFieldFactory
 
     private static String findFieldType(COSDictionary dic)
     {
+        return findFieldType(dic, new HashSet<>());
+    }
+
+    private static String findFieldType(COSDictionary dic, Set<String> visitedObjectIds)
+    {
         String retval = dic.getNameAsString(COSName.FT);
         if (retval == null)
         {
             COSDictionary parent = dic.getDictionaryObject(COSName.PARENT, COSName.P,
                     COSDictionary.class);
+            
             if (parent != null && parent != dic)
             {
-                retval = findFieldType(parent);
+                String objId = ObjectIdUtils.getObjectIdOf(dic);
+                if(!objId.isBlank() && visitedObjectIds.contains(objId))
+                {
+                    // prevent infinite recursion
+                    return null;
+                }
+
+                visitedObjectIds.add(objId);
+                
+                retval = findFieldType(parent, visitedObjectIds);
             }
         }
         return retval;
