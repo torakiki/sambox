@@ -37,8 +37,8 @@ import org.slf4j.LoggerFactory;
 class ObjectsFullScanner
 {
     private static final Logger LOG = LoggerFactory.getLogger(ObjectsFullScanner.class);
-    private static final Pattern OBJECT_DEF_PATTERN = Pattern.compile(
-            "(\\d+)[\\s]+(\\d+)[\\s]+obj");
+    private static final Matcher OBJECT_DEF_MATCHER = Pattern.compile("(\\d+)[\\s]+(\\d+)[\\s]+obj")
+            .matcher("");
 
     private Xref xref = new Xref();
     private SourceReader reader;
@@ -74,17 +74,18 @@ class ObjectsFullScanner
 
     private void addEntryIfObjectDefinition(long offset, String line) throws IOException
     {
-        Matcher matcher = OBJECT_DEF_PATTERN.matcher(line);
-        //TODO when we switch to jdk 9+
-        // long count = countEmailMatcher.results().count();
         boolean found = false;
-        while (matcher.find())
+        if (line.contains("obj"))
         {
-            long entryOffset = offset + matcher.start();
-            xref.add(XrefEntry.inUseEntry(Long.parseUnsignedLong(matcher.group(1)), entryOffset,
-                    Integer.parseUnsignedInt(matcher.group(2))));
-            onObjectDefinitionLine(entryOffset, line);
-            found = true;
+            OBJECT_DEF_MATCHER.reset(line);
+            while (OBJECT_DEF_MATCHER.find())
+            {
+                long entryOffset = offset + OBJECT_DEF_MATCHER.start();
+                xref.add(XrefEntry.inUseEntry(Long.parseUnsignedLong(OBJECT_DEF_MATCHER.group(1)),
+                        entryOffset, Integer.parseUnsignedInt(OBJECT_DEF_MATCHER.group(2))));
+                onObjectDefinitionLine(entryOffset, line);
+                found = true;
+            }
         }
         if (!found)
         {
