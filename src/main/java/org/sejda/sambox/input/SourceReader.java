@@ -91,8 +91,7 @@ class SourceReader implements Closeable
 
     /**
      * @return the current position
-     * @throws IOException
-     * @see {@link SeekableSource#position()}
+     * @see SeekableSource#position()
      */
     public long position() throws IOException
     {
@@ -102,9 +101,7 @@ class SourceReader implements Closeable
     /**
      * adds an offset to the source
      *
-     * @param offset
-     * @throws IOException
-     * @see {@link OffsettableSeekableSource#offset(long)}
+     * @see OffsettableSeekableSource#offset(long)
      */
     public void offset(long offset) throws IOException
     {
@@ -120,8 +117,7 @@ class SourceReader implements Closeable
      * seeks to the given offset
      *
      * @param offset the new offset
-     * @throws IOException
-     * @see {@link SeekableSource#position(long)}
+     * @see SeekableSource#position(long)
      */
     public void position(long offset) throws IOException
     {
@@ -130,7 +126,7 @@ class SourceReader implements Closeable
 
     /**
      * @return the source length
-     * @see {@link SeekableSource#size()}
+     * @see SeekableSource#size()
      */
     public long length()
     {
@@ -145,9 +141,9 @@ class SourceReader implements Closeable
      */
     public final void skipExpected(String expected) throws IOException
     {
-        for (char c : expected.toCharArray())
+        for (int i = 0; i < expected.length(); i++)
         {
-            skipExpected(c);
+            skipExpected(expected.charAt(i));
         }
     }
 
@@ -187,8 +183,9 @@ class SourceReader implements Closeable
     }
 
     /**
-     * Skips an indirect object definition open tag (Ex. "12 0 obj") as defined in the chap 7.3.10 PDF 32000-1:2008.
-     * 
+     * Skips an indirect object definition open tag (Ex. "12 0 obj") as defined in the chap 7.3.10
+     * PDF 32000-1:2008.
+     *
      * @throws IOException if we are reading a not valid indirect object definition open tag
      */
     public void skipIndirectObjectDefinition() throws IOException
@@ -200,11 +197,12 @@ class SourceReader implements Closeable
     }
 
     /**
-     * Skips an indirect object definition open tag (Ex. "12 0 obj") as defined in the chap 7.3.10 PDF 32000-1:2008.
-     * 
+     * Skips an indirect object definition open tag (Ex. "12 0 obj") as defined in the chap 7.3.10
+     * PDF 32000-1:2008.
+     *
      * @param expected object we are expecting to find
-     * @throws IOException if we are reading a not valid indirect object definition open tag or the object number or
-     * generation number don't match the expected object
+     * @throws IOException if we are reading a not valid indirect object definition open tag or the
+     *                     object number or generation number don't match the expected object
      */
     public void skipExpectedIndirectObjectDefinition(COSObjectKey expected) throws IOException
     {
@@ -230,7 +228,6 @@ class SourceReader implements Closeable
 
     /**
      * @return The next token that was read from the stream.
-     *
      * @throws IOException If there is an error reading from the stream.
      * @see CharUtils#isEndOfName(int)
      */
@@ -327,8 +324,8 @@ class SourceReader implements Closeable
     }
 
     /**
-     * Reads a long and throws an {@link IOException} if the long value is negative or has more than 10 digits (i.e. :
-     * bigger than {@link #OBJECT_NUMBER_THRESHOLD})
+     * Reads a long and throws an {@link IOException} if the long value is negative or has more than
+     * 10 digits (i.e. : bigger than {@link #OBJECT_NUMBER_THRESHOLD})
      *
      * @return the object number being read.
      * @throws IOException if an I/O error occurs
@@ -345,9 +342,9 @@ class SourceReader implements Closeable
     }
 
     /**
-     * reads an integer and throws an {@link IOException} if the integer value has more than the maximum object revision
-     * (i.e. : bigger than {@link #GENERATION_NUMBER_THRESHOLD})
-     * 
+     * reads an integer and throws an {@link IOException} if the integer value has more than the
+     * maximum object revision (i.e. : bigger than {@link #GENERATION_NUMBER_THRESHOLD})
+     *
      * @return the generation number being read.
      * @throws IOException if an I/O error occurs
      */
@@ -363,7 +360,7 @@ class SourceReader implements Closeable
 
     /**
      * Reads a token conforming with PDF Name Objects chap 7.3.5 PDF 32000-1:2008.
-     * 
+     *
      * @return the generation number being read.
      * @throws IOException if an I/O error occurs
      */
@@ -731,9 +728,6 @@ class SourceReader implements Closeable
 
     /**
      * Unreads the given character if it's not -1
-     * 
-     * @param c
-     * @throws IOException
      */
     public void unreadIfValid(int c) throws IOException
     {
