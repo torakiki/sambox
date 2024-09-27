@@ -16,17 +16,16 @@
  */
 package org.sejda.sambox.cos;
 
-import org.junit.Test;
-import org.sejda.sambox.TestUtils;
+import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+import org.sejda.sambox.TestUtils;
 
 /**
  * @author Andrea Vacondio
- *
  */
 public class COSFloatTest
 {
@@ -50,15 +49,15 @@ public class COSFloatTest
     }
 
     @Test
-    public void doubleValue() throws IOException
-    {
-        assertEquals(2.04, COSFloat.get("2.04").doubleValue(), 0);
-    }
-
-    @Test
     public void floatValue() throws IOException
     {
         assertEquals(2.04f, COSFloat.get("2.04").floatValue(), 0);
+    }
+
+    @Test
+    public void precisionToString() throws IOException
+    {
+        assertEquals("83745.38273645", COSFloat.get("83745.38273645").toString());
     }
 
     @Test
@@ -76,7 +75,7 @@ public class COSFloatTest
     @Test(expected = IOException.class)
     public void invalidExponential() throws IOException
     {
-        new COSFloat("4.72856f");
+        new COSFloat("4.72856k");
     }
 
     @Test
@@ -210,4 +209,29 @@ public class COSFloatTest
         assertEquals(-Float.MAX_VALUE, cosFloat.floatValue(), 0);
     }
 
+    @Test
+    public void floatInfinity()
+    {
+        var victim = new COSFloat(Float.POSITIVE_INFINITY);
+        assertEquals(Float.MAX_VALUE, victim.floatValue(), 0);
+        assertEquals(new BigDecimal(String.valueOf(Float.MAX_VALUE)).toPlainString(),
+                victim.toString());
+    }
+
+    @Test
+    public void floatNegativeInfinity()
+    {
+        var victim = new COSFloat(Float.NEGATIVE_INFINITY);
+        assertEquals(-Float.MAX_VALUE, victim.floatValue(), 0);
+        assertEquals(new BigDecimal(String.valueOf(-Float.MAX_VALUE)).toPlainString(),
+                victim.toString());
+    }
+
+    @Test
+    public void stringRepresentationOfInvalid() throws IOException
+    {
+        var victim = new COSFloat("0.00-35095424");
+        assertEquals(new BigDecimal("-0.0035095424").toPlainString(), victim.toString());
+
+    }
 }

@@ -16,11 +16,10 @@
  */
 package org.sejda.sambox.cos;
 
-import java.io.IOException;
-import java.util.regex.Pattern;
-
 import static org.sejda.commons.util.RequireUtils.requireArg;
 import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
+
+import java.io.IOException;
 
 /**
  * This class represents an abstract number in a PDF document.
