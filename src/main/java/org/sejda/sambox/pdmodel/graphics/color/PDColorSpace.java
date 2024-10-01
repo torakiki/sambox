@@ -16,6 +16,16 @@
  */
 package org.sejda.sambox.pdmodel.graphics.color;
 
+import java.awt.Graphics;
+import java.awt.Transparency;
+import java.awt.color.ColorSpace;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorConvertOp;
+import java.awt.image.ColorModel;
+import java.awt.image.ComponentColorModel;
+import java.awt.image.WritableRaster;
+import java.io.IOException;
+
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
@@ -26,16 +36,6 @@ import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.ResourceCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.awt.Graphics;
-import java.awt.Transparency;
-import java.awt.color.ColorSpace;
-import java.awt.image.BufferedImage;
-import java.awt.image.ColorConvertOp;
-import java.awt.image.ColorModel;
-import java.awt.image.ComponentColorModel;
-import java.awt.image.WritableRaster;
-import java.io.IOException;
 
 /**
  * A color space specifies how the colours of graphics objects will be painted on the page.
@@ -88,7 +88,7 @@ public abstract class PDColorSpace implements COSObjectable
             PDColorSpace existing = cache.getColorSpace(colorSpace.id().objectIdentifier);
             if (existing != null)
             {
-                LOG.debug("Using cached color space for {}", colorSpace.id().objectIdentifier);
+                LOG.trace("Using cached color space for {}", colorSpace.id().objectIdentifier);
                 return existing;
             }
         }
