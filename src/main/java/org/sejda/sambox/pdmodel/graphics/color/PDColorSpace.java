@@ -91,7 +91,7 @@ public abstract class PDColorSpace implements COSObjectable
             PDColorSpace existing = cache.getColorSpace(colorSpace.id().objectIdentifier);
             if (existing != null)
             {
-                LOG.debug("Using cached color space for {}", colorSpace.id().objectIdentifier);
+                LOG.trace("Using cached color space for {}", colorSpace.id().objectIdentifier);
                 return existing;
             }
         }

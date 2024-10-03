@@ -35,6 +35,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.ref.SoftReference;
 import java.nio.ByteBuffer;
+import java.util.Iterator;
 import java.util.List;
 
 import org.sejda.commons.util.IOUtils;
@@ -60,6 +61,8 @@ import org.sejda.sambox.util.filetypedetector.FileTypeDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 
 /**
  * An Image XObject.
@@ -175,6 +178,43 @@ public final class PDImageXObject extends PDXObject implements PDImage
     public static PDImageXObject createFromSeekableSource(SeekableSource source, String filename)
             throws IOException
     {
+        return createFromSeekableSource(source, filename, 0);
+    }
+
+    // same as ImageIO.read() but allows reading a specific image from a multi-page image (eg: tiff)
+    public static BufferedImage read(InputStream inputStream, int number) throws IOException
+    {
+        if (number == 0)
+        {
+            return ImageIO.read(inputStream);
+        }
+
+        BufferedImage image = null;
+        ImageInputStream iis = ImageIO.createImageInputStream(inputStream);
+        Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
+
+        if (readers.hasNext())
+        {
+            ImageReader reader = readers.next();
+            reader.setInput(iis);
+
+            try
+            {
+                image = reader.read(number);
+            }
+            finally
+            {
+                reader.dispose();
+                iis.close();
+            }
+        }
+
+        return image;
+    }
+
+    public static PDImageXObject createFromSeekableSource(SeekableSource source, String filename,
+            int number) throws IOException
+    {
         // we first try to match the first bytes to some known pattern, so we don't rely on the extension first
         FileType fileType = FileTypeDetector.detectFileType(source);
 
@@ -186,11 +226,12 @@ public final class PDImageXObject extends PDXObject implements PDImage
         {
             try
             {
-                return CCITTFactory.createFromSeekableSource(source);
+                return CCITTFactory.createFromSeekableSource(source, number);
             }
             catch (IOException ex)
             {
-                LOG.warn("Reading as TIFF failed, setting fileType to PNG", ex);
+                LOG.warn("Reading as TIFF failed using CCITTFactory, falling back to ImageIO: {}",
+                        ex.getMessage());
                 // Plan B: try reading with ImageIO
                 // common exception:
                 // First image in tiff is not CCITT T4 or T6 compressed
@@ -200,7 +241,7 @@ public final class PDImageXObject extends PDXObject implements PDImage
         BufferedImage image;
         try
         {
-            image = ImageIO.read(source.asNewInputStream());
+            image = read(source.asNewInputStream(), number);
         }
         catch (Exception e)
         {
@@ -377,8 +418,8 @@ public final class PDImageXObject extends PDXObject implements PDImage
     /**
      * @param image           The image to apply the mask to as alpha channel.
      * @param mask            A mask image in 8 bit Gray. Even for a stencil mask image due to
-     *                        {@link #getOpaqueImage()} and {@link SampledImageReader}'s {@code
-     *                        from1Bit()} special handling of DeviceGray.
+     *                        {@link #getOpaqueImage()} and {@link SampledImageReader}'s
+     *                        {@code from1Bit()} special handling of DeviceGray.
      * @param interpolateMask interpolation flag of the mask image.
      * @param isSoft          {@code true} if a soft mask. If not stencil mask, then alpha will be
      *                        inverted by this method.

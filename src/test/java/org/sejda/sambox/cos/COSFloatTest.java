@@ -26,7 +26,6 @@ import org.sejda.sambox.TestUtils;
 
 /**
  * @author Andrea Vacondio
- *
  */
 public class COSFloatTest
 {

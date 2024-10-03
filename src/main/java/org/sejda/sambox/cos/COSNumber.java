@@ -49,12 +49,13 @@ public abstract class COSNumber extends COSBase
             return false;
         }
 
-        for (char c : s.toCharArray()) {
+        int len = s.length();
+        for (int i = 0; i < len; i++) {
+            char c = s.charAt(i);
             if (c != 'E' && c != 'e' && c != '+' && c != '-' && c != '.' && !Character.isDigit(c)) {
                 return false;
             }
         }
-        
         return true;
     }
 

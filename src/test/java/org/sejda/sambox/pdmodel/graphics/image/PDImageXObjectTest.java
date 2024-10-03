@@ -2,9 +2,11 @@ package org.sejda.sambox.pdmodel.graphics.image;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -77,6 +79,43 @@ public class PDImageXObjectTest
             assertThat(e.getFilename(), is(outFile.getName()));
             assertThat(e.getFileType(), is(FileType.PSD));
         }
+    }
+    
+    @Test
+    public void tiffMultiImage() throws IOException {
+        PDImageXObject p0 = PDImageXObject.createFromSeekableSource(
+                tempSeekableSourceFromResource("/org/sejda/sambox/resources/images/multipage.tiff"),
+                "multipage.tiff", 0);
+        
+        PDImageXObject p1 = PDImageXObject.createFromSeekableSource(
+                tempSeekableSourceFromResource("/org/sejda/sambox/resources/images/multipage.tiff"), 
+                "multipage.tiff", 1);
+        
+        assertFalse(compareImages(p0.getImage(), p1.getImage()));
+    }
+
+    private boolean compareImages(BufferedImage img1, BufferedImage img2) 
+    {
+        if (img1.getWidth() != img2.getWidth() || img1.getHeight() != img2.getHeight()) 
+        {
+            return false;
+        }
+
+        int width = img1.getWidth();
+        int height = img1.getHeight();
+
+        for (int y = 0; y < height; y++) 
+        {
+            for (int x = 0; x < width; x++) 
+            {
+                if (img1.getRGB(x, y) != img2.getRGB(x, y)) 
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     private File tempFileFromResource(String name) throws IOException
