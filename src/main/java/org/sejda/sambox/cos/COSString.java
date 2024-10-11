@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.cos;
 
+import static java.util.Objects.nonNull;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -195,23 +197,26 @@ public final class COSString extends COSBase implements Encryptable
     }
 
     /**
-     * Factory method creating a {@link COSString} from a literal string.
+     * Null safe factory method creating a {@link COSString} from a literal string.
      *
      * @param literal A literal string.
      * @return A {@link COSString} encoded with {@link PDFDocEncoding} encoding if possible, with
-     * {@link Charsets#UTF_16BE} otherwise.
-     * @throws IOException If there is an error with the hex string.
+     * {@link StandardCharsets#UTF_16BE} otherwise, null if the input string is null.
      */
     public static COSString parseLiteral(String literal)
     {
         return Optional.ofNullable(PDFDocEncoding.getBytes(literal)).map(COSString::new)
                 .orElseGet(() -> {
-                    byte[] data = literal.getBytes(StandardCharsets.UTF_16BE);
-                    byte[] bytes = new byte[data.length + 2];
-                    bytes[0] = (byte) 0xFE;
-                    bytes[1] = (byte) 0xFF;
-                    System.arraycopy(data, 0, bytes, 2, data.length);
-                    return new COSString(bytes);
+                    if (nonNull(literal))
+                    {
+                        byte[] data = literal.getBytes(StandardCharsets.UTF_16BE);
+                        byte[] bytes = new byte[data.length + 2];
+                        bytes[0] = (byte) 0xFE;
+                        bytes[1] = (byte) 0xFF;
+                        System.arraycopy(data, 0, bytes, 2, data.length);
+                        return new COSString(bytes);
+                    }
+                    return null;
                 });
     }
 

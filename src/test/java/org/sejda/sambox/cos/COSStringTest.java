@@ -19,6 +19,7 @@ package org.sejda.sambox.cos;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -120,6 +121,12 @@ public class COSStringTest
         COSString other = COSString.parseLiteral("A string");
         other.setValue(bytes);
         assertEquals(COSString.newInstance(bytes), other);
+    }
+
+    @Test
+    public void nullSafe()
+    {
+        assertNull(COSString.parseLiteral(null));
     }
 
     @Test
