@@ -18,6 +18,7 @@
 package org.sejda.sambox.cos;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,7 +28,6 @@ import org.junit.Test;
 
 /**
  * Test for PDFDocEncoding.
- *
  */
 public class PDFDocEncodingTest
 {
@@ -92,8 +92,20 @@ public class PDFDocEncodingTest
         }
     }
 
+    @Test
+    public void nullSafe() throws IOException
+    {
+        var sb = new StringBuilder("Chuck");
+        sb.append((char) 0x18);
+        sb.append((char) 0x19);
+        sb.append((char) 0x7F);
+        sb.append((char) 0xA0);
+        assertNull(PDFDocEncoding.getBytes(sb.toString()));
+    }
+
     /**
-     * PDFBOX-3864: Test that chars smaller than 256 which are NOT part of PDFDocEncoding are handled correctly.
+     * PDFBOX-3864: Test that chars smaller than 256 which are NOT part of PDFDocEncoding are
+     * handled correctly.
      *
      * @throws IOException
      */

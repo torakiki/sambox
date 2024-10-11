@@ -17,9 +17,13 @@
 
 package org.sejda.sambox.cos;
 
-import java.io.ByteArrayOutputStream;
+import static java.util.Objects.nonNull;
+
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.sejda.commons.FastByteArrayOutputStream;
 
 /**
  * The "PDFDocEncoding" encoding. Note that this is *not* a Type 1 font encoding, it is used only within PDF
@@ -140,16 +144,31 @@ final class PDFDocEncoding
      */
     public static byte[] getBytes(String text)
     {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        for (char c : text.toCharArray())
+        if (nonNull(text))
         {
-            Integer code = UNI_TO_CODE.get(c);
-            if (code == null)
+            try (var out = new FastByteArrayOutputStream(text.length()))
             {
-                return null;
+                for (int i = 0; i < text.length(); i++)
+                {
+                    char c = text.charAt(i);
+                    Integer code = UNI_TO_CODE.get(c);
+                    if (code == null)
+                    {
+                        return null;
+                    }
+                    try
+                    {
+                        out.write(code);
+                    }
+                    catch (IOException e)
+                    {
+                        return null;
+                    }
+                }
+                return out.toByteArray();
             }
-            out.write(code);
         }
-        return out.toByteArray();
+        return null;
     }
+
 }
