@@ -580,18 +580,15 @@ public final class COSName extends COSBase implements Comparable<COSName>
     private final String name;
 
     /**
-     * This will get a COSName object with that name.
-     * 
-     * @param aName The name of the object.
-     * 
-     * @return A COSName with the specified name.
+     * @param name The name of the object.
+     * @return A COSName with the specified name or null if the specified name is null.
      */
-    public static COSName getPDFName(String aName)
+    public static COSName getPDFName(String name)
     {
-        if (aName != null)
+        if (name != null)
         {
-            COSName cosName = COMMON_NAMES.get(aName);
-            return Objects.requireNonNullElseGet(cosName, () -> getCustom(aName));
+            COSName cosName = COMMON_NAMES.get(name);
+            return Objects.requireNonNullElseGet(cosName, () -> getCustom(name));
         }
         return null;
     }
