@@ -17,15 +17,21 @@
 package org.sejda.sambox.pdmodel.font;
 
 import static java.util.Objects.isNull;
+import static java.util.Optional.ofNullable;
 
 import java.awt.geom.GeneralPath;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
 import org.apache.fontbox.FontBoxFont;
+import org.sejda.sambox.cos.COSArray;
+import org.sejda.sambox.cos.COSArrayList;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
@@ -50,6 +56,8 @@ public abstract class PDSimpleFont extends PDFont
     protected Encoding encoding;
     protected GlyphList glyphList;
     private Boolean isSymbolic;
+    private List<Float> widths;
+    private final Map<Integer, Float> codeToWidth = new HashMap<>();
     private final Set<Integer> noUnicode = new HashSet<>(); // for logging
 
     /**
@@ -69,8 +77,6 @@ public abstract class PDSimpleFont extends PDFont
     }
 
     /**
-     * Constructor.
-     *
      * @param fontDictionary Font dictionary.
      */
     PDSimpleFont(COSDictionary fontDictionary) throws IOException
@@ -86,7 +92,7 @@ public abstract class PDSimpleFont extends PDFont
      */
     protected void readEncoding() throws IOException
     {
-        COSBase encodingBase = dict.getDictionaryObject(COSName.ENCODING);
+        COSBase encodingBase = getCOSObject().getDictionaryObject(COSName.ENCODING);
         if (encodingBase instanceof COSName encodingName)
         {
             this.encoding = Encoding.getInstance(encodingName);
@@ -403,14 +409,76 @@ public abstract class PDSimpleFont extends PDFont
     }
 
     @Override
-    public boolean hasExplicitWidth(int code) throws IOException
+    public float getWidth(int code) throws IOException
     {
-        if (dict.containsKey(COSName.WIDTHS))
+        var width = codeToWidth.computeIfAbsent(code, c -> {
+            // Acrobat overrides the widths in the font program on the conforming reader's system with
+            // the widths specified in the font dictionary." (Adobe Supplement to the ISO 32000)
+            //
+            // Note: The Adobe Supplement says that the override happens "If the font program is not
+            // embedded", however PDFBOX-427 shows that it also applies to embedded fonts.
+
+            initWidths();
+
+            // Type1, Type1C, Type3
+            if (hasExplicitWidth(code))
+            {
+                int index = code - getCOSObject().getInt(COSName.FIRST_CHAR, 0);
+                return ofNullable(widths.get(index)).orElse(0f);
+            }
+
+            if (getCOSObject().containsKey(COSName.MISSING_WIDTH))
+            {
+                PDFontDescriptor fd = getFontDescriptor();
+                if (fd != null)
+                {
+                    // get entry from /MissingWidth entry
+                    return fd.getMissingWidth();
+                }
+            }
+
+            // standard 14 font widths are specified by an AFM
+            if (isStandard14())
+            {
+                return getStandard14Width(code);
+            }
+            return null;
+        });
+
+        if (isNull(width))
         {
-            int firstChar = dict.getInt(COSName.FIRST_CHAR, -1);
-            return code >= firstChar && code - firstChar < getWidths().size();
+            // if there's nothing to override with, then obviously we fall back to the font
+            width = getWidthFromFont(code);
+            codeToWidth.put(code, width);
+        }
+        return width;
+    }
+
+    @Override
+    public boolean hasExplicitWidth(int code)
+    {
+        initWidths();
+        if (!widths.isEmpty())
+        {
+            int firstChar = getCOSObject().getInt(COSName.FIRST_CHAR, 0);
+            int index = code - firstChar;
+            return code >= firstChar && index < widths.size();
         }
         return false;
+    }
+
+    /**
+     * initialize the internal widths property with The widths of the characters. This will be null
+     * for the standard 14 fonts.
+     */
+    private void initWidths()
+    {
+        if (isNull(widths))
+        {
+            this.widths = ofNullable(
+                    getCOSObject().getDictionaryObject(COSName.WIDTHS, COSArray.class)).map(
+                    COSArrayList::convertFloatCOSArrayToList).orElseGet(Collections::emptyList);
+        }
     }
 
     private void assignGlyphList(String baseFont)

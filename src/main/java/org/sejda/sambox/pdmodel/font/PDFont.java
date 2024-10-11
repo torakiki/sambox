@@ -21,24 +21,21 @@ import static java.util.Objects.nonNull;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.fontbox.afm.FontMetrics;
 import org.apache.fontbox.cmap.CMap;
 import org.sejda.commons.FastByteArrayOutputStream;
 import org.sejda.commons.util.IOUtils;
 import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSArrayList;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSNumber;
 import org.sejda.sambox.cos.COSObjectable;
 import org.sejda.sambox.cos.COSStream;
+import org.sejda.sambox.pdmodel.common.PDDictionaryWrapper;
 import org.sejda.sambox.pdmodel.font.encoding.GlyphList;
 import org.sejda.sambox.util.Matrix;
 import org.sejda.sambox.util.Vector;
@@ -50,30 +47,27 @@ import org.slf4j.LoggerFactory;
  *
  * @author Ben Litchfield
  */
-public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
+public abstract class PDFont extends PDDictionaryWrapper
+        implements COSObjectable, PDFontLike, Subsettable
 {
     private static final Logger LOG = LoggerFactory.getLogger(PDFont.class);
     protected static final Matrix DEFAULT_FONT_MATRIX = new Matrix(0.001f, 0, 0, 0.001f, 0, 0);
 
-    protected final COSDictionary dict;
     private final CMap toUnicodeCMap;
     private final FontMetrics afmStandard14; // AFM for standard 14 fonts
 
     private PDFontDescriptor fontDescriptor;
-    private List<Float> widths;
     private float avgFontWidth;
     private float fontWidthOfSpace = -1f;
-    private final Map<Integer, Float> codeToWidthMap;
     // sambox specific, transient metadata, does not get serialized to the document
     private final Map<String, String> transientMetadata = new HashMap<>();
 
     PDFont()
     {
-        dict = COSDictionary.of(COSName.TYPE, COSName.FONT);
+        super(COSDictionary.of(COSName.TYPE, COSName.FONT));
         toUnicodeCMap = null;
         fontDescriptor = null;
         afmStandard14 = null;
-        codeToWidthMap = new HashMap<>();
     }
 
     /**
@@ -81,7 +75,7 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
      */
     PDFont(String baseFont)
     {
-        dict = COSDictionary.of(COSName.TYPE, COSName.FONT);
+        super(COSDictionary.of(COSName.TYPE, COSName.FONT));
         toUnicodeCMap = null;
         afmStandard14 = Standard14Fonts.getAFM(baseFont);
         if (afmStandard14 == null)
@@ -89,8 +83,6 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
             throw new IllegalArgumentException("No AFM for font " + baseFont);
         }
         fontDescriptor = PDType1FontEmbedder.buildFontDescriptor(afmStandard14);
-        // standard 14 fonts may be accessed concurrently, as they are singletons
-        codeToWidthMap = new ConcurrentHashMap<>();
     }
 
     /**
@@ -100,9 +92,7 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
      */
     protected PDFont(COSDictionary fontDictionary) throws IOException
     {
-        dict = fontDictionary;
-        codeToWidthMap = new HashMap<>();
-
+        super(fontDictionary);
         // standard 14 fonts use an AFM
         afmStandard14 = Standard14Fonts.getAFM(getName()); // may be null (it usually is)
         fontDescriptor = loadFontDescriptor();
@@ -111,7 +101,8 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
 
     private PDFontDescriptor loadFontDescriptor()
     {
-        COSDictionary fd = dict.getDictionaryObject(COSName.FONT_DESC, COSDictionary.class);
+        COSDictionary fd = getCOSObject().getDictionaryObject(COSName.FONT_DESC,
+                COSDictionary.class);
         if (nonNull(fd))
         {
             return new PDFontDescriptor(fd);
@@ -126,7 +117,7 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
 
     private CMap loadUnicodeCmap()
     {
-        COSBase toUnicode = dict.getDictionaryObject(COSName.TO_UNICODE);
+        COSBase toUnicode = getCOSObject().getDictionaryObject(COSName.TO_UNICODE);
         if (toUnicode == null)
         {
             return null;
@@ -141,13 +132,14 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
                 LOG.warn("Invalid ToUnicode CMap in font " + getName());
                 String cmapName = cmap.getName() != null ? cmap.getName() : "";
                 String ordering = cmap.getOrdering() != null ? cmap.getOrdering() : "";
-                COSBase encoding = dict.getDictionaryObject(COSName.ENCODING);
+                COSBase encoding = getCOSObject().getDictionaryObject(COSName.ENCODING);
                 if (cmapName.contains("Identity") //
                         || ordering.contains("Identity") //
                         || COSName.IDENTITY_H.equals(encoding) //
                         || COSName.IDENTITY_V.equals(encoding))
                 {
-                    COSDictionary encodingDict = dict.getDictionaryObject(COSName.ENCODING, COSDictionary.class);
+                    COSDictionary encodingDict = getCOSObject().getDictionaryObject(
+                            COSName.ENCODING, COSDictionary.class);
                     if (encodingDict == null || !encodingDict.containsKey(COSName.DIFFERENCES))
                     {
                         // assume that if encoding is identity, then the reverse is also true
@@ -218,12 +210,6 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
     }
 
     @Override
-    public COSDictionary getCOSObject()
-    {
-        return dict;
-    }
-
-    @Override
     public Vector getPositionVector(int code)
     {
         throw new UnsupportedOperationException("Horizontal fonts have no position vector");
@@ -239,64 +225,6 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
     public Vector getDisplacement(int code) throws IOException
     {
         return new Vector(getWidth(code) / 1000, 0);
-    }
-
-    @Override
-    public float getWidth(int code) throws IOException
-    {
-        Float width = codeToWidthMap.get(code);
-        if (width != null)
-        {
-            return width;
-        }
-
-        // Acrobat overrides the widths in the font program on the conforming reader's system with
-        // the widths specified in the font dictionary." (Adobe Supplement to the ISO 32000)
-        //
-        // Note: The Adobe Supplement says that the override happens "If the font program is not
-        // embedded", however PDFBOX-427 shows that it also applies to embedded fonts.
-
-        // Type1, Type1C, Type3
-        if (dict.getDictionaryObject(COSName.WIDTHS) != null || dict.containsKey(
-                COSName.MISSING_WIDTH))
-        {
-            int firstChar = dict.getInt(COSName.FIRST_CHAR, -1);
-            int lastChar = dict.getInt(COSName.LAST_CHAR, -1);
-            int siz = getWidths().size();
-            int idx = code - firstChar;
-            if (siz > 0 && code >= firstChar && code <= lastChar && idx < siz)
-            {
-                width = getWidths().get(idx);
-                if (width == null)
-                {
-                    width = 0f;
-                }
-                codeToWidthMap.put(code, width);
-                return width;
-            }
-
-            PDFontDescriptor fd = getFontDescriptor();
-            if (fd != null)
-            {
-                // get entry from /MissingWidth entry
-                width = fd.getMissingWidth();
-                codeToWidthMap.put(code, width);
-                return width;
-            }
-        }
-
-        // standard 14 font widths are specified by an AFM
-        if (isStandard14())
-        {
-            width = getStandard14Width(code);
-            codeToWidthMap.put(code, width);
-            return width;
-        }
-
-        // if there's nothing to override with, then obviously we fall back to the font
-        width = getWidthFromFont(code);
-        codeToWidthMap.put(code, width);
-        return width;
     }
 
     /**
@@ -441,7 +369,7 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
         {
             float totalWidth = 0.0f;
             float characterCount = 0.0f;
-            COSArray widths = dict.getDictionaryObject(COSName.WIDTHS, COSArray.class);
+            COSArray widths = getCOSObject().getDictionaryObject(COSName.WIDTHS, COSArray.class);
             if (widths != null)
             {
                 for (int i = 0; i < widths.size(); i++)
@@ -505,7 +433,7 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
         if (toUnicodeCMap != null)
         {
             if (toUnicodeCMap.getName() != null && toUnicodeCMap.getName().startsWith("Identity-")
-                    && (dict.getDictionaryObject(COSName.TO_UNICODE) instanceof COSName
+                    && (getCOSObject().getDictionaryObject(COSName.TO_UNICODE) instanceof COSName
                     || !toUnicodeCMap.hasUnicodeMappings()))
             {
                 // handle the undocumented case of using Identity-H/V as a ToUnicode CMap, this
@@ -524,44 +452,14 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
         return null;
     }
 
-    /**
-     * This will always return "Font" for fonts.
-     *
-     * @return The type of object that this is.
-     */
     public String getType()
     {
-        return dict.getNameAsString(COSName.TYPE);
+        return getCOSObject().getNameAsString(COSName.TYPE);
     }
 
-    /**
-     * This will get the subtype of font.
-     */
     public String getSubType()
     {
-        return dict.getNameAsString(COSName.SUBTYPE);
-    }
-
-    /**
-     * The widths of the characters. This will be null for the standard 14 fonts.
-     *
-     * @return The widths of the characters.
-     */
-    protected final List<Float> getWidths()
-    {
-        if (widths == null)
-        {
-            COSArray array = dict.getDictionaryObject(COSName.WIDTHS, COSArray.class);
-            if (array != null)
-            {
-                widths = COSArrayList.convertFloatCOSArrayToList(array);
-            }
-            else
-            {
-                widths = Collections.emptyList();
-            }
-        }
-        return widths;
+        return getCOSObject().getNameAsString(COSName.SUBTYPE);
     }
 
     @Override
@@ -581,7 +479,7 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
         {
             try
             {
-                if (toUnicodeCMap != null && dict.containsKey(COSName.TO_UNICODE))
+                if (toUnicodeCMap != null && getCOSObject().containsKey(COSName.TO_UNICODE))
                 {
                     int spaceMapping = toUnicodeCMap.getSpaceMapping();
                     if (spaceMapping > -1)
@@ -659,8 +557,9 @@ public abstract class PDFont implements COSObjectable, PDFontLike, Subsettable
     {
         return toUnicodeCMap;
     }
-    
-    public Map<String, String> getTransientMetadata() {
+
+    public Map<String, String> getTransientMetadata()
+    {
         return transientMetadata;
     }
 }

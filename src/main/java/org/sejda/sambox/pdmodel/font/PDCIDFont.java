@@ -270,7 +270,7 @@ public abstract class PDCIDFont implements COSObjectable, PDFontLike, PDVectorFo
     }
 
     @Override
-    public boolean hasExplicitWidth(int code) throws IOException
+    public boolean hasExplicitWidth(int code)
     {
         return widths.get(codeToCID(code)) != null;
     }

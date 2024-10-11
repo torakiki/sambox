@@ -22,7 +22,6 @@ import static java.util.Optional.ofNullable;
 import java.awt.geom.GeneralPath;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 
 import org.apache.fontbox.FontBoxFont;
 import org.apache.fontbox.util.BoundingBox;
@@ -53,7 +52,6 @@ public class PDType3Font extends PDSimpleFont
     private static final Logger LOG = LoggerFactory.getLogger(PDType3Font.class);
 
     private PDResources resources;
-    private COSDictionary charProcs;
     private Matrix fontMatrix;
     private BoundingBox fontBBox;
     private final ResourceCache resourceCache;
@@ -73,13 +71,13 @@ public class PDType3Font extends PDSimpleFont
     @Override
     public String getName()
     {
-        return dict.getNameAsString(COSName.NAME);
+        return getCOSObject().getNameAsString(COSName.NAME);
     }
 
     @Override
     protected final void readEncoding()
     {
-        COSBase encodingBase = dict.getDictionaryObject(COSName.ENCODING);
+        COSBase encodingBase = getCOSObject().getDictionaryObject(COSName.ENCODING);
         if (encodingBase instanceof COSName encodingName)
         {
             encoding = Encoding.getInstance(encodingName);
@@ -133,28 +131,6 @@ public class PDType3Font extends PDSimpleFont
     public Vector getDisplacement(int code) throws IOException
     {
         return getFontMatrix().transform(new Vector(getWidth(code), 0));
-    }
-
-    @Override
-    public float getWidth(int code) throws IOException
-    {
-        int firstChar = dict.getInt(COSName.FIRST_CHAR, -1);
-        int lastChar = dict.getInt(COSName.LAST_CHAR, -1);
-        List<Float> widths = getWidths();
-        if (!widths.isEmpty() && code >= firstChar && code <= lastChar)
-        {
-            if (code - firstChar >= widths.size())
-            {
-                return 0;
-            }
-            return ofNullable(widths.get(code - firstChar)).orElse(0f);
-        }
-        PDFontDescriptor fd = getFontDescriptor();
-        if (nonNull(fd))
-        {
-            return fd.getMissingWidth();
-        }
-        return getWidthFromFont(code);
     }
 
     @Override
@@ -227,7 +203,7 @@ public class PDType3Font extends PDSimpleFont
     {
         if (fontMatrix == null)
         {
-            COSArray matrix = dict.getCOSArray(COSName.FONT_MATRIX);
+            COSArray matrix = getCOSObject().getCOSArray(COSName.FONT_MATRIX);
             fontMatrix = checkFontMatrixValues(matrix) ? Matrix.createMatrix(
                     matrix) : super.getFontMatrix();
         }
@@ -262,15 +238,13 @@ public class PDType3Font extends PDSimpleFont
     }
 
     /**
-     * Returns the optional resources of the type3 stream.
-     *
-     * @return the resources bound to be used when parsing the type3 stream
+     * @return the optional resources bound to be used when parsing the type3 stream
      */
     public PDResources getResources()
     {
         if (resources == null)
         {
-            COSDictionary resourcesDict = dict.getDictionaryObject(COSName.RESOURCES,
+            var resourcesDict = getCOSObject().getDictionaryObject(COSName.RESOURCES,
                     COSDictionary.class);
             if (resourcesDict != null)
             {
@@ -281,13 +255,12 @@ public class PDType3Font extends PDSimpleFont
     }
 
     /**
-     * This will get the fonts bounding box from its dictionary.
-     *
      * @return The fonts bounding box.
      */
     public PDRectangle getFontBBox()
     {
-        return ofNullable(dict.getDictionaryObject(COSName.FONT_BBOX, COSArray.class)).map(
+        return ofNullable(
+                getCOSObject().getDictionaryObject(COSName.FONT_BBOX, COSArray.class)).map(
                 PDRectangle::new).orElse(null);
     }
 
@@ -343,17 +316,11 @@ public class PDType3Font extends PDSimpleFont
     }
 
     /**
-     * Returns the dictionary containing all streams to be used to render the glyphs.
-     *
-     * @return the dictionary containing all glyph streams.
+     * @return the dictionary containing all streams to be used to render the glyphs.
      */
     public COSDictionary getCharProcs()
     {
-        if (charProcs == null)
-        {
-            charProcs = dict.getDictionaryObject(COSName.CHAR_PROCS, COSDictionary.class);
-        }
-        return charProcs;
+        return getCOSObject().getDictionaryObject(COSName.CHAR_PROCS, COSDictionary.class);
     }
 
     /**

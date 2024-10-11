@@ -119,8 +119,8 @@ public class PDType1Font extends PDSimpleFont
     {
         super(baseFont);
 
-        dict.setItem(COSName.SUBTYPE, COSName.TYPE1);
-        dict.setName(COSName.BASE_FONT, baseFont);
+        getCOSObject().setItem(COSName.SUBTYPE, COSName.TYPE1);
+        getCOSObject().setName(COSName.BASE_FONT, baseFont);
         if ("ZapfDingbats".equals(baseFont))
         {
             encoding = ZapfDingbatsEncoding.INSTANCE;
@@ -132,7 +132,7 @@ public class PDType1Font extends PDSimpleFont
         else
         {
             encoding = WinAnsiEncoding.INSTANCE;
-            dict.setItem(COSName.ENCODING, COSName.WIN_ANSI_ENCODING);
+            getCOSObject().setItem(COSName.ENCODING, COSName.WIN_ANSI_ENCODING);
         }
 
         // standard 14 fonts may be accessed concurrently, as they are singletons
@@ -185,7 +185,8 @@ public class PDType1Font extends PDSimpleFont
      */
     public PDType1Font(PDDocument doc, InputStream pfbIn, Encoding encoding) throws IOException
     {
-        PDType1FontEmbedder embedder = new PDType1FontEmbedder(doc, dict, pfbIn, encoding);
+        PDType1FontEmbedder embedder = new PDType1FontEmbedder(doc, getCOSObject(), pfbIn,
+                encoding);
         this.encoding = ofNullable(encoding).orElseGet(embedder::getFontEncoding);
         glyphList = embedder.getGlyphList();
         type1font = embedder.getType1Font();
@@ -382,11 +383,11 @@ public class PDType1Font extends PDSimpleFont
     }
 
     /**
-     * Returns the PostScript name of the font.
+     * @return the PostScript name of the font.
      */
     public final String getBaseFont()
     {
-        return dict.getNameAsString(COSName.BASE_FONT);
+        return getCOSObject().getNameAsString(COSName.BASE_FONT);
     }
 
     @Override

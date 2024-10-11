@@ -221,7 +221,7 @@ public class PDTrueTypeFont extends PDSimpleFont implements PDVectorFont
      */
     public final String getBaseFont()
     {
-        return dict.getNameAsString(COSName.BASE_FONT);
+        return getCOSObject().getNameAsString(COSName.BASE_FONT);
     }
 
     @Override
@@ -279,7 +279,7 @@ public class PDTrueTypeFont extends PDSimpleFont implements PDVectorFont
      */
     private PDTrueTypeFont(TrueTypeFont ttf, Encoding encoding, boolean closeTTF) throws IOException
     {
-        PDTrueTypeFontEmbedder embedder = new PDTrueTypeFontEmbedder(dict, ttf, encoding);
+        PDTrueTypeFontEmbedder embedder = new PDTrueTypeFontEmbedder(getCOSObject(), ttf, encoding);
         this.encoding = encoding;
         this.ttf = ttf;
         setFontDescriptor(embedder.getFontDescriptor());

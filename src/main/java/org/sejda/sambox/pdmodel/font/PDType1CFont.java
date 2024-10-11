@@ -164,11 +164,11 @@ public class PDType1CFont extends PDSimpleFont
     }
 
     /**
-     * Returns the PostScript name of the font.
+     * @return the PostScript name of the font.
      */
     public final String getBaseFont()
     {
-        return dict.getNameAsString(COSName.BASE_FONT);
+        return getCOSObject().getNameAsString(COSName.BASE_FONT);
     }
 
     @Override

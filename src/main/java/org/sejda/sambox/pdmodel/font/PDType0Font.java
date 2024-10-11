@@ -16,8 +16,9 @@
  */
 package org.sejda.sambox.pdmodel.font;
 
-import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.sejda.commons.util.RequireUtils.requireIOCondition;
+import static org.sejda.commons.util.RequireUtils.requireState;
 
 import java.awt.geom.GeneralPath;
 import java.io.File;
@@ -185,26 +186,17 @@ public class PDType0Font extends PDFont implements PDVectorFont
     public PDType0Font(COSDictionary fontDictionary) throws IOException
     {
         super(fontDictionary);
-        COSArray descendantFonts = dict.getDictionaryObject(COSName.DESCENDANT_FONTS,
+        var descendantFonts = getCOSObject().getDictionaryObject(COSName.DESCENDANT_FONTS,
                 COSArray.class);
-        if (isNull(descendantFonts))
-        {
-            throw new IOException("Missing descendant font array");
-        }
-        if (descendantFonts.size() == 0)
-        {
-            throw new IOException("Descendant font array is empty");
-        }
-        COSDictionary descendantFontDict = descendantFonts.getObject(0, COSDictionary.class);
-        if (isNull(descendantFontDict))
-        {
-            throw new IOException("Missing descendant font dictionary");
-        }
-        if (!COSName.FONT.equals(
-                descendantFontDict.getDictionaryObject(COSName.TYPE, COSName.FONT, COSName.class)))
-        {
-            throw new IOException("Missing or wrong type in descendant font dictionary");
-        }
+        requireIOCondition(nonNull(descendantFonts), "Missing descendant font array");
+        requireIOCondition(!descendantFonts.isEmpty(), "Descendant font array is empty");
+
+        var descendantFontDict = descendantFonts.getObject(0, COSDictionary.class);
+        requireIOCondition(nonNull(descendantFontDict), "Missing descendant font dictionary");
+        requireIOCondition(COSName.FONT.equals(
+                        descendantFontDict.getDictionaryObject(COSName.TYPE, COSName.FONT, COSName.class)),
+                "Missing or wrong type in descendant font dictionary");
+
         descendantFont = PDFontFactory.createDescendantFont(descendantFontDict, this);
         readEncoding();
         fetchCMapUCS2();
@@ -217,7 +209,7 @@ public class PDType0Font extends PDFont implements PDVectorFont
      * @param closeTTF    whether to close the ttf parameter after embedding. Must be true when the
      *                    ttf parameter was created in the load() method, false when the ttf
      *                    parameter was passed to the load() method.
-     * @param vertical whether to enable vertical substitutions.   
+     * @param vertical    whether to enable vertical substitutions.
      * @throws IOException
      */
     private PDType0Font(PDDocument document, TrueTypeFont ttf, boolean embedSubset,
@@ -227,7 +219,8 @@ public class PDType0Font extends PDFont implements PDVectorFont
         {
             ttf.enableVerticalSubstitutions();
         }
-        embedder = new PDCIDFontType2Embedder(document, dict, ttf, embedSubset, this, vertical);
+        embedder = new PDCIDFontType2Embedder(document, getCOSObject(), ttf, embedSubset, this,
+                vertical);
         descendantFont = embedder.getCIDFont();
         readEncoding();
         fetchCMapUCS2();
@@ -249,20 +242,14 @@ public class PDType0Font extends PDFont implements PDVectorFont
     @Override
     public void addToSubset(int codePoint)
     {
-        if (!willBeSubset())
-        {
-            throw new IllegalStateException("This font was created with subsetting disabled");
-        }
+        requireState(willBeSubset(), "This font was created with subsetting disabled");
         embedder.addToSubset(codePoint);
     }
 
     @Override
     public void subset() throws IOException
     {
-        if (!willBeSubset())
-        {
-            throw new IllegalStateException("This font was created with subsetting disabled");
-        }
+        requireState(willBeSubset(), "This font was created with subsetting disabled");
         embedder.subset();
         if (nonNull(ttf))
         {
@@ -282,7 +269,7 @@ public class PDType0Font extends PDFont implements PDVectorFont
      */
     private void readEncoding() throws IOException
     {
-        COSBase encoding = dict.getDictionaryObject(COSName.ENCODING);
+        COSBase encoding = getCOSObject().getDictionaryObject(COSName.ENCODING);
         if (encoding instanceof COSName encodingName)
         {
             // predefined CMap
@@ -292,10 +279,7 @@ public class PDType0Font extends PDFont implements PDVectorFont
         else if (encoding != null)
         {
             cMap = readCMap(encoding);
-            if (cMap == null)
-            {
-                throw new IOException("Missing required CMap");
-            }
+            requireIOCondition(nonNull(cMap), "Missing required CMap");
             if (!cMap.hasCIDMappings())
             {
                 LOG.warn("Invalid Encoding CMap in font " + getName());
@@ -307,9 +291,9 @@ public class PDType0Font extends PDFont implements PDVectorFont
         if (ros != null)
         {
             String ordering = ros.getOrdering();
-            isDescendantCJK = "Adobe".equals(ros.getRegistry()) && ("GB1".equals(ordering)
-                    || "CNS1".equals(ordering) || "Japan1".equals(ordering)
-                    || "Korea1".equals(ordering));
+            isDescendantCJK =
+                    "Adobe".equals(ros.getRegistry()) && ("GB1".equals(ordering) || "CNS1".equals(
+                            ordering) || "Japan1".equals(ordering) || "Korea1".equals(ordering));
         }
     }
 
@@ -321,7 +305,7 @@ public class PDType0Font extends PDFont implements PDVectorFont
         // if the font is composite and uses a predefined cmap (excluding Identity-H/V)
         // or whose descendant CIDFont uses the Adobe-GB1, Adobe-CNS1, Adobe-Japan1, or
         // Adobe-Korea1 character collection:
-        COSName name = dict.getCOSName(COSName.ENCODING);
+        COSName name = getCOSObject().getCOSName(COSName.ENCODING);
         if (isCMapPredefined && !(name == COSName.IDENTITY_H || name == COSName.IDENTITY_V)
                 || isDescendantCJK)
         {
@@ -338,9 +322,8 @@ public class PDType0Font extends PDFont implements PDVectorFont
                 PDCIDSystemInfo cidSystemInfo = descendantFont.getCIDSystemInfo();
                 if (cidSystemInfo != null)
                 {
-                    strName = cidSystemInfo.getRegistry() + "-" +
-                            cidSystemInfo.getOrdering() + "-" +
-                            cidSystemInfo.getSupplement();
+                    strName = cidSystemInfo.getRegistry() + "-" + cidSystemInfo.getOrdering() + "-"
+                            + cidSystemInfo.getSupplement();
                 }
             }
             else if (name != null)
@@ -370,7 +353,7 @@ public class PDType0Font extends PDFont implements PDVectorFont
      */
     public String getBaseFont()
     {
-        return dict.getNameAsString(COSName.BASE_FONT);
+        return getCOSObject().getNameAsString(COSName.BASE_FONT);
     }
 
     /**
@@ -428,7 +411,7 @@ public class PDType0Font extends PDFont implements PDVectorFont
     }
 
     @Override
-    public boolean hasExplicitWidth(int code) throws IOException
+    public boolean hasExplicitWidth(int code)
     {
         return descendantFont.hasExplicitWidth(code);
     }
@@ -566,10 +549,7 @@ public class PDType0Font extends PDFont implements PDVectorFont
     @Override
     public int readCode(InputStream in) throws IOException
     {
-        if (cMap == null)
-        {
-            throw new IOException("required cmap is null");
-        }
+        requireIOCondition(nonNull(cMap), "required cmap is null");
         return cMap.readCode(in);
     }
 

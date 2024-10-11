@@ -89,7 +89,7 @@ public interface PDFontLike
     float getWidth(int code) throws IOException;
 
     /**
-     * Returns true if the Font dictionary specifies an explicit width for the given glyph.
+     * @return true if the Font dictionary specifies an explicit width for the given glyph.
      * This includes Width, W but not default widths entries.
      *
      * @param code character code
@@ -98,38 +98,34 @@ public interface PDFontLike
     boolean hasExplicitWidth(int code) throws IOException;
 
     /**
-     * Returns the width of a glyph in the embedded font file.
-     *
      * @param code character code
-     * @return width in glyph space
+     * @return the width of a glyph in the embedded font file
      * @throws IOException if the font could not be read
      */
     float getWidthFromFont(int code) throws IOException;
 
     /**
-     * Returns true if the font file is embedded in the PDF.
+     * @return true if the font file is embedded in the PDF.
      */
     boolean isEmbedded();
 
     /**
-     * Returns true if the embedded font file is damaged.
+     * @return true if the embedded font file is damaged.
      */
     boolean isDamaged();
 
     /**
-     * Returns true if the font file that was supposed to be embedded in the PDF is missing.
+     * @return true if the font file that was supposed to be embedded in the PDF is missing.
      */
     boolean isOriginalEmbeddedMissing();
 
     /**
-     * Returns true if a substitute font was searched via font mappings, but an exact match was not found, and
+     * @return true if a substitute font was searched via font mappings, but an exact match was not found, and
      * a fallback was used
      */
     boolean isMappingFallbackUsed();
 
     /**
-     * This will get the average font width for all characters.
-     *
      * @return The width is in 1000 unit of text space, ie 333 or 777
      */
     // todo: this method is highly suspicious, the average glyph width is not usually a good metric
