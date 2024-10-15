@@ -27,7 +27,6 @@ import java.util.Map;
 import org.apache.fontbox.afm.FontMetrics;
 import org.apache.fontbox.cmap.CMap;
 import org.sejda.commons.FastByteArrayOutputStream;
-import org.sejda.commons.util.IOUtils;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
@@ -186,24 +185,17 @@ public abstract class PDFont extends PDDictionaryWrapper
      */
     protected final CMap readCMap(COSBase base) throws IOException
     {
-        if (base instanceof COSName)
+        if (base instanceof COSName name)
         {
             // predefined CMap
-            String name = ((COSName) base).getName();
-            return CMapManager.getPredefinedCMap(name);
+            return CMapManager.getPredefinedCMap(name.getName());
         }
-        if (base instanceof COSStream)
+        if (base instanceof COSStream stream)
         {
             // embedded CMap
-            InputStream input = null;
-            try
+            try (var input = stream.getUnfilteredStream())
             {
-                input = ((COSStream) base).getUnfilteredStream();
                 return CMapManager.parseCMap(input);
-            }
-            finally
-            {
-                IOUtils.closeQuietly(input);
             }
         }
         throw new IOException("Expected Name or Stream");

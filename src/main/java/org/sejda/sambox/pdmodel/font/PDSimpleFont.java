@@ -17,6 +17,7 @@
 package org.sejda.sambox.pdmodel.font;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.requireNonNullElse;
 import static java.util.Optional.ofNullable;
 
 import java.awt.geom.GeneralPath;
@@ -26,7 +27,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 import org.apache.fontbox.FontBoxFont;
@@ -164,9 +164,8 @@ public abstract class PDSimpleFont extends PDFont
     {
         if (isSymbolic == null)
         {
-            Boolean result = isFontSymbolic();
-            // unless we can prove that the font is symbolic, we assume that it is not
-            isSymbolic = Objects.requireNonNullElse(result, true);
+            // unless we can prove that the font is non-symbolic, we assume that it is symbolic
+            isSymbolic = requireNonNullElse(isFontSymbolic(), true);
         }
         return isSymbolic;
     }
@@ -227,17 +226,13 @@ public abstract class PDSimpleFont extends PDFont
     }
 
     /**
-     * Returns the value of the symbolic flag, allowing for the fact that the result may be
+     * @return the value of the symbolic flag, allowing for the fact that the result may be
      * indeterminate.
      */
     protected final Boolean getSymbolicFlag()
     {
-        if (getFontDescriptor() != null)
-        {
             // fixme: isSymbolic() defaults to false if the flag is missing so we can't trust this
-            return getFontDescriptor().isSymbolic();
-        }
-        return null;
+        return ofNullable(getFontDescriptor()).map(PDFontDescriptor::isSymbolic).orElse(null);
     }
 
     @Override
@@ -347,7 +342,7 @@ public abstract class PDSimpleFont extends PDFont
         // the Encoding entry cannot have Differences if we want "standard 14" font handling
         if (getEncoding() instanceof DictionaryEncoding dictionary)
         {
-            if (dictionary.getDifferences().size() > 0)
+            if (!dictionary.getDifferences().isEmpty())
             {
                 // we also require that the differences are actually different, see PDFBOX-1900 with
                 // the file from PDFBOX-2192 on Windows
