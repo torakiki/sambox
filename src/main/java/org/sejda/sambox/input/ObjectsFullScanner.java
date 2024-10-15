@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 class ObjectsFullScanner
 {
     private static final Logger LOG = LoggerFactory.getLogger(ObjectsFullScanner.class);
-    private static final Matcher OBJECT_DEF_MATCHER = Pattern.compile("(\\d+)[\\s]+(\\d+)[\\s]+obj")
+    private final Matcher matcher = Pattern.compile("(\\d+)[\\s]+(\\d+)[\\s]+obj")
             .matcher("");
 
     private Xref xref = new Xref();
@@ -77,12 +77,12 @@ class ObjectsFullScanner
         boolean found = false;
         if (line.contains("obj"))
         {
-            OBJECT_DEF_MATCHER.reset(line);
-            while (OBJECT_DEF_MATCHER.find())
+            matcher.reset(line);
+            while (matcher.find())
             {
-                long entryOffset = offset + OBJECT_DEF_MATCHER.start();
-                xref.add(XrefEntry.inUseEntry(Long.parseUnsignedLong(OBJECT_DEF_MATCHER.group(1)),
-                        entryOffset, Integer.parseUnsignedInt(OBJECT_DEF_MATCHER.group(2))));
+                long entryOffset = offset + matcher.start();
+                xref.add(XrefEntry.inUseEntry(Long.parseUnsignedLong(matcher.group(1)), entryOffset,
+                        Integer.parseUnsignedInt(matcher.group(2))));
                 onObjectDefinitionLine(entryOffset, line);
                 found = true;
             }
