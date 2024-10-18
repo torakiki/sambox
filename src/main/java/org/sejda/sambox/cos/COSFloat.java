@@ -138,7 +138,8 @@ public class COSFloat extends COSNumber
 
     private String formatString()
     {
-        var s = String.valueOf(value);
+        // if the float is an integer, avoid having an unnecessary .0 decimal at the end, eg: 123.0
+        var s = value == (long) value ? String.valueOf((long)value): String.valueOf(value);
         if (s.indexOf('E') < 0)
         {
             return s;

@@ -61,6 +61,12 @@ public class COSFloatTest
     }
 
     @Test
+    public void integerFloatToString()
+    {
+        assertEquals("83745", new COSFloat(83745f).toString());
+    }
+
+    @Test
     public void emptyExponentialValue() throws IOException
     {
         assertEquals(4.72856f, COSFloat.get("4.72856e").floatValue(), 0);
