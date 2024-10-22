@@ -16,9 +16,10 @@
  */
 package org.sejda.sambox.pdmodel.font;
 
+import static java.util.Objects.nonNull;
+
 import java.io.IOException;
 
-import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.ResourceCache;
@@ -70,8 +71,8 @@ public final class PDFontFactory
         COSName subType = dictionary.getCOSName(COSName.SUBTYPE);
         if (COSName.TYPE1.equals(subType))
         {
-            COSBase fd = dictionary.getDictionaryObject(COSName.FONT_DESC);
-            if (fd instanceof COSDictionary && ((COSDictionary) fd).containsKey(COSName.FONT_FILE3))
+            var fd = dictionary.getDictionaryObject(COSName.FONT_DESC, COSDictionary.class);
+            if (nonNull(fd) && fd.containsKey(COSName.FONT_FILE3))
             {
                 return new PDType1CFont(dictionary);
             }
@@ -79,8 +80,8 @@ public final class PDFontFactory
         }
         if (COSName.MM_TYPE1.equals(subType))
         {
-            COSBase fd = dictionary.getDictionaryObject(COSName.FONT_DESC);
-            if (fd instanceof COSDictionary && ((COSDictionary) fd).containsKey(COSName.FONT_FILE3))
+            var fd = dictionary.getDictionaryObject(COSName.FONT_DESC, COSDictionary.class);
+            if (nonNull(fd) && fd.containsKey(COSName.FONT_FILE3))
             {
                 return new PDType1CFont(dictionary);
             }

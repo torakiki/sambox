@@ -17,6 +17,7 @@
 package org.sejda.sambox.pdmodel.font;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNullElse;
 import static java.util.Optional.ofNullable;
 
@@ -35,6 +36,7 @@ import org.sejda.sambox.cos.COSArrayList;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.cos.COSNumber;
 import org.sejda.sambox.pdmodel.font.encoding.DictionaryEncoding;
 import org.sejda.sambox.pdmodel.font.encoding.Encoding;
 import org.sejda.sambox.pdmodel.font.encoding.GlyphList;
@@ -231,7 +233,7 @@ public abstract class PDSimpleFont extends PDFont
      */
     protected final Boolean getSymbolicFlag()
     {
-            // fixme: isSymbolic() defaults to false if the flag is missing so we can't trust this
+        // fixme: isSymbolic() defaults to false if the flag is missing so we can't trust this
         return ofNullable(getFontDescriptor()).map(PDFontDescriptor::isSymbolic).orElse(null);
     }
 
@@ -416,20 +418,19 @@ public abstract class PDSimpleFont extends PDFont
             initWidths();
 
             // Type1, Type1C, Type3
-            if (hasExplicitWidth(code))
+            var explicitWith = getExplicitWidth(code);
+            if (nonNull(explicitWith))
             {
-                int index = code - getCOSObject().getInt(COSName.FIRST_CHAR, 0);
-                return ofNullable(widths.get(index)).orElse(0f);
+                return explicitWith;
             }
 
-            if (getCOSObject().containsKey(COSName.MISSING_WIDTH))
+            //we use MissingWidth of the descriptor only if present, we fallback to width from font otherwise
+            var missingWidth = ofNullable(getFontDescriptor()).map(PDFontDescriptor::getCOSObject)
+                    .map(d -> d.getDictionaryObject(COSName.MISSING_WIDTH, COSNumber.class))
+                    .orElse(null);
+            if (nonNull(missingWidth))
             {
-                PDFontDescriptor fd = getFontDescriptor();
-                if (fd != null)
-                {
-                    // get entry from /MissingWidth entry
-                    return fd.getMissingWidth();
-                }
+                return missingWidth.floatValue();
             }
 
             // standard 14 font widths are specified by an AFM
@@ -450,16 +451,25 @@ public abstract class PDSimpleFont extends PDFont
     }
 
     @Override
-    public boolean hasExplicitWidth(int code)
+    public Float getExplicitWidth(int code)
     {
         initWidths();
         if (!widths.isEmpty())
         {
             int firstChar = getCOSObject().getInt(COSName.FIRST_CHAR, 0);
             int index = code - firstChar;
-            return code >= firstChar && index < widths.size();
+            if (code >= firstChar && index < widths.size())
+            {
+                return widths.get(index);
+            }
         }
-        return false;
+        return null;
+    }
+
+    @Override
+    public boolean hasExplicitWidth(int code)
+    {
+        return nonNull(getExplicitWidth(code));
     }
 
     /**
