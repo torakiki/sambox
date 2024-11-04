@@ -350,7 +350,7 @@ public class PDFontTest
             cs.endText();
 
             // tt full embedding but only WinAnsiEncoding
-            font = PDTrueTypeFont.load(doc, ttf, WinAnsiEncoding.INSTANCE);
+            font = PDTrueTypeFont.load(ttf, WinAnsiEncoding.INSTANCE);
 
             cs.beginText();
             cs.newLineAtOffset(10, 600);
@@ -484,7 +484,7 @@ public class PDFontTest
         File fontFile = new File("target/fonts", "PDFBOX-5484.ttf");
         TrueTypeFont ttf = new TTFParser().parse(fontFile);
         PDDocument doc = new PDDocument();
-        PDTrueTypeFont tr = PDTrueTypeFont.load(doc, ttf, WinAnsiEncoding.INSTANCE);
+        PDTrueTypeFont tr = PDTrueTypeFont.load(ttf, WinAnsiEncoding.INSTANCE);
         GeneralPath path1 = tr.getPath("oslash");
         GeneralPath path2 = tr.getPath(248);
         Assert.assertFalse(path2.getPathIterator(null).isDone()); // not empty
