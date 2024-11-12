@@ -48,4 +48,28 @@ public class PDFRendererTest {
             ImageCompareUtils.assertSameContents(expected, actual);
         }
     }
+
+    @Test
+    public void disabledImageContentRendering() throws IOException {
+        String inputResPath = "/sambox/text-image-rendering.pdf";
+        try (PDDocument doc = PDFParser.parse(SeekableSources.onTempFileSeekableSourceFrom(
+                getClass().getResourceAsStream(inputResPath)))) {
+            PDFRenderer renderer = new PDFRenderer(doc){
+                @Override
+                protected PageDrawer createPageDrawer(PageDrawerParameters parameters) throws IOException {
+                    PageDrawer drawer = super.createPageDrawer(parameters);
+                    drawer.setImageContentRendered(false);
+                    return drawer;
+                }
+            };
+
+            BufferedImage image = renderer.renderImage(0);
+            File actual = Files.createTempFile("text-image-rendering_no_images", ".jpg").toFile();
+            actual.deleteOnExit();
+            ImageIO.write(image, "jpeg", new FileOutputStream(actual));
+
+            File expected = new File(this.getClass().getResource("/sambox/text-image-rendering_no_images.jpg").getFile());
+            ImageCompareUtils.assertSameContents(expected, actual);
+        }
+    }
 }
