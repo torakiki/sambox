@@ -165,6 +165,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
     private AnnotationFilter annotationFilter = annotation -> true;
 
     private boolean textContentRendered = true;
+    private boolean imageContentRendered = true;
 
     /**
      * Constructor.
@@ -1053,7 +1054,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         {
             return;
         }
-        if (!isContentRendered())
+        if (!isContentRendered() || !isImageContentRendered())
         {
             return;
         }
@@ -2060,4 +2061,11 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         this.textContentRendered = textContentRendered;
     }
 
+    public boolean isImageContentRendered() {
+        return imageContentRendered;
+    }
+
+    public void setImageContentRendered(boolean imageContentRendered) {
+        this.imageContentRendered = imageContentRendered;
+    }
 }
