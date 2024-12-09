@@ -534,7 +534,7 @@ public class AppearanceGeneratorHelper
         // so the font was substituted to another one, which has better unicode support
         // see PDVariableText.setAppearanceOverrideFont()
         PDFont font = ofNullable(field.getAppearanceFont()).or(
-                () -> ofNullable(defaultAppearance.getFont())).orElse(PDType1Font.HELVETICA);
+                () -> ofNullable(defaultAppearance.getFont())).orElse(PDType1Font.HELVETICA());
 
         requireNotNullArg(font, "font is null, check whether /DA entry is incomplete or incorrect");
         if (font.getName().contains("+"))

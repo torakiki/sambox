@@ -716,7 +716,7 @@ public abstract class PDFStreamEngine
         if (font == null)
         {
             LOG.warn("No current font, will use default");
-            font = PDType1Font.HELVETICA;
+            font = PDType1Font.HELVETICA();
         }
 
         float fontSize = textState.getFontSize();

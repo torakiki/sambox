@@ -98,11 +98,11 @@ public class AcroFormDefaultsProcessor extends AbstractProcessor
         }
         if (!fontDict.containsKey(COSName.HELV))
         {
-            defaultResources.put(COSName.HELV, PDType1Font.HELVETICA);
+            defaultResources.put(COSName.HELV, PDType1Font.HELVETICA());
         }
         if (!fontDict.containsKey(COSName.ZA_DB))
         {
-            defaultResources.put(COSName.ZA_DB, PDType1Font.ZAPF_DINGBATS);
+            defaultResources.put(COSName.ZA_DB, PDType1Font.ZAPF_DINGBATS());
         }
     }
 } 

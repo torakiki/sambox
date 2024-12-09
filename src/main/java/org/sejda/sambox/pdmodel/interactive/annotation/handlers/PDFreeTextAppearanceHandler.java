@@ -234,7 +234,7 @@ public class PDFreeTextAppearanceHandler extends PDAbstractAppearanceHandler
                     : borderBox.getWidth();
             // strategy to write formatted text is somewhat inspired by
             // AppearanceGeneratorHelper.insertGeneratedAppearance()
-            PDFont font = PDType1Font.HELVETICA;
+            PDFont font = PDType1Font.HELVETICA();
             float clipY;
             float clipWidth = width - ab.width * 4;
             float clipHeight = rotation == 90 || rotation == 270

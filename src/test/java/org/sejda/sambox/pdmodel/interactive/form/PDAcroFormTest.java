@@ -423,8 +423,8 @@ public class PDAcroFormTest
             assertNotNull(helv);
             assertNotNull(zadb);
             // make sure that font wasn't overwritten
-            assertNotEquals(PDType1Font.HELVETICA, helv);
-            assertNotEquals(PDType1Font.ZAPF_DINGBATS, zadb);
+            assertNotEquals(PDType1Font.HELVETICA(), helv);
+            assertNotEquals(PDType1Font.ZAPF_DINGBATS(), zadb);
         }
     }
 

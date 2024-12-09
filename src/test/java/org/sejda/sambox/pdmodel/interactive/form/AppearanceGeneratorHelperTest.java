@@ -26,7 +26,7 @@ public class AppearanceGeneratorHelperTest
         helper.setAppearanceValue("This is a test");
         PDRectangle content = new PDRectangle(2, 2, 517, 10);
 
-        float fontSize = helper.calculateFontSize(PDType1Font.HELVETICA, content);
+        float fontSize = helper.calculateFontSize(PDType1Font.HELVETICA(), content);
         assertEquals(10.81, fontSize, 0.1);
     }
 
@@ -38,7 +38,7 @@ public class AppearanceGeneratorHelperTest
         helper.setAppearanceValue("This is a test\nright here");
         PDRectangle content = new PDRectangle(2, 2, 517, 10);
 
-        float fontSize = helper.calculateFontSize(PDType1Font.HELVETICA, content);
+        float fontSize = helper.calculateFontSize(PDType1Font.HELVETICA(), content);
         assertEquals(5.40, fontSize, 0.1);
     }
 
@@ -49,7 +49,7 @@ public class AppearanceGeneratorHelperTest
         helper.setAppearanceValue("Line 1\nLine 2\nLine 3\nLine 4\nLine 5");
 
         PDRectangle content = new PDRectangle(2, 2, 517, 50);
-        float fontSize = helper.calculateFontSize(PDType1Font.HELVETICA, content);
+        float fontSize = helper.calculateFontSize(PDType1Font.HELVETICA(), content);
         assertEquals(10.81, fontSize, 0.1);
     }
 
@@ -60,7 +60,7 @@ public class AppearanceGeneratorHelperTest
         helper.setAppearanceValue("Line 1\nLine 2\nLine 3\nLine 4\nLine 5");
 
         PDRectangle content = new PDRectangle(2, 2, 517, 150);
-        float fontSize = helper.calculateFontSize(PDType1Font.HELVETICA, content);
+        float fontSize = helper.calculateFontSize(PDType1Font.HELVETICA(), content);
         assertEquals(12.0, fontSize, 0.1);
     }
 
@@ -71,7 +71,7 @@ public class AppearanceGeneratorHelperTest
         helper.setAppearanceValue("This is a test");
 
         PDRectangle content = new PDRectangle(2, 2, 517, 10);
-        float fontSize = helper.calculateFontSize(PDType1Font.HELVETICA, content);
+        float fontSize = helper.calculateFontSize(PDType1Font.HELVETICA(), content);
         assertEquals(10.81, fontSize, 0.1);
     }
 
@@ -83,7 +83,7 @@ public class AppearanceGeneratorHelperTest
                 "This is a test for a field that is very wide so the font will be shrinked to fit the width of the field on the page aaaaaaaaaa");
 
         PDRectangle content = new PDRectangle(2, 2, 517, 10);
-        float fontSize = helper.calculateFontSize(PDType1Font.HELVETICA, content);
+        float fontSize = helper.calculateFontSize(PDType1Font.HELVETICA(), content);
         assertEquals(9.8, fontSize, 0.1);
     }
 

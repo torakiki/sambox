@@ -160,7 +160,7 @@ public class PDLineAppearanceHandler extends PDAbstractAppearanceHandler
                 // when the text is so long that it would cross arrows, but we ignore this for now
                 // and stick to the specification.
 
-                PDType1Font font = PDType1Font.HELVETICA;
+                PDType1Font font = PDType1Font.HELVETICA();
                 // TODO: support newlines!!!!!
                 // see https://www.pdfill.com/example/pdf_commenting_new.pdf
                 float contentLength = 0;

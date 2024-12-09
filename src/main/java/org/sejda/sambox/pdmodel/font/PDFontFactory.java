@@ -158,6 +158,6 @@ public final class PDFontFactory
     @Deprecated
     public static PDFont createDefaultFont() throws IOException
     {
-        return PDType1Font.HELVETICA;
+        return PDType1Font.HELVETICA();
     }
 }

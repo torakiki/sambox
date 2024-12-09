@@ -79,22 +79,109 @@ public class PDType1Font extends PDSimpleFont
 
     private static final int PFB_START_MARKER = 0x80;
 
-    // todo: replace with enum? or getters?
-    public static final PDType1Font TIMES_ROMAN = new PDType1Font("Times-Roman");
-    public static final PDType1Font TIMES_BOLD = new PDType1Font("Times-Bold");
-    public static final PDType1Font TIMES_ITALIC = new PDType1Font("Times-Italic");
-    public static final PDType1Font TIMES_BOLD_ITALIC = new PDType1Font("Times-BoldItalic");
-    public static final PDType1Font HELVETICA = new PDType1Font("Helvetica");
-    public static final PDType1Font HELVETICA_BOLD = new PDType1Font("Helvetica-Bold");
-    public static final PDType1Font HELVETICA_OBLIQUE = new PDType1Font("Helvetica-Oblique");
-    public static final PDType1Font HELVETICA_BOLD_OBLIQUE = new PDType1Font(
-            "Helvetica-BoldOblique");
-    public static final PDType1Font COURIER = new PDType1Font("Courier");
-    public static final PDType1Font COURIER_BOLD = new PDType1Font("Courier-Bold");
-    public static final PDType1Font COURIER_OBLIQUE = new PDType1Font("Courier-Oblique");
-    public static final PDType1Font COURIER_BOLD_OBLIQUE = new PDType1Font("Courier-BoldOblique");
-    public static final PDType1Font SYMBOL = new PDType1Font("Symbol");
-    public static final PDType1Font ZAPF_DINGBATS = new PDType1Font("ZapfDingbats");
+    public enum StandardFont {
+        TIMES_ROMAN,
+        TIMES_BOLD,
+        TIMES_ITALIC,
+        TIMES_BOLD_ITALIC,
+        HELVETICA,
+        HELVETICA_BOLD,
+        HELVETICA_OBLIQUE,
+        HELVETICA_BOLD_OBLIQUE,
+        COURIER,
+        COURIER_BOLD,
+        COURIER_OBLIQUE,
+        COURIER_BOLD_OBLIQUE,
+        SYMBOL,
+        ZAPF_DINGBATS
+    }
+
+    private static Map<StandardFont, PDType1Font> cache = new ConcurrentHashMap<>();
+    protected static PDType1Font getStandardFont(StandardFont key)
+    {
+        return cache.computeIfAbsent(key, standardFont -> loadStandardFont(key));
+    }
+
+    private static PDType1Font loadStandardFont(StandardFont font)
+    {
+        return switch (font) {
+            case TIMES_ROMAN -> new PDType1Font("Times-Roman");
+            case TIMES_BOLD -> new PDType1Font("Times-Bold");
+            case TIMES_ITALIC -> new PDType1Font("Times-Italic");
+            case TIMES_BOLD_ITALIC -> new PDType1Font("Times-BoldItalic");
+            case HELVETICA -> new PDType1Font("Helvetica");
+            case HELVETICA_BOLD -> new PDType1Font("Helvetica-Bold");
+            case HELVETICA_OBLIQUE -> new PDType1Font("Helvetica-Oblique");
+            case HELVETICA_BOLD_OBLIQUE -> new PDType1Font("Helvetica-BoldOblique");
+            case COURIER -> new PDType1Font("Courier");
+            case COURIER_BOLD -> new PDType1Font("Courier-Bold");
+            case COURIER_OBLIQUE -> new PDType1Font("Courier-Oblique");
+            case COURIER_BOLD_OBLIQUE -> new PDType1Font("Courier-BoldOblique");
+            case SYMBOL -> new PDType1Font("Symbol");
+            case ZAPF_DINGBATS -> new PDType1Font("ZapfDingbats");
+        };
+    }
+
+    public static PDType1Font TIMES_ROMAN()
+    {
+        return getStandardFont(StandardFont.TIMES_ROMAN);
+    }
+    public static PDType1Font TIMES_BOLD()
+    {
+        return getStandardFont(StandardFont.TIMES_BOLD);
+    }
+    public static PDType1Font TIMES_ITALIC()
+    {
+        return getStandardFont(StandardFont.TIMES_ITALIC);
+    }
+    public static PDType1Font TIMES_BOLD_ITALIC()
+    {
+        return getStandardFont(StandardFont.TIMES_BOLD_ITALIC);
+    }
+    
+    public static PDType1Font HELVETICA() 
+    {
+        return getStandardFont(StandardFont.HELVETICA);
+    }
+    
+    public static PDType1Font HELVETICA_BOLD()
+    {
+        return getStandardFont(StandardFont.HELVETICA_BOLD);
+    }
+
+    public static PDType1Font HELVETICA_OBLIQUE()
+    {
+        return getStandardFont(StandardFont.HELVETICA_OBLIQUE);
+    }
+    public static PDType1Font HELVETICA_BOLD_OBLIQUE()
+    {
+        return getStandardFont(StandardFont.HELVETICA_BOLD_OBLIQUE);
+    }
+    public static PDType1Font COURIER()
+    {
+        return getStandardFont(StandardFont.COURIER);
+    }
+    public static PDType1Font COURIER_BOLD()
+    {
+        return getStandardFont(StandardFont.COURIER_BOLD);
+    }
+    public static PDType1Font COURIER_OBLIQUE()
+    {
+        return getStandardFont(StandardFont.COURIER_OBLIQUE);
+    }
+    public static PDType1Font COURIER_BOLD_OBLIQUE()
+    {
+        return getStandardFont(StandardFont.COURIER_BOLD_OBLIQUE);
+    }
+    
+    public static PDType1Font SYMBOL()
+    {
+        return getStandardFont(StandardFont.SYMBOL);
+    }
+    public static PDType1Font ZAPF_DINGBATS()
+    {
+        return getStandardFont(StandardFont.ZAPF_DINGBATS);
+    }
 
     private final Type1Font type1font; // embedded font
     private final FontBoxFont genericFont; // embedded or system font for rendering

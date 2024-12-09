@@ -192,7 +192,7 @@ class PDDefaultAppearanceString
         {
             LOG.warn(
                     "Could not find font: /" + fontName.getName() + ", will use Helvetica instead");
-            font = PDType1Font.HELVETICA;
+            font = PDType1Font.HELVETICA();
         }
         setFontName(fontName);
         setFont(font);
