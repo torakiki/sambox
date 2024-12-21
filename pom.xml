@@ -736,7 +736,7 @@
                         </goals>
                         <configuration>
                             <url>
-                                https://gemmei.ftp.acc.umu.se/mirror/osdn.net/ipafonts/51867/ipag00303.zip
+                                https://mirrors.dotsrc.org/osdn/ipafonts/51867/ipag00303.zip
                             </url>
                             <outputDirectory>${project.build.directory}/fonts</outputDirectory>
                             <outputFileName>ipag00303.zip</outputFileName>
@@ -754,7 +754,7 @@
                         </goals>
                         <configuration>
                             <url>
-                                https://gemmei.ftp.acc.umu.se/mirror/osdn.net/ipafonts/51867/ipagp00303.zip
+                                https://mirrors.dotsrc.org/osdn/ipafonts/51867/ipagp00303.zip
                             </url>
                             <outputDirectory>${project.build.directory}/fonts</outputDirectory>
                             <outputFileName>ipagp00303.zip</outputFileName>
