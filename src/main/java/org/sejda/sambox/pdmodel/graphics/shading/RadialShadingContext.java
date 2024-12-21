@@ -118,8 +118,10 @@ public class RadialShadingContext extends ShadingContext implements PaintContext
         }
         catch (NoninvertibleTransformException ex)
         {
-            LOG.error(ex.getMessage() + ", matrix: " + matrix, ex);
-            LOG.error(ex.getMessage(), ex);
+            LOG.warn(ex.getMessage() + ", matrix: " + matrix + ", using fallback to identity transform with a minimal scale to avoid singularity");
+            // Fallback to identity transform with a minimal scale to avoid singularity
+            rat = new AffineTransform();
+            rat.scale(1e-6, 1e-6);
         }
 
         // shading space -> device space
