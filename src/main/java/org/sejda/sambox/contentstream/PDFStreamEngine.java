@@ -382,7 +382,7 @@ public abstract class PDFStreamEngine
      * @param color         color to use, if this is an uncoloured pattern, otherwise null.
      * @param colorSpace    color space to use, if this is an uncoloured pattern, otherwise null.
      */
-    protected final void processTilingPattern(PDTilingPattern tilingPattern, PDColor color,
+    public final void processTilingPattern(PDTilingPattern tilingPattern, PDColor color,
             PDColorSpace colorSpace) throws IOException
     {
         processTilingPattern(tilingPattern, color, colorSpace, tilingPattern.getMatrix());
@@ -397,7 +397,7 @@ public abstract class PDFStreamEngine
      * @param colorSpace    color space to use, if this is an uncoloured pattern, otherwise null.
      * @param patternMatrix the pattern matrix, may be overridden for custom rendering.
      */
-    protected final void processTilingPattern(PDTilingPattern tilingPattern, PDColor color,
+    public final void processTilingPattern(PDTilingPattern tilingPattern, PDColor color,
             PDColorSpace colorSpace, Matrix patternMatrix) throws IOException
     {
         PDResources parent = pushResources(tilingPattern);
