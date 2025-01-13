@@ -506,6 +506,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName SW = newCommonInstance("SW");
     // T
     public static final COSName T = newCommonInstance("T");
+    public static final COSName Tabs = newCommonInstance("Tabs");
     public static final COSName TARGET = newCommonInstance("Target");
     public static final COSName TEMPLATES = newCommonInstance("Templates");
     public static final COSName THREADS = newCommonInstance("Threads");
