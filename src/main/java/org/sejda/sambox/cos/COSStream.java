@@ -296,7 +296,7 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
 
     private byte[] decodeChain(COSArray filters, InputStream startingFrom) throws IOException
     {
-        if (filters.size() > 0)
+        if (!filters.isEmpty())
         {
             byte[] tmpResult = new byte[0];
             InputStream input = startingFrom;
@@ -358,7 +358,7 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
 
     private byte[] encodeChain(COSArray filters, InputStream startingFrom) throws IOException
     {
-        if (filters.size() > 0)
+        if (!filters.isEmpty())
         {
             byte[] tmpResult = new byte[0];
             InputStream input = startingFrom;
@@ -433,7 +433,6 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
      *
      * @param filters COSArray or COSName of filters to be used.
      * @return OutputStream for un-encoded stream data.
-     * @throws IOException If the output stream could not be created.
      */
     public OutputStream createFilteredStream(COSBase filters)
     {
@@ -474,7 +473,7 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
     /**
      * Adds Flate decode filter to the current filters list if possible
      *
-     * @true if the FlateDecode filter has been added
+     * @return true if the FlateDecode filter has been added
      */
     public boolean addCompression()
     {
@@ -546,7 +545,6 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
      * This will create an output stream that can be written to.
      *
      * @return An output stream which raw data bytes should be written to.
-     * @throws IOException If there is an error creating the stream.
      */
     public OutputStream createUnfilteredStream()
     {

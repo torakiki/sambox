@@ -16,6 +16,13 @@
  */
 package org.sejda.sambox.pdmodel.common;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import org.sejda.commons.util.IOUtils;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSArrayList;
@@ -27,13 +34,6 @@ import org.sejda.sambox.cos.COSObjectable;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.pdmodel.common.filespecification.FileSpecifications;
 import org.sejda.sambox.pdmodel.common.filespecification.PDFileSpecification;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 /**
  * A PDStream represents a stream in a PDF document. Streams are tied to a single PDF document.
@@ -136,7 +136,6 @@ public class PDStream implements COSObjectable
      * This will get a stream that can be written to.
      *
      * @return An output stream to write data to.
-     * @throws IOException If an IO error occurs during writing.
      */
     public OutputStream createOutputStream()
     {
@@ -148,7 +147,6 @@ public class PDStream implements COSObjectable
      *
      * @param filter the filter to be used.
      * @return An output stream to write data to.
-     * @throws IOException If an IO error occurs during writing.
      */
     public OutputStream createOutputStream(COSName filter)
     {

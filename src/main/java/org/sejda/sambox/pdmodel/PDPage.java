@@ -301,11 +301,11 @@ public class PDPage implements COSObjectable, PDContentStream
         if (mediaBox == null)
         {
             COSBase base = PDPageTree.getInheritableAttribute(page, COSName.MEDIA_BOX);
-            if (base instanceof COSArray)
+            if (base instanceof COSArray array)
             {
-                mediaBox = new PDRectangle((COSArray) base);
-            } 
-            else 
+                mediaBox = new PDRectangle(array);
+            }
+            else
             {
                 LOG.debug("Can't find MediaBox, will use U.S. Letter");
                 mediaBox = PDRectangle.LETTER;
@@ -316,10 +316,10 @@ public class PDPage implements COSObjectable, PDContentStream
 
     public PDRectangle getMediaBoxRaw()
     {
-        COSBase array = PDPageTree.getInheritableAttribute(page, COSName.MEDIA_BOX);
-        if (array instanceof COSArray)
+        COSBase base = PDPageTree.getInheritableAttribute(page, COSName.MEDIA_BOX);
+        if (base instanceof COSArray array)
         {
-            return PDRectangle.rectangleFrom((COSArray) array);
+            return PDRectangle.rectangleFrom(array);
         }
         return null;
     }
@@ -352,9 +352,9 @@ public class PDPage implements COSObjectable, PDContentStream
         try
         {
             COSBase base = PDPageTree.getInheritableAttribute(page, COSName.CROP_BOX);
-            if (base instanceof COSArray)
+            if (base instanceof COSArray array)
             {
-                return clipToMediaBox(new PDRectangle((COSArray) base));
+                return clipToMediaBox(new PDRectangle(array));
             }
         }
         catch (Exception ex)
@@ -367,10 +367,10 @@ public class PDPage implements COSObjectable, PDContentStream
 
     public PDRectangle getCropBoxRaw()
     {
-        COSBase array = PDPageTree.getInheritableAttribute(page, COSName.CROP_BOX);
-        if (array instanceof COSArray)
+        COSBase base = PDPageTree.getInheritableAttribute(page, COSName.CROP_BOX);
+        if (base instanceof COSArray array)
         {
-            return PDRectangle.rectangleFrom((COSArray) array);
+            return PDRectangle.rectangleFrom(array);
         }
         return null;
     }
