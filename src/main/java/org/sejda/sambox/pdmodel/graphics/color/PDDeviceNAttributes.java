@@ -88,6 +88,11 @@ public final class PDDeviceNAttributes extends PDDictionaryWrapper
      */
     public PDDeviceNProcess getProcess()
     {
+        if (getCOSObject() == null)
+        {
+            return null;
+        }
+        
         COSDictionary process = getCOSObject().getDictionaryObject(COSName.PROCESS,
                 COSDictionary.class);
         if (process == null)
