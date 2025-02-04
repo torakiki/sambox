@@ -17,6 +17,7 @@
 package org.sejda.sambox.pdmodel.graphics;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
@@ -42,24 +43,19 @@ public class PDFontSetting implements COSObjectable
      */
     public PDFontSetting()
     {
-        fontSetting = new COSArray();
-        fontSetting.add( null );
-        fontSetting.add( new COSFloat( 1 ) );
+        fontSetting = new COSArray(null, new COSFloat(1));
     }
 
     /**
      * Constructs a font setting from an existing array.
      *
-     * @param fs The new font setting value.
+     * @param fontSetting The new font setting value.
      */
-    public PDFontSetting( COSArray fs )
+    public PDFontSetting(COSArray fontSetting)
     {
-        fontSetting = fs;
+        this.fontSetting = fontSetting;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public COSBase getCOSObject()
     {
@@ -69,49 +65,34 @@ public class PDFontSetting implements COSObjectable
     /**
      * This will get the font for this font setting.
      *
-     * @return The font for this setting of null if one was not found.
-     *
+     * @return The font for this setting or null if one was not found.
      * @throws IOException If there is an error getting the font.
      */
     public PDFont getFont() throws IOException
     {
-        PDFont retval = null;
-        COSBase font = fontSetting.getObject(0);
-        if( font instanceof COSDictionary )
+        if (fontSetting.getObject(0) instanceof COSDictionary dictionary)
         {
-            retval = PDFontFactory.createFont( (COSDictionary)font );
+            return PDFontFactory.createFont(dictionary);
         }
-        return retval;
+        return null;
     }
 
-    /**
-     * This will set the font for this font setting.
-     *
-     * @param font The new font.
-     */
-    public void setFont( PDFont font )
+    public void setFont(PDFont font)
     {
-        fontSetting.set( 0, font );
+        fontSetting.set(0, font);
     }
 
     /**
-     * This will get the size of the font.
-     *
-     * @return The size of the font.
+     * @return The size of the font or 0 if size is of the wrong type.
      */
     public float getFontSize()
     {
-        COSNumber size = (COSNumber)fontSetting.get( 1 );
-        return size.floatValue();
+        return Optional.ofNullable(fontSetting.getObject(1, COSNumber.class))
+                .map(COSNumber::floatValue).orElse(0f);
     }
 
-    /**
-     * This will set the size of the font.
-     *
-     * @param size The new size of the font.
-     */
-    public void setFontSize( float size )
+    public void setFontSize(float size)
     {
-        fontSetting.set( 1, new COSFloat( size ) );
+        fontSetting.set(1, new COSFloat(size));
     }
 }

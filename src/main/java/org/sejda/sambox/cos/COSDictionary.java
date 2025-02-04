@@ -1409,13 +1409,13 @@ public class COSDictionary extends COSBase
             retVal.append(key);
             retVal.append(":");
             retVal.append(Optional.ofNullable(getItem(key)).map(v -> {
-                if (v instanceof COSDictionary)
+                if (v instanceof COSDictionary dic)
                 {
-                    return "COSDictionary{.." + ((COSDictionary) v).size() + " items ..}";
+                    return "COSDictionary{.." + dic.size() + " items ..}";
                 }
-                if (v instanceof COSArray)
+                if (v instanceof COSArray array)
                 {
-                    return "COSArray{.." + ((COSArray) v).size() + " items ..}";
+                    return "COSArray{.." + array.size() + " items ..}";
                 }
                 return v.toString();
             }).orElse("null"));
