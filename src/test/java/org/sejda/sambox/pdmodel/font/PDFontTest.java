@@ -207,16 +207,16 @@ public class PDFontTest
     {
         try
         {
-            PDType1Font.HELVETICA_BOLD.encode("\u0080");
+            PDType1Font.HELVETICA_BOLD().encode("\u0080");
             Assert.fail("should have thrown IllegalArgumentException");
         }
         catch (IllegalArgumentException ex)
         {
         }
-        PDType1Font.HELVETICA_BOLD.encode("€");
+        PDType1Font.HELVETICA_BOLD().encode("€");
         try
         {
-            PDType1Font.HELVETICA_BOLD.encode("\u0080");
+            PDType1Font.HELVETICA_BOLD().encode("\u0080");
             Assert.fail("should have thrown IllegalArgumentException");
         }
         catch (IllegalArgumentException ex)
@@ -372,7 +372,7 @@ public class PDFontTest
 
         try
         {
-            PDType1Font.HELVETICA.encode(unsupported);
+            PDType1Font.HELVETICA().encode(unsupported);
             fail("Exception expected");
         }
         catch (IllegalArgumentException ex)
@@ -380,7 +380,7 @@ public class PDFontTest
             // expected
         }
 
-        PDType1Font.HELVETICA.encodeLeniently(unsupported);
+        PDType1Font.HELVETICA().encodeLeniently(unsupported);
     }
 
     /**
@@ -442,7 +442,7 @@ public class PDFontTest
         {
             PDPage page = new PDPage();
             doc.addPage(page);
-            PDFont font1 = PDType1Font.HELVETICA;
+            PDFont font1 = PDType1Font.HELVETICA();
             PDFont font2 = PDType0Font.load(doc, PDFontTest.class.getResourceAsStream(
                     "/org/sejda/sambox/resources/ttf/LiberationSans-Regular.ttf"));
 

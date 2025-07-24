@@ -80,7 +80,7 @@ public class TestFontEncoding extends TestCase
             PDPage page = new PDPage();
             doc.addPage(page);
             PDPageContentStream cs = new PDPageContentStream(doc, page);
-            cs.setFont(PDType1Font.HELVETICA, 20);
+            cs.setFont(PDType1Font.HELVETICA(), 20);
             cs.beginText();
             cs.newLineAtOffset(100, 700);
             // first tilde is "asciitilde" (from the keyboard), 2nd tilde is "tilde"

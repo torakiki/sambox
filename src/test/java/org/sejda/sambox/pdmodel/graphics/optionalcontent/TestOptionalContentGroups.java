@@ -16,6 +16,17 @@
  */
 package org.sejda.sambox.pdmodel.graphics.optionalcontent;
 
+import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferInt;
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import junit.framework.TestCase;
 import org.junit.Assert;
 import org.sejda.io.SeekableSources;
@@ -36,18 +47,7 @@ import org.sejda.sambox.rendering.PDFRenderer;
 import org.sejda.sambox.text.PDFMarkedContentExtractor;
 import org.sejda.sambox.text.TextPosition;
 import org.sejda.sambox.util.SpecVersionUtils;
-
 import javax.imageio.ImageIO;
-import java.awt.Color;
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferInt;
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Tests optional content group functionality (also called layers).
@@ -110,14 +110,14 @@ public class TestOptionalContentGroups extends TestCase
             // Setup page content stream and paint background/title
             PDPageContentStream contentStream = new PDPageContentStream(doc, page,
                     AppendMode.OVERWRITE, false);
-            PDFont font = PDType1Font.HELVETICA_BOLD;
+            PDFont font = PDType1Font.HELVETICA_BOLD();
             contentStream.beginMarkedContent(COSName.OC, background);
             contentStream.beginText();
             contentStream.setFont(font, 14);
             contentStream.newLineAtOffset(80, 700);
             contentStream.showText("PDF 1.5: Optional Content Groups");
             contentStream.endText();
-            font = PDType1Font.HELVETICA;
+            font = PDType1Font.HELVETICA();
             contentStream.beginText();
             contentStream.setFont(font, 12);
             contentStream.newLineAtOffset(80, 680);
@@ -283,14 +283,14 @@ public class TestOptionalContentGroups extends TestCase
             // Setup page content stream and paint background/title
             PDPageContentStream contentStream = new PDPageContentStream(doc, page,
                     AppendMode.OVERWRITE, false);
-            PDFont font = PDType1Font.HELVETICA_BOLD;
+            PDFont font = PDType1Font.HELVETICA_BOLD();
             contentStream.beginMarkedContent(COSName.OC, visible);
             contentStream.beginText();
             contentStream.setFont(font, 14);
             contentStream.newLineAtOffset(80, 700);
             contentStream.showText("PDF 1.5: Optional Content Groups");
             contentStream.endText();
-            font = PDType1Font.HELVETICA;
+            font = PDType1Font.HELVETICA();
             contentStream.beginText();
             contentStream.setFont(font, 12);
             contentStream.newLineAtOffset(80, 680);
@@ -369,7 +369,7 @@ public class TestOptionalContentGroups extends TestCase
             // Setup page content stream and paint background/title
             PDPageContentStream contentStream = new PDPageContentStream(doc, page,
                     AppendMode.OVERWRITE, false);
-            PDFont font = PDType1Font.HELVETICA_BOLD;
+            PDFont font = PDType1Font.HELVETICA_BOLD();
             contentStream.beginMarkedContent(COSName.OC, background);
             contentStream.beginText();
             contentStream.setFont(font, 14);
@@ -378,7 +378,7 @@ public class TestOptionalContentGroups extends TestCase
             contentStream.endText();
             contentStream.endMarkedContent();
 
-            font = PDType1Font.HELVETICA;
+            font = PDType1Font.HELVETICA();
 
             // Paint enabled layer
             contentStream.beginMarkedContent(COSName.OC, enabled);
@@ -446,7 +446,7 @@ public class TestOptionalContentGroups extends TestCase
             try (PDPageContentStream contentStream = new PDPageContentStream(doc2, page,
                     AppendMode.OVERWRITE, false))
             {
-                PDFont font = PDType1Font.HELVETICA;
+                PDFont font = PDType1Font.HELVETICA();
 
                 contentStream.setNonStrokingColor(Color.RED);
                 contentStream.beginText();

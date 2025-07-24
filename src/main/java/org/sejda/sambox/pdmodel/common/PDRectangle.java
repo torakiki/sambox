@@ -336,6 +336,11 @@ public class PDRectangle implements COSObjectable
         return ret;
     }
 
+    public boolean isLandscape()
+    {
+        return getWidth() > getHeight();
+    }
+
     @Override
     public boolean equals(Object o)
     {
@@ -343,11 +348,11 @@ public class PDRectangle implements COSObjectable
         {
             return true;
         }
-        if (!(o instanceof PDRectangle))
+        if (!(o instanceof PDRectangle rectangle))
         {
             return false;
         }
-        return rectArray.equals(((PDRectangle) o).rectArray);
+        return rectArray.equals(rectangle.rectArray);
     }
 
     @Override
@@ -356,11 +361,6 @@ public class PDRectangle implements COSObjectable
         return rectArray.hashCode();
     }
 
-    /**
-     * This will return a string representation of this rectangle.
-     *
-     * @return This object as a string.
-     */
     @Override
     public String toString()
     {
@@ -370,7 +370,7 @@ public class PDRectangle implements COSObjectable
 
     /**
      * @param array
-     * @return a {@link PDRectangle} if the the array is not null and has enough elements, null otherwise
+     * @return a {@link PDRectangle} if the array is not null and has enough elements, null otherwise
      */
     public static PDRectangle rectangleFrom(COSArray array)
     {

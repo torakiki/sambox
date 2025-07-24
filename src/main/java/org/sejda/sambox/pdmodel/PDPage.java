@@ -54,6 +54,7 @@ import org.sejda.sambox.pdmodel.common.PDStream;
 import org.sejda.sambox.pdmodel.interactive.action.PDPageAdditionalActions;
 import org.sejda.sambox.pdmodel.interactive.annotation.AnnotationFilter;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotation;
+import org.sejda.sambox.pdmodel.interactive.form.Tabs;
 import org.sejda.sambox.pdmodel.interactive.measurement.PDViewportDictionary;
 import org.sejda.sambox.pdmodel.interactive.pagenavigation.PDThreadBead;
 import org.sejda.sambox.pdmodel.interactive.pagenavigation.PDTransition;
@@ -936,5 +937,21 @@ public class PDPage implements COSObjectable, PDContentStream
     public COSDictionary getPageTreeParent()
     {
         return pageTreeParent;
+    }
+
+    public Tabs getTabs()
+    {
+        return Tabs.fromString(page.getString(COSName.Tabs));
+    }
+
+    public void setTabs(Tabs value)
+    {
+        if (value == null)
+        {
+            page.removeItem(COSName.Tabs);
+            return;
+        }
+
+        page.setString(COSName.Tabs, value.stringValue());
     }
 }

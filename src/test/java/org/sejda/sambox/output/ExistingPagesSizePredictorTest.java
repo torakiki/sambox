@@ -56,7 +56,7 @@ public class ExistingPagesSizePredictorTest
         document = new PDDocument();
         page = new PDPage();
         document.addPage(page);
-        PDFont font = PDType1Font.HELVETICA_BOLD;
+        PDFont font = PDType1Font.HELVETICA_BOLD();
         try (PDPageContentStream contents = new PDPageContentStream(document, page))
         {
             contents.beginText();

@@ -106,7 +106,7 @@ public abstract class PDFunction implements COSObjectable
      */
     public static PDFunction create(COSBase function) throws IOException
     {
-        if (function == COSName.IDENTITY)
+        if (function == null || function == COSName.IDENTITY)
         {
             return new PDFunctionTypeIdentity(null);
         }

@@ -16,6 +16,13 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
+import static org.sejda.io.SeekableSources.inMemorySeekableSourceFrom;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.cos.COSArray;
@@ -36,13 +43,6 @@ import org.sejda.sambox.pdmodel.graphics.color.PDDeviceRGB;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.sejda.io.SeekableSources.inMemorySeekableSourceFrom;
 
 /**
  * Represents a default appearance string, as found in the /DA entry of free text annotations.
@@ -192,7 +192,7 @@ class PDDefaultAppearanceString
         {
             LOG.warn(
                     "Could not find font: /" + fontName.getName() + ", will use Helvetica instead");
-            font = PDType1Font.HELVETICA;
+            font = PDType1Font.HELVETICA();
         }
         setFontName(fontName);
         setFont(font);

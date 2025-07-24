@@ -44,7 +44,7 @@ public class PDDefaultAppearanceStringTest
         resources = new PDResources();
         // the resource name is created when the font is added so need
         // to capture that
-        fontResourceName = resources.add(PDType1Font.HELVETICA);
+        fontResourceName = resources.add(PDType1Font.HELVETICA());
     }
 
     @Test
@@ -57,7 +57,7 @@ public class PDDefaultAppearanceStringTest
                 sampleString, resources);
 
         assertEquals(12, defaultAppearanceString.getFontSize(), 0.001);
-        assertEquals(PDType1Font.HELVETICA, defaultAppearanceString.getFont());
+        assertEquals(PDType1Font.HELVETICA(), defaultAppearanceString.getFont());
         assertEquals(PDDeviceRGB.INSTANCE, defaultAppearanceString.getFontColor().getColorSpace());
         assertEquals(0.019, defaultAppearanceString.getFontColor().getComponents()[0], 0.0001);
         assertEquals(0.305, defaultAppearanceString.getFontColor().getComponents()[1], 0.0001);
@@ -69,7 +69,7 @@ public class PDDefaultAppearanceStringTest
     {
         COSString sampleString = COSString.parseLiteral("/Helvetica 12 Tf 0.019 0.305 0.627 rg");
         PDDefaultAppearanceString defaultAppearanceString = new PDDefaultAppearanceString(sampleString, resources);
-        assertEquals(PDType1Font.HELVETICA, defaultAppearanceString.getFont());
+        assertEquals(PDType1Font.HELVETICA(), defaultAppearanceString.getFont());
     }
 
     @Test(expected = IOException.class)

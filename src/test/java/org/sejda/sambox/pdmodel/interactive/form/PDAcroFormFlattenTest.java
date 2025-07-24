@@ -76,7 +76,7 @@ public class PDAcroFormFlattenTest
         PDDocument doc = PDFParser.parse(
                 SeekableSources.seekableSourceFrom(new File(TARGETPDFDIR, "Testformular1.pdf")));
         PDField field = doc.getDocumentCatalog().getAcroForm().getField("Vorname");
-        field.setValue("nbspace\u00A0");
+        field.setValue("nbspace\u00A0\u202F");
 
         doc.writeTo(new File(TARGETPDFDIR, "Testformular1-filled-out-nbspace.pdf"));
         doc.close();

@@ -39,7 +39,16 @@ import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.awt.image.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.ByteLookupTable;
+import java.awt.image.ColorModel;
+import java.awt.image.ComponentColorModel;
+import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferByte;
+import java.awt.image.LookupOp;
+import java.awt.image.LookupTable;
+import java.awt.image.Raster;
+import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -165,6 +174,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
     private AnnotationFilter annotationFilter = annotation -> true;
 
     private boolean textContentRendered = true;
+    private boolean imageContentRendered = true;
 
     /**
      * Constructor.
@@ -1053,7 +1063,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         {
             return;
         }
-        if (!isContentRendered())
+        if (!isContentRendered() || !isImageContentRendered())
         {
             return;
         }
@@ -2060,4 +2070,13 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         this.textContentRendered = textContentRendered;
     }
 
+    public boolean isImageContentRendered()
+    {
+        return imageContentRendered;
+    }
+
+    public void setImageContentRendered(boolean imageContentRendered)
+    {
+        this.imageContentRendered = imageContentRendered;
+    }
 }

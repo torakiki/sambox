@@ -43,7 +43,12 @@ import org.sejda.sambox.output.ContentStreamWriter;
 import org.sejda.sambox.pdmodel.PDPageContentStream;
 import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
-import org.sejda.sambox.pdmodel.font.*;
+import org.sejda.sambox.pdmodel.font.PDFont;
+import org.sejda.sambox.pdmodel.font.PDSimpleFont;
+import org.sejda.sambox.pdmodel.font.PDType1Font;
+import org.sejda.sambox.pdmodel.font.PDType3CharProc;
+import org.sejda.sambox.pdmodel.font.PDType3Font;
+import org.sejda.sambox.pdmodel.font.PDVectorFont;
 import org.sejda.sambox.pdmodel.graphics.color.PDColor;
 import org.sejda.sambox.pdmodel.interactive.action.PDAction;
 import org.sejda.sambox.pdmodel.interactive.action.PDActionJavaScript;
@@ -202,6 +207,7 @@ public class AppearanceGeneratorHelper
             // avoid java.lang.IllegalArgumentException: U+00A0 ('nbspace') is not available in this font XYZ
             // TODO: generic way of handling any character which is not supported by the font?
             value = value.replaceAll("\\u00A0", " "); // non-breaking space
+            value = value.replaceAll("\\u202F", " "); // narrow non-breaking space
             value = value.replaceAll("\\u0009", "   "); // tab
         }
 
@@ -534,7 +540,7 @@ public class AppearanceGeneratorHelper
         // so the font was substituted to another one, which has better unicode support
         // see PDVariableText.setAppearanceOverrideFont()
         PDFont font = ofNullable(field.getAppearanceFont()).or(
-                () -> ofNullable(defaultAppearance.getFont())).orElse(PDType1Font.HELVETICA);
+                () -> ofNullable(defaultAppearance.getFont())).orElse(PDType1Font.HELVETICA());
 
         requireNotNullArg(font, "font is null, check whether /DA entry is incomplete or incorrect");
         if (font.getName().contains("+"))

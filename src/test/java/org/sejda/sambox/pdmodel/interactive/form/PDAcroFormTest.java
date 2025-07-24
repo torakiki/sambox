@@ -16,6 +16,19 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,20 +46,6 @@ import org.sejda.sambox.pdmodel.font.PDFont;
 import org.sejda.sambox.pdmodel.font.PDType1Font;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotation;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
-
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Test for the PDButton class.
@@ -423,8 +422,8 @@ public class PDAcroFormTest
             assertNotNull(helv);
             assertNotNull(zadb);
             // make sure that font wasn't overwritten
-            assertNotEquals(PDType1Font.HELVETICA, helv);
-            assertNotEquals(PDType1Font.ZAPF_DINGBATS, zadb);
+            assertNotEquals(PDType1Font.HELVETICA(), helv);
+            assertNotEquals(PDType1Font.ZAPF_DINGBATS(), zadb);
         }
     }
 

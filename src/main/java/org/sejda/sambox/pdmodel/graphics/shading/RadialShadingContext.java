@@ -16,13 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.graphics.shading;
 
-import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSBoolean;
-import org.sejda.sambox.pdmodel.common.function.PDFunction;
-import org.sejda.sambox.util.Matrix;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.awt.PaintContext;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
@@ -31,6 +24,13 @@ import java.awt.image.ColorModel;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
+
+import org.sejda.sambox.cos.COSArray;
+import org.sejda.sambox.cos.COSBoolean;
+import org.sejda.sambox.pdmodel.common.function.PDFunction;
+import org.sejda.sambox.util.Matrix;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * AWT PaintContext for radial shading.
@@ -118,8 +118,11 @@ public class RadialShadingContext extends ShadingContext implements PaintContext
         }
         catch (NoninvertibleTransformException ex)
         {
-            LOG.error(ex.getMessage() + ", matrix: " + matrix, ex);
-            LOG.error(ex.getMessage(), ex);
+            LOG.warn(ex.getMessage() + ", matrix: " + matrix
+                    + ", using fallback to identity transform with a minimal scale to avoid singularity");
+            // Fallback to identity transform with a minimal scale to avoid singularity
+            rat = new AffineTransform();
+            rat.scale(1e-6, 1e-6);
         }
 
         // shading space -> device space

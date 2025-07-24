@@ -16,15 +16,15 @@
  */
 package org.sejda.sambox.pdmodel.graphics.color;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.common.COSDictionaryMap;
 import org.sejda.sambox.pdmodel.common.PDDictionaryWrapper;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Contains additional information about the components of colour space. Instead of using the
@@ -88,6 +88,11 @@ public final class PDDeviceNAttributes extends PDDictionaryWrapper
      */
     public PDDeviceNProcess getProcess()
     {
+        if (getCOSObject() == null)
+        {
+            return null;
+        }
+
         COSDictionary process = getCOSObject().getDictionaryObject(COSName.PROCESS,
                 COSDictionary.class);
         if (process == null)
