@@ -16,18 +16,7 @@
  */
 package org.sejda.sambox.pdmodel.graphics.color;
 
-import org.sejda.commons.util.IOUtils;
-import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSArrayList;
-import org.sejda.sambox.cos.COSBase;
-import org.sejda.sambox.cos.COSFloat;
-import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.cos.COSStream;
-import org.sejda.sambox.pdmodel.PDResources;
-import org.sejda.sambox.pdmodel.common.PDRange;
-import org.sejda.sambox.pdmodel.common.PDStream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.sejda.commons.util.RequireUtils.requireIOCondition;
 
 import java.awt.Transparency;
 import java.awt.color.CMMException;
@@ -46,7 +35,18 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import static org.sejda.commons.util.RequireUtils.requireIOCondition;
+import org.sejda.commons.util.IOUtils;
+import org.sejda.sambox.cos.COSArray;
+import org.sejda.sambox.cos.COSArrayList;
+import org.sejda.sambox.cos.COSBase;
+import org.sejda.sambox.cos.COSFloat;
+import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.cos.COSStream;
+import org.sejda.sambox.pdmodel.PDResources;
+import org.sejda.sambox.pdmodel.common.PDRange;
+import org.sejda.sambox.pdmodel.common.PDStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * ICCBased colour spaces are based on a cross-platform colour profile as defined by the
@@ -226,7 +226,8 @@ public final class PDICCBased extends PDCIEBasedColorSpace
                 }
 
                 // set initial colour
-                float[] initial = new float[getNumberOfComponents()];
+                int numOfComponents = getNumberOfComponents();
+                float[] initial = new float[numOfComponents];
                 for (int c = 0; c < initial.length; c++)
                 {
                     initial[c] = Math.max(0, getRangeForComponent(c).getMin());
@@ -239,7 +240,7 @@ public final class PDICCBased extends PDCIEBasedColorSpace
                 // also triggers a ProfileDataException for PDFBOX-3549 with KCMS
                 // also triggers "CMMException: LCMS error 13" for PDFBOX-5563 with LCMS, but
                 // calling "new ComponentColorModel" doesn't
-                awtColorSpace.toRGB(new float[getNumberOfComponents()]);
+                awtColorSpace.toRGB(new float[numOfComponents]);
                 if(!IS_KCMS)
                 {
                     // PDFBOX-4015: this one triggers "CMMException: LCMS error 13" with LCMS

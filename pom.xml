@@ -42,7 +42,7 @@
         <developer>
             <id>torakiki</id>
             <name>Andrea Vacondio</name>
-            <email>andrea.vacondio@gmail.com</email>
+            <email>andrea@soberlemur.com</email>
         </developer>
         <developer>
             <id>ediweissmann</id>
@@ -55,7 +55,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.javadoc.failOnError>false</maven.javadoc.failOnError>
         <bouncycastle.version>1.81</bouncycastle.version>
-        <fontbox.version>2.0.28</fontbox.version>
+        <fontbox.version>2.0.29</fontbox.version>
         <sejda.commons.version>2.0.0</sejda.commons.version>
         <sejda.io.version>3.0.1</sejda.io.version>
         <slf4j.version>2.0.17</slf4j.version>

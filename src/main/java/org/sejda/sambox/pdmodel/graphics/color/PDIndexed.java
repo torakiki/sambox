@@ -16,6 +16,17 @@
  */
 package org.sejda.sambox.pdmodel.graphics.color;
 
+import static org.sejda.commons.util.RequireUtils.requireArg;
+
+import java.awt.Point;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.DataBuffer;
+import java.awt.image.IndexColorModel;
+import java.awt.image.Raster;
+import java.awt.image.WritableRaster;
+import java.io.IOException;
+
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSInteger;
@@ -26,15 +37,6 @@ import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.cos.COSString;
 import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.common.PDStream;
-
-import java.awt.Point;
-import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
-import java.awt.image.DataBuffer;
-import java.awt.image.IndexColorModel;
-import java.awt.image.Raster;
-import java.awt.image.WritableRaster;
-import java.io.IOException;
 
 /**
  * An Indexed colour space specifies that an area is to be painted using a colour table of arbitrary
@@ -170,10 +172,7 @@ public final class PDIndexed extends PDSpecialColorSpace
     @Override
     public float[] toRGB(float[] value)
     {
-        if (value.length > 1)
-        {
-            throw new IllegalArgumentException("Indexed color spaces must have one color value");
-        }
+        requireArg(value.length == 1, "Indexed color spaces must have one color value");
 
         // scale and clamp input value
         int index = Math.round(value[0]);
