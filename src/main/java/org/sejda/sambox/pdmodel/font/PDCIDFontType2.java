@@ -177,6 +177,11 @@ public class PDCIDFontType2 extends PDCIDFont
         else
         {
             ttfFont = (TrueTypeFont) mapping.getTrueTypeFont();
+            if (ttfFont == null)
+            {
+                // shouldn't happen?!
+                throw new IOException("mapping.getTrueTypeFont() returns null, please report");
+            }
         }
         if (mapping.isFallback())
         {
@@ -265,9 +270,13 @@ public class PDCIDFontType2 extends PDCIDFont
             // dependent.
 
             // omit the CID2GID mapping if the embedded font is replaced by an external font
-            if (cid2gid != null && !isDamaged)
+            String name = getName();
+            if (cid2gid != null && !isDamaged && name != null && name.equals(ttf.getName()))
             {
                 // Acrobat allows non-embedded GIDs - todo: can we find a test PDF for this?
+                // PDFBOX-5612: should happen only if it's really the same font
+                // this is not perfect, we may have to improve this because some identical fonts
+                // have different names
                 LOG.warn("Using non-embedded GIDs in font " + getName());
                 int cid = codeToCID(code);
                 if (cid < cid2gid.length)

@@ -16,6 +16,15 @@
  */
 package org.sejda.sambox.pdmodel.graphics.image;
 
+import java.awt.Paint;
+import java.awt.image.BufferedImage;
+import java.awt.image.WritableRaster;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.util.List;
+
 import org.sejda.commons.FastByteArrayOutputStream;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSArrayList;
@@ -28,15 +37,6 @@ import org.sejda.sambox.filter.FilterFactory;
 import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
-
-import java.awt.Paint;
-import java.awt.image.BufferedImage;
-import java.awt.image.WritableRaster;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.ByteBuffer;
-import java.util.List;
 
 /**
  * An inline image object which uses a special syntax to express the data for a small image directly
@@ -80,15 +80,17 @@ public final class PDInlineImage implements PDImage
         {
             ByteArrayInputStream in = new ByteArrayInputStream(data);
             FastByteArrayOutputStream out = new FastByteArrayOutputStream(data.length);
+            byte[] ba = null;
             for (int i = 0; i < filters.size(); i++)
             {
                 // TODO handling of abbreviated names belongs here, rather than in other classes
                 out.reset();
                 Filter filter = FilterFactory.INSTANCE.getFilter(filters.get(i));
                 decodeResult = filter.decode(in, out, parameters, i);
-                in = new ByteArrayInputStream(out.toByteArray());
+                ba = out.toByteArray();
+                in = new ByteArrayInputStream(ba);
             }
-            this.decodedData = out.toByteArray();
+            this.decodedData = ba;
         }
 
         // repair parameters

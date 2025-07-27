@@ -19,7 +19,12 @@ package org.sejda.sambox.cos;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ListIterator;
 
 /**
  * This is an implementation of a List that will sync its contents to a COSArray.
@@ -302,7 +307,6 @@ public class COSArrayList<E> implements List<E>
      */
     public static List<String> convertCOSNameCOSArrayToList(COSArray nameArray)
     {
-        List<String> retval = null;
         if (nameArray != null)
         {
             List<String> names = new ArrayList<>();
@@ -310,9 +314,9 @@ public class COSArrayList<E> implements List<E>
             {
                 names.add(((COSName) nameArray.getObject(i)).getName());
             }
-            retval = new COSArrayList<>(names, nameArray);
+            return new COSArrayList<>(names, nameArray);
         }
-        return retval;
+        return null;
     }
 
     /**

@@ -56,6 +56,7 @@ import org.sejda.sambox.pdmodel.graphics.PDLineDashPattern;
 import org.sejda.sambox.pdmodel.graphics.blend.BlendMode;
 import org.sejda.sambox.pdmodel.graphics.color.PDColor;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
+import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
 import org.sejda.sambox.pdmodel.graphics.form.PDFormXObject;
 import org.sejda.sambox.pdmodel.graphics.form.PDTransparencyGroup;
 import org.sejda.sambox.pdmodel.graphics.pattern.PDTilingPattern;
@@ -79,9 +80,6 @@ public abstract class PDFStreamEngine
     private static final Logger LOG = LoggerFactory.getLogger(PDFStreamEngine.class);
 
     private final Map<String, OperatorProcessor> operators = new HashMap<>(80);
-
-    private Matrix textMatrix;
-    private Matrix textLineMatrix;
 
     private Deque<PDGraphicsState> graphicsStack = new ArrayDeque<>();
 
@@ -140,8 +138,6 @@ public abstract class PDFStreamEngine
         currentPage = page;
         graphicsStack.clear();
         graphicsStack.push(new PDGraphicsState(page.getCropBox()));
-        textMatrix = null;
-        textLineMatrix = null;
         resources = null;
         initialMatrix = page.getMatrix();
     }
@@ -204,8 +200,20 @@ public abstract class PDFStreamEngine
         saveGraphicsState();
         Matrix softMaskCTM = getGraphicsState().getSoftMask().getInitialTransformationMatrix();
         getGraphicsState().setCurrentTransformationMatrix(softMaskCTM);
-        processTransparencyGroup(group);
-        restoreGraphicsState();
+        getGraphicsState().setTextMatrix(new Matrix());
+        getGraphicsState().setTextLineMatrix(new Matrix());
+        getGraphicsState().setNonStrokingColorSpace(PDDeviceGray.INSTANCE);
+        getGraphicsState().setNonStrokingColor(PDDeviceGray.INSTANCE.getInitialColor());
+        getGraphicsState().setStrokingColorSpace(PDDeviceGray.INSTANCE);
+        getGraphicsState().setStrokingColor(PDDeviceGray.INSTANCE.getInitialColor());
+        try
+        {
+            processTransparencyGroup(group);
+        }
+        finally
+        {
+            restoreGraphicsState();
+        }
     }
 
     /**
@@ -225,15 +233,9 @@ public abstract class PDFStreamEngine
         PDResources parent = pushResources(group);
         Deque<PDGraphicsState> savedStack = saveGraphicsStack();
 
-        // sambox specific (currently)
-        // save text matrices (stream may contain BT/ET, see PDFBOX-2137)
-        Matrix textMatrixOld = textMatrix;
-        textMatrix = new Matrix();
-        Matrix textLineMatrixOld = textLineMatrix;
-        textLineMatrix = new Matrix();
-
-        PDGraphicsState graphicsState = getGraphicsState();
         Matrix parentMatrix = initialMatrix;
+        PDGraphicsState graphicsState = getGraphicsState();
+
 
         // the stream's initial matrix includes the parent CTM, e.g. this allows a scaled form
         initialMatrix = graphicsState.getCurrentTransformationMatrix().clone();
@@ -259,11 +261,6 @@ public abstract class PDFStreamEngine
         finally
         {
             initialMatrix = parentMatrix;
-
-            // sambox specific (currently)
-            // restore text matrices
-            textMatrix = textMatrixOld;
-            textLineMatrix = textLineMatrixOld;
 
             restoreGraphicsStack(savedStack);
             popResources(parent);
@@ -297,10 +294,8 @@ public abstract class PDFStreamEngine
         // note: we don't clip to the BBox as it is often wrong, see PDFBOX-1917
 
         // save text matrices (Type 3 stream may contain BT/ET, see PDFBOX-2137)
-        Matrix textMatrixOld = textMatrix;
-        textMatrix = new Matrix();
-        Matrix textLineMatrixOld = textLineMatrix;
-        textLineMatrix = new Matrix();
+        getGraphicsState().setTextMatrix(new Matrix());
+        getGraphicsState().setTextLineMatrix(new Matrix());
 
         try
         {
@@ -308,10 +303,6 @@ public abstract class PDFStreamEngine
         }
         finally
         {
-            // restore text matrices
-            textMatrix = textMatrixOld;
-            textLineMatrix = textLineMatrixOld;
-
             restoreGraphicsStack(savedStack);
             popResources(parent);
         }
@@ -432,16 +423,12 @@ public abstract class PDFStreamEngine
         // clip to bounding box
         clipToRect(tilingBBox);
 
-        Matrix textMatrixSave = textMatrix;
-        Matrix textLineMatrixSave = textLineMatrix;
         try
         {
             processStreamOperators(tilingPattern);
         }
         finally
         {
-            textMatrix = textMatrixSave;
-            textLineMatrix = textLineMatrixSave;
             initialMatrix = parentMatrix;
             restoreGraphicsStack(savedStack);
             popResources(parent);
@@ -696,7 +683,7 @@ public abstract class PDFStreamEngine
     protected void applyTextAdjustment(float tx, float ty) throws IOException
     {
         // update the text matrix
-        textMatrix.concatenate(Matrix.getTranslateInstance(tx, ty));
+        getGraphicsState().getTextMatrix().translate(tx, ty);
     }
 
     /**
@@ -727,6 +714,8 @@ public abstract class PDFStreamEngine
         Matrix parameters = new Matrix(fontSize * horizontalScaling, 0, // 0
                 0, fontSize, // 0
                 0, textState.getRise()); // 1
+
+        Matrix textMatrix = getGraphicsState().getTextMatrix();
 
         // read the stream until it is empty
         InputStream in = new ByteArrayInputStream(string);
@@ -781,7 +770,7 @@ public abstract class PDFStreamEngine
             }
 
             // update the text matrix
-            textMatrix.concatenate(Matrix.getTranslateInstance(tx, ty));
+            textMatrix.translate(tx, ty);
         }
     }
 
@@ -933,7 +922,7 @@ public abstract class PDFStreamEngine
         }
         else if (e instanceof EmptyGraphicsStackException)
         {
-            LOG.warn(e.getMessage());
+            LOG.warn(e.getMessage(), e);
         }
         else if (operator.getName().equals("Do"))
         {
@@ -1003,7 +992,7 @@ public abstract class PDFStreamEngine
      */
     public Matrix getTextLineMatrix()
     {
-        return textLineMatrix;
+        return getGraphicsState().getTextLineMatrix();
     }
 
     /**
@@ -1011,7 +1000,7 @@ public abstract class PDFStreamEngine
      */
     public void setTextLineMatrix(Matrix value)
     {
-        textLineMatrix = value;
+        getGraphicsState().setTextLineMatrix(value);
     }
 
     /**
@@ -1019,7 +1008,7 @@ public abstract class PDFStreamEngine
      */
     public Matrix getTextMatrix()
     {
-        return textMatrix;
+        return getGraphicsState().getTextMatrix();
     }
 
     /**
@@ -1027,7 +1016,7 @@ public abstract class PDFStreamEngine
      */
     public void setTextMatrix(Matrix value)
     {
-        textMatrix = value;
+        getGraphicsState().setTextMatrix(value);
     }
 
     /**
