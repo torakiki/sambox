@@ -16,19 +16,19 @@
  */
 package org.sejda.sambox.filter;
 
-import junit.framework.TestCase;
-import org.sejda.commons.util.IOUtils;
-import org.sejda.io.SeekableSources;
-import org.sejda.sambox.cos.COSDictionary;
-import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.input.PDFParser;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Random;
+
+import junit.framework.TestCase;
+import org.sejda.commons.util.IOUtils;
+import org.sejda.io.SeekableSources;
+import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.input.PDFParser;
 
 /**
  * This will test all of the filters in the PDFBox system.
@@ -94,8 +94,7 @@ public class TestFilters extends TestCase
                 {
                     // Skip filters that don't currently support roundtripping
                     if (filter instanceof DCTFilter || filter instanceof CCITTFaxFilter
-                            || filter instanceof JPXFilter || filter instanceof JBIG2Filter
-                            || filter instanceof RunLengthDecodeFilter)
+                            || filter instanceof JPXFilter || filter instanceof JBIG2Filter)
                     {
                         continue;
                     }
@@ -142,6 +141,36 @@ public class TestFilters extends TestCase
         checkEncodeDecode(lzwFilter, byteArray);
     }
 
+    /**
+     * Test simple and corner cases (128 identical, 128 identical at the end) of RLE implementation.
+     * 128 non identical bytes likely to be caught in random testing.
+     *
+     * @throws IOException
+     */
+    public void testRLE() throws IOException
+    {
+        Filter rleFilter = FilterFactory.INSTANCE.getFilter(COSName.RUN_LENGTH_DECODE);
+        byte[] input0 = new byte[0];
+        checkEncodeDecode(rleFilter, input0);
+        byte[] input1 = new byte[] { 1, 2, 3, 4, 5, (byte) 128, (byte) 140, (byte) 180,
+                (byte) 0xFF };
+        checkEncodeDecode(rleFilter, input1);
+        byte[] input2 = new byte[10];
+        checkEncodeDecode(rleFilter, input2);
+        byte[] input3 = new byte[128];
+        checkEncodeDecode(rleFilter, input3);
+        byte[] input4 = new byte[129];
+        checkEncodeDecode(rleFilter, input4);
+        byte[] input5 = new byte[128 + 128];
+        checkEncodeDecode(rleFilter, input5);
+        byte[] input6 = new byte[1];
+        checkEncodeDecode(rleFilter, input6);
+        byte[] input7 = new byte[] { 1, 2 };
+        checkEncodeDecode(rleFilter, input7);
+        byte[] input8 = new byte[2];
+        checkEncodeDecode(rleFilter, input8);
+    }
+
     private void checkEncodeDecode(Filter filter, byte[] original) throws IOException
     {
         ByteArrayOutputStream encoded = new ByteArrayOutputStream();
@@ -155,4 +184,5 @@ public class TestFilters extends TestCase
                         + " does not match the original data",
                 Arrays.equals(original, decoded.toByteArray()));
     }
+
 }
