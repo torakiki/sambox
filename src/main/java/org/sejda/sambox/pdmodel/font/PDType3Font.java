@@ -116,8 +116,9 @@ public class PDType3Font extends PDSimpleFont
     @Override
     public boolean hasGlyph(String name)
     {
-        return nonNull(
-                getCharProcs().getDictionaryObject(COSName.getPDFName(name), COSStream.class));
+        return ofNullable(getCharProcs()).map(
+                        d -> nonNull(d.getDictionaryObject(COSName.getPDFName(name), COSStream.class)))
+                .orElse(false);
     }
 
     @Override

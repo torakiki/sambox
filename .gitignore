@@ -15,3 +15,4 @@ target/
 .idea/
 *.iml
 *.ipr
+/.claude/

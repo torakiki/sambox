@@ -95,10 +95,11 @@ public class PDDeviceN extends PDSpecialColorSpace
             attributes = new PDDeviceNAttributes(
                     array.getObject(DEVICEN_ATTRIBUTES, COSDictionary.class));
         }
-        initColorConversionCache();
+        List<String> colorantNames = getColorantNames();
+        initColorConversionCache(colorantNames);
 
         // set initial color space
-        int n = getNumberOfComponents();
+        int n = colorantNames.size();
         float[] initial = new float[n];
         for (int i = 0; i < n; i++)
         {
@@ -108,7 +109,7 @@ public class PDDeviceN extends PDSpecialColorSpace
     }
 
     // initializes the color conversion cache
-    private void initColorConversionCache() throws IOException
+    private void initColorConversionCache(List<String> colorantNames) throws IOException
     {
         // there's nothing to cache for non-attribute spaces
         if (attributes == null)
@@ -117,16 +118,10 @@ public class PDDeviceN extends PDSpecialColorSpace
         }
 
         // colorant names
-        List<String> colorantNames = getColorantNames();
         numColorants = colorantNames.size();
 
         // process components
         colorantToComponent = new int[numColorants];
-        for (int c = 0; c < numColorants; c++)
-        {
-            colorantToComponent[c] = -1;
-        }
-
         if (attributes.getProcess() != null)
         {
             List<String> components = attributes.getProcess().getComponents();
@@ -139,6 +134,13 @@ public class PDDeviceN extends PDSpecialColorSpace
 
             // process color space
             processColorSpace = attributes.getProcess().getColorSpace();
+        }
+        else
+        {
+            for (int c = 0; c < numColorants; c++)
+            {
+                colorantToComponent[c] = -1;
+            }
         }
 
         // spot colorants
@@ -220,12 +222,13 @@ public class PDDeviceN extends PDSpecialColorSpace
                 componentColorSpace = spotColorSpaces[c];
             }
 
+            int numberOfComponents = componentColorSpace.getNumberOfComponents();
             // copy single-component to its own raster in the component color space
             WritableRaster componentRaster = Raster.createBandedRaster(DataBuffer.TYPE_BYTE, width,
-                    height, componentColorSpace.getNumberOfComponents(), new Point(0, 0));
+                    height, numberOfComponents, new Point(0, 0));
 
             int[] samples = new int[numColorants];
-            int[] componentSamples = new int[componentColorSpace.getNumberOfComponents()];
+            int[] componentSamples = new int[numberOfComponents];
             boolean isProcessColorant = colorantToComponent[c] >= 0;
             int componentIndex = colorantToComponent[c];
             for (int y = 0; y < height; y++)
@@ -467,9 +470,9 @@ public class PDDeviceN extends PDSpecialColorSpace
      *
      * @return the list of colorants
      */
-    public List<String> getColorantNames()
+    public final List<String> getColorantNames()
     {
-        COSArray names = (COSArray) array.getObject(COLORANT_NAMES);
+        COSArray names = array.getObject(COLORANT_NAMES, COSArray.class);
         return COSArrayList.convertCOSNameCOSArrayToList(names);
     }
 

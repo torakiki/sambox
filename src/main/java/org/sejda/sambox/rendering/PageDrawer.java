@@ -126,6 +126,10 @@ public class PageDrawer extends PDFGraphicsStreamEngine
 {
     private static final Logger LOG = LoggerFactory.getLogger(PageDrawer.class);
 
+    private static final String OS_NAME = System.getProperty("os.name").toLowerCase();
+    private static final boolean IS_WINDOWS = OS_NAME.startsWith("windows");
+    private static final boolean IS_LINUX = OS_NAME.startsWith("linux");
+
     // parent document renderer - note: this is needed for not-yet-implemented resource caching
     private final PDFRenderer renderer;
 
@@ -517,7 +521,8 @@ public class PageDrawer extends PDFGraphicsStreamEngine
                     && font.hasExplicitWidth(code))
             {
                 float fontWidth = font.getWidthFromFont(code);
-                if (fontWidth > 0 && // ignore spaces
+                if (displacement.getX() > 0 && // PDFBOX-5611: ignore zero widths
+                        fontWidth > 0 && // ignore spaces
                         Math.abs(fontWidth - displacement.getX() * 1000) > 0.0001)
                 {
                     float pdfWidth = displacement.getX() * 1000;
@@ -802,7 +807,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         float[] dashArray = dashPattern.getDashArray();
         int phase = dashPattern.getPhase();
         // avoid empty, infinite and NaN values (PDFBOX-3360)
-        if (dashArray.length == 0 || Float.isInfinite(phase) || Float.isNaN(phase))
+        if (dashArray.length == 0)
         {
             return null;
         }
@@ -1309,6 +1314,29 @@ public class PageDrawer extends PDFGraphicsStreamEngine
             }
             else
             {
+                GraphicsConfiguration graphicsConfiguration = graphics.getDeviceConfiguration();
+                int deviceType = GraphicsDevice.TYPE_RASTER_SCREEN;
+                if (graphicsConfiguration != null)
+                {
+                    GraphicsDevice graphicsDevice = graphicsConfiguration.getDevice();
+                    if (graphicsDevice != null)
+                    {
+                        deviceType = graphicsDevice.getType();
+                    }
+                }
+                if (deviceType == GraphicsDevice.TYPE_PRINTER
+                        && image.getType() != BufferedImage.TYPE_4BYTE_ABGR && (IS_WINDOWS
+                        || IS_LINUX))
+                {
+                    // PDFBOX-5601, PDFBOX-4010, JDK-8308099, JDK-8191800:
+                    // workaround to avoid terrible / missing output on printer unless TYPE_4BYTE_ABGR
+                    BufferedImage bim = new BufferedImage(image.getWidth(), image.getHeight(),
+                            BufferedImage.TYPE_4BYTE_ABGR);
+                    Graphics g = bim.getGraphics();
+                    g.drawImage(image, 0, 0, null);
+                    g.dispose();
+                    image = bim;
+                }
                 graphics.drawImage(image, imageTransform, null);
             }
         }

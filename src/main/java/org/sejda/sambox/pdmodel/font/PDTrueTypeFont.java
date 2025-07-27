@@ -18,6 +18,7 @@ package org.sejda.sambox.pdmodel.font;
 
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
+import static org.sejda.commons.util.RequireUtils.requireIOCondition;
 import static org.sejda.sambox.pdmodel.font.UniUtil.getUniNameOfCodePoint;
 
 import java.awt.geom.GeneralPath;
@@ -31,6 +32,7 @@ import org.apache.fontbox.FontBoxFont;
 import org.apache.fontbox.ttf.CmapSubtable;
 import org.apache.fontbox.ttf.CmapTable;
 import org.apache.fontbox.ttf.GlyphData;
+import org.apache.fontbox.ttf.GlyphTable;
 import org.apache.fontbox.ttf.PostScriptTable;
 import org.apache.fontbox.ttf.TTFParser;
 import org.apache.fontbox.ttf.TrueTypeFont;
@@ -442,7 +444,11 @@ public class PDTrueTypeFont extends PDSimpleFont implements PDVectorFont
     public GeneralPath getPath(int code) throws IOException
     {
         int gid = codeToGID(code);
-        GlyphData glyph = ttf.getGlyph().getGlyph(gid);
+        GlyphTable glyphTable = ttf.getGlyph();
+        requireIOCondition(nonNull(glyphTable),
+                "glyf table is missing in font " + getName() + ", please report this file");
+        // needs to be caught earlier, see PDFBOX-5587 and PDFBOX-3488
+        GlyphData glyph = glyphTable.getGlyph(gid);
 
         // some glyphs have no outlines (e.g. space, table, newline)
         if (glyph == null)
