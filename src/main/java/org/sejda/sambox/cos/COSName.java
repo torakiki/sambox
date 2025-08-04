@@ -479,6 +479,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName SIZE = newCommonInstance("Size");
     public static final COSName SM = newCommonInstance("SM");
     public static final COSName SMASK = newCommonInstance("SMask");
+    public static final COSName SMASK_IN_DATA = newCommonInstance("SMaskInData");
     public static final COSName SOFT_LIGHT = newCommonInstance("SoftLight");
     public static final COSName SOUND = newCommonInstance("Sound");
     public static final COSName SS = newCommonInstance("SS");

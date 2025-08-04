@@ -16,14 +16,6 @@
  */
 package org.sejda.sambox.rendering;
 
-import org.sejda.sambox.pdmodel.common.PDRectangle;
-import org.sejda.sambox.pdmodel.graphics.color.PDColor;
-import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
-import org.sejda.sambox.pdmodel.graphics.pattern.PDTilingPattern;
-import org.sejda.sambox.util.Matrix;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.PaintContext;
@@ -38,6 +30,14 @@ import java.awt.image.ColorModel;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+
+import org.sejda.sambox.pdmodel.common.PDRectangle;
+import org.sejda.sambox.pdmodel.graphics.color.PDColor;
+import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
+import org.sejda.sambox.pdmodel.graphics.pattern.PDTilingPattern;
+import org.sejda.sambox.util.Matrix;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * AWT Paint for a tiling pattern, which consists of a small repeating graphical figure.
@@ -230,12 +230,12 @@ class TilingPaint implements Paint
         if (Math.abs(width * height) > MAXEDGE * MAXEDGE)
         {
             // PDFBOX-3653: prevent huge sizes
-            LOG.info("Pattern surface is too large, will be clipped");
-            LOG.info("width: " + width + ", height: " + height);
-            LOG.info("XStep: " + xStep + ", YStep: " + yStep);
-            LOG.info("bbox: " + bbox);
-            LOG.info("pattern matrix: " + pattern.getMatrix());
-            LOG.info("concatenated matrix: " + patternMatrix);
+            LOG.warn("Pattern surface is too large, will be clipped");
+            LOG.warn("width: " + width + ", height: " + height);
+            LOG.warn("XStep: " + xStep + ", YStep: " + yStep);
+            LOG.warn("bbox: " + bbox);
+            LOG.warn("pattern matrix: " + pattern.getMatrix());
+            LOG.warn("concatenated matrix: " + patternMatrix);
             width = Math.min(MAXEDGE, Math.abs(width)) * Math.signum(width);
             height = Math.min(MAXEDGE, Math.abs(height)) * Math.signum(height);
             // TODO better solution needed
