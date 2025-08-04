@@ -18,8 +18,6 @@ package org.sejda.sambox.pdmodel.font;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -75,8 +73,7 @@ public final class CMapManager
         {
             try
             {
-                // parse CMap using strict mode
-                return new CMapParser(true).parse(cMapStream);
+                return new CMapParser().parse(cMapStream);
             }
             catch (IOException e)
             {
