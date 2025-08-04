@@ -16,6 +16,20 @@
  */
 package org.sejda.sambox.input;
 
+import static org.sejda.sambox.util.CharUtils.ASCII_SPACE;
+import static org.sejda.sambox.util.CharUtils.isEOF;
+import static org.sejda.sambox.util.CharUtils.isEOL;
+import static org.sejda.sambox.util.CharUtils.isNul;
+import static org.sejda.sambox.util.CharUtils.isSpace;
+import static org.sejda.sambox.util.CharUtils.isWhitespace;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 import org.sejda.commons.FastByteArrayOutputStream;
 import org.sejda.commons.util.IOUtils;
 import org.sejda.io.SeekableSource;
@@ -28,20 +42,6 @@ import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
-import static org.sejda.sambox.util.CharUtils.ASCII_SPACE;
-import static org.sejda.sambox.util.CharUtils.isEOF;
-import static org.sejda.sambox.util.CharUtils.isEOL;
-import static org.sejda.sambox.util.CharUtils.isNul;
-import static org.sejda.sambox.util.CharUtils.isSpace;
-import static org.sejda.sambox.util.CharUtils.isWhitespace;
 
 /**
  * Component responsible for parsing a content stream to extract operands and such.
@@ -112,7 +112,7 @@ public class ContentStreamParser extends SourceReader
             }
             return operator;
         }
-        return Optional.ofNullable(readToken()).filter(s -> s.length() > 0)
+        return Optional.ofNullable(readToken()).filter(s -> !s.isEmpty())
                 .map(Operator::getOperator).orElse(null);
 
     }

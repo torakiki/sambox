@@ -43,6 +43,7 @@ import org.sejda.sambox.pdmodel.font.encoding.GlyphList;
 import org.sejda.sambox.pdmodel.font.encoding.MacRomanEncoding;
 import org.sejda.sambox.pdmodel.font.encoding.StandardEncoding;
 import org.sejda.sambox.pdmodel.font.encoding.WinAnsiEncoding;
+import org.sejda.sambox.pdmodel.font.encoding.ZapfDingbatsEncoding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,11 +98,21 @@ public abstract class PDSimpleFont extends PDFont
         COSBase encodingBase = getCOSObject().getDictionaryObject(COSName.ENCODING);
         if (encodingBase instanceof COSName encodingName)
         {
-            this.encoding = Encoding.getInstance(encodingName);
-            if (this.encoding == null)
+            if ("ZapfDingbats".equals(getName()) && !isEmbedded())
             {
-                LOG.warn("Unknown encoding: " + encodingName.getName());
-                this.encoding = readEncodingFromFont(); // fallback
+                // PDFBOX- and PDF.js issue 16464: ignore other encodings
+                // this segment will work only if readEncoding() is called after the data
+                // for getName() and isEmbedded() is available
+                this.encoding = ZapfDingbatsEncoding.INSTANCE;
+            }
+            else
+            {
+                this.encoding = Encoding.getInstance(encodingName);
+                if (this.encoding == null)
+                {
+                    LOG.warn("Unknown encoding: " + encodingName.getName());
+                    this.encoding = readEncodingFromFont(); // fallback
+                }
             }
         }
         else if (encodingBase instanceof COSDictionary encodingDict)

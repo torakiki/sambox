@@ -275,7 +275,7 @@ class SourceReader implements Closeable
     }
 
     /**
-     * Reads bytes until the first end of line marker occurs. NOTE: The EOL marker may consists of 1
+     * Reads bytes until the first end of line marker occurs. NOTE: The EOL marker may consist of 1
      * (CR or LF) or 2 (CR and CL) bytes which is an important detail if one wants to unread the
      * line.
      *
