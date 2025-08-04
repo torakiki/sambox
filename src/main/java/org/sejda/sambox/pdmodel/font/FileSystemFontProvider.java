@@ -26,7 +26,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.AccessControlException;
 import java.util.ArrayList;
@@ -401,6 +400,7 @@ public class FileSystemFontProvider extends FontProvider
         try
         {
             File file = getDiskCacheFile();
+            LOG.debug("Saving font cache to {}", file.getAbsolutePath());
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(file)))
             {
                 for (FSFontInfo fontInfo : fontInfoList)
@@ -490,7 +490,7 @@ public class FileSystemFontProvider extends FontProvider
                 String line;
                 while ((line = reader.readLine()) != null)
                 {
-                    String[] parts = line.split("(?<!\\\\)\\|", 10);
+                    String[] parts = line.split("(?<!\\\\)\\|", 12);
                     if (parts.length < 10)
                     {
                         LOG.warn("Incorrect line '" + line + "' in font disk cache is skipped");

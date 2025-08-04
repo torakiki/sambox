@@ -16,19 +16,28 @@
  */
 package org.sejda.sambox.filter;
 
+import java.awt.Graphics2D;
+import java.awt.Transparency;
 import java.awt.color.ColorSpace;
-import java.awt.image.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferByte;
+import java.awt.image.DataBufferUShort;
+import java.awt.image.IndexColorModel;
+import java.awt.image.MultiPixelPackedSampleModel;
+import java.awt.image.Raster;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import javax.imageio.ImageReader;
-import javax.imageio.stream.ImageInputStream;
-import javax.imageio.stream.MemoryCacheImageInputStream;
-
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.graphics.color.PDJPXColorSpace;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
+import javax.imageio.stream.MemoryCacheImageInputStream;
 
 /**
  * Decompress data encoded using the wavelet-based JPEG 2000 standard, reproducing the original data.
@@ -45,9 +54,8 @@ import org.sejda.sambox.pdmodel.graphics.color.PDJPXColorSpace;
  */
 public final class JPXFilter extends Filter
 {
-    /**
-     * {@inheritDoc}
-     */
+    private static final Logger LOG = LoggerFactory.getLogger(JPXFilter.class);
+
     @Override
     public DecodeResult decode(InputStream encoded, OutputStream decoded, COSDictionary parameters,
             int index) throws IOException
@@ -151,6 +159,19 @@ public final class JPXFilter extends Filter
                     // in raster
                     result.setColorSpace(
                             new PDJPXColorSpace(ColorSpace.getInstance(ColorSpace.CS_GRAY)));
+                }
+                else if (image.getTransparency() == Transparency.TRANSLUCENT
+                        && parameters.getInt(COSName.SMASK_IN_DATA) > 0)
+                {
+                    LOG.warn("JPEG2000 SMaskInData is not supported, returning opaque image");
+                    BufferedImage bim = new BufferedImage(image.getWidth(), image.getHeight(),
+                            BufferedImage.TYPE_INT_RGB);
+                    Graphics2D g2d = (Graphics2D) bim.getGraphics();
+                    g2d.drawImage(image, 0, 0, null);
+                    g2d.dispose();
+                    image = bim;
+                    result.setColorSpace(
+                            new PDJPXColorSpace(image.getColorModel().getColorSpace()));
                 }
                 else
                 {

@@ -16,16 +16,8 @@
  */
 package org.sejda.sambox.pdmodel.graphics.image;
 
-import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSNumber;
-import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
-import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
-import org.sejda.sambox.pdmodel.graphics.color.PDIndexed;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.sejda.commons.util.RequireUtils.requireIOCondition;
 
-import javax.imageio.stream.ImageInputStream;
-import javax.imageio.stream.MemoryCacheImageInputStream;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.Point;
@@ -38,6 +30,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+
+import org.sejda.sambox.cos.COSArray;
+import org.sejda.sambox.cos.COSNumber;
+import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
+import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
+import org.sejda.sambox.pdmodel.graphics.color.PDIndexed;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import javax.imageio.stream.ImageInputStream;
+import javax.imageio.stream.MemoryCacheImageInputStream;
 
 /**
  * Reads a sampled image from a PDF file.
@@ -143,10 +145,7 @@ final class SampledImageReader
     public static BufferedImage getRGBImage(PDImage pdImage, COSArray colorKey) throws IOException
     {
 
-        if (pdImage.isEmpty())
-        {
-            throw new IOException("Image stream is empty");
-        }
+        requireIOCondition(!pdImage.isEmpty(), "Image stream is empty");
 
         // get parameters, they must be valid or have been repaired
         final PDColorSpace colorSpace = pdImage.getColorSpace();
@@ -184,7 +183,7 @@ final class SampledImageReader
             }
             return fromAny(pdImage, raster, colorKey);
         }
-        catch (NegativeArraySizeException ex)
+        catch (NegativeArraySizeException | IllegalArgumentException ex)
         {
             throw new IOException(ex);
         }
@@ -199,10 +198,7 @@ final class SampledImageReader
      */
     public static WritableRaster getRawRaster(PDImage pdImage) throws IOException
     {
-        if (pdImage.isEmpty())
-        {
-            throw new IOException("Image stream is empty");
-        }
+        requireIOCondition(!pdImage.isEmpty(), "Image stream is empty");
 
         // get parameters, they must be valid or have been repaired
         final PDColorSpace colorSpace = pdImage.getColorSpace();
@@ -228,7 +224,7 @@ final class SampledImageReader
             readRasterFromAny(pdImage, raster);
             return raster;
         }
-        catch (NegativeArraySizeException ex)
+        catch (NegativeArraySizeException | IllegalArgumentException ex)
         {
             throw new IOException(ex);
         }
