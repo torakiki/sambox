@@ -27,12 +27,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import org.apache.fontbox.FontBoxFont;
@@ -299,49 +297,35 @@ public class FileSystemFontProvider extends FontProvider
         }
 
     }
-    
+
     protected List<File> findFontFiles()
     {
         return new FontFileFinder().find().stream().map(File::new).collect(Collectors.toList());
     }
 
-
     private void initialize()
     {
-        try
+        LOG.trace("Will search the local system for fonts");
+
+        // scan the local system for font files
+        List<File> files = findFontFiles();
+
+        LOG.trace("Found {} fonts on the local system", files.size());
+
+        if (!files.isEmpty())
         {
-            LOG.trace("Will search the local system for fonts");
-
-            // scan the local system for font files
-            List<File> files = new ArrayList<>();
-            List<File> fonts = findFontFiles();
-            files.addAll(fonts);
-
-            LOG.trace("Found {} fonts on the local system", files.size());
-
-            if (!files.isEmpty())
+            // load cached FontInfo objects
+            List<FSFontInfo> cachedInfos = loadDiskCache(files);
+            if (cachedInfos != null && !cachedInfos.isEmpty())
             {
-                // load cached FontInfo objects
-                List<FSFontInfo> cachedInfos = loadDiskCache(files);
-                if (cachedInfos != null && !cachedInfos.isEmpty())
-                {
-                    fontInfoList.addAll(cachedInfos);
-                }
-                else
-                {
-                    LOG.warn("Building on-disk font cache, this may take a while");
-                    scanFonts(files);
-                    var executor = Executors.newSingleThreadExecutor();
-                    executor.execute(this::saveDiskCache);
-                    executor.shutdown();
-                    LOG.info("Finished building on-disk font cache, found {} fonts",
-                            fontInfoList.size());
-                }
+                fontInfoList.addAll(cachedInfos);
             }
-        }
-        catch (AccessControlException e)
-        {
-            LOG.error("Error accessing the file system", e);
+            else
+            {
+                LOG.warn("Building on-disk font cache, this may take a while");
+                scanFonts(files);
+                Thread.ofVirtual().name("save-font-cache-vt").start(this::saveDiskCache);
+            }
         }
     }
 
@@ -453,6 +437,7 @@ public class FileSystemFontProvider extends FontProvider
                     writer.newLine();
                 }
             }
+            LOG.info("Finished building on-disk font cache, found {} fonts", fontInfoList.size());
         }
         catch (IOException | SecurityException e)
         {
