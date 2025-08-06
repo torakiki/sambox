@@ -22,8 +22,19 @@ import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
 
 import org.apache.fontbox.FontBoxFont;
 import org.apache.fontbox.ttf.OpenTypeFont;
@@ -64,7 +75,8 @@ final class FontMapperImpl implements FontMapper
                     info -> getPostScriptNames(info.getPostScriptName()).forEach(
                             name -> map.put(name.toLowerCase(Locale.ENGLISH), info)));
             return map;
-        });
+        }, Executors.newVirtualThreadPerTaskExecutor());
+
         // substitutes for standard 14 fonts
         addSubstitutes("Courier", new ArrayList<>(
                 Arrays.asList("CourierNew", "CourierNewPSMT", "LiberationMono",
@@ -153,7 +165,7 @@ final class FontMapperImpl implements FontMapper
         {
             return new NoopFontProvider();
         }
-        else if(configuredFontProvider != null && !configuredFontProvider.isEmpty())
+        if (configuredFontProvider != null && !configuredFontProvider.isEmpty())
         {
             try
             {
@@ -165,7 +177,7 @@ final class FontMapperImpl implements FontMapper
                 LOG.error("Failed loading custom font provider", ex);
             }
         }
-        
+
         return new FileSystemFontProvider();
     }
 
