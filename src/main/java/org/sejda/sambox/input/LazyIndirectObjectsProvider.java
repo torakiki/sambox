@@ -303,7 +303,7 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
                 streamParser.position(entry.getKey());
                 if (streamParser.skipTokenIfValue(OBJ))
                 {
-                    LOG.warn("Unexptected 'obj' token in objects stream");
+                    LOG.warn("Unexpected 'obj' token in objects stream");
                 }
                 COSBase object = streamParser.nextParsedToken();
                 if (object != null)
