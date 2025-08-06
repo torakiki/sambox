@@ -154,12 +154,12 @@ class XrefFullScanner
         parser.skipIndirectObjectDefinition();
         parser.skipSpaces();
         COSBase found = parser.nextParsedToken();
-        if (found instanceof COSDictionary
-                && COSName.XREF.equals(((COSDictionary) found).getItem(COSName.TYPE)))
+        if (found instanceof COSDictionary xrefStream && COSName.XREF.equals(
+                xrefStream.getItem(COSName.TYPE)))
         {
             LOG.debug("Found xref stream at {}", offset);
             trailer.xrefOffset(offset);
-            parseFoundXrefStream((COSDictionary) found);
+            parseFoundXrefStream(xrefStream);
         }
     }
 

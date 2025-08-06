@@ -181,9 +181,9 @@ class DefaultCOSWriter implements COSWriter
             {
                 writer.write(stream);
             }
-            if (length instanceof IndirectCOSObjectReference)
+            if (length instanceof IndirectCOSObjectReference indirectLength)
             {
-                ((IndirectCOSObjectReference) length).setValue(
+                indirectLength.setValue(
                         new COSInteger(writer.offset() - streamStartingPosition));
             }
             writer.write(CRLF);
