@@ -29,6 +29,7 @@ public final class SAMBox
     /**
      * Pool size used in org.sejda.sambox.input.SourceReader
      */
+    @Deprecated
     public static final String BUFFERS_POOL_SIZE_PROPERTY = "org.sejda.sambox.buffers.pool.size";
     /**
      * The number of objects to include in a single ObjectsStream.
