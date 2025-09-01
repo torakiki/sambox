@@ -93,7 +93,7 @@ public class PDFDocEncodingTest
     }
 
     @Test
-    public void nullSafe() throws IOException
+    public void nullSafe()
     {
         var sb = new StringBuilder("Chuck");
         sb.append((char) 0x18);
@@ -101,6 +101,18 @@ public class PDFDocEncodingTest
         sb.append((char) 0x7F);
         sb.append((char) 0xA0);
         assertNull(PDFDocEncoding.getBytes(sb.toString()));
+    }
+
+    @Test
+    public void nullText()
+    {
+        assertNull(PDFDocEncoding.getBytes(null));
+    }
+
+    @Test
+    public void blankSafe()
+    {
+        assertNull(PDFDocEncoding.getBytes(""));
     }
 
     /**

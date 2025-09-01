@@ -144,7 +144,7 @@ final class PDFDocEncoding
      */
     public static byte[] getBytes(String text)
     {
-        if (nonNull(text))
+        if (nonNull(text) && !text.isEmpty())
         {
             try (var out = new FastByteArrayOutputStream(text.length()))
             {
