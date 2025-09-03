@@ -16,12 +16,11 @@
  */
 package org.sejda.sambox.pdmodel.graphics.color;
 
-import org.sejda.sambox.cos.COSBase;
-
 import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
-import java.io.IOException;
+
+import org.sejda.sambox.cos.COSBase;
 
 /**
  * A color space embedded in a JPX file. This wraps the AWT ColorSpace which is obtained after JAI
@@ -81,7 +80,7 @@ public final class PDJPXColorSpace extends PDColorSpace
     }
 
     @Override
-    public BufferedImage toRGBImage(WritableRaster raster) throws IOException
+    public BufferedImage toRGBImage(WritableRaster raster)
     {
         return toRGBImageAWT(raster, awtColorSpace);
     }

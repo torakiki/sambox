@@ -16,14 +16,14 @@
  */
 package org.sejda.sambox.pdmodel.graphics.color;
 
+import java.awt.image.BufferedImage;
+import java.awt.image.WritableRaster;
+import java.io.IOException;
+
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.PDResources;
 import org.sejda.sambox.pdmodel.graphics.pattern.PDAbstractPattern;
-
-import java.awt.image.BufferedImage;
-import java.awt.image.WritableRaster;
-import java.io.IOException;
 
 /**
  * A Pattern color space is either a Tiling pattern or a Shading pattern.
@@ -99,13 +99,13 @@ public final class PDPattern extends PDSpecialColorSpace
     }
 
     @Override
-    public BufferedImage toRGBImage(WritableRaster raster) throws IOException
+    public BufferedImage toRGBImage(WritableRaster raster)
     {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public BufferedImage toRawImage(WritableRaster raster) throws IOException
+    public BufferedImage toRawImage(WritableRaster raster)
     {
         throw new UnsupportedOperationException();
     }

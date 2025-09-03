@@ -16,14 +16,13 @@
  */
 package org.sejda.sambox.pdmodel.graphics.color;
 
+import java.awt.image.BufferedImage;
+import java.awt.image.WritableRaster;
+
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSFloat;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.common.PDRange;
-
-import java.awt.image.BufferedImage;
-import java.awt.image.WritableRaster;
-import java.io.IOException;
 
 /**
  * A Lab colour space is a CIE-based ABC colour space with two transformation stages.
@@ -63,7 +62,7 @@ public final class PDLab extends PDCIEDictionaryBasedColorSpace
     // WARNING: this method is performance sensitive, modify with care!
     //
     @Override
-    public BufferedImage toRGBImage(WritableRaster raster) throws IOException
+    public BufferedImage toRGBImage(WritableRaster raster)
     {
         int width = raster.getWidth();
         int height = raster.getHeight();

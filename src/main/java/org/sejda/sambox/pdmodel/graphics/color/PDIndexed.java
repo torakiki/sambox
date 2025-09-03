@@ -188,7 +188,7 @@ public final class PDIndexed extends PDSpecialColorSpace
     // WARNING: this method is performance sensitive, modify with care!
     //
     @Override
-    public BufferedImage toRGBImage(WritableRaster raster) throws IOException
+    public BufferedImage toRGBImage(WritableRaster raster)
     {
         // use lookup table
         int width = raster.getWidth();
@@ -258,13 +258,13 @@ public final class PDIndexed extends PDSpecialColorSpace
         if (lookupData == null)
         {
             COSBase lookupTable = array.getObject(3);
-            if (lookupTable instanceof COSString)
+            if (lookupTable instanceof COSString lookupString)
             {
-                lookupData = ((COSString) lookupTable).getBytes();
+                lookupData = lookupString.getBytes();
             }
-            else if (lookupTable instanceof COSStream)
+            else if (lookupTable instanceof COSStream lookupStream)
             {
-                lookupData = new PDStream((COSStream) lookupTable).toByteArray();
+                lookupData = new PDStream(lookupStream).toByteArray();
             }
             else if (lookupTable == null)
             {

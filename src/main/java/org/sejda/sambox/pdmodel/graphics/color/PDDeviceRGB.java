@@ -16,11 +16,10 @@
  */
 package org.sejda.sambox.pdmodel.graphics.color;
 
-import org.sejda.sambox.cos.COSName;
-
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
-import java.io.IOException;
+
+import org.sejda.sambox.cos.COSName;
 
 /**
  * Colours in the DeviceRGB colour space are specified according to the additive RGB
@@ -48,9 +47,6 @@ public final class PDDeviceRGB extends PDDeviceColorSpace
         return COSName.DEVICERGB.getName();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int getNumberOfComponents()
     {
@@ -76,7 +72,7 @@ public final class PDDeviceRGB extends PDDeviceColorSpace
     }
 
     @Override
-    public BufferedImage toRGBImage(WritableRaster raster) throws IOException
+    public BufferedImage toRGBImage(WritableRaster raster)
     {
         //
         // WARNING: this method is performance sensitive, modify with care!
@@ -91,7 +87,7 @@ public final class PDDeviceRGB extends PDDeviceColorSpace
     }
 
     @Override
-    public BufferedImage toRawImage(WritableRaster raster) throws IOException
+    public BufferedImage toRawImage(WritableRaster raster)
     {
         // Device RGB is not specified, as its the colors of whatever device you use. The user
         // should use the toRGBImage().
