@@ -22,10 +22,18 @@ import static org.junit.Assert.assertThrows;
 
 import java.io.IOException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 public class PDDeviceCMYKTest
 {
+
+    @AfterEach
+    public void tearDown() throws IOException
+    {
+        PDDeviceCMYK.INSTANCE = PDDeviceCMYK.eagerInstance(PDDeviceCMYK.class.getResourceAsStream(
+                "/org/sejda/sambox/resources/icc/ISOcoated_v2_300_bas.icc"));
+    }
 
     @Test
     public void testCMYK() throws IOException
