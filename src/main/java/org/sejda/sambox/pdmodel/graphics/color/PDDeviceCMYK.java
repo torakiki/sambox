@@ -16,20 +16,18 @@
  */
 package org.sejda.sambox.pdmodel.graphics.color;
 
-import org.sejda.sambox.cos.COSName;
+import static java.util.Objects.nonNull;
+import static org.sejda.commons.util.RequireUtils.require;
 
 import java.awt.color.ColorSpace;
 import java.awt.color.ICC_ColorSpace;
 import java.awt.color.ICC_Profile;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
-import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Arrays;
 
-import static java.util.Objects.nonNull;
-import static org.sejda.commons.util.RequireUtils.requireIOCondition;
+import org.sejda.sambox.cos.COSName;
 
 /**
  * Allows colors to be specified according to the subtractive CMYK (cyan, magenta, yellow, black)
@@ -38,78 +36,14 @@ import static org.sejda.commons.util.RequireUtils.requireIOCondition;
  * @author John Hewson
  * @author Ben Litchfield
  */
-public class PDDeviceCMYK extends PDDeviceColorSpace
+public final class PDDeviceCMYK extends PDDeviceColorSpace
 {
-    /**
-     * The single instance of this class.
-     */
-    public static PDDeviceCMYK INSTANCE;
-
-    static
-    {
-        INSTANCE = new PDDeviceCMYK();
-    }
+    public static final PDDeviceCMYK INSTANCE = new PDDeviceCMYK();
 
     private final PDColor initialColor = new PDColor(new float[] { 0, 0, 0, 1 }, this);
-    private ICC_ColorSpace awtColorSpace;
-    private volatile boolean initDone = false;
-    private boolean usePureJavaCMYKConversion = false;
 
-    protected PDDeviceCMYK()
+    private PDDeviceCMYK()
     {
-    }
-
-    /**
-     * Lazy load the ICC profile, because it's slow.
-     */
-    protected void init() throws IOException
-    {
-        // no need to synchronize this check as it is atomic
-        if (initDone)
-        {
-            return;
-        }
-        synchronized (this)
-        {
-            // we might have been waiting for another thread, so check again
-            if (initDone)
-            {
-                return;
-            }
-            // loads the ICC color profile for CMYK
-            ICC_Profile iccProfile = getICCProfile();
-            if (iccProfile == null)
-            {
-                throw new IOException("Default CMYK color profile could not be loaded");
-            }
-            awtColorSpace = new ICC_ColorSpace(iccProfile);
-
-            // there is a JVM bug which results in a CMMException which appears to be a race
-            // condition caused by lazy initialization of the color transform, so we perform
-            // an initial color conversion while we're still in a static context, see PDFBOX-2184
-            awtColorSpace.toRGB(new float[] { 0, 0, 0, 0 });
-            usePureJavaCMYKConversion =
-                    System.getProperty("org.sejda.sambox.rendering.UsePureJavaCMYKConversion")
-                            != null;
-
-            // Assignment to volatile must be the LAST statement in this block!
-            initDone = true;
-        }
-    }
-
-    protected ICC_Profile getICCProfile() throws IOException
-    {
-        // Adobe Acrobat uses "U.S. Web Coated (SWOP) v2" as the default
-        // CMYK profile, however it is not available under an open license.
-        // Instead, the "ISO Coated v2 300% (basICColor)" is used, which
-        // is an open alternative to the "ISO Coated v2 300% (ECI)" profile.
-
-        String name = "/org/sejda/sambox/resources/icc/ISOcoated_v2_300_bas.icc";
-        try (InputStream is = PDDeviceCMYK.class.getResourceAsStream(name))
-        {
-            requireIOCondition(nonNull(is), "Error loading " + name);
-            return ICC_Profile.getInstance(new BufferedInputStream(is));
-        }
     }
 
     @Override
@@ -137,14 +71,13 @@ public class PDDeviceCMYK extends PDDeviceColorSpace
     }
 
     @Override
-    public float[] toRGB(float[] value) throws IOException
+    public float[] toRGB(float[] value)
     {
-        init();
-        return awtColorSpace.toRGB(value);
+        return ConversionContextHolder.CONVERSION_CONTEXT.colorSpace.toRGB(value);
     }
 
     @Override
-    public BufferedImage toRawImage(WritableRaster raster) throws IOException
+    public BufferedImage toRawImage(WritableRaster raster)
     {
         // Device CMYK is not specified, as its the colors of whatever device you use.
         // The user should fallback to the RGB image
@@ -152,16 +85,15 @@ public class PDDeviceCMYK extends PDDeviceColorSpace
     }
 
     @Override
-    public BufferedImage toRGBImage(WritableRaster raster) throws IOException
+    public BufferedImage toRGBImage(WritableRaster raster)
     {
-        init();
-        return toRGBImageAWT(raster, awtColorSpace);
+        return toRGBImageAWT(raster, ConversionContextHolder.CONVERSION_CONTEXT.colorSpace);
     }
 
     @Override
     protected BufferedImage toRGBImageAWT(WritableRaster raster, ColorSpace colorSpace)
     {
-        if (usePureJavaCMYKConversion)
+        if (ConversionContextHolder.CONVERSION_CONTEXT.usePureJavaCMYKConversion)
         {
             BufferedImage dest = new BufferedImage(raster.getWidth(), raster.getHeight(),
                     BufferedImage.TYPE_INT_RGB);
@@ -193,7 +125,7 @@ public class PDDeviceCMYK extends PDDeviceColorSpace
 
                         lastValues[3] = srcValues[3];
                         srcValues[3] = srcValues[3] / 255f;
-                        
+
                         // use CIEXYZ as intermediate format to optimize the color conversion
                         destValues = destCS.fromCIEXYZ(colorSpace.toCIEXYZ(srcValues));
                         for (int k = 0; k < destValues.length; k++)
@@ -207,5 +139,58 @@ public class PDDeviceCMYK extends PDDeviceColorSpace
             return dest;
         }
         return super.toRGBImageAWT(raster, colorSpace);
+    }
+
+    /**
+     * Lazy initialization holder class
+     *
+     * @author Andrea Vacondio
+     *
+     */
+    private static final class ConversionContextHolder
+    {
+
+        private ConversionContextHolder()
+        {
+            // hide constructor
+        }
+
+        static final ConversionContext CONVERSION_CONTEXT = new ConversionContext();
+    }
+
+    private static class ConversionContext
+    {
+        private final ICC_ColorSpace colorSpace;
+        private final boolean usePureJavaCMYKConversion;
+
+        ConversionContext()
+        {
+            this.usePureJavaCMYKConversion = Boolean.getBoolean(
+                    "org.sejda.sambox.rendering.UsePureJavaCMYKConversion");
+            this.colorSpace = new ICC_ColorSpace(getICCProfile());
+
+        }
+
+        private ICC_Profile getICCProfile()
+        {
+            // Adobe Acrobat uses "U.S. Web Coated (SWOP) v2" as the default
+            // CMYK profile, however it is not available under an open license.
+            // Instead, the "ISO Coated v2 300% (basICColor)" is used, which
+            // is an open alternative to the "ISO Coated v2 300% (ECI)" profile.
+            try
+            {
+                String name = "/org/sejda/sambox/resources/icc/ISOcoated_v2_300_bas.icc";
+                try (var iccProfileStream = PDDeviceCMYK.class.getResourceAsStream(name))
+                {
+                    require(nonNull(iccProfileStream),
+                            () -> new IOException("Error loading " + name));
+                    return ICC_Profile.getInstance(iccProfileStream);
+                }
+            }
+            catch (IOException e)
+            {
+                throw new IllegalStateException("Failed to initialize PDDeviceCMYK", e);
+            }
+        }
     }
 }
