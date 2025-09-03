@@ -22,8 +22,8 @@ import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.util.Matrix;
 
 /**
- * A CalRGB colour space is a CIE-based colour space with one transformation stage instead of two. In this type of
- * space, A, B, and C represent calibrated red, green, and blue colour values.
+ * A CalRGB colour space is a CIE-based colour space with one transformation stage instead of two.
+ * In this type of space, A, B, and C represent calibrated red, green, and blue colour values.
  *
  * @author Ben Litchfield
  * @author John Hewson
@@ -42,7 +42,7 @@ public class PDCalRGB extends PDCIEDictionaryBasedColorSpace
 
     /**
      * Creates a new CalRGB color space using the given COS array.
-     * 
+     *
      * @param rgb the cos array which represents this color space
      */
     public PDCalRGB(COSArray rgb)
@@ -111,33 +111,26 @@ public class PDCalRGB extends PDCIEDictionaryBasedColorSpace
     }
 
     /**
-     * Returns the gamma value. If none is present then the default of 1,1,1 will be returned.
-     * 
-     * @return the gamma value
+     * @return the gamma value.  If none is present then the default of 1,1,1 will be returned.
      */
     public final PDGamma getGamma()
     {
-        COSArray gammaArray = (COSArray) dictionary.getDictionaryObject(COSName.GAMMA);
+        COSArray gammaArray = dictionary.getDictionaryObject(COSName.GAMMA, COSArray.class);
         if (gammaArray == null)
         {
-            gammaArray = new COSArray();
-            gammaArray.add(new COSFloat(1.0f));
-            gammaArray.add(new COSFloat(1.0f));
-            gammaArray.add(new COSFloat(1.0f));
+            gammaArray = new COSArray(new COSFloat(1.0f), new COSFloat(1.0f), new COSFloat(1.0f));
             dictionary.setItem(COSName.GAMMA, gammaArray);
         }
         return new PDGamma(gammaArray);
     }
 
     /**
-     * Returns the linear interpretation matrix, which is an array of nine numbers. If the underlying dictionary
-     * contains null then the identity matrix will be returned.
-     * 
-     * @return the linear interpretation matrix
+     * @return the linear interpretation matrix, which is an array of nine numbers. If the
+     *      * underlying dictionary contains null then the identity matrix will be returned.
      */
     public final float[] getMatrix()
     {
-        COSArray matrix = (COSArray) dictionary.getDictionaryObject(COSName.MATRIX);
+        COSArray matrix = dictionary.getDictionaryObject(COSName.MATRIX, COSArray.class);
         if (matrix == null)
         {
             return new float[] { 1, 0, 0, 0, 1, 0, 0, 0, 1 };
@@ -147,7 +140,7 @@ public class PDCalRGB extends PDCIEDictionaryBasedColorSpace
 
     /**
      * Sets the gamma value.
-     * 
+     *
      * @param gamma the new gamma value
      */
     public final void setGamma(PDGamma gamma)
@@ -162,7 +155,7 @@ public class PDCalRGB extends PDCIEDictionaryBasedColorSpace
 
     /**
      * Sets the linear interpretation matrix. Passing in null will clear the matrix.
-     * 
+     *
      * @param matrix the new linear interpretation matrix, or null
      */
     public final void setMatrix(Matrix matrix)
