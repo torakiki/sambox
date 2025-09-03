@@ -24,9 +24,6 @@ import static org.sejda.sambox.cos.DirectCOSObject.asDirectObject;
 import static org.sejda.sambox.util.SpecVersionUtils.V1_4;
 import static org.sejda.sambox.util.SpecVersionUtils.isAtLeast;
 
-import java.awt.Point;
-import java.awt.image.DataBuffer;
-import java.awt.image.Raster;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.Closeable;
@@ -58,7 +55,6 @@ import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSDocument;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.cos.COSNumber;
 import org.sejda.sambox.cos.COSString;
 import org.sejda.sambox.cos.DirectCOSObject;
 import org.sejda.sambox.encryption.EncryptionContext;
@@ -73,7 +69,6 @@ import org.sejda.sambox.pdmodel.encryption.AccessPermission;
 import org.sejda.sambox.pdmodel.encryption.PDEncryption;
 import org.sejda.sambox.pdmodel.encryption.SecurityHandler;
 import org.sejda.sambox.pdmodel.font.Subsettable;
-import org.sejda.sambox.pdmodel.graphics.color.PDDeviceRGB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import javax.xml.transform.TransformerException;
@@ -86,32 +81,6 @@ import javax.xml.transform.TransformerException;
 public class PDDocument implements Closeable
 {
     private static final Logger LOG = LoggerFactory.getLogger(PDDocument.class);
-
-    /**
-     * avoid concurrency issues with PDDeviceRGB and deadlock in COSNumber/COSInteger
-     */
-    static
-    {
-        try
-        {
-            PDDeviceRGB.INSTANCE.toRGBImage(
-                    Raster.createBandedRaster(DataBuffer.TYPE_BYTE, 1, 1, 3, new Point(0, 0)));
-        }
-        catch (IOException e)
-        {
-            LOG.warn("This shouldn't happen", e);
-        }
-        try
-        {
-            // TODO remove this and deprecated COSNumber statics in 3.0
-            COSNumber.get("0");
-            COSNumber.get("1");
-        }
-        catch (IOException ex)
-        {
-            //
-        }
-    }
 
     private final COSDocument document;
     private PDDocumentCatalog documentCatalog;
