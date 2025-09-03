@@ -336,13 +336,13 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
     private void doEncode() throws IOException
     {
         COSBase filters = getFilters();
-        if (filters instanceof COSName)
+        if (filters instanceof COSName name)
         {
-            filtered = encode((COSName) filters, new MyByteArrayInputStream(unfiltered));
+            filtered = encode(name, new MyByteArrayInputStream(unfiltered));
         }
-        else if (filters instanceof COSArray)
+        else if (filters instanceof COSArray array)
         {
-            filtered = encodeChain((COSArray) filters, new MyByteArrayInputStream(unfiltered));
+            filtered = encodeChain(array, new MyByteArrayInputStream(unfiltered));
         }
     }
 
@@ -396,9 +396,9 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
         {
             return filters.equals(filter);
         }
-        if (filters instanceof COSArray)
+        if (filters instanceof COSArray array)
         {
-            return ((COSArray) filters).contains(filter);
+            return array.contains(filter);
         }
         return false;
     }
@@ -488,9 +488,9 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
                     newFilters.add(filters);
                     setFilters(newFilters);
                 }
-                else if (filters instanceof COSArray)
+                else if (filters instanceof COSArray array)
                 {
-                    newFilters.addAll((COSArray) filters);
+                    newFilters.addAll(array);
                     setFilters(newFilters);
                 }
                 else
