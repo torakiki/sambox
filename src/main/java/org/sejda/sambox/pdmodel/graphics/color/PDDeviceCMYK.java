@@ -16,8 +16,7 @@
  */
 package org.sejda.sambox.pdmodel.graphics.color;
 
-import static java.util.Objects.nonNull;
-import static org.sejda.commons.util.RequireUtils.require;
+import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
 
 import java.awt.color.ColorSpace;
 import java.awt.color.ICC_ColorSpace;
@@ -25,6 +24,7 @@ import java.awt.color.ICC_Profile;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 
 import org.sejda.sambox.cos.COSName;
@@ -36,9 +36,9 @@ import org.sejda.sambox.cos.COSName;
  * @author John Hewson
  * @author Ben Litchfield
  */
-public final class PDDeviceCMYK extends PDDeviceColorSpace
+public class PDDeviceCMYK extends PDDeviceColorSpace
 {
-    public static final PDDeviceCMYK INSTANCE = new PDDeviceCMYK();
+    public static PDDeviceCMYK INSTANCE = new PDDeviceCMYK();
 
     private final PDColor initialColor = new PDColor(new float[] { 0, 0, 0, 1 }, this);
 
@@ -93,7 +93,7 @@ public final class PDDeviceCMYK extends PDDeviceColorSpace
     @Override
     protected BufferedImage toRGBImageAWT(WritableRaster raster, ColorSpace colorSpace)
     {
-        if (ConversionContextHolder.CONVERSION_CONTEXT.usePureJavaCMYKConversion)
+        if (Boolean.getBoolean("org.sejda.sambox.rendering.UsePureJavaCMYKConversion"))
         {
             BufferedImage dest = new BufferedImage(raster.getWidth(), raster.getHeight(),
                     BufferedImage.TYPE_INT_RGB);
@@ -161,36 +161,65 @@ public final class PDDeviceCMYK extends PDDeviceColorSpace
     private static class ConversionContext
     {
         private final ICC_ColorSpace colorSpace;
-        private final boolean usePureJavaCMYKConversion;
 
         ConversionContext()
-        {
-            this.usePureJavaCMYKConversion = Boolean.getBoolean(
-                    "org.sejda.sambox.rendering.UsePureJavaCMYKConversion");
-            this.colorSpace = new ICC_ColorSpace(getICCProfile());
-
-        }
-
-        private ICC_Profile getICCProfile()
         {
             // Adobe Acrobat uses "U.S. Web Coated (SWOP) v2" as the default
             // CMYK profile, however it is not available under an open license.
             // Instead, the "ISO Coated v2 300% (basICColor)" is used, which
             // is an open alternative to the "ISO Coated v2 300% (ECI)" profile.
-            try
+            try (var iccProfileStream = PDDeviceCMYK.class.getResourceAsStream(
+                    "/org/sejda/sambox/resources/icc/ISOcoated_v2_300_bas.icc"))
             {
-                String name = "/org/sejda/sambox/resources/icc/ISOcoated_v2_300_bas.icc";
-                try (var iccProfileStream = PDDeviceCMYK.class.getResourceAsStream(name))
-                {
-                    require(nonNull(iccProfileStream),
-                            () -> new IOException("Error loading " + name));
-                    return ICC_Profile.getInstance(iccProfileStream);
-                }
+                this.colorSpace = new ICC_ColorSpace(ICC_Profile.getInstance(iccProfileStream));
             }
             catch (IOException e)
             {
                 throw new IllegalStateException("Failed to initialize PDDeviceCMYK", e);
             }
         }
+
+    }
+
+    /**
+     * Creates a PDDeviceCMYK instance using the provided ICC profile stream for color conversion
+     * which is eagerly loaded.
+     * <p>This allows for custom CMYK color profiles to be used instead of the
+     * default one:
+     * <pre>
+     *     PDDeviceCMYK.INSTANCE = PDDeviceCMYK.eagerInstance(yourIccProfileStream);
+     * </pre>
+     * </p>
+     *
+     * @param iccProfileStream stream to the icc profile to be used for color conversion
+     * @return the PDDeviceCMYK instance
+     * @throws IOException              if there is an error reading the ICC profile stream
+     * @throws IllegalArgumentException if the provided stream is not a valid ICC profile
+     */
+    public static PDDeviceCMYK eagerInstance(InputStream iccProfileStream)
+            throws IOException, IllegalArgumentException
+    {
+        var instance = new PDDeviceCMYK()
+        {
+            private final ICC_ColorSpace colorSpace;
+
+            {
+                requireNotNullArg(iccProfileStream, "Cannot load a null ICC profile");
+                this.colorSpace = new ICC_ColorSpace(ICC_Profile.getInstance(iccProfileStream));
+            }
+
+            @Override
+            public float[] toRGB(float[] value)
+            {
+                return colorSpace.toRGB(value);
+            }
+
+            @Override
+            public BufferedImage toRGBImage(WritableRaster raster)
+            {
+                return toRGBImageAWT(raster, colorSpace);
+            }
+        };
+        return instance;
     }
 }

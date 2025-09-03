@@ -17,26 +17,31 @@
 
 package org.sejda.sambox.pdmodel.graphics.color;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertThrows;
+
 import java.io.IOException;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-/**
- * Test for power user creation of a custom default CMYK color space.
- *
- * @author John Hewson
- */
-public class PDDeviceCMYKTest extends TestCase
+public class PDDeviceCMYKTest
 {
+
+    @Test
     public void testCMYK() throws IOException
     {
-        PDDeviceCMYK.INSTANCE = new CustomDeviceCMYK();
+        assertArrayEquals(new float[] { 0.73669034f, 0.594995f, 0.32845044f },
+                PDDeviceCMYK.INSTANCE.toRGB(new float[] { 0.25f, 0.35f, 0.7f, 0.11f }), 0.01f);
+        PDDeviceCMYK.INSTANCE = PDDeviceCMYK.eagerInstance(
+                PDDeviceCMYKTest.class.getResourceAsStream(
+                        "/org/sejda/sambox/resources/icc/CGATS001Compat-v2-micro.icc"));
+        assertArrayEquals(new float[] { 0.692668f, 0.57610434f, 0.36299688f },
+                PDDeviceCMYK.INSTANCE.toRGB(new float[] { 0.25f, 0.35f, 0.7f, 0.11f }), 0.01f);
     }
-    
-    private static class CustomDeviceCMYK extends PDDeviceCMYK
+
+    @Test
+    public void nullProfile() throws IOException
     {
-        protected CustomDeviceCMYK() throws IOException
-        {
-        }
+        assertThrows(IllegalArgumentException.class, () -> PDDeviceCMYK.eagerInstance(null));
     }
 }
