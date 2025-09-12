@@ -16,8 +16,9 @@
  */
 package org.sejda.sambox.output;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.AdditionalMatchers.aryEq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -27,8 +28,9 @@ import static org.sejda.sambox.cos.COSDictionary.of;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
 import org.sejda.io.BufferedCountingChannelWriter;
@@ -50,28 +52,30 @@ public class IndirectObjectsWriterTest
     private BufferedCountingChannelWriter writer;
     private IndirectObjectsWriter victim;
     private PDFWriteContext context;
-    private PreSaveCOSTransformer transformer;
+    private PreSaveCOSVisitor transformer;
 
-    @Before
-    public void setUp()
+    @BeforeEach
+    public void setUp() throws IOException
     {
-        transformer = mock(PreSaveCOSTransformer.class);
+        transformer = mock(PreSaveCOSVisitor.class);
         context = new PDFWriteContext(null, transformer);
         writer = mock(BufferedCountingChannelWriter.class);
         victim = new IndirectObjectsWriter(writer, context);
 
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void nullWriter()
     {
-        new IndirectObjectsWriter((BufferedCountingChannelWriter) null, context);
+        assertThrows(IllegalArgumentException.class,
+                () -> new IndirectObjectsWriter((BufferedCountingChannelWriter) null, context));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void nullContext()
     {
-        new IndirectObjectsWriter(writer, null);
+        assertThrows(IllegalArgumentException.class, () -> new IndirectObjectsWriter(writer, null));
+
     }
 
     @Test
@@ -161,5 +165,16 @@ public class IndirectObjectsWriterTest
         IndirectCOSObjectReference ref = new IndirectCOSObjectReference(123, 0, cosArray);
         victim.writeObjectIfNotWritten(ref);
         verify(transformer).visit(cosArray);
+    }
+
+    @Test
+    @DisplayName("Direct objects are visited")
+    public void writerDirectInteger() throws IOException
+    {
+        var cosInteger = COSInteger.get(1000);
+        var cosDictionary = of(COSName.SIZE, cosInteger);
+        IndirectCOSObjectReference ref = new IndirectCOSObjectReference(123, 0, cosDictionary);
+        victim.writeObjectIfNotWritten(ref);
+        verify(transformer).visit(cosInteger);
     }
 }

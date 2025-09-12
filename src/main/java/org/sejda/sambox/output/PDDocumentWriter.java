@@ -49,14 +49,14 @@ public class PDDocumentWriter implements Closeable
     private final EncryptionContext encryptionContext;
 
     public PDDocumentWriter(CountingWritableByteChannel channel,
-            EncryptionContext encryptionContext, PreSaveCOSTransformer preSaveCOSTransformer,
+            EncryptionContext encryptionContext, PreSaveCOSVisitor preSaveCOSVisitor,
             WriteOption... options)
     {
         requireNotNullArg(channel, "Cannot write to a null channel");
         this.encryptionContext = encryptionContext;
         this.context = new PDFWriteContext(
                 ofNullable(this.encryptionContext).map(EncryptionContext::encryptionAlgorithm)
-                        .orElse(null), preSaveCOSTransformer, options);
+                        .orElse(null), preSaveCOSVisitor, options);
         this.writer = new DefaultPDFWriter(new IndirectObjectsWriter(channel, context));
     }
 

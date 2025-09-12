@@ -49,7 +49,7 @@ import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.input.PDFParser;
-import org.sejda.sambox.output.PreSaveCOSTransformer;
+import org.sejda.sambox.output.PreSaveCOSVisitor;
 import org.sejda.sambox.output.WriteOption;
 import org.sejda.sambox.pdmodel.PDDocument.OnClose;
 import org.sejda.sambox.util.SpecVersionUtils;
@@ -425,7 +425,7 @@ public class TestPDDocument
         {
             document.addPage(new PDPage());
             document.getDocumentCatalog().setPageLayout(PageLayout.SINGLE_PAGE);
-            document.withPreSaveTransformer(new PreSaveCOSTransformer()
+            document.withPreSaveVisitor(new PreSaveCOSVisitor()
             {
                 @Override
                 public void visit(COSDictionary value) throws IOException

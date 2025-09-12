@@ -60,19 +60,19 @@ class PDFWriteContext
     private final List<WriteOption> opts;
     private final SortedMap<Long, XrefEntry> written = new ConcurrentSkipListMap<>();
     private final GeneralEncryptionAlgorithm encryptor;
-    private PreSaveCOSTransformer preSaveCOSTransformer;
+    private PreSaveCOSVisitor preSaveCOSVisitor;
 
-    PDFWriteContext(GeneralEncryptionAlgorithm encryptor,
-            PreSaveCOSTransformer preSaveCOSTransformer, WriteOption... options)
+    PDFWriteContext(GeneralEncryptionAlgorithm encryptor, PreSaveCOSVisitor preSaveCOSVisitor,
+            WriteOption... options)
     {
-        this(0, encryptor, preSaveCOSTransformer, options);
+        this(0, encryptor, preSaveCOSVisitor, options);
     }
 
     PDFWriteContext(long highestExistingReferenceNumber, GeneralEncryptionAlgorithm encryptor,
-            PreSaveCOSTransformer preSaveCOSTransformer, WriteOption... options)
+            PreSaveCOSVisitor preSaveCOSVisitor, WriteOption... options)
     {
         this.encryptor = encryptor;
-        this.preSaveCOSTransformer = preSaveCOSTransformer;
+        this.preSaveCOSVisitor = preSaveCOSVisitor;
         this.opts = Arrays.asList(options);
         this.referencesProvider = new IndirectReferenceProvider(highestExistingReferenceNumber);
         LOG.debug("PDFWriteContext created with highest object reference number {}",
@@ -297,9 +297,9 @@ class PDFWriteContext
      */
     <T extends COSBase> T maybeTransform(T cosEntity) throws IOException
     {
-        if (nonNull(preSaveCOSTransformer))
+        if (nonNull(preSaveCOSVisitor))
         {
-            cosEntity.accept(preSaveCOSTransformer);
+            cosEntity.accept(preSaveCOSVisitor);
         }
         return cosEntity;
     }

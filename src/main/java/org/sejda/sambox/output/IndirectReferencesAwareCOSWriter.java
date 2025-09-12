@@ -55,7 +55,9 @@ class IndirectReferencesAwareCOSWriter extends DefaultCOSWriter
     @Override
     void writeValue(COSBase value) throws IOException
     {
-        ofNullable((COSBase) context.getIndirectReferenceFor(value)).orElse(value).accept(this);
+        context.maybeTransform(
+                        ofNullable((COSBase) context.getIndirectReferenceFor(value)).orElse(value))
+                .accept(this);
     }
 
 }

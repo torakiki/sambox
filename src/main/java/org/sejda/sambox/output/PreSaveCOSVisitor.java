@@ -26,6 +26,6 @@ import org.sejda.sambox.cos.COSVisitor;
  *
  * @author Andrea Vacondio
  */
-public interface PreSaveCOSTransformer extends COSVisitor
+public interface PreSaveCOSVisitor extends COSVisitor
 {
 }

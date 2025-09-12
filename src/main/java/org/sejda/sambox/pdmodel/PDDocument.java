@@ -62,7 +62,7 @@ import org.sejda.sambox.encryption.MessageDigests;
 import org.sejda.sambox.encryption.StandardSecurity;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.output.PDDocumentWriter;
-import org.sejda.sambox.output.PreSaveCOSTransformer;
+import org.sejda.sambox.output.PreSaveCOSVisitor;
 import org.sejda.sambox.output.WriteOption;
 import org.sejda.sambox.pdmodel.common.PDMetadata;
 import org.sejda.sambox.pdmodel.encryption.AccessPermission;
@@ -88,7 +88,7 @@ public class PDDocument implements Closeable
     private boolean open = true;
     private OnClose onClose = () -> LOG.debug("Closing document");
     private OnBeforeWrite onBeforeWrite = () -> LOG.trace("About to write document");
-    private PreSaveCOSTransformer preSaveCOSTransformer;
+    private PreSaveCOSVisitor preSaveCOSVisitor;
     private ResourceCache resourceCache = new DefaultResourceCache();
 
     // fonts to subset before saving
@@ -520,7 +520,7 @@ public class PDDocument implements Closeable
         generateFileIdentifier(output.toString().getBytes(StandardCharsets.ISO_8859_1),
                 encryptionContext);
         try (PDDocumentWriter writer = new PDDocumentWriter(output, encryptionContext,
-                preSaveCOSTransformer, options))
+                preSaveCOSVisitor, options))
         {
             onBeforeWrite.onBeforeWrite();
             writer.write(this);
@@ -601,13 +601,15 @@ public class PDDocument implements Closeable
     }
 
     /**
-     * Sets the {@link PreSaveCOSTransformer} for this PDDocument object. This transformer is
-     * responsible for visiting COSBase objects before they are written to the output. The intended
-     * use is {@code document.withPreSaveTransformer(processor).writeTo(file, options);}
+     * Sets the {@link PreSaveCOSVisitor} for this PDDocument object. This component is responsible
+     * for visiting COSBase objects before they are written to the output. The intended use is
+     * <pre>
+     *     {@code document.withPreSaveVisitor(visitor).writeTo(file, options);}
+     * </pre>
      */
-    public PDDocument withPreSaveTransformer(PreSaveCOSTransformer transformer)
+    public PDDocument withPreSaveVisitor(PreSaveCOSVisitor transformer)
     {
-        this.preSaveCOSTransformer = transformer;
+        this.preSaveCOSVisitor = transformer;
         return this;
     }
 
