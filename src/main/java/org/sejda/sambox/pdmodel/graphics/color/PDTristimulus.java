@@ -31,7 +31,7 @@ public final class PDTristimulus implements COSObjectable
     private final COSArray values;
 
     /**
-     * Constructor. Defaults all values to 0, 0, 0.
+     * Default constructor all values to 0, 0, 0.
      */
     public PDTristimulus()
     {
@@ -39,8 +39,6 @@ public final class PDTristimulus implements COSObjectable
     }
 
     /**
-     * Constructor from COS object.
-     *
      * @param array the array containing the XYZ values
      */
     public PDTristimulus(COSArray array)
@@ -49,8 +47,6 @@ public final class PDTristimulus implements COSObjectable
     }
 
     /**
-     * Constructor from COS object.
-     *
      * @param array the array containing the XYZ values
      */
     public PDTristimulus(float[] array)
@@ -68,61 +64,31 @@ public final class PDTristimulus implements COSObjectable
         return values;
     }
 
-    /**
-     * Returns the x value of the tristimulus.
-     *
-     * @return the X value
-     */
     public float getX()
     {
         return values.getObject(0, COSNumber.class).floatValue();
     }
 
-    /**
-     * Sets the x value of the tristimulus.
-     *
-     * @param x the x value for the tristimulus
-     */
     public void setX(float x)
     {
         values.set(0, new COSFloat(x));
     }
 
-    /**
-     * Returns the y value of the tristimulus.
-     *
-     * @return the Y value
-     */
     public float getY()
     {
         return values.getObject(1, COSNumber.class).floatValue();
     }
 
-    /**
-     * Sets the y value of the tristimulus.
-     *
-     * @param y the y value for the tristimulus
-     */
     public void setY(float y)
     {
         values.set(1, new COSFloat(y));
     }
 
-    /**
-     * Returns the z value of the tristimulus.
-     *
-     * @return the Z value
-     */
     public float getZ()
     {
         return values.getObject(2, COSNumber.class).floatValue();
     }
 
-    /**
-     * Sets the z value of the tristimulus.
-     *
-     * @param z the z value for the tristimulus
-     */
     public void setZ(float z)
     {
         values.set(2, new COSFloat(z));
