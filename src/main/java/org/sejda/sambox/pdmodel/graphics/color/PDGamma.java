@@ -17,7 +17,6 @@
 package org.sejda.sambox.pdmodel.graphics.color;
 
 import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSFloat;
 import org.sejda.sambox.cos.COSNumber;
 import org.sejda.sambox.cos.COSObjectable;
@@ -40,8 +39,6 @@ public final class PDGamma implements COSObjectable
     }
 
     /**
-     * Creates a new gamma from a COS array.
-     *
      * @param array the array containing the XYZ values
      */
     public PDGamma(COSArray array)
@@ -49,22 +46,8 @@ public final class PDGamma implements COSObjectable
         values = array;
     }
 
-    /**
-     * Convert this standard java object to a COS object.
-     *
-     * @return the cos object that matches this Java object
-     */
-    public COSBase getCOSObject()
-    {
-        return values;
-    }
-
-    /**
-     * Convert this standard java object to a COS object.
-     *
-     * @return the cos object that matches this Java object
-     */
-    public COSArray getCOSArray()
+    @Override
+    public COSArray getCOSObject()
     {
         return values;
     }

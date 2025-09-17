@@ -209,9 +209,9 @@ public abstract class PDShading extends PDDictionaryWrapper
      *
      * @param shadingDictionary the COS shading dictionary
      * @return the newly created shading resources object
-     * @throws IOException if we are unable to create the PDShading object
+     * @throws IllegalArgumentException if we are unable to create the PDShading object
      */
-    public static PDShading create(COSDictionary shadingDictionary) throws IOException
+    public static PDShading create(COSDictionary shadingDictionary) throws IllegalArgumentException
     {
         int shadingType = shadingDictionary.getInt(COSName.SHADING_TYPE, 0);
         return switch (shadingType)
@@ -223,7 +223,7 @@ public abstract class PDShading extends PDDictionaryWrapper
             case SHADING_TYPE5 -> new PDShadingType5(shadingDictionary);
             case SHADING_TYPE6 -> new PDShadingType6(shadingDictionary);
             case SHADING_TYPE7 -> new PDShadingType7(shadingDictionary);
-            default -> throw new IOException("Error: Unknown shading type " + shadingType);
+            default -> throw new IllegalArgumentException("Unknown shading type " + shadingType);
         };
     }
 

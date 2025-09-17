@@ -355,38 +355,28 @@ public class PageDrawer extends PDFGraphicsStreamEngine
             float[] rgb = colorSpace.toRGB(color.getComponents());
             return new Color(clampColor(rgb[0]), clampColor(rgb[1]), clampColor(rgb[2]));
         }
-        else
+        PDAbstractPattern pattern = patternSpace.getPattern(color);
+        if (pattern instanceof PDTilingPattern tilingPattern)
         {
-            PDAbstractPattern pattern = patternSpace.getPattern(color);
-            if (pattern instanceof PDTilingPattern tilingPattern)
-            {
 
-                if (tilingPattern.getPaintType() == PDTilingPattern.PAINT_COLORED)
-                {
-                    // colored tiling pattern
-                    return tilingPaintFactory.create(tilingPattern, null, null, xform);
-                }
-                else
-                {
-                    // uncolored tiling pattern
-                    return tilingPaintFactory.create(tilingPattern,
-                            patternSpace.getUnderlyingColorSpace(), color, xform);
-                }
-            }
-            else
+            if (tilingPattern.getPaintType() == PDTilingPattern.PAINT_COLORED)
             {
-                PDShadingPattern shadingPattern = (PDShadingPattern) pattern;
-                PDShading shading = shadingPattern.getShading();
-                if (shading == null)
-                {
-                    LOG.error("shadingPattern is null, will be filled with transparency");
-                    return new Color(0, 0, 0, 0);
-                }
-                return shading.toPaint(
-                        Matrix.concatenate(getInitialMatrix(), shadingPattern.getMatrix()));
-
+                // colored tiling pattern
+                return tilingPaintFactory.create(tilingPattern, null, null, xform);
             }
+            // uncolored tiling pattern
+            return tilingPaintFactory.create(tilingPattern, patternSpace.getUnderlyingColorSpace(),
+                    color, xform);
         }
+        PDShadingPattern shadingPattern = (PDShadingPattern) pattern;
+        PDShading shading = shadingPattern.getShading();
+        if (shading == null)
+        {
+            LOG.error("shadingPattern is null, will be filled with transparency");
+            return new Color(0, 0, 0, 0);
+        }
+        return shading.toPaint(Matrix.concatenate(getInitialMatrix(), shadingPattern.getMatrix()));
+
     }
 
     /**

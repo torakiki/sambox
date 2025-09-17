@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.pdmodel.documentinterchange.taggedpdf;
 
+import static java.util.Optional.ofNullable;
+
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSNull;
@@ -34,11 +36,7 @@ public class PDFourColours implements COSObjectable
 
     public PDFourColours()
     {
-        this.array = new COSArray();
-        this.array.add(COSNull.NULL);
-        this.array.add(COSNull.NULL);
-        this.array.add(COSNull.NULL);
-        this.array.add(COSNull.NULL);
+        this.array = new COSArray(COSNull.NULL, COSNull.NULL, COSNull.NULL, COSNull.NULL);
     }
 
     public PDFourColours(COSArray array)
@@ -54,10 +52,7 @@ public class PDFourColours implements COSObjectable
         }
     }
 
-
     /**
-     * Gets the colour for the before edge.
-     * 
      * @return the colour for the before edge
      */
     public PDGamma getBeforeColour()
@@ -66,8 +61,6 @@ public class PDFourColours implements COSObjectable
     }
 
     /**
-     * Sets the colour for the before edge.
-     * 
      * @param colour the colour for the before edge
      */
     public void setBeforeColour(PDGamma colour)
@@ -76,8 +69,6 @@ public class PDFourColours implements COSObjectable
     }
 
     /**
-     * Gets the colour for the after edge.
-     * 
      * @return the colour for the after edge
      */
     public PDGamma getAfterColour()
@@ -86,8 +77,6 @@ public class PDFourColours implements COSObjectable
     }
 
     /**
-     * Sets the colour for the after edge.
-     * 
      * @param colour the colour for the after edge
      */
     public void setAfterColour(PDGamma colour)
@@ -96,8 +85,6 @@ public class PDFourColours implements COSObjectable
     }
 
     /**
-     * Gets the colour for the start edge.
-     * 
      * @return the colour for the start edge
      */
     public PDGamma getStartColour()
@@ -106,8 +93,6 @@ public class PDFourColours implements COSObjectable
     }
 
     /**
-     * Sets the colour for the start edge.
-     * 
      * @param colour the colour for the start edge
      */
     public void setStartColour(PDGamma colour)
@@ -116,8 +101,6 @@ public class PDFourColours implements COSObjectable
     }
 
     /**
-     * Gets the colour for the end edge.
-     * 
      * @return the colour for the end edge
      */
     public PDGamma getEndColour()
@@ -126,8 +109,6 @@ public class PDFourColours implements COSObjectable
     }
 
     /**
-     * Sets the colour for the end edge.
-     * 
      * @param colour the colour for the end edge
      */
     public void setEndColour(PDGamma colour)
@@ -135,52 +116,34 @@ public class PDFourColours implements COSObjectable
         this.setColourByIndex(3, colour);
     }
 
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public COSBase getCOSObject()
+    public COSArray getCOSObject()
     {
         return this.array;
     }
 
-
     /**
-     * Gets the colour by edge index.
-     * 
      * @param index edge index
-     * @return the colour
+     * @return the colour by edge index
      */
     private PDGamma getColourByIndex(int index)
     {
-        PDGamma retval = null;
         COSBase item = this.array.getObject(index);
-        if (item instanceof COSArray)
+        if (item instanceof COSArray array)
         {
-            retval = new PDGamma((COSArray) item);
+            return new PDGamma(array);
         }
-        return retval;
+        return null;
     }
 
     /**
-     * Sets the colour by edge index.
-     * 
-     * @param index the edge index
-     * @param colour the colour
+     * @param index  the edge index
+     * @param colour the colour to set
      */
     private void setColourByIndex(int index, PDGamma colour)
     {
-        COSBase base;
-        if (colour == null)
-        {
-            base = COSNull.NULL;
-        }
-        else
-        {
-            base = colour.getCOSArray();
-        }
-        this.array.set(index, base);
+        this.array.set(index,
+                ofNullable(colour).map(c -> (COSBase) c.getCOSObject()).orElse(COSNull.NULL));
     }
 
 }

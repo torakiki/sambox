@@ -102,82 +102,42 @@ public class PDTilingPattern extends PDAbstractPattern implements PDContentStrea
         return PDAbstractPattern.TYPE_TILING_PATTERN;
     }
 
-    /**
-     * This will set the paint type.
-     *
-     * @param paintType The new paint type.
-     */
     @Override
     public void setPaintType(int paintType)
     {
         getCOSObject().setInt(COSName.PAINT_TYPE, paintType);
     }
 
-    /**
-     * This will return the paint type.
-     *
-     * @return The paint type
-     */
     public int getPaintType()
     {
         return getCOSObject().getInt(COSName.PAINT_TYPE, 0);
     }
 
-    /**
-     * This will set the tiling type.
-     *
-     * @param tilingType The new tiling type.
-     */
     public void setTilingType(int tilingType)
     {
         getCOSObject().setInt(COSName.TILING_TYPE, tilingType);
     }
 
-    /**
-     * This will return the tiling type.
-     *
-     * @return The tiling type
-     */
     public int getTilingType()
     {
         return getCOSObject().getInt(COSName.TILING_TYPE, 0);
     }
 
-    /**
-     * This will set the XStep value.
-     *
-     * @param xStep The new XStep value.
-     */
     public void setXStep(float xStep)
     {
         getCOSObject().setFloat(COSName.X_STEP, xStep);
     }
 
-    /**
-     * This will return the XStep value.
-     *
-     * @return The XStep value
-     */
     public float getXStep()
     {
         return getCOSObject().getFloat(COSName.X_STEP, 0);
     }
 
-    /**
-     * This will set the YStep value.
-     *
-     * @param yStep The new YStep value.
-     */
     public void setYStep(float yStep)
     {
         getCOSObject().setFloat(COSName.Y_STEP, yStep);
     }
 
-    /**
-     * This will return the YStep value.
-     *
-     * @return The YStep value
-     */
     public float getYStep()
     {
         return getCOSObject().getFloat(COSName.Y_STEP, 0);
@@ -217,11 +177,6 @@ public class PDTilingPattern extends PDAbstractPattern implements PDContentStrea
         return null;
     }
 
-    /**
-     * This will set the resources for this pattern.
-     *
-     * @param resources The new resources for this pattern.
-     */
     public void setResources(PDResources resources)
     {
         getCOSObject().setItem(COSName.RESOURCES, resources);
@@ -244,11 +199,6 @@ public class PDTilingPattern extends PDAbstractPattern implements PDContentStrea
         return null;
     }
 
-    /**
-     * This will set the BBox (bounding box) for this Pattern.
-     *
-     * @param bbox The new BBox for this Pattern.
-     */
     public void setBBox(PDRectangle bbox)
     {
         if (bbox == null)

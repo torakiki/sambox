@@ -45,7 +45,6 @@ public class PDMetadata extends PDStream
      * document, this will close the InputStream.
      *
      * @param str The stream parameter.
-     * @param filtered True if the stream already has a filter applied.
      * @throws IOException If there is an error creating the stream in the document.
      */
     public PDMetadata(InputStream str) throws IOException

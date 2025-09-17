@@ -23,14 +23,14 @@ import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSFloat;
 import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.cos.COSObjectable;
 import org.sejda.sambox.pdmodel.ResourceCache;
+import org.sejda.sambox.pdmodel.common.PDDictionaryWrapper;
 import org.sejda.sambox.util.Matrix;
 
 /**
  * A Pattern dictionary from a page's resources.
  */
-public abstract class PDAbstractPattern implements COSObjectable
+public abstract class PDAbstractPattern extends PDDictionaryWrapper
 {
     /** Tiling pattern type. */
     public static final int TYPE_TILING_PATTERN = 1;
@@ -58,91 +58,50 @@ public abstract class PDAbstractPattern implements COSObjectable
      * @param resourceDictionary the COS pattern dictionary
      * @param resourceCache      the resource cache, may be null, useful for tiling patterns.
      * @return the newly created pattern object
-     * @throws IOException If we are unable to create the PDPattern object.
+     * @throws IllegalArgumentException If we are unable to create the PDPattern object.
      */
     public static PDAbstractPattern create(COSDictionary resourceDictionary,
-            ResourceCache resourceCache) throws IOException
+            ResourceCache resourceCache) throws IllegalArgumentException
     {
-        PDAbstractPattern pattern;
         int patternType = resourceDictionary.getInt(COSName.PATTERN_TYPE, 0);
-        switch (patternType)
+        return switch (patternType)
         {
-        case TYPE_TILING_PATTERN:
-            pattern = new PDTilingPattern(resourceDictionary, resourceCache);
-            break;
-        case TYPE_SHADING_PATTERN:
-            pattern = new PDShadingPattern(resourceDictionary);
-            break;
-        default:
-            throw new IOException("Error: Unknown pattern type " + patternType);
-        }
-        return pattern;
+            case TYPE_TILING_PATTERN -> new PDTilingPattern(resourceDictionary, resourceCache);
+            case TYPE_SHADING_PATTERN -> new PDShadingPattern(resourceDictionary);
+            default -> throw new IllegalArgumentException("Unknown pattern type " + patternType);
+        };
     }
 
-    private final COSDictionary patternDictionary;
-
-    /**
-     * Creates a new Pattern dictionary.
-     */
     public PDAbstractPattern()
     {
-        patternDictionary = COSDictionary.of(COSName.TYPE, COSName.PATTERN);
+        super(COSDictionary.of(COSName.TYPE, COSName.PATTERN));
     }
 
-    /**
-     * Creates a new Pattern dictionary from the given COS dictionary.
-     * @param resourceDictionary The COSDictionary for this pattern resource.
-     */
     public PDAbstractPattern(COSDictionary resourceDictionary)
     {
-        patternDictionary = resourceDictionary;
+        super(resourceDictionary);
     }
 
-    /**
-     * This will get the underlying dictionary.
-     * @return The dictionary for these pattern resources.
-     */
-    @Override
-    public COSDictionary getCOSObject()
-    {
-        return patternDictionary;
-    }
 
-    /**
-     * This will set the paint type.
-     * @param paintType The new paint type.
-     */
     public void setPaintType(int paintType)
     {
-        patternDictionary.setInt(COSName.PAINT_TYPE, paintType);
+        getCOSObject().setInt(COSName.PAINT_TYPE, paintType);
     }
 
-    /**
-     * This will return the paint type.
-     * @return The type of object that this is.
-     */
     public String getType()
     {
         return COSName.PATTERN.getName();
     }
 
-    /**
-     * This will set the pattern type.
-     * @param patternType The new pattern type.
-     */
     public void setPatternType(int patternType)
     {
-        patternDictionary.setInt(COSName.PATTERN_TYPE, patternType);
+        getCOSObject().setInt(COSName.PATTERN_TYPE, patternType);
     }
 
-    /**
-     * This will return the pattern type.
-     * @return The pattern type
-     */
     public abstract int getPatternType();
 
     /**
-     * Returns the pattern matrix, or the identity matrix is none is available.
+     * @return the pattern matrix, or the identity matrix is none is available.
      */
     public Matrix getMatrix()
     {
