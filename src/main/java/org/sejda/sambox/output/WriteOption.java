@@ -47,9 +47,9 @@ public enum WriteOption
      * It creates or updates the document XMP metadata before the document is written.
      * <ul>
      *     <li>Creates: if the document XMP metadata does not exist, it creates a new one based on the info dictionary</li>
-     *     <li>Updates: if the document XMP metadata exists, it updates all the values corresponding to the info dictionary (see ISO 32000-2:2020 Chap 14.3.3 Table 349)</li>
+     *     <li>Updates: if the document XMP metadata exists, it updates all the values corresponding to the info dictionary (see ISO 32000-2:2020 Chap 14.3.3 Table 349).
+     *     If an exception happens while parsing the metadata we fallback to the Creates case</li>
      * </ul>
-     * Note: we currently leave untouched a malformed metadata stream.
      */
     UPSERT_DOCUMENT_METADATA_STREAM
 }

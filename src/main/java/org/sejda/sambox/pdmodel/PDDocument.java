@@ -574,14 +574,10 @@ public class PDDocument implements Closeable
             {
                 LOG.warn("Unable to set xmp document metadata", e);
             }
-            catch (XmpParsingException e)
-            {
-                LOG.warn("Unable to parse existing document level xmp metadata", e);
-            }
         }
     }
 
-    private XMPMetadata getOrCreateXmpMetadata() throws XmpParsingException, IOException
+    private XMPMetadata getOrCreateXmpMetadata()
     {
         var metadata = getDocumentCatalog().getMetadata();
         if (nonNull(metadata))
@@ -591,6 +587,10 @@ public class PDDocument implements Closeable
                 var parser = new DomXmpParser();
                 parser.setStrictParsing(false);
                 return parser.parse(new BufferedInputStream(metadata.createInputStream()));
+            }
+            catch (XmpParsingException | IOException e)
+            {
+                LOG.warn("Unable to parse existing document level xmp metadata", e);
             }
             finally
             {

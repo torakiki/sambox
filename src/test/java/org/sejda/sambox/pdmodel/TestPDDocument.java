@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -39,6 +40,7 @@ import java.util.Locale;
 import org.apache.fontbox.ttf.TrueTypeFont;
 import org.apache.xmpbox.XMPMetadata;
 import org.apache.xmpbox.xml.DomXmpParser;
+import org.apache.xmpbox.xml.XmpParsingException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -367,15 +369,22 @@ public class TestPDDocument
     }
 
     @Test
-    // malformed xmp are not fixed nor replaced. We currently leave them as they are this can be
-    // changed in the future with some more advanced logic even though it seems hard to try to catch
-    // all possible errors. Maybe we should look at Acrobat and see what it does
     public void testWriteWithExistingMalformedXMPMetadata(@TempDir Path tmp) throws Exception
     {
         var output = Files.createTempFile(tmp, "", ".pdf").toFile();
         try (PDDocument document = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
                 getClass().getResourceAsStream("/sambox/xmp_metadata_missing_rdf_namespace.pdf"))))
         {
+            assertThrows(XmpParsingException.class, () -> {
+                try (var metadata = document.getDocumentCatalog().getCOSObject()
+                        .getDictionaryObject(COSName.METADATA, COSStream.class))
+                {
+                    assertNotNull(metadata);
+                    //make sure it's malformed
+                    new DomXmpParser().parse(
+                            new BufferedInputStream(metadata.getUnfilteredStream()));
+                }
+            });
             document.writeTo(output, WriteOption.UPSERT_DOCUMENT_METADATA_STREAM);
         }
         try (var outputDoc = PDFParser.parse(SeekableSources.seekableSourceFrom(output)))
@@ -384,6 +393,7 @@ public class TestPDDocument
                     .getDictionaryObject(COSName.METADATA, COSStream.class))
             {
                 assertNotNull(metadata);
+                new DomXmpParser().parse(new BufferedInputStream(metadata.getUnfilteredStream()));
             }
         }
     }
