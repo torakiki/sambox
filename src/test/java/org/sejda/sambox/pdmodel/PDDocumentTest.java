@@ -56,7 +56,7 @@ import org.sejda.sambox.output.WriteOption;
 import org.sejda.sambox.pdmodel.PDDocument.OnClose;
 import org.sejda.sambox.util.SpecVersionUtils;
 
-public class TestPDDocument
+public class PDDocumentTest
 {
 
     /**
