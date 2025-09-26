@@ -592,7 +592,7 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
     }
 
     /**
-     * offload decoded/unfiltered data leaving the COSStrem in its filtered state and reducing
+     * offload decoded/unfiltered data leaving the COSStream in its filtered state and reducing
      * memory footprint
      */
     public void unDecode()

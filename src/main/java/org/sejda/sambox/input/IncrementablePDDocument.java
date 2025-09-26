@@ -63,9 +63,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Model for a document to be used to incrementally update an existing PDF file. Has info regarding PDF objects that
- * need to be replaced in the original document.
- * 
+ * Model for a document to be used to incrementally update an existing PDF file. Has info regarding
+ * PDF objects that need to be replaced in the original document.
+ *
  * @author Andrea Vacondio
  *
  */
@@ -73,10 +73,10 @@ public class IncrementablePDDocument implements Closeable
 {
     private static final Logger LOG = LoggerFactory.getLogger(IncrementablePDDocument.class);
 
-    private Map<IndirectCOSObjectIdentifier, COSBase> replacements = new HashMap<>();
-    private Set<COSBase> newIndirects = new HashSet<>();
-    private PDDocument incremented;
-    public final COSParser parser;
+    private final Map<IndirectCOSObjectIdentifier, COSBase> replacements = new HashMap<>();
+    private final Set<COSBase> newIndirects = new HashSet<>();
+    private final PDDocument incremented;
+    private final COSParser parser;
 
     IncrementablePDDocument(PDDocument incremented, COSParser parser)
     {
@@ -118,10 +118,8 @@ public class IncrementablePDDocument implements Closeable
     }
 
     /**
-     * Replaces the object with the given {@link IndirectCOSObjectIdentifier} during the incremental update
-     * 
-     * @param toReplace
-     * @param replacement
+     * Replaces the object with the given {@link IndirectCOSObjectIdentifier} during the incremental
+     * update
      */
     public void replace(IndirectCOSObjectIdentifier toReplace, COSObjectable replacement)
     {
@@ -131,13 +129,14 @@ public class IncrementablePDDocument implements Closeable
     }
 
     /**
-     * Adds the given object as modified, this object will be written as part of the incremental update.
-     * 
-     * @param modified
-     * @return true if the {@link COSBase} was added, false if not. In case where false is returned, the {@link COSBase}
-     * doesn't have an id, meaning it's not written as indirect object in the original document but it's written as
-     * direct object. In this case we have to call {@link IncrementablePDDocument#modified(COSBase)} on the first
-     * indirect parent because incremental updates are meant to replace indirect references.
+     * Adds the given object as modified, this object will be written as part of the incremental
+     * update.
+     *
+     * @return true if the {@link COSBase} was added, false if not. In case where false is returned,
+     * the {@link COSBase} doesn't have an id, meaning it's not written as indirect object in the
+     * original document but it's written as direct object. In this case we have to call
+     * {@link IncrementablePDDocument#modified(COSBase)} on the first indirect parent because
+     * incremental updates are meant to replace indirect references.
      */
     public boolean modified(COSObjectable modified)
     {
@@ -151,12 +150,10 @@ public class IncrementablePDDocument implements Closeable
     }
 
     /**
-     * Adds the given object to the set of the new indirect objects. These objects will be written as new indirect
-     * objects (with a new object number) as part of the incremental update. If, when writing the incremental update, a
-     * new object that was not added using this method is found, it will be written as direct object and no indirect
-     * reference will be created.
-     * 
-     * @param newObject
+     * Adds the given object to the set of the new indirect objects. These objects will be written
+     * as new indirect objects (with a new object number) as part of the incremental update. If,
+     * when writing the incremental update, a new object that was not added using this method is
+     * found, it will be written as direct object and no indirect reference will be created.
      */
     public void newIndirect(COSObjectable newObject)
     {
@@ -165,7 +162,8 @@ public class IncrementablePDDocument implements Closeable
     }
 
     /**
-     * @return a list of {@link IndirectCOSObjectReference} to be written as replacements for this incremental update
+     * @return a list of {@link IndirectCOSObjectReference} to be written as replacements for this
+     * incremental update
      */
     public List<IndirectCOSObjectReference> replacements()
     {
@@ -211,10 +209,6 @@ public class IncrementablePDDocument implements Closeable
 
     /**
      * Writes the document to the given {@link File}. The document is closed once written.
-     * 
-     * @param file
-     * @param options
-     * @throws IOException
      */
     public void writeTo(File file, WriteOption... options) throws IOException
     {
@@ -222,11 +216,8 @@ public class IncrementablePDDocument implements Closeable
     }
 
     /**
-     * Writes the document to the file corresponding the given file name. The document is closed once written.
-     * 
-     * @param filename
-     * @param options
-     * @throws IOException
+     * Writes the document to the file corresponding the given file name. The document is closed
+     * once written.
      */
     public void writeTo(String filename, WriteOption... options) throws IOException
     {
@@ -234,11 +225,8 @@ public class IncrementablePDDocument implements Closeable
     }
 
     /**
-     * Writes the document to the given {@link WritableByteChannel}. The document is closed once written.
-     * 
-     * @param channel
-     * @param options
-     * @throws IOException
+     * Writes the document to the given {@link WritableByteChannel}. The document is closed once
+     * written.
      */
     public void writeTo(WritableByteChannel channel, WriteOption... options) throws IOException
     {
@@ -247,10 +235,6 @@ public class IncrementablePDDocument implements Closeable
 
     /**
      * Writes the document to the given {@link OutputStream}. The document is closed once written.
-     * 
-     * @param out
-     * @param options
-     * @throws IOException
      */
     public void writeTo(OutputStream out, WriteOption... options) throws IOException
     {
@@ -277,8 +261,6 @@ public class IncrementablePDDocument implements Closeable
 
     /**
      * Updates the file identifier as defined in the chap 14.4 PDF 32000-1:2008
-     * 
-     * @param bytes
      */
     private void updateId(byte[] bytes)
     {
@@ -287,20 +269,18 @@ public class IncrementablePDDocument implements Closeable
                 .getDictionaryObject(COSName.ID, COSArray.class);
         if (nonNull(existingId) && existingId.size() == 2)
         {
-            ((COSString) existingId.get(0).getCOSObject()).encryptable(false);
+            ((COSString) existingId.getFirst().getCOSObject()).encryptable(false);
             existingId.set(1, id);
         }
         else
         {
-            incremented.getDocument().getTrailer().getCOSObject().setItem(COSName.ID,
-                    asDirectObject(new COSArray(id, id)));
+            incremented.getDocument().getTrailer().getCOSObject()
+                    .setItem(COSName.ID, asDirectObject(new COSArray(id, id)));
         }
     }
 
     /**
      * Sets the version for this document if not at the minimum version required
-     * 
-     * @param version
      */
     public void requireMinVersion(String version)
     {
