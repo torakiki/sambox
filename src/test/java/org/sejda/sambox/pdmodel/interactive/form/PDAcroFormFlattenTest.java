@@ -293,19 +293,19 @@ public class PDAcroFormFlattenTest
     private void generateScreenshotsBefore(File inputFile, File destinationFolder)
             throws IOException
     {
-        PDDocument document = PDDocument.load(inputFile);
-        
-        String outputPrefix = inputFile.getName() + "-";
-        int numPages = document.getNumberOfPages();
-
-        PDFRenderer renderer = new PDFRenderer(document);
-        for (int i = 0; i < numPages; i++)
+        try (PDDocument document = PDFParser.parse(SeekableSources.seekableSourceFrom(inputFile)))
         {
-            String fileName = outputPrefix + (i + 1) + ".png";
-            BufferedImage image = renderer.renderImageWithDPI(i, 96); // Windows native DPI
-            ImageIO.write(image, "PNG", new File(destinationFolder, fileName));
-        }
 
-        document.close();
+            String outputPrefix = inputFile.getName() + "-";
+            int numPages = document.getNumberOfPages();
+
+            PDFRenderer renderer = new PDFRenderer(document);
+            for (int i = 0; i < numPages; i++)
+            {
+                String fileName = outputPrefix + (i + 1) + ".png";
+                BufferedImage image = renderer.renderImageWithDPI(i, 96); // Windows native DPI
+                ImageIO.write(image, "PNG", new File(destinationFolder, fileName));
+            }
+        }
     }
 }

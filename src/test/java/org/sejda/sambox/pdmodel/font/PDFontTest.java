@@ -420,7 +420,7 @@ public class PDFontTest
 
         Assert.assertTrue(tempFontFile.delete());
 
-        try (PDDocument doc = PDDocument.load(tempPdfFile))
+        try (PDDocument doc = PDFParser.parse(SeekableSources.seekableSourceFrom(tempPdfFile)))
         {
             PDFTextStripper stripper = new PDFTextStripper();
             String extractedText = stripper.getText(doc);

@@ -19,7 +19,10 @@ package org.sejda.sambox.pdmodel;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.endsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 import static org.sejda.sambox.input.PDFParser.parse;
 
 import java.io.File;
@@ -31,6 +34,7 @@ import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.output.WriteOption;
 import org.sejda.sambox.pdmodel.interactive.documentnavigation.outline.PDDocumentOutline;
 import org.sejda.sambox.pdmodel.interactive.documentnavigation.outline.PDOutlineItem;
 
@@ -355,8 +359,8 @@ public class PDPageTreeTest
 
         File tempFile = Files.createTempFile("sambox_getInheritableAttribute_recursive", ".pdf").toFile();
         tempFile.deleteOnExit();
-        
-        doc.save(tempFile.getAbsolutePath());
+
+        doc.writeTo(new File(tempFile.getAbsolutePath()), WriteOption.COMPRESS_STREAMS);
 
         try (PDDocument doc2 = parse(SeekableSources.seekableSourceFrom(tempFile)))
         {

@@ -17,6 +17,7 @@
 package org.sejda.sambox.input;
 
 import java.io.Closeable;
+import java.util.function.Consumer;
 
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSObjectKey;
@@ -33,7 +34,7 @@ import org.sejda.sambox.xref.XrefEntry;
  * @author Andrea Vacondio
  *
  */
-interface IndirectObjectsProvider extends Closeable
+public interface IndirectObjectsProvider extends Closeable
 {
 
     /**
@@ -94,4 +95,11 @@ interface IndirectObjectsProvider extends Closeable
      * @return the unique id for the provider.
      */
     String id();
+
+    /**
+     * Inspects all the currently loaded objects with the provided consumer.
+     *
+     * @param inspector
+     */
+    void inspect(Consumer<COSBase> inspector);
 }

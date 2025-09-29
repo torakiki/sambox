@@ -33,6 +33,7 @@ import org.apache.fontbox.ttf.CmapLookup;
 import org.apache.fontbox.ttf.TTFParser;
 import org.apache.fontbox.ttf.TrueTypeFont;
 import org.apache.fontbox.util.BoundingBox;
+import org.sejda.commons.util.IOUtils;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
@@ -229,7 +230,7 @@ public class PDType0Font extends PDFont implements PDVectorFont
             if (embedSubset)
             {
                 this.ttf = ttf;
-                document.registerTrueTypeFontForClosing(ttf);
+                document.addOnCloseAction(() -> IOUtils.closeQuietly(ttf));
             }
             else
             {

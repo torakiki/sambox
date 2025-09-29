@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.sejda.io.SeekableSources.seekableSourceFrom;
 
 import java.io.File;
 import java.io.IOException;
@@ -108,10 +109,8 @@ public class PDFParserTest
     @Test
     public void encrypted() throws IOException
     {
-        try (PDDocument doc = PDFParser.parse(
-                SeekableSources.inMemorySeekableSourceFrom(
-                        getClass().getResourceAsStream("/sambox/encrypted_simple_test.pdf")),
-                "test"))
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/encrypted_simple_test.pdf")), "test"))
         {
             assertNotNull(doc);
             assertTrue(doc.isEncrypted());
@@ -279,8 +278,8 @@ public class PDFParserTest
     @Test
     public void testPDFBox3208() throws IOException
     {
-        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(getClass()
-                .getResourceAsStream(
+        try (PDDocument doc = PDFParser.parse(
+                SeekableSources.inMemorySeekableSourceFrom(getClass().getResourceAsStream(
                         "/org/sejda/sambox/input/PDFBOX-3208-L33MUTT2SVCWGCS6UIYL5TH3PNPXHIS6.pdf"))))
         {
             PDDocumentInformation di = doc.getDocumentInformation();
@@ -323,8 +322,8 @@ public class PDFParserTest
     @Test
     public void testPDFBox3783() throws IOException
     {
-        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(getClass()
-                .getResourceAsStream(
+        try (PDDocument doc = PDFParser.parse(
+                SeekableSources.inMemorySeekableSourceFrom(getClass().getResourceAsStream(
                         "/org/sejda/sambox/input/PDFBOX-3783-72GLBIGUC6LB46ELZFBARRJTLN4RBSQM.pdf"))))
         {
             // noop
@@ -340,34 +339,36 @@ public class PDFParserTest
     @Test
     public void testParseGenko() throws IOException
     {
-        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(getClass()
-                .getResourceAsStream("/org/sejda/sambox/input/genko_oc_shiryo1.pdf"))))
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/org/sejda/sambox/input/genko_oc_shiryo1.pdf"))))
         {
             // noop
         }
     }
+
     /**
-     * Test parsing the file from PDFBOX-4338, which brought an
-     * ArrayIndexOutOfBoundsException before the bug was fixed.
+     * Test parsing the file from PDFBOX-4338, which brought an ArrayIndexOutOfBoundsException
+     * before the bug was fixed.
      *
      * @throws IOException
      */
     @Test
     public void testPDFBox4338() throws IOException
     {
-        PDDocument.load(new File(TARGETPDFDIR, "PDFBOX-4338.pdf")).close();
+        PDFParser.parse(seekableSourceFrom(new File(TARGETPDFDIR, "PDFBOX-4338.pdf"))).close();
+
     }
 
     /**
-     * Test parsing the file from PDFBOX-4339, which brought a
-     * NullPointerException before the bug was fixed.
+     * Test parsing the file from PDFBOX-4339, which brought a NullPointerException before the bug
+     * was fixed.
      *
      * @throws IOException
      */
     @Test
     public void testPDFBox4339() throws IOException
     {
-        PDDocument.load(new File(TARGETPDFDIR, "PDFBOX-4339.pdf")).close();
+        PDFParser.parse(seekableSourceFrom(new File(TARGETPDFDIR, "PDFBOX-4339.pdf"))).close();
     }
 
     /**
@@ -378,7 +379,8 @@ public class PDFParserTest
     @Test
     public void testPDFBox3964() throws IOException
     {
-        try(PDDocument doc = PDDocument.load(new File(TARGETPDFDIR, "PDFBOX-3964-c687766d68ac766be3f02aaec5e0d713_2.pdf")))
+        try (PDDocument doc = PDFParser.parse(seekableSourceFrom(
+                new File(TARGETPDFDIR, "PDFBOX-3964-c687766d68ac766be3f02aaec5e0d713_2.pdf"))))
         {
             assertEquals(10, doc.getNumberOfPages());
         }
@@ -390,7 +392,8 @@ public class PDFParserTest
     @Test
     public void testPDFBox3703() throws IOException
     {
-        try(PDDocument doc = PDDocument.load(new File(TARGETPDFDIR, "PDFBOX-3703-966635-p12.pdf")))
+        try (PDDocument doc = PDFParser.parse(
+                seekableSourceFrom(new File(TARGETPDFDIR, "PDFBOX-3703-966635-p12.pdf"))))
         {
             doc.writeTo(new DevNullWritableByteChannel());
         }
@@ -405,7 +408,8 @@ public class PDFParserTest
     @Test
     public void testPDFBox4153() throws IOException
     {
-        try(PDDocument doc = PDDocument.load(new File(TARGETPDFDIR, "PDFBOX-4153-WXMDXCYRWFDCMOSFQJ5OAJIAFXYRZ5OA.pdf")))
+        try (PDDocument doc = PDFParser.parse(seekableSourceFrom(
+                new File(TARGETPDFDIR, "PDFBOX-4153-WXMDXCYRWFDCMOSFQJ5OAJIAFXYRZ5OA.pdf"))))
         {
             PDDocumentOutline documentOutline = doc.getDocumentCatalog().getDocumentOutline();
             PDOutlineItem firstChild = documentOutline.getFirstChild();
@@ -421,11 +425,13 @@ public class PDFParserTest
     @Test
     public void testPDFBox4490() throws IOException
     {
-        try(PDDocument doc = PDDocument.load(new File(TARGETPDFDIR, "PDFBOX-4490.pdf")))
+        try (PDDocument doc = PDFParser.parse(
+                seekableSourceFrom(new File(TARGETPDFDIR, "PDFBOX-4490.pdf"))))
         {
             assertEquals(3, doc.getNumberOfPages());
         }
     }
+
     /**
      * PDFBOX-3951: test parsing of truncated file.
      *
@@ -434,7 +440,8 @@ public class PDFParserTest
     @Test
     public void testPDFBox3951() throws IOException
     {
-        PDDocument doc = PDDocument.load(new File(TARGETPDFDIR, "PDFBOX-3951-FIHUZWDDL2VGPOE34N6YHWSIGSH5LVGZ.pdf"));
+        PDDocument doc = PDFParser.parse(seekableSourceFrom(
+                new File(TARGETPDFDIR, "PDFBOX-3951-FIHUZWDDL2VGPOE34N6YHWSIGSH5LVGZ.pdf")));
         assertEquals(143, doc.getNumberOfPages());
         doc.close();
     }
@@ -447,7 +454,8 @@ public class PDFParserTest
     @Test
     public void testPDFBox3950() throws IOException
     {
-        PDDocument doc = PDDocument.load(new File(TARGETPDFDIR, "PDFBOX-3950-23EGDHXSBBYQLKYOKGZUOVYVNE675PRD.pdf"));
+        PDDocument doc = PDFParser.parse(seekableSourceFrom(
+                new File(TARGETPDFDIR, "PDFBOX-3950-23EGDHXSBBYQLKYOKGZUOVYVNE675PRD.pdf")));
         assertEquals(8, doc.getNumberOfPages());
         PDFRenderer renderer = new PDFRenderer(doc);
         for (int i = 0; i < doc.getNumberOfPages(); ++i)
@@ -476,7 +484,9 @@ public class PDFParserTest
     @Test
     public void testPDFBox3949() throws IOException
     {
-        PDDocument.load(new File(TARGETPDFDIR, "PDFBOX-3949-MKFYUGZWS3OPXLLVU2Z4LWCTVA5WNOGF.pdf")).close();
+        PDFParser.parse(seekableSourceFrom(
+                        new File(TARGETPDFDIR, "PDFBOX-3949-MKFYUGZWS3OPXLLVU2Z4LWCTVA5WNOGF.pdf")))
+                .close();
     }
 
     /**
@@ -487,7 +497,9 @@ public class PDFParserTest
     @Test
     public void testPDFBox3948() throws IOException
     {
-        PDDocument.load(new File(TARGETPDFDIR, "PDFBOX-3948-EUWO6SQS5TM4VGOMRD3FLXZHU35V2CP2.pdf")).close();
+        PDFParser.parse(seekableSourceFrom(
+                        new File(TARGETPDFDIR, "PDFBOX-3948-EUWO6SQS5TM4VGOMRD3FLXZHU35V2CP2.pdf")))
+                .close();
     }
 
     @Test
@@ -504,7 +516,8 @@ public class PDFParserTest
     public void testPDFBOX4372() throws IOException
     {
         try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
-                getClass().getResourceAsStream("/org/sejda/sambox/input/PDFBOX-4372-2DAYCLVOFG3FTVO4RMAJJL3VTPNYDFRO-p4_reduced.pdf"))))
+                getClass().getResourceAsStream(
+                        "/org/sejda/sambox/input/PDFBOX-4372-2DAYCLVOFG3FTVO4RMAJJL3VTPNYDFRO-p4_reduced.pdf"))))
         {
 
             PDFTextStripper textStripper = new PDFTextStripper();
@@ -516,12 +529,13 @@ public class PDFParserTest
     public void testNegativeOffsetXrefEntry() throws IOException
     {
         try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
-                getClass().getResourceAsStream("/sambox/test_multiple_xref_tables_negative_offset.pdf"))))
+                getClass().getResourceAsStream(
+                        "/sambox/test_multiple_xref_tables_negative_offset.pdf"))))
         {
 
             PDFTextStripper textStripper = new PDFTextStripper();
             textStripper.getText(doc);
-            
+
             assertTrue(doc.hasParseErrors());
         }
     }
@@ -530,7 +544,9 @@ public class PDFParserTest
     @Test
     public void noLoopOrOOM() throws IOException
     {
-        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(Base64.getDecoder().decode("ef//RET/KS8AYgAAtDd0cmFpbGVyPDxmJSkvAGIAALQ3dHJhkWlsZUlyPDxmJVBERi0vIPb2APYlUERGLS8g9vYA9i9UaGlhbW5uO0+tjY2NcmVuZG9vO0RGN0RhWQAAAAAAAAB0YQ=="))))
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                Base64.getDecoder()
+                        .decode("ef//RET/KS8AYgAAtDd0cmFpbGVyPDxmJSkvAGIAALQ3dHJhkWlsZUlyPDxmJVBERi0vIPb2APYlUERGLS8g9vYA9i9UaGlhbW5uO0+tjY2NcmVuZG9vO0RGN0RhWQAAAAAAAAB0YQ=="))))
         {
             //nothing to do, just don't blow up
         }

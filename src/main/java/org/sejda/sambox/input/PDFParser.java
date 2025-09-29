@@ -27,6 +27,7 @@ import java.util.Optional;
 import org.sejda.commons.util.IOUtils;
 import org.sejda.io.SeekableSource;
 import org.sejda.sambox.cos.COSDocument;
+import org.sejda.sambox.pdmodel.LoadedPDDocument;
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.encryption.DecryptionMaterial;
 import org.sejda.sambox.pdmodel.encryption.PDEncryption;
@@ -38,7 +39,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Provides public entry point to parse a {@link SeekableSource} and obtain a {@link PDDocument} or
  * {@link IncrementablePDDocument}.
- * 
+ *
  * @author Andrea Vacondio
  */
 public class PDFParser
@@ -46,20 +47,21 @@ public class PDFParser
     private static final Logger LOG = LoggerFactory.getLogger(PDFParser.class);
 
     /**
-     * Parses the given {@link SeekableSource} returning the corresponding {@link PDDocument}.
-     * 
+     * Parses the given {@link SeekableSource} returning the corresponding {@link LoadedPDDocument}.
+     *
      * @param source
      * @return the parsed document
      * @throws IOException
      */
-    public static PDDocument parse(SeekableSource source) throws IOException
+    public static LoadedPDDocument parse(SeekableSource source) throws IOException
     {
         return parse(source, (String) null);
     }
 
     /**
-     * Parses the given {@link SeekableSource} returning the corresponding {@link IncrementablePDDocument}.
-     * 
+     * Parses the given {@link SeekableSource} returning the corresponding
+     * {@link IncrementablePDDocument}.
+     *
      * @param source
      * @return the incrementable document
      * @throws IOException
@@ -70,25 +72,26 @@ public class PDFParser
     }
 
     /**
-     * Parses the given {@link SeekableSource} using the given password, returning the corresponding decrypted
-     * {@link PDDocument}.
-     * 
-     * @param source {@link SeekableSource} to parse
+     * Parses the given {@link SeekableSource} using the given password, returning the corresponding
+     * decrypted {@link LoadedPDDocument}.
+     *
+     * @param source   {@link SeekableSource} to parse
      * @param password to be used for decryption. Optional.
      * @return the parsed document
      * @throws IOException
      */
-    public static PDDocument parse(SeekableSource source, String password) throws IOException
+    public static LoadedPDDocument parse(SeekableSource source, String password) throws IOException
     {
         return parse(source,
                 Optional.ofNullable(password).map(StandardDecryptionMaterial::new).orElse(null));
     }
 
     /**
-     * Parses the given {@link SeekableSource} using the given password, , returning the corresponding decrypted
-     * {@link IncrementablePDDocument} to be used for an incremental update.
-     * 
-     * @param source {@link SeekableSource} to parse
+     * Parses the given {@link SeekableSource} using the given password, , returning the
+     * corresponding decrypted {@link IncrementablePDDocument} to be used for an incremental
+     * update.
+     *
+     * @param source   {@link SeekableSource} to parse
      * @param password to be used for decryption. Optional.
      * @return the incrementable document
      * @throws IOException
@@ -101,35 +104,34 @@ public class PDFParser
     }
 
     /**
-     * Parses the given {@link SeekableSource} using the given {@link DecryptionMaterial}, returning the corresponding
-     * decrypted {@link PDDocument}.
-     * 
-     * @param source {@link SeekableSource} to parse
+     * Parses the given {@link SeekableSource} using the given {@link DecryptionMaterial}, returning
+     * the corresponding decrypted {@link LoadedPDDocument}.
+     *
+     * @param source             {@link SeekableSource} to parse
      * @param decryptionMaterial to be used for decryption. Optional.
      * @return the parsed document
      * @throws IOException
      */
-    public static PDDocument parse(SeekableSource source, DecryptionMaterial decryptionMaterial)
-            throws IOException
+    public static LoadedPDDocument parse(SeekableSource source,
+            DecryptionMaterial decryptionMaterial) throws IOException
     {
         requireNonNull(source);
         COSParser parser = new COSParser(source);
-        PDDocument document = doParse(decryptionMaterial, parser);
+        LoadedPDDocument document = doParse(decryptionMaterial, parser);
         document.addOnCloseAction(() -> {
-            IOUtils.close(parser.provider());
             IOUtils.close(parser);
         });
         return document;
     }
 
     /**
-     * Parses the given {@link SeekableSource} using the given {@link DecryptionMaterial}, returning the corresponding
-     * decrypted {@link IncrementablePDDocument} to be used for an incremental update.
-     * 
-     * @param source {@link SeekableSource} to parse
+     * Parses the given {@link SeekableSource} using the given {@link DecryptionMaterial}, returning
+     * the corresponding decrypted {@link IncrementablePDDocument} to be used for an incremental
+     * update.
+     *
+     * @param source             {@link SeekableSource} to parse
      * @param decryptionMaterial to be used for decryption. Optional.
      * @return the incrementable document
-     * @throws IOException
      */
     public static IncrementablePDDocument parseToIncrement(SeekableSource source,
             DecryptionMaterial decryptionMaterial) throws IOException
@@ -139,7 +141,7 @@ public class PDFParser
         return new IncrementablePDDocument(doParse(decryptionMaterial, parser), parser);
     }
 
-    private static PDDocument doParse(DecryptionMaterial decryptionMaterial, COSParser parser)
+    private static LoadedPDDocument doParse(DecryptionMaterial decryptionMaterial, COSParser parser)
             throws IOException
     {
         String headerVersion = readHeader(parser);
@@ -154,12 +156,13 @@ public class PDFParser
             PDEncryption encryption = new PDEncryption(document.getEncryptionDictionary());
 
             SecurityHandler securityHandler = encryption.getSecurityHandler();
-            securityHandler.prepareForDecryption(encryption, document.getDocumentID(), Optional
-                    .ofNullable(decryptionMaterial).orElse(new StandardDecryptionMaterial("")));
+            securityHandler.prepareForDecryption(encryption, document.getDocumentID(),
+                    Optional.ofNullable(decryptionMaterial)
+                            .orElse(new StandardDecryptionMaterial("")));
             parser.provider().initializeWith(securityHandler);
-            return new PDDocument(document, securityHandler);
+            return new LoadedPDDocument(document, securityHandler, parser.provider());
         }
-        return new PDDocument(document);
+        return new LoadedPDDocument(document, null, parser.provider());
     }
 
     private static String readHeader(COSParser parser) throws IOException

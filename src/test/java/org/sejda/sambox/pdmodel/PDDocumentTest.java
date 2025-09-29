@@ -246,8 +246,8 @@ public class PDDocumentTest
         var anotherfont = mock(TrueTypeFont.class);
 
         var document = new PDDocument();
-        document.registerTrueTypeFontForClosing(onefont);
-        document.registerTrueTypeFontForClosing(anotherfont);
+        document.addOnCloseAction(() -> IOUtils.closeQuietly(onefont));
+        document.addOnCloseAction(() -> IOUtils.closeQuietly(anotherfont));
         document.addPage(new PDPage());
         document.writeTo(new ByteArrayOutputStream());
         verify(onefont).close();

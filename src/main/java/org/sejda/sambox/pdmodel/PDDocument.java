@@ -39,7 +39,6 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-import org.apache.fontbox.ttf.TrueTypeFont;
 import org.apache.xmpbox.XMPMetadata;
 import org.apache.xmpbox.schema.AdobePDFSchema;
 import org.apache.xmpbox.xml.DomXmpParser;
@@ -47,7 +46,6 @@ import org.apache.xmpbox.xml.XmpParsingException;
 import org.apache.xmpbox.xml.XmpSerializer;
 import org.sejda.commons.util.IOUtils;
 import org.sejda.io.CountingWritableByteChannel;
-import org.sejda.io.SeekableSources;
 import org.sejda.sambox.SAMBox;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
@@ -60,7 +58,6 @@ import org.sejda.sambox.cos.DirectCOSObject;
 import org.sejda.sambox.encryption.EncryptionContext;
 import org.sejda.sambox.encryption.MessageDigests;
 import org.sejda.sambox.encryption.StandardSecurity;
-import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.output.PDDocumentWriter;
 import org.sejda.sambox.output.PreSaveCOSVisitor;
 import org.sejda.sambox.output.WriteOption;
@@ -104,21 +101,11 @@ public class PDDocument implements Closeable
 
     }
 
-    /**
-     * Constructor that uses an existing document. The COSDocument that is passed in must be valid.
-     *
-     * @param document The COSDocument that this document wraps.
-     */
     public PDDocument(COSDocument document)
     {
         this(document, null);
     }
 
-    /**
-     * Constructor that uses an existing document. The COSDocument that is passed in must be valid.
-     *
-     * @param document The COSDocument that this document wraps.
-     */
     public PDDocument(COSDocument document, SecurityHandler securityHandler)
     {
         this.document = document;
@@ -139,8 +126,6 @@ public class PDDocument implements Closeable
 
     /**
      * Remove the page from the document.
-     *
-     * @param page The page to remove from the document.
      */
     public void removePage(PDPage page)
     {
@@ -149,8 +134,6 @@ public class PDDocument implements Closeable
     }
 
     /**
-     * Remove the page from the document.
-     *
      * @param pageNumber 0 based index to page number.
      */
     public void removePage(int pageNumber)
@@ -186,8 +169,6 @@ public class PDDocument implements Closeable
 
     /**
      * This will set the document information for this document.
-     *
-     * @param documentInformation The updated document information.
      */
     public void setDocumentInformation(PDDocumentInformation documentInformation)
     {
@@ -230,16 +211,6 @@ public class PDDocument implements Closeable
             return new PDEncryption(document.getEncryptionDictionary());
         }
         return new PDEncryption();
-    }
-
-    /**
-     * For internal PDFBox use when creating PDF documents: register a TrueTypeFont to make sure it
-     * is closed when the PDDocument is closed to avoid memory leaks. Users don't have to call this
-     * method, it is done by the appropriate PDFont classes.
-     */
-    public void registerTrueTypeFontForClosing(TrueTypeFont ttf)
-    {
-        addOnCloseAction(() -> IOUtils.closeQuietly(ttf));
     }
 
     /**
@@ -680,27 +651,11 @@ public class PDDocument implements Closeable
     }
 
     /**
-     * Returns the resource cache associated with this document, or null if there is none.
+     * @return the resource cache associated with this document, or null if there is none.
      */
     public ResourceCache getResourceCache()
     {
         return resourceCache;
-    }
-
-    // bridge to pdfbox style api, used in tests
-    public static PDDocument load(File file) throws IOException
-    {
-        return PDFParser.parse(SeekableSources.seekableSourceFrom(file));
-    }
-
-    public static PDDocument load(String path) throws IOException
-    {
-        return load(new File(path));
-    }
-
-    public void save(String path) throws IOException
-    {
-        writeTo(new File(path), WriteOption.COMPRESS_STREAMS);
     }
 
     public boolean hasParseErrors()

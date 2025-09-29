@@ -32,6 +32,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 import org.sejda.commons.util.IOUtils;
 import org.sejda.sambox.cos.COSBase;
@@ -350,6 +351,12 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
     public String id()
     {
         return parser.source().id();
+    }
+
+    @Override
+    public void inspect(Consumer<COSBase> inspector)
+    {
+        store.values().forEach(inspector::accept);
     }
 
 }

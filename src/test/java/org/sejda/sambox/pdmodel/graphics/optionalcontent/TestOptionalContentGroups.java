@@ -419,8 +419,8 @@ public class TestOptionalContentGroups extends TestCase
         }
 
         // render PDF with science disabled and alternatives with same name enabled
-        try (PDDocument doc = PDDocument.load(
-                new File(testResultsDir, "ocg-generation-same-name-off.pdf")))
+        try (PDDocument doc = PDFParser.parse(SeekableSources.seekableSourceFrom(
+                new File(testResultsDir, "ocg-generation-same-name-off.pdf"))))
         {
             doc.getDocumentCatalog().getOCProperties().setGroupEnabled("background", false);
             doc.getDocumentCatalog().getOCProperties().setGroupEnabled("science", false);
@@ -467,8 +467,8 @@ public class TestOptionalContentGroups extends TestCase
             doc2.writeTo(targetFile.getAbsolutePath());
         }
 
-        try (PDDocument doc = PDDocument.load(
-                new File(testResultsDir, "ocg-generation-same-name-off-expected.pdf")))
+        try (PDDocument doc = PDFParser.parse(SeekableSources.seekableSourceFrom(
+                new File(testResultsDir, "ocg-generation-same-name-off-expected.pdf"))))
         {
             expectedImage = new PDFRenderer(doc).renderImage(0, 2);
             ImageIO.write(expectedImage, "png",

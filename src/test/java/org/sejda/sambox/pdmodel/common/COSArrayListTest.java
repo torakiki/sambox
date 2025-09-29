@@ -15,18 +15,10 @@
  */
 package org.sejda.sambox.pdmodel.common;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSArrayList;
-import org.sejda.sambox.cos.COSBase;
-import org.sejda.sambox.pdmodel.PDDocument;
-import org.sejda.sambox.pdmodel.PDPage;
-import org.sejda.sambox.pdmodel.interactive.annotation.AnnotationFilter;
-import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotation;
-import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationLink;
-import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationSquareCircle;
-import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationTextMarkup;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.sejda.io.SeekableSources.seekableSourceFrom;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,9 +26,19 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.junit.Before;
+import org.junit.Test;
+import org.sejda.sambox.cos.COSArray;
+import org.sejda.sambox.cos.COSArrayList;
+import org.sejda.sambox.cos.COSBase;
+import org.sejda.sambox.input.PDFParser;
+import org.sejda.sambox.pdmodel.PDDocument;
+import org.sejda.sambox.pdmodel.PDPage;
+import org.sejda.sambox.pdmodel.interactive.annotation.AnnotationFilter;
+import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotation;
+import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationLink;
+import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationSquareCircle;
+import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationTextMarkup;
 
 public class COSArrayListTest
 {
@@ -321,7 +323,7 @@ public class COSArrayListTest
         pdf.writeTo(tmpFile);
         pdf.close();
 
-        pdf = PDDocument.load(tmpFile);
+        pdf = PDFParser.parse(seekableSourceFrom(tmpFile));
         page = pdf.getPage(0);
 
         COSArrayList<PDAnnotation> annotations = (COSArrayList) page.getAnnotations();
@@ -364,7 +366,7 @@ public class COSArrayListTest
         pdf.writeTo(tmpFile);
         pdf.close();
 
-        pdf = PDDocument.load(tmpFile);
+        pdf = PDFParser.parse(seekableSourceFrom(tmpFile));
         page = pdf.getPage(0);
 
         List<PDAnnotation> annotations = page.getAnnotations();
@@ -415,7 +417,7 @@ public class COSArrayListTest
         pdf.writeTo(tmpFile);
         pdf.close();
 
-        pdf = PDDocument.load(tmpFile);
+        pdf = PDFParser.parse(seekableSourceFrom(tmpFile));
         page = pdf.getPage(0);
 
         COSArrayList<PDAnnotation> annotations = (COSArrayList) page.getAnnotations();
@@ -457,7 +459,7 @@ public class COSArrayListTest
         pdf.writeTo(tmpFile);
         pdf.close();
 
-        pdf = PDDocument.load(tmpFile);
+        pdf = PDFParser.parse(seekableSourceFrom(tmpFile));
         page = pdf.getPage(0);
 
         COSArrayList<PDAnnotation> annotations = (COSArrayList) page.getAnnotations();
@@ -505,7 +507,7 @@ public class COSArrayListTest
         pdf.writeTo(tmpFile);
         pdf.close();
 
-        pdf = PDDocument.load(tmpFile);
+        pdf = PDFParser.parse(seekableSourceFrom(tmpFile));
         page = pdf.getPage(0);
 
         COSArrayList<PDAnnotation> annotations = (COSArrayList) page.getAnnotations();
@@ -553,7 +555,7 @@ public class COSArrayListTest
         pdf.writeTo(tmpFile);
         pdf.close();
 
-        pdf = PDDocument.load(tmpFile);
+        pdf = PDFParser.parse(seekableSourceFrom(tmpFile));
         page = pdf.getPage(0);
 
         COSArrayList<PDAnnotation> annotations = (COSArrayList) page.getAnnotations();
@@ -593,7 +595,7 @@ public class COSArrayListTest
         pdf.writeTo(tmpFile);
         pdf.close();
 
-        pdf = PDDocument.load(tmpFile);
+        pdf = PDFParser.parse(seekableSourceFrom(tmpFile));
         page = pdf.getPage(0);
 
         List<PDAnnotation> annotations = page.getAnnotations();

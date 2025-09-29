@@ -228,7 +228,7 @@ public class TestTextStripper
             }
         }
 
-        try (PDDocument document = PDDocument.load(inFile))
+        try (PDDocument document = PDFParser.parse(SeekableSources.seekableSourceFrom(inFile)))
         {
             File outFile;
             File diffFile;
@@ -563,7 +563,7 @@ public class TestTextStripper
         File outFile = new File("target/test-output", "eu-001.pdf-tabula.txt");
         File expectedOutFile = new File("src/test/resources/input", "eu-001.pdf-tabula.txt");
         File diffFile = new File("target/test-output", "eu-001.pdf-tabula-diff.txt");
-        PDDocument tabulaDocument = PDDocument.load(pdfFile);
+        PDDocument tabulaDocument = PDFParser.parse(SeekableSources.seekableSourceFrom(pdfFile));
         PDFTextStripper tabulaStripper = new PDFTabulaTextStripper();
 
         try (OutputStream os = new FileOutputStream(outFile))
