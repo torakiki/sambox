@@ -54,7 +54,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.javadoc.failOnError>false</maven.javadoc.failOnError>
-        <bouncycastle.version>1.81</bouncycastle.version>
+        <bouncycastle.version>1.82</bouncycastle.version>
         <fontbox.version>2.0.34</fontbox.version>
         <sejda.commons.version>2.0.0</sejda.commons.version>
         <sejda.io.version>3.0.1</sejda.io.version>
