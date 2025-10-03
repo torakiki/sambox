@@ -59,7 +59,7 @@
         <sejda.commons.version>2.0.0</sejda.commons.version>
         <sejda.io.version>3.0.1</sejda.io.version>
         <slf4j.version>2.0.17</slf4j.version>
-        <diffutils.version>4.12</diffutils.version>
+        <diffutils.version>4.16</diffutils.version>
         <mockito.version>5.18.0</mockito.version>
         <tinylog.version>2.7.0</tinylog.version>
         <archunit.version>1.4.1</archunit.version>
