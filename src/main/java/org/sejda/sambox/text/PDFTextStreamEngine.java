@@ -374,7 +374,16 @@ public class PDFTextStreamEngine extends PDFStreamEngine
             // sometimes even CapHeight has very high value, but Ascent and Descent are ok
             float ascent = fontDescriptor.getAscent();
             float descent = fontDescriptor.getDescent();
-            if (capHeight > ascent && ascent > 0 && descent < 0 && (
+            // SAMBOX SPECIFIC HERE
+            // capHeight is sometimes missing (eg: 0), but ascent/descent are OK
+            // adjust the conditions so the algorithm based on ascent/descent is used
+            // font.isOriginalEmbeddedMissing() condition was added to minimize regression impact
+            // (the font was a TrueType with a /BaseFont Times New Roman)
+            // remove if we discover more cases where this conditions helps when further expanded
+            boolean unusableCapHeight = capHeight > ascent ||
+                    // sambox specific here        
+                    (capHeight == 0 && font.isOriginalEmbeddedMissing()); 
+            if (unusableCapHeight && ascent > 0 && descent < 0 && (
                     (ascent - descent) / 2 < glyphHeight || Float.compare(glyphHeight, 0) == 0))
             {
                 glyphHeight = (ascent - descent) / 2;
