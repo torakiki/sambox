@@ -19,6 +19,7 @@ package org.sejda.sambox.pdmodel.interactive.annotation;
 import static java.util.Optional.ofNullable;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Calendar;
 
 import org.sejda.sambox.cos.COSArray;
@@ -227,14 +228,14 @@ public class PDAnnotationMarkup extends PDAnnotation
         return getCOSObject().getDate(COSName.CREATION_DATE);
     }
 
-    /**
-     * This will set the date and time the annotation was created.
-     *
-     * @param creationDate the date and time the annotation was created.
-     */
     public void setCreationDate(Calendar creationDate)
     {
-        getCOSObject().setDate(COSName.CREATION_DATE, creationDate);
+        getCOSObject().setDate(COSName.CREATION_DATE, creationDate.toInstant());
+    }
+
+    public void setCreationDate(Instant instant)
+    {
+        getCOSObject().setDate(COSName.CREATION_DATE, instant);
     }
 
     /**
@@ -547,8 +548,8 @@ public class PDAnnotationMarkup extends PDAnnotation
 
     /**
      * This will get the 'quadding' or justification of the text to be displayed. <br> 0 - Left
-     * (default)<br> 1 - Centered<br> 2 - Right<br> Please see the QUADDING_CONSTANTS in {@link
-     * PDVariableText }.
+     * (default)<br> 1 - Centered<br> 2 - Right<br> Please see the QUADDING_CONSTANTS in
+     * {@link PDVariableText }.
      *
      * @return The justification of the text strings.
      */

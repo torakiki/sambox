@@ -16,8 +16,11 @@
  */
 package org.sejda.sambox.pdmodel.common.filespecification;
 
+import static java.util.Optional.ofNullable;
+
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Instant;
 import java.util.Calendar;
 
 import org.sejda.sambox.cos.COSDictionary;
@@ -33,23 +36,11 @@ import org.sejda.sambox.pdmodel.common.PDStream;
 public class PDEmbeddedFile extends PDStream
 {
 
-    /**
-     * Constructor.
-     *
-     * @param str The stream parameter.
-     */
     public PDEmbeddedFile(COSStream str)
     {
         super(str);
     }
 
-    /**
-     * Constructor.
-     *
-     * @param str {@inheritDoc}
-     *
-     * @throws IOException {@inheritDoc}
-     */
     public PDEmbeddedFile(InputStream str) throws IOException
     {
         super(str);
@@ -73,9 +64,7 @@ public class PDEmbeddedFile extends PDStream
     }
 
     /**
-     * Get the subtype(mimetype) for the embedded file.
-     *
-     * @return The type of embedded file.
+     * @return the subtype(mimetype) for the embedded file.
      */
     public String getSubtype()
     {
@@ -83,190 +72,103 @@ public class PDEmbeddedFile extends PDStream
     }
 
     /**
-     * Get the size of the embedded file.
-     *
      * @return The size of the embedded file.
      */
     public int getSize()
     {
-        return getCOSObject().getEmbeddedInt("Params", "Size");
+        return ofNullable(
+                getCOSObject().getDictionaryObject(COSName.PARAMS, COSDictionary.class)).map(
+                d -> d.getInt(COSName.SIZE, -1)).orElse(-1);
     }
 
-    /**
-     * Set the size of the embedded file.
-     *
-     * @param size The size of the embedded file.
-     */
     public void setSize(long size)
     {
-        getCOSObject().setEmbeddedInt("Params", "Size", size);
+        getCOSObject().computeIfAbsent(COSName.PARAMS, _ -> new COSDictionary(),
+                COSDictionary.class).setLong(COSName.SIZE, size);
     }
 
     /**
-     * Get the creation date of the embedded file.
-     *
-     * @return The Creation date.
-     * @throws IOException If there is an error while constructing the date.
+     * @return The Creation date of the embedded file.
      */
     public Calendar getCreationDate()
     {
-        return getCOSObject().getEmbeddedDate("Params", "CreationDate");
+        return ofNullable(
+                getCOSObject().getDictionaryObject(COSName.PARAMS, COSDictionary.class)).map(
+                d -> d.getDate(COSName.CREATION_DATE)).orElse(null);
     }
 
-    /**
-     * Set the creation date.
-     *
-     * @param creation The new creation date.
-     */
-    public void setCreationDate(Calendar creation)
+    public void setCreationDate(Instant creation)
     {
-        getCOSObject().setEmbeddedDate("Params", "CreationDate", creation);
+        getCOSObject().computeIfAbsent(COSName.PARAMS, _ -> new COSDictionary(),
+                COSDictionary.class).setDate(COSName.CREATION_DATE, creation);
     }
 
     /**
-     * Get the mod date of the embedded file.
-     *
-     * @return The mod date.
-     * @throws IOException If there is an error while constructing the date.
+     * @return The ModDate of the embedded file.
      */
     public Calendar getModDate()
     {
-        return getCOSObject().getEmbeddedDate("Params", "ModDate");
+        return ofNullable(
+                getCOSObject().getDictionaryObject(COSName.PARAMS, COSDictionary.class)).map(
+                d -> d.getDate(COSName.MOD_DATE)).orElse(null);
     }
 
-    /**
-     * Set the mod date.
-     *
-     * @param mod The new creation mod.
-     */
-    public void setModDate(Calendar mod)
+    public void setModDate(Instant modified)
     {
-        getCOSObject().setEmbeddedDate("Params", "ModDate", mod);
+        getCOSObject().computeIfAbsent(COSName.MOD_DATE, _ -> new COSDictionary(),
+                COSDictionary.class).setDate(COSName.CREATION_DATE, modified);
     }
 
-    /**
-     * Get the check sum of the embedded file.
-     *
-     * @return The check sum of the file.
-     */
     public String getCheckSum()
     {
-        return getCOSObject().getEmbeddedString("Params", "CheckSum");
+        return ofNullable(
+                getCOSObject().getDictionaryObject(COSName.PARAMS, COSDictionary.class)).map(
+                d -> d.getString("CheckSum")).orElse(null);
     }
 
-    /**
-     * Set the check sum.
-     *
-     * @param checksum The checksum of the file.
-     */
     public void setCheckSum(String checksum)
     {
-        getCOSObject().setEmbeddedString("Params", "CheckSum", checksum);
+        getCOSObject().computeIfAbsent(COSName.PARAMS, _ -> new COSDictionary(),
+                COSDictionary.class).setString("CheckSum", checksum);
     }
 
-    /**
-     * Get the mac subtype.
-     *
-     * @return The mac subtype.
-     */
+    @Deprecated
+    //Mac dictionary is deprecated in PDF 2.0
     public String getMacSubtype()
     {
-        String retval = null;
-        COSDictionary params = (COSDictionary) getCOSObject().getDictionaryObject(COSName.PARAMS);
+        var params = getCOSObject().getDictionaryObject(COSName.PARAMS, COSDictionary.class);
         if (params != null)
         {
-            retval = params.getEmbeddedString("Mac", "Subtype");
+            return ofNullable(getCOSObject().getDictionaryObject("Mac", COSDictionary.class)).map(
+                    d -> d.getString("Subtype")).orElse(null);
         }
-        return retval;
+        return null;
     }
 
-    /**
-     * Set the mac subtype.
-     *
-     * @param macSubtype The mac subtype.
-     */
-    public void setMacSubtype(String macSubtype)
-    {
-        COSDictionary params = (COSDictionary) getCOSObject().getDictionaryObject(COSName.PARAMS);
-        if (params == null && macSubtype != null)
-        {
-            params = new COSDictionary();
-            getCOSObject().setItem(COSName.PARAMS, params);
-        }
-        if (params != null)
-        {
-            params.setEmbeddedString("Mac", "Subtype", macSubtype);
-        }
-    }
-
-    /**
-     * Get the mac Creator.
-     *
-     * @return The mac Creator.
-     */
+    @Deprecated
+    //Mac dictionary is deprecated in PDF 2.0
     public String getMacCreator()
     {
-        String retval = null;
-        COSDictionary params = (COSDictionary) getCOSObject().getDictionaryObject(COSName.PARAMS);
+        var params = getCOSObject().getDictionaryObject(COSName.PARAMS, COSDictionary.class);
         if (params != null)
         {
-            retval = params.getEmbeddedString("Mac", "Creator");
+            return ofNullable(getCOSObject().getDictionaryObject("Mac", COSDictionary.class)).map(
+                    d -> d.getString("Creator")).orElse(null);
         }
-        return retval;
+        return null;
     }
 
-    /**
-     * Set the mac Creator.
-     *
-     * @param macCreator The mac Creator.
-     */
-    public void setMacCreator(String macCreator)
-    {
-        COSDictionary params = (COSDictionary) getCOSObject().getDictionaryObject(COSName.PARAMS);
-        if (params == null && macCreator != null)
-        {
-            params = new COSDictionary();
-            getCOSObject().setItem(COSName.PARAMS, params);
-        }
-        if (params != null)
-        {
-            params.setEmbeddedString("Mac", "Creator", macCreator);
-        }
-    }
-
-    /**
-     * Get the mac ResFork.
-     *
-     * @return The mac ResFork.
-     */
+    @Deprecated
+    //Mac dictionary is deprecated in PDF 2.0
     public String getMacResFork()
     {
-        String retval = null;
-        COSDictionary params = (COSDictionary) getCOSObject().getDictionaryObject(COSName.PARAMS);
+        var params = getCOSObject().getDictionaryObject(COSName.PARAMS, COSDictionary.class);
         if (params != null)
         {
-            retval = params.getEmbeddedString("Mac", "ResFork");
+            return ofNullable(getCOSObject().getDictionaryObject("Mac", COSDictionary.class)).map(
+                    d -> d.getString("ResFork")).orElse(null);
         }
-        return retval;
-    }
-
-    /**
-     * Set the mac ResFork.
-     *
-     * @param macResFork The mac ResFork.
-     */
-    public void setMacResFork(String macResFork)
-    {
-        COSDictionary params = (COSDictionary) getCOSObject().getDictionaryObject(COSName.PARAMS);
-        if (params == null && macResFork != null)
-        {
-            params = new COSDictionary();
-            getCOSObject().setItem(COSName.PARAMS, params);
-        }
-        if (params != null)
-        {
-            params.setEmbeddedString("Mac", "ResFork", macResFork);
-        }
+        return null;
     }
 
 }

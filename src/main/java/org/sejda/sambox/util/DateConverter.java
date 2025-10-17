@@ -16,8 +16,15 @@
  */
 package org.sejda.sambox.util;
 
+import static java.util.Objects.nonNull;
+
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -61,6 +68,9 @@ import org.sejda.sambox.cos.COSString;
  */
 public final class DateConverter
 {
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmss",
+            Locale.US);
+
     private DateConverter()
     {
     }
@@ -156,6 +166,35 @@ public final class DateConverter
                         + "%2$s" // time zone
                         + "'", // trailing apostrophe
                 cal, offset);
+    }
+
+    /**
+     * Converts the given UTC Instant to a PDF date string formatted as D:yyyyMMddHHmmssZ per ISO
+     * 32000-2:2020 section 7.9.4. Uses UTC to avoid issues with timezone offset formats across PDF
+     * specification versions where trailing apostrophe was once required but now is not. See <a
+     * href="https://github.com/pdf-association/pdf-issues/issues/636">https://github.com/pdf-association/pdf-issues/issues/636</a>
+     *
+     * @param instant the instant in UTC timezone
+     * @return the formatted date string
+     */
+    public static String toString(Instant instant)
+    {
+        return "D:" + ZonedDateTime.ofInstant(instant, ZoneOffset.UTC).format(FORMATTER) + "Z";
+    }
+
+    /**
+     * Converts the given Instant to a PDF date string formatted as D:yyyyMMddHHmmss#hh'mm' where #
+     * is Z, +, or -. This method allows to specify the timezone to be used for conversion.
+     *
+     * @param instant the instant in UTC timezone
+     * @param zoneId  the timezone to be used for conversion
+     * @return the formatted date string
+     */
+    public static String toString(Instant instant, ZoneId zoneId)
+    {
+        ZonedDateTime zdt = instant.atZone(zoneId);
+        String offsetString = zdt.format(DateTimeFormatter.ofPattern("XXX"));
+        return "D:" + zdt.format(FORMATTER) + offsetString.replace(':', '\'');
     }
 
     /**
@@ -624,11 +663,11 @@ public final class DateConverter
      */
     public static Calendar toCalendar(COSString text)
     {
-        if (text == null)
+        if (nonNull(text))
         {
-            return null;
+            return toCalendar(text.getString());
         }
-        return toCalendar(text.getString());
+        return null;
     }
 
     /**

@@ -16,6 +16,15 @@
  */
 package org.sejda.sambox.pdmodel.interactive.annotation;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static java.util.Optional.of;
+import static java.util.Optional.ofNullable;
+import static org.sejda.commons.util.RequireUtils.requireArg;
+
+import java.time.Instant;
+import java.util.Calendar;
+
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
@@ -32,14 +41,6 @@ import org.sejda.sambox.pdmodel.graphics.color.PDDeviceGray;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceRGB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Calendar;
-
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
-import static java.util.Optional.of;
-import static java.util.Optional.ofNullable;
-import static org.sejda.commons.util.RequireUtils.requireArg;
 
 /**
  * A PDF annotation.
@@ -585,14 +586,14 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
         getCOSObject().setString(COSName.M, m);
     }
 
-    /**
-     * This will set the date and time the annotation was modified.
-     *
-     * @param c the date and time the annotation was created.
-     */
     public void setModifiedDate(Calendar c)
     {
-        getCOSObject().setDate(COSName.M, c);
+        getCOSObject().setDate(COSName.M, c.toInstant());
+    }
+
+    public void setModifiedDate(Instant instant)
+    {
+        getCOSObject().setDate(COSName.M, instant);
     }
 
     /**

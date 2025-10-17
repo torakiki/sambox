@@ -18,6 +18,7 @@ package org.sejda.sambox.pdmodel;
 
 import static java.util.Optional.ofNullable;
 
+import java.time.Instant;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Set;
@@ -153,7 +154,12 @@ public class PDDocumentInformation extends PDDictionaryWrapper
 
     public void setCreationDate(Calendar date)
     {
-        getCOSObject().setDate(COSName.CREATION_DATE, date);
+        getCOSObject().setDate(COSName.CREATION_DATE, date.toInstant());
+    }
+
+    public void setCreationDate(Instant instant)
+    {
+        getCOSObject().setDate(COSName.CREATION_DATE, instant);
     }
 
     /**
@@ -166,7 +172,12 @@ public class PDDocumentInformation extends PDDictionaryWrapper
 
     public void setModificationDate(Calendar date)
     {
-        getCOSObject().setDate(COSName.MOD_DATE, date);
+        getCOSObject().setDate(COSName.MOD_DATE, date.toInstant());
+    }
+
+    public void setModificationDate(Instant instant)
+    {
+        getCOSObject().setDate(COSName.MOD_DATE, instant);
     }
 
     /**

@@ -33,8 +33,8 @@ import java.io.OutputStream;
 import java.nio.channels.WritableByteChannel;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.time.Instant;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -525,7 +525,7 @@ public class PDDocument implements Closeable
         {
             // update producer and last modification date only if the write option doesn't state otherwise
             getDocumentInformation().setProducer(SAMBox.PRODUCER);
-            getDocumentInformation().setModificationDate(Calendar.getInstance());
+            getDocumentInformation().setModificationDate(Instant.now());
         }
         if (Arrays.stream(options).anyMatch(o -> o == WriteOption.UPSERT_DOCUMENT_METADATA_STREAM))
         {

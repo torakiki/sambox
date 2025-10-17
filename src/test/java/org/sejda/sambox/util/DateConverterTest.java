@@ -16,19 +16,25 @@
  */
 package org.sejda.sambox.util;
 
-import org.junit.Test;
-import org.sejda.sambox.cos.COSString;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.IOException;
 import java.text.ParsePosition;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.SimpleTimeZone;
 import java.util.TimeZone;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.sejda.sambox.cos.COSString;
 
 /**
  * Test the date conversion utility.
@@ -36,7 +42,7 @@ import static org.junit.Assert.assertNull;
  * @author Ben Litchfield
  * @author Fred Hansen
  */
-public class TestDateUtil
+public class DateConverterTest
 {
     private static final int MINS = 60 * 1000, HRS = 60 * MINS;
     // expect parse fail
@@ -413,6 +419,117 @@ public class TestDateUtil
         checkFormatOffset(11.1, "+11:06");
         checkFormatOffset(-11.9, "-11:54");
         checkFormatOffset(-11.1, "-11:06");
+    }
+
+    /**
+     * Test toString(Instant) method that formats dates in UTC with Z suffix.
+     */
+    @Test
+    public void testToStringInstantUTC()
+    {
+        // Test a specific date/time in UTC
+        var instant = Instant.parse("2023-05-15T14:30:45Z");
+        assertEquals("D:20230515143045Z", DateConverter.toString(instant));
+        // Midnight
+        var midnight = Instant.parse("2024-01-01T00:00:00Z");
+        assertEquals("D:20240101000000Z", DateConverter.toString(midnight));
+    }
+
+    /**
+     * Test toString(Instant, ZoneId) method with UTC timezone (should produce Z).
+     */
+    @Test
+    public void testToStringInstantWithUTC()
+    {
+        var instant = Instant.parse("2023-05-15T14:30:45Z");
+        String result = DateConverter.toString(instant, ZoneId.of("UTC"));
+        assertEquals("D:20230515143045Z", result);
+    }
+
+    @Test
+    public void testOverloadedToStringYieldsSameResultExceptFinalApostrophe()
+    {
+        var calendar = Calendar.getInstance();
+        var instantString = DateConverter.toString(calendar.toInstant(),
+                calendar.getTimeZone().toZoneId());
+        var calendarString = DateConverter.toString(calendar);
+        assertThat(calendarString.substring(0, calendarString.length() - 1),
+                equalTo(instantString));
+        assertThat(calendarString, endsWith("'"));
+    }
+
+    /**
+     * Test toString(Instant, ZoneId) method with positive offset timezones.
+     */
+    @Test
+    public void testToStringInstantWithPositiveOffsets()
+    {
+        var instant = Instant.parse("2023-05-15T14:30:45Z");
+        // +02:00 (CET)
+        String result1 = DateConverter.toString(instant, ZoneId.of("Europe/Paris"));
+        assertEquals("D:20230515163045+02'00", result1);
+    }
+
+    @Test
+    @DisplayName("Zero offset timezone should produce Z suffix")
+    public void testToStringInstantWithZeroOffset()
+    {
+        var instant = Instant.parse("2023-05-15T14:30:45Z");
+        // +01:00 (CET)
+        String result1 = DateConverter.toString(instant, ZoneId.of("Atlantic/Reykjavik"));
+        assertEquals("D:20230515143045Z", result1);
+    }
+
+    /**
+     * Test toString(Instant, ZoneId) method with negative offset timezones.
+     */
+    @Test
+    public void testToStringInstantWithNegativeOffsets()
+    {
+        var instant = Instant.parse("2023-05-15T14:30:45Z");
+        // -05:00 (EST)
+        String result1 = DateConverter.toString(instant, ZoneId.of("America/New_York"));
+        assertEquals("D:20230515103045-04'00", result1);
+    }
+
+    /**
+     * Test toString(Instant, ZoneId) with half-hour offset timezones.
+     */
+    @Test
+    public void testToStringInstantWithHalfHourOffsets()
+    {
+        var instant = Instant.parse("2023-05-15T14:30:45Z");
+        // +05:30 (IST)
+        String result1 = DateConverter.toString(instant, ZoneId.of("Asia/Kolkata"));
+        assertEquals("D:20230515200045+05'30", result1);
+    }
+
+    /**
+     * Test toString(Instant, ZoneId) with extreme offset timezones.
+     */
+    @Test
+    public void testToStringInstantWithExtremeOffsets()
+    {
+        var instant = Instant.parse("2023-05-15T12:00:00Z");
+
+        // +14:00 (Kiribati)
+        String result1 = DateConverter.toString(instant, ZoneId.of("+14:00"));
+        assertEquals("D:20230516020000+14'00", result1);
+
+        // -12:00 (Baker Island)
+        String result2 = DateConverter.toString(instant, ZoneId.of("-12:00"));
+        assertEquals("D:20230515000000-12'00", result2);
+    }
+
+    /**
+     * Test toString(Instant) and toString(Instant, ZoneId.of("UTC")) produce same result.
+     */
+    @Test
+    public void testToStringInstantUTCConsistency()
+    {
+        var instant = Instant.parse("2023-05-15T14:30:45Z");
+        assertEquals(DateConverter.toString(instant),
+                DateConverter.toString(instant, ZoneId.of("UTC")));
     }
 
 }
