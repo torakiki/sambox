@@ -95,9 +95,6 @@ import org.sejda.sambox.pdmodel.interactive.documentnavigation.outline.PDOutline
  */
 public class TestTextStripper
 {
-    /**
-     * Logger instance.
-     */
     private static final Log log = LogFactory.getLog(TestTextStripper.class);
 
     private boolean bFail = false;

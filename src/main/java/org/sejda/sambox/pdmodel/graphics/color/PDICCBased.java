@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.pdmodel.graphics.color;
 
+import static java.util.Optional.ofNullable;
 import static org.sejda.commons.util.RequireUtils.requireIOCondition;
 
 import java.awt.Transparency;
@@ -37,7 +38,6 @@ import java.util.StringTokenizer;
 
 import org.sejda.commons.util.IOUtils;
 import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSArrayList;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSFloat;
 import org.sejda.sambox.cos.COSName;
@@ -545,12 +545,8 @@ public final class PDICCBased extends PDCIEBasedColorSpace
      */
     public void setAlternateColorSpaces(List<PDColorSpace> list)
     {
-        COSArray altArray = null;
-        if (list != null)
-        {
-            altArray = COSArrayList.converterToCOSArray(list);
-        }
-        stream.getCOSObject().setItem(COSName.ALTERNATE, altArray);
+        stream.getCOSObject().setItem(COSName.ALTERNATE,
+                ofNullable(list).map(COSArray::fromCOSObjectables).orElse(null));
     }
 
     /**

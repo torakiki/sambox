@@ -16,17 +16,18 @@
  */
 package org.sejda.sambox.pdmodel.common;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static java.util.Optional.ofNullable;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.sejda.sambox.cos.COSArrayList;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.sejda.sambox.cos.COSInteger;
 
 /**
@@ -44,7 +45,7 @@ public class PDNameTreeNodeTest
     private PDIntegerNameTreeNode leaf21;
     private PDIntegerNameTreeNode leaf22;
 
-    @Before
+    @BeforeEach
     public void setUp()
     {
         this.leaf1 = new PDIntegerNameTreeNode();
@@ -75,59 +76,50 @@ public class PDNameTreeNodeTest
         this.leaf22.setNames(names);
 
         this.node2 = new PDIntegerNameTreeNode();
-        List<PDNameTreeNode<COSInteger>> kids = this.node2.getKids();
-        if (kids == null)
-        {
-            kids = new COSArrayList<>();
-        }
-        kids.add(this.leaf1);
-        this.node2.setKids(kids);
+        List<PDNameTreeNode<COSInteger>> kids2 = ofNullable(this.node2.getKids()).map(
+                ArrayList::new).orElseGet(ArrayList::new);
+        kids2.add(this.leaf1);
+        this.node2.setKids(kids2);
 
         this.node4 = new PDIntegerNameTreeNode();
-        kids = this.node4.getKids();
-        if (kids == null)
-        {
-            kids = new COSArrayList<>();
-        }
-        kids.add(this.leaf21);
-        kids.add(this.leaf22);
-        this.node4.setKids(kids);
+        List<PDNameTreeNode<COSInteger>> kids4 = ofNullable(this.node4.getKids()).map(
+                ArrayList::new).orElseGet(ArrayList::new);
+        kids4.add(this.leaf21);
+        kids4.add(this.leaf22);
+        this.node4.setKids(kids4);
 
         this.root = new PDIntegerNameTreeNode();
-        kids = this.root.getKids();
-        if (kids == null)
-        {
-            kids = new COSArrayList<>();
-        }
-        kids.add(this.node2);
-        kids.add(this.node4);
-        this.root.setKids(kids);
+        List<PDNameTreeNode<COSInteger>> kidsRoot = ofNullable(this.root.getKids()).map(
+                ArrayList::new).orElseGet(ArrayList::new);
+        kidsRoot.add(this.node2);
+        kidsRoot.add(this.node4);
+        this.root.setKids(kidsRoot);
     }
 
     @Test
     public void testUpperLimit()
     {
-        Assert.assertEquals("Astatine", this.leaf1.getUpperLimit());
-        Assert.assertEquals("Astatine", this.node2.getUpperLimit());
+        assertEquals("Astatine", this.leaf1.getUpperLimit());
+        assertEquals("Astatine", this.node2.getUpperLimit());
 
-        Assert.assertEquals("Zebra", this.leaf21.getUpperLimit());
-        Assert.assertEquals("Zlatan", this.leaf22.getUpperLimit());
-        Assert.assertEquals("Zlatan", this.node4.getUpperLimit());
+        assertEquals("Zebra", this.leaf21.getUpperLimit());
+        assertEquals("Zlatan", this.leaf22.getUpperLimit());
+        assertEquals("Zlatan", this.node4.getUpperLimit());
 
-        Assert.assertEquals(null, this.root.getUpperLimit());
+        assertEquals(null, this.root.getUpperLimit());
     }
 
     @Test
     public void testLowerLimit()
     {
-        Assert.assertEquals("Actinium", this.leaf1.getLowerLimit());
-        Assert.assertEquals("Actinium", this.node2.getLowerLimit());
+        assertEquals("Actinium", this.leaf1.getLowerLimit());
+        assertEquals("Actinium", this.node2.getLowerLimit());
 
-        Assert.assertEquals("Xenon", this.leaf21.getLowerLimit());
-        Assert.assertEquals("Zavor", this.leaf22.getLowerLimit());
-        Assert.assertEquals("Xenon", this.node4.getLowerLimit());
+        assertEquals("Xenon", this.leaf21.getLowerLimit());
+        assertEquals("Zavor", this.leaf22.getLowerLimit());
+        assertEquals("Xenon", this.node4.getLowerLimit());
 
-        Assert.assertEquals(null, this.root.getLowerLimit());
+        assertEquals(null, this.root.getLowerLimit());
     }
 
     @Test

@@ -148,7 +148,7 @@ public class PDCalRGB extends PDCIEDictionaryBasedColorSpace
         COSArray gammaArray = null;
         if (gamma != null)
         {
-            gammaArray = gamma.getCOSArray();
+            gammaArray = gamma.getCOSObject();
         }
         dictionary.setItem(COSName.GAMMA, gammaArray);
     }

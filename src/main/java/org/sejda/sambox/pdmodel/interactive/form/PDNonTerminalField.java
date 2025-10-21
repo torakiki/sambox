@@ -16,8 +16,15 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
+import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSArrayList;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSInteger;
@@ -25,13 +32,6 @@ import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import static java.util.Objects.nonNull;
 
 /**
  * A non terminal field in an interactive form.
@@ -122,7 +122,8 @@ public class PDNonTerminalField extends PDField
      */
     public void setChildren(List<PDField> children)
     {
-        getCOSObject().setItem(COSName.KIDS, COSArrayList.converterToCOSArray(children));
+        getCOSObject().setItem(COSName.KIDS,
+                ofNullable(children).map(COSArray::fromCOSObjectables).orElse(null));
     }
 
     /**
@@ -168,8 +169,7 @@ public class PDNonTerminalField extends PDField
     /**
      * <p>
      * <b>Note:</b> while non-terminal fields <b>do</b> inherit field values, this method returns
-     * the local value,
-     * without inheritance.
+     * the local value, without inheritance.
      */
     @Override
     public String getFieldType()
@@ -180,8 +180,7 @@ public class PDNonTerminalField extends PDField
     /**
      * <p>
      * <b>Note:</b> while non-terminal fields <b>do</b> inherit field values, this method returns
-     * the local value,
-     * without inheritance.
+     * the local value, without inheritance.
      */
     public COSBase getValue()
     {
@@ -191,8 +190,7 @@ public class PDNonTerminalField extends PDField
     /**
      * <p>
      * <b>Note:</b> while non-terminal fields <b>do</b> inherit field values, this method returns
-     * the local value,
-     * without inheritance.
+     * the local value, without inheritance.
      */
     @Override
     public String getValueAsString()
@@ -206,8 +204,7 @@ public class PDNonTerminalField extends PDField
      *
      * <p>
      * <b>Note:</b> while non-terminal fields <b>do</b> inherit field values, this method returns
-     * the local value,
-     * without inheritance.
+     * the local value, without inheritance.
      */
     public void setValue(COSBase object)
     {
@@ -236,8 +233,7 @@ public class PDNonTerminalField extends PDField
      *
      * <p>
      * <b>Note:</b> while non-terminal fields <b>do</b> inherit field values, this method returns
-     * the local value,
-     * without inheritance.
+     * the local value, without inheritance.
      */
     public COSBase getDefaultValue()
     {
@@ -250,8 +246,7 @@ public class PDNonTerminalField extends PDField
      *
      * <p>
      * <b>Note:</b> while non-terminal fields <b>do</b> inherit field values, this method returns
-     * the local value,
-     * without inheritance.
+     * the local value, without inheritance.
      */
     public void setDefaultValue(COSBase value)
     {

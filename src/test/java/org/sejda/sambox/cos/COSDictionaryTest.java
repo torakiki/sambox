@@ -182,4 +182,77 @@ public class COSDictionaryTest
         assertSame(initialValue, victim.getItem(key));
     }
 
+    @Test
+    public void getKeyForValueWhenValueExists()
+    {
+        var value = COSInteger.THREE;
+        var victim = COSDictionary.of(COSName.A, value);
+
+        assertEquals(COSName.A, victim.getKeyForValue(value));
+    }
+
+    @Test
+    public void getKeyForValueWhenValueDoesNotExist()
+    {
+        var victim = COSDictionary.of(COSName.A, COSInteger.ONE);
+
+        assertNull(victim.getKeyForValue(COSInteger.TWO));
+    }
+
+    @Test
+    public void getKeyForValueWithEmptyDictionary()
+    {
+        var victim = new COSDictionary();
+
+        assertNull(victim.getKeyForValue(COSInteger.ONE));
+    }
+
+    @Test
+    public void getKeyForValueWithNullValue()
+    {
+        var victim = COSDictionary.of(COSName.A, COSInteger.ONE);
+
+        assertNull(victim.getKeyForValue(null));
+    }
+
+    @Test
+    public void getKeyForValueReturnsFirstKeyWhenMultipleKeysHaveSameValue()
+    {
+        var value = COSInteger.ONE;
+        var victim = new COSDictionary();
+        victim.setItem(COSName.A, value);
+        victim.setItem(COSName.B, value);
+        victim.setItem(COSName.C, value);
+
+        assertEquals(COSName.A, victim.getKeyForValue(value));
+    }
+
+    @Test
+    public void getKeyForValueIgnoresNullValuesInDictionary()
+    {
+        var value = COSInteger.ONE;
+        var victim = new COSDictionary();
+        victim.setItem(COSName.A, null);
+        victim.setItem(COSName.B, value);
+
+        assertEquals(COSName.B, victim.getKeyForValue(value));
+    }
+
+    @Test
+    public void getKeyForValueWithDifferentTypes()
+    {
+        var stringValue = COSString.parseLiteral("test");
+        var nameValue = COSName.getPDFName("Name");
+        var intValue = COSInteger.get(42);
+
+        var victim = new COSDictionary();
+        victim.setItem(COSName.A, stringValue);
+        victim.setItem(COSName.B, nameValue);
+        victim.setItem(COSName.C, intValue);
+
+        assertEquals(COSName.A, victim.getKeyForValue(stringValue));
+        assertEquals(COSName.B, victim.getKeyForValue(nameValue));
+        assertEquals(COSName.C, victim.getKeyForValue(intValue));
+    }
+
 }

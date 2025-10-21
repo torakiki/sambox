@@ -16,13 +16,8 @@
  */
 package org.sejda.sambox.pdmodel.common;
 
-import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSBase;
-import org.sejda.sambox.cos.COSDictionary;
-import org.sejda.sambox.cos.COSInteger;
-import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.cos.COSObjectable;
-import org.sejda.sambox.pdmodel.PDDocumentCatalog;
+import static java.util.Objects.nonNull;
+import static org.sejda.commons.util.RequireUtils.requireArg;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -31,8 +26,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-import static java.util.Objects.nonNull;
-import static org.sejda.commons.util.RequireUtils.requireArg;
+import org.sejda.sambox.cos.COSArray;
+import org.sejda.sambox.cos.COSBase;
+import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSInteger;
+import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.cos.COSObjectable;
+import org.sejda.sambox.pdmodel.PDDocumentCatalog;
 
 /**
  * Represents the page label dictionary of a document.
@@ -85,7 +85,7 @@ public class PDPageLabels implements COSObjectable
     private void findLabels(PDNumberTreeNode node) throws IOException
     {
         List<PDNumberTreeNode> kids = node.getKids();
-        if (nonNull(kids))
+        if (!kids.isEmpty())
         {
             for (PDNumberTreeNode kid : kids)
             {

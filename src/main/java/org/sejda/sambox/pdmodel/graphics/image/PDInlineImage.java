@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.pdmodel.graphics.image;
 
+import static java.util.stream.Collectors.toCollection;
+
 import java.awt.Paint;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
@@ -23,11 +25,11 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.sejda.commons.FastByteArrayOutputStream;
 import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSArrayList;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
@@ -230,24 +232,21 @@ public final class PDInlineImage implements PDImage
     }
 
     /**
-     * Returns a list of filters applied to this stream, or null if there are none.
-     *
-     * @return a list of filters applied to this stream
+     * @return a mutable list of filters applied to this stream, or null if there are none
      */
-    // TODO return an empty list if there are none?
     public List<String> getFilters()
     {
-        List<String> names = null;
         COSBase filters = parameters.getDictionaryObject(COSName.F, COSName.FILTER);
         if (filters instanceof COSName name)
         {
-            names = new COSArrayList<>(name.getName(), name, parameters, COSName.FILTER);
+            return new ArrayList<>(List.of(name.getName()));
         }
-        else if (filters instanceof COSArray)
+        if (filters instanceof COSArray cosArray)
         {
-            names = COSArrayList.convertCOSNameCOSArrayToList((COSArray) filters);
+            return cosArray.stream().map(COSBase::getCOSObject).filter(e -> e instanceof COSName)
+                    .map(n -> ((COSName) n).getName()).collect(toCollection(ArrayList::new));
         }
-        return names;
+        return new ArrayList<>();
     }
 
     /**
@@ -257,8 +256,7 @@ public final class PDInlineImage implements PDImage
      */
     public void setFilters(List<String> filters)
     {
-        COSBase obj = COSArrayList.convertStringListToCOSNameCOSArray(filters);
-        parameters.setItem(COSName.F, obj);
+        parameters.setItem(COSName.F, COSArray.fromStringsToCOSNames(filters));
     }
 
     @Override

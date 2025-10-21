@@ -84,7 +84,7 @@ public final class PDComboBox extends PDChoice
 
         if (!values.isEmpty())
         {
-            apHelper.setAppearanceValue(values.get(0));
+            apHelper.setAppearanceValue(values.getFirst());
         }
         else
         {

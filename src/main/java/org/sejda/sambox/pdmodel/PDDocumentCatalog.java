@@ -18,6 +18,7 @@ package org.sejda.sambox.pdmodel;
 
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toCollection;
 import static org.sejda.sambox.util.SpecVersionUtils.V1_5;
 
 import java.io.IOException;
@@ -25,7 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSArrayList;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
@@ -114,7 +114,7 @@ public class PDDocumentCatalog implements COSObjectable
         //return getAcroForm(new AcroFormDefaultFixup(document));
         return getAcroForm(new AcroFormDefaultSamboxFixup(document));
     }
-    
+
     public PDAcroForm getAcroFromWithFixups()
     {
         return getAcroForm(new AcroFormDefaultFixup(document));
@@ -122,12 +122,14 @@ public class PDDocumentCatalog implements COSObjectable
 
     /**
      * Get the documents AcroForm. This will return null if no AcroForm is part of the document.
-     *
-     * Dependent on setting <code>acroFormFixup</code> some fixing/changes will be done to the AcroForm.
-     * If you need to ensure that there are no fixes applied call <code>getAcroForm</code> with <code>null</code>.
-     *
-     * Using <code>getAcroForm(PDDocumentFixup acroFormFixup)</code> might change the original content and
-     * subsequent calls with <code>getAcroForm(null)</code> will return the changed content.
+     * <p>
+     * Dependent on setting <code>acroFormFixup</code> some fixing/changes will be done to the
+     * AcroForm. If you need to ensure that there are no fixes applied call <code>getAcroForm</code>
+     * with <code>null</code>.
+     * <p>
+     * Using <code>getAcroForm(PDDocumentFixup acroFormFixup)</code> might change the original
+     * content and subsequent calls with <code>getAcroForm(null)</code> will return the changed
+     * content.
      *
      * @param acroFormFixup the fix up action or null
      * @return The document's AcroForm.
@@ -138,11 +140,12 @@ public class PDDocumentCatalog implements COSObjectable
         {
             acroFormFixup.apply();
             cachedAcroForm = null;
-            acroFormFixupApplied =  acroFormFixup;
+            acroFormFixupApplied = acroFormFixup;
         }
         else if (acroFormFixupApplied != null)
         {
-            LOG.debug("AcroForm content has already been retrieved with fixes applied - original content changed because of that");
+            LOG.debug(
+                    "AcroForm content has already been retrieved with fixes applied - original content changed because of that");
         }
 
         if (cachedAcroForm == null)
@@ -218,22 +221,19 @@ public class PDDocumentCatalog implements COSObjectable
     }
 
     /**
-     * Returns the document's article threads.
+     * @return A mutable list with the document's article threads.
      */
     public List<PDThread> getThreads()
     {
-        COSArray array = (COSArray) root.getDictionaryObject(COSName.THREADS);
-        if (array == null)
+        COSArray threads = root.getDictionaryObject(COSName.THREADS, COSArray.class);
+        if (nonNull(threads))
         {
-            array = new COSArray();
-            root.setItem(COSName.THREADS, array);
+            return threads.stream().map(COSBase::getCOSObject)
+                    .filter(b -> b instanceof COSDictionary)
+                    .map(b -> new PDThread((COSDictionary) b))
+                    .collect(toCollection(ArrayList::new));
         }
-        List<PDThread> pdObjects = new ArrayList<>(array.size());
-        for (int i = 0; i < array.size(); i++)
-        {
-            pdObjects.add(new PDThread((COSDictionary) array.getObject(i)));
-        }
-        return new COSArrayList<>(pdObjects, array);
+        return new ArrayList<>();
     }
 
     /**
@@ -243,7 +243,8 @@ public class PDDocumentCatalog implements COSObjectable
      */
     public void setThreads(List<PDThread> threads)
     {
-        root.setItem(COSName.THREADS, COSArrayList.converterToCOSArray(threads));
+        root.setItem(COSName.THREADS,
+                ofNullable(threads).map(COSArray::fromCOSObjectables).orElse(null));
     }
 
     /**
@@ -467,7 +468,8 @@ public class PDDocumentCatalog implements COSObjectable
             }
             catch (IllegalArgumentException ex)
             {
-                LOG.debug(String.format("Unrecognized page layout %s - returning PageLayout.SINGLE_PAGE", mode));
+                LOG.debug(String.format(
+                        "Unrecognized page layout %s - returning PageLayout.SINGLE_PAGE", mode));
             }
         }
         return PageLayout.SINGLE_PAGE;
@@ -614,8 +616,8 @@ public class PDDocumentCatalog implements COSObjectable
     }
 
     /**
-     * Looks up for the {@link PDPageDestination} referenced by the given {@link
-     * PDNamedDestination}
+     * Looks up for the {@link PDPageDestination} referenced by the given
+     * {@link PDNamedDestination}
      *
      * @param namedDest
      * @return the destination or null if nothing is fond

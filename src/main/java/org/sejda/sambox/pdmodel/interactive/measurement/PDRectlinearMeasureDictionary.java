@@ -314,9 +314,7 @@ public class PDRectlinearMeasureDictionary extends PDMeasureDictionary
      */
     public void setCoordSystemOrigin(float[] coordSystemOrigin)
     {
-        COSArray array = new COSArray();
-        array.setFloatArray(coordSystemOrigin);
-        this.getCOSObject().setItem("O", array);
+        this.getCOSObject().setItem("O", COSArray.fromFloats(coordSystemOrigin));
     }
 
     /**

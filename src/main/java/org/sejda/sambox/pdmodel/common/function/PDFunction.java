@@ -221,10 +221,7 @@ public abstract class PDFunction implements COSObjectable
     @Deprecated
     public COSArray eval(COSArray input) throws IOException
     {
-        float[] outputValues = eval(input.toFloatArray());
-        COSArray array = new COSArray();
-        array.setFloatArray(outputValues);
-        return array;
+        return COSArray.fromFloats(eval(input.toFloatArray()));
     }
 
     /**

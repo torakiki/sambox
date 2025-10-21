@@ -16,16 +16,9 @@
  */
 package org.sejda.sambox.pdmodel.common;
 
-import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSArrayList;
-import org.sejda.sambox.cos.COSBase;
-import org.sejda.sambox.cos.COSDictionary;
-import org.sejda.sambox.cos.COSInteger;
-import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.cos.COSNull;
-import org.sejda.sambox.cos.COSObjectable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toCollection;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,7 +27,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static java.util.Objects.nonNull;
+import org.sejda.sambox.cos.COSArray;
+import org.sejda.sambox.cos.COSBase;
+import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSInteger;
+import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.cos.COSNull;
+import org.sejda.sambox.cos.COSObjectable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class represents a PDF Number tree. See the PDF Reference 1.7 section 7.9.7 for more
@@ -48,11 +49,9 @@ public class PDNumberTreeNode implements COSObjectable
     private static final Logger LOG = LoggerFactory.getLogger(PDNumberTreeNode.class);
 
     private final COSDictionary node;
-    private Class<? extends COSObjectable> valueType = null;
+    private Class<? extends COSObjectable> valueType;
 
     /**
-     * Constructor.
-     *
      * @param valueClass The PD Model type of object that is the value.
      */
     public PDNumberTreeNode(Class<? extends COSObjectable> valueClass)
@@ -62,8 +61,6 @@ public class PDNumberTreeNode implements COSObjectable
     }
 
     /**
-     * Constructor.
-     *
      * @param dict       The dictionary that holds the name information.
      * @param valueClass The PD Model type of object that is the value.
      */
@@ -85,24 +82,22 @@ public class PDNumberTreeNode implements COSObjectable
     }
 
     /**
-     * Return the children of this node. This list will contain PDNumberTreeNode objects.
-     *
-     * @return The list of children or null if there are no children.
+     * @return The immutable list of children or an empty list if there are no children.
      */
     public List<PDNumberTreeNode> getKids()
     {
-        COSArray kids = node.getDictionaryObject(COSName.KIDS, COSArray.class);
-        if (nonNull(kids))
+        if (nonNull(node))
         {
-            List<PDNumberTreeNode> pdObjects = new ArrayList<>();
-            for (int i = 0; i < kids.size(); i++)
+            COSArray kids = node.getDictionaryObject(COSName.KIDS, COSArray.class);
+            if (nonNull(kids))
             {
-                pdObjects.add(createChildNode((COSDictionary) kids.getObject(i)));
+                return kids.stream().map(COSBase::getCOSObject)
+                        .filter(e -> e instanceof COSDictionary)
+                        .map(d -> createChildNode((COSDictionary) d))
+                        .collect(toCollection(ArrayList::new));
             }
-            return new COSArrayList<>(pdObjects, kids);
         }
-
-        return null;
+        return new ArrayList<>();
     }
 
     /**
@@ -114,8 +109,8 @@ public class PDNumberTreeNode implements COSObjectable
     {
         if (kids != null && !kids.isEmpty())
         {
-            PDNumberTreeNode firstKid = kids.get(0);
-            PDNumberTreeNode lastKid = kids.get(kids.size() - 1);
+            PDNumberTreeNode firstKid = kids.getFirst();
+            PDNumberTreeNode lastKid = kids.getLast();
             Integer lowerLimit = firstKid.getLowerLimit();
             this.setLowerLimit(lowerLimit);
             Integer upperLimit = lastKid.getUpperLimit();
@@ -126,7 +121,7 @@ public class PDNumberTreeNode implements COSObjectable
             // Remove limits if there are no kids and no numbers set.
             node.removeItem(COSName.LIMITS);
         }
-        node.setItem(COSName.KIDS, COSArrayList.converterToCOSArray(kids));
+        node.setItem(COSName.KIDS, ofNullable(kids).map(COSArray::fromCOSObjectables).orElse(null));
     }
 
     /**
@@ -143,17 +138,15 @@ public class PDNumberTreeNode implements COSObjectable
         {
             return numbers.get(index);
         }
-        Object retval = null;
         List<PDNumberTreeNode> kids = getKids();
-        if (nonNull(kids))
+        if (!kids.isEmpty())
         {
-            for (int i = 0; i < kids.size() && retval == null; i++)
+            for (PDNumberTreeNode childNode : kids)
             {
-                PDNumberTreeNode childNode = kids.get(i);
                 if (childNode.getLowerLimit().compareTo(index) <= 0
                         && childNode.getUpperLimit().compareTo(index) >= 0)
                 {
-                    retval = childNode.getValue(index);
+                    return childNode.getValue(index);
                 }
             }
         }
@@ -161,7 +154,7 @@ public class PDNumberTreeNode implements COSObjectable
         {
             LOG.warn("NumberTreeNode does not have \"nums\" nor \"kids\" objects.");
         }
-        return retval;
+        return null;
     }
 
     /**

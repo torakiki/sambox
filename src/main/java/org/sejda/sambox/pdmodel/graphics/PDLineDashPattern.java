@@ -19,7 +19,6 @@ package org.sejda.sambox.pdmodel.graphics;
 import java.util.Arrays;
 
 import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSObjectable;
 
@@ -76,14 +75,9 @@ public final class PDLineDashPattern implements COSObjectable
     }
 
     @Override
-    public COSBase getCOSObject()
+    public COSArray getCOSObject()
     {
-        COSArray cos = new COSArray();
-        COSArray patternArray = new COSArray();
-        patternArray.setFloatArray(array);
-        cos.add(patternArray);
-        cos.add(COSInteger.get(phase));
-        return cos;
+        return new COSArray(COSArray.fromFloats(array), COSInteger.get(phase));
     }
 
     /**

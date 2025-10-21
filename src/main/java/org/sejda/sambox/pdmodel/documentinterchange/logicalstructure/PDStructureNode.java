@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSArrayList;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSInteger;
@@ -125,16 +124,6 @@ public abstract class PDStructureNode implements COSObjectable
             }
         }
         return kidObjects;
-    }
-
-    /**
-     * Sets the kids (K).
-     * 
-     * @param kids the kids
-     */
-    public void setKids(List<Object> kids)
-    {
-        this.getCOSObject().setItem(COSName.K, COSArrayList.converterToCOSArray(kids));
     }
 
     /**

@@ -17,6 +17,15 @@
 
 package org.sejda.sambox.pdmodel.encryption;
 
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.KeyStoreException;
+import java.security.PrivateKey;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
+import java.util.Arrays;
+import java.util.Collection;
+
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cms.CMSEnvelopedData;
 import org.bouncycastle.cms.CMSException;
@@ -28,15 +37,6 @@ import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSString;
 import org.sejda.sambox.pdmodel.PDDocument;
-
-import java.io.IOException;
-import java.math.BigInteger;
-import java.security.KeyStoreException;
-import java.security.PrivateKey;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
-import java.util.Arrays;
-import java.util.Collection;
 
 /**
  * This class implements the public key security handler described in the PDF specification.
@@ -121,10 +121,12 @@ public final class PublicKeySecurityHandler extends SecurityHandler
             byte[] envelopedData = null;
 
             // the bytes of each recipient in the recipients array
-            COSArray array = encryption.getCOSObject().getCOSArray(COSName.RECIPIENTS);
+            COSArray array = encryption.getCOSObject()
+                    .getDictionaryObject(COSName.RECIPIENTS, COSArray.class);
             if (array == null && defaultCryptFilterDictionary != null)
             {
-                array = defaultCryptFilterDictionary.getCOSObject().getCOSArray(COSName.RECIPIENTS);
+                array = defaultCryptFilterDictionary.getCOSObject()
+                        .getDictionaryObject(COSName.RECIPIENTS, COSArray.class);
             }
             if (array == null)
             {

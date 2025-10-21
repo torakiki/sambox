@@ -16,6 +16,9 @@
  */
 package org.sejda.sambox.pdmodel.graphics.color;
 
+import static java.util.Objects.nonNull;
+import static java.util.stream.Collectors.toCollection;
+
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -24,12 +27,12 @@ import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSArrayList;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
@@ -466,14 +469,17 @@ public class PDDeviceN extends PDSpecialColorSpace
     }
 
     /**
-     * Returns the list of colorants.
-     *
-     * @return the list of colorants
+     * @return a mutable list of colorants
      */
     public final List<String> getColorantNames()
     {
         COSArray names = array.getObject(COLORANT_NAMES, COSArray.class);
-        return COSArrayList.convertCOSNameCOSArrayToList(names);
+        if (nonNull(names))
+        {
+            return names.stream().map(COSBase::getCOSObject).filter(e -> e instanceof COSName)
+                    .map(n -> ((COSName) n).getName()).collect(toCollection(ArrayList::new));
+        }
+        return new ArrayList<>();
     }
 
     /**
@@ -493,8 +499,7 @@ public class PDDeviceN extends PDSpecialColorSpace
      */
     public void setColorantNames(List<String> names)
     {
-        COSArray namesArray = COSArrayList.convertStringListToCOSNameCOSArray(names);
-        array.set(COLORANT_NAMES, namesArray);
+        array.set(COLORANT_NAMES, COSArray.fromStringsToCOSNames(names));
     }
 
     /**

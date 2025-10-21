@@ -466,9 +466,7 @@ public class PDAnnotationMarkup extends PDAnnotation
         COSArray array = new COSArray();
         for (float[] path : inkList)
         {
-            COSArray innerArray = new COSArray();
-            innerArray.setFloatArray(path);
-            array.add(innerArray);
+            array.add(COSArray.fromFloats(path));
         }
         getCOSObject().setItem(COSName.INKLIST, array);
     }
@@ -661,9 +659,7 @@ public class PDAnnotationMarkup extends PDAnnotation
      */
     public final void setCallout(float[] callout)
     {
-        COSArray newCallout = new COSArray();
-        newCallout.setFloatArray(callout);
-        getCOSObject().setItem(COSName.CL, newCallout);
+        getCOSObject().setItem(COSName.CL, COSArray.fromFloats(callout));
     }
 
     /**
@@ -792,9 +788,7 @@ public class PDAnnotationMarkup extends PDAnnotation
      */
     public void setVertices(float[] points)
     {
-        COSArray ar = new COSArray();
-        ar.setFloatArray(points);
-        getCOSObject().setItem(COSName.VERTICES, ar);
+        getCOSObject().setItem(COSName.VERTICES, COSArray.fromFloats(points));
     }
 
     /**

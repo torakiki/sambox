@@ -136,9 +136,7 @@ public class PDAnnotationLine extends PDAnnotationMarkup
      */
     public void setLine(float[] l)
     {
-        COSArray newL = new COSArray();
-        newL.setFloatArray(l);
-        getCOSObject().setItem(COSName.L, newL);
+        getCOSObject().setItem(COSName.L, COSArray.fromFloats(l));
     }
 
     /**
@@ -392,9 +390,8 @@ public class PDAnnotationLine extends PDAnnotationMarkup
         COSArray array = (COSArray) this.getCOSObject().getDictionaryObject(COSName.CO);
         if (array == null)
         {
-            array = new COSArray();
-            array.setFloatArray(new float[] { offset, 0.f });
-            this.getCOSObject().setItem(COSName.CO, array);
+            this.getCOSObject()
+                    .setItem(COSName.CO, COSArray.fromFloats(new float[] { offset, 0.f }));
         }
         else
         {
@@ -427,9 +424,8 @@ public class PDAnnotationLine extends PDAnnotationMarkup
         COSArray array = this.getCOSObject().getDictionaryObject(COSName.CO, COSArray.class);
         if (array == null)
         {
-            array = new COSArray();
-            array.setFloatArray(new float[] { 0.f, offset });
-            this.getCOSObject().setItem(COSName.CO, array);
+            this.getCOSObject()
+                    .setItem(COSName.CO, COSArray.fromFloats(new float[] { 0.f, offset }));
         }
         else
         {

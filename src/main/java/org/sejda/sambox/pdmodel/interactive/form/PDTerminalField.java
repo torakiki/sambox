@@ -18,6 +18,7 @@ package org.sejda.sambox.pdmodel.interactive.form;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,7 +27,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSArrayList;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSInteger;
@@ -35,7 +35,8 @@ import org.sejda.sambox.pdmodel.interactive.action.PDFormFieldAdditionalActions;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
 
 /**
- * A field in an interactive form. Fields may be one of four types: button, text, choice, or signature.
+ * A field in an interactive form. Fields may be one of four types: button, text, choice, or
+ * signature.
  *
  * @author sug
  */
@@ -43,7 +44,7 @@ public abstract class PDTerminalField extends PDField
 {
     /**
      * Constructor.
-     * 
+     *
      * @param acroForm The form that this field is part of.
      */
     protected PDTerminalField(PDAcroForm acroForm)
@@ -53,10 +54,10 @@ public abstract class PDTerminalField extends PDField
 
     /**
      * Constructor.
-     * 
+     *
      * @param acroForm The form that this field is part of.
-     * @param field the PDF object to represent as a field.
-     * @param parent the parent node of the node
+     * @param field    the PDF object to represent as a field.
+     * @param parent   the parent node of the node
      */
     PDTerminalField(PDAcroForm acroForm, COSDictionary field, PDNonTerminalField parent)
     {
@@ -65,7 +66,7 @@ public abstract class PDTerminalField extends PDField
 
     /**
      * Set the actions of the field.
-     * 
+     *
      * @param actions The field actions.
      */
     public void setActions(PDFormFieldAdditionalActions actions)
@@ -102,7 +103,7 @@ public abstract class PDTerminalField extends PDField
 
     /**
      * Returns the widget annotations associated with this field.
-     * 
+     *
      * @return The list of widget annotations.
      */
     @Override
@@ -110,14 +111,14 @@ public abstract class PDTerminalField extends PDField
     {
         COSArray kids = getCOSObject().getDictionaryObject(COSName.KIDS, COSArray.class);
         List<PDAnnotationWidget> result = new ArrayList<>();
-        
+
         if (isNull(kids))
         {
             // the field itself is a widget
             result.add(new PDAnnotationWidget(getCOSObject()));
             return result;
         }
-        
+
         if (kids.size() > 0)
         {
             return kids.stream().filter(Objects::nonNull).map(COSBase::getCOSObject)
@@ -126,25 +127,26 @@ public abstract class PDTerminalField extends PDField
                     .collect(Collectors.toList());
 
         }
-        
+
         return result;
     }
-    
+
     public boolean removeWidget(PDAnnotationWidget widget)
     {
         List<PDAnnotationWidget> widgets = getWidgets();
         boolean removed = widgets.remove(widget);
-        
-        if(removed){
+
+        if (removed)
+        {
             setWidgets(widgets);
         }
-        
+
         return removed;
     }
 
     /**
      * Adds the given widget as child of this fields, only if not already present
-     * 
+     *
      * @param widget
      */
     public void addWidgetIfMissing(PDAnnotationWidget widget)
@@ -173,7 +175,8 @@ public abstract class PDTerminalField extends PDField
      */
     public void setWidgets(List<PDAnnotationWidget> children)
     {
-        getCOSObject().setItem(COSName.KIDS, COSArrayList.converterToCOSArray(children));
+        getCOSObject().setItem(COSName.KIDS,
+                ofNullable(children).map(COSArray::fromCOSObjectables).orElse(null));
         for (PDAnnotationWidget widget : children)
         {
             widget.getCOSObject().setItem(COSName.PARENT, this);
@@ -182,7 +185,7 @@ public abstract class PDTerminalField extends PDField
 
     /**
      * Applies a value change to the field. Generates appearances if required and raises events.
-     * 
+     *
      * @throws IOException if the appearance couldn't be generated
      */
     public final void applyChange() throws IOException
@@ -192,9 +195,9 @@ public abstract class PDTerminalField extends PDField
     }
 
     /**
-     * Constructs appearance streams and appearance dictionaries for all widget annotations. Subclasses should not call
-     * this method directly but via {@link #applyChange()}.
-     * 
+     * Constructs appearance streams and appearance dictionaries for all widget annotations.
+     * Subclasses should not call this method directly but via {@link #applyChange()}.
+     *
      * @throws IOException if the appearance couldn't be generated
      */
     abstract void constructAppearances() throws IOException;

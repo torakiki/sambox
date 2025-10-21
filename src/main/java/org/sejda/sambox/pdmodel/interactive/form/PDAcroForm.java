@@ -16,8 +16,26 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
+
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Rectangle2D;
+import java.io.IOException;
+import java.lang.ref.SoftReference;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSArrayList;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
@@ -37,25 +55,6 @@ import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceStream;
 import org.sejda.sambox.util.Matrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.awt.geom.GeneralPath;
-import java.awt.geom.Rectangle2D;
-import java.io.IOException;
-import java.lang.ref.SoftReference;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
-import static java.util.Optional.ofNullable;
 
 /**
  * An interactive form, also known as an AcroForm.
@@ -355,7 +354,8 @@ public final class PDAcroForm extends PDDictionaryWrapper
      */
     public void setFields(List<PDField> fields)
     {
-        getCOSObject().setItem(COSName.FIELDS, COSArrayList.converterToCOSArray(fields));
+        getCOSObject().setItem(COSName.FIELDS,
+                ofNullable(fields).map(COSArray::fromCOSObjectables).orElse(null));
     }
 
     /**

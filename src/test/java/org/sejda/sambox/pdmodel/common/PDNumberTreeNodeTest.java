@@ -16,24 +16,28 @@
  */
 package org.sejda.sambox.pdmodel.common;
 
-import junit.framework.TestCase;
-import org.junit.Assert;
-import org.sejda.sambox.cos.COSArrayList;
-import org.sejda.sambox.cos.COSInteger;
-import org.sejda.sambox.cos.COSObjectable;
+import static java.util.Optional.ofNullable;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.sejda.sambox.cos.COSInteger;
+import org.sejda.sambox.cos.COSObjectable;
+
 /**
  * A test case for PDNumberTreeNode. Based on TestPDNameTreeNode.
- * 
+ *
  * @author Dominic Tubach
  */
-public class TestPDNumberTreeNode extends TestCase
+public class PDNumberTreeNodeTest
 {
 
     private PDNumberTreeNode node1;
@@ -91,7 +95,7 @@ public class TestPDNumberTreeNode extends TestCase
         }
     }
 
-    @Override
+    @BeforeEach
     protected void setUp() throws Exception
     {
         this.node5 = new PDNumberTreeNode(PDTest.class);
@@ -115,82 +119,76 @@ public class TestPDNumberTreeNode extends TestCase
         this.node24.setNumbers(Numbers);
 
         this.node2 = new PDNumberTreeNode(PDTest.class);
-        List<PDNumberTreeNode> kids = this.node2.getKids();
-        if (kids == null)
-        {
-            kids = new COSArrayList<>();
-        }
-        kids.add(this.node5);
-        this.node2.setKids(kids);
+        List<PDNumberTreeNode> kids2 = ofNullable(this.node2.getKids()).map(ArrayList::new)
+                .orElseGet(ArrayList::new);
+        kids2.add(this.node5);
+        this.node2.setKids(kids2);
 
         this.node4 = new PDNumberTreeNode(PDTest.class);
-        kids = this.node4.getKids();
-        if (kids == null)
-        {
-            kids = new COSArrayList<>();
-        }
-        kids.add(this.node24);
-        this.node4.setKids(kids);
+        List<PDNumberTreeNode> kids4 = ofNullable(this.node4.getKids()).map(ArrayList::new)
+                .orElseGet(ArrayList::new);
+        kids4.add(this.node24);
+        this.node4.setKids(kids4);
 
         this.node1 = new PDNumberTreeNode(PDTest.class);
-        kids = this.node1.getKids();
-        if (kids == null)
-        {
-            kids = new COSArrayList<>();
-        }
-        kids.add(this.node2);
-        kids.add(this.node4);
-        this.node1.setKids(kids);
+        List<PDNumberTreeNode> kids1 = ofNullable(this.node1.getKids()).map(ArrayList::new)
+                .orElseGet(ArrayList::new);
+        kids1.add(this.node2);
+        kids1.add(this.node4);
+        this.node1.setKids(kids1);
     }
 
+    @Test
     public void testGetValue() throws IOException
     {
-        Assert.assertEquals(new PDTest(51), this.node5.getValue(4));
-        Assert.assertEquals(new PDTest(70), this.node1.getValue(9));
+        assertEquals(new PDTest(51), this.node5.getValue(4));
+        assertEquals(new PDTest(70), this.node1.getValue(9));
 
         this.node1.setKids(null);
         this.node1.setNumbers(null);
-        Assert.assertNull(this.node1.getValue(0));
+        assertNull(this.node1.getValue(0));
     }
 
+    @Test
     public void testUpperLimit() throws IOException
     {
-        Assert.assertEquals(7, (int) this.node5.getUpperLimit());
-        Assert.assertEquals(7, (int) this.node2.getUpperLimit());
+        assertEquals(7, (int) this.node5.getUpperLimit());
+        assertEquals(7, (int) this.node2.getUpperLimit());
 
-        Assert.assertEquals(12, (int) this.node24.getUpperLimit());
-        Assert.assertEquals(12, (int) this.node4.getUpperLimit());
+        assertEquals(12, (int) this.node24.getUpperLimit());
+        assertEquals(12, (int) this.node4.getUpperLimit());
 
-        Assert.assertEquals(12, (int) this.node1.getUpperLimit());
+        assertEquals(12, (int) this.node1.getUpperLimit());
 
         this.node24.setNumbers(new HashMap<>());
-        Assert.assertNull(this.node24.getUpperLimit());
+        assertNull(this.node24.getUpperLimit());
 
         this.node5.setNumbers(null);
-        Assert.assertNull(this.node5.getUpperLimit());
+        assertNull(this.node5.getUpperLimit());
 
         this.node1.setKids(null);
-        Assert.assertNull(this.node1.getUpperLimit());
+        assertNull(this.node1.getUpperLimit());
     }
 
+    @Test
     public void testLowerLimit() throws IOException
     {
-        Assert.assertEquals(1, (int) this.node5.getLowerLimit());
-        Assert.assertEquals(1, (int) this.node2.getLowerLimit());
+        assertEquals(1, (int) this.node5.getLowerLimit());
+        assertEquals(1, (int) this.node2.getLowerLimit());
 
-        Assert.assertEquals(8, (int) this.node24.getLowerLimit());
-        Assert.assertEquals(8, (int) this.node4.getLowerLimit());
+        assertEquals(8, (int) this.node24.getLowerLimit());
+        assertEquals(8, (int) this.node4.getLowerLimit());
 
-        Assert.assertEquals(1, (int) this.node1.getLowerLimit());
+        assertEquals(1, (int) this.node1.getLowerLimit());
 
         this.node24.setNumbers(new HashMap<>());
-        Assert.assertNull(this.node24.getLowerLimit());
+        assertNull(this.node24.getLowerLimit());
 
         this.node5.setNumbers(null);
-        Assert.assertNull(this.node5.getLowerLimit());
+        assertNull(this.node5.getLowerLimit());
 
         this.node1.setKids(null);
-        Assert.assertNull(this.node1.getLowerLimit());
+        assertNull(this.node1.getLowerLimit());
     }
 
 }

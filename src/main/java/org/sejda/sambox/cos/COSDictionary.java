@@ -71,7 +71,8 @@ public class COSDictionary extends COSBase
     {
         for (Map.Entry<COSName, COSBase> entry : items.entrySet())
         {
-            if (entry.getValue().getCOSObject().equals(value.getCOSObject()))
+            var entryValue = ofNullable(entry.getValue()).map(COSBase::getCOSObject).orElse(null);
+            if (nonNull(entryValue) && nonNull(value) && entryValue.equals(value.getCOSObject()))
             {
                 return entry.getKey();
             }
@@ -130,12 +131,13 @@ public class COSDictionary extends COSBase
      */
     public COSBase getDictionaryObject(COSName firstKey, COSName secondKey)
     {
-        COSBase retval = getDictionaryObject(firstKey);
-        if (retval == null && secondKey != null)
-        {
-            return getDictionaryObject(secondKey);
-        }
-        return retval;
+        return ofNullable(getDictionaryObject(firstKey)).orElseGet(() -> {
+            if (nonNull(secondKey))
+            {
+                return getDictionaryObject(secondKey);
+            }
+            return null;
+        });
     }
 
     /**
@@ -248,12 +250,7 @@ public class COSDictionary extends COSBase
      */
     public void setItem(COSName key, COSObjectable value)
     {
-        COSBase base = null;
-        if (value != null)
-        {
-            base = value.getCOSObject();
-        }
-        setItem(key, base);
+        setItem(key, ofNullable(value).map(COSObjectable::getCOSObject).orElse(null));
     }
 
     public void putIfAbsent(COSName key, COSObjectable value)
@@ -514,23 +511,6 @@ public class COSDictionary extends COSBase
     public COSName getCOSName(COSName key)
     {
         return getCOSName(key, null);
-    }
-
-    /**
-     * This is a convenience method that will get the dictionary object that is expected to be a
-     * COSArray. Null is returned if the entry does not exist in the dictionary.
-     *
-     * @param key The key to the item in the dictionary.
-     * @return The COSArray.
-     */
-    public COSArray getCOSArray(COSName key)
-    {
-        COSBase array = getDictionaryObject(key);
-        if (array instanceof COSArray)
-        {
-            return (COSArray) array;
-        }
-        return null;
     }
 
     /**

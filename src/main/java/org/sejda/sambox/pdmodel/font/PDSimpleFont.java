@@ -20,10 +20,11 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNullElse;
 import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toCollection;
 
 import java.awt.geom.GeneralPath;
 import java.io.IOException;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -32,7 +33,6 @@ import java.util.Set;
 
 import org.apache.fontbox.FontBoxFont;
 import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSArrayList;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
@@ -491,9 +491,17 @@ public abstract class PDSimpleFont extends PDFont
     {
         if (isNull(widths))
         {
-            this.widths = ofNullable(
-                    getCOSObject().getDictionaryObject(COSName.WIDTHS, COSArray.class)).map(
-                    COSArrayList::convertFloatCOSArrayToList).orElseGet(Collections::emptyList);
+            COSArray value = getCOSObject().getDictionaryObject(COSName.WIDTHS, COSArray.class);
+            if (nonNull(value))
+            {
+                this.widths = value.stream().map(COSBase::getCOSObject)
+                        .filter(e -> e instanceof COSNumber).map(n -> ((COSNumber) n).floatValue())
+                        .collect(toCollection(ArrayList::new));
+            }
+            else
+            {
+                this.widths = new ArrayList<>();
+            }
         }
     }
 

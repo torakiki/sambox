@@ -16,14 +16,17 @@
  */
 package org.sejda.sambox.pdmodel.interactive.action;
 
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toCollection;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSArrayList;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.cos.COSObjectable;
 import org.sejda.sambox.pdmodel.common.PDDestinationOrAction;
 
 /**
@@ -50,7 +53,7 @@ public abstract class PDAction implements PDDestinationOrAction
     public PDAction()
     {
         action = new COSDictionary();
-        setType( TYPE );
+        setType(TYPE);
     }
 
     /**
@@ -58,7 +61,7 @@ public abstract class PDAction implements PDDestinationOrAction
      *
      * @param a The action dictionary.
      */
-    public PDAction( COSDictionary a )
+    public PDAction(COSDictionary a)
     {
         action = a;
     }
@@ -75,30 +78,30 @@ public abstract class PDAction implements PDDestinationOrAction
     }
 
     /**
-     * This will get the type of PDF object that the actions dictionary describes.
-     * If present must be Action for an action dictionary.
+     * This will get the type of PDF object that the actions dictionary describes. If present must
+     * be Action for an action dictionary.
      *
      * @return The Type of PDF object.
      */
     public String getType()
     {
-       return action.getNameAsString( COSName.TYPE );
+        return action.getNameAsString(COSName.TYPE);
     }
 
     /**
-     * This will set the type of PDF object that the actions dictionary describes.
-     * If present must be Action for an action dictionary.
+     * This will set the type of PDF object that the actions dictionary describes. If present must
+     * be Action for an action dictionary.
      *
      * @param type The new Type for the PDF object.
      */
-    public final void setType( String type )
+    public final void setType(String type)
     {
-       action.setName(COSName.TYPE, type );
+        action.setName(COSName.TYPE, type);
     }
 
     /**
-     * This will get the type of action that the actions dictionary describes.
-     * If present, must be Action for an action dictionary.
+     * This will get the type of action that the actions dictionary describes. If present, must be
+     * Action for an action dictionary.
      *
      * @return The S entry of actions dictionary.
      */
@@ -108,54 +111,51 @@ public abstract class PDAction implements PDDestinationOrAction
     }
 
     /**
-     * This will set the type of action that the actions dictionary describes.
-     * If present, must be Action for an action dictionary.
+     * This will set the type of action that the actions dictionary describes. If present, must be
+     * Action for an action dictionary.
      *
      * @param s The new type of action.
      */
-    public void setSubType( String s )
+    public void setSubType(String s)
     {
         action.setName(COSName.S, s);
     }
 
     /**
-     * This will get the next action, or sequence of actions, to be performed after this one.
-     * The value is either a single action dictionary or an array of action dictionaries
-     * to be performed in order.
+     * This will get the next action, or sequence of actions, to be performed after this one. The
+     * value is either a single action dictionary or an array of action dictionaries to be performed
+     * in order.
      *
-     * @return The Next action or sequence of actions.
+     * @return A mutable sequence of actions.
      */
     public List<PDAction> getNext()
     {
-        List<PDAction> retval = null;
         COSBase next = action.getDictionaryObject(COSName.NEXT);
-        if( next instanceof COSDictionary )
+        if (next instanceof COSDictionary dictionary)
         {
-            PDAction pdAction = PDActionFactory.createAction( (COSDictionary) next );
-            retval = new COSArrayList<>(pdAction, next, action, COSName.NEXT);
+            return new ArrayList<>(List.of(PDActionFactory.createAction(dictionary)));
         }
-        else if(next instanceof COSArray array)
+        if (next instanceof COSArray cosArray)
         {
-            List<PDAction> actions = new ArrayList<>();
-            for( int i=0; i<array.size(); i++ )
-            {
-                actions.add( PDActionFactory.createAction( (COSDictionary) array.getObject( i )));
-            }
-            retval = new COSArrayList<>(actions, array);
+            return cosArray.stream().map(COSBase::getCOSObject)
+                    .filter(e -> e instanceof COSDictionary)
+                    .map(d -> PDActionFactory.createAction((COSDictionary) d))
+                    .collect(toCollection(ArrayList::new));
         }
 
-        return retval;
+        return new ArrayList<>();
     }
 
     /**
-     * This will set the next action, or sequence of actions, to be performed after this one.
-     * The value is either a single action dictionary or an array of action dictionaries
-     * to be performed in order.
+     * This will set the next action, or sequence of actions, to be performed after this one. The
+     * value is either a single action dictionary or an array of action dictionaries to be performed
+     * in order.
      *
      * @param next The Next action or sequence of actions.
      */
-    public void setNext( List<?> next )
+    public void setNext(List<? extends COSObjectable> next)
     {
-        action.setItem(COSName.NEXT, COSArrayList.converterToCOSArray(next));
+        action.setItem(COSName.NEXT,
+                ofNullable(next).map(COSArray::fromCOSObjectables).orElse(null));
     }
 }

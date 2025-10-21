@@ -16,6 +16,10 @@
  */
 package org.sejda.sambox.pdmodel.interactive.annotation;
 
+import static java.util.Optional.ofNullable;
+
+import java.io.IOException;
+
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
@@ -27,10 +31,6 @@ import org.sejda.sambox.pdmodel.interactive.annotation.handlers.PDAppearanceHand
 import org.sejda.sambox.pdmodel.interactive.annotation.handlers.PDLinkAppearanceHandler;
 import org.sejda.sambox.pdmodel.interactive.documentnavigation.destination.PDDestination;
 import org.sejda.sambox.pdmodel.interactive.documentnavigation.destination.WithActionOrDestination;
-
-import java.io.IOException;
-
-import static java.util.Optional.ofNullable;
 
 /**
  * This is the class that represents a link annotation.
@@ -208,9 +208,7 @@ public class PDAnnotationLink extends PDAnnotation implements WithActionOrDestin
      */
     public void setQuadPoints(float[] quadPoints)
     {
-        COSArray newQuadPoints = new COSArray();
-        newQuadPoints.setFloatArray(quadPoints);
-        getCOSObject().setItem(COSName.QUADPOINTS, newQuadPoints);
+        getCOSObject().setItem(COSName.QUADPOINTS, COSArray.fromFloats(quadPoints));
     }
 
     /**

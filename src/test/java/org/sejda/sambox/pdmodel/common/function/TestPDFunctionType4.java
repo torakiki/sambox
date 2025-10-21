@@ -16,20 +16,21 @@
  */
 package org.sejda.sambox.pdmodel.common.function;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
+import org.junit.jupiter.api.Test;
 import org.sejda.commons.util.IOUtils;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSStream;
 
-import junit.framework.TestCase;
-
 /**
  * Tests the {@link PDFunctionType4} class.
  */
-public class TestPDFunctionType4 extends TestCase
+public class TestPDFunctionType4
 {
 
     private PDFunctionType4 createFunction(String function, float[] domain, float[] range)
@@ -37,12 +38,8 @@ public class TestPDFunctionType4 extends TestCase
     {
         COSStream stream = new COSStream();
         stream.setInt("FunctionType", 4);
-        COSArray domainArray = new COSArray();
-        domainArray.setFloatArray(domain);
-        stream.setItem("Domain", domainArray);
-        COSArray rangeArray = new COSArray();
-        rangeArray.setFloatArray(range);
-        stream.setItem("Range", rangeArray);
+        stream.setItem("Domain", COSArray.fromFloats(domain));
+        stream.setItem("Range", COSArray.fromFloats(range));
 
         OutputStream out = stream.createUnfilteredStream();
         byte[] data = function.getBytes(StandardCharsets.US_ASCII);
@@ -57,6 +54,7 @@ public class TestPDFunctionType4 extends TestCase
      * 
      * @throws Exception if an error occurs
      */
+    @Test
     public void testFunctionSimple() throws Exception
     {
         String functionText = "{ add }";
@@ -89,6 +87,7 @@ public class TestPDFunctionType4 extends TestCase
      * 
      * @throws Exception if an error occurs
      */
+    @Test
     public void testFunctionArgumentOrder() throws Exception
     {
         String functionText = "{ pop }";

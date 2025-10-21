@@ -204,7 +204,8 @@ public class PDType3Font extends PDSimpleFont
     {
         if (fontMatrix == null)
         {
-            COSArray matrix = getCOSObject().getCOSArray(COSName.FONT_MATRIX);
+            COSArray matrix = getCOSObject().getDictionaryObject(COSName.FONT_MATRIX,
+                    COSArray.class);
             fontMatrix = checkFontMatrixValues(matrix) ? Matrix.createMatrix(
                     matrix) : super.getFontMatrix();
         }

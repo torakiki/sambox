@@ -26,7 +26,7 @@ import java.util.Map;
 
 import org.apache.fontbox.ttf.HorizontalMetricsTable;
 import org.apache.fontbox.ttf.TrueTypeFont;
-import org.sejda.sambox.cos.COSArrayList;
+import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.font.encoding.Encoding;
@@ -107,7 +107,7 @@ final class PDTrueTypeFontEmbedder extends TrueTypeEmbedder
 
         font.setInt(COSName.FIRST_CHAR, firstChar);
         font.setInt(COSName.LAST_CHAR, lastChar);
-        font.setItem(COSName.WIDTHS, COSArrayList.converterToCOSArray(widths));
+        font.setItem(COSName.WIDTHS, COSArray.fromIntegers(widths));
     }
 
     /**

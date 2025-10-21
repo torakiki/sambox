@@ -2018,7 +2018,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
 
     private boolean isHiddenOCMD(PDOptionalContentMembershipDictionary ocmd)
     {
-        if (ocmd.getCOSObject().getCOSArray(COSName.VE) != null)
+        if (ocmd.getCOSObject().getDictionaryObject(COSName.VE, COSArray.class) != null)
         {
             // support seems to be optional, and is approximated by /P and /OCGS
             LOG.info("/VE entry ignored in Optional Content Membership Dictionary");

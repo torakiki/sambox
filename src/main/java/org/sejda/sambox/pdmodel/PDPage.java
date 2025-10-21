@@ -18,6 +18,7 @@ package org.sejda.sambox.pdmodel;
 
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toCollection;
 import static org.sejda.sambox.cos.COSName.DECODE_PARMS;
 import static org.sejda.sambox.cos.COSName.DL;
 import static org.sejda.sambox.cos.COSName.F;
@@ -40,7 +41,6 @@ import java.util.List;
 
 import org.sejda.sambox.contentstream.PDContentStream;
 import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSArrayList;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSFloat;
@@ -618,41 +618,26 @@ public class PDPage implements COSObjectable, PDContentStream
      * This will get a list of PDThreadBead objects, which are article threads in the document. This
      * will return an empty list of there are no thread beads.
      *
-     * @return A list of article threads on this page.
+     * @return A mutable list of article threads on this page.
      */
     public List<PDThreadBead> getThreadBeads()
     {
         COSArray beads = page.getDictionaryObject(COSName.B, COSArray.class);
-        if (beads == null)
+        if (nonNull(beads))
         {
-            return new COSArrayList<>(page, COSName.B);
+            return beads.stream().map(COSBase::getCOSObject).filter(b -> b instanceof COSDictionary)
+                    .map(b -> new PDThreadBead((COSDictionary) b))
+                    .collect(toCollection(ArrayList::new));
         }
-        List<PDThreadBead> actuals = new ArrayList<>(beads.size());
-        for (int i = 0; i < beads.size(); i++)
-        {
-            COSBase item = beads.getObject(i);
-            PDThreadBead bead = ofNullable(item).filter(d -> d instanceof COSDictionary)
-                    .map(COSDictionary.class::cast).map(PDThreadBead::new).orElseGet(() -> {
-                        LOG.warn("Ignored thread bead expected to be a dictionary but was {}",
-                                item);
-                        return null;
-                    });
-            if (nonNull(bead))
-            {
-                actuals.add(bead);
-            }
-        }
-        return new COSArrayList<>(actuals, beads);
+        return new ArrayList<>();
     }
 
     /**
-     * This will set the list of thread beads.
-     *
      * @param beads A list of PDThreadBead objects or null.
      */
     public void setThreadBeads(List<PDThreadBead> beads)
     {
-        page.setItem(COSName.B, COSArrayList.converterToCOSArray(beads));
+        page.setItem(COSName.B, ofNullable(beads).map(COSArray::fromCOSObjectables).orElse(null));
     }
 
     /**
@@ -735,10 +720,7 @@ public class PDPage implements COSObjectable, PDContentStream
     }
 
     /**
-     * This will return a list of the annotations for this page.
-     *
-     * @return List of the PDAnnotation objects, never null. The returned list is backed by the
-     * annotations COSArray, so any adding or deleting in this list will change the document too.
+     * @return A mutable List of {@link PDAnnotation} objects for this page.
      */
     public List<PDAnnotation> getAnnotations()
     {
@@ -746,36 +728,22 @@ public class PDPage implements COSObjectable, PDContentStream
     }
 
     /**
-     * This will return a list of the annotations for this page.
-     *
      * @param annotationFilter the annotation filter provided allowing to filter out specific
      *                         annotations
-     * @return List of the PDAnnotation objects, never null. The returned list is backed by the
-     * annotations COSArray, so any adding or deleting in this list will change the document too.
+     * @return A mutable List of {@link PDAnnotation} objects for this page that satisfy the
+     * provided filter.
      */
     public List<PDAnnotation> getAnnotations(AnnotationFilter annotationFilter)
     {
-        COSArray annots = page.getDictionaryObject(COSName.ANNOTS, COSArray.class);
-        if (annots == null)
+        COSArray annotations = page.getDictionaryObject(COSName.ANNOTS, COSArray.class);
+        if (nonNull(annotations))
         {
-            return new COSArrayList<>(page, COSName.ANNOTS);
+            return annotations.stream().map(COSBase::getCOSObject)
+                    .filter(b -> b instanceof COSDictionary).map(COSDictionary.class::cast)
+                    .map(PDAnnotation::createAnnotation).filter(annotationFilter::accept)
+                    .collect(toCollection(ArrayList::new));
         }
-        List<PDAnnotation> actuals = new ArrayList<>();
-        for (int i = 0; i < annots.size(); i++)
-        {
-            COSBase item = annots.getObject(i);
-            PDAnnotation annotation = ofNullable(item).filter(d -> d instanceof COSDictionary)
-                    .map(COSDictionary.class::cast).map(PDAnnotation::createAnnotation)
-                    .orElseGet(() -> {
-                        LOG.warn("Ignored annotation expected to be a dictionary but was {}", item);
-                        return null;
-                    });
-            if (nonNull(annotation) && annotationFilter.accept(annotation))
-            {
-                actuals.add(annotation);
-            }
-        }
-        return new COSArrayList<>(actuals, annots);
+        return new ArrayList<>();
     }
 
     /**
@@ -822,7 +790,8 @@ public class PDPage implements COSObjectable, PDContentStream
      */
     public void setAnnotations(List<PDAnnotation> annotations)
     {
-        page.setItem(COSName.ANNOTS, COSArrayList.converterToCOSArray(annotations));
+        page.setItem(COSName.ANNOTS,
+                ofNullable(annotations).map(COSArray::fromCOSObjectables).orElse(null));
     }
 
     @Override

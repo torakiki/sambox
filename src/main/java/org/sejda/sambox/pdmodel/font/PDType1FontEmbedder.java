@@ -27,7 +27,7 @@ import org.apache.fontbox.pfb.PfbParser;
 import org.apache.fontbox.type1.Type1Font;
 import org.apache.fontbox.util.BoundingBox;
 import org.sejda.commons.util.IOUtils;
-import org.sejda.sambox.cos.COSArrayList;
+import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.PDDocument;
@@ -94,7 +94,7 @@ class PDType1FontEmbedder
 
         dict.setInt(COSName.FIRST_CHAR, 0);
         dict.setInt(COSName.LAST_CHAR, 255);
-        dict.setItem(COSName.WIDTHS, COSArrayList.converterToCOSArray(widths));
+        dict.setItem(COSName.WIDTHS, COSArray.fromIntegers(widths));
         dict.setItem(COSName.ENCODING, encoding);
     }
 

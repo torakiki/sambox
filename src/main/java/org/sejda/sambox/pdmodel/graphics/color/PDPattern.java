@@ -42,15 +42,12 @@ public final class PDPattern extends PDSpecialColorSpace
     private PDColorSpace underlyingColorSpace;
 
     /**
-     * Creates a new pattern color space.
-     *
      * @param resources The current resources.
      */
     public PDPattern(PDResources resources)
     {
+        this.array = new COSArray(COSName.PATTERN);
         this.resources = resources;
-        this.array = new COSArray();
-        this.array.add(COSName.PATTERN);
     }
 
     /**
@@ -61,11 +58,9 @@ public final class PDPattern extends PDSpecialColorSpace
      */
     public PDPattern(PDResources resources, PDColorSpace colorSpace)
     {
+        this.array = new COSArray(COSName.PATTERN, colorSpace.getCOSObject());
         this.resources = resources;
         this.underlyingColorSpace = colorSpace;
-        this.array = new COSArray();
-        this.array.add(COSName.PATTERN);
-        this.array.add(colorSpace);
     }
 
     @Override
@@ -111,8 +106,6 @@ public final class PDPattern extends PDSpecialColorSpace
     }
 
     /**
-     * Returns the pattern for the given color.
-     *
      * @param color color containing a pattern name
      * @return pattern for the given color
      * @throws java.io.IOException if the pattern name was not found.
@@ -128,7 +121,7 @@ public final class PDPattern extends PDSpecialColorSpace
     }
 
     /**
-     * Returns the underlying color space, if this is an uncolored tiling pattern, otherwise null.
+     * @return the underlying color space, if this is an uncolored tiling pattern, otherwise null.
      */
     public PDColorSpace getUnderlyingColorSpace()
     {

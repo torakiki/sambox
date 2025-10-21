@@ -16,18 +16,17 @@
  */
 package org.sejda.sambox.pdmodel.common;
 
+import static java.util.stream.Collectors.toCollection;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.sejda.commons.util.IOUtils;
 import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSArrayList;
 import org.sejda.sambox.cos.COSBase;
-import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.COSObjectable;
@@ -176,23 +175,24 @@ public class PDStream implements COSObjectable
     }
 
     /**
-     * This will get the list of filters that are associated with this stream. Or null if there are
-     * none.
+     * This will get the list of filters that are associated with this stream. Or an empty list if
+     * there is none
      *
-     * @return A list of all encoding filters to apply to this stream.
+     * @return A mutable list of all encoding filters to apply to this stream.
      */
     public List<COSName> getFilters()
     {
         COSBase filters = stream.getFilters();
         if (filters instanceof COSName name)
         {
-            return new COSArrayList<>(name, name, stream, COSName.FILTER);
+            return new ArrayList<>(List.of(name));
         }
-        if (filters instanceof COSArray filtersArray)
+        if (filters instanceof COSArray cosArray)
         {
-            return (List<COSName>) filtersArray.toList();
+            return cosArray.stream().map(COSBase::getCOSObject).filter(e -> e instanceof COSName)
+                    .map(n -> ((COSName) n)).collect(toCollection(ArrayList::new));
         }
-        return null;
+        return new ArrayList<>();
     }
 
     /**
@@ -202,55 +202,7 @@ public class PDStream implements COSObjectable
      */
     public void setFilters(List<COSName> filters)
     {
-        COSBase obj = COSArrayList.converterToCOSArray(filters);
-        stream.setItem(COSName.FILTER, obj);
-    }
-
-    /**
-     * Get the list of decode parameters. Each entry in the list will refer to an entry in the
-     * filters list.
-     *
-     * @return The list of decode parameters.
-     * @throws IOException if there is an error retrieving the parameters.
-     */
-    public List<Object> getDecodeParms() throws IOException
-    {
-        List<Object> retval = null;
-
-        COSBase dp = stream.getDictionaryObject(COSName.DECODE_PARMS);
-        if (dp == null)
-        {
-            // See PDF Ref 1.5 implementation note 7, the DP is sometimes used
-            // instead.
-            dp = stream.getDictionaryObject(COSName.DP);
-        }
-        if (dp instanceof COSDictionary)
-        {
-            Map<?, ?> map = COSDictionaryMap.convertBasicTypesToMap((COSDictionary) dp);
-            retval = new COSArrayList<>(map, dp, stream, COSName.DECODE_PARMS);
-        }
-        else if (dp instanceof COSArray array)
-        {
-            List<Object> actuals = new ArrayList<>();
-            for (int i = 0; i < array.size(); i++)
-            {
-                actuals.add(COSDictionaryMap.convertBasicTypesToMap(
-                        (COSDictionary) array.getObject(i)));
-            }
-            retval = new COSArrayList<>(actuals, array);
-        }
-
-        return retval;
-    }
-
-    /**
-     * This will set the list of decode parameterss.
-     *
-     * @param decodeParams The list of decode parameterss.
-     */
-    public void setDecodeParms(List<?> decodeParams)
-    {
-        stream.setItem(COSName.DECODE_PARMS, COSArrayList.converterToCOSArray(decodeParams));
+        stream.setItem(COSName.FILTER, new COSArray(filters));
     }
 
     /**
@@ -272,76 +224,6 @@ public class PDStream implements COSObjectable
     public void setFile(PDFileSpecification f)
     {
         stream.setItem(COSName.F, f);
-    }
-
-    /**
-     * This will get the list of filters that are associated with this stream. Or null if there are
-     * none.
-     *
-     * @return A list of all encoding filters to apply to this stream.
-     */
-    public List<String> getFileFilters()
-    {
-        COSBase filters = stream.getDictionaryObject(COSName.F_FILTER);
-        if (filters instanceof COSName name)
-        {
-            return new COSArrayList<>(name.getName(), name, stream, COSName.F_FILTER);
-        }
-        if (filters instanceof COSArray)
-        {
-            return COSArrayList.convertCOSNameCOSArrayToList((COSArray) filters);
-        }
-        return null;
-    }
-
-    /**
-     * This will set the filters that are part of this stream.
-     *
-     * @param filters The filters that are part of this stream.
-     */
-    public void setFileFilters(List<String> filters)
-    {
-        COSBase obj = COSArrayList.convertStringListToCOSNameCOSArray(filters);
-        stream.setItem(COSName.F_FILTER, obj);
-    }
-
-    /**
-     * Get the list of decode parameters. Each entry in the list will refer to an entry in the
-     * filters list.
-     *
-     * @return The list of decode parameters.
-     * @throws IOException if there is an error retrieving the parameters.
-     */
-    public List<Object> getFileDecodeParams() throws IOException
-    {
-        COSBase dp = stream.getDictionaryObject(COSName.F_DECODE_PARMS);
-        if (dp instanceof COSDictionary)
-        {
-            Map<?, ?> map = COSDictionaryMap.convertBasicTypesToMap((COSDictionary) dp);
-            return new COSArrayList<>(map, dp, stream, COSName.F_DECODE_PARMS);
-        }
-        if (dp instanceof COSArray array)
-        {
-            List<Object> actuals = new ArrayList<>();
-            for (int i = 0; i < array.size(); i++)
-            {
-                actuals.add(COSDictionaryMap.convertBasicTypesToMap(
-                        (COSDictionary) array.getObject(i)));
-            }
-            return new COSArrayList<>(actuals, array);
-        }
-
-        return null;
-    }
-
-    /**
-     * This will set the list of decode params.
-     *
-     * @param decodeParams The list of decode params.
-     */
-    public void setFileDecodeParams(List<?> decodeParams)
-    {
-        stream.setItem(COSName.F_DECODE_PARMS, COSArrayList.converterToCOSArray(decodeParams));
     }
 
     /**

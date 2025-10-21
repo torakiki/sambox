@@ -16,15 +16,15 @@
  */
 package org.sejda.sambox.pdmodel.graphics.color;
 
+import java.io.IOException;
+import java.util.Arrays;
+
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSNumber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.Arrays;
 
 /**
  * A color value, consisting of one or more color components, or for pattern color spaces, a name
@@ -37,7 +37,7 @@ import java.util.Arrays;
 public final class PDColor
 {
     private static final Logger LOG = LoggerFactory.getLogger(PDColor.class);
-    
+
     private float[] components;
     private final COSName patternName;
     private final PDColorSpace colorSpace;
@@ -50,7 +50,7 @@ public final class PDColor
      */
     public PDColor(COSArray array, PDColorSpace colorSpace)
     {
-        if (array.size() > 0 && array.get(array.size() - 1) instanceof COSName)
+        if (!array.isEmpty() && array.getLast() instanceof COSName)
         {
             // color components (optional)
             components = new float[array.size() - 1];
@@ -199,8 +199,7 @@ public final class PDColor
      */
     public COSArray toCOSArray()
     {
-        COSArray array = new COSArray();
-        array.setFloatArray(components);
+        var array = COSArray.fromFloats(components);
         if (patternName != null)
         {
             array.add(patternName);
@@ -214,9 +213,7 @@ public final class PDColor
      */
     public COSArray toComponentsCOSArray()
     {
-        COSArray array = new COSArray();
-        array.setFloatArray(components);
-        return array;
+        return COSArray.fromFloats(components);
     }
 
     /**

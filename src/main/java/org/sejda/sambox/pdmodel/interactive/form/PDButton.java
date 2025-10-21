@@ -16,8 +16,19 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
+import static java.util.stream.Collectors.toCollection;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+
 import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSArrayList;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
@@ -28,10 +39,6 @@ import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceEntry;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * A button field represents an interactive control on the screen that the user can manipulate with
@@ -59,13 +66,13 @@ public abstract class PDButton extends PDTerminalField
      * will turn on and off in unison.
      */
     static final int FLAG_RADIOS_IN_UNISON = 1 << 25;
-    
+
     // SAMBOX SPECIFIC
     // PDFBox accepts field.setValue("Export option 1") and does some mapping between option/value
     // this mapping makes a lot of assumptions and breaks in several cases: 
     // 1) when widgets.size != exportOptions.size
     // 2) when options are numeric and match the appearance states, eg: export options /Opt = ["0", "1"]
-    
+
     // We add an option to perform setValue()/getValue() by always passing the final dict /V value,
     // (the appearance state value), and ignoring any /Opt mapping
     private boolean ignoreExportOptions = false;
@@ -84,8 +91,8 @@ public abstract class PDButton extends PDTerminalField
      * Constructor.
      *
      * @param acroForm The form that this field is part of.
-     * @param field the PDF object to represent as a field.
-     * @param parent the parent node of the node
+     * @param field    the PDF object to represent as a field.
+     * @param parent   the parent node of the node
      */
     PDButton(PDAcroForm acroForm, COSDictionary field, PDNonTerminalField parent)
     {
@@ -105,8 +112,8 @@ public abstract class PDButton extends PDTerminalField
     /**
      * Set the push button bit.
      *
-     * @deprecated use {@link org.sejda.sambox.pdmodel.interactive.form.PDPushButton} instead
      * @param pushbutton if true the button field is treated as a push button field.
+     * @deprecated use {@link org.sejda.sambox.pdmodel.interactive.form.PDPushButton} instead
      */
     @Deprecated
     public void setPushButton(boolean pushbutton)
@@ -131,8 +138,8 @@ public abstract class PDButton extends PDTerminalField
     /**
      * Set the radio button bit.
      *
-     * @deprecated use {@link org.sejda.sambox.pdmodel.interactive.form.PDRadioButton} instead
      * @param radiobutton if true the button field is treated as a radio button field.
+     * @deprecated use {@link org.sejda.sambox.pdmodel.interactive.form.PDRadioButton} instead
      */
     @Deprecated
     public void setRadioButton(boolean radiobutton)
@@ -157,13 +164,13 @@ public abstract class PDButton extends PDTerminalField
         COSBase value = getInheritableAttribute(COSName.V);
         if (value instanceof COSName)
         {
-            String stringValue = ((COSName)value).getName();
-            
-            if(ignoreExportOptions)
+            String stringValue = ((COSName) value).getName();
+
+            if (ignoreExportOptions)
             {
                 return stringValue;
             }
-            
+
             List<String> exportValues = getExportValues();
             if (!exportValues.isEmpty())
             {
@@ -193,19 +200,18 @@ public abstract class PDButton extends PDTerminalField
      * unless {@link PDAcroForm#isNeedAppearances()} is true.
      *
      * @param value Name of option to select
-     * @throws IOException if the value could not be set
+     * @throws IOException              if the value could not be set
      * @throws IllegalArgumentException if the value is not a valid option.
      */
     @Override
     public void setValue(String value) throws IOException
     {
         checkValue(value);
-        
+
         // if there are export values/an Opt entry there is a different 
         // approach to setting the value
-        boolean hasExportValues = getExportValues().size() > 0;
-
-        if (hasExportValues && !ignoreExportOptions) {
+        if (!getExportValues().isEmpty() && !ignoreExportOptions)
+        {
             updateByOption(value);
         }
         else
@@ -223,7 +229,7 @@ public abstract class PDButton extends PDTerminalField
      * FLAG_RADIOS_IN_UNISON not set.
      *
      * @param index index of option to be selected
-     * @throws IOException if the value could not be set
+     * @throws IOException              if the value could not be set
      * @throws IllegalArgumentException if the index provided is not a valid index.
      */
     public void setValue(int index) throws IOException
@@ -251,9 +257,9 @@ public abstract class PDButton extends PDTerminalField
         COSBase value = getInheritableAttribute(COSName.DV);
         if (value instanceof COSName)
         {
-            return ((COSName)value).getName();
+            return ((COSName) value).getName();
         }
-            return "";
+        return "";
     }
 
     /**
@@ -274,7 +280,6 @@ public abstract class PDButton extends PDTerminalField
         return getValue();
     }
 
-
     /**
      * This will get the export values.
      *
@@ -291,24 +296,24 @@ public abstract class PDButton extends PDTerminalField
      * </ul>
      * </p>
      *
-     * @return List containing all possible export values. If there is no Opt entry an empty list
+     * @return A mutable list containing all possible export values. If there is no Opt entry an empty list
      * will be returned.
      */
     public List<String> getExportValues()
     {
         COSBase value = getInheritableAttribute(COSName.OPT);
 
-        if (value instanceof COSString)
+        if (value instanceof COSString cosString)
         {
-            List<String> array = new ArrayList<>();
-            array.add(((COSString) value).getString());
-            return array;
+            return new ArrayList<>(List.of(cosString.getString()));
         }
-        if (value instanceof COSArray)
+
+        if (value instanceof COSArray cosArray)
         {
-            return COSArrayList.convertCOSStringCOSArrayToList((COSArray) value);
+            return cosArray.stream().map(COSBase::getCOSObject).filter(e -> e instanceof COSString)
+                    .map(n -> ((COSString) n).getString()).collect(toCollection(ArrayList::new));
         }
-        return Collections.emptyList();
+        return new ArrayList<>();
     }
 
     /**
@@ -323,8 +328,7 @@ public abstract class PDButton extends PDTerminalField
         COSArray cosValues;
         if (values != null && !values.isEmpty())
         {
-            cosValues = COSArrayList.convertStringListToCOSStringCOSArray(values);
-            getCOSObject().setItem(COSName.OPT, cosValues);
+            getCOSObject().setItem(COSName.OPT, COSArray.fromStrings(values));
         }
         else
         {
@@ -336,7 +340,7 @@ public abstract class PDButton extends PDTerminalField
     void constructAppearances() throws IOException
     {
         List<String> exportValues = getExportValues();
-        if (exportValues.size() > 0 && !ignoreExportOptions)
+        if (!exportValues.isEmpty() && !ignoreExportOptions)
         {
             // the value is the index value of the option. So we need to get that
             // and use it to set the value
@@ -347,7 +351,8 @@ public abstract class PDButton extends PDTerminalField
                 {
                     updateByOption(exportValues.get(optionsIndex));
                 }
-            } catch (NumberFormatException e)
+            }
+            catch (NumberFormatException e)
             {
                 // silently ignore that
                 // and don't update the appearance
@@ -374,7 +379,7 @@ public abstract class PDButton extends PDTerminalField
     public Set<String> getOnValues()
     {
         Set<String> onValues = new HashSet<>();
-        if(!ignoreExportOptions) 
+        if (!ignoreExportOptions)
         {
             onValues.addAll(getExportValues());
         }
@@ -437,13 +442,12 @@ public abstract class PDButton extends PDTerminalField
                 }
             }
         }
-        
+
         // PDFBox returns an empty string here.
         // Chose to return null so it's clear it's an undefined value
         // Caller should choose to not act on these values
         return null;
     }
-
 
     /**
      * Checks value.
@@ -504,20 +508,23 @@ public abstract class PDButton extends PDTerminalField
             // FIX scenario: checkbox that only has an "Off" entry in normal appearances
             if (entries.isEmpty() || (entries.size() == 1 && entries.contains("Off")))
             {
-                if(this instanceof PDCheckBox checkBox)
+                if (this instanceof PDCheckBox checkBox)
                 {
-                    if (checkBox.getOnValue().equals(value)) {
+                    if (checkBox.getOnValue().equals(value))
+                    {
                         // checkbox is being checked
                         widget.setAppearanceState(value);
-                    } else {
+                    }
+                    else
+                    {
                         // checkbox being unchecked
                         widget.setAppearanceState(COSName.Off.getName());
                     }
                 }
 
-                if(normalAppearance != null && !normalAppearance.isSubDictionary())
+                if (normalAppearance != null && !normalAppearance.isSubDictionary())
                 {
-                    if(this instanceof PDRadioButton || this instanceof PDCheckBox) 
+                    if (this instanceof PDRadioButton || this instanceof PDCheckBox)
                     {
                         // checkbox/radio has a single stream normal appearance
                         // this can cause problems, because the checkbox looks the same no matter if checked or not
@@ -536,7 +543,8 @@ public abstract class PDButton extends PDTerminalField
 
         if (widgets.size() != options.size())
         {
-            throw new IllegalArgumentException("The number of options doesn't match the number of widgets");
+            throw new IllegalArgumentException(
+                    "The number of options doesn't match the number of widgets");
         }
 
         if (value.equals(COSName.Off.getName()))
@@ -558,11 +566,13 @@ public abstract class PDButton extends PDTerminalField
         }
     }
 
-    public boolean isIgnoreExportOptions() {
+    public boolean isIgnoreExportOptions()
+    {
         return ignoreExportOptions;
     }
 
-    public void setIgnoreExportOptions(boolean ignoreExportOptions) {
+    public void setIgnoreExportOptions(boolean ignoreExportOptions)
+    {
         this.ignoreExportOptions = ignoreExportOptions;
     }
 }

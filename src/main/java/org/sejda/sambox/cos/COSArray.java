@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.cos;
 
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 
 import java.io.IOException;
@@ -45,6 +46,11 @@ public class COSArray extends COSBase implements List<COSBase>
     public COSArray(COSBase... items)
     {
         objects.addAll(Arrays.asList(items));
+    }
+
+    public COSArray(List<? extends COSBase> items)
+    {
+        objects.addAll(items);
     }
 
     /**
@@ -449,8 +455,6 @@ public class COSArray extends COSBase implements List<COSBase>
 
     /**
      * trims the array to the given size
-     *
-     * @param size
      */
     public COSArray trimToSize(int size)
     {
@@ -475,20 +479,6 @@ public class COSArray extends COSBase implements List<COSBase>
                     .orElse(0f);
         }
         return retval;
-    }
-
-    /**
-     * Clear the current contents of the COSArray and set it with the float[].
-     *
-     * @param value The new value of the float array.
-     */
-    public void setFloatArray(float[] value)
-    {
-        this.clear();
-        for (float aValue : value)
-        {
-            add(new COSFloat(aValue));
-        }
     }
 
     /**
@@ -551,6 +541,71 @@ public class COSArray extends COSBase implements List<COSBase>
         return ret;
     }
 
+    /**
+     * Factory method to create a COSArray from an array of floats
+     */
+    public static COSArray fromFloats(float[] values)
+    {
+        COSArray array = new COSArray();
+        for (float v : values)
+        {
+            array.add(new COSFloat(v));
+        }
+        return array;
+    }
+
+    /**
+     * Factory method to create a COSArray from a Collection of Integers
+     */
+    public static COSArray fromIntegers(Collection<Integer> integers)
+    {
+        if (nonNull(integers))
+        {
+            return new COSArray(
+                    integers.stream().map(Integer::longValue).map(COSInteger::get).toList());
+        }
+        return new COSArray();
+    }
+
+    /**
+     * Factory method to create a COSArray from a Collection of Strings
+     */
+    public static COSArray fromStrings(Collection<String> strings)
+    {
+        if (nonNull(strings))
+        {
+            return new COSArray(strings.stream().map(COSString::parseLiteral).toList());
+        }
+        return new COSArray();
+    }
+
+    /**
+     * Factory method to create a COSArray from a list of COSObjectable items. The items are
+     * converted to their COSBase representation. Null items are converted to COSNull.
+     */
+    public static COSArray fromCOSObjectables(List<? extends COSObjectable> items)
+    {
+        if (nonNull(items))
+        {
+            return new COSArray(items.stream()
+                    .map(item -> ofNullable(item).map(COSObjectable::getCOSObject)
+                            .orElse(COSNull.NULL)).toList());
+        }
+        return new COSArray();
+    }
+
+    /**
+     * Factory method to create a COSArray from a list of strings, converting them to COSName
+     */
+    public static COSArray fromStringsToCOSNames(List<String> strings)
+    {
+        if (nonNull(strings))
+        {
+            return new COSArray(strings.stream().map(COSName::getPDFName).toList());
+        }
+        return new COSArray();
+    }
+
     @Override
     public boolean equals(Object o)
     {
@@ -558,11 +613,11 @@ public class COSArray extends COSBase implements List<COSBase>
         {
             return true;
         }
-        if (!(o instanceof COSArray))
+        if (!(o instanceof COSArray array))
         {
             return false;
         }
-        return objects.equals(((COSArray) o).objects);
+        return objects.equals(array.objects);
     }
 
     @Override

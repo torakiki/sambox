@@ -19,6 +19,7 @@ package org.sejda.sambox.pdmodel.common;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toCollection;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,7 +30,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSArrayList;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
@@ -111,26 +111,22 @@ public abstract class PDNameTreeNode<T extends COSObjectable> implements COSObje
     }
 
     /**
-     * Return the children of this node. This list will contain PDNameTreeNode objects.
-     *
-     * @return The list of children or null if there are no children.
+     * @return The immutable list of children or an empty list if there are no children.
      */
     public List<PDNameTreeNode<T>> getKids()
     {
         if (nonNull(node))
         {
             COSArray kids = node.getDictionaryObject(COSName.KIDS, COSArray.class);
-            if (kids != null)
+            if (nonNull(kids))
             {
-                List<PDNameTreeNode<T>> pdObjects = new ArrayList<>();
-                for (int i = 0; i < kids.size(); i++)
-                {
-                    pdObjects.add(createChildNode((COSDictionary) kids.getObject(i)));
-                }
-                return new COSArrayList<>(pdObjects, kids);
+                return kids.stream().map(COSBase::getCOSObject)
+                        .filter(e -> e instanceof COSDictionary)
+                        .map(d -> createChildNode((COSDictionary) d))
+                        .collect(toCollection(ArrayList::new));
             }
         }
-        return null;
+        return new ArrayList<>();
     }
 
     /**
@@ -146,7 +142,7 @@ public abstract class PDNameTreeNode<T extends COSObjectable> implements COSObje
             {
                 kidsNode.setParent(this);
             }
-            node.setItem(COSName.KIDS, COSArrayList.converterToCOSArray(kids));
+            node.setItem(COSName.KIDS, COSArray.fromCOSObjectables(kids));
             // root nodes with kids don't have Names
             if (isRootNode())
             {
@@ -170,10 +166,10 @@ public abstract class PDNameTreeNode<T extends COSObjectable> implements COSObje
         else
         {
             List<PDNameTreeNode<T>> kids = getKids();
-            if (kids != null && !kids.isEmpty())
+            if (!kids.isEmpty())
             {
-                PDNameTreeNode<T> firstKid = kids.get(0);
-                PDNameTreeNode<T> lastKid = kids.get(kids.size() - 1);
+                PDNameTreeNode<T> firstKid = kids.getFirst();
+                PDNameTreeNode<T> lastKid = kids.getLast();
                 String lowerLimit = firstKid.getLowerLimit();
                 setLowerLimit(lowerLimit);
                 String upperLimit = lastKid.getUpperLimit();
@@ -184,7 +180,7 @@ public abstract class PDNameTreeNode<T extends COSObjectable> implements COSObje
                 try
                 {
                     Map<String, T> names = getNames();
-                    if (names != null && names.size() > 0)
+                    if (names != null && !names.isEmpty())
                     {
                         Set<String> strings = names.keySet();
                         String[] keys = strings.toArray(new String[0]);
@@ -213,7 +209,7 @@ public abstract class PDNameTreeNode<T extends COSObjectable> implements COSObje
      *
      * @param name The name in the tree.
      * @return The value of the name in the tree.
-     * @throws IOException If an there is a problem creating the destinations.
+     * @throws IOException If there is a problem creating the destinations.
      */
     public T getValue(String name)
     {
@@ -223,7 +219,7 @@ public abstract class PDNameTreeNode<T extends COSObjectable> implements COSObje
             if (isNull(names))
             {
                 List<PDNameTreeNode<T>> kids = getKids();
-                if (kids != null)
+                if (!kids.isEmpty())
                 {
                     for (PDNameTreeNode<T> childNode : kids)
                     {
