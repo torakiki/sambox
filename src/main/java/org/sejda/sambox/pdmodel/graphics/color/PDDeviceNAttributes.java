@@ -16,14 +16,16 @@
  */
 package org.sejda.sambox.pdmodel.graphics.color;
 
+import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
+
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.pdmodel.common.COSDictionaryMap;
 import org.sejda.sambox.pdmodel.common.PDDictionaryWrapper;
 
 /**
@@ -36,75 +38,55 @@ import org.sejda.sambox.pdmodel.common.PDDictionaryWrapper;
 public final class PDDeviceNAttributes extends PDDictionaryWrapper
 {
 
-    /**
-     * Creates a new DeviceN colour space attributes dictionary.
-     */
     public PDDeviceNAttributes()
     {
         super();
     }
 
-    /**
-     * Creates a new DeviceN colour space attributes dictionary from the given dictionary.
-     *
-     * @param attributes a dictionary that has all of the attributes
-     */
     public PDDeviceNAttributes(COSDictionary attributes)
     {
         super(attributes);
     }
 
     /**
-     * Returns a map of colorants and their associated Separation color space.
-     *
-     * @return map of colorants to color spaces
+     * @return a map of colorants and their associated Separation color space.
      * @throws IOException If there is an error reading a color space
      */
     public Map<String, PDSeparation> getColorants() throws IOException
     {
-        Map<String, PDSeparation> actuals = new HashMap<>();
         COSDictionary colorants = getCOSObject().getDictionaryObject(COSName.COLORANTS,
                 COSDictionary.class);
-        if (colorants == null)
+        if (nonNull(colorants))
         {
-            colorants = new COSDictionary();
-            getCOSObject().setItem(COSName.COLORANTS, colorants);
-        }
-        else
-        {
+            Map<String, PDSeparation> actuals = new HashMap<>();
             for (COSName name : colorants.keySet())
             {
-                COSBase value = colorants.getDictionaryObject(name);
-                actuals.put(name.getName(), (PDSeparation) PDColorSpace.create(value));
+                var cs = PDColorSpace.create(colorants.getDictionaryObject(name));
+                if (cs instanceof PDSeparation)
+                {
+                    actuals.put(name.getName(), (PDSeparation) cs);
+                }
             }
+            return actuals;
         }
-        return new COSDictionaryMap<>(actuals, colorants);
+        return Collections.emptyMap();
     }
 
     /**
-     * Returns the DeviceN Process Dictionary, or null if it is missing.
-     *
      * @return the DeviceN Process Dictionary, or null if it is missing.
      */
     public PDDeviceNProcess getProcess()
     {
-        if (getCOSObject() == null)
-        {
-            return null;
-        }
-
         COSDictionary process = getCOSObject().getDictionaryObject(COSName.PROCESS,
                 COSDictionary.class);
-        if (process == null)
+        if (nonNull(process))
         {
-            return null;
+            return new PDDeviceNProcess(process);
         }
-        return new PDDeviceNProcess(process);
+        return null;
     }
 
     /**
-     * Returns true if this is an NChannel (PDF 1.6) color space.
-     *
      * @return true if this is an NChannel color space.
      */
     public boolean isNChannel()
@@ -113,18 +95,16 @@ public final class PDDeviceNAttributes extends PDDictionaryWrapper
     }
 
     /**
-     * Sets the colorant map.
-     *
      * @param colorants the map of colorants
      */
     public void setColorants(Map<String, PDColorSpace> colorants)
     {
-        COSDictionary colorantDict = null;
-        if (colorants != null)
-        {
-            colorantDict = COSDictionaryMap.convert(colorants);
-        }
-        getCOSObject().setItem(COSName.COLORANTS, colorantDict);
+        getCOSObject().setItem(COSName.COLORANTS, ofNullable(colorants).map(c -> {
+            COSDictionary dictionary = new COSDictionary();
+            c.forEach((name, colorspace) -> dictionary.setItem(COSName.getPDFName(name),
+                    colorspace.getCOSObject()));
+            return dictionary;
+        }).orElse(null));
     }
 
     @Override

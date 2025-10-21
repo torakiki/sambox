@@ -17,11 +17,17 @@
 
 package org.sejda.sambox.pdmodel.interactive.annotation;
 
+import static org.sejda.commons.util.RequireUtils.requireState;
+
 import java.util.HashMap;
 import java.util.Map;
 
-import org.sejda.sambox.cos.*;
-import org.sejda.sambox.pdmodel.common.COSDictionaryMap;
+import org.sejda.sambox.cos.COSBase;
+import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.cos.COSNull;
+import org.sejda.sambox.cos.COSObjectable;
+import org.sejda.sambox.cos.COSStream;
 
 /**
  * An entry in an appearance dictionary. May contain either a single appearance stream or an appearance subdictionary.
@@ -32,10 +38,6 @@ public class PDAppearanceEntry implements COSObjectable
 {
     private COSBase entry;
 
-    /**
-     * 
-     * @param entry
-     */
     public PDAppearanceEntry(COSBase entry)
     {
         this.entry = entry;
@@ -48,7 +50,7 @@ public class PDAppearanceEntry implements COSObjectable
     }
 
     /**
-     * Returns true if this entry is an appearance subdictionary.
+     * @return true if this entry is an appearance subdictionary.
      */
     public boolean isSubDictionary()
     {
@@ -56,7 +58,7 @@ public class PDAppearanceEntry implements COSObjectable
     }
 
     /**
-     * Returns true if this entry is an appearance stream.
+     * @return true if this entry is an appearance stream.
      */
     public boolean isStream()
     {
@@ -64,16 +66,13 @@ public class PDAppearanceEntry implements COSObjectable
     }
 
     /**
-     * Returns the entry as an appearance stream.
+     * @return the entry as an appearance stream.
      *
      * @throws IllegalStateException if this entry is not an appearance stream
      */
     public PDAppearanceStream getAppearanceStream()
     {
-        if (!isStream())
-        {
-            throw new IllegalStateException("Expecting a stream, but got: " + this.entry);
-        }
+        requireState(isStream(), "Invalid appearance stream type was: " + this.entry);
         return new PDAppearanceStream((COSStream) entry);
     }
 
@@ -84,10 +83,8 @@ public class PDAppearanceEntry implements COSObjectable
      */
     public Map<COSName, PDAppearanceStream> getSubDictionary()
     {
-        if (!isSubDictionary())
-        {
-            throw new IllegalStateException("Expecting a sub-dictionary, but got: " + this.entry);
-        }
+        requireState(isSubDictionary(),
+                "Invalid type, expected a sub-dictionary but was: " + this.entry);
 
         COSDictionary dict = (COSDictionary) entry;
         Map<COSName, PDAppearanceStream> map = new HashMap<>();
@@ -97,9 +94,9 @@ public class PDAppearanceEntry implements COSObjectable
             COSBase value = dict.getDictionaryObject(name);
 
             // the file from PDFBOX-1599 contains /null as its entry, so we skip non-stream entries
-            if (value instanceof COSStream)
+            if (value instanceof COSStream stream)
             {
-                map.put(name, new PDAppearanceStream((COSStream) value));
+                map.put(name, new PDAppearanceStream(stream));
             }
             // form fields with NeedsAppearances = true  might have an empty dictionary here instead of a stream
             // in order to define the field valid values for example
@@ -113,6 +110,6 @@ public class PDAppearanceEntry implements COSObjectable
             }
         }
 
-        return new COSDictionaryMap<>(map, dict);
+        return map;
     }
 }

@@ -16,8 +16,8 @@
  */
 package org.sejda.sambox.pdmodel.documentinterchange.logicalstructure;
 
-import java.io.IOException;
-import java.util.HashMap;
+import static java.util.Optional.ofNullable;
+
 import java.util.Map;
 
 import org.sejda.sambox.cos.COSArray;
@@ -25,7 +25,6 @@ import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.PDStructureElementNameTreeNode;
-import org.sejda.sambox.pdmodel.common.COSDictionaryMap;
 import org.sejda.sambox.pdmodel.common.PDNameTreeNode;
 import org.sejda.sambox.pdmodel.common.PDNumberTreeNode;
 import org.slf4j.Logger;
@@ -33,10 +32,10 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A root of a structure tree.
- * 
+ *
  * @author Ben Litchfield
  * @author Johannes Koch
- * 
+ *
  */
 public class PDStructureTreeRoot extends PDStructureNode
 {
@@ -52,7 +51,7 @@ public class PDStructureTreeRoot extends PDStructureNode
 
     /**
      * Constructor for an existing structure element.
-     * 
+     *
      * @param dic The existing dictionary.
      */
     public PDStructureTreeRoot(COSDictionary dic)
@@ -61,11 +60,11 @@ public class PDStructureTreeRoot extends PDStructureNode
     }
 
     /**
-     * 
+     *
      * @return the K array entry
-     * @deprecated use {@link #getK()} only. /K can be a dictionary or an array, and the next level can also be a
-     * dictionary. See file 054080.pdf in PDFBOX-4417 and read "Entries in the structure tree root" in the PDF
-     * specification.
+     * @deprecated use {@link #getK()} only. /K can be a dictionary or an array, and the next level
+     * can also be a dictionary. See file 054080.pdf in PDFBOX-4417 and read "Entries in the
+     * structure tree root" in the PDF specification.
      */
     @Deprecated
     public COSArray getKArray()
@@ -88,7 +87,7 @@ public class PDStructureTreeRoot extends PDStructureNode
 
     /**
      * Returns the K entry.
-     * 
+     *
      * @return the K entry
      */
     public COSBase getK()
@@ -98,7 +97,7 @@ public class PDStructureTreeRoot extends PDStructureNode
 
     /**
      * Sets the K entry.
-     * 
+     *
      * @param k the K value
      */
     public void setK(COSBase k)
@@ -108,7 +107,7 @@ public class PDStructureTreeRoot extends PDStructureNode
 
     /**
      * Returns the ID tree.
-     * 
+     *
      * @return the ID tree
      */
     public PDNameTreeNode<PDStructureElement> getIDTree()
@@ -123,7 +122,7 @@ public class PDStructureTreeRoot extends PDStructureNode
 
     /**
      * Sets the ID tree.
-     * 
+     *
      * @param idTree the ID tree
      */
     public void setIDTree(PDNameTreeNode<PDStructureElement> idTree)
@@ -133,7 +132,7 @@ public class PDStructureTreeRoot extends PDStructureNode
 
     /**
      * Returns the parent tree.
-     * 
+     *
      * @return the parent tree
      */
     public PDNumberTreeNode getParentTree()
@@ -148,7 +147,7 @@ public class PDStructureTreeRoot extends PDStructureNode
 
     /**
      * Sets the parent tree.
-     * 
+     *
      * @param parentTree the parent tree
      */
     public void setParentTree(PDNumberTreeNode parentTree)
@@ -158,7 +157,7 @@ public class PDStructureTreeRoot extends PDStructureNode
 
     /**
      * Returns the next key in the parent tree.
-     * 
+     *
      * @return the next key in the parent tree
      */
     public int getParentTreeNextKey()
@@ -168,7 +167,7 @@ public class PDStructureTreeRoot extends PDStructureNode
 
     /**
      * Sets the next key in the parent tree.
-     * 
+     *
      * @param parentTreeNextkey the next key in the parent tree.
      */
     public void setParentTreeNextKey(int parentTreeNextkey)
@@ -177,40 +176,23 @@ public class PDStructureTreeRoot extends PDStructureNode
     }
 
     /**
-     * Returns the role map.
-     * 
      * @return the role map
      */
-    public Map<String, Object> getRoleMap()
+    public COSDictionary getRoleMap()
     {
-        COSBase rm = this.getCOSObject().getDictionaryObject(COSName.ROLE_MAP);
-        if (rm instanceof COSDictionary)
-        {
-            try
-            {
-                return COSDictionaryMap.convertBasicTypesToMap((COSDictionary) rm);
-            }
-            catch (IOException e)
-            {
-                LOG.error(e.getMessage(), e);
-            }
-        }
-        return new HashMap<>();
+        return this.getCOSObject().getDictionaryObject(COSName.ROLE_MAP, COSDictionary.class);
     }
 
     /**
-     * Sets the role map.
-     * 
      * @param roleMap the role map
      */
     public void setRoleMap(Map<String, String> roleMap)
     {
-        COSDictionary rmDic = new COSDictionary();
-        for (Map.Entry<String, String> entry : roleMap.entrySet())
-        {
-            rmDic.setName(entry.getKey(), entry.getValue());
-        }
-        this.getCOSObject().setItem(COSName.ROLE_MAP, rmDic);
+        getCOSObject().setItem(COSName.COLORANTS, ofNullable(roleMap).map(c -> {
+            COSDictionary dictionary = new COSDictionary();
+            c.forEach(dictionary::setName);
+            return dictionary;
+        }).orElse(null));
     }
 
 }

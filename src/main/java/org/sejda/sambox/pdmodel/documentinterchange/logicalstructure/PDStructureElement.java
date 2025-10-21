@@ -16,8 +16,10 @@
  */
 package org.sejda.sambox.pdmodel.documentinterchange.logicalstructure;
 
+import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
+
 import java.util.Iterator;
-import java.util.Map;
 
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
@@ -35,14 +37,14 @@ import org.sejda.sambox.pdmodel.documentinterchange.markedcontent.PDMarkedConten
  */
 public class PDStructureElement extends PDStructureNode
 {
-    
+
     public static final String TYPE = "StructElem";
 
     /**
      * Constructor with required values.
      *
      * @param structureType the structure type
-     * @param parent the parent structure node
+     * @param parent        the parent structure node
      */
     public PDStructureElement(String structureType, PDStructureNode parent)
     {
@@ -56,15 +58,14 @@ public class PDStructureElement extends PDStructureNode
      *
      * @param dic The existing dictionary.
      */
-    public PDStructureElement( COSDictionary dic )
+    public PDStructureElement(COSDictionary dic)
     {
         super(dic);
     }
 
-
     /**
      * Returns the structure type (S).
-     * 
+     *
      * @return the structure type
      */
     public String getStructureType()
@@ -74,7 +75,7 @@ public class PDStructureElement extends PDStructureNode
 
     /**
      * Sets the structure type (S).
-     * 
+     *
      * @param structureType the structure type
      */
     public final void setStructureType(String structureType)
@@ -84,7 +85,7 @@ public class PDStructureElement extends PDStructureNode
 
     /**
      * Returns the parent in the structure hierarchy (P).
-     * 
+     *
      * @return the parent in the structure hierarchy
      */
     public PDStructureNode getParent()
@@ -100,7 +101,7 @@ public class PDStructureElement extends PDStructureNode
 
     /**
      * Sets the parent in the structure hierarchy (P).
-     * 
+     *
      * @param structureNode the parent in the structure hierarchy
      */
     public final void setParent(PDStructureNode structureNode)
@@ -110,7 +111,7 @@ public class PDStructureElement extends PDStructureNode
 
     /**
      * Returns the element identifier (ID).
-     * 
+     *
      * @return the element identifier
      */
     public String getElementIdentifier()
@@ -120,7 +121,7 @@ public class PDStructureElement extends PDStructureNode
 
     /**
      * Sets the element identifier (ID).
-     * 
+     *
      * @param id the element identifier
      */
     public void setElementIdentifier(String id)
@@ -129,11 +130,11 @@ public class PDStructureElement extends PDStructureNode
     }
 
     /**
-     * Returns the page on which some or all of the content items designated by
-     *  the K entry shall be rendered (Pg).
-     * 
-     * @return the page on which some or all of the content items designated by
-     *  the K entry shall be rendered
+     * Returns the page on which some or all of the content items designated by the K entry shall be
+     * rendered (Pg).
+     *
+     * @return the page on which some or all of the content items designated by the K entry shall be
+     * rendered
      */
     public PDPage getPage()
     {
@@ -146,10 +147,11 @@ public class PDStructureElement extends PDStructureNode
     }
 
     /**
-     * Sets the page on which some or all of the content items designated by
-     *  the K entry shall be rendered (Pg).
-     * @param page the page on which some or all of the content items designated
-     *  by the K entry shall be rendered.
+     * Sets the page on which some or all of the content items designated by the K entry shall be
+     * rendered (Pg).
+     *
+     * @param page the page on which some or all of the content items designated by the K entry
+     *             shall be rendered.
      */
     public void setPage(PDPage page)
     {
@@ -158,13 +160,12 @@ public class PDStructureElement extends PDStructureNode
 
     /**
      * Returns the attributes together with their revision numbers (A).
-     * 
+     *
      * @return the attributes
      */
     public Revisions<PDAttributeObject> getAttributes()
     {
-        Revisions<PDAttributeObject> attributes =
-                new Revisions<>();
+        Revisions<PDAttributeObject> attributes = new Revisions<>();
         COSBase a = this.getCOSObject().getDictionaryObject(COSName.A);
         if (a instanceof COSArray aa)
         {
@@ -181,8 +182,7 @@ public class PDStructureElement extends PDStructureNode
                 }
                 else if (item instanceof COSInteger)
                 {
-                    attributes.setRevisionNumber(ao,
-                        ((COSInteger) item).intValue());
+                    attributes.setRevisionNumber(ao, ((COSInteger) item).intValue());
                 }
             }
         }
@@ -197,7 +197,7 @@ public class PDStructureElement extends PDStructureNode
 
     /**
      * Sets the attributes together with their revision numbers (A).
-     * 
+     *
      * @param attributes the attributes
      */
     public void setAttributes(Revisions<PDAttributeObject> attributes)
@@ -228,7 +228,7 @@ public class PDStructureElement extends PDStructureNode
 
     /**
      * Adds an attribute object.
-     * 
+     *
      * @param attributeObject the attribute object
      */
     public void addAttribute(PDAttributeObject attributeObject)
@@ -257,7 +257,7 @@ public class PDStructureElement extends PDStructureNode
 
     /**
      * Removes an attribute object.
-     * 
+     *
      * @param attributeObject the attribute object
      */
     public void removeAttribute(PDAttributeObject attributeObject)
@@ -284,7 +284,7 @@ public class PDStructureElement extends PDStructureNode
 
     /**
      * Updates the revision number for the given attribute object.
-     * 
+     *
      * @param attributeObject the attribute object
      */
     public void attributeChanged(PDAttributeObject attributeObject)
@@ -317,7 +317,7 @@ public class PDStructureElement extends PDStructureNode
 
     /**
      * Returns the class names together with their revision numbers (C).
-     * 
+     *
      * @return the class names
      */
     public Revisions<String> getClassNames()
@@ -343,8 +343,7 @@ public class PDStructureElement extends PDStructureNode
                 }
                 else if (item instanceof COSInteger)
                 {
-                    classNames.setRevisionNumber(className,
-                        ((COSInteger) item).intValue());
+                    classNames.setRevisionNumber(className, ((COSInteger) item).intValue());
                 }
             }
         }
@@ -353,7 +352,7 @@ public class PDStructureElement extends PDStructureNode
 
     /**
      * Sets the class names together with their revision numbers (C).
-     * 
+     *
      * @param classNames the class names
      */
     public void setClassNames(Revisions<String> classNames)
@@ -386,7 +385,7 @@ public class PDStructureElement extends PDStructureNode
 
     /**
      * Adds a class name.
-     * 
+     *
      * @param className the class name
      */
     public void addClassName(String className)
@@ -418,7 +417,7 @@ public class PDStructureElement extends PDStructureNode
 
     /**
      * Removes a class name.
-     * 
+     *
      * @param className the class name
      */
     public void removeClassName(String className)
@@ -449,7 +448,7 @@ public class PDStructureElement extends PDStructureNode
 
     /**
      * Returns the revision number (R).
-     * 
+     *
      * @return the revision number
      */
     public int getRevisionNumber()
@@ -459,7 +458,7 @@ public class PDStructureElement extends PDStructureNode
 
     /**
      * Sets the revision number (R).
-     * 
+     *
      * @param revisionNumber the revision number
      */
     public void setRevisionNumber(int revisionNumber)
@@ -481,7 +480,7 @@ public class PDStructureElement extends PDStructureNode
 
     /**
      * Returns the title (T).
-     * 
+     *
      * @return the title
      */
     public String getTitle()
@@ -491,7 +490,7 @@ public class PDStructureElement extends PDStructureNode
 
     /**
      * Sets the title (T).
-     * 
+     *
      * @param title the title
      */
     public void setTitle(String title)
@@ -501,7 +500,7 @@ public class PDStructureElement extends PDStructureNode
 
     /**
      * Returns the language (Lang).
-     * 
+     *
      * @return the language
      */
     public String getLanguage()
@@ -511,7 +510,7 @@ public class PDStructureElement extends PDStructureNode
 
     /**
      * Sets the language (Lang).
-     * 
+     *
      * @param language the language
      */
     public void setLanguage(String language)
@@ -521,7 +520,7 @@ public class PDStructureElement extends PDStructureNode
 
     /**
      * Returns the alternate description (Alt).
-     * 
+     *
      * @return the alternate description
      */
     public String getAlternateDescription()
@@ -531,7 +530,7 @@ public class PDStructureElement extends PDStructureNode
 
     /**
      * Sets the alternate description (Alt).
-     * 
+     *
      * @param alternateDescription the alternate description
      */
     public void setAlternateDescription(String alternateDescription)
@@ -541,7 +540,7 @@ public class PDStructureElement extends PDStructureNode
 
     /**
      * Returns the expanded form (E).
-     * 
+     *
      * @return the expanded form
      */
     public String getExpandedForm()
@@ -551,7 +550,7 @@ public class PDStructureElement extends PDStructureNode
 
     /**
      * Sets the expanded form (E).
-     * 
+     *
      * @param expandedForm the expanded form
      */
     public void setExpandedForm(String expandedForm)
@@ -560,8 +559,6 @@ public class PDStructureElement extends PDStructureNode
     }
 
     /**
-     * Returns the actual text (ActualText).
-     * 
      * @return the actual text
      */
     public String getActualText()
@@ -570,8 +567,6 @@ public class PDStructureElement extends PDStructureNode
     }
 
     /**
-     * Sets the actual text (ActualText).
-     * 
      * @param actualText the actual text
      */
     public void setActualText(String actualText)
@@ -580,29 +575,26 @@ public class PDStructureElement extends PDStructureNode
     }
 
     /**
-     * Returns the standard structure type, the actual structure type is mapped
-     * to in the role map.
-     * 
-     * @return the standard structure type
+     * @return the standard structure type, the actual structure type is mapped to in the role map
      */
     public String getStandardStructureType()
     {
-        String type = this.getStructureType();
-        Map<String,Object> roleMap = getRoleMap();
-        if (roleMap.containsKey(type))
+        COSName type = this.getCOSObject().getCOSName(COSName.S);
+        if (nonNull(type))
         {
-            Object mappedValue = getRoleMap().get(type);
-            if (mappedValue instanceof String)
+            COSName mapped = getRoleMap().getCOSName(type);
+            if (nonNull(mapped))
             {
-                type = (String)mappedValue;
+                return mapped.getName();
             }
+
         }
-        return type;
+        return type.getName();
     }
 
     /**
      * Appends a marked-content sequence kid.
-     * 
+     *
      * @param markedContent the marked-content sequence
      */
     public void appendKid(PDMarkedContent markedContent)
@@ -616,7 +608,7 @@ public class PDStructureElement extends PDStructureNode
 
     /**
      * Appends a marked-content reference kid.
-     * 
+     *
      * @param markedContentReference the marked-content reference
      */
     public void appendKid(PDMarkedContentReference markedContentReference)
@@ -626,7 +618,7 @@ public class PDStructureElement extends PDStructureNode
 
     /**
      * Appends an object reference kid.
-     * 
+     *
      * @param objectReference the object reference
      */
     public void appendKid(PDObjectReference objectReference)
@@ -636,9 +628,9 @@ public class PDStructureElement extends PDStructureNode
 
     /**
      * Inserts a marked-content identifier kid before a reference kid.
-     * 
+     *
      * @param markedContentIdentifier the marked-content identifier
-     * @param refKid the reference kid
+     * @param refKid                  the reference kid
      */
     public void insertBefore(COSInteger markedContentIdentifier, Object refKid)
     {
@@ -647,21 +639,20 @@ public class PDStructureElement extends PDStructureNode
 
     /**
      * Inserts a marked-content reference kid before a reference kid.
-     * 
+     *
      * @param markedContentReference the marked-content reference
-     * @param refKid the reference kid
+     * @param refKid                 the reference kid
      */
-    public void insertBefore(PDMarkedContentReference markedContentReference,
-        Object refKid)
+    public void insertBefore(PDMarkedContentReference markedContentReference, Object refKid)
     {
         this.insertObjectableBefore(markedContentReference, refKid);
     }
 
     /**
      * Inserts an object reference kid before a reference kid.
-     * 
+     *
      * @param objectReference the object reference
-     * @param refKid the reference kid
+     * @param refKid          the reference kid
      */
     public void insertBefore(PDObjectReference objectReference, Object refKid)
     {
@@ -670,7 +661,7 @@ public class PDStructureElement extends PDStructureNode
 
     /**
      * Removes a marked-content identifier kid.
-     * 
+     *
      * @param markedContentIdentifier the marked-content identifier
      */
     public void removeKid(COSInteger markedContentIdentifier)
@@ -680,7 +671,7 @@ public class PDStructureElement extends PDStructureNode
 
     /**
      * Removes a marked-content reference kid.
-     * 
+     *
      * @param markedContentReference the marked-content reference
      */
     public void removeKid(PDMarkedContentReference markedContentReference)
@@ -690,7 +681,7 @@ public class PDStructureElement extends PDStructureNode
 
     /**
      * Removes an object reference kid.
-     * 
+     *
      * @param objectReference the object reference
      */
     public void removeKid(PDObjectReference objectReference)
@@ -698,10 +689,7 @@ public class PDStructureElement extends PDStructureNode
         this.removeObjectableKid(objectReference);
     }
 
-
     /**
-     * Returns the structure tree root.
-     * 
      * @return the structure tree root
      */
     private PDStructureTreeRoot getStructureTreeRoot()
@@ -719,18 +707,12 @@ public class PDStructureElement extends PDStructureNode
     }
 
     /**
-     * Returns the role map.
-     * 
      * @return the role map
      */
-    private Map<String, Object> getRoleMap()
+    private COSDictionary getRoleMap()
     {
-        PDStructureTreeRoot root = this.getStructureTreeRoot();
-        if (root != null)
-        {
-            return root.getRoleMap();
-        }
-        return null;
+        return ofNullable(this.getStructureTreeRoot()).map(PDStructureTreeRoot::getRoleMap)
+                .orElse(null);
     }
 
 }

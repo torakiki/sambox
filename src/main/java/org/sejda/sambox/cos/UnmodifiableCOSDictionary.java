@@ -25,9 +25,6 @@ import java.util.Collections;
  */
 final class UnmodifiableCOSDictionary extends COSDictionary
 {
-    /**
-     * {@inheritDoc}
-     */
     UnmodifiableCOSDictionary(COSDictionary dict)
     {
         super();
