@@ -1067,7 +1067,7 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Factory method for a dictionary with an item with the given keys and values
+     * Factory method for a dictionary with the given keys and values
      */
     public static COSDictionary of(COSName key1, COSBase value1, COSName key2, COSBase value2)
     {
@@ -1077,7 +1077,7 @@ public class COSDictionary extends COSBase
     }
 
     /**
-     * Factory method for a dictionary with an item with the given keys and values
+     * Factory method for a dictionary with the given keys and values
      */
     public static COSDictionary of(COSName key1, COSBase value1, COSName key2, COSBase value2,
             COSName key3, COSBase value3)
