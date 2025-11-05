@@ -16,6 +16,9 @@
  */
 package org.sejda.sambox.contentstream.operator;
 
+import static java.util.Objects.nonNull;
+import static org.sejda.commons.util.RequireUtils.require;
+
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -28,87 +31,54 @@ import org.sejda.sambox.cos.COSDictionary;
  */
 public final class Operator
 {
-    private final String theOperator;
+    private final String operator;
     private byte[] imageData;
     private COSDictionary imageParameters;
 
     /**
-     * map for singleton operator objects; use {@link ConcurrentHashMap} for better scalability with multiple threads
+     * map for singleton operator objects; use {@link ConcurrentHashMap} for better scalability with
+     * multiple threads
      */
-    private static final ConcurrentMap<String, Operator> operators = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, Operator> OPERATORS = new ConcurrentHashMap<>();
 
-    /**
-     * Constructor.
-     *
-     * @param aOperator The operator that this object will represent.
-     */
-    private Operator(String aOperator)
+    private Operator(String operator)
     {
-        theOperator = aOperator;
-        if (aOperator.startsWith("/"))
-        {
-            throw new RuntimeException(
-                    "Operators are not allowed to start with / '" + aOperator + "'");
-        }
+        this.operator = operator;
     }
 
     /**
      * This is used to create/cache operators in the system.
      *
      * @param operator The operator for the system.
-     *
      * @return The operator that matches the operator keyword.
      */
     public static Operator getOperator(String operator)
     {
-        Operator operation;
+        require(nonNull(operator) && !operator.startsWith("/"),
+                () -> new IllegalArgumentException("Invalid operator: " + operator));
         if (OperatorName.BEGIN_INLINE_IMAGE_DATA.equals(operator)
                 || OperatorName.BEGIN_INLINE_IMAGE.equals(operator))
         {
             // we can't cache the ID operators.
-            operation = new Operator(operator);
+            return new Operator(operator);
         }
-        else
-        {
-            operation = operators.get(operator);
-            if (operation == null)
-            {
-                // another thread may has already added an operator of this kind
-                // make sure that we get the same operator
-                operation = operators.putIfAbsent(operator, new Operator(operator));
-                if (operation == null)
-                {
-                    operation = operators.get(operator);
-                }
-            }
-        }
-
-        return operation;
+        return OPERATORS.computeIfAbsent(operator, Operator::new);
     }
 
-    /**
-     * This will get the name of the operator.
-     *
-     * @return The string representation of the operation.
-     */
     public String getName()
     {
-        return theOperator;
+        return operator;
     }
 
-    /**
-     * This will print a string rep of this class.
-     *
-     * @return A string rep of this class.
-     */
     @Override
     public String toString()
     {
-        return "PDFOperator{" + theOperator + "}";
+        return "Operator{" + operator + "}";
     }
 
     /**
-     * This is the special case for the ID operator where there are just random bytes inlined the stream.
+     * This is the special case for the ID operator where there are just random bytes inlined the
+     * stream.
      *
      * @return Value of property imageData.
      */
