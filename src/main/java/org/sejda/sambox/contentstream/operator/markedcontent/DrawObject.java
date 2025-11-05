@@ -16,6 +16,11 @@
  */
 package org.sejda.sambox.contentstream.operator.markedcontent;
 
+import static org.sejda.commons.util.RequireUtils.require;
+
+import java.io.IOException;
+import java.util.List;
+
 import org.sejda.sambox.contentstream.operator.MissingOperandException;
 import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.contentstream.operator.OperatorName;
@@ -29,9 +34,6 @@ import org.sejda.sambox.text.PDFMarkedContentExtractor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.List;
-
 /**
  * Do: Draws an XObject.
  *
@@ -43,13 +45,10 @@ public class DrawObject extends OperatorProcessor
     private static final Logger LOG = LoggerFactory.getLogger(DrawObject.class);
 
     @Override
-    public void process(Operator operator, List<COSBase> arguments) throws IOException
+    public void process(Operator operator, List<COSBase> operands) throws IOException
     {
-        if (arguments.isEmpty())
-        {
-            throw new MissingOperandException(operator, arguments);
-        }
-        COSBase base0 = arguments.get(0);
+        require(!operands.isEmpty(), () -> new MissingOperandException(operator, operands));
+        COSBase base0 = operands.get(0);
         if (!(base0 instanceof COSName name))
         {
             return;

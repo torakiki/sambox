@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.contentstream.operator.state;
 
+import static org.sejda.commons.util.RequireUtils.require;
+
 import java.util.List;
 
 import org.sejda.sambox.contentstream.operator.MissingOperandException;
@@ -34,21 +36,18 @@ import org.sejda.sambox.util.Matrix;
 public class SetMatrix extends OperatorProcessor
 {
     @Override
-    public void process(Operator operator, List<COSBase> arguments) throws MissingOperandException
+    public void process(Operator operator, List<COSBase> operands) throws MissingOperandException
     {
-        if (arguments.size() < 6)
+        require(operands.size() >= 6, () -> new MissingOperandException(operator, operands));
+
+        if (checkArrayTypesClass(operands, COSNumber.class))
         {
-            throw new MissingOperandException(operator, arguments);
-        }
-        
-        if (checkArrayTypesClass(arguments, COSNumber.class))
-        {
-            COSNumber a = (COSNumber) arguments.get(0);
-            COSNumber b = (COSNumber) arguments.get(1);
-            COSNumber c = (COSNumber) arguments.get(2);
-            COSNumber d = (COSNumber) arguments.get(3);
-            COSNumber e = (COSNumber) arguments.get(4);
-            COSNumber f = (COSNumber) arguments.get(5);
+            COSNumber a = (COSNumber) operands.get(0);
+            COSNumber b = (COSNumber) operands.get(1);
+            COSNumber c = (COSNumber) operands.get(2);
+            COSNumber d = (COSNumber) operands.get(3);
+            COSNumber e = (COSNumber) operands.get(4);
+            COSNumber f = (COSNumber) operands.get(5);
 
             Matrix matrix = new Matrix(a.floatValue(), b.floatValue(), c.floatValue(),
                     d.floatValue(), e.floatValue(), f.floatValue());

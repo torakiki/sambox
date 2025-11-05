@@ -33,19 +33,19 @@ import org.sejda.sambox.cos.COSName;
 public class BeginMarkedContentSequenceWithProperties extends OperatorProcessor
 {
     @Override
-    public void process(Operator operator, List<COSBase> arguments)
+    public void process(Operator operator, List<COSBase> operands)
     {
         COSName tag = null;
         COSDictionary properties = null;
-        for (COSBase argument : arguments)
+        for (COSBase argument : operands)
         {
-            if (argument instanceof COSName)
+            if (argument instanceof COSName name)
             {
-                tag = (COSName) argument;
+                tag = name;
             }
-            else if (argument instanceof COSDictionary)
+            else if (argument instanceof COSDictionary dictionary)
             {
-                properties = (COSDictionary) argument;
+                properties = dictionary;
             }
         }
         getContext().beginMarkedContentSequence(tag, properties);

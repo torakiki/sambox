@@ -39,10 +39,9 @@ public class ShowTextAdjusted extends OperatorProcessor
     {
         if (!arguments.isEmpty())
         {
-            COSBase base = arguments.get(0);
-            if (base instanceof COSArray && nonNull(getContext().getTextMatrix()))
+            if (arguments.get(0) instanceof COSArray array && nonNull(getContext().getTextMatrix()))
             {
-                getContext().showTextStrings((COSArray) base);
+                getContext().showTextStrings(array);
             }
         }
     }

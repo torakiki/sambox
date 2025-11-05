@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.contentstream.operator.state;
 
+import static org.sejda.commons.util.RequireUtils.require;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -40,25 +42,23 @@ public class SetGraphicsStateParameters extends OperatorProcessor
     private static final Logger LOG = LoggerFactory.getLogger(SetGraphicsStateParameters.class);
 
     @Override
-    public void process(Operator operator, List<COSBase> arguments) throws IOException
+    public void process(Operator operator, List<COSBase> operands) throws IOException
     {
-        if (arguments.isEmpty())
+        require(!operands.isEmpty(), () -> new MissingOperandException(operator, operands));
+        COSBase base0 = operands.get(0);
+        if (base0 instanceof COSName graphicsName)
         {
-            throw new MissingOperandException(operator, arguments);
-        }
-        COSBase base0 = arguments.get(0);
-        if (!(base0 instanceof COSName graphicsName))
-        {
-            return;
-        }
-
-        // set parameters from graphics state parameter dictionary
-        PDExtendedGraphicsState gs = getContext().getResources().getExtGState(graphicsName);
-        if (gs == null)
-        {
-            LOG.warn("name for 'gs' operator not found in resources: /" + graphicsName.getName());
-        } else {
-            gs.copyIntoGraphicsState(getContext().getGraphicsState());
+            // set parameters from graphics state parameter dictionary
+            PDExtendedGraphicsState gs = getContext().getResources().getExtGState(graphicsName);
+            if (gs == null)
+            {
+                LOG.warn("name for 'gs' operator not found in resources: /{}",
+                        graphicsName.getName());
+            }
+            else
+            {
+                gs.copyIntoGraphicsState(getContext().getGraphicsState());
+            }
         }
     }
 

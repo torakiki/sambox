@@ -16,15 +16,19 @@
  */
 package org.sejda.sambox.contentstream.operator.state;
 
+import static org.sejda.commons.util.RequireUtils.require;
+import static org.sejda.sambox.contentstream.operator.OperatorName.SET_LINE_WIDTH;
+
 import java.io.IOException;
 import java.util.List;
 
 import org.sejda.sambox.contentstream.operator.MissingOperandException;
 import org.sejda.sambox.contentstream.operator.Operator;
-import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.contentstream.operator.OperatorProcessor;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSNumber;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * w: Set line width.
@@ -33,20 +37,26 @@ import org.sejda.sambox.cos.COSNumber;
  */
 public class SetLineWidth extends OperatorProcessor
 {
+    private static final Logger LOG = LoggerFactory.getLogger(SetLineWidth.class);
+
     @Override
-    public void process(Operator operator, List<COSBase> arguments) throws IOException
+    public void process(Operator operator, List<COSBase> operands) throws IOException
     {
-        if (arguments.isEmpty())
+        require(!operands.isEmpty(), () -> new MissingOperandException(operator, operands));
+        var base = operands.get(0);
+        if (base instanceof COSNumber width)
         {
-            throw new MissingOperandException(operator, arguments);
+            getContext().getGraphicsState().setLineWidth(width.floatValue());
         }
-        COSNumber width = (COSNumber) arguments.get(0);
-        getContext().getGraphicsState().setLineWidth(width.floatValue());
+        else
+        {
+            LOG.warn("Invalid type {} operand for {} operator", base, SET_LINE_WIDTH);
+        }
     }
 
     @Override
     public String getName()
     {
-        return OperatorName.SET_LINE_WIDTH;
+        return SET_LINE_WIDTH;
     }
 }

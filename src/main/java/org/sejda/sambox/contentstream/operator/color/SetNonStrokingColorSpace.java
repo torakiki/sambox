@@ -16,6 +16,9 @@
  */
 package org.sejda.sambox.contentstream.operator.color;
 
+import java.io.IOException;
+import java.util.List;
+
 import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.contentstream.operator.OperatorProcessor;
@@ -24,9 +27,6 @@ import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.List;
 
 /**
  * cs: Sets the non-stroking color space.
@@ -42,7 +42,7 @@ public class SetNonStrokingColorSpace extends OperatorProcessor
     @Override
     public void process(Operator operator, List<COSBase> arguments) throws IOException
     {
-        if(arguments == null || arguments.size() == 0)
+        if (arguments == null || arguments.isEmpty())
         {
             LOG.warn("Ignoring SetNonStrokingColorSpace operator without operands");
             return;

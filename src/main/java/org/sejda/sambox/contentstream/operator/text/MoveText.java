@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.contentstream.operator.text;
 
+import static org.sejda.commons.util.RequireUtils.require;
+
 import java.util.List;
 
 import org.sejda.sambox.contentstream.operator.MissingOperandException;
@@ -38,33 +40,22 @@ public class MoveText extends OperatorProcessor
     private static final Logger LOG = LoggerFactory.getLogger(MoveText.class);
 
     @Override
-    public void process(Operator operator, List<COSBase> arguments) throws MissingOperandException
+    public void process(Operator operator, List<COSBase> operands) throws MissingOperandException
     {
-        if (arguments.size() < 2)
-        {
-            throw new MissingOperandException(operator, arguments);
-        }
+        require(operands.size() >= 2, () -> new MissingOperandException(operator, operands));
         Matrix textLineMatrix = getContext().getTextLineMatrix();
         if (textLineMatrix == null)
         {
             LOG.warn("TextLineMatrix is null, " + getName() + " operator will be ignored");
             return;
         }
-        
-        COSBase base0 = arguments.get(0);
-        COSBase base1 = arguments.get(1);
-        if (!(base0 instanceof COSNumber x))
-        {
-            return;
-        }
-        if (!(base1 instanceof COSNumber y))
-        {
-            return;
-        }
 
-        Matrix matrix = new Matrix(1, 0, 0, 1, x.floatValue(), y.floatValue());
-        textLineMatrix.concatenate(matrix);
-        getContext().setTextMatrix(textLineMatrix.clone());
+        if ((operands.get(0) instanceof COSNumber x) && (operands.get(1) instanceof COSNumber y))
+        {
+            Matrix matrix = new Matrix(1, 0, 0, 1, x.floatValue(), y.floatValue());
+            textLineMatrix.concatenate(matrix);
+            getContext().setTextMatrix(textLineMatrix.clone());
+        }
     }
 
     @Override

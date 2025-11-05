@@ -16,15 +16,17 @@
  */
 package org.sejda.sambox.contentstream.operator.text;
 
+import static org.sejda.commons.util.RequireUtils.require;
+
+import java.io.IOException;
+import java.util.List;
+
 import org.sejda.sambox.contentstream.operator.MissingOperandException;
 import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.contentstream.operator.OperatorProcessor;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSNumber;
-
-import java.io.IOException;
-import java.util.List;
 
 /**
  * Tz: Set horizontal text scaling.
@@ -34,19 +36,14 @@ import java.util.List;
 public class SetTextHorizontalScaling extends OperatorProcessor
 {
     @Override
-    public void process(Operator operator, List<COSBase> arguments) throws IOException
+    public void process(Operator operator, List<COSBase> operands) throws IOException
     {
-        if (arguments.isEmpty())
+        require(!operands.isEmpty(), () -> new MissingOperandException(operator, operands));
+        if (operands.get(0) instanceof COSNumber scaling)
         {
-            throw new MissingOperandException(operator, arguments);
+            getContext().getGraphicsState().getTextState()
+                    .setHorizontalScaling(scaling.floatValue());
         }
-
-        COSBase base = arguments.get(0);
-        if (!(base instanceof COSNumber scaling))
-        {
-            return;
-        }
-        getContext().getGraphicsState().getTextState().setHorizontalScaling(scaling.floatValue());
     }
 
     @Override

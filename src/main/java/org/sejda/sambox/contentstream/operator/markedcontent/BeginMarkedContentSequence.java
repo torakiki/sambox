@@ -37,9 +37,9 @@ public class BeginMarkedContentSequence extends OperatorProcessor
         COSName tag = null;
         for (COSBase argument : arguments)
         {
-            if (argument instanceof COSName)
+            if (argument instanceof COSName name)
             {
-                tag = (COSName) argument;
+                tag = name;
             }
         }
         this.getContext().beginMarkedContentSequence(tag, null);

@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.contentstream.operator.text;
 
+import static org.sejda.commons.util.RequireUtils.require;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -33,15 +35,12 @@ import org.sejda.sambox.cos.COSBase;
 public class ShowTextLineAndSpace extends OperatorProcessor
 {
     @Override
-    public void process(Operator operator, List<COSBase> arguments) throws IOException
+    public void process(Operator operator, List<COSBase> operands) throws IOException
     {
-        if (arguments.size() < 3)
-        {
-            throw new MissingOperandException(operator, arguments);
-        }
-        getContext().processOperator(OperatorName.SET_WORD_SPACING, arguments.subList(0, 1));
-        getContext().processOperator(OperatorName.SET_CHAR_SPACING, arguments.subList(1, 2));
-        getContext().processOperator(OperatorName.SHOW_TEXT_LINE, arguments.subList(2, 3));
+        require(operands.size() >= 3, () -> new MissingOperandException(operator, operands));
+        getContext().processOperator(OperatorName.SET_WORD_SPACING, operands.subList(0, 1));
+        getContext().processOperator(OperatorName.SET_CHAR_SPACING, operands.subList(1, 2));
+        getContext().processOperator(OperatorName.SHOW_TEXT_LINE, operands.subList(2, 3));
     }
 
     @Override

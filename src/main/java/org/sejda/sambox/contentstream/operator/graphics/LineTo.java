@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.contentstream.operator.graphics;
 
+import static org.sejda.commons.util.RequireUtils.require;
+
 import java.awt.geom.Point2D;
 import java.io.IOException;
 import java.util.List;
@@ -40,32 +42,20 @@ public class LineTo extends GraphicsOperatorProcessor
     @Override
     public void process(Operator operator, List<COSBase> operands) throws IOException
     {
-        if (operands.size() < 2)
+        require(operands.size() >= 2, () -> new MissingOperandException(operator, operands));
+        if ((operands.get(0) instanceof COSNumber x) && (operands.get(1) instanceof COSNumber y))
         {
-            throw new MissingOperandException(operator, operands);
-        }
-        COSBase base0 = operands.get(0);
-        if (!(base0 instanceof COSNumber x))
-        {
-            return;
-        }
-        COSBase base1 = operands.get(1);
-        if (!(base1 instanceof COSNumber y))
-        {
-            return;
-        }
-        // append straight line segment from the current point to the point
-
-        Point2D.Float pos = getContext().transformedPoint(x.floatValue(), y.floatValue());
-
-        if (getContext().getCurrentPoint() == null)
-        {
-            LOG.warn("LineTo (" + pos.x + "," + pos.y + ") without initial MoveTo");
-            getContext().moveTo(pos.x, pos.y);
-        }
-        else
-        {
-            getContext().lineTo(pos.x, pos.y);
+            // append straight line segment from the current point to the point
+            Point2D.Float pos = getContext().transformedPoint(x.floatValue(), y.floatValue());
+            if (getContext().getCurrentPoint() == null)
+            {
+                LOG.warn("LineTo (" + pos.x + "," + pos.y + ") without initial MoveTo");
+                getContext().moveTo(pos.x, pos.y);
+            }
+            else
+            {
+                getContext().lineTo(pos.x, pos.y);
+            }
         }
     }
 

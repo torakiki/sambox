@@ -16,8 +16,11 @@
  */
 package org.sejda.sambox.contentstream.operator.text;
 
+import static org.sejda.commons.util.RequireUtils.require;
+
 import java.util.List;
 
+import org.sejda.sambox.contentstream.operator.MissingOperandException;
 import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.contentstream.operator.OperatorProcessor;
@@ -32,16 +35,12 @@ import org.sejda.sambox.cos.COSNumber;
 public class SetTextRise extends OperatorProcessor
 {
     @Override
-    public void process(Operator operator, List<COSBase> arguments)
+    public void process(Operator operator, List<COSBase> operands) throws MissingOperandException
     {
-        if (!arguments.isEmpty())
+        require(!operands.isEmpty(), () -> new MissingOperandException(operator, operands));
+        if (operands.get(0) instanceof COSNumber rise)
         {
-            COSBase base = arguments.get(0);
-            if (base instanceof COSNumber)
-            {
-                getContext().getGraphicsState().getTextState()
-                        .setRise(((COSNumber) base).floatValue());
-            }
+            getContext().getGraphicsState().getTextState().setRise(rise.floatValue());
         }
 
     }

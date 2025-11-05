@@ -16,15 +16,18 @@
  */
 package org.sejda.sambox.contentstream.operator.state;
 
-import java.io.IOException;
+import static org.sejda.commons.util.RequireUtils.require;
+import static org.sejda.sambox.contentstream.operator.OperatorName.SET_LINE_CAPSTYLE;
+
 import java.util.List;
 
 import org.sejda.sambox.contentstream.operator.MissingOperandException;
 import org.sejda.sambox.contentstream.operator.Operator;
-import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.contentstream.operator.OperatorProcessor;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSNumber;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * J: Set the line cap style.
@@ -32,20 +35,26 @@ import org.sejda.sambox.cos.COSNumber;
  */
 public class SetLineCapStyle extends OperatorProcessor
 {
+    private static final Logger LOG = LoggerFactory.getLogger(SetLineCapStyle.class);
+
     @Override
-    public void process(Operator operator, List<COSBase> arguments) throws IOException
+    public void process(Operator operator, List<COSBase> operands) throws MissingOperandException
     {
-        if (arguments.isEmpty())
+        require(!operands.isEmpty(), () -> new MissingOperandException(operator, operands));
+        var base = operands.get(0);
+        if (base instanceof COSNumber style)
         {
-            throw new MissingOperandException(operator, arguments);
+            getContext().getGraphicsState().setLineCap(style.intValue());
         }
-        int lineCapStyle = ((COSNumber) arguments.get(0)).intValue();
-        getContext().getGraphicsState().setLineCap(lineCapStyle);
+        else
+        {
+            LOG.warn("Invalid type {} operand for {} operator", base, SET_LINE_CAPSTYLE);
+        }
     }
 
     @Override
     public String getName()
     {
-        return OperatorName.SET_LINE_CAPSTYLE;
+        return SET_LINE_CAPSTYLE;
     }
 }

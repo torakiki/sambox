@@ -18,6 +18,7 @@
 package org.sejda.sambox.contentstream.operator.text;
 
 import static java.util.Objects.isNull;
+import static org.sejda.commons.util.RequireUtils.require;
 
 import java.io.IOException;
 import java.util.List;
@@ -43,31 +44,21 @@ public class SetFontAndSize extends OperatorProcessor
     private static final Logger LOG = LoggerFactory.getLogger(SetFontAndSize.class);
 
     @Override
-    public void process(Operator operator, List<COSBase> arguments) throws IOException
+    public void process(Operator operator, List<COSBase> operands) throws IOException
     {
-        if (arguments.size() < 2)
-        {
-            throw new MissingOperandException(operator, arguments);
-        }
+        require(operands.size() >= 2, () -> new MissingOperandException(operator, operands));
 
-        COSBase base0 = arguments.get(0);
-        COSBase base1 = arguments.get(1);
-        if (!(base0 instanceof COSName fontName))
+        if ((operands.get(0) instanceof COSName name) && (operands.get(
+                1) instanceof COSNumber size))
         {
-            return;
+            getContext().getGraphicsState().getTextState().setFontSize(size.floatValue());
+            PDFont font = getContext().getResources().getFont(name);
+            if (isNull(font))
+            {
+                LOG.warn("font '{}' not found in resources", name.getName());
+            }
+            getContext().getGraphicsState().getTextState().setFont(font);
         }
-        if (!(base1 instanceof COSNumber))
-        {
-            return;
-        }
-        float fontSize = ((COSNumber) base1).floatValue();
-        getContext().getGraphicsState().getTextState().setFontSize(fontSize);
-        PDFont font = getContext().getResources().getFont(fontName);
-        if (isNull(font))
-        {
-            LOG.warn("font '{}' not found in resources", fontName.getName());
-        }
-        getContext().getGraphicsState().getTextState().setFont(font);
     }
 
     @Override

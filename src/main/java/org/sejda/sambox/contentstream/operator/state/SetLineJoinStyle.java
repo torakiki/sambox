@@ -16,15 +16,18 @@
  */
 package org.sejda.sambox.contentstream.operator.state;
 
-import java.io.IOException;
+import static org.sejda.commons.util.RequireUtils.require;
+import static org.sejda.sambox.contentstream.operator.OperatorName.SET_LINE_JOINSTYLE;
+
 import java.util.List;
 
 import org.sejda.sambox.contentstream.operator.MissingOperandException;
 import org.sejda.sambox.contentstream.operator.Operator;
-import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.contentstream.operator.OperatorProcessor;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSNumber;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * j: Set the line join style.
@@ -32,20 +35,26 @@ import org.sejda.sambox.cos.COSNumber;
  */
 public class SetLineJoinStyle extends OperatorProcessor
 {
+    private static final Logger LOG = LoggerFactory.getLogger(SetLineJoinStyle.class);
+
     @Override
-    public void process(Operator operator, List<COSBase> arguments) throws IOException
+    public void process(Operator operator, List<COSBase> operands) throws MissingOperandException
     {
-        if (arguments.isEmpty())
+        require(!operands.isEmpty(), () -> new MissingOperandException(operator, operands));
+        var base = operands.get(0);
+        if (base instanceof COSNumber style)
         {
-            throw new MissingOperandException(operator, arguments);
+            getContext().getGraphicsState().setLineJoin(style.intValue());
         }
-        int lineJoinStyle = ((COSNumber) arguments.get(0)).intValue();
-        getContext().getGraphicsState().setLineJoin(lineJoinStyle);
+        else
+        {
+            LOG.warn("Invalid type {} operand for {} operator", base, SET_LINE_JOINSTYLE);
+        }
     }
 
     @Override
     public String getName()
     {
-        return OperatorName.SET_LINE_JOINSTYLE;
+        return SET_LINE_JOINSTYLE;
     }
 }

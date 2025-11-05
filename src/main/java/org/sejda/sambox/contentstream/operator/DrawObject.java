@@ -16,6 +16,11 @@
  */
 package org.sejda.sambox.contentstream.operator;
 
+import static org.sejda.commons.util.RequireUtils.require;
+
+import java.io.IOException;
+import java.util.List;
+
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.graphics.PDXObject;
@@ -23,9 +28,6 @@ import org.sejda.sambox.pdmodel.graphics.form.PDFormXObject;
 import org.sejda.sambox.pdmodel.graphics.form.PDTransparencyGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.List;
 
 /**
  * Do: Draws an XObject.
@@ -38,46 +40,36 @@ public class DrawObject extends OperatorProcessor
     private static final Logger LOG = LoggerFactory.getLogger(DrawObject.class);
 
     @Override
-    public void process(Operator operator, List<COSBase> arguments) throws IOException
+    public void process(Operator operator, List<COSBase> operands) throws IOException
     {
-        if (arguments.isEmpty())
+        require(!operands.isEmpty(), () -> new MissingOperandException(operator, operands));
+        COSBase base0 = operands.get(0);
+        if (base0 instanceof COSName name && !getContext().getResources().isImageXObject(name))
         {
-            throw new MissingOperandException(operator, arguments);
-        }
-        COSBase base0 = arguments.get(0);
-        if (!(base0 instanceof COSName name))
-        {
-            return;
-        }
-        if (getContext().getResources().isImageXObject(name))
-        {
-            // we're done here, don't decode images when doing text extraction
-            return;
-        }
-
-        PDXObject xobject = getContext().getResources().getXObject(name);
-        if (xobject instanceof PDFormXObject)
-        {
-            try
+            PDXObject xobject = getContext().getResources().getXObject(name);
+            if (xobject instanceof PDFormXObject)
             {
-                getContext().increaseLevel();
-                if (getContext().getLevel() > 50)
+                try
                 {
-                    LOG.error("recursion is too deep, skipping form XObject");
-                    return;
+                    getContext().increaseLevel();
+                    if (getContext().getLevel() > 50)
+                    {
+                        LOG.error("recursion is too deep, skipping form XObject");
+                        return;
+                    }
+                    if (xobject instanceof PDTransparencyGroup)
+                    {
+                        getContext().showTransparencyGroup((PDTransparencyGroup) xobject);
+                    }
+                    else
+                    {
+                        getContext().showForm((PDFormXObject) xobject);
+                    }
                 }
-                if (xobject instanceof PDTransparencyGroup)
+                finally
                 {
-                    getContext().showTransparencyGroup((PDTransparencyGroup) xobject);
+                    getContext().decreaseLevel();
                 }
-                else
-                {
-                    getContext().showForm((PDFormXObject) xobject);
-                }
-            }
-            finally
-            {
-                getContext().decreaseLevel();
             }
         }
     }

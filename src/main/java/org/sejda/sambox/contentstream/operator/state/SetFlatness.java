@@ -17,6 +17,8 @@
 
 package org.sejda.sambox.contentstream.operator.state;
 
+import static org.sejda.commons.util.RequireUtils.require;
+
 import java.util.List;
 
 import org.sejda.sambox.contentstream.operator.MissingOperandException;
@@ -36,16 +38,12 @@ public class SetFlatness extends OperatorProcessor
     @Override
     public void process(Operator operator, List<COSBase> operands) throws MissingOperandException
     {
-        if (operands.isEmpty())
+        require(!operands.isEmpty(), () -> new MissingOperandException(operator, operands));
+        if (checkArrayTypesClass(operands, COSNumber.class))
         {
-            throw new MissingOperandException(operator, operands);
+            COSNumber value = (COSNumber) operands.get(0);
+            getContext().getGraphicsState().setFlatness(value.floatValue());
         }
-        if (!checkArrayTypesClass(operands, COSNumber.class))
-        {
-            return;
-        }
-        COSNumber value = (COSNumber) operands.get(0);
-        getContext().getGraphicsState().setFlatness(value.floatValue());
     }
 
     @Override

@@ -16,21 +16,23 @@
  */
 package org.sejda.sambox.contentstream.operator.graphics;
 
+import static java.util.Objects.nonNull;
+import static org.sejda.commons.util.RequireUtils.require;
+
+import java.io.IOException;
+import java.util.List;
+
 import org.sejda.sambox.contentstream.operator.MissingOperandException;
 import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.pdmodel.MissingResourceException;
 import org.sejda.sambox.pdmodel.graphics.PDXObject;
 import org.sejda.sambox.pdmodel.graphics.form.PDFormXObject;
 import org.sejda.sambox.pdmodel.graphics.form.PDTransparencyGroup;
 import org.sejda.sambox.pdmodel.graphics.image.PDImageXObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.List;
 
 /**
  * Do: Draws an XObject.
@@ -45,47 +47,40 @@ public final class DrawObject extends GraphicsOperatorProcessor
     @Override
     public void process(Operator operator, List<COSBase> operands) throws IOException
     {
-        if (operands.isEmpty())
+        require(!operands.isEmpty(), () -> new MissingOperandException(operator, operands));
+        if (operands.get(0) instanceof COSName objectName)
         {
-            throw new MissingOperandException(operator, operands);
-        }
-        COSBase base0 = operands.get(0);
-        if (!(base0 instanceof COSName objectName))
-        {
-            return;
-        }
-        PDXObject xobject = getContext().getResources().getXObject(objectName);
 
-        if (xobject == null)
-        {
-            throw new MissingResourceException("Missing XObject: " + objectName.getName());
-        }
-        if (xobject instanceof PDImageXObject image)
-        {
-            getContext().drawImage(image);
-        }
-        else if (xobject instanceof PDFormXObject)
-        {
-            try
+            PDXObject xobject = getContext().getResources().getXObject(objectName);
+
+            require(nonNull(xobject), () -> new MissingOperandException(operator, operands));
+            if (xobject instanceof PDImageXObject image)
             {
-                getContext().increaseLevel();
-                if (getContext().getLevel() > 50)
-                {
-                    LOG.error("recursion is too deep, skipping form XObject");
-                    return;
-                }
-                if (xobject instanceof PDTransparencyGroup)
-                {
-                    getContext().showTransparencyGroup((PDTransparencyGroup) xobject);
-                }
-                else
-                {
-                    getContext().showForm((PDFormXObject) xobject);
-                }
+                getContext().drawImage(image);
             }
-            finally
+            else if (xobject instanceof PDFormXObject xform)
             {
-                getContext().decreaseLevel();
+                try
+                {
+                    getContext().increaseLevel();
+                    if (getContext().getLevel() > 50)
+                    {
+                        LOG.error("Recursion is too deep, skipping form XObject");
+                        return;
+                    }
+                    if (xform instanceof PDTransparencyGroup transparencyGroup)
+                    {
+                        getContext().showTransparencyGroup(transparencyGroup);
+                    }
+                    else
+                    {
+                        getContext().showForm(xform);
+                    }
+                }
+                finally
+                {
+                    getContext().decreaseLevel();
+                }
             }
         }
     }

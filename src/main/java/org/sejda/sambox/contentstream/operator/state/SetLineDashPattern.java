@@ -16,6 +16,10 @@
  */
 package org.sejda.sambox.contentstream.operator.state;
 
+import static org.sejda.commons.util.RequireUtils.require;
+
+import java.util.List;
+
 import org.sejda.sambox.contentstream.operator.MissingOperandException;
 import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.contentstream.operator.OperatorName;
@@ -25,8 +29,6 @@ import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSNumber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
 
 /**
  * d: Set the line dash pattern.
@@ -38,41 +40,31 @@ public class SetLineDashPattern extends OperatorProcessor
     private static final Logger LOG = LoggerFactory.getLogger(SetLineDashPattern.class);
 
     @Override
-    public void process(Operator operator, List<COSBase> arguments) throws MissingOperandException
+    public void process(Operator operator, List<COSBase> operands) throws MissingOperandException
     {
-        if (arguments.size() < 2)
+        require(operands.size() >= 2, () -> new MissingOperandException(operator, operands));
+        if ((operands.get(0) instanceof COSArray dashArray) && (operands.get(
+                1) instanceof COSNumber dashNumber))
         {
-            throw new MissingOperandException(operator, arguments);
-        }
-        COSBase base0 = arguments.get(0);
-        if (!(base0 instanceof COSArray dashArray))
-        {
-            return;
-        }
-        COSBase base1 = arguments.get(1);
-        if (!(base1 instanceof COSNumber))
-        {
-            return;
-        }
-        int dashPhase = ((COSNumber) base1).intValue();
-
-        for (COSBase base : dashArray)
-        {
-            if (base instanceof COSNumber num)
+            int dashPhase = dashNumber.intValue();
+            for (COSBase base : dashArray)
             {
-                if (num.floatValue() != 0)
+                if (base instanceof COSNumber num)
                 {
+                    if (num.floatValue() != 0)
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    LOG.warn("dash array has non number element " + base + ", ignored");
+                    dashArray = new COSArray();
                     break;
                 }
             }
-            else
-            {
-                LOG.warn("dash array has non number element " + base + ", ignored");
-                dashArray = new COSArray();
-                break;
-            }
+            getContext().setLineDashPattern(dashArray, dashPhase);
         }
-        getContext().setLineDashPattern(dashArray, dashPhase);
     }
 
     @Override

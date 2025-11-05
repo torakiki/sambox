@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.contentstream.operator.text;
 
+import static org.sejda.commons.util.RequireUtils.require;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -34,17 +36,14 @@ import org.sejda.sambox.cos.COSNumber;
 public class SetCharSpacing extends OperatorProcessor
 {
     @Override
-    public void process(Operator operator, List<COSBase> arguments) throws IOException
+    public void process(Operator operator, List<COSBase> operands) throws IOException
     {
-        if (arguments.isEmpty())
-        {
-            throw new MissingOperandException(operator, arguments);
-        }
+        require(!operands.isEmpty(), () -> new MissingOperandException(operator, operands));
 
         // there are some documents which are incorrectly structured, and have
         // a wrong number of arguments to this, so we will assume the last argument
         // in the list
-        Object charSpacing = arguments.get(arguments.size()-1);
+        Object charSpacing = operands.get(operands.size() - 1);
         if (charSpacing instanceof COSNumber characterSpacing)
         {
             getContext().getGraphicsState().getTextState()

@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.contentstream.operator.state;
 
+import static org.sejda.commons.util.RequireUtils.require;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -35,28 +37,24 @@ import org.sejda.sambox.util.Matrix;
 public class Concatenate extends OperatorProcessor
 {
     @Override
-    public void process(Operator operator, List<COSBase> arguments) throws IOException
+    public void process(Operator operator, List<COSBase> operands) throws IOException
     {
-        if (arguments.size() < 6)
+        require(operands.size() >= 6, () -> new MissingOperandException(operator, operands));
+        if (checkArrayTypesClass(operands, COSNumber.class))
         {
-            throw new MissingOperandException(operator, arguments);
-        }
-        if (!checkArrayTypesClass(arguments, COSNumber.class))
-        {
-            return;
-        }
-        // concatenate matrix to current transformation matrix
-        COSNumber a = (COSNumber) arguments.get(0);
-        COSNumber b = (COSNumber) arguments.get(1);
-        COSNumber c = (COSNumber) arguments.get(2);
-        COSNumber d = (COSNumber) arguments.get(3);
-        COSNumber e = (COSNumber) arguments.get(4);
-        COSNumber f = (COSNumber) arguments.get(5);
+            // concatenate matrix to current transformation matrix
+            COSNumber a = (COSNumber) operands.get(0);
+            COSNumber b = (COSNumber) operands.get(1);
+            COSNumber c = (COSNumber) operands.get(2);
+            COSNumber d = (COSNumber) operands.get(3);
+            COSNumber e = (COSNumber) operands.get(4);
+            COSNumber f = (COSNumber) operands.get(5);
 
-        Matrix matrix = new Matrix(a.floatValue(), b.floatValue(), c.floatValue(),
-                                   d.floatValue(), e.floatValue(), f.floatValue());
+            Matrix matrix = new Matrix(a.floatValue(), b.floatValue(), c.floatValue(),
+                    d.floatValue(), e.floatValue(), f.floatValue());
 
-        getContext().getGraphicsState().getCurrentTransformationMatrix().concatenate(matrix);
+            getContext().getGraphicsState().getCurrentTransformationMatrix().concatenate(matrix);
+        }
     }
 
     @Override

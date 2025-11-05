@@ -21,15 +21,13 @@ import org.sejda.sambox.pdmodel.graphics.color.PDColor;
 import org.sejda.sambox.pdmodel.graphics.color.PDColorSpace;
 
 /**
- * SC: Sets the colour to use for stroking stroking operations.
+ * SC: Sets the colour to use for stroking operations.
  *
  * @author John Hewson
  */
 public class SetStrokingColor extends SetColor
 {
     /**
-     * Returns the stroking color.
-     * 
      * @return The stroking color.
      */
     @Override
@@ -39,8 +37,6 @@ public class SetStrokingColor extends SetColor
     }
 
     /**
-     * Sets the stroking color.
-     * 
      * @param color The new stroking color.
      */
     @Override
@@ -50,8 +46,6 @@ public class SetStrokingColor extends SetColor
     }
 
     /**
-     * Returns the stroking color space.
-     * 
      * @return The stroking color space.
      */
     @Override

@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.contentstream.operator.graphics;
 
+import static org.sejda.commons.util.RequireUtils.require;
+
 import java.awt.geom.Point2D;
 import java.io.IOException;
 import java.util.List;
@@ -36,10 +38,7 @@ public final class CurveToReplicateFinalPoint extends GraphicsOperatorProcessor
     @Override
     public void process(Operator operator, List<COSBase> operands) throws IOException
     {
-        if (operands.size() < 4)
-        {
-            throw new MissingOperandException(operator, operands);
-        }
+        require(operands.size() >= 4, () -> new MissingOperandException(operator, operands));
         if (!checkArrayTypesClass(operands, COSNumber.class))
         {
             return;

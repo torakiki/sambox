@@ -17,7 +17,8 @@
 
 package org.sejda.sambox.contentstream.operator.state;
 
-import java.io.IOException;
+import static org.sejda.commons.util.RequireUtils.require;
+
 import java.util.List;
 
 import org.sejda.sambox.contentstream.operator.MissingOperandException;
@@ -36,17 +37,14 @@ import org.sejda.sambox.pdmodel.graphics.state.RenderingIntent;
 public class SetRenderingIntent extends OperatorProcessor
 {
     @Override
-    public void process(Operator operator, List<COSBase> operands) throws IOException
+    public void process(Operator operator, List<COSBase> operands) throws MissingOperandException
     {
-        if (operands.isEmpty())
-        {
-            throw new MissingOperandException(operator, operands);
-        }
+        require(!operands.isEmpty(), () -> new MissingOperandException(operator, operands));
         COSBase base = operands.get(0);
-        if (base instanceof COSName)
+        if (base instanceof COSName name)
         {
             getContext().getGraphicsState()
-                    .setRenderingIntent(RenderingIntent.fromString(((COSName) base).getName()));
+                    .setRenderingIntent(RenderingIntent.fromString(name.getName()));
         }
     }
 

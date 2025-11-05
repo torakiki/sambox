@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.contentstream.operator.color;
 
+import static org.sejda.commons.util.RequireUtils.require;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -42,18 +44,14 @@ public abstract class SetColor extends OperatorProcessor
         PDColorSpace colorSpace = getColorSpace();
         if (!(colorSpace instanceof PDPattern))
         {
-            if (arguments.size() < colorSpace.getNumberOfComponents())
-            {
-                throw new MissingOperandException(operator, arguments);
-            }
+            require(arguments.size() >= colorSpace.getNumberOfComponents(),
+                    () -> new MissingOperandException(operator, arguments));
             if (!checkArrayTypesClass(arguments, COSNumber.class))
             {
                 return;
             }
         }
-        COSArray array = new COSArray();
-        array.addAll(arguments);
-        setColor(new PDColor(array, colorSpace));
+        setColor(new PDColor(new COSArray(arguments), colorSpace));
     }
 
     /**
