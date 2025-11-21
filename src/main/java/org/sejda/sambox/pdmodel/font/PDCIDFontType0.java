@@ -99,7 +99,7 @@ public class PDCIDFontType0 extends PDCIDFont
             CFFParser cffParser = new CFFParser();
             try
             {
-                cffFont = cffParser.parse(bytes, new FF3ByteSource()).get(0);
+                cffFont = cffParser.parse(bytes, new FF3ByteSource()).getFirst();
             }
             catch (IOException e)
             {

@@ -17,6 +17,13 @@
 
 package org.sejda.sambox.pdmodel.font;
 
+import static java.util.Objects.nonNull;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.sejda.sambox.contentstream.PDContentStream;
 import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.cos.COSBase;
@@ -32,13 +39,6 @@ import org.sejda.sambox.pdmodel.common.PDStream;
 import org.sejda.sambox.util.Matrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-
-import static java.util.Objects.nonNull;
 
 /**
  * A Type 3 character procedure. This is a standalone PDF content stream.
@@ -110,15 +110,14 @@ public final class PDType3CharProc implements COSObjectable, PDContentStream
     public PDRectangle getGlyphBBox()
     {
         List<COSBase> arguments = new ArrayList<>();
-        try
+        try (var parser = new ContentStreamParser(this))
         {
-            ContentStreamParser parser = new ContentStreamParser(this);
             Object token = null;
             while ((token = parser.nextParsedToken()) != null)
             {
-                if (token instanceof Operator)
+                if (token instanceof Operator operator)
                 {
-                    if (((Operator) token).getName().equals("d1") && arguments.size() == 6)
+                    if ("d1".equals(operator.getName()) && arguments.size() == 6)
                     {
                         for (int i = 0; i < 6; ++i)
                         {
@@ -129,9 +128,7 @@ public final class PDType3CharProc implements COSObjectable, PDContentStream
                         }
                         float x = ((COSNumber) arguments.get(2)).floatValue();
                         float y = ((COSNumber) arguments.get(3)).floatValue();
-                        return new PDRectangle(
-                                x,
-                                y,
+                        return new PDRectangle(x, y,
                                 ((COSNumber) arguments.get(4)).floatValue() - x,
                                 ((COSNumber) arguments.get(5)).floatValue() - y);
                     }
@@ -142,7 +139,7 @@ public final class PDType3CharProc implements COSObjectable, PDContentStream
         }
         catch (IOException e)
         {
-            LOG.warn("An error occured while calculating the glyph bbox", e);
+            LOG.warn("An error occurred while calculating the glyph bbox", e);
         }
         return null;
     }
@@ -163,33 +160,34 @@ public final class PDType3CharProc implements COSObjectable, PDContentStream
     public float getWidth() throws IOException
     {
         List<COSBase> arguments = new ArrayList<>();
-        ContentStreamParser parser = new ContentStreamParser(this);
-        Object token = null;
-        while ((token = parser.nextParsedToken()) != null)
+        try (var parser = new ContentStreamParser(this))
         {
-            if (token instanceof Operator)
+            Object token = null;
+            while ((token = parser.nextParsedToken()) != null)
             {
-                return parseWidth((Operator) token, arguments);
+                if (token instanceof Operator operator)
+                {
+                    return parseWidth(operator, arguments);
+                }
+                if (token instanceof COSBase argument)
+                {
+                    arguments.add(argument.getCOSObject());
+                }
             }
-            arguments.add(((COSBase) token).getCOSObject());
         }
         throw new IOException("Unexpected end of stream");
     }
 
-    private float parseWidth(Operator operator, List arguments) throws IOException
+    private float parseWidth(Operator operator, List<COSBase> arguments) throws IOException
     {
-        if (operator.getName().equals("d0") || operator.getName().equals("d1"))
+        if ("d0".equals(operator.getName()) || "d1".equals(operator.getName()))
         {
-            Object obj = arguments.get(0);
-            if (obj instanceof Number)
+            COSBase fist = arguments.getFirst();
+            if (fist instanceof COSNumber number)
             {
-                return ((Number) obj).floatValue();
+                return number.floatValue();
             }
-            if (obj instanceof COSNumber)
-            {
-                return ((COSNumber) obj).floatValue();
-            }
-            throw new IOException("Unexpected argument type: " + obj.getClass().getName());
+            throw new IOException("Expected COSNumber but was: " + fist);
         }
         throw new IOException("First operator must be d0 or d1");
     }

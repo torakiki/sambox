@@ -70,8 +70,6 @@ public class PDType1CFont extends PDSimpleFont
     private BoundingBox fontBBox;
 
     /**
-     * Constructor.
-     *
      * @param fontDictionary the corresponding dictionary
      * @throws IOException it something went wrong
      */

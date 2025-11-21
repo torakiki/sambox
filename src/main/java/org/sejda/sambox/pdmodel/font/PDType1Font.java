@@ -81,20 +81,37 @@ public class PDType1Font extends PDSimpleFont
 
     public enum StandardFont
     {
-        TIMES_ROMAN,
-        TIMES_BOLD,
-        TIMES_ITALIC,
-        TIMES_BOLD_ITALIC,
-        HELVETICA,
-        HELVETICA_BOLD,
-        HELVETICA_OBLIQUE,
-        HELVETICA_BOLD_OBLIQUE,
-        COURIER,
-        COURIER_BOLD,
-        COURIER_OBLIQUE,
-        COURIER_BOLD_OBLIQUE,
-        SYMBOL,
-        ZAPF_DINGBATS
+        TIMES_ROMAN("Times-Roman"),
+        TIMES_BOLD("Times-Bold"),
+        TIMES_ITALIC("Times-Italic"),
+        TIMES_BOLD_ITALIC("Times-BoldItalic"),
+        HELVETICA("Helvetica"),
+        HELVETICA_BOLD("Helvetica-Bold"),
+        HELVETICA_OBLIQUE("Helvetica-Oblique"),
+        HELVETICA_BOLD_OBLIQUE("Helvetica-BoldOblique"),
+        COURIER("Courier"),
+        COURIER_BOLD("Courier-Bold"),
+        COURIER_OBLIQUE("Courier-Oblique"),
+        COURIER_BOLD_OBLIQUE("Courier-BoldOblique"),
+        SYMBOL("Symbol"),
+        ZAPF_DINGBATS("ZapfDingbats");
+
+        private final String fontName;
+
+        StandardFont(String fontName)
+        {
+            this.fontName = fontName;
+        }
+
+        public String fontName()
+        {
+            return this.fontName;
+        }
+
+        public static boolean isStandardFontName(String name)
+        {
+            return Arrays.stream(StandardFont.values()).anyMatch(f -> f.fontName().equals(name));
+        }
     }
 
     private static Map<StandardFont, PDType1Font> cache = new ConcurrentHashMap<>();
@@ -106,23 +123,7 @@ public class PDType1Font extends PDSimpleFont
 
     private static PDType1Font loadStandardFont(StandardFont font)
     {
-        return switch (font)
-        {
-            case TIMES_ROMAN -> new PDType1Font("Times-Roman");
-            case TIMES_BOLD -> new PDType1Font("Times-Bold");
-            case TIMES_ITALIC -> new PDType1Font("Times-Italic");
-            case TIMES_BOLD_ITALIC -> new PDType1Font("Times-BoldItalic");
-            case HELVETICA -> new PDType1Font("Helvetica");
-            case HELVETICA_BOLD -> new PDType1Font("Helvetica-Bold");
-            case HELVETICA_OBLIQUE -> new PDType1Font("Helvetica-Oblique");
-            case HELVETICA_BOLD_OBLIQUE -> new PDType1Font("Helvetica-BoldOblique");
-            case COURIER -> new PDType1Font("Courier");
-            case COURIER_BOLD -> new PDType1Font("Courier-Bold");
-            case COURIER_OBLIQUE -> new PDType1Font("Courier-Oblique");
-            case COURIER_BOLD_OBLIQUE -> new PDType1Font("Courier-BoldOblique");
-            case SYMBOL -> new PDType1Font("Symbol");
-            case ZAPF_DINGBATS -> new PDType1Font("ZapfDingbats");
-        };
+        return new PDType1Font(font.fontName());
     }
 
     public static PDType1Font TIMES_ROMAN()

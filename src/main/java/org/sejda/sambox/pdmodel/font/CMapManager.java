@@ -16,6 +16,8 @@
  */
 package org.sejda.sambox.pdmodel.font;
 
+import static java.util.Objects.nonNull;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
@@ -62,23 +64,14 @@ public final class CMapManager
     }
 
     /**
-     * Parse the given CMap.
-     *
      * @param cMapStream the CMap to be read
      * @return the parsed CMap
      */
     public static CMap parseCMap(InputStream cMapStream) throws IOException
     {
-        if (cMapStream != null)
+        if (nonNull(cMapStream))
         {
-            try
-            {
-                return new CMapParser().parse(cMapStream);
-            }
-            catch (IOException e)
-            {
-                LOG.warn("Failed to parse CMap for font", e);
-            }
+            return new CMapParser().parse(cMapStream);
         }
         return null;
     }

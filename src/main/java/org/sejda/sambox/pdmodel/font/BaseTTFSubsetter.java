@@ -177,7 +177,7 @@ public abstract class BaseTTFSubsetter implements Function<String, COSStream>
         for (Map.Entry<String, byte[]> entry : tables.entrySet())
         {
             checksum += writeTableHeader(out, entry.getKey(), offset, entry.getValue());
-            offset += (entry.getValue().length + 3) / 4 * 4;
+            offset += (entry.getValue().length + 3L) / 4 * 4;
         }
         checksum = 0xB1B0AFBAL - (checksum & 0xffffffffL);
         byte[] head = tables.get("head");
@@ -270,7 +270,7 @@ public abstract class BaseTTFSubsetter implements Function<String, COSStream>
 
     protected byte[] buildHeadTable() throws IOException
     {
-        try (FastByteArrayOutputStream bos = new FastByteArrayOutputStream())
+        try (FastByteArrayOutputStream bos = new FastByteArrayOutputStream(54))
         {
             try (DataOutputStream out = new DataOutputStream(bos))
             {
@@ -337,22 +337,24 @@ public abstract class BaseTTFSubsetter implements Function<String, COSStream>
             {
 
                 MaximumProfileTable p = getFont().getMaximumProfile();
-                writeFixed(out, 1.0);
+                writeFixed(out, p.getVersion());
                 writeUint16(out, numberOfGlyphs + 1);
-                writeUint16(out, p.getMaxPoints());
-                writeUint16(out, p.getMaxContours());
-                writeUint16(out, p.getMaxCompositePoints());
-                writeUint16(out, p.getMaxCompositeContours());
-                writeUint16(out, p.getMaxZones());
-                writeUint16(out, p.getMaxTwilightPoints());
-                writeUint16(out, p.getMaxStorage());
-                writeUint16(out, p.getMaxFunctionDefs());
-                writeUint16(out, p.getMaxInstructionDefs());
-                writeUint16(out, p.getMaxStackElements());
-                writeUint16(out, p.getMaxSizeOfInstructions());
-                writeUint16(out, p.getMaxComponentElements());
-                writeUint16(out, p.getMaxComponentDepth());
-
+                if (p.getVersion() >= 1.0f)
+                {
+                    writeUint16(out, p.getMaxPoints());
+                    writeUint16(out, p.getMaxContours());
+                    writeUint16(out, p.getMaxCompositePoints());
+                    writeUint16(out, p.getMaxCompositeContours());
+                    writeUint16(out, p.getMaxZones());
+                    writeUint16(out, p.getMaxTwilightPoints());
+                    writeUint16(out, p.getMaxStorage());
+                    writeUint16(out, p.getMaxFunctionDefs());
+                    writeUint16(out, p.getMaxInstructionDefs());
+                    writeUint16(out, p.getMaxStackElements());
+                    writeUint16(out, p.getMaxSizeOfInstructions());
+                    writeUint16(out, p.getMaxComponentElements());
+                    writeUint16(out, p.getMaxComponentDepth());
+                }
             }
             return bos.toByteArray();
         }
