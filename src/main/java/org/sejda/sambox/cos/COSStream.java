@@ -471,7 +471,7 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
     }
 
     /**
-     * Adds Flate decode filter to the current filters list if possible
+     * Adds FlateDecode filter to the current filters list if possible
      *
      * @return true if the FlateDecode filter has been added
      */
@@ -502,6 +502,38 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
             catch (IOException e)
             {
                 LOG.warn("Unable to add FlateDecode filter to the stream", e);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Removes, if present, the FlateDecode filter from the current filter list.
+     *
+     * @return true if the filter was present and was removed
+     */
+    public boolean removeCompression()
+    {
+        if (hasFilter(COSName.FLATE_DECODE))
+        {
+            try
+            {
+                COSBase filters = getFilters();
+                if (filters instanceof COSArray array)
+                {
+                    var newFilters = array.duplicate();
+                    newFilters.remove(COSName.FLATE_DECODE);
+                    setFilters(newFilters);
+                }
+                else
+                {
+                    setFilters(null);
+                }
+                return true;
+            }
+            catch (IOException e)
+            {
+                LOG.warn("Unable to remove FlateDecode filter to the stream", e);
             }
         }
         return false;

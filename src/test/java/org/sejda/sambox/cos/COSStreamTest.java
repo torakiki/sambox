@@ -16,17 +16,18 @@
  */
 package org.sejda.sambox.cos;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.sejda.commons.util.IOUtils;
 import org.sejda.sambox.filter.Filter;
 import org.sejda.sambox.filter.FilterFactory;
@@ -214,8 +215,9 @@ public class COSStreamTest
     }
 
     /**
-     * Tests tests that encoding is done correctly even if the the stream is closed twice. Closeable.close() allows
-     * streams to be closed multiple times. The second and subsequent close() calls should have no effect.
+     * Tests tests that encoding is done correctly even if the the stream is closed twice.
+     * Closeable.close() allows streams to be closed multiple times. The second and subsequent
+     * close() calls should have no effect.
      *
      * @throws IOException
      */
@@ -231,6 +233,34 @@ public class COSStreamTest
         stream.setItem(COSName.FILTER, COSName.FLATE_DECODE);
         output.close();
         output.close();
+        validateEncoded(stream, testStringEncoded);
+    }
+
+    @Test
+    @DisplayName("Test removeCompression when filters is a COSName")
+    public void testRemoveCompression() throws IOException
+    {
+        byte[] testString = "This is a test string to be used as input for TestCOSStream".getBytes(
+                StandardCharsets.US_ASCII);
+        COSStream stream = createStream(testString, COSName.FLATE_DECODE);
+        assertTrue(stream.hasFilter(COSName.FLATE_DECODE));
+        stream.removeCompression();
+        assertFalse(stream.hasFilter(COSName.FLATE_DECODE));
+        validateDecoded(stream, testString);
+    }
+
+    @Test
+    @DisplayName("Test removeCompression when filters is a COSArray")
+    public void testRemoveCompressionTwoFilter() throws IOException
+    {
+        byte[] testString = "This is a test string to be used as input for TestCOSStream".getBytes(
+                StandardCharsets.US_ASCII);
+        byte[] testStringEncoded = encodeData(testString, COSName.ASCII85_DECODE);
+        COSStream stream = createStream(testString,
+                new COSArray(COSName.FLATE_DECODE, COSName.ASCII85_DECODE));
+        assertTrue(stream.hasFilter(COSName.FLATE_DECODE));
+        stream.removeCompression();
+        assertFalse(stream.hasFilter(COSName.FLATE_DECODE));
         validateEncoded(stream, testStringEncoded);
     }
 
@@ -266,13 +296,13 @@ public class COSStreamTest
     {
         byte[] encoded = IOUtils.toByteArray(stream.getFilteredStream());
         stream.close();
-        assertTrue("Encoded data doesn't match input", Arrays.equals(expected, encoded));
+        assertArrayEquals(expected, encoded, "Encoded data doesn't match input");
     }
 
     private static void validateDecoded(COSStream stream, byte[] expected) throws IOException
     {
         byte[] decoded = IOUtils.toByteArray(stream.getUnfilteredStream());
         stream.close();
-        assertTrue("Decoded data doesn't match input", Arrays.equals(expected, decoded));
+        assertArrayEquals(expected, decoded, "Decoded data doesn't match input");
     }
 }
