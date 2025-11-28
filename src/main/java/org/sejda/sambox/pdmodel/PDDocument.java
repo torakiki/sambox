@@ -24,8 +24,6 @@ import static org.sejda.sambox.cos.DirectCOSObject.asDirectObject;
 import static org.sejda.sambox.util.SpecVersionUtils.V1_4;
 import static org.sejda.sambox.util.SpecVersionUtils.isAtLeast;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -39,12 +37,8 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-import org.apache.xmpbox.XMPMetadata;
-import org.apache.xmpbox.schema.AdobePDFSchema;
-import org.apache.xmpbox.xml.DomXmpParser;
-import org.apache.xmpbox.xml.XmpParsingException;
-import org.apache.xmpbox.xml.XmpSerializer;
 import org.sejda.commons.util.IOUtils;
+import org.sejda.commons.util.StringUtils;
 import org.sejda.io.CountingWritableByteChannel;
 import org.sejda.sambox.SAMBox;
 import org.sejda.sambox.cos.COSArray;
@@ -61,14 +55,14 @@ import org.sejda.sambox.encryption.StandardSecurity;
 import org.sejda.sambox.output.PDDocumentWriter;
 import org.sejda.sambox.output.PreSaveCOSVisitor;
 import org.sejda.sambox.output.WriteOption;
-import org.sejda.sambox.pdmodel.common.PDMetadata;
 import org.sejda.sambox.pdmodel.encryption.AccessPermission;
 import org.sejda.sambox.pdmodel.encryption.PDEncryption;
 import org.sejda.sambox.pdmodel.encryption.SecurityHandler;
 import org.sejda.sambox.pdmodel.font.Subsettable;
+import org.sejda.sambox.pdmodel.xmp.DefaultDocumentXmpMetadataProvider;
+import org.sejda.sambox.pdmodel.xmp.DocumentXmpMetadataProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import javax.xml.transform.TransformerException;
 
 /**
  * This is the in-memory representation of the PDF document.
@@ -530,45 +524,29 @@ public class PDDocument implements Closeable
         if (Arrays.stream(options).anyMatch(o -> o == WriteOption.UPSERT_DOCUMENT_METADATA_STREAM))
         {
             requireMinVersion(V1_4);
-            var metadataStream = new PDMetadata();
-            try (var metadataOutputStream = new BufferedOutputStream(
-                    metadataStream.getCOSObject().createUnfilteredStream()))
-            {
-                var meta = getDocumentInformation().toXMPMetadata(getOrCreateXmpMetadata());
-                AdobePDFSchema pdfSchema = ofNullable(meta.getAdobePDFSchema()).orElseGet(
-                        meta::createAndAddAdobePDFSchema);
-                pdfSchema.setPDFVersion(getVersion());
-                new XmpSerializer().serialize(meta, metadataOutputStream, true);
-                getDocumentCatalog().setMetadata(metadataStream);
-            }
-            catch (IOException | TransformerException e)
-            {
-                LOG.warn("Unable to set xmp document metadata", e);
-            }
+            ofNullable(metadataProvider().xmpMetadataFor(this)).ifPresent(
+                    getDocumentCatalog()::setMetadata);
         }
     }
 
-    private XMPMetadata getOrCreateXmpMetadata()
+    private DocumentXmpMetadataProvider metadataProvider()
     {
-        var metadata = getDocumentCatalog().getMetadata();
-        if (nonNull(metadata))
+        String metadataUpdater = System.getProperty(SAMBox.METADATA_PROVIDER_PROPERTY);
+        if (StringUtils.isNotEmpty(metadataUpdater))
         {
             try
             {
-                var parser = new DomXmpParser();
-                parser.setStrictParsing(false);
-                return parser.parse(new BufferedInputStream(metadata.createInputStream()));
+                return (DocumentXmpMetadataProvider) Class.forName(metadataUpdater)
+                        .getDeclaredConstructor().newInstance();
             }
-            catch (XmpParsingException | IOException e)
+            catch (Exception ex)
             {
-                LOG.warn("Unable to parse existing document level xmp metadata", e);
-            }
-            finally
-            {
-                metadata.getCOSObject().unDecode();
+                LOG.error("Failed loading custom DocumentXmpMetadataProvider with name "
+                        + metadataUpdater, ex);
             }
         }
-        return XMPMetadata.createXMPMetadata();
+
+        return new DefaultDocumentXmpMetadataProvider();
     }
 
     /**

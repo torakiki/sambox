@@ -75,6 +75,7 @@ module org.sejda.sambox {
     exports org.sejda.sambox.pdmodel.interactive.measurement;
     exports org.sejda.sambox.pdmodel.interactive.pagenavigation;
     exports org.sejda.sambox.pdmodel.interactive.viewerpreferences;
+    exports org.sejda.sambox.pdmodel.xmp;
     exports org.sejda.sambox.printing;
     exports org.sejda.sambox.rendering;
     exports org.sejda.sambox.text;

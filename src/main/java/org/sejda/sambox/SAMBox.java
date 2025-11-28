@@ -36,7 +36,10 @@ public final class SAMBox
      */
     public static final String OBJECTS_STREAM_SIZE_PROPERTY = "org.sejda.sambox.objects.stream.size";
     public static final String FONT_PROVIDER_PROPERTY = "org.sejda.sambox.font.provider";
-
+    /**
+     * Custom class to use a document xmp metadata provider
+     */
+    public static final String METADATA_PROVIDER_PROPERTY = "org.sejda.sambox.metadata.provider";
     public static final String SAMBOX_PROPERTIES = "/org/sejda/sambox/resources/version.properties";
 
     public static String PRODUCER = "SAMBox " + Version.getVersion();

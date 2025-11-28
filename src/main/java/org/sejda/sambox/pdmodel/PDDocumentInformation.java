@@ -16,19 +16,11 @@
  */
 package org.sejda.sambox.pdmodel;
 
-import static java.util.Optional.ofNullable;
-
 import java.time.Instant;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.UUID;
 
-import org.apache.xmpbox.XMPMetadata;
-import org.apache.xmpbox.schema.AdobePDFSchema;
-import org.apache.xmpbox.schema.DublinCoreSchema;
-import org.apache.xmpbox.schema.XMPBasicSchema;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.common.PDDictionaryWrapper;
@@ -236,39 +228,5 @@ public class PDDocumentInformation extends PDDictionaryWrapper
         }
 
         getCOSObject().setName(COSName.TRAPPED, value);
-    }
-
-    /**
-     * @param metadata the metadata to update. If null a new empty {@link XMPMetadata} is created.
-     * @return and updated version of the input metadata where all the properties corresponding to
-     * the info dictionary have their values updated with the current value of the info dictionary.
-     */
-    public XMPMetadata toXMPMetadata(XMPMetadata metadata)
-    {
-        metadata = ofNullable(metadata).orElseGet(XMPMetadata::createXMPMetadata);
-        AdobePDFSchema pdfSchema = ofNullable(metadata.getAdobePDFSchema()).orElseGet(
-                metadata::createAndAddAdobePDFSchema);
-        ofNullable(getKeywords()).ifPresent(pdfSchema::setKeywords);
-        ofNullable(getProducer()).map(p -> pdfSchema.getMetadata().getTypeMapping()
-                        .createAgentName(pdfSchema.getNamespace(), pdfSchema.getPrefix(), "Producer", p))
-                .ifPresent(pdfSchema::addProperty);
-
-        XMPBasicSchema basicSchema = ofNullable(metadata.getXMPBasicSchema()).orElseGet(
-                metadata::createAndAddXMPBasicSchema);
-        basicSchema.addIdentifier(UUID.randomUUID().toString());
-        basicSchema.setMetadataDate(new GregorianCalendar());
-        ofNullable(getModificationDate()).ifPresent(basicSchema::setModifyDate);
-        ofNullable(getCreator()).ifPresent(basicSchema::setCreatorTool);
-        ofNullable(getCreationDate()).ifPresent(basicSchema::setCreateDate);
-
-        DublinCoreSchema dcSchema = ofNullable(metadata.getDublinCoreSchema()).orElseGet(
-                metadata::createAndAddDublinCoreSchema);
-        dcSchema.setFormat("application/pdf");
-        ofNullable(getTitle()).ifPresent(dcSchema::setTitle);
-        ofNullable(getSubject()).ifPresent(dcSchema::setDescription);
-        ofNullable(getAuthor()).filter(
-                        a -> ofNullable(dcSchema.getCreators()).map(l -> !l.contains(a)).orElse(true))
-                .ifPresent(dcSchema::addCreator);
-        return metadata;
     }
 }
