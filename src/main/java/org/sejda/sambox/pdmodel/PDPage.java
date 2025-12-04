@@ -354,7 +354,7 @@ public class PDPage implements COSObjectable, PDContentStream
         try
         {
             COSBase base = PDPageTree.getInheritableAttribute(page, COSName.CROP_BOX);
-            if (base instanceof COSArray)
+            if (base instanceof COSArray && !isNullEmptyOrOnlyZeros((COSArray) base))
             {
                 return clipToMediaBox(new PDRectangle((COSArray) base));
             }
@@ -365,6 +365,32 @@ public class PDPage implements COSObjectable, PDContentStream
         }
 
         return getMediaBox();
+    }
+
+    private boolean isNullEmptyOrOnlyZeros(COSArray array)
+    {
+        if (array == null || array.isEmpty())
+        {
+            return true;
+        }
+
+        for (int i = 0; i < array.size(); i++)
+        {
+            COSBase element = array.get(i);
+            if (element instanceof COSNumber)
+            {
+                if (((COSNumber) element).floatValue() != 0)
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                // Non-numeric element found
+                return false;
+            }
+        }
+        return true;
     }
 
     public PDRectangle getCropBoxRaw()
