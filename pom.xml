@@ -56,7 +56,7 @@
         <maven.javadoc.failOnError>false</maven.javadoc.failOnError>
         <bouncycastle.version>1.81</bouncycastle.version>
         <fontbox.version>2.0.34</fontbox.version>
-        <sejda.commons.version>2.0.0</sejda.commons.version>
+        <sejda.commons.version>3.0.1</sejda.commons.version>
         <sejda.io.version>3.0.1</sejda.io.version>
         <slf4j.version>2.0.17</slf4j.version>
         <diffutils.version>4.12</diffutils.version>
