@@ -16,24 +16,28 @@
  */
 package org.sejda.sambox.pdmodel;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.input.PDFParser;
+import org.sejda.sambox.output.WriteOption;
 
 /**
  * This class tests the extraction of document-level metadata.
- * 
+ *
  * @author Neil McErlean
  * @since 1.3.0
  */
@@ -43,42 +47,41 @@ public class PDDocumentInformationTest
     @Test
     public void testMetadataExtraction() throws Exception
     {
-        try (PDDocument doc = PDFParser.parse(SeekableSources
-                .inMemorySeekableSourceFrom(getClass().getResourceAsStream("/input/hello3.pdf"))))
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/input/hello3.pdf"))))
         {
             // This document has been selected for this test as it contains custom metadata.
             PDDocumentInformation info = doc.getDocumentInformation();
 
-            assertEquals("Wrong author", "Brian Carrier", info.getAuthor());
-            assertNotNull("Wrong creationDate", info.getCreationDate());
-            assertEquals("Wrong creator", "Acrobat PDFMaker 8.1 for Word", info.getCreator());
-            assertNull("Wrong keywords", info.getKeywords());
-            assertNotNull("Wrong modificationDate", info.getModificationDate());
-            assertEquals("Wrong producer", "Acrobat Distiller 8.1.0 (Windows)", info.getProducer());
-            assertNull("Wrong subject", info.getSubject());
-            assertNull("Wrong trapped", info.getTrapped());
+            assertEquals("Brian Carrier", info.getAuthor());
+            assertNotNull(info.getCreationDate());
+            assertEquals("Acrobat PDFMaker 8.1 for Word", info.getCreator());
+            assertNull(info.getKeywords());
+            assertNotNull(info.getModificationDate());
+            assertEquals("Acrobat Distiller 8.1.0 (Windows)", info.getProducer());
+            assertNull(info.getSubject());
+            assertNull(info.getTrapped());
 
-            List<String> expectedMetadataKeys = Arrays
-                    .asList(new String[] { "CreationDate", "Author", "Creator", "Producer",
-                            "ModDate", "Company", "SourceModified", "Title" });
-            assertEquals("Wrong metadata key count", expectedMetadataKeys.size(),
-                    info.getMetadataKeys().size());
+            List<String> expectedMetadataKeys = Arrays.asList(
+                    new String[] { "CreationDate", "Author", "Creator", "Producer", "ModDate",
+                            "Company", "SourceModified", "Title" });
+            assertEquals(expectedMetadataKeys.size(), info.getMetadataKeys().size());
             for (String key : expectedMetadataKeys)
             {
-                assertTrue("Missing metadata key:" + key, info.getMetadataKeys().contains(key));
+                assertTrue(info.getMetadataKeys().contains(key), "Missing metadata key:" + key);
             }
 
             // Custom metadata fields.
-            assertEquals("Wrong company", "Basis Technology Corp.",
-                    info.getCustomMetadataValue("Company"));
-            assertEquals("Wrong sourceModified", "D:20080819181502",
-                    info.getCustomMetadataValue("SourceModified"));
+            assertEquals("Basis Technology Corp.", info.getCustomMetadataValue("Company"),
+                    "Wrong company");
+            assertEquals("D:20080819181502", info.getCustomMetadataValue("SourceModified"),
+                    "Wrong sourceModified");
         }
     }
 
     /**
      * PDFBOX-3068: test that indirect /Title element of /Info entry can be found.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -118,6 +121,23 @@ public class PDDocumentInformationTest
             }
 
             temp.delete();
+        }
+    }
+
+    @Test
+    public void testDatesAreFixedOnWrite() throws IOException
+    {
+        try (PDDocument document = new PDDocument())
+        {
+            document.addPage(new PDPage());
+            document.getDocumentInformation().getCOSObject()
+                    .setString(COSName.CREATION_DATE, "20250715094238+02'00'");
+            //it's an invalid format but our parsing logic handles the missing D:
+            assertNotNull(document.getDocumentInformation().getCreationDate());
+            document.writeTo(new ByteArrayOutputStream(),
+                    WriteOption.UPSERT_DOCUMENT_METADATA_STREAM);
+            assertThat(document.getDocumentInformation().getCOSObject()
+                    .getString(COSName.CREATION_DATE), startsWith("D:"));
         }
     }
 }

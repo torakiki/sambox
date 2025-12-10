@@ -84,9 +84,15 @@ public class DefaultDocumentXmpMetadataProvider implements DocumentXmpMetadataPr
                 metadata::createAndAddXMPBasicSchema);
         basicSchema.addIdentifier(UUID.randomUUID().toString());
         basicSchema.setMetadataDate(new GregorianCalendar());
-        ofNullable(documentInformation.getModificationDate()).ifPresent(basicSchema::setModifyDate);
         ofNullable(documentInformation.getCreator()).ifPresent(basicSchema::setCreatorTool);
-        ofNullable(documentInformation.getCreationDate()).ifPresent(basicSchema::setCreateDate);
+        ofNullable(documentInformation.getModificationDate()).ifPresent(modDate -> {
+            basicSchema.setModifyDate(modDate);
+            documentInformation.setModificationDate(modDate.toInstant());
+        });
+        ofNullable(documentInformation.getCreationDate()).ifPresent(creationDate -> {
+            basicSchema.setCreateDate(creationDate);
+            documentInformation.setCreationDate(creationDate.toInstant());
+        });
 
         DublinCoreSchema dcSchema = ofNullable(metadata.getDublinCoreSchema()).orElseGet(
                 metadata::createAndAddDublinCoreSchema);
