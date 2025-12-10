@@ -18,6 +18,8 @@
 package org.sejda.sambox.pdmodel.font;
 
 import static java.util.Objects.nonNull;
+import static org.sejda.sambox.contentstream.operator.OperatorName.TYPE3_D0;
+import static org.sejda.sambox.contentstream.operator.OperatorName.TYPE3_D1;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -180,7 +182,7 @@ public final class PDType3CharProc implements COSObjectable, PDContentStream
 
     private float parseWidth(Operator operator, List<COSBase> arguments) throws IOException
     {
-        if ("d0".equals(operator.getName()) || "d1".equals(operator.getName()))
+        if (TYPE3_D0.equals(operator.getName()) || TYPE3_D1.equals(operator.getName()))
         {
             COSBase fist = arguments.getFirst();
             if (fist instanceof COSNumber number)
