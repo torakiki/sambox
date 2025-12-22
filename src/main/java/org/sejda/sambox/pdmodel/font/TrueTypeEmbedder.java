@@ -19,6 +19,7 @@ package org.sejda.sambox.pdmodel.font;
 
 import static java.util.Objects.nonNull;
 import static org.sejda.commons.util.RequireUtils.requireIOCondition;
+import static org.sejda.commons.util.RequireUtils.requireState;
 import static org.sejda.sambox.pdmodel.font.FontUtils.getTag;
 import static org.sejda.sambox.pdmodel.font.FontUtils.isEmbeddingPermitted;
 import static org.sejda.sambox.pdmodel.font.FontUtils.isSubsettingPermitted;
@@ -46,6 +47,7 @@ import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.common.PDStream;
+
 /**
  * Common functionality for embedding TrueType fonts.
  *
@@ -136,14 +138,13 @@ abstract class TrueTypeEmbedder implements Subsetter
         fontDescriptor.setFontFile2(stream);
     }
 
-
     /**
      * Creates a new font descriptor dictionary for the given TTF.
      */
     private PDFontDescriptor createFontDescriptor(TrueTypeFont ttf) throws IOException
     {
         String ttfName = ttf.getName();
-        
+
         OS2WindowsMetricsTable os2 = ttf.getOS2Windows();
         requireIOCondition(nonNull(os2), "os2 table is missing in font " + ttfName);
         PostScriptTable post = ttf.getPostScript();
@@ -155,8 +156,7 @@ abstract class TrueTypeEmbedder implements Subsetter
         HorizontalHeaderTable hhea = ttf.getHorizontalHeader();
 
         // Flags
-        fd.setFixedPitch(
-                post.getIsFixedPitch() > 0 || hhea.getNumberOfHMetrics() == 1);
+        fd.setFixedPitch(post.getIsFixedPitch() > 0 || hhea.getNumberOfHMetrics() == 1);
 
         int fsSelection = os2.getFsSelection();
         fd.setItalic(((fsSelection & (ITALIC | OBLIQUE)) != 0));
@@ -261,21 +261,15 @@ abstract class TrueTypeEmbedder implements Subsetter
     @Override
     public void subset() throws IOException
     {
-        if (!isSubsettingPermitted(ttf))
-        {
-            throw new IOException("This font does not permit subsetting");
-        }
-
-        if (!embedSubset)
-        {
-            throw new IllegalStateException("Subsetting is disabled");
-        }
+        requireIOCondition(isSubsettingPermitted(ttf),
+                "Font " + ttf.getName() + " doesn't allow subsetting");
+        requireState(embedSubset, "Subsetting is disabled");
 
         // PDF spec required tables (if present), all others will be removed
         // set the GIDs to subset
         TTFSubsetter subsetter = new TTFSubsetter(ttf,
                 Arrays.asList("head", "hhea", "loca", "maxp", "cvt ", "prep", "glyf", "hmtx",
-                        "fpgm", "gasp"));
+                        "fpgm", "gasp", "name", "OS/2"));
         subsetter.addAll(subsetCodePoints);
 
         // calculate deterministic tag based on the chosen subset
@@ -305,6 +299,5 @@ abstract class TrueTypeEmbedder implements Subsetter
      */
     protected abstract void buildSubset(InputStream ttfSubset, String tag,
             Map<Integer, Integer> gidToCid) throws IOException;
-
 
 }
