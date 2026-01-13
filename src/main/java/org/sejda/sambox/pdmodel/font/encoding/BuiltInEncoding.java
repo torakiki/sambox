@@ -29,8 +29,6 @@ import org.sejda.sambox.cos.COSBase;
 public class BuiltInEncoding extends Encoding
 {
     /**
-     * Constructor.
-     *
      * @param codeToName the given code to name mapping
      */
     public BuiltInEncoding(Map<Integer, String> codeToName)

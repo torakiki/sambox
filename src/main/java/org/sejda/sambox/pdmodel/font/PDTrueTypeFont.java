@@ -18,6 +18,7 @@ package org.sejda.sambox.pdmodel.font;
 
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
+import static java.util.Optional.ofNullable;
 import static org.sejda.commons.util.RequireUtils.requireIOCondition;
 import static org.sejda.sambox.pdmodel.font.UniUtil.getUniNameOfCodePoint;
 
@@ -41,7 +42,6 @@ import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
-import org.sejda.sambox.pdmodel.common.PDStream;
 import org.sejda.sambox.pdmodel.font.encoding.BuiltInEncoding;
 import org.sejda.sambox.pdmodel.font.encoding.Encoding;
 import org.sejda.sambox.pdmodel.font.encoding.GlyphList;
@@ -135,8 +135,7 @@ public class PDTrueTypeFont extends PDSimpleFont implements PDVectorFont
      * @return a PDTrueTypeFont instance.
      * @throws IOException If there is an error loading the data.
      */
-    public static PDTrueTypeFont load(TrueTypeFont ttf, Encoding encoding)
-            throws IOException
+    public static PDTrueTypeFont load(TrueTypeFont ttf, Encoding encoding) throws IOException
     {
         return new PDTrueTypeFont(ttf, encoding);
     }
@@ -162,25 +161,21 @@ public class PDTrueTypeFont extends PDSimpleFont implements PDVectorFont
     public PDTrueTypeFont(COSDictionary fontDictionary) throws IOException
     {
         super(fontDictionary);
-
-        if (getFontDescriptor() != null)
+        var fontFile2Stream = ofNullable(getFontDescriptor()).map(PDFontDescriptor::getFontFile2)
+                .orElse(null);
+        if (nonNull(fontFile2Stream))
         {
-            PDFontDescriptor fd = super.getFontDescriptor();
-            PDStream ff2Stream = fd.getFontFile2();
-            if (ff2Stream != null)
+            try (var is = fontFile2Stream.createInputStream())
             {
-                try (var is = ff2Stream.createInputStream())
-                {
-                    // embedded
-                    ttf = new TTFParser(true).parse(is);
-                }
-                catch (NullPointerException | IOException e) // TTF parser is buggy
-                {
-                    LOG.warn("Could not read embedded TTF for font " + getBaseFont(), e);
-                    isDamaged = true;
-                }
-
+                // embedded
+                ttf = new TTFParser(true).parse(is);
             }
+            catch (NullPointerException | IOException e) // TTF parser is buggy
+            {
+                LOG.warn("Could not read embedded TTF for font " + getBaseFont(), e);
+                isDamaged = true;
+            }
+
         }
         isEmbedded = nonNull(ttf);
 
@@ -281,7 +276,6 @@ public class PDTrueTypeFont extends PDSimpleFont implements PDVectorFont
         }
         return new BuiltInEncoding(codeToName);
     }
-
 
     @Override
     public int readCode(InputStream in) throws IOException

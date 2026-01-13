@@ -27,38 +27,38 @@ import org.apache.fontbox.FontBoxFont;
 public abstract class FontInfo
 {
     /**
-     * Returns the PostScript name of the font.
+     * @return the PostScript name of the font.
      */
     public abstract String getPostScriptName();
 
     /**
-     * Returns the font's format.
+     * @return the font's format.
      */
     public abstract FontFormat getFormat();
 
     /**
-     * Returns the CIDSystemInfo associated with the font, if any.
+     * @return the CIDSystemInfo associated with the font, if any.
      */
     public abstract CIDSystemInfo getCIDSystemInfo();
 
     /**
-     * Returns a new FontBox font instance for the font. Implementors of this method must not
+     * @return a new FontBox font instance for the font. Implementors of this method must not
      * cache the return value of this method unless doing so via the current {@link FontCache}.
      */
     public abstract FontBoxFont getFont();
 
     /**
-     * Returns the sFamilyClass field of the "OS/2" table, or -1.
+     * @return the sFamilyClass field of the "OS/2" table, or -1.
      */
     public abstract int getFamilyClass();
 
     /**
-     * Returns the usWeightClass field of the "OS/2" table, or -1.
+     * @return the usWeightClass field of the "OS/2" table, or -1.
      */
     public abstract int getWeightClass();
 
     /**
-     * Returns the usWeightClass field as a Panose Weight.
+     * @return the usWeightClass field as a Panose Weight.
      */
     final int getWeightClassAsPanose()
     {
@@ -81,17 +81,17 @@ public abstract class FontInfo
     }
 
     /**
-     * Returns the ulCodePageRange1 field of the "OS/2" table, or 0.
+     * @return the ulCodePageRange1 field of the "OS/2" table, or 0.
      */
     public abstract int getCodePageRange1();
 
     /**
-     * Returns the ulCodePageRange2 field of the "OS/2" table, or 0.
+     * @return the ulCodePageRange2 field of the "OS/2" table, or 0.
      */
     public abstract int getCodePageRange2();
 
     /**
-     * Returns the ulCodePageRange1 and ulCodePageRange1 field of the "OS/2" table, or 0.
+     * @return the ulCodePageRange1 and ulCodePageRange1 field of the "OS/2" table, or 0.
      */
     final long getCodePageRange()
     {
@@ -101,12 +101,12 @@ public abstract class FontInfo
     }
 
     /**
-     * Returns the macStyle field of the "head" table, or -1.
+     * @return the macStyle field of the "head" table, or -1.
      */
     public abstract int getMacStyle();
 
     /**
-     * Returns the Panose classification of the font, if any.
+     * @return the Panose classification of the font, if any.
      */
     public abstract PDPanoseClassification getPanose();
     

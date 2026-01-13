@@ -19,7 +19,7 @@ package org.sejda.sambox.pdmodel.font.encoding;
 import org.sejda.sambox.cos.COSName;
 
 /**
- * This is an interface to a text encoder.
+ * This is Mac Roman encoding.
  *
  * @author Ben Litchfield
  */
@@ -92,9 +92,6 @@ public class MacRomanEncoding extends Encoding
      */
     public static final MacRomanEncoding INSTANCE = new MacRomanEncoding();
 
-    /**
-     * Constructor.
-     */
     public MacRomanEncoding()
     {
         for (Object[] encodingEntry : MAC_ROMAN_ENCODING_TABLE)

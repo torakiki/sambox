@@ -408,7 +408,7 @@ public abstract class PDFont extends PDDictionaryWrapper
      * @param customGlyphList a custom glyph list to use instead of the Adobe Glyph List
      * @return Unicode character(s)
      */
-    public String toUnicode(int code, GlyphList customGlyphList) throws IOException
+    public String toUnicode(int code, GlyphList customGlyphList)
     {
         return toUnicode(code);
     }
@@ -419,7 +419,7 @@ public abstract class PDFont extends PDDictionaryWrapper
      * @param code character code
      * @return Unicode character(s)
      */
-    public String toUnicode(int code) throws IOException
+    public String toUnicode(int code)
     {
         // if the font dictionary containsName a ToUnicode CMap, use that CMap
         if (toUnicodeCMap != null)

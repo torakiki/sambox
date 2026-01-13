@@ -111,7 +111,7 @@ final class PDTrueTypeFontEmbedder extends TrueTypeEmbedder
     }
 
     /**
-     * Returns the font's encoding.
+     * @return the font's encoding.
      */
     public Encoding getFontEncoding()
     {

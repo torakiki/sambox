@@ -43,26 +43,18 @@ public class PDStream implements COSObjectable
 {
     private COSStream stream;
 
-    /**
-     * This will create a new PDStream object.
-     */
     public PDStream()
     {
-        stream = new COSStream();
+        this.stream = new COSStream();
     }
 
-    /**
-     * Constructor.
-     *
-     * @param str The stream parameter.
-     */
-    public PDStream(COSStream str)
+    public PDStream(COSStream stream)
     {
-        stream = str;
+        this.stream = stream;
     }
 
     /**
-     * Constructor. Reads all data from the input stream and embeds it into the document, this will
+     * Reads all data from the input stream and embeds it into the document, this will
      * close the InputStream.
      *
      * @param input The stream parameter.
@@ -74,7 +66,7 @@ public class PDStream implements COSObjectable
     }
 
     /**
-     * Constructor. Reads all data from the input stream and embeds it into the document with the
+     * Reads all data from the input stream and embeds it into the document with the
      * given filter applied. This method closes the InputStream.
      *
      * @param input  The stream parameter.
@@ -87,7 +79,7 @@ public class PDStream implements COSObjectable
     }
 
     /**
-     * Constructor. Reads all data from the input stream and embeds it into the document with the
+     * Reads all data from the input stream and embeds it into the document with the
      * given filters applied. This method closes the InputStream.
      *
      * @param input   The stream parameter.
@@ -100,7 +92,7 @@ public class PDStream implements COSObjectable
     }
 
     /**
-     * Constructor. Reads all data from the input stream and embeds it into the document, this will
+     * Reads all data from the input stream and embeds it into the document, this will
      * close the InputStream.
      *
      * @param input  The stream parameter.
