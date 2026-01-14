@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "giongy": {
+      "type": "stdio",
+      "command": "java",
+      "args": [
+        "-jar",
+        "-Dspring.profiles.active=prod,prodsecrets",
+        "/home/torakiki/repos/giongy/giongy-mcp/target/giongy-mcp-0.0.1-SNAPSHOT.jar"
+      ],
+      "env": {}
+    }
+  }
+}

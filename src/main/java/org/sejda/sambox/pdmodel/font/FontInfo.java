@@ -17,6 +17,8 @@
 
 package org.sejda.sambox.pdmodel.font;
 
+import java.io.File;
+
 import org.apache.fontbox.FontBoxFont;
 
 /**
@@ -26,6 +28,14 @@ import org.apache.fontbox.FontBoxFont;
  */
 public abstract class FontInfo
 {
+    /**
+     * @return the file the font was loaded from, if available.
+     */
+    public File getFile()
+    {
+        return null;
+    }
+
     /**
      * @return the PostScript name of the font.
      */

@@ -19,6 +19,8 @@ package org.sejda.sambox.pdmodel.font;
  */
 
 import static java.util.Objects.nonNull;
+import static org.sejda.commons.util.RequireUtils.requireNotBlank;
+import static org.sejda.commons.util.RequireUtils.requireState;
 import static org.sejda.sambox.pdmodel.font.FontUtils.isSubsettingPermitted;
 
 import java.io.DataOutputStream;
@@ -54,10 +56,7 @@ import org.apache.fontbox.ttf.PostScriptTable;
 import org.apache.fontbox.ttf.TTFParser;
 import org.apache.fontbox.ttf.TrueTypeFont;
 import org.sejda.commons.FastByteArrayOutputStream;
-import org.sejda.commons.util.RequireUtils;
 import org.sejda.io.SeekableSource;
-import org.sejda.sambox.cos.COSDictionary;
-import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,36 +78,32 @@ public abstract class BaseTTFSubsetter implements Function<String, COSStream>
     private final SeekableSource fontSource;
     private final SortedSet<Integer> glyphIds = new TreeSet<>();
     private final SortedMap<Integer, Integer> codeToGIDLookup = new TreeMap<>();
-    private final COSStream fontFileStream;
-    private final COSDictionary existingFont;
+    private final String existingFontName;
     private TrueTypeFont font;
     private int numberOfGlyphs;
 
     /**
-     * @param existingFont   the font dictionary that will be updated
-     * @param fontFileStream the corresponding not subsetted FontFile2
-     * @param font           the existing and already parsed font. If null the fontFileStream will
-     *                       be parsed to get the ttf font when needed
+     * @param existingFontName name of the existing font
+     * @param fontSource       the not subsetted font source
+     * @param font             the existing and already parsed font. If null the fontSource will
+     *                         be parsed to get the ttf font when needed
      */
-    public BaseTTFSubsetter(COSDictionary existingFont, COSStream fontFileStream, TrueTypeFont font)
-            throws IOException
+    public BaseTTFSubsetter(String existingFontName, SeekableSource fontSource, TrueTypeFont font)
     {
-        this.existingFont = Objects.requireNonNull(existingFont);
-        this.fontFileStream = Objects.requireNonNull(fontFileStream);
-        this.fontSource = fontFileStream.getUnfilteredSource();
+        requireNotBlank(existingFontName, "Font name cannot be blank");
+        this.existingFontName = existingFontName;
+        this.fontSource = Objects.requireNonNull(fontSource);
         this.font = font;
         this.glyphIds.add(0);
     }
 
-    public BaseTTFSubsetter(COSDictionary existingFont, COSStream fontFileStream) throws IOException
+    public BaseTTFSubsetter(String existingFontName, SeekableSource fontSource)
     {
-        this(existingFont, fontFileStream, null);
+        this(existingFontName, fontSource, null);
     }
 
     /**
      * Adds all the given mappings code -> GID to this subsetter
-     *
-     * @param codesToGID
      */
     public void putAll(Map<Integer, Integer> codesToGID)
     {
@@ -124,14 +119,13 @@ public abstract class BaseTTFSubsetter implements Function<String, COSStream>
      */
     public COSStream apply(String subsetFontName)
     {
-        String existingFontName = existingFont.getNameAsString(COSName.BASE_FONT);
         LOG.debug("Subsetting {}", existingFontName);
         //TTFParser#parse already closes the InputStream so no need to close it
         try (TrueTypeFont font = getFont())
         {
             if (isSubsettingPermitted(font))
             {
-                RequireUtils.requireState(!codeToGIDLookup.isEmpty(),
+                requireState(!codeToGIDLookup.isEmpty(),
                         "Unable to subset, no glyph was specified");
                 this.glyphIds.addAll(codeToGIDLookup.values());
                 addCompositeGlyphs();
@@ -149,7 +143,8 @@ public abstract class BaseTTFSubsetter implements Function<String, COSStream>
     {
         if (Objects.isNull(font))
         {
-            font = new TTFParser(true, true).parse(fontFileStream.getUnfilteredStream());
+            font = new TTFParser(true, true).parse(
+                    fontSource.view(0, fontSource.size()).asInputStream());
         }
         return font;
     }
@@ -580,7 +575,7 @@ public abstract class BaseTTFSubsetter implements Function<String, COSStream>
         }
     }
 
-    protected byte[] buildCMapTable() throws IOException
+    protected byte[] buildCMapTable(boolean symbolic) throws IOException
     {
         try (FastByteArrayOutputStream bos = new FastByteArrayOutputStream())
         {
@@ -593,7 +588,14 @@ public abstract class BaseTTFSubsetter implements Function<String, COSStream>
 
                 // encoding record
                 writeUint16(out, CmapTable.PLATFORM_WINDOWS); // platformID
-                writeUint16(out, CmapTable.ENCODING_WIN_UNICODE_BMP); // platformSpecificID
+                if (symbolic)
+                {
+                    writeUint16(out, CmapTable.ENCODING_WIN_SYMBOL); // platformSpecificID
+                }
+                else
+                {
+                    writeUint16(out, CmapTable.ENCODING_WIN_UNICODE_BMP); // platformSpecificID
+                }
                 writeUint32(out, 12); // offset 4 * 2 + 4
 
                 // build Format 4 subtable (Unicode BMP)

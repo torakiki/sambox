@@ -23,12 +23,15 @@ import java.util.Map;
 
 import org.apache.fontbox.ttf.OS2WindowsMetricsTable;
 import org.apache.fontbox.ttf.TrueTypeFont;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Andrea Vacondio
  */
 public final class FontUtils
 {
+    private static final Logger LOG = LoggerFactory.getLogger(FontUtils.class);
     private static final String BASE25 = "BCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     private FontUtils()
@@ -39,22 +42,29 @@ public final class FontUtils
     /**
      * @return true if the fsType in the OS/2 table permits embedding.
      */
-    public static boolean isEmbeddingPermitted(TrueTypeFont ttf) throws IOException
+    public static boolean isEmbeddingPermitted(TrueTypeFont ttf)
     {
-        if (ttf.getOS2Windows() != null)
+        try
         {
-            int fsType = ttf.getOS2Windows().getFsType();
-
-            int maskedFsType = fsType & 0x000F;
-            // PDFBOX-5191: don't check the bit because permissions are exclusive
-            if (maskedFsType == OS2WindowsMetricsTable.FSTYPE_RESTRICTED)
+            if (ttf.getOS2Windows() != null)
             {
-                // restricted License embedding
-                return false;
+                int fsType = ttf.getOS2Windows().getFsType();
+
+                int maskedFsType = fsType & 0x000F;
+                // PDFBOX-5191: don't check the bit because permissions are exclusive
+                if (maskedFsType == OS2WindowsMetricsTable.FSTYPE_RESTRICTED)
+                {
+                    // restricted License embedding
+                    return false;
+                }
+                // bitmap embedding only
+                return (fsType & OS2WindowsMetricsTable.FSTYPE_BITMAP_ONLY)
+                        != OS2WindowsMetricsTable.FSTYPE_BITMAP_ONLY;
             }
-            // bitmap embedding only
-            return (fsType & OS2WindowsMetricsTable.FSTYPE_BITMAP_ONLY)
-                    != OS2WindowsMetricsTable.FSTYPE_BITMAP_ONLY;
+        }
+        catch (IOException e)
+        {
+            LOG.warn("Unable to read OS/2 table", e);
         }
         return true;
     }
@@ -62,13 +72,20 @@ public final class FontUtils
     /**
      * @return true if the fsType in the OS/2 table permits subsetting.
      */
-    public static boolean isSubsettingPermitted(TrueTypeFont ttf) throws IOException
+    public static boolean isSubsettingPermitted(TrueTypeFont ttf)
     {
-        if (ttf.getOS2Windows() != null)
+        try
         {
-            int fsType = ttf.getOS2Windows().getFsType();
-            return (fsType & OS2WindowsMetricsTable.FSTYPE_NO_SUBSETTING)
-                    != OS2WindowsMetricsTable.FSTYPE_NO_SUBSETTING;
+            if (ttf.getOS2Windows() != null)
+            {
+                int fsType = ttf.getOS2Windows().getFsType();
+                return (fsType & OS2WindowsMetricsTable.FSTYPE_NO_SUBSETTING)
+                        != OS2WindowsMetricsTable.FSTYPE_NO_SUBSETTING;
+            }
+        }
+        catch (IOException e)
+        {
+            LOG.warn("Unable to read OS/2 table", e);
         }
         return true;
     }
