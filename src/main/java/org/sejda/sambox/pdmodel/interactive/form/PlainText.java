@@ -16,14 +16,14 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
-import org.sejda.sambox.pdmodel.font.PDFont;
-
 import java.io.IOException;
 import java.text.AttributedCharacterIterator.Attribute;
 import java.text.AttributedString;
 import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.sejda.sambox.pdmodel.font.PDFont;
 
 /**
  * A block of text.
@@ -170,6 +170,15 @@ class PlainText
             {
                 whitespaceWidth = 0f;
                 String word = textContent.substring(start, end);
+
+                // SAMBOX specific
+                if (word.isEmpty())
+                {
+                    start = end;
+                    end = iterator.next();
+                    continue;
+                }
+
                 wordWidth = font.getStringWidth(word) * scale;
 
                 boolean wordNeedsSplit = false;
@@ -201,6 +210,12 @@ class PlainText
                     {
                         splitOffset--;
                         String substring = word.substring(0, splitOffset);
+                        if (substring.isEmpty())
+                        {
+                            wordNeedsSplit = false;
+                            break;
+                        }
+
                         float substringWidth = font.getStringWidth(substring) * scale;
                         if (substringWidth < width)
                         {
@@ -212,11 +227,14 @@ class PlainText
                     }
                 }
 
-                AttributedString as = new AttributedString(word);
-                as.addAttribute(TextAttribute.WIDTH, wordWidth);
-                Word wordInstance = new Word(word);
-                wordInstance.setAttributes(as);
-                textLine.addWord(wordInstance);
+                if (!word.isEmpty())
+                {
+                    AttributedString as = new AttributedString(word);
+                    as.addAttribute(TextAttribute.WIDTH, wordWidth);
+                    Word wordInstance = new Word(word);
+                    wordInstance.setAttributes(as);
+                    textLine.addWord(wordInstance);
+                }
 
                 if (wordNeedsSplit)
                 {

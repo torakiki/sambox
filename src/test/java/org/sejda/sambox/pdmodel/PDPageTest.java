@@ -130,6 +130,26 @@ public class PDPageTest
     }
 
     @Test
+    public void cropBoxOnlyZeros()
+    {
+        PDPage page = new PDPage();
+        PDRectangle mediaBoxRect = new PDRectangle(toArray(0, 0, 287.07f, 831));
+        page.setMediaBox(mediaBoxRect);
+        page.setCropBox(new PDRectangle(toArray(0, 0, 0, 0)));
+        assertEquals(page.getCropBox(), mediaBoxRect);
+    }
+
+    @Test
+    public void cropBoxEmptyArray()
+    {
+        PDPage page = new PDPage();
+        PDRectangle mediaBoxRect = new PDRectangle(toArray(0, 0, 287.07f, 831));
+        page.setMediaBox(mediaBoxRect);
+        page.setCropBox(new PDRectangle(new COSArray()));
+        assertEquals(page.getCropBox(), mediaBoxRect);
+    }
+
+    @Test
     public void cropBoxCoordinatesToDraw()
     {
         PDPage page = new PDPage(PDRectangle.A4);
