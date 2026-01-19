@@ -17,6 +17,7 @@
 package org.sejda.sambox.pdmodel.font;
 
 import static java.util.Objects.nonNull;
+import static org.sejda.commons.util.RequireUtils.requireIOCondition;
 
 import java.awt.geom.GeneralPath;
 import java.io.IOException;
@@ -177,11 +178,9 @@ public class PDCIDFontType2 extends PDCIDFont
         else
         {
             ttfFont = (TrueTypeFont) mapping.getTrueTypeFont();
-            if (ttfFont == null)
-            {
-                // shouldn't happen?!
-                throw new IOException("mapping.getTrueTypeFont() returns null, please report");
-            }
+            // shouldn't happen?!
+            requireIOCondition(nonNull(ttfFont),
+                    "mapping.getTrueTypeFont() returns null, please report");
         }
         if (mapping.isFallback())
         {

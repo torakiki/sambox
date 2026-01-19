@@ -137,7 +137,7 @@ public final class PDResources implements COSObjectable
     }
 
     /**
-     * Returns the font resource with the given name, or null if none exists.
+     * @return the font resource with the given name, or null if none exists.
      *
      * @param name Name of the font resource.
      * @throws java.io.IOException if something went wrong.
@@ -186,7 +186,7 @@ public final class PDResources implements COSObjectable
     }
 
     /**
-     * Returns the color space resource with the given name, or null if none exists.
+     * @return the color space resource with the given name, or null if none exists.
      *
      * @param name Name of the color space resource.
      * @throws java.io.IOException if something went wrong.
@@ -231,7 +231,7 @@ public final class PDResources implements COSObjectable
     }
 
     /**
-     * Returns true if the given color space name exists in these resources.
+     * @return true if the given color space name exists in these resources.
      *
      * @param name Name of the color space resource.
      */
@@ -241,7 +241,7 @@ public final class PDResources implements COSObjectable
     }
 
     /**
-     * Returns the extended graphics state resource with the given name, or null if none exists.
+     * @return the extended graphics state resource with the given name, or null if none exists.
      *
      * @param name Name of the graphics state resource.
      */
@@ -269,12 +269,11 @@ public final class PDResources implements COSObjectable
     }
 
     /**
-     * Returns the shading resource with the given name, or null if none exists.
+     * @return the shading resource with the given name, or null if none exists.
      *
      * @param name Name of the shading resource.
-     * @throws java.io.IOException if something went wrong.
      */
-    public PDShading getShading(COSName name) throws IOException
+    public PDShading getShading(COSName name)
     {
         COSObjectKey key = getIndirectKey(COSName.SHADING, name);
         if (cache != null && key != null)
@@ -302,12 +301,11 @@ public final class PDResources implements COSObjectable
     }
 
     /**
-     * Returns the pattern resource with the given name, or null if none exists.
+     * @return the pattern resource with the given name, or null if none exists.
      *
      * @param name Name of the pattern resource.
-     * @throws java.io.IOException if something went wrong.
      */
-    public PDAbstractPattern getPattern(COSName name) throws IOException
+    public PDAbstractPattern getPattern(COSName name)
     {
         COSObjectKey key = getIndirectKey(COSName.PATTERN, name);
         if (cache != null && key != null)
@@ -335,7 +333,7 @@ public final class PDResources implements COSObjectable
     }
 
     /**
-     * Returns the property list resource with the given name, or null if none exists.
+     * @return the property list resource with the given name, or null if none exists.
      *
      * @param name Name of the property list resource.
      */
@@ -391,7 +389,7 @@ public final class PDResources implements COSObjectable
     }
 
     /**
-     * Returns the XObject resource with the given name, or null if none exists.
+     * @return the XObject resource with the given name, or null if none exists.
      *
      * @param name Name of the XObject resource.
      * @throws java.io.IOException if something went wrong.

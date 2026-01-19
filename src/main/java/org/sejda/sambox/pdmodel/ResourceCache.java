@@ -17,8 +17,6 @@
 
 package org.sejda.sambox.pdmodel;
 
-import java.io.IOException;
-
 import org.sejda.sambox.cos.COSObjectKey;
 import org.sejda.sambox.pdmodel.documentinterchange.markedcontent.PDPropertyList;
 import org.sejda.sambox.pdmodel.font.PDFont;
@@ -36,49 +34,50 @@ import org.sejda.sambox.pdmodel.graphics.state.PDExtendedGraphicsState;
 public interface ResourceCache
 {
     /**
-     * Returns the font resource for the given key object, if it is in the cache.
+     * @return the font resource for the given key object, if it is in the cache.
      */
-    PDFont getFont(COSObjectKey key) throws IOException;
+    PDFont getFont(COSObjectKey key);
 
     /**
-     * Returns the color space resource for the given key object, if it is in the cache.
+     * @return the color space resource for the given key object, if it is in the cache.
      */
-    PDColorSpace getColorSpace(COSObjectKey key) throws IOException;
+    PDColorSpace getColorSpace(COSObjectKey key);
 
     /**
-     * Returns the external graphics state resource for the given key object, if it is in the cache.
+     * @return the external graphics state resource for the given key object, if it is in the
+     * cache.
      */
     PDExtendedGraphicsState getExtGState(COSObjectKey key);
 
     /**
-     * Returns the shading resource for the given key object, if it is in the cache.
+     * @return the shading resource for the given key object, if it is in the cache.
      */
-    PDShading getShading(COSObjectKey key) throws IOException;
+    PDShading getShading(COSObjectKey key);
 
     /**
-     * Returns the pattern resource for the given key object, if it is in the cache.
+     * @return the pattern resource for the given key object, if it is in the cache.
      */
-    PDAbstractPattern getPattern(COSObjectKey key) throws IOException;
+    PDAbstractPattern getPattern(COSObjectKey key);
 
     /**
-     * Returns the property list resource for the given key object, if it is in the cache.
+     * @return the property list resource for the given key object, if it is in the cache.
      */
     PDPropertyList getProperties(COSObjectKey key);
 
     /**
-     * Returns the XObject resource for the given key object, if it is in the cache.
+     * @return the XObject resource for the given key object, if it is in the cache.
      */
-    PDXObject getXObject(COSObjectKey key) throws IOException;
+    PDXObject getXObject(COSObjectKey key);
 
     /**
      * Puts the given key font resource in the cache.
      */
-    void put(COSObjectKey key, PDFont font) throws IOException;
+    void put(COSObjectKey key, PDFont font);
 
     /**
      * Puts the given key color space resource in the cache.
      */
-    void put(COSObjectKey key, PDColorSpace colorSpace) throws IOException;
+    void put(COSObjectKey key, PDColorSpace colorSpace);
 
     /**
      * Puts the given key extended graphics state resource in the cache.
@@ -88,12 +87,12 @@ public interface ResourceCache
     /**
      * Puts the given key shading resource in the cache.
      */
-    void put(COSObjectKey key, PDShading shading) throws IOException;
+    void put(COSObjectKey key, PDShading shading);
 
     /**
      * Puts the given key pattern resource in the cache.
      */
-    void put(COSObjectKey key, PDAbstractPattern pattern) throws IOException;
+    void put(COSObjectKey key, PDAbstractPattern pattern);
 
     /**
      * Puts the given key property list resource in the cache.
@@ -103,7 +102,7 @@ public interface ResourceCache
     /**
      * Puts the given key XObject resource in the cache.
      */
-    void put(COSObjectKey key, PDXObject xobject) throws IOException;
+    void put(COSObjectKey key, PDXObject xobject);
 
     /**
      * Clears the cache
