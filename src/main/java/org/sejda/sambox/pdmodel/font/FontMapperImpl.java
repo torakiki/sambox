@@ -400,12 +400,15 @@ final class FontMapperImpl implements FontMapper
      */
     private FontInfo findFont(FontFormat format, String postScriptName)
     {
-        // strip subset tag (happens when we substitute a corrupt embedded font, see PDFBOX-2642)
-        var subsetSign = postScriptName.indexOf('+');
-        if (subsetSign >= 0)
-        {
-            postScriptName = postScriptName.substring(subsetSign + 1);
-        }
+        postScriptName = ofNullable(postScriptName).map(name -> {
+            // strip subset tag (happens when we substitute a corrupt embedded font, see PDFBOX-2642)
+            var subsetSign = name.indexOf('+');
+            if (subsetSign >= 0)
+            {
+                return name.substring(subsetSign + 1);
+            }
+            return name;
+        }).orElse(null);
 
         // handle damaged PDFs, see PDFBOX-2884
         if (isNotEmpty(postScriptName))
