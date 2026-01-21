@@ -445,7 +445,10 @@ final class FontMapperImpl implements FontMapper
             }
 
             // try appending "-Regular", works for Wingdings on windows
-            return getFont(format, postScriptName + "-Regular");
+            if (!postScriptName.endsWith("-Regular"))
+            {
+                return getFont(format, postScriptName + "-Regular");
+            }
         }
         // no matches
         return null;
