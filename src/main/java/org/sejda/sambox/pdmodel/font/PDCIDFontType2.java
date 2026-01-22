@@ -21,10 +21,8 @@ import static org.sejda.commons.util.RequireUtils.requireIOCondition;
 
 import java.awt.geom.GeneralPath;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.fontbox.cff.Type2CharString;
@@ -35,7 +33,6 @@ import org.apache.fontbox.ttf.OTFParser;
 import org.apache.fontbox.ttf.OpenTypeFont;
 import org.apache.fontbox.ttf.TrueTypeFont;
 import org.apache.fontbox.util.BoundingBox;
-import org.sejda.commons.util.ReflectionUtils;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.common.PDStream;
@@ -390,15 +387,16 @@ public class PDCIDFontType2 extends PDCIDFont
 
             if (cid == -1)
             {
-                // invert the ToUnicode CMap
-                // this helps when re-encoding text with an existing subset font
-                cid = lookupInInvertedUnicodeCmap(unicode);
-            }
-
-            // otherwise we require an explicit ToUnicode CMap
-            if (cid == -1)
-            {
-
+                CMap toUnicodeCMap = parent.getToUnicodeCMap();
+                if (toUnicodeCMap != null)
+                {
+                    byte[] codes = toUnicodeCMap.getCodesFromUnicode(
+                            Character.toString((char) unicode));
+                    if (codes != null)
+                    {
+                        return codes;
+                    }
+                }
                 cid = 0;
             }
         }
@@ -417,57 +415,6 @@ public class PDCIDFontType2 extends PDCIDFont
 
         // CID is always 2-bytes (16-bit) for TrueType
         return new byte[] { (byte) (cid >> 8 & 0xff), (byte) (cid & 0xff) };
-    }
-
-    private Map<String, Integer> invertedUnicodeCmap = null;
-
-    /**
-     * Inverts the unicode cmap from the parent and uses it for lookup
-     */
-    private Map<String, Integer> generateInvertedUnicodeCmap()
-    {
-        CMap cMap = parent.getToUnicodeCMap();
-
-        if (cMap != null)
-        {
-            // fontbox doesn't expose the charToUnicode map via getter
-            // use reflection to get access to the underlying data
-            Class<CMap> clazz = CMap.class;
-            Field charToUnicodeField = ReflectionUtils.findField(clazz, "charToUnicode");
-            ReflectionUtils.makeAccessible(charToUnicodeField);
-            final Map<Integer, String> charToUnicode = (Map<Integer, String>) ReflectionUtils.getField(
-                    charToUnicodeField, cMap);
-
-            // if there's an char to unicode map, invert it and use it for lookup
-            if (charToUnicode != null)
-            {
-                Map<String, Integer> invertedUnicodeCmap = new HashMap<>(charToUnicode.size());
-                for (Integer code : charToUnicode.keySet())
-                {
-                    invertedUnicodeCmap.put(charToUnicode.get(code), code);
-                }
-
-                return invertedUnicodeCmap;
-            }
-        }
-
-        return new HashMap<>();
-    }
-
-    private int lookupInInvertedUnicodeCmap(int unicode)
-    {
-        if (invertedUnicodeCmap == null)
-        {
-            invertedUnicodeCmap = generateInvertedUnicodeCmap();
-        }
-
-        String s = new String(Character.toChars(unicode));
-        if (invertedUnicodeCmap.containsKey(s))
-        {
-            return invertedUnicodeCmap.get(s);
-        }
-
-        return -1;
     }
 
     @Override
