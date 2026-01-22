@@ -23,12 +23,12 @@ import java.awt.geom.AffineTransform;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.text.NumberFormat;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Locale;
 
-import org.apache.fontbox.util.Charsets;
 import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
@@ -1477,7 +1477,7 @@ abstract class PDAbstractContentStream implements Closeable
      */
     protected void writeOperator(String text) throws IOException
     {
-        writer.writeContent(text.getBytes(Charsets.US_ASCII));
+        writer.writeContent(text.getBytes(StandardCharsets.US_ASCII));
         writer.writeEOL();
     }
 
@@ -1489,7 +1489,7 @@ abstract class PDAbstractContentStream implements Closeable
      */
     protected void write(String text) throws IOException
     {
-        writer.writeContent(text.getBytes(Charsets.US_ASCII));
+        writer.writeContent(text.getBytes(StandardCharsets.US_ASCII));
     }
 
     /**

@@ -19,11 +19,11 @@ import static org.sejda.io.SeekableSources.inMemorySeekableSourceFrom;
 import static org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationLine.LE_NONE;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.fontbox.util.Charsets;
 import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.cos.COSArray;
@@ -375,7 +375,7 @@ public class PDFreeTextAppearanceHandler extends PDAbstractAppearanceHandler
 
         // not sure if charset is correct, but we only need numbers and simple characters
         try (ContentStreamParser parser = new ContentStreamParser(
-                inMemorySeekableSourceFrom(defaultAppearance.getBytes(Charsets.US_ASCII))))
+                inMemorySeekableSourceFrom(defaultAppearance.getBytes(StandardCharsets.US_ASCII))))
         {
             COSArray arguments = new COSArray();
             COSArray colors = null;
@@ -444,7 +444,7 @@ public class PDFreeTextAppearanceHandler extends PDAbstractAppearanceHandler
 
         // not sure if charset is correct, but we only need numbers and simple characters
         try (ContentStreamParser parser = new ContentStreamParser(
-                inMemorySeekableSourceFrom(defaultAppearance.getBytes(Charsets.US_ASCII))))
+                inMemorySeekableSourceFrom(defaultAppearance.getBytes(StandardCharsets.US_ASCII))))
         {
             COSArray arguments = new COSArray();
             COSArray fontArguments = new COSArray();

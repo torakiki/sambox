@@ -21,7 +21,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.fontbox.util.Charsets;
 import org.sejda.io.BufferedCountingChannelWriter;
 import org.sejda.io.CountingWritableByteChannel;
 import org.sejda.sambox.contentstream.operator.Operator;
@@ -112,7 +111,7 @@ public class ContentStreamWriter extends DefaultCOSWriter
     public void writeComment(String comment) throws IOException
     {
         writer().write(PERCENT_SIGN);
-        writeContent(comment.getBytes(Charsets.US_ASCII));
+        writeContent(comment.getBytes(StandardCharsets.US_ASCII));
         writeEOL();
     }
 
