@@ -204,14 +204,28 @@ public class PDType0Font extends PDFont implements PDVectorFont
     }
 
     /**
-     * @param document
-     * @param ttf
-     * @param embedSubset
-     * @param closeTTF    whether to close the ttf parameter after embedding. Must be true when the
-     *                    ttf parameter was created in the load() method, false when the ttf
-     *                    parameter was passed to the load() method.
-     * @param vertical    whether to enable vertical substitutions.
-     * @throws IOException
+     * An instance whose descendant font will use the provided substitute as substitue of the font.
+     */
+    public PDType0Font(COSDictionary fontDictionary, TrueTypeFont substitute) throws IOException
+    {
+        super(fontDictionary);
+        var descendantFonts = getCOSObject().getDictionaryObject(COSName.DESCENDANT_FONTS,
+                COSArray.class);
+        requireIOCondition(nonNull(descendantFonts), "Missing descendant font array");
+        requireIOCondition(!descendantFonts.isEmpty(), "Descendant font array is empty");
+
+        var descendant = descendantFonts.getObject(0, COSDictionary.class);
+        requireIOCondition(nonNull(descendant), "Missing descendant font dictionary");
+        this.descendantFont = PDCIDFontType2.instanceWithSubstitute(descendant, this, substitute);
+        readEncoding();
+        fetchCMapUCS2();
+    }
+
+    /**
+     * @param closeTTF whether to close the ttf parameter after embedding. Must be true when the ttf
+     *                 parameter was created in the load() method, false when the ttf parameter was
+     *                 passed to the load() method.
+     * @param vertical whether to enable vertical substitutions.
      */
     private PDType0Font(PDDocument document, TrueTypeFont ttf, boolean embedSubset,
             boolean closeTTF, boolean vertical) throws IOException
@@ -301,7 +315,7 @@ public class PDType0Font extends PDFont implements PDVectorFont
     /**
      * Fetches the corresponding UCS2 CMap if the font's CMap is predefined.
      */
-    private void fetchCMapUCS2() throws IOException
+    private void fetchCMapUCS2()
     {
         // if the font is composite and uses a predefined cmap (excluding Identity-H/V)
         // or whose descendant CIDFont uses the Adobe-GB1, Adobe-CNS1, Adobe-Japan1, or
@@ -357,24 +371,18 @@ public class PDType0Font extends PDFont implements PDVectorFont
         return getCOSObject().getNameAsString(COSName.BASE_FONT);
     }
 
-    /**
-     * Returns the descendant font.
-     */
     public PDCIDFont getDescendantFont()
     {
         return descendantFont;
     }
 
-    /**
-     * Returns the font's CMap.
-     */
     public CMap getCMap()
     {
         return cMap;
     }
 
     /**
-     * Returns the font's UCS2 CMap, only present this font uses a predefined CMap.
+     * @return the font's UCS2 CMap, only present if this font uses a predefined CMap.
      */
     public CMap getCMapUCS2()
     {
@@ -518,7 +526,7 @@ public class PDType0Font extends PDFont implements PDVectorFont
                         List<Integer> codes = cmap.getCharCodes(gid);
                         if (codes != null && !codes.isEmpty())
                         {
-                            return Character.toString((char) (int) codes.get(0));
+                            return Character.toString((char) (int) codes.getFirst());
                         }
                     }
                 }

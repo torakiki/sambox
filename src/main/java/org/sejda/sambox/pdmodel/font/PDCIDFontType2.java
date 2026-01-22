@@ -52,7 +52,7 @@ public class PDCIDFontType2 extends PDCIDFont
     private final TrueTypeFont ttf;
     private final int[] cid2gid;
     private final HashMap<Integer, Integer> gid2cid = new HashMap<>();
-    private final boolean isEmbedded;
+    private boolean isEmbedded;
     private final boolean isDamaged;
     private boolean isOriginalEmbeddedMissing = false;
     private boolean isMappingFallbackUsed = false;
@@ -160,6 +160,19 @@ public class PDCIDFontType2 extends PDCIDFont
                 }
             }
         }
+    }
+
+    /**
+     * @return an instance where the TrueTypeFont is an external (not embedded) font, coming from
+     * the FontMapper or other means, and is used as substitute
+     */
+    public static PDCIDFontType2 instanceWithSubstitute(COSDictionary dictionary,
+            PDType0Font parent, TrueTypeFont trueTypeFont) throws IOException
+    {
+        var instance = new PDCIDFontType2(dictionary, parent, trueTypeFont);
+        instance.isEmbedded = false;
+        instance.isOriginalEmbeddedMissing = true;
+        return instance;
     }
 
     private TrueTypeFont findFontOrSubstitute() throws IOException
