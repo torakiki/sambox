@@ -139,7 +139,6 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
 
     /**
      * @return the length of the encoded stream as long
-     * @throws IOException
      */
     public long getFilteredLength() throws IOException
     {
@@ -219,7 +218,6 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
 
     /**
      * @return the length of the decoded stream as long
-     * @throws IOException
      */
     public long getUnfilteredLength() throws IOException
     {
@@ -270,13 +268,13 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
         COSBase filters = getFilters();
         if (nonNull(filters))
         {
-            if (filters instanceof COSName)
+            if (filters instanceof COSName name)
             {
-                unfiltered = decode((COSName) filters, 0, getStreamToDecode());
+                unfiltered = decode(name, 0, getStreamToDecode());
             }
-            else if (filters instanceof COSArray)
+            else if (filters instanceof COSArray array)
             {
-                unfiltered = decodeChain((COSArray) filters, getStreamToDecode());
+                unfiltered = decodeChain(array, getStreamToDecode());
             }
             else
             {
@@ -386,7 +384,6 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
     }
 
     /**
-     * @param filter
      * @return true if the stream has the given filter in the filters list
      */
     public boolean hasFilter(COSName filter)
@@ -405,8 +402,6 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
 
     /**
      * Sets the function to be used to encrypt this stream.
-     *
-     * @param encryptor
      */
     public void setEncryptor(Function<InputStream, InputStream> encryptor)
     {

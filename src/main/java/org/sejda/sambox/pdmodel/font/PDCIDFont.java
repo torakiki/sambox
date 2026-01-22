@@ -62,8 +62,6 @@ public abstract class PDCIDFont extends PDDictionaryWrapper
     private float[] dw2 = new float[] { 880, -1000 };
 
     /**
-     * Constructor.
-     *
      * @param fontDictionary The font dictionary according to the PDF specification.
      */
     PDCIDFont(COSDictionary fontDictionary, PDType0Font parent)
@@ -337,18 +335,14 @@ public abstract class PDCIDFont extends PDDictionaryWrapper
     }
 
     /**
-     * Returns the CID for the given character code. If not found then CID 0 is returned.
-     *
      * @param code character code
-     * @return CID
+     * @return the CID for the given character code. If not found then CID 0 is returned.
      */
     public abstract int codeToCID(int code);
 
     /**
-     * Returns the GID for the given character code.
-     *
      * @param code character code
-     * @return GID
+     * @return the GID for the given character code
      */
     public abstract int codeToGID(int code) throws IOException;
 
@@ -371,7 +365,6 @@ public abstract class PDCIDFont extends PDDictionaryWrapper
         COSBase map = getCOSObject().getDictionaryObject(COSName.CID_TO_GID_MAP);
         if (map instanceof COSStream stream)
         {
-
             InputStream is = stream.getUnfilteredStream();
             byte[] mapAsBytes = IOUtils.toByteArray(is);
             IOUtils.closeQuietly(is);
