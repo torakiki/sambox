@@ -16,8 +16,6 @@
  */
 package org.sejda.sambox.pdmodel.font;
 
-import java.util.function.Predicate;
-
 import org.apache.fontbox.FontBoxFont;
 import org.apache.fontbox.ttf.TrueTypeFont;
 
@@ -33,15 +31,6 @@ public interface FontMapper
      * Finds a TrueType font with the given PostScript name, or a suitable substitute, or null.
      */
     FontMapping<TrueTypeFont> getTrueTypeFont(String baseFont, PDFontDescriptor fontDescriptor);
-
-    /**
-     * Finds a TrueType font with the given PostScript name, or a suitable substitute, or null.
-     *
-     * @param predicate if specified, the found font info must satisfy the predicate. If nothing is
-     *                  found then the last resort font is returned.
-     */
-    FontMapping<TrueTypeFont> getTrueTypeFont(String baseFont, PDFontDescriptor fontDescriptor,
-            Predicate<FontInfo> predicate);
 
     /**
      * Finds a font with the given PostScript name, or a suitable substitute, or null. This allows

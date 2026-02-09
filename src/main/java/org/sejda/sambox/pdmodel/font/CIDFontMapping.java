@@ -17,8 +17,6 @@
 
 package org.sejda.sambox.pdmodel.font;
 
-import java.io.File;
-
 import org.apache.fontbox.FontBoxFont;
 import org.apache.fontbox.ttf.OpenTypeFont;
 
@@ -32,9 +30,9 @@ public final class CIDFontMapping extends FontMapping<OpenTypeFont>
 {
     private final FontBoxFont ttf;
 
-    public CIDFontMapping(OpenTypeFont font, FontBoxFont fontBoxFont, File file, boolean isFallback)
+    public CIDFontMapping(OpenTypeFont font, FontBoxFont fontBoxFont, boolean isFallback)
     {
-        super(font, file, isFallback);
+        super(font, isFallback);
         this.ttf = fontBoxFont;
     }
 

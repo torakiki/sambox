@@ -37,7 +37,6 @@ import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
-import java.util.function.Predicate;
 
 import org.apache.fontbox.FontBoxFont;
 import org.apache.fontbox.ttf.OpenTypeFont;
@@ -322,29 +321,21 @@ final class FontMapperImpl implements FontMapper
 
     @Override
     public FontMapping<TrueTypeFont> getTrueTypeFont(String baseFont,
-            PDFontDescriptor fontDescriptor, Predicate<FontInfo> predicate)
+            PDFontDescriptor fontDescriptor)
     {
-        var filter = ofNullable(predicate).orElse(_ -> true);
         FontInfo ttf = findFont(FontFormat.TTF, baseFont);
-        if (nonNull(ttf) && nonNull(ttf.getFont()) && filter.test(ttf))
+        if (nonNull(ttf) && nonNull(ttf.getFont()))
         {
-            return new FontMapping<>((TrueTypeFont) ttf.getFont(), ttf.getFile(), false);
+            return new FontMapping<>((TrueTypeFont) ttf.getFont(), false);
         }
         // fallback - todo: i.e. fuzzy match
         String fontName = getFallbackFontName(fontDescriptor);
         ttf = findFont(FontFormat.TTF, fontName);
-        if (nonNull(ttf) && nonNull(ttf.getFont()) && filter.test(ttf))
+        if (nonNull(ttf) && nonNull(ttf.getFont()))
         {
-            return new FontMapping<>((TrueTypeFont) ttf.getFont(), ttf.getFile(), true);
+            return new FontMapping<>((TrueTypeFont) ttf.getFont(), true);
         }
-        return new FontMapping<>(lastResortFont, null, true);
-    }
-
-    @Override
-    public FontMapping<TrueTypeFont> getTrueTypeFont(String baseFont,
-            PDFontDescriptor fontDescriptor)
-    {
-        return getTrueTypeFont(baseFont, fontDescriptor, null);
+        return new FontMapping<>(lastResortFont, true);
     }
 
     /**
@@ -359,16 +350,16 @@ final class FontMapperImpl implements FontMapper
         FontInfo font = findFontBoxFont(baseFont);
         if (nonNull(font) && nonNull(font.getFont()))
         {
-            return new FontMapping<>(font.getFont(), font.getFile(), false);
+            return new FontMapping<>(font.getFont(), false);
         }
         // fallback - todo: i.e. fuzzy match
         String fallbackName = getFallbackFontName(fontDescriptor);
         font = findFontBoxFont(fallbackName);
         if (nonNull(font) && nonNull(font.getFont()))
         {
-            return new FontMapping<>(font.getFont(), font.getFile(), true);
+            return new FontMapping<>(font.getFont(), true);
         }
-        return new FontMapping<>(lastResortFont, null, true);
+        return new FontMapping<>(lastResortFont, true);
     }
 
     /**
@@ -483,14 +474,14 @@ final class FontMapperImpl implements FontMapper
         FontInfo otf1 = findFont(FontFormat.OTF, baseFont);
         if (nonNull(otf1) && nonNull(otf1.getFont()))
         {
-            return new CIDFontMapping((OpenTypeFont) otf1.getFont(), null, otf1.getFile(), false);
+            return new CIDFontMapping((OpenTypeFont) otf1.getFont(), null, false);
         }
 
         // try name match or substitute with TTF
         FontInfo ttf = findFont(FontFormat.TTF, baseFont);
         if (nonNull(ttf) && nonNull(ttf.getFont()))
         {
-            return new CIDFontMapping(null, ttf.getFont(), ttf.getFile(), false);
+            return new CIDFontMapping(null, ttf.getFont(), false);
         }
 
         if (cidSystemInfo != null)
@@ -512,19 +503,18 @@ final class FontMapperImpl implements FontMapper
                     FontBoxFont font = bestMatch.info.getFont();
                     if (font instanceof OpenTypeFont)
                     {
-                        return new CIDFontMapping((OpenTypeFont) font, null,
-                                bestMatch.info.getFile(), true);
+                        return new CIDFontMapping((OpenTypeFont) font, null, true);
                     }
                     if (font != null)
                     {
-                        return new CIDFontMapping(null, font, bestMatch.info.getFile(), true);
+                        return new CIDFontMapping(null, font, true);
                     }
                 }
             }
         }
 
         // last-resort fallback
-        return new CIDFontMapping(null, lastResortFont, null, true);
+        return new CIDFontMapping(null, lastResortFont, true);
     }
 
     /**

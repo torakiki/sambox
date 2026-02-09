@@ -95,12 +95,6 @@ public class FileSystemFontProvider extends FontProvider
         }
 
         @Override
-        public File getFile()
-        {
-            return file;
-        }
-
-        @Override
         public String getPostScriptName()
         {
             return postScriptName;

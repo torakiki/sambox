@@ -17,8 +17,6 @@
 
 package org.sejda.sambox.pdmodel.font;
 
-import java.io.File;
-
 import org.apache.fontbox.FontBoxFont;
 
 /**
@@ -29,13 +27,11 @@ import org.apache.fontbox.FontBoxFont;
 public class FontMapping<T extends FontBoxFont>
 {
     private final T font;
-    private final File file;
     private final boolean isFallback;
 
-    public FontMapping(T font, File file, boolean isFallback)
+    public FontMapping(T font, boolean isFallback)
     {
         this.font = font;
-        this.file = file;
         this.isFallback = isFallback;
     }
 
@@ -45,14 +41,6 @@ public class FontMapping<T extends FontBoxFont>
     public T getFont()
     {
         return font;
-    }
-
-    /**
-     * @return the file the font was loaded from, if any. Can be null.
-     */
-    public File getFile()
-    {
-        return file;
     }
 
     /**
