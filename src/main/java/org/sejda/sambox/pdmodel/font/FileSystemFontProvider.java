@@ -122,20 +122,12 @@ public class FileSystemFontProvider extends FontProvider
             }
             FontBoxFont font;
             LOG.debug("Loading {} from {}", postScriptName, file);
-            switch (format)
+            font = switch (format)
             {
-            case PFB:
-                font = getType1Font(postScriptName, file);
-                break;
-            case TTF:
-                font = getTrueTypeFont(postScriptName, file);
-                break;
-            case OTF:
-                font = getOTFFont(postScriptName, file);
-                break;
-            default:
-                throw new RuntimeException("can't happen");
-            }
+                case PFB -> getType1Font(postScriptName, file);
+                case TTF -> getTrueTypeFont(postScriptName, file);
+                case OTF -> getOTFFont(postScriptName, file);
+            };
             if (font != null)
             {
                 FONT_CACHE.addFont(this, font);
@@ -208,7 +200,7 @@ public class FileSystemFontProvider extends FontProvider
                 // ttc not closed here because it is needed later when ttf is accessed,
                 // e.g. rendering PDF with non-embedded font which is in ttc file in our font directory
                 TrueTypeCollection ttc = new TrueTypeCollection(file);
-                TrueTypeFont ttf = null;
+                TrueTypeFont ttf;
                 try
                 {
                     ttf = ttc.getFontByName(postScriptName);
@@ -239,7 +231,7 @@ public class FileSystemFontProvider extends FontProvider
                     // ttc not closed here because it is needed later when ttf is accessed,
                     // e.g. rendering PDF with non-embedded font which is in ttc file in our font directory
                     TrueTypeCollection ttc = new TrueTypeCollection(file);
-                    TrueTypeFont ttf = null;
+                    TrueTypeFont ttf;
                     try
                     {
                         ttf = ttc.getFontByName(postScriptName);
@@ -495,26 +487,26 @@ public class FileSystemFontProvider extends FontProvider
 
                     postScriptName = parts[0].replace("\\|", "|");
                     format = FontFormat.valueOf(parts[1]);
-                    if (parts[2].length() > 0)
+                    if (!parts[2].isEmpty())
                     {
                         String[] ros = parts[2].split("-");
                         cidSystemInfo = new CIDSystemInfo(ros[0], ros[1], Integer.parseInt(ros[2]));
                     }
-                    if (parts[3].length() > 0)
+                    if (!parts[3].isEmpty())
                     {
                         usWeightClass = (int) Long.parseLong(parts[3], 16);
                     }
-                    if (parts[4].length() > 0)
+                    if (!parts[4].isEmpty())
                     {
                         sFamilyClass = (int) Long.parseLong(parts[4], 16);
                     }
                     ulCodePageRange1 = (int) Long.parseLong(parts[5], 16);
                     ulCodePageRange2 = (int) Long.parseLong(parts[6], 16);
-                    if (parts[7].length() > 0)
+                    if (!parts[7].isEmpty())
                     {
                         macStyle = (int) Long.parseLong(parts[7], 16);
                     }
-                    if (parts[8].length() > 0)
+                    if (!parts[8].isEmpty())
                     {
                         panose = new byte[10];
                         for (int i = 0; i < 10; i++)
@@ -560,8 +552,6 @@ public class FileSystemFontProvider extends FontProvider
 
     /**
      * Adds a TTC or OTC to the file cache. To reduce memory, the parsed font is not cached.
-     *
-     * @throws IOException
      */
     private void addTrueTypeCollection(final File ttcFile) throws IOException
     {
@@ -573,8 +563,6 @@ public class FileSystemFontProvider extends FontProvider
 
     /**
      * Adds an OTF or TTF font to the file cache. To reduce memory, the parsed font is not cached.
-     *
-     * @throws IOException
      */
     private void addTrueTypeFont(File ttfFile) throws IOException
     {
@@ -697,8 +685,6 @@ public class FileSystemFontProvider extends FontProvider
 
     /**
      * Adds a Type 1 font to the file cache. To reduce memory, the parsed font is not cached.
-     *
-     * @throws IOException
      */
     private void addType1Font(File pfbFile) throws IOException
     {
