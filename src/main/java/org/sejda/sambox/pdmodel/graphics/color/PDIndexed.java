@@ -170,11 +170,6 @@ public final class PDIndexed extends PDSpecialColorSpace
     @Override
     public float[] toRGB(float[] value)
     {
-        if (value.length > 1)
-        {
-            throw new IllegalArgumentException("Indexed color spaces must have one color value");
-        }
-
         // scale and clamp input value
         int index = Math.round(value[0]);
         index = Math.max(index, 0);
