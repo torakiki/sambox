@@ -25,7 +25,7 @@ package org.sejda.sambox.cos;
 public interface Encryptable
 {
     /**
-     * @return true if the can be encrypted
+     * @return true if the object can be encrypted
      */
     boolean encryptable();
 
