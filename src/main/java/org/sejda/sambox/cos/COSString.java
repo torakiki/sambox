@@ -125,6 +125,15 @@ public final class COSString extends COSBase implements Encryptable
             }
         }
 
+        // (PDF 2.0)
+        if ((bytes.length >= 3) && ((bytes[0] & 0xff) == 0xEF && (bytes[1] & 0xff) == 0xBB
+                && (bytes[2] & 0xff) == 0xBF))
+        {
+
+            // UTF-8
+            return new String(bytes, 3, bytes.length - 3, StandardCharsets.UTF_8);
+        }
+
         // otherwise use PDFDocEncoding
         return PDFDocEncoding.toString(bytes);
     }

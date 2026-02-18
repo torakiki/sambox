@@ -24,6 +24,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 import org.junit.Test;
@@ -94,7 +95,7 @@ public class COSStringTest
     }
 
     @Test
-    public void unitocde8BitsParseLiteral() throws UnsupportedEncodingException
+    public void unitocde8BitsParseLiteral()
     {
         /** En français où les choses sont accentués. En español, así */
         String text8Bit = "En fran\u00e7ais o\u00f9 les choses sont accentu\u00e9s. En espa\u00f1ol, as\u00ed";
@@ -159,9 +160,26 @@ public class COSStringTest
         return sb.toString().toUpperCase();
     }
 
+    @Test
+    public void utf8EncodedStrings()
+    {
+        String text = "Det är kallt vid -30°";
+        byte[] utf8Bytes = text.getBytes(StandardCharsets.UTF_8);
+        ByteBuffer buffer = ByteBuffer.allocate(3 + utf8Bytes.length);
+        // Put the BOM bytes (0xEF, 0xBB, 0xBF)
+        buffer.put((byte) 0xEF);
+        buffer.put((byte) 0xBB);
+        buffer.put((byte) 0xBF);
+
+        //Put the original data
+        buffer.put(utf8Bytes);
+
+        assertEquals(text, new COSString(buffer.array()).getString());
+    }
+
     /**
      * PDFBOX-3881: Test that if String has only the BOM, that it be an empty string.
-     * 
+     *
      * @throws IOException
      */
     @Test
@@ -169,5 +187,6 @@ public class COSStringTest
     {
         assertTrue(COSString.parseHex("FEFF").getString().isEmpty());
         assertTrue(COSString.parseHex("FFFE").getString().isEmpty());
+        assertTrue(COSString.parseHex("EFBBBF").getString().isEmpty());
     }
 }
