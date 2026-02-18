@@ -123,6 +123,15 @@ public final class COSString extends COSBase implements Encryptable
             }
         }
 
+        // (PDF 2.0)
+        if ((bytes.length >= 3) && ((bytes[0] & 0xff) == 0xEF && (bytes[1] & 0xff) == 0xBB
+                && (bytes[2] & 0xff) == 0xBF))
+        {
+
+            // UTF-8
+            return new String(bytes, 3, bytes.length - 3, StandardCharsets.UTF_8);
+        }
+
         // otherwise use PDFDocEncoding
         return PDFDocEncoding.toString(bytes);
     }
@@ -185,7 +194,7 @@ public final class COSString extends COSBase implements Encryptable
 
     /**
      * Factory method for a {@link COSString} from a byte array
-     * 
+     *
      * @param value
      * @return a new instance
      */
@@ -199,8 +208,7 @@ public final class COSString extends COSBase implements Encryptable
      *
      * @param literal A literal string.
      * @return A {@link COSString} encoded with {@link PDFDocEncoding} encoding if possible, with
-     * {@link Charsets#UTF_16BE} otherwise.
-     * @throws IOException If there is an error with the hex string.
+     * {@link StandardCharsets#UTF_16BE} otherwise.
      */
     public static COSString parseLiteral(String literal)
     {
