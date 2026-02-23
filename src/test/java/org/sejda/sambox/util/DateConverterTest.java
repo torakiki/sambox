@@ -19,6 +19,7 @@ package org.sejda.sambox.util;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -447,15 +448,26 @@ public class DateConverterTest
     }
 
     @Test
+    @DisplayName("toString with Instant UTC returns a string ending with Z instead of 00:00")
+    public void testOverloadedToStringYieldDifferentResultIfUTC()
+    {
+        ZoneId zone = ZoneId.of("UTC");
+        var calendar = Calendar.getInstance(TimeZone.getTimeZone(zone));
+        var instantStr = DateConverter.toString(calendar.toInstant(), zone);
+        var calendarStr = DateConverter.toString(calendar);
+        assertThat(calendarStr.substring(0, calendarStr.length() - 1), not(equalTo(instantStr)));
+        assertThat(calendarStr, endsWith("'"));
+    }
+
+    @Test
     public void testOverloadedToStringYieldsSameResultExceptFinalApostrophe()
     {
-        var calendar = Calendar.getInstance();
-        var instantString = DateConverter.toString(calendar.toInstant(),
-                calendar.getTimeZone().toZoneId());
-        var calendarString = DateConverter.toString(calendar);
-        assertThat(calendarString.substring(0, calendarString.length() - 1),
-                equalTo(instantString));
-        assertThat(calendarString, endsWith("'"));
+        ZoneId zone = ZoneId.of("America/New_York");
+        var calendar = Calendar.getInstance(TimeZone.getTimeZone(zone));
+        var instantStr = DateConverter.toString(calendar.toInstant(), zone);
+        var calendarStr = DateConverter.toString(calendar);
+        assertThat(calendarStr.substring(0, calendarStr.length() - 1), equalTo(instantStr));
+        assertThat(calendarStr, endsWith("'"));
     }
 
     /**
