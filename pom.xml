@@ -6,6 +6,7 @@
     <packaging>jar</packaging>
     <name>sambox</name>
     <version>4.0.0.M2-SNAPSHOT</version>
+    <url>https://github.com/torakiki/sambox</url>
 
     <description>
         An Apache PDFBox fork intended to be used as PDF processor for Sejda and PDFsam related
