@@ -101,6 +101,14 @@ public class ShakeDownTest
     }
 
     @Test
+    public void writeUncompressed() throws IOException
+    {
+        doTest(WriteOption.UNCOMPRESS_STREAMS);
+        doIncrementalTest(WriteOption.UNCOMPRESS_STREAMS);
+        doTestEncrypted(WriteOption.UNCOMPRESS_STREAMS);
+    }
+
+    @Test
     public void writeObjectStreamCompressed() throws IOException
     {
         doTest(WriteOption.OBJECT_STREAMS, WriteOption.COMPRESS_STREAMS);

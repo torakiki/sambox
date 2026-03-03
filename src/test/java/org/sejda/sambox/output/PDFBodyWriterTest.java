@@ -32,6 +32,7 @@ import java.io.OutputStream;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
@@ -104,6 +105,7 @@ public class PDFBodyWriterTest
     }
 
     @Test
+    @DisplayName("Stream uncompressed with COMPRESS_STREAMS write option")
     public void writeCompressedStream() throws IOException
     {
         byte[] data = new byte[] { (byte) 0x41, (byte) 0x42, (byte) 0x43 };
@@ -120,7 +122,28 @@ public class PDFBodyWriterTest
     }
 
     @Test
+    @DisplayName("Stream compressed with UNCOMPRESS_STREAMS write option")
     public void writeUncompressedStream() throws IOException
+    {
+        victim = new PDFBodyWriter(new PDFWriteContext(null, null, WriteOption.UNCOMPRESS_STREAMS),
+                writer);
+        byte[] data = new byte[] { (byte) 0x41, (byte) 0x42, (byte) 0x43 };
+        COSStream stream = new COSStream();
+        stream.addCompression();
+        stream.setInt(COSName.B, 2);
+        try (OutputStream out = stream.createUnfilteredStream())
+        {
+            out.write(data);
+        }
+        assertEquals(COSName.FLATE_DECODE, stream.getFilters());
+        document.getDocument().getCatalog().setItem(COSName.SA, stream);
+        victim.write(document.getDocument());
+        assertNull(stream.getFilters());
+    }
+
+    @Test
+    @DisplayName("Stream uncompressed with no write option")
+    public void writeUncompressedStreamNoOpts() throws IOException
     {
         victim = new PDFBodyWriter(new PDFWriteContext(null, null), writer);
         byte[] data = new byte[] { (byte) 0x41, (byte) 0x42, (byte) 0x43 };
@@ -134,6 +157,25 @@ public class PDFBodyWriterTest
         document.getDocument().getCatalog().setItem(COSName.SA, stream);
         victim.write(document.getDocument());
         assertNull(stream.getFilters());
+    }
+
+    @Test
+    @DisplayName("Stream compressed with no write option")
+    public void writeCompressedStreamNoOpts() throws IOException
+    {
+        victim = new PDFBodyWriter(new PDFWriteContext(null, null), writer);
+        byte[] data = new byte[] { (byte) 0x41, (byte) 0x42, (byte) 0x43 };
+        COSStream stream = new COSStream();
+        stream.setInt(COSName.B, 2);
+        stream.addCompression();
+        try (OutputStream out = stream.createUnfilteredStream())
+        {
+            out.write(data);
+        }
+        assertEquals(COSName.FLATE_DECODE, stream.getFilters());
+        document.getDocument().getCatalog().setItem(COSName.SA, stream);
+        victim.write(document.getDocument());
+        assertEquals(COSName.FLATE_DECODE, stream.getFilters());
     }
 
     @Test

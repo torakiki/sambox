@@ -72,9 +72,6 @@ class PDFBodyWriter implements COSVisitor, Closeable
 
     /**
      * Writes the given document
-     * 
-     * @param document
-     * @throws IOException
      */
     public void write(IncrementablePDDocument document) throws IOException
     {
@@ -87,9 +84,6 @@ class PDFBodyWriter implements COSVisitor, Closeable
 
     /**
      * Writes the body of the given document
-     * 
-     * @param document
-     * @throws IOException
      */
     public void write(COSDocument document) throws IOException
     {
@@ -112,8 +106,6 @@ class PDFBodyWriter implements COSVisitor, Closeable
 
     /**
      * Starts writing whatever has been stacked
-     * 
-     * @throws IOException
      */
     void startWriting() throws IOException
     {
@@ -168,12 +160,15 @@ class PDFBodyWriter implements COSVisitor, Closeable
         {
             value.addCompression();
         }
+        else if (context.hasWriteOption(WriteOption.UNCOMPRESS_STREAMS))
+        {
+            value.removeCompression();
+        }
         // with encrypted docs we write length as an indirect ref
         value.indirectLength(nonNull(context.encryptor()));
         if (value.indirectLength())
         {
-            IndirectCOSObjectReference length = context
-                    .createNonStorableInObjectStreamIndirectReference();
+            IndirectCOSObjectReference length = context.createNonStorableInObjectStreamIndirectReference();
             value.setItem(COSName.LENGTH, length);
             stack.add(length);
         }
@@ -190,9 +185,6 @@ class PDFBodyWriter implements COSVisitor, Closeable
     /**
      * Called during the visit on the objects graph, when a potential indirect object is met. Default implementation
      * creates a new indirect reference for it.
-     * 
-     * @param item
-     * @throws IOException
      */
     public void onPotentialIndirectObject(COSBase item) throws IOException
     {

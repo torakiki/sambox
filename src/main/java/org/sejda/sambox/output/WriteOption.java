@@ -40,6 +40,14 @@ public enum WriteOption
      */
     COMPRESS_STREAMS,
     /**
+     * Removes a Flate filter from the streams if present. Writes streams plain/uncompressed so that
+     * they can be inspected with a simple text or hex editor.
+     * <p>For all PDF objects and the xref table to be fully visible,
+     * this should be used without {@link WriteOption#OBJECT_STREAMS} and
+     * {@link WriteOption#XREF_STREAM}.</p>
+     */
+    UNCOMPRESS_STREAMS,
+    /**
      * Does not automatically update metadata modified date and producer when saving
      */
     NO_METADATA_PRODUCER_MODIFIED_DATE_UPDATE,
