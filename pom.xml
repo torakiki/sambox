@@ -506,7 +506,7 @@
                         </goals>
                         <configuration>
                             <url>
-                                https://github.com/jondot/dotfiles/blob/master/.fonts/calibri.ttf?raw=true
+                                https://raw.githubusercontent.com/jondot/dotfiles/master/.fonts/calibri.ttf
                             </url>
                             <outputDirectory>${project.build.directory}/fonts</outputDirectory>
                             <outputFileName>PDFBOX-3747-calibri.ttf</outputFileName>
