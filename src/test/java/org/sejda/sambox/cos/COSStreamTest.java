@@ -17,7 +17,10 @@
 package org.sejda.sambox.cos;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
@@ -37,8 +40,6 @@ public class COSStreamTest
 
     /**
      * Tests encoding of a stream without any filter applied.
-     *
-     * @throws IOException
      */
     @Test
     public void testUncompressedStreamEncode() throws IOException
@@ -51,8 +52,6 @@ public class COSStreamTest
 
     /**
      * Tests decoding of a stream without any filter applied.
-     *
-     * @throws IOException
      */
     @Test
     public void testUncompressedStreamDecode() throws IOException
@@ -65,8 +64,6 @@ public class COSStreamTest
 
     /**
      * Tests encoding of a stream with one filter applied.
-     *
-     * @throws IOException
      */
     @Test
     public void testCompressedStream1Encode() throws IOException
@@ -91,8 +88,6 @@ public class COSStreamTest
 
     /**
      * Tests decoding of a stream with one filter applied.
-     *
-     * @throws IOException
      */
     @Test
     public void testCompressedStream1Decode() throws IOException
@@ -112,8 +107,6 @@ public class COSStreamTest
 
     /**
      * Tests encoding of a stream with 2 filters applied.
-     *
-     * @throws IOException
      */
     @Test
     public void testCompressedStream2Encode() throws IOException
@@ -131,8 +124,6 @@ public class COSStreamTest
 
     /**
      * Tests encoding of a stream with 2 filters applied.
-     *
-     * @throws IOException
      */
     @Test
     public void testCompressedStream2AddCompression() throws IOException
@@ -148,8 +139,6 @@ public class COSStreamTest
 
     /**
      * test addCompression doesn't throw anything when ASCIIHex stream has garbage
-     *
-     * @throws IOException
      */
     @Test
     public void addCompressionWithGarbageAsciiHex() throws IOException
@@ -164,8 +153,6 @@ public class COSStreamTest
 
     /**
      * Tests decoding of a stream with 2 filters applied.
-     *
-     * @throws IOException
      */
     @Test
     public void testCompressedStream2Decode() throws IOException
@@ -215,11 +202,9 @@ public class COSStreamTest
     }
 
     /**
-     * Tests tests that encoding is done correctly even if the the stream is closed twice.
+     * Tests that encoding is done correctly even if the the stream is closed twice.
      * Closeable.close() allows streams to be closed multiple times. The second and subsequent
      * close() calls should have no effect.
-     *
-     * @throws IOException
      */
     @Test
     public void testCompressedStreamDoubleClose() throws IOException
@@ -262,6 +247,203 @@ public class COSStreamTest
         stream.removeCompression();
         assertFalse(stream.hasFilter(COSName.FLATE_DECODE));
         validateEncoded(stream, testStringEncoded);
+    }
+
+    @Test
+    @DisplayName("removeCompression removes LZWDecode when filter is a single COSName")
+    public void testRemoveCompressionLZWSingleFilter() throws IOException
+    {
+        byte[] testString = "LZW test data for COSStream".getBytes(StandardCharsets.US_ASCII);
+        COSStream stream = createStream(testString, COSName.LZW_DECODE);
+        assertTrue(stream.hasFilter(COSName.LZW_DECODE));
+        var result = stream.removeCompression();
+        assertTrue(result);
+        assertFalse(stream.hasFilter(COSName.LZW_DECODE));
+    }
+
+    @Test
+    @DisplayName("removeCompression removes LZWDecode from a COSArray, leaving other filters")
+    public void testRemoveCompressionLZWInArray() throws IOException
+    {
+        byte[] testString = "LZW array test data".getBytes(StandardCharsets.US_ASCII);
+        COSStream stream = createStream(testString,
+                new COSArray(COSName.LZW_DECODE, COSName.ASCII85_DECODE));
+        assertTrue(stream.hasFilter(COSName.LZW_DECODE));
+        assertTrue(stream.hasFilter(COSName.ASCII85_DECODE));
+        var result = stream.removeCompression();
+        assertTrue(result);
+        assertFalse(stream.hasFilter(COSName.LZW_DECODE));
+        assertTrue(stream.hasFilter(COSName.ASCII85_DECODE));
+    }
+
+    @Test
+    @DisplayName("removeCompression returns false when no compression filter is present")
+    public void testRemoveCompressionNoCompressionFilter() throws IOException
+    {
+        byte[] testString = "No compression test".getBytes(StandardCharsets.US_ASCII);
+        COSStream stream = createStream(testString, COSName.ASCII85_DECODE);
+        assertTrue(stream.hasFilter(COSName.ASCII85_DECODE));
+        var result = stream.removeCompression();
+        assertFalse(result);
+        assertTrue(stream.hasFilter(COSName.ASCII85_DECODE));
+    }
+
+    @Test
+    @DisplayName("removeCompression removes DecodeParms when single filter with DecodeParms")
+    public void testRemoveCompressionRemovesDecodeParms() throws IOException
+    {
+        byte[] testString = "DecodeParms test".getBytes(StandardCharsets.US_ASCII);
+        COSStream stream = createStream(testString, COSName.FLATE_DECODE);
+        var parms = new COSDictionary();
+        parms.setItem(COSName.PREDICTOR, COSInteger.get(12));
+        stream.setItem(COSName.DECODE_PARMS, parms);
+        var result = stream.removeCompression();
+        assertTrue(result);
+        assertFalse(stream.hasFilter(COSName.FLATE_DECODE));
+        assertNull(stream.getDictionaryObject(COSName.DECODE_PARMS, COSName.DP));
+    }
+
+    @Test
+    @DisplayName("removeCompression removes correct DecodeParms index from array")
+    public void testRemoveCompressionRemovesDecodeParmsArrayIndex() throws IOException
+    {
+        byte[] testString = "DecodeParms array test".getBytes(StandardCharsets.US_ASCII);
+        COSStream stream = createStream(testString,
+                new COSArray(COSName.ASCII85_DECODE, COSName.FLATE_DECODE));
+        // DecodeParms: [null, {Predictor: 12}]
+        var flateParms = new COSDictionary();
+        flateParms.setItem(COSName.PREDICTOR, COSInteger.get(12));
+        stream.setItem(COSName.DECODE_PARMS, new COSArray(COSNull.NULL, flateParms));
+        var result = stream.removeCompression();
+        assertTrue(result);
+        assertFalse(stream.hasFilter(COSName.FLATE_DECODE));
+        assertTrue(stream.hasFilter(COSName.ASCII85_DECODE));
+        assertNull(stream.getDictionaryObject(COSName.DECODE_PARMS, COSName.DP));
+    }
+
+    @Test
+    @DisplayName("removeCompression removes correct DecodeParms from three-filter array")
+    public void testRemoveCompressionThreeFiltersDecodeParmsArray() throws IOException
+    {
+        byte[] testString = "Three filters test".getBytes(StandardCharsets.US_ASCII);
+        COSStream stream = createStream(testString,
+                new COSArray(COSName.ASCII85_DECODE, COSName.FLATE_DECODE,
+                        COSName.ASCII_HEX_DECODE));
+        // DecodeParms: [null, {Predictor: 12}, null]
+        var flateParms = new COSDictionary();
+        flateParms.setItem(COSName.PREDICTOR, COSInteger.get(12));
+        stream.setItem(COSName.DECODE_PARMS, new COSArray(COSNull.NULL, flateParms, COSNull.NULL));
+        var result = stream.removeCompression();
+        assertTrue(result);
+        assertFalse(stream.hasFilter(COSName.FLATE_DECODE));
+        assertTrue(stream.hasFilter(COSName.ASCII85_DECODE));
+        assertTrue(stream.hasFilter(COSName.ASCII_HEX_DECODE));
+        // DecodeParms removed since they are all null
+        assertNull(stream.getDictionaryObject(COSName.DECODE_PARMS, COSName.DP));
+    }
+
+    @Test
+    @DisplayName("removeCompression removes DP key instead of DecodeParms when DP is used")
+    public void testRemoveCompressionRemovesDPKey() throws IOException
+    {
+        byte[] testString = "DP key test".getBytes(StandardCharsets.US_ASCII);
+        COSStream stream = createStream(testString, COSName.FLATE_DECODE);
+        var parms = new COSDictionary();
+        parms.setItem(COSName.PREDICTOR, COSInteger.get(12));
+        stream.setItem(COSName.DP, parms);
+        var result = stream.removeCompression();
+        assertTrue(result);
+        assertFalse(stream.hasFilter(COSName.FLATE_DECODE));
+        assertNull(stream.getDictionaryObject(COSName.DP));
+    }
+
+    @Test
+    @DisplayName("removeCompression returns false when no filter is present")
+    public void testRemoveCompressionNoFilter() throws IOException
+    {
+        byte[] testString = "No filter test".getBytes(StandardCharsets.US_ASCII);
+        COSStream stream = createStream(testString);
+        var result = stream.removeCompression();
+        assertFalse(result);
+    }
+
+    @Test
+    @DisplayName("removeCompression removes both FlateDecode and LZWDecode from array")
+    public void testRemoveCompressionBothCompressionFilters() throws IOException
+    {
+        byte[] testString = "Both compression filters test".getBytes(StandardCharsets.US_ASCII);
+        COSStream stream = createStream(testString,
+                new COSArray(COSName.FLATE_DECODE, COSName.LZW_DECODE));
+        assertTrue(stream.hasFilter(COSName.FLATE_DECODE));
+        assertTrue(stream.hasFilter(COSName.LZW_DECODE));
+        var result = stream.removeCompression();
+        assertTrue(result);
+        assertFalse(stream.hasFilter(COSName.FLATE_DECODE));
+        assertFalse(stream.hasFilter(COSName.LZW_DECODE));
+        assertNull(stream.getItem(COSName.FILTER));
+    }
+
+    @Test
+    @DisplayName("removeCompression removes both compression filters mixed with other filters")
+    public void testRemoveCompressionBothCompressionFiltersMixedWithOthers() throws IOException
+    {
+        byte[] testString = "Mixed filters test".getBytes(StandardCharsets.US_ASCII);
+        COSStream stream = createStream(testString,
+                new COSArray(COSName.FLATE_DECODE, COSName.ASCII85_DECODE, COSName.LZW_DECODE));
+        // DecodeParms: [null, null, {Predictor: 12}]
+        var lzwParms = new COSDictionary();
+        lzwParms.setItem(COSName.PREDICTOR, COSInteger.get(12));
+        stream.setItem(COSName.DECODE_PARMS, new COSArray(COSNull.NULL, COSNull.NULL, lzwParms));
+        var result = stream.removeCompression();
+        assertTrue(result);
+        assertFalse(stream.hasFilter(COSName.FLATE_DECODE));
+        assertFalse(stream.hasFilter(COSName.LZW_DECODE));
+        assertTrue(stream.hasFilter(COSName.ASCII85_DECODE));
+        // DecodeParms remove since only COSNull remained
+        assertNull(stream.getDictionaryObject(COSName.DECODE_PARMS));
+    }
+
+    @Test
+    @DisplayName("removeCompression removes both compression filters with DecodeParms")
+    public void testRemoveCompressionBothCompressionFiltersWithDecodeParms() throws IOException
+    {
+        byte[] testString = "Both filters with parms test".getBytes(StandardCharsets.US_ASCII);
+        COSStream stream = createStream(testString,
+                new COSArray(COSName.FLATE_DECODE, COSName.LZW_DECODE));
+        // DecodeParms: [{Predictor: 12}, {EarlyChange: 0}]
+        var flateParms = new COSDictionary();
+        flateParms.setItem(COSName.PREDICTOR, COSInteger.get(12));
+        var lzwParms = new COSDictionary();
+        lzwParms.setItem(COSName.EARLY_CHANGE, COSInteger.get(0));
+        stream.setItem(COSName.DECODE_PARMS, new COSArray(flateParms, lzwParms));
+        var result = stream.removeCompression();
+        assertTrue(result);
+        assertFalse(stream.hasFilter(COSName.FLATE_DECODE));
+        assertFalse(stream.hasFilter(COSName.LZW_DECODE));
+        assertNull(stream.getItem(COSName.FILTER));
+        assertNull(stream.getDictionaryObject(COSName.DECODE_PARMS));
+    }
+
+    @Test
+    @DisplayName("removeCompression with two filters both having DecodeParms keeps remaining parms")
+    public void testRemoveCompressionKeepsRemainingDecodeParms() throws IOException
+    {
+        byte[] testString = "Two filters with parms".getBytes(StandardCharsets.US_ASCII);
+        COSStream stream = createStream(testString,
+                new COSArray(COSName.FLATE_DECODE, COSName.ASCII85_DECODE));
+        // DecodeParms: [{Predictor: 12}, {SomeParam: 1}]
+        var flateParms = new COSDictionary();
+        flateParms.setItem(COSName.PREDICTOR, COSInteger.get(12));
+        var asciiParms = new COSDictionary();
+        asciiParms.setItem(COSName.getPDFName("SomeParam"), COSInteger.get(1));
+        stream.setItem(COSName.DECODE_PARMS, new COSArray(flateParms, asciiParms));
+        var result = stream.removeCompression();
+        assertTrue(result);
+        assertFalse(stream.hasFilter(COSName.FLATE_DECODE));
+        assertTrue(stream.hasFilter(COSName.ASCII85_DECODE));
+        var remainingParms = stream.getDictionaryObject(COSName.DECODE_PARMS, COSArray.class);
+        assertNotNull(remainingParms);
+        assertEquals(1, remainingParms.size());
     }
 
     private static byte[] encodeData(byte[] original, COSName filter) throws IOException

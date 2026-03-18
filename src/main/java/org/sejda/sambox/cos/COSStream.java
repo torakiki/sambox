@@ -502,34 +502,67 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
         return false;
     }
 
+    private static boolean isCompressionFilter(COSName filter)
+    {
+        return COSName.FLATE_DECODE.equals(filter) || COSName.LZW_DECODE.equals(filter);
+    }
+
     /**
-     * Removes, if present, the FlateDecode filter from the current filter list.
+     * Removes all compression filters (FlateDecode and LZWDecode) from the current filter list.
+     * When a filter is part of an array, the corresponding DecodeParms/DP entry at the same index
+     * is also removed.
      *
-     * @return true if the filter was present and was removed
+     * @return true if at least one compression filter was present and was removed
      */
     public boolean removeCompression()
     {
-        if (hasFilter(COSName.FLATE_DECODE))
+        COSBase filters = getFilters();
+        try
         {
-            try
+            if (filters instanceof COSName name && isCompressionFilter(name))
             {
-                COSBase filters = getFilters();
-                if (filters instanceof COSArray array)
-                {
-                    var newFilters = array.duplicate();
-                    newFilters.remove(COSName.FLATE_DECODE);
-                    setFilters(newFilters);
-                }
-                else
-                {
-                    setFilters(null);
-                }
+                removeItems(COSName.DECODE_PARMS, COSName.DP);
+                setFilters(null);
                 return true;
             }
-            catch (IOException e)
+            if (filters instanceof COSArray array)
             {
-                LOG.warn("Unable to remove FlateDecode filter to the stream", e);
+                var newFilters = new COSArray();
+                var params = getDictionaryObject(COSName.DECODE_PARMS, COSName.DP, COSArray.class);
+                var newParams = new COSArray();
+                for (int i = 0; i < array.size(); i++)
+                {
+                    var current = array.getObject(i, COSName.class);
+                    if (!isCompressionFilter(current))
+                    {
+                        newFilters.add(current);
+                        if (nonNull(params))
+                        {
+                            if (i < params.size())
+                            {
+                                newParams.add(ofNullable(params.get(i)).orElse(COSNull.NULL));
+                            }
+                        }
+                    }
+                }
+                //something changed
+                if (newParams.size() != array.size())
+                {
+                    setFilters(newFilters.isEmpty() ? null : newFilters);
+                    removeItems(COSName.DECODE_PARMS, COSName.DP);
+                    if (!newParams.isEmpty() && newParams.stream()
+                            .anyMatch(i -> !(i instanceof COSNull)))
+                    {
+                        
+                        setItem(COSName.DECODE_PARMS, newParams);
+                    }
+                    return true;
+                }
             }
+        }
+        catch (IOException e)
+        {
+            LOG.warn("Unable to remove compression filter from the stream", e);
         }
         return false;
     }
