@@ -194,7 +194,7 @@ public final class PDAcroForm extends PDDictionaryWrapper
                 {
                     annotations.add(annotation);
                 }
-                else if (isVisibleAnnotation(annotation))
+                else if (isVisibleAnnotation(annotation, page))
                 {
                     try (PDPageContentStream contentStream = new PDPageContentStream(document, page,
                             AppendMode.APPEND, true, !isContentStreamWrapped))
@@ -231,7 +231,7 @@ public final class PDAcroForm extends PDDictionaryWrapper
 
     }
 
-    private boolean isVisibleAnnotation(PDAnnotation annotation)
+    private boolean isVisibleAnnotation(PDAnnotation annotation, PDPage page)
     {
         if (annotation.isInvisible() || annotation.isHidden())
         {
@@ -242,6 +242,20 @@ public final class PDAcroForm extends PDDictionaryWrapper
         {
             return false;
         }
+
+        // handle malformed /BBox
+        try
+        {
+            normalAppearanceStream.getBBox();
+        }
+        catch (ClassCastException e)
+        {
+            LOG.warn(
+                    "Invalid /BBox on annotation appearance stream, repairing with page CropBox: {}",
+                    e.getMessage());
+            normalAppearanceStream.setBBox(page.getCropBox());
+        }
+
         PDRectangle bbox = normalAppearanceStream.getBBox();
         return bbox != null && bbox.getWidth() > 0 && bbox.getHeight() > 0;
     }

@@ -296,6 +296,10 @@
                 <groupId>com.googlecode.maven-download-plugin</groupId>
                 <artifactId>download-maven-plugin</artifactId>
                 <version>1.13.0</version>
+                <configuration>
+                    <retries>5</retries>
+                    <overwrite>false</overwrite>
+                </configuration>
                 <executions>
                     <execution>
                         <id>PDFBOX-1031-1</id>
@@ -484,7 +488,7 @@
                         </goals>
                         <configuration>
                             <url>
-                                https://github.com/jondot/dotfiles/blob/master/.fonts/calibri.ttf?raw=true
+                                https://raw.githubusercontent.com/jondot/dotfiles/master/.fonts/calibri.ttf
                             </url>
                             <outputDirectory>${project.build.directory}/fonts</outputDirectory>
                             <outputFileName>PDFBOX-3747-calibri.ttf</outputFileName>
