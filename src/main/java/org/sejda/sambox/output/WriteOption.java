@@ -40,11 +40,13 @@ public enum WriteOption
      */
     COMPRESS_STREAMS,
     /**
-     * Removes a Flate filter from the streams if present. Writes streams plain/uncompressed so that
-     * they can be inspected with a simple text or hex editor.
+     * Removes a Flate and LZW filters from the streams if present. Writes streams uncompressed so
+     * that they can be inspected with a simple text or hex editor. Something similar is available
+     * in many tools (qpdf, pdftk, mutool ...).
      * <p>For all PDF objects and the xref table to be fully visible,
      * this should be used without {@link WriteOption#OBJECT_STREAMS} and
-     * {@link WriteOption#XREF_STREAM}.</p>
+     * {@link WriteOption#XREF_STREAM}. Obviously, it doesn't make sense to have both,
+     * {@link WriteOption#COMPRESS_STREAMS} and this option are active.</p>
      */
     UNCOMPRESS_STREAMS,
     /**
