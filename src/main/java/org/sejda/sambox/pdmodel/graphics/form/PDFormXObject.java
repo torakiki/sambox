@@ -83,8 +83,6 @@ public class PDFormXObject extends PDXObject implements PDContentStream
 
     /**
      * Creates a Form Image XObject for writing, in the given document.
-     * 
-     * @param document The current document
      */
     public PDFormXObject()
     {
@@ -102,20 +100,13 @@ public class PDFormXObject extends PDXObject implements PDContentStream
         return getCOSObject().getInt(COSName.FORMTYPE, 1);
     }
 
-    /**
-     * Set the form type.
-     * 
-     * @param formType The new form type.
-     */
     public void setFormType(int formType)
     {
         getCOSObject().setInt(COSName.FORMTYPE, formType);
     }
 
     /**
-     * Returns the group attributes dictionary (Group XObject).
-     *
-     * @return the group attributes dictionary
+     * @return the group attributes dictionary (Group XObject)
      */
     public PDTransparencyGroupAttributes getGroup()
     {
@@ -200,13 +191,12 @@ public class PDFormXObject extends PDXObject implements PDContentStream
     @Override
     public PDRectangle getBBox()
     {
-        PDRectangle retval = null;
-        COSArray array = (COSArray) getCOSObject().getDictionaryObject(COSName.BBOX);
+        COSArray array = getCOSObject().getDictionaryObject(COSName.BBOX, COSArray.class);
         if (array != null && array.size() >= 4)
         {
-            retval = new PDRectangle(array);
+            return new PDRectangle(array);
         }
-        return retval;
+        return null;
     }
 
     /**

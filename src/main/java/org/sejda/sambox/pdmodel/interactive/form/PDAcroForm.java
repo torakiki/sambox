@@ -244,15 +244,10 @@ public final class PDAcroForm extends PDDictionaryWrapper
         }
 
         // handle malformed /BBox
-        try
-        {
-            normalAppearanceStream.getBBox();
-        }
-        catch (ClassCastException e)
+        if (isNull(normalAppearanceStream.getBBox()))
         {
             LOG.warn(
-                    "Invalid /BBox on annotation appearance stream, repairing with page CropBox: {}",
-                    e.getMessage());
+                    "Invalid required /BBox on annotation appearance stream, repairing with page CropBox");
             normalAppearanceStream.setBBox(page.getCropBox());
         }
 
@@ -302,8 +297,8 @@ public final class PDAcroForm extends PDDictionaryWrapper
      * <p>
      * The fields within an AcroForm are organized in a tree structure. The documents root fields
      * might either be terminal fields, non-terminal fields or a mixture of both. Non-terminal
-     * fields mark branches which contents can be retrieved using {@link
-     * PDNonTerminalField#getChildren()}.
+     * fields mark branches which contents can be retrieved using
+     * {@link PDNonTerminalField#getChildren()}.
      *
      * @return A list of the documents root fields, never null. If there are no fields then this
      * method returns an empty list.
@@ -466,7 +461,8 @@ public final class PDAcroForm extends PDDictionaryWrapper
     public PDResources getDefaultResources()
     {
         return ofNullable(getCOSObject().getDictionaryObject(COSName.DR, COSDictionary.class)).map(
-                dr -> new PDResources(dr, document.getResourceCache(), directFontCache)).orElse(null);
+                        dr -> new PDResources(dr, document.getResourceCache(), directFontCache))
+                .orElse(null);
     }
 
     /**
@@ -522,8 +518,8 @@ public final class PDAcroForm extends PDDictionaryWrapper
 
     /**
      * This will get the 'quadding' or justification of the text to be displayed. 0 -
-     * Left(default)<br/> 1 - Centered<br /> 2 - Right<br /> See the QUADDING constants of {@link
-     * PDVariableText}.
+     * Left(default)<br/> 1 - Centered<br /> 2 - Right<br /> See the QUADDING constants of
+     * {@link PDVariableText}.
      *
      * @return The justification of the text strings.
      */
