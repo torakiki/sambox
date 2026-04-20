@@ -46,7 +46,7 @@ public enum WriteOption
      * <p>For all PDF objects and the xref table to be fully visible,
      * this should be used without {@link WriteOption#OBJECT_STREAMS} and
      * {@link WriteOption#XREF_STREAM}. Obviously, it doesn't make sense to have both,
-     * {@link WriteOption#COMPRESS_STREAMS} and this option are active.</p>
+     * {@link WriteOption#COMPRESS_STREAMS} and this option active.</p>
      */
     UNCOMPRESS_STREAMS,
     /**
