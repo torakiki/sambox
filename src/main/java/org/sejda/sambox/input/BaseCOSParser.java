@@ -336,9 +336,7 @@ abstract class BaseCOSParser extends SourceReader
      * Retrieves the stream length. It gets it from the dictionary, if not present there it applies fallback strategy
      * searching for endstream or endobj keywords.
      * 
-     * @param streamDictionary
      * @return the length
-     * @throws IOException
      */
     private long streamLength(COSDictionary streamDictionary) throws IOException
     {
@@ -354,9 +352,7 @@ abstract class BaseCOSParser extends SourceReader
     }
 
     /**
-     * @param streamDictionary
      * @return the stream length if found in the dictionary. -1 if nothing is found or if the length is incorrect.
-     * @throws IOException
      */
     private long streamLengthFrom(COSDictionary streamDictionary) throws IOException
     {
@@ -388,16 +384,16 @@ abstract class BaseCOSParser extends SourceReader
             return -1;
         }
         long length = ((COSNumber) retVal).longValue();
-        long endStreamOffset = startingOffset + length;
-        if (endStreamOffset > length())
+        if (length < 0 || length > length() - startingOffset)
         {
             LOG.warn("Invalid stream length. Out of range");
             return -1;
         }
-        position(endStreamOffset);
+        position(startingOffset + length);
         if (!isNextToken(ENDSTREAM))
         {
-            LOG.warn("Invalid stream length. Expected '" + ENDSTREAM + "' at " + endStreamOffset);
+            LOG.warn("Invalid stream length. Expected '" + ENDSTREAM + "' at " + (startingOffset
+                    + length));
             return -1;
         }
         return length;
@@ -427,7 +423,7 @@ abstract class BaseCOSParser extends SourceReader
     private long doFindStreamLength(long start) throws IOException
     {
         Pattern pattern = Pattern.compile("endstream|endobj");
-        while (true)
+        while (position() < length())
         {
             long currentPosition = position();
             String currentLine = readLine();
@@ -453,5 +449,7 @@ abstract class BaseCOSParser extends SourceReader
                 return length;
             }
         }
+        LOG.warn("Reached EOF without finding 'endstream' or 'endobj'");
+        return length() - start;
     }
 }

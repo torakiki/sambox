@@ -19,16 +19,18 @@ package org.sejda.sambox.input;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.sejda.io.SeekableSources.inMemorySeekableSourceFrom;
 import static org.sejda.sambox.cos.COSDictionary.of;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.sejda.commons.util.IOUtils;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
@@ -50,16 +52,16 @@ public class COSParserTest
 
     private COSParser victim;
 
-    @After
+    @AfterEach
     public void tearDown() throws Exception
     {
         IOUtils.close(victim);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void nullArgument()
     {
-        new COSParser(null);
+        assertThrows(IllegalArgumentException.class, () -> new COSParser(null));
     }
 
     @Test
@@ -70,12 +72,12 @@ public class COSParserTest
         assertEquals(COSNull.NULL, victim.nextNull());
     }
 
-    @Test(expected = IOException.class)
+    @Test
     public void nextNullFailing() throws IOException
     {
         victim = new COSParser(inMemorySeekableSourceFrom("53 0 obj <</key value>>".getBytes()));
         victim.position(16);
-        victim.nextNull();
+        assertThrows(IOException.class, () -> victim.nextNull());
     }
 
     @Test
@@ -94,12 +96,12 @@ public class COSParserTest
         assertEquals(COSBoolean.FALSE, victim.nextBoolean());
     }
 
-    @Test(expected = IOException.class)
+    @Test
     public void nextBooleanFailing() throws IOException
     {
         victim = new COSParser(inMemorySeekableSourceFrom("53 0 obj <</key value>>".getBytes()));
         victim.position(16);
-        victim.nextBoolean();
+        assertThrows(IOException.class, () -> victim.nextBoolean());
     }
 
     @Test
@@ -150,11 +152,11 @@ public class COSParserTest
         assertEquals(expected, victim.nextString());
     }
 
-    @Test(expected = IOException.class)
+    @Test
     public void nextHexStringFailing() throws IOException
     {
         victim = new COSParser(inMemorySeekableSourceFrom("53 0 obj <</Chuck me>>".getBytes()));
-        victim.nextString();
+        assertThrows(IOException.class, () -> victim.nextString());
     }
 
     @Test
@@ -232,11 +234,11 @@ public class COSParserTest
                 result.get(2));
     }
 
-    @Test(expected = IOException.class)
-    public void nextArrayTrunkatedEOF() throws IOException
+    @Test
+    public void nextArrayTruncatedEOF() throws IOException
     {
         victim = new COSParser(inMemorySeekableSourceFrom("[10 (A String)".getBytes()));
-        victim.nextArray();
+        assertThrows(IOException.class, () -> victim.nextArray());
     }
 
     @Test
@@ -306,11 +308,11 @@ public class COSParserTest
         assertNull(result.getItem(COSName.R));
     }
 
-    @Test(expected = IOException.class)
-    public void nextDictionaryTrunkatedEOF() throws IOException
+    @Test
+    public void nextDictionaryTruncatedEOF() throws IOException
     {
         victim = new COSParser(inMemorySeekableSourceFrom("<< /R 10 ".getBytes()));
-        victim.nextDictionary();
+        assertThrows(IOException.class, () -> victim.nextDictionary());
     }
 
     @Test
@@ -370,11 +372,11 @@ public class COSParserTest
         assertEquals(0, id.objectIdentifier.generation());
     }
 
-    @Test(expected = IOException.class)
+    @Test
     public void nextNumberOrIndirectReferenceMalformed() throws IOException
     {
         victim = new COSParser(inMemorySeekableSourceFrom("1.23 5 R".getBytes()));
-        victim.nextNumberOrIndirectReference();
+        assertThrows(IOException.class, () -> victim.nextNumberOrIndirectReference());
     }
 
     @Test
@@ -533,12 +535,37 @@ public class COSParserTest
         }
     }
 
-    @Test(expected = IOException.class)
-    public void nextStreamTrunkated() throws IOException
+    @Test
+    public void nextStreamTruncated() throws IOException
     {
         victim = new COSParser(inMemorySeekableSourceFrom(
                 getClass().getResourceAsStream("/sambox/stream_trunkated.txt")));
-        victim.nextStream(new COSDictionary());
+        try (COSStream result = victim.nextStream(new COSDictionary()))
+        {
+            assertTrue(result.getFilteredLength() >= 0);
+        }
+    }
+
+    @Test
+    public void nextStreamNegativeLengthFallsBackToScan() throws IOException
+    {
+        victim = new COSParser(inMemorySeekableSourceFrom("stream\nhello\nendstream".getBytes()));
+        var dict = of(COSName.LENGTH, COSInteger.get(-1));
+        try (COSStream result = victim.nextStream(dict))
+        {
+            assertTrue(result.getFilteredLength() > 0);
+        }
+    }
+
+    @Test
+    void nextStreamMaxLongLengthFallsBackToScan() throws IOException
+    {
+        victim = new COSParser(inMemorySeekableSourceFrom("stream\nhello\nendstream".getBytes()));
+        var dict = of(COSName.LENGTH, COSInteger.get(Long.MAX_VALUE));
+        try (COSStream result = victim.nextStream(dict))
+        {
+            assertTrue(result.getFilteredLength() > 0);
+        }
     }
 
     @Test
