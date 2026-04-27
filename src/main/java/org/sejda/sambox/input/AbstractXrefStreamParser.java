@@ -16,8 +16,10 @@
  */
 package org.sejda.sambox.input;
 
+import static java.util.Objects.nonNull;
 import static java.util.stream.LongStream.empty;
 import static java.util.stream.LongStream.rangeClosed;
+import static org.sejda.commons.util.RequireUtils.requireIOCondition;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,15 +38,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Base class for an xref stream parser. Implementors will decide what to do when the parser finds a new trailer or a
- * new entries.
- * 
+ * Base class for an xref stream parser. Implementors will decide what to do when the parser finds a
+ * new trailer or a new entries.
+ *
  * @author Andrea Vacondio
  * @see AbstractXrefTableParser
  */
 abstract class AbstractXrefStreamParser
 {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractXrefStreamParser.class);
+    // Upper bound on objects in a single xref stream to prevent OOM via crafted /Index or /Size entries
+    private static final int MAX_XREF_ENTRIES = 24_000_000;
 
     private final COSParser parser;
 
@@ -55,24 +59,19 @@ abstract class AbstractXrefStreamParser
 
     /**
      * Action to perform when a trailer is found
-     * 
-     * @param trailer
      */
     abstract void onTrailerFound(COSDictionary trailer);
 
     /**
      * Action to perform when an {@link XrefEntry} is found
-     * 
-     * @param entry
      */
     abstract void onEntryFound(XrefEntry entry);
 
     /**
      * Parse the xref object stream.
-     * 
+     *
      * @param streamObjectOffset xref stream object offset
      * @return the stream dictionary
-     * @throws IOException
      */
     COSDictionary parse(long streamObjectOffset) throws IOException
     {
@@ -99,7 +98,10 @@ abstract class AbstractXrefStreamParser
         if (index == null)
         {
             LOG.debug("No index found for xref stream, using default values");
-            objectNumbers = rangeClosed(0, xrefStream.getInt(COSName.SIZE));
+            int size = xrefStream.getInt(COSName.SIZE);
+            requireIOCondition(size > 0 && size < MAX_XREF_ENTRIES,
+                    "Invalid xref /Size value " + size);
+            objectNumbers = rangeClosed(0, size);
         }
         else
         {
@@ -107,28 +109,41 @@ abstract class AbstractXrefStreamParser
             Builder builder = LongStream.builder();
             for (int i = 0; i < index.size(); i += 2)
             {
-                long start = ((COSNumber) index.get(i)).longValue();
-                long end = start + Math.max(((COSNumber) index.get(i + 1)).longValue() - 1, 0);
+                long start = index.getObject(i, COSNumber.class).longValue();
+                long count = index.getObject(i + 1, COSNumber.class).longValue();
+                requireIOCondition(count > 0 && count < MAX_XREF_ENTRIES,
+                        "Invalid xref /Index count " + count);
+                long end = start + Math.max(count - 1, 0);
                 LOG.trace(String.format("Adding expected range from %d to %d", start, end));
                 rangeClosed(start, end).forEach(builder::add);
             }
             objectNumbers = builder.build();
-
         }
-        COSArray xrefFormat = (COSArray) xrefStream.getDictionaryObject(COSName.W);
+        COSArray xrefFormat = xrefStream.getDictionaryObject(COSName.W, COSArray.class);
+        requireIOCondition(nonNull(xrefFormat), "Invalid type for /W xref stream entry");
+        requireIOCondition(xrefFormat.size() == 3, "Invalid /W array size");
         int w0 = xrefFormat.getInt(0);
         int w1 = xrefFormat.getInt(1);
         int w2 = xrefFormat.getInt(2);
+        if (w0 < 0 || w0 > 8 || w1 < 1 || w1 > 8 || w2 < 0 || w2 > 8)
+        {
+            throw new IOException(
+                    String.format("Invalid /W widths [%d %d %d] in xref stream", w0, w1, w2));
+        }
         int lineSize = w0 + w1 + w2;
         try (InputStream stream = xrefStream.getUnfilteredStream())
         {
             OfLong objectIds = objectNumbers.iterator();
-            while (stream.available() > 0 && objectIds.hasNext())
+            byte[] currLine = new byte[lineSize];
+            while (objectIds.hasNext())
             {
-
                 Long objectId = objectIds.next();
-                byte[] currLine = new byte[lineSize];
-                stream.read(currLine);
+                int bytesRead = stream.readNBytes(currLine, 0, lineSize);
+                if (bytesRead < lineSize)
+                {
+                    LOG.warn("Xref stream ended prematurely at object {}", objectId);
+                    break;
+                }
                 int type = (w0 == 0) ? 1 : 0;
                 int i = 0;
                 /*
