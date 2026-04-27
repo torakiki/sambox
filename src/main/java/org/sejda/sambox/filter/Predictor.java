@@ -15,6 +15,8 @@
  */
 package org.sejda.sambox.filter;
 
+import static org.sejda.commons.util.RequireUtils.requireIOCondition;
+
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -236,6 +238,7 @@ public final class Predictor
      * given stream. If no predictor is specified, the original stream is returned.
      */
     static OutputStream wrapPredictor(OutputStream out, COSDictionary decodeParams)
+            throws IOException
     {
         int predictor = decodeParams.getInt(COSName.PREDICTOR);
         if (predictor > 1)
@@ -276,9 +279,24 @@ public final class Predictor
         private boolean predictorRead = false;
 
         PredictorOutputStream(OutputStream out, int predictor, int colors, int bitsPerComponent,
-                int columns)
+                int columns) throws IOException
         {
             super(out);
+            requireIOCondition(columns > 0,
+                    "Invalid /Columns decode parameter, must be positive but found " + columns);
+            requireIOCondition(colors > 0,
+                    "Invalid /Colors decode parameter, , must be positive but found " + colors);
+            requireIOCondition(
+                    bitsPerComponent == 1 || bitsPerComponent == 2 || bitsPerComponent == 4
+                            || bitsPerComponent == 8 || bitsPerComponent == 16,
+                    "Invalid /BitsPerComponent decode parameter, must be 1, 2, 4, 8 or 16 but found "
+                            + bitsPerComponent);
+            // Guard against int overflow in calculateRowLength: (columns * colors * bitsPerComponent + 7) / 8
+            // With colors <= 32 and bitsPerComponent <= 16, max product is 2^31 * 32 * 16 + 7, fits in long.
+            long rowLengthBits = (long) columns * colors * bitsPerComponent + 7L;
+            requireIOCondition(rowLengthBits <= Integer.MAX_VALUE,
+                    "Predictor row length overflows int architectural limits: columns=" + columns
+                            + ", colors=" + colors + ", bitsPerComponent=" + bitsPerComponent);
             this.predictor = predictor;
             this.colors = colors;
             this.bitsPerComponent = bitsPerComponent;
