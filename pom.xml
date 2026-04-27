@@ -55,16 +55,16 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.javadoc.failOnError>false</maven.javadoc.failOnError>
-        <bouncycastle.version>1.83</bouncycastle.version>
-        <fontbox.version>2.0.35</fontbox.version>
+        <bouncycastle.version>1.84</bouncycastle.version>
+        <fontbox.version>2.0.36</fontbox.version>
         <xmpbox.version>3.0.7</xmpbox.version>
         <sejda.commons.version>3.0.1</sejda.commons.version>
         <sejda.io.version>5.0.0.M1</sejda.io.version>
         <slf4j.version>2.0.17</slf4j.version>
         <diffutils.version>4.16</diffutils.version>
-        <mockito.version>5.22.0</mockito.version>
+        <mockito.version>5.23.0</mockito.version>
         <tinylog.version>2.7.0</tinylog.version>
-        <archunit.version>1.4.1</archunit.version>
+        <archunit.version>1.4.2</archunit.version>
         <hamcrest.version>3.0</hamcrest.version>
         <junit.version>5.14.3</junit.version>
         <jbig2imageio.version>3.0.4</jbig2imageio.version>
