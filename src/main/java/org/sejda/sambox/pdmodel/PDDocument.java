@@ -556,9 +556,9 @@ public class PDDocument implements Closeable
      *     {@code document.withPreSaveVisitor(visitor).writeTo(file, options);}
      * </pre>
      */
-    public PDDocument withPreSaveVisitor(PreSaveCOSVisitor transformer)
+    public PDDocument withPreSaveVisitor(PreSaveCOSVisitor preSaveCOSVisitor)
     {
-        this.preSaveCOSVisitor = transformer;
+        this.preSaveCOSVisitor = preSaveCOSVisitor;
         return this;
     }
 
