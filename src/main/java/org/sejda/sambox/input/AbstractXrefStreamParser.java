@@ -49,6 +49,8 @@ abstract class AbstractXrefStreamParser
     private static final Logger LOG = LoggerFactory.getLogger(AbstractXrefStreamParser.class);
     // Upper bound on objects in a single xref stream to prevent OOM via crafted /Index or /Size entries
     private static final int MAX_XREF_ENTRIES = 24_000_000;
+    // PDF 32000-1 §7.5.4: maximum generation number is 65535.
+    private static final long MAX_GENERATION = 65_535L;
 
     private final COSParser parser;
 
@@ -125,11 +127,10 @@ abstract class AbstractXrefStreamParser
         int w0 = xrefFormat.getInt(0);
         int w1 = xrefFormat.getInt(1);
         int w2 = xrefFormat.getInt(2);
-        if (w0 < 0 || w0 > 8 || w1 < 1 || w1 > 8 || w2 < 0 || w2 > 8)
-        {
-            throw new IOException(
-                    String.format("Invalid /W widths [%d %d %d] in xref stream", w0, w1, w2));
-        }
+        // we cap at 8 bytes, the bytes needed to decode a long
+        requireIOCondition(w0 >= 0 && w0 <= 8 && w1 >= 1 && w1 <= 8 && w2 >= 0 && w2 <= 8,
+                "Invalid /W widths [" + w0 + " " + w1 + " " + w2
+                        + "], expected w0 in [0,8], w1 in [1,8], w2 in [0,8]");
         int lineSize = w0 + w1 + w2;
         try (InputStream stream = xrefStream.getUnfilteredStream())
         {
@@ -137,42 +138,46 @@ abstract class AbstractXrefStreamParser
             byte[] currLine = new byte[lineSize];
             while (objectIds.hasNext())
             {
-                Long objectId = objectIds.next();
+                long objectId = objectIds.nextLong();
                 int bytesRead = stream.readNBytes(currLine, 0, lineSize);
                 if (bytesRead < lineSize)
                 {
                     LOG.warn("Xref stream ended prematurely at object {}", objectId);
                     break;
                 }
-                int type = (w0 == 0) ? 1 : 0;
-                int i = 0;
-                /*
-                 * Grabs the number of bytes specified for the first column in the W array and stores it.
-                 */
-                for (i = 0; i < w0; i++)
+                // PDF 32000-1 Table 17: when /W[0] is 0, the type field is omitted and defaults to 1 (in-use).
+                long type = (w0 == 0) ? 1 : decodeField(currLine, 0, w0);
+                long field1 = decodeField(currLine, w0, w1);
+                long field2 = decodeField(currLine, w0 + w1, w2);
+                if (type == 0 && field2 <= MAX_GENERATION)
                 {
-                    type += (currLine[i] & 0x00ff) << ((w0 - i - 1) * 8);
+                    onEntryFound(XrefEntry.freeEntry(objectId, (int) field2));
                 }
-                int field1 = 0;
-                for (i = 0; i < w1; i++)
+                else if (type == 1 && field2 <= MAX_GENERATION)
                 {
-                    field1 += (currLine[i + w0] & 0x00ff) << ((w1 - i - 1) * 8);
+                    onEntryFound(XrefEntry.inUseEntry(objectId, field1, (int) field2));
                 }
-                int field2 = 0;
-                for (i = 0; i < w2; i++)
+                else if (type == 2)
                 {
-                    field2 += (currLine[i + w0 + w1] & 0x00ff) << ((w2 - i - 1) * 8);
+                    onEntryFound(CompressedXrefEntry.compressedEntry(objectId, field1, field2));
                 }
-                switch (type)
+                else
                 {
-                case 0 -> onEntryFound(XrefEntry.freeEntry(objectId, field2));
-                case 1 -> onEntryFound(XrefEntry.inUseEntry(objectId, field1, field2));
-                case 2 ->
-                        onEntryFound(CompressedXrefEntry.compressedEntry(objectId, field1, field2));
-                default -> LOG.warn("Unknown xref entry type " + type);
+                    LOG.warn("Discarding xref entry at object {}: type={}, field1={}, field2={}",
+                            objectId, type, field1, field2);
                 }
             }
         }
+    }
+
+    private static long decodeField(byte[] data, int start, int length)
+    {
+        long value = 0L;
+        for (int i = 0; i < length; i++)
+        {
+            value |= ((long) data[start + i] & 0xff) << ((length - i - 1) * 8);
+        }
+        return value;
     }
 
     COSParser parser()
