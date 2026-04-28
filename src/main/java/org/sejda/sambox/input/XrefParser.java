@@ -55,9 +55,10 @@ class XrefParser
     private static final String STARTXREF = "startxref";
 
     private FileTrailer trailer = new FileTrailer();
-    private AbstractXrefStreamParser xrefStreamParser;
-    private AbstractXrefTableParser xrefTableParser;
-    private COSParser parser;
+    private final AbstractXrefStreamParser xrefStreamParser;
+    private final AbstractXrefTableParser xrefTableParser;
+    private final COSParser parser;
+    private final HashSet<Long> catalogSeenOffsets = new HashSet<>();
 
     public XrefParser(COSParser parser)
     {
@@ -98,8 +99,6 @@ class XrefParser
             }
         };
     }
-    
-    private HashSet<Long> catalogSeenOffsets = new HashSet<>();
 
     /**
      * parse the xref using the given parser.
@@ -308,9 +307,7 @@ class XrefParser
     }
 
     /**
-     * @param xrefOffset
      * @return true if the given offset points to an xref table or and xref stream
-     * @throws IOException
      */
     private boolean isValidXrefOffset(long xrefOffset) throws IOException
     {
@@ -323,9 +320,7 @@ class XrefParser
     }
 
     /**
-     * @param xrefStreamOffset
      * @return true if the given offset points to a valid xref stream
-     * @throws IOException
      */
     private boolean isValidXrefStreamOffset(long xrefStreamOffset) throws IOException
     {

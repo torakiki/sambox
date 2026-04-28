@@ -79,7 +79,6 @@ public class XrefEntry
     }
 
     /**
-     * @param entry
      * @return true if the given input entry is part of an object stream and this is the entry representing that object
      * stream.
      */
@@ -147,9 +146,6 @@ public class XrefEntry
     /**
      * Factory method for an in use xref table/stream entry
      * 
-     * @param objectNumber
-     * @param byteOffset
-     * @param generationNumber
      * @return the newly created instance
      */
     public static XrefEntry inUseEntry(long objectNumber, long byteOffset, int generationNumber)
@@ -160,8 +156,6 @@ public class XrefEntry
     /**
      * Factory method for an in use xref table/stream entry with unknown offset
      * 
-     * @param objectNumber
-     * @param generationNumber
      * @return the newly created instance
      */
     public static XrefEntry unknownOffsetEntry(long objectNumber, int generationNumber)
@@ -172,8 +166,6 @@ public class XrefEntry
     /**
      * Factory method for a free xref tabe/stream entry
      * 
-     * @param objectNumber
-     * @param generationNumber
      * @return the newly created instance
      */
     public static XrefEntry freeEntry(long objectNumber, int generationNumber)
