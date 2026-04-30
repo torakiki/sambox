@@ -562,6 +562,14 @@ public class PDPageTree implements COSObjectable, Iterable<PDPage>
         }
 
         COSArray kids = parent.getDictionaryObject(COSName.KIDS, COSArray.class);
+
+        if (kids == null)
+        {
+            // broken node with missing KIDS, use the parent known from traversing the page tree
+            parent = knownParent;
+            kids = parent.getDictionaryObject(COSName.KIDS, COSArray.class);
+        }
+
         if (kids.removeObject(node))
         {
             // update ancestor counts
