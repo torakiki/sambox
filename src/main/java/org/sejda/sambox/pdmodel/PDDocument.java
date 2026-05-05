@@ -550,8 +550,10 @@ public class PDDocument implements Closeable
     }
 
     /**
-     * Sets the {@link PreSaveCOSVisitor} for this PDDocument object. This component is responsible
-     * for visiting COSBase objects before they are written to the output. The intended use is
+     * Sets the {@link PreSaveCOSVisitor} for this PDDocument object. The visitor is called during
+     * the document graph traversal, before indirect object references are allocated. This means
+     * that entries removed by the visitor are never queued for writing and never appear in the
+     * output. The intended use is
      * <pre>
      *     {@code document.withPreSaveVisitor(visitor).writeTo(file, options);}
      * </pre>

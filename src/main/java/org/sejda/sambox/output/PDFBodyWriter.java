@@ -41,13 +41,14 @@ import org.sejda.sambox.input.ExistingIndirectCOSObject;
 import org.sejda.sambox.input.IncrementablePDDocument;
 
 /**
- * Base component providing methods to write the body of a pdf document. This implementation starts from the document
- * trailer and visits the whole document graph updating the {@link PDFWriteContext}. An
- * {@link IndirectCOSObjectReference} is created by the context for each {@link COSDictionary} and
- * {@link ExistingIndirectCOSObject}, if not previously created. Once all the values of a {@link COSDictionary} or
- * {@link COSArray} have been explored, the {@link COSDictionary}/ {@link COSArray} is written as a pdf object, this
- * allows an async implementation to write objects while the body writer is still performing its algorithm.
- * 
+ * Base component providing methods to write the body of a pdf document. This implementation starts
+ * from the document trailer and visits the whole document graph updating the
+ * {@link PDFWriteContext}. An {@link IndirectCOSObjectReference} is created by the context for each
+ * {@link COSDictionary} and {@link ExistingIndirectCOSObject}, if not previously created. Once all
+ * the values of a {@link COSDictionary} or {@link COSArray} have been explored, the
+ * {@link COSDictionary}/ {@link COSArray} is written as a pdf object, this allows an async
+ * implementation to write objects while the body writer is still performing its algorithm.
+ *
  * @author Andrea Vacondio
  */
 class PDFBodyWriter implements COSVisitor, Closeable
@@ -76,7 +77,10 @@ class PDFBodyWriter implements COSVisitor, Closeable
     public void write(IncrementablePDDocument document) throws IOException
     {
         requireState(open, "The writer is closed");
-        document.newIndirects().forEach(o -> stack.add(context.getOrCreateIndirectReferenceFor(o)));
+        for (COSBase newIndirect : document.newIndirects())
+        {
+            stack.add(context.getOrCreateIndirectReferenceFor(context.maybeTransform(newIndirect)));
+        }
         document.trailer().getCOSObject().accept(this);
         stack.addAll(document.replacements());
         startWriting();
@@ -94,13 +98,21 @@ class PDFBodyWriter implements COSVisitor, Closeable
     @Override
     public void visit(COSDocument document) throws IOException
     {
+        context.maybeTransform(document.getTrailer().getCOSObject());
         for (COSName k : Arrays.asList(COSName.ROOT, COSName.ENCRYPT))
         {
-            ofNullable(document.getTrailer().getCOSObject().getItem(k)).ifPresent(
-                    r -> stack.add(context.createNonStorableInObjectStreamIndirectReferenceFor(r)));
+            var item = document.getTrailer().getCOSObject().getItem(k);
+            if (nonNull(item))
+            {
+                stack.add(context.createNonStorableInObjectStreamIndirectReferenceFor(
+                        context.maybeTransform(item)));
+            }
         }
-        ofNullable(document.getTrailer().getCOSObject().getItem(COSName.INFO))
-                .ifPresent(this::createIndirectReferenceIfNeededFor);
+        var info = document.getTrailer().getCOSObject().getItem(COSName.INFO);
+        if (nonNull(info))
+        {
+            createIndirectReferenceIfNeededFor(info);
+        }
         startWriting();
     }
 
@@ -130,7 +142,7 @@ class PDFBodyWriter implements COSVisitor, Closeable
             }
             else
             {
-                item.accept(this);
+                context.maybeTransform(item).accept(this);
             }
         }
     }
@@ -147,7 +159,7 @@ class PDFBodyWriter implements COSVisitor, Closeable
             }
             else
             {
-                item.accept(this);
+                context.maybeTransform(item).accept(this);
             }
         }
     }
@@ -183,19 +195,19 @@ class PDFBodyWriter implements COSVisitor, Closeable
     }
 
     /**
-     * Called during the visit on the objects graph, when a potential indirect object is met. Default implementation
-     * creates a new indirect reference for it.
+     * Called during the visit on the objects graph, when a potential indirect object is met.
+     * Default implementation creates a new indirect reference for it.
      */
     public void onPotentialIndirectObject(COSBase item) throws IOException
     {
         createIndirectReferenceIfNeededFor(item);
     }
 
-    final void createIndirectReferenceIfNeededFor(COSBase item)
+    final void createIndirectReferenceIfNeededFor(COSBase item) throws IOException
     {
         if (!context.hasIndirectReferenceFor(item))
         {
-            stack.add(context.createIndirectReferenceFor(item));
+            stack.add(context.createIndirectReferenceFor(context.maybeTransform(item)));
         }
     }
 

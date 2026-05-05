@@ -211,7 +211,7 @@ public class PDFBodyWriterTest
     }
 
     @Test
-    public void createIndirectReferenceIfNeededFor()
+    public void createIndirectReferenceIfNeededFor() throws IOException
     {
         COSDictionary dic = new COSDictionary();
         dic.idIfAbsent(new IndirectCOSObjectIdentifier(new COSObjectKey(20, 0), "ff"));
@@ -220,7 +220,7 @@ public class PDFBodyWriterTest
     }
 
     @Test
-    public void noCreateIndirectReferenceIfNeededFor()
+    public void noCreateIndirectReferenceIfNeededFor() throws IOException
     {
         COSDictionary dic = new COSDictionary();
         dic.idIfAbsent(new IndirectCOSObjectIdentifier(new COSObjectKey(20, 0), "ff"));
@@ -228,5 +228,62 @@ public class PDFBodyWriterTest
         verify(context, times(1)).createIndirectReferenceFor(dic);
         victim.createIndirectReferenceIfNeededFor(dic);
         verify(context, times(1)).createIndirectReferenceFor(dic);
+    }
+
+    @Test
+    public void preSaveCOSVisitorCalledForTrailer() throws IOException
+    {
+        var visitor = mock(PreSaveCOSVisitor.class);
+        var testVictim = new PDFBodyWriter(new PDFWriteContext(null, visitor), writer);
+        testVictim.write(document.getDocument());
+        verify(visitor).visit(document.getDocument().getTrailer().getCOSObject());
+    }
+
+    @Test
+    public void preSaveCOSVisitorCalledForDictionary() throws IOException
+    {
+        var visitor = mock(PreSaveCOSVisitor.class);
+        var dict = of(COSName.TYPE, COSName.FONT);
+        document.getDocument().getCatalog().setItem(COSName.W, dict);
+        var testVictim = new PDFBodyWriter(new PDFWriteContext(null, visitor), writer);
+        testVictim.write(document.getDocument());
+        verify(visitor).visit(dict);
+    }
+
+    @Test
+    public void preSaveCOSVisitorCalledForArray() throws IOException
+    {
+        var visitor = mock(PreSaveCOSVisitor.class);
+        var array = new COSArray(COSName.FONT, COSName.FORM);
+        document.getDocument().getCatalog().setItem(COSName.W, array);
+        var testVictim = new PDFBodyWriter(new PDFWriteContext(null, visitor), writer);
+        testVictim.write(document.getDocument());
+        verify(visitor).visit(array);
+    }
+
+    @Test
+    @DisplayName("Direct items in a dictionary are visited by the pre-save visitor")
+    public void preSaveCOSVisitorCalledForDirectItemInDictionary() throws IOException
+    {
+        var visitor = mock(PreSaveCOSVisitor.class);
+        var integer = COSInteger.get(1000);
+        var dict = of(COSName.SIZE, integer);
+        document.getDocument().getCatalog().setItem(COSName.W, dict);
+        var testVictim = new PDFBodyWriter(new PDFWriteContext(null, visitor), writer);
+        testVictim.write(document.getDocument());
+        verify(visitor).visit(integer);
+    }
+
+    @Test
+    @DisplayName("Direct items in an array are visited by the pre-save visitor")
+    public void preSaveCOSVisitorCalledForDirectItemInArray() throws IOException
+    {
+        var visitor = mock(PreSaveCOSVisitor.class);
+        var integer = COSInteger.get(42);
+        var array = new COSArray(integer);
+        document.getDocument().getCatalog().setItem(COSName.W, array);
+        var testVictim = new PDFBodyWriter(new PDFWriteContext(null, visitor), writer);
+        testVictim.write(document.getDocument());
+        verify(visitor).visit(integer);
     }
 }

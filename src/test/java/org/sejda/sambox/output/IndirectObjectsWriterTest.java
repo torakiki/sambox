@@ -23,24 +23,17 @@ import static org.mockito.AdditionalMatchers.aryEq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.sejda.sambox.cos.COSDictionary.of;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
 import org.sejda.io.BufferedCountingChannelWriter;
-import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSBoolean;
-import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSInteger;
-import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSNull;
-import org.sejda.sambox.cos.COSString;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
 
 /**
@@ -96,7 +89,6 @@ public class IndirectObjectsWriterTest
         inOrder.verify(writer).writeEOL();
         inOrder.verify(writer).write(aryEq("endobj".getBytes(StandardCharsets.US_ASCII)));
         inOrder.verify(writer).writeEOL();
-        verify(transformer).visit(hundreds);
         assertEquals(12345, ref.xrefEntry().getByteOffset());
     }
 
@@ -130,51 +122,5 @@ public class IndirectObjectsWriterTest
         victim.writeObjectIfNotWritten(ref);
         victim.writeObjectIfNotWritten(ref);
         verify(writer).write("123");
-    }
-
-    @Test
-    public void writerCOSBoolean() throws IOException
-    {
-        IndirectCOSObjectReference ref = new IndirectCOSObjectReference(123, 0, COSBoolean.TRUE);
-        victim.writeObjectIfNotWritten(ref);
-        verify(transformer).visit(COSBoolean.TRUE);
-    }
-
-    @Test
-    public void writerCOSString() throws IOException
-    {
-        var cosString = COSString.parseLiteral("test");
-        IndirectCOSObjectReference ref = new IndirectCOSObjectReference(123, 0, cosString);
-        victim.writeObjectIfNotWritten(ref);
-        verify(transformer).visit(cosString);
-    }
-
-    @Test
-    public void writerCOSDictionary() throws IOException
-    {
-        var cosDictionary = of(COSName.SIZE, COSInteger.get(1000));
-        IndirectCOSObjectReference ref = new IndirectCOSObjectReference(123, 0, cosDictionary);
-        victim.writeObjectIfNotWritten(ref);
-        verify(transformer).visit(cosDictionary);
-    }
-
-    @Test
-    public void writerCOSArray() throws IOException
-    {
-        var cosArray = new COSArray(new COSDictionary());
-        IndirectCOSObjectReference ref = new IndirectCOSObjectReference(123, 0, cosArray);
-        victim.writeObjectIfNotWritten(ref);
-        verify(transformer).visit(cosArray);
-    }
-
-    @Test
-    @DisplayName("Direct objects are visited")
-    public void writerDirectInteger() throws IOException
-    {
-        var cosInteger = COSInteger.get(1000);
-        var cosDictionary = of(COSName.SIZE, cosInteger);
-        IndirectCOSObjectReference ref = new IndirectCOSObjectReference(123, 0, cosDictionary);
-        victim.writeObjectIfNotWritten(ref);
-        verify(transformer).visit(cosInteger);
     }
 }

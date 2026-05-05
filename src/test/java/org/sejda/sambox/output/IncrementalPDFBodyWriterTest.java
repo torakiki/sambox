@@ -16,11 +16,13 @@
  */
 package org.sejda.sambox.output;
 
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 
@@ -49,10 +51,11 @@ public class IncrementalPDFBodyWriterTest
     private PDFBodyObjectsWriter writer;
 
     @Before
-    public void setUp()
+    public void setUp() throws IOException
     {
         writer = mock(PDFBodyObjectsWriter.class);
         context = mock(PDFWriteContext.class);
+        when(context.maybeTransform(any())).then(returnsFirstArg());
         victim = new IncrementalPDFBodyWriter(context, writer);
     }
 
@@ -74,7 +77,7 @@ public class IncrementalPDFBodyWriterTest
     }
 
     @Test
-    public void createIndirectReferenceIfNeededFor()
+    public void createIndirectReferenceIfNeededFor() throws IOException
     {
         COSDictionary ref = new COSDictionary();
         victim.createIndirectReferenceIfNeededFor(ref);

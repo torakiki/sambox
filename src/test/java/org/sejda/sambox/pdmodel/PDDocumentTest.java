@@ -438,7 +438,7 @@ public class PDDocumentTest
             document.withPreSaveVisitor(new PreSaveCOSVisitor()
             {
                 @Override
-                public void visit(COSDictionary value) throws IOException
+                public void visit(COSDictionary value)
                 {
                     if (COSName.CATALOG.equals(value.getCOSName(COSName.TYPE)))
                     {

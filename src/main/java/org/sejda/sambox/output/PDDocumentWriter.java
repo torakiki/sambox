@@ -122,16 +122,15 @@ public class PDDocumentWriter implements Closeable
 
     private void writeXref(PDDocument document) throws IOException
     {
-        var trailer = context.maybeTransform(document.getDocument().getTrailer().getCOSObject());
         if (context.hasWriteOption(WriteOption.XREF_STREAM) || context.hasWriteOption(
                 WriteOption.OBJECT_STREAMS))
         {
-            writer.writeXrefStream(trailer);
+            writer.writeXrefStream(document.getDocument().getTrailer().getCOSObject());
         }
         else
         {
             long startxref = writer.writeXrefTable();
-            writer.writeTrailer(trailer, startxref);
+            writer.writeTrailer(document.getDocument().getTrailer().getCOSObject(), startxref);
         }
     }
 
