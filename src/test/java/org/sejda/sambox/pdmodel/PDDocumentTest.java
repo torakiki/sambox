@@ -17,6 +17,7 @@
 package org.sejda.sambox.pdmodel;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -452,6 +453,34 @@ public class PDDocumentTest
         {
             assertNull(
                     outputDoc.getDocumentCatalog().getCOSObject().getCOSName(COSName.PAGE_LAYOUT));
+        }
+    }
+
+    @Test
+    public void testNoDanglingXrefEntryWithPreSaveVisitor(@TempDir Path tmp) throws IOException
+    {
+        var output = Files.createTempFile(tmp, "", ".pdf").toFile();
+        try (PDDocument document = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/page-and-font-metadata.pdf"))))
+        {
+            document.withPreSaveVisitor(new PreSaveCOSVisitor()
+            {
+                @Override
+                public void visit(COSDictionary value) throws IOException
+                {
+                    value.removeItem(COSName.METADATA);
+                }
+            }).writeTo(output);
+        }
+        try (var outputDoc = PDFParser.parse(SeekableSources.seekableSourceFrom(output)))
+        {
+            assertNull(outputDoc.getPage(0).getCOSObject().getDictionaryObject(COSName.METADATA));
+            outputDoc.inspect(cos -> {
+                if (cos.getCOSObject() instanceof COSDictionary d)
+                {
+                    assertFalse(d.containsKey(COSName.METADATA));
+                }
+            });
         }
     }
 }
