@@ -475,7 +475,7 @@ public class PDDocumentTest
         try (var outputDoc = PDFParser.parse(SeekableSources.seekableSourceFrom(output)))
         {
             assertNull(outputDoc.getPage(0).getCOSObject().getDictionaryObject(COSName.METADATA));
-            outputDoc.inspect(cos -> {
+            outputDoc.inspectAll(cos -> {
                 if (cos.getCOSObject() instanceof COSDictionary d)
                 {
                     assertFalse(d.containsKey(COSName.METADATA));

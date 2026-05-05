@@ -26,11 +26,12 @@ import org.sejda.sambox.xref.Xref;
 import org.sejda.sambox.xref.XrefEntry;
 
 /**
- * Component providing {@link COSBase} objects for given keys. It's used when an indirect reference is asked to resolve
- * to the actual COS object. This component is populated during the xref parsing process by adding {@link XrefEntry}s
- * found in the xref table/stream, it's then initialized with {@link COSParser} to use to parse and retrieve requested
- * objects and the {@link SecurityHandler} required (if any) to decrypt streams and string.
- * 
+ * Component providing {@link COSBase} objects for given keys. It's used when an indirect reference
+ * is asked to resolve to the actual COS object. This component is populated during the xref parsing
+ * process by adding {@link XrefEntry}s found in the xref table/stream, it's then initialized with
+ * {@link COSParser} to use to parse and retrieve requested objects and the {@link SecurityHandler}
+ * required (if any) to decrypt streams and string.
+ *
  * @author Andrea Vacondio
  *
  */
@@ -44,35 +45,37 @@ public interface IndirectObjectsProvider extends Closeable
     COSBase get(COSObjectKey key);
 
     /**
-     * Signals that the object corresponding to the given key is no longer needed and can be released
-     * 
+     * Signals that the object corresponding to the given key is no longer needed and can be
+     * released
+     *
      * @param key
      */
     void release(COSObjectKey key);
 
     /**
      * Adds the given xref entry to the {@link Xref} if absent
-     * 
+     *
      * @param entry
-     * @return null if the entry was added. The current entry with the given object number and generation if the entry
-     * was already present.
+     * @return null if the entry was added. The current entry with the given object number and
+     * generation if the entry was already present.
      * @see Xref#addIfAbsent(XrefEntry)
      */
     XrefEntry addEntryIfAbsent(XrefEntry entry);
 
     /**
      * Adds the given xref entry to the {@link Xref}
-     * 
+     *
      * @param entry
-     * @return the previous value or null if no entry was previously associated to the given object number and
-     * generation.
+     * @return the previous value or null if no entry was previously associated to the given object
+     * number and generation.
      * @see Xref#add(XrefEntry)
      */
     XrefEntry addEntry(XrefEntry entry);
 
     /**
-     * Initialize the component with the {@link COSParser} to use to retrieve and parse requested object
-     * 
+     * Initialize the component with the {@link COSParser} to use to retrieve and parse requested
+     * object
+     *
      * @param parser
      * @return this provider
      */
@@ -80,7 +83,7 @@ public interface IndirectObjectsProvider extends Closeable
 
     /**
      * Initialize the component with the {@link SecurityHandler} to decrypt streams and strings.
-     * 
+     *
      * @param handler
      * @return this provider
      */
@@ -97,9 +100,13 @@ public interface IndirectObjectsProvider extends Closeable
     String id();
 
     /**
-     * Inspects all the currently loaded objects with the provided consumer.
-     *
-     * @param inspector
+     * Inspects all the objects already loaded by this provider.
      */
     void inspect(Consumer<COSBase> inspector);
+
+    /**
+     * Inspects all the objects associated to this provider. Every key available in the Xref is
+     * loaded and the corresponding object passed to the inspector.
+     */
+    void inspectAll(Consumer<COSBase> inspector);
 }

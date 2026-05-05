@@ -304,7 +304,7 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
                 streamParser.position(entry.getKey());
                 if (streamParser.skipTokenIfValue(OBJ))
                 {
-                    LOG.warn("Unexpected 'obj' token in objects stream");
+                    LOG.warn("Unexptected 'obj' token in objects stream");
                 }
                 COSBase object = streamParser.nextParsedToken();
                 if (object != null)
@@ -357,6 +357,14 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
     public void inspect(Consumer<COSBase> inspector)
     {
         store.values().forEach(inspector::accept);
+    }
+
+    @Override
+    public void inspectAll(Consumer<COSBase> inspector)
+    {
+        xref.values().stream().map(XrefEntry::key).forEach(k -> {
+            inspector.accept(get(k));
+        });
     }
 
 }

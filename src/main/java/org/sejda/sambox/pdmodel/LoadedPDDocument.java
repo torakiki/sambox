@@ -30,8 +30,8 @@ import org.sejda.sambox.input.IndirectObjectsProvider;
 import org.sejda.sambox.pdmodel.encryption.SecurityHandler;
 
 /**
- * PDDocument created from an existing PDF document and allowing to inspect all the COSBase instances
- * associated with it.
+ * PDDocument created from an existing PDF document and allowing to inspect all the COSBase
+ * instances associated with it.
  *
  * @author Andrea Vacondio
  */
@@ -49,14 +49,24 @@ public class LoadedPDDocument extends PDDocument
     }
 
     /**
-     * Allows the consumer to inspect all the COSBase instances associated with this document. A use
-     * case is if you want to un-decode all the COSStream in this document to free memory, but you
-     * want to keep the document open.
+     * Allows the consumer to inspect all the COSBase instances associated with this document and
+     * currently loaded. A use case is if you want to un-decode all the loaded COSStream in this
+     * document to free memory, but you want to keep the document open.
      */
     public void inspect(Consumer<COSBase> inspector)
     {
         requireNotNullArg(inspector, "Inspector cannot be null");
         provider.inspect(inspector);
+    }
+
+    /**
+     * Allows the consumer to inspect all the COSBase instances associated with this document. It
+     * takes the xref and loads every indirect object to be inspected.
+     */
+    public void inspectAll(Consumer<COSBase> inspector)
+    {
+        requireNotNullArg(inspector, "Inspector cannot be null");
+        provider.inspectAll(inspector);
     }
 
     @Override
