@@ -106,4 +106,38 @@ public class IncrementalPDFBodyWriterTest
         }
         verify(writer, times(2)).writeObject(any());
     }
+
+    @Test
+    public void preSaveCOSVisitorCalledForTrailerInIncrementalWrite() throws Exception
+    {
+        try (IncrementablePDDocument incrementable = PDFParser.parseToIncrement(
+                SeekableSources.inMemorySeekableSourceFrom(
+                        getClass().getResourceAsStream("/sambox/simple_test.pdf"))))
+        {
+            var visitor = mock(PreSaveCOSVisitor.class);
+            victim = new IncrementalPDFBodyWriter(
+                    new PDFWriteContext(incrementable.highestExistingReference().objectNumber(),
+                            null, visitor), writer);
+            victim.write(incrementable);
+            verify(visitor).visit(incrementable.trailer().getCOSObject());
+        }
+    }
+
+    @Test
+    public void preSaveCOSVisitorCalledForReplacementInIncrementalWrite() throws Exception
+    {
+        try (IncrementablePDDocument incrementable = PDFParser.parseToIncrement(
+                SeekableSources.inMemorySeekableSourceFrom(
+                        getClass().getResourceAsStream("/sambox/simple_test.pdf"))))
+        {
+            var visitor = mock(PreSaveCOSVisitor.class);
+            victim = new IncrementalPDFBodyWriter(
+                    new PDFWriteContext(incrementable.highestExistingReference().objectNumber(),
+                            null, visitor), writer);
+            PDPage page = incrementable.incremented().getPage(0);
+            incrementable.modified(page);
+            victim.write(incrementable);
+            verify(visitor).visit(page.getCOSObject());
+        }
+    }
 }

@@ -25,9 +25,6 @@ import org.sejda.sambox.cos.COSVisitor;
  * traversal, before indirect object references are allocated. Mutations made here (e.g. dictionary
  * entries removed or modified) are reflected in the written output: removed values are never
  * allocated a reference and never appear in the xref table.
- * <p>
- * Implementations must be idempotent: objects reachable through multiple parents in the graph may
- * be visited more than once.
  *
  * @author Andrea Vacondio
  */

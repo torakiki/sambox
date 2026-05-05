@@ -81,8 +81,12 @@ class PDFBodyWriter implements COSVisitor, Closeable
         {
             stack.add(context.getOrCreateIndirectReferenceFor(context.maybeTransform(newIndirect)));
         }
-        document.trailer().getCOSObject().accept(this);
-        stack.addAll(document.replacements());
+        context.maybeTransform(document.trailer().getCOSObject()).accept(this);
+        for (IndirectCOSObjectReference replacement : document.replacements())
+        {
+            context.maybeTransform(replacement.getCOSObject());
+            stack.add(replacement);
+        }
         startWriting();
     }
 

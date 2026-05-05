@@ -132,11 +132,11 @@ public class IncrementablePDDocument implements Closeable
      * Adds the given object as modified, this object will be written as part of the incremental
      * update.
      *
-     * @return true if the {@link COSBase} was added, false if not. In case where false is returned,
-     * the {@link COSBase} doesn't have an id, meaning it's not written as indirect object in the
-     * original document but it's written as direct object. In this case we have to call
-     * {@link IncrementablePDDocument#modified(COSBase)} on the first indirect parent because
-     * incremental updates are meant to replace indirect references.
+     * @return true if the {@link COSObjectable} was added, false if not. In case where false is
+     * returned, the {@link COSObjectable} doesn't have an id, meaning it's not written as indirect
+     * object in the original document, but it's written as direct object. In this case we have to
+     * call {@link IncrementablePDDocument#modified(COSObjectable)} on the first indirect parent
+     * because incremental updates are meant to replace indirect references.
      */
     public boolean modified(COSObjectable modified)
     {
