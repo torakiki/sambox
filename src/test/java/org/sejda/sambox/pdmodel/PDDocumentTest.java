@@ -466,6 +466,12 @@ public class PDDocumentTest
             document.withPreSaveVisitor(new PreSaveCOSVisitor()
             {
                 @Override
+                public void visit(COSStream value) throws IOException
+                {
+                    value.removeItem(COSName.METADATA);
+                }
+
+                @Override
                 public void visit(COSDictionary value) throws IOException
                 {
                     value.removeItem(COSName.METADATA);
