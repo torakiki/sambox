@@ -272,6 +272,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName HARD_LIGHT = newCommonInstance("HardLight");
     public static final COSName HEIGHT = newCommonInstance("Height");
     public static final COSName HELV = newCommonInstance("Helv");
+    public static final COSName HIDE = newCommonInstance("Hide");
     public static final COSName HIDE_MENUBAR = newCommonInstance("HideMenubar");
     public static final COSName HIDE_TOOLBAR = newCommonInstance("HideToolbar");
     public static final COSName HIDE_WINDOWUI = newCommonInstance("HideWindowUI");
