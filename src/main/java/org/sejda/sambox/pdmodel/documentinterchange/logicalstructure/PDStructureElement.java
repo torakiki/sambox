@@ -18,6 +18,8 @@ package org.sejda.sambox.pdmodel.documentinterchange.logicalstructure;
 
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
+import static org.sejda.commons.util.RequireUtils.requireArg;
+import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
 
 import java.util.Iterator;
 
@@ -28,6 +30,7 @@ import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.PDPage;
 import org.sejda.sambox.pdmodel.documentinterchange.markedcontent.PDMarkedContent;
+import org.sejda.sambox.pdmodel.documentinterchange.taggedpdf.StandardStructureType;
 
 /**
  * A structure element.
@@ -35,37 +38,34 @@ import org.sejda.sambox.pdmodel.documentinterchange.markedcontent.PDMarkedConten
  * @author Ben Litchfield
  * @author Johannes Koch
  */
-public class PDStructureElement extends PDStructureNode
+public class PDStructureElement extends PDAbstractStructureNode
 {
 
     public static final String TYPE = "StructElem";
 
-    /**
-     * Constructor with required values.
-     *
-     * @param structureType the structure type
-     * @param parent        the parent structure node
-     */
-    public PDStructureElement(String structureType, PDStructureNode parent)
+    public PDStructureElement(StandardStructureType type, PDAbstractStructureNode parent)
     {
-        super(TYPE);
+        this(type.type(), parent);
+    }
+
+    public PDStructureElement(String structureType, PDAbstractStructureNode parent)
+    {
+        this(COSDictionary.of(COSName.TYPE, COSName.getPDFName(TYPE)));
         this.setStructureType(structureType);
         this.setParent(parent);
     }
 
     /**
-     * Constructor for an existing structure element.
-     *
-     * @param dic The existing dictionary.
+     * @param dictionary The existing structure element dictionary.
      */
-    public PDStructureElement(COSDictionary dic)
+    public PDStructureElement(COSDictionary dictionary)
     {
-        super(dic);
+        requireNotNullArg(dictionary, "Dictionary cannot be null");
+        super(dictionary);
+
     }
 
     /**
-     * Returns the structure type (S).
-     *
      * @return the structure type
      */
     public String getStructureType()
@@ -73,45 +73,32 @@ public class PDStructureElement extends PDStructureNode
         return this.getCOSObject().getNameAsString(COSName.S);
     }
 
-    /**
-     * Sets the structure type (S).
-     *
-     * @param structureType the structure type
-     */
     public final void setStructureType(String structureType)
     {
         this.getCOSObject().setName(COSName.S, structureType);
     }
 
     /**
-     * Returns the parent in the structure hierarchy (P).
-     *
      * @return the parent in the structure hierarchy
      */
-    public PDStructureNode getParent()
+    @Override
+    public PDAbstractStructureNode getParent()
     {
-        COSBase base = this.getCOSObject().getDictionaryObject(COSName.P);
-        if (base instanceof COSDictionary)
+        COSDictionary parent = this.getCOSObject()
+                .getDictionaryObject(COSName.P, COSDictionary.class);
+        if (nonNull(parent))
         {
-            return PDStructureNode.create((COSDictionary) base);
+            return PDAbstractStructureNode.create(parent);
         }
-
         return null;
     }
 
-    /**
-     * Sets the parent in the structure hierarchy (P).
-     *
-     * @param structureNode the parent in the structure hierarchy
-     */
-    public final void setParent(PDStructureNode structureNode)
+    public final void setParent(PDAbstractStructureNode structureNode)
     {
         this.getCOSObject().setItem(COSName.P, structureNode);
     }
 
     /**
-     * Returns the element identifier (ID).
-     *
      * @return the element identifier
      */
     public String getElementIdentifier()
@@ -119,49 +106,33 @@ public class PDStructureElement extends PDStructureNode
         return this.getCOSObject().getString(COSName.ID);
     }
 
-    /**
-     * Sets the element identifier (ID).
-     *
-     * @param id the element identifier
-     */
     public void setElementIdentifier(String id)
     {
         this.getCOSObject().setString(COSName.ID, id);
     }
 
     /**
-     * Returns the page on which some or all of the content items designated by the K entry shall be
-     * rendered (Pg).
-     *
      * @return the page on which some or all of the content items designated by the K entry shall be
      * rendered
      */
     public PDPage getPage()
     {
-        COSBase base = this.getCOSObject().getDictionaryObject(COSName.PG);
-        if (base instanceof COSDictionary)
+        COSDictionary page = this.getCOSObject()
+                .getDictionaryObject(COSName.PG, COSDictionary.class);
+        if (nonNull(page))
         {
-            return new PDPage((COSDictionary) base);
+            return new PDPage(page);
         }
         return null;
     }
 
-    /**
-     * Sets the page on which some or all of the content items designated by the K entry shall be
-     * rendered (Pg).
-     *
-     * @param page the page on which some or all of the content items designated by the K entry
-     *             shall be rendered.
-     */
     public void setPage(PDPage page)
     {
         this.getCOSObject().setItem(COSName.PG, page);
     }
 
     /**
-     * Returns the attributes together with their revision numbers (A).
-     *
-     * @return the attributes
+     * @return he attributes together with their revision numbers (A).
      */
     public Revisions<PDAttributeObject> getAttributes()
     {
@@ -174,21 +145,21 @@ public class PDStructureElement extends PDStructureNode
             while (it.hasNext())
             {
                 COSBase item = it.next().getCOSObject();
-                if (item instanceof COSDictionary)
+                if (item instanceof COSDictionary itemDic)
                 {
-                    ao = PDAttributeObject.create((COSDictionary) item);
+                    ao = PDAttributeObject.create(itemDic);
                     ao.setStructureElement(this);
                     attributes.addObject(ao, 0);
                 }
-                else if (item instanceof COSInteger)
+                else if (item instanceof COSInteger itemInt)
                 {
-                    attributes.setRevisionNumber(ao, ((COSInteger) item).intValue());
+                    attributes.setRevisionNumber(ao, itemInt.intValue());
                 }
             }
         }
-        if (a instanceof COSDictionary)
+        if (a instanceof COSDictionary aDic)
         {
-            PDAttributeObject ao = PDAttributeObject.create((COSDictionary) a);
+            PDAttributeObject ao = PDAttributeObject.create(aDic);
             ao.setStructureElement(this);
             attributes.addObject(ao, 0);
         }
@@ -197,8 +168,6 @@ public class PDStructureElement extends PDStructureNode
 
     /**
      * Sets the attributes together with their revision numbers (A).
-     *
-     * @param attributes the attributes
      */
     public void setAttributes(Revisions<PDAttributeObject> attributes)
     {
@@ -308,26 +277,22 @@ public class PDStructureElement extends PDStructureNode
         }
         else
         {
-            COSArray array = new COSArray();
-            array.add(a);
-            array.add(COSInteger.get(this.getRevisionNumber()));
-            this.getCOSObject().setItem(key, array);
+            this.getCOSObject()
+                    .setItem(key, new COSArray(a, COSInteger.get(this.getRevisionNumber())));
         }
     }
 
     /**
-     * Returns the class names together with their revision numbers (C).
-     *
-     * @return the class names
+     * @return the class names together with their revision numbers (C).
      */
     public Revisions<String> getClassNames()
     {
         COSName key = COSName.C;
         Revisions<String> classNames = new Revisions<>();
         COSBase c = this.getCOSObject().getDictionaryObject(key);
-        if (c instanceof COSName)
+        if (c instanceof COSName name)
         {
-            classNames.addObject(((COSName) c).getName(), 0);
+            classNames.addObject(name.getName(), 0);
         }
         if (c instanceof COSArray array)
         {
@@ -336,14 +301,14 @@ public class PDStructureElement extends PDStructureNode
             while (it.hasNext())
             {
                 COSBase item = it.next().getCOSObject();
-                if (item instanceof COSName)
+                if (item instanceof COSName name)
                 {
-                    className = ((COSName) item).getName();
+                    className = name.getName();
                     classNames.addObject(className, 0);
                 }
-                else if (item instanceof COSInteger)
+                else if (item instanceof COSInteger integer)
                 {
-                    classNames.setRevisionNumber(className, ((COSInteger) item).intValue());
+                    classNames.setRevisionNumber(className, integer.intValue());
                 }
             }
         }
@@ -383,11 +348,6 @@ public class PDStructureElement extends PDStructureNode
         this.getCOSObject().setItem(key, array);
     }
 
-    /**
-     * Adds a class name.
-     *
-     * @param className the class name
-     */
     public void addClassName(String className)
     {
         if (className == null)
@@ -397,9 +357,9 @@ public class PDStructureElement extends PDStructureNode
         COSName key = COSName.C;
         COSBase c = this.getCOSObject().getDictionaryObject(key);
         COSArray array;
-        if (c instanceof COSArray)
+        if (c instanceof COSArray a)
         {
-            array = (COSArray) c;
+            array = a;
         }
         else
         {
@@ -415,11 +375,6 @@ public class PDStructureElement extends PDStructureNode
         array.add(COSInteger.get(this.getRevisionNumber()));
     }
 
-    /**
-     * Removes a class name.
-     *
-     * @param className the class name
-     */
     public void removeClassName(String className)
     {
         if (className == null)
@@ -447,8 +402,6 @@ public class PDStructureElement extends PDStructureNode
     }
 
     /**
-     * Returns the revision number (R).
-     *
      * @return the revision number
      */
     public int getRevisionNumber()
@@ -456,17 +409,9 @@ public class PDStructureElement extends PDStructureNode
         return this.getCOSObject().getInt(COSName.R, 0);
     }
 
-    /**
-     * Sets the revision number (R).
-     *
-     * @param revisionNumber the revision number
-     */
     public void setRevisionNumber(int revisionNumber)
     {
-        if (revisionNumber < 0)
-        {
-            throw new IllegalArgumentException("The revision number shall be > -1");
-        }
+        requireArg(revisionNumber >= 0, "The revision number must be >= 0");
         this.getCOSObject().setInt(COSName.R, revisionNumber);
     }
 
@@ -479,8 +424,6 @@ public class PDStructureElement extends PDStructureNode
     }
 
     /**
-     * Returns the title (T).
-     *
      * @return the title
      */
     public String getTitle()
@@ -488,19 +431,12 @@ public class PDStructureElement extends PDStructureNode
         return this.getCOSObject().getString(COSName.T);
     }
 
-    /**
-     * Sets the title (T).
-     *
-     * @param title the title
-     */
     public void setTitle(String title)
     {
         this.getCOSObject().setString(COSName.T, title);
     }
 
     /**
-     * Returns the language (Lang).
-     *
      * @return the language
      */
     public String getLanguage()
@@ -508,19 +444,12 @@ public class PDStructureElement extends PDStructureNode
         return this.getCOSObject().getString(COSName.LANG);
     }
 
-    /**
-     * Sets the language (Lang).
-     *
-     * @param language the language
-     */
     public void setLanguage(String language)
     {
         this.getCOSObject().setString(COSName.LANG, language);
     }
 
     /**
-     * Returns the alternate description (Alt).
-     *
      * @return the alternate description
      */
     public String getAlternateDescription()
@@ -528,19 +457,12 @@ public class PDStructureElement extends PDStructureNode
         return this.getCOSObject().getString(COSName.ALT);
     }
 
-    /**
-     * Sets the alternate description (Alt).
-     *
-     * @param alternateDescription the alternate description
-     */
     public void setAlternateDescription(String alternateDescription)
     {
         this.getCOSObject().setString(COSName.ALT, alternateDescription);
     }
 
     /**
-     * Returns the expanded form (E).
-     *
      * @return the expanded form
      */
     public String getExpandedForm()
@@ -548,11 +470,6 @@ public class PDStructureElement extends PDStructureNode
         return this.getCOSObject().getString(COSName.E);
     }
 
-    /**
-     * Sets the expanded form (E).
-     *
-     * @param expandedForm the expanded form
-     */
     public void setExpandedForm(String expandedForm)
     {
         this.getCOSObject().setString(COSName.E, expandedForm);
@@ -566,9 +483,6 @@ public class PDStructureElement extends PDStructureNode
         return this.getCOSObject().getString(COSName.ACTUAL_TEXT);
     }
 
-    /**
-     * @param actualText the actual text
-     */
     public void setActualText(String actualText)
     {
         this.getCOSObject().setString(COSName.ACTUAL_TEXT, actualText);
@@ -589,119 +503,34 @@ public class PDStructureElement extends PDStructureNode
             }
 
         }
-        return type.getName();
+        return ofNullable(type).map(COSName::getName).orElse("");
     }
 
     /**
      * Appends a marked-content sequence kid.
-     *
-     * @param markedContent the marked-content sequence
      */
     public void appendKid(PDMarkedContent markedContent)
     {
-        if (markedContent == null)
+        if (nonNull(markedContent))
         {
-            return;
+            this.appendKid(new PDMarkedContentIdentifier(COSInteger.get(markedContent.getMCID())));
         }
-        this.appendKid(COSInteger.get(markedContent.getMCID()));
     }
 
-    /**
-     * Appends a marked-content reference kid.
-     *
-     * @param markedContentReference the marked-content reference
-     */
-    public void appendKid(PDMarkedContentReference markedContentReference)
-    {
-        this.appendObjectableKid(markedContentReference);
-    }
-
-    /**
-     * Appends an object reference kid.
-     *
-     * @param objectReference the object reference
-     */
-    public void appendKid(PDObjectReference objectReference)
-    {
-        this.appendObjectableKid(objectReference);
-    }
-
-    /**
-     * Inserts a marked-content identifier kid before a reference kid.
-     *
-     * @param markedContentIdentifier the marked-content identifier
-     * @param refKid                  the reference kid
-     */
-    public void insertBefore(COSInteger markedContentIdentifier, Object refKid)
-    {
-        this.insertBefore((COSBase) markedContentIdentifier, refKid);
-    }
-
-    /**
-     * Inserts a marked-content reference kid before a reference kid.
-     *
-     * @param markedContentReference the marked-content reference
-     * @param refKid                 the reference kid
-     */
-    public void insertBefore(PDMarkedContentReference markedContentReference, Object refKid)
-    {
-        this.insertObjectableBefore(markedContentReference, refKid);
-    }
-
-    /**
-     * Inserts an object reference kid before a reference kid.
-     *
-     * @param objectReference the object reference
-     * @param refKid          the reference kid
-     */
-    public void insertBefore(PDObjectReference objectReference, Object refKid)
-    {
-        this.insertObjectableBefore(objectReference, refKid);
-    }
-
-    /**
-     * Removes a marked-content identifier kid.
-     *
-     * @param markedContentIdentifier the marked-content identifier
-     */
-    public void removeKid(COSInteger markedContentIdentifier)
-    {
-        this.removeKid((COSBase) markedContentIdentifier);
-    }
-
-    /**
-     * Removes a marked-content reference kid.
-     *
-     * @param markedContentReference the marked-content reference
-     */
-    public void removeKid(PDMarkedContentReference markedContentReference)
-    {
-        this.removeObjectableKid(markedContentReference);
-    }
-
-    /**
-     * Removes an object reference kid.
-     *
-     * @param objectReference the object reference
-     */
-    public void removeKid(PDObjectReference objectReference)
-    {
-        this.removeObjectableKid(objectReference);
-    }
 
     /**
      * @return the structure tree root
      */
     private PDStructureTreeRoot getStructureTreeRoot()
     {
-        PDStructureNode parent = this.getParent();
-        while (parent instanceof PDStructureElement)
+        PDAbstractStructureNode parent = this.getParent();
+        while (parent instanceof PDStructureElement element)
         {
-            parent = ((PDStructureElement) parent).getParent();
+            parent = element.getParent();
         }
-        if (parent instanceof PDStructureTreeRoot)
+        if (parent instanceof PDStructureTreeRoot root)
         {
-            return (PDStructureTreeRoot) parent;
+            return root;
         }
         return null;
     }

@@ -16,94 +16,53 @@
  */
 package org.sejda.sambox.pdmodel.documentinterchange.logicalstructure;
 
-import java.io.IOException;
+import static java.util.Objects.nonNull;
 
-import org.sejda.sambox.cos.COSBase;
+import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
+
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.cos.COSObjectable;
-import org.sejda.sambox.cos.COSStream;
+import org.sejda.sambox.pdmodel.PDPage;
 import org.sejda.sambox.pdmodel.common.PDDictionaryWrapper;
 import org.sejda.sambox.pdmodel.graphics.PDXObject;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotation;
-import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationUnknown;
 
 /**
  * An object reference.
- * 
+ *
  * @author Johannes Koch
  */
-public class PDObjectReference extends PDDictionaryWrapper
+public class PDObjectReference extends PDDictionaryWrapper implements StructureElement
 {
 
-    /**
-     * TYPE of this object.
-     */
     public static final String TYPE = "OBJR";
-    
-    /**
-     * Default Constructor.
-     *
-     */
-    public PDObjectReference()
-    {
 
-        this.getCOSObject().setName(COSName.TYPE, TYPE);
+    private PDAbstractStructureNode parent;
+
+    public PDObjectReference(PDAbstractStructureNode parent)
+    {
+        this(COSDictionary.of(COSName.TYPE, COSName.getPDFName(TYPE)), parent);
     }
 
-    public PDObjectReference(COSDictionary dictionary)
+    public PDObjectReference(COSDictionary dictionary, PDAbstractStructureNode parent)
     {
+        requireNotNullArg(dictionary, "Dictionary cannot be null");
+        requireNotNullArg(parent, "Parent cannot be null");
         super(dictionary);
+        this.parent = parent;
     }
 
     /**
-     * Gets a higher-level object for the referenced object.
-     * Currently this method may return a {@link PDAnnotation},
-     * a {@link PDXObject} or <code>null</code>.
-     * 
-     * @return a higher-level object for the referenced object
+     * @return the Obj dictionary or null
      */
-    public COSObjectable getReferencedObject()
+    public COSDictionary getReferencedObject()
     {
-        COSBase obj = this.getCOSObject().getDictionaryObject(COSName.OBJ);
-        if (!(obj instanceof COSDictionary))
-        {
-            return null;
-        }
-        try
-        {
-            if (obj instanceof COSStream s)
-            {
-                PDXObject xobject = PDXObject.createXObject(s, null); // <-- TODO: valid?
-                if (xobject != null)
-                {
-                    return xobject;
-                }
-            }
-            COSDictionary objDictionary  = (COSDictionary)obj;
-            PDAnnotation annotation = PDAnnotation.createAnnotation(obj);
-            /*
-             * COSName.TYPE is optional, so if annotation is of type unknown and
-             * COSName.TYPE is not COSName.ANNOT it still may be an annotation.
-             * TODO shall we return the annotation object instead of null?
-             * what else can be the target of the object reference?
-             */
-            if (!(annotation instanceof PDAnnotationUnknown) 
-                    || COSName.ANNOT.equals(objDictionary.getDictionaryObject(COSName.TYPE))) 
-            {
-                return annotation;
-            }
-        }
-        catch (IOException exception)
-        {
-            // this can only happen if the target is an XObject.
-        }
-        return null;
+        return this.getCOSObject().getDictionaryObject(COSName.OBJ, COSDictionary.class);
     }
 
     /**
      * Sets the referenced annotation.
-     * 
+     *
      * @param annotation the referenced annotation
      */
     public void setReferencedObject(PDAnnotation annotation)
@@ -113,7 +72,7 @@ public class PDObjectReference extends PDDictionaryWrapper
 
     /**
      * Sets the referenced XObject.
-     * 
+     *
      * @param xobject the referenced XObject
      */
     public void setReferencedObject(PDXObject xobject)
@@ -121,4 +80,28 @@ public class PDObjectReference extends PDDictionaryWrapper
         this.getCOSObject().setItem(COSName.OBJ, xobject);
     }
 
+    @Override
+    public PDAbstractStructureNode getParent()
+    {
+        return parent;
+    }
+
+    @Override
+    public void setParent(PDAbstractStructureNode parent)
+    {
+        this.parent = parent;
+    }
+
+    /**
+     * @return The page object of the page on which the object shall be rendered
+     */
+    public PDPage getPage()
+    {
+        COSDictionary pg = this.getCOSObject().getDictionaryObject(COSName.PG, COSDictionary.class);
+        if (nonNull(pg))
+        {
+            return new PDPage(pg);
+        }
+        return null;
+    }
 }

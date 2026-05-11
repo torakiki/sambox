@@ -16,13 +16,14 @@
  */
 package org.sejda.sambox.pdmodel.documentinterchange.logicalstructure;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
@@ -57,13 +58,13 @@ public class PDStructureElementTest
             doc.close();
 
             // collect attributes and check their count.
-            Assert.assertEquals(117, attributeSet.size());
+            assertEquals(117, attributeSet.size());
             int cnt = 0;
             for (Revisions<PDAttributeObject> attributes : attributeSet)
             {
                 cnt += attributes.size();
             }
-            Assert.assertEquals(111, cnt); // this one was 105 before PDFBOX-4197 was fixed
+            assertEquals(111, cnt); // this one was 105 before PDFBOX-4197 was fixed
         }
     }
 

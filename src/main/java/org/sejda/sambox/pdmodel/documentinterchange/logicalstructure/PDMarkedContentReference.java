@@ -16,59 +16,45 @@
  */
 package org.sejda.sambox.pdmodel.documentinterchange.logicalstructure;
 
+import static java.util.Objects.nonNull;
+import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
+
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.cos.COSObjectable;
 import org.sejda.sambox.pdmodel.PDPage;
+import org.sejda.sambox.pdmodel.common.PDDictionaryWrapper;
 
 /**
  * A marked-content reference.
- * 
+ *
  * @author Johannes Koch
  */
-public class PDMarkedContentReference implements COSObjectable
+public class PDMarkedContentReference extends PDDictionaryWrapper implements StructureElement
 {
     public static final String TYPE = "MCR";
 
-    private final COSDictionary dictionary;
+    private PDAbstractStructureNode parent;
 
-    /**
-     * Constructor for an existing marked content reference.
-     * 
-     * @param dictionary the page dictionary
-     */
-    public PDMarkedContentReference(COSDictionary dictionary)
+    public PDMarkedContentReference(PDAbstractStructureNode parent)
     {
-        this.dictionary = dictionary;
+        this(COSDictionary.of(COSName.TYPE, COSName.getPDFName(TYPE)), parent);
+    }
+
+    public PDMarkedContentReference(COSDictionary dictionary, PDAbstractStructureNode parent)
+    {
+        requireNotNullArg(dictionary, "Dictionary cannot be null");
+        requireNotNullArg(parent, "Parent cannot be null");
+        super(dictionary);
+        this.parent = parent;
     }
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    public COSDictionary getCOSObject()
-    {
-        return this.dictionary;
-    }
-
-    /**
-     * Default constructor
-     */
-    public PDMarkedContentReference()
-    {
-        this.dictionary = new COSDictionary();
-        this.dictionary.setName(COSName.TYPE, TYPE);
-    }
-
-    /**
-     * Gets the page.
-     * 
-     * @return the page
+     * @return The page object of the page on which the object shall be rendered
      */
     public PDPage getPage()
     {
-        COSDictionary pg = (COSDictionary) this.getCOSObject().getDictionaryObject(COSName.PG);
-        if (pg != null)
+        COSDictionary pg = this.getCOSObject().getDictionaryObject(COSName.PG, COSDictionary.class);
+        if (nonNull(pg))
         {
             return new PDPage(pg);
         }
@@ -76,8 +62,6 @@ public class PDMarkedContentReference implements COSObjectable
     }
 
     /**
-     * Sets the page.
-     * 
      * @param page the page
      */
     public void setPage(PDPage page)
@@ -86,8 +70,6 @@ public class PDMarkedContentReference implements COSObjectable
     }
 
     /**
-     * Gets the marked content identifier.
-     * 
      * @return the marked content identifier
      */
     public int getMCID()
@@ -96,8 +78,6 @@ public class PDMarkedContentReference implements COSObjectable
     }
 
     /**
-     * Sets the marked content identifier.
-     * 
      * @param mcid the marked content identifier
      */
     public void setMCID(int mcid)
@@ -106,9 +86,15 @@ public class PDMarkedContentReference implements COSObjectable
     }
 
     @Override
-    public String toString()
+    public PDAbstractStructureNode getParent()
     {
-        return "mcid=" + this.getMCID();
+        return parent;
+    }
+
+    @Override
+    public void setParent(PDAbstractStructureNode parent)
+    {
+        this.parent = parent;
     }
 
 }

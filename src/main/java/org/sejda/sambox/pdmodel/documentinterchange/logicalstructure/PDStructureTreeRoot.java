@@ -16,19 +16,17 @@
  */
 package org.sejda.sambox.pdmodel.documentinterchange.logicalstructure;
 
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 
 import java.util.Map;
 
-import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.PDStructureElementNameTreeNode;
 import org.sejda.sambox.pdmodel.common.PDNameTreeNode;
 import org.sejda.sambox.pdmodel.common.PDNumberTreeNode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * A root of a structure tree.
@@ -37,57 +35,25 @@ import org.slf4j.LoggerFactory;
  * @author Johannes Koch
  *
  */
-public class PDStructureTreeRoot extends PDStructureNode
+public class PDStructureTreeRoot extends PDAbstractStructureNode
 {
-
-    private static final Logger LOG = LoggerFactory.getLogger(PDStructureTreeRoot.class);
 
     private static final String TYPE = "StructTreeRoot";
 
     public PDStructureTreeRoot()
     {
-        super(TYPE);
+        this(COSDictionary.of(COSName.TYPE, COSName.getPDFName(TYPE)));
     }
 
     /**
-     * Constructor for an existing structure element.
-     *
-     * @param dic The existing dictionary.
+     * @param dictionary The existing structure tree root dictionary.
      */
-    public PDStructureTreeRoot(COSDictionary dic)
+    public PDStructureTreeRoot(COSDictionary dictionary)
     {
-        super(dic);
+        super(dictionary);
     }
 
     /**
-     *
-     * @return the K array entry
-     * @deprecated use {@link #getK()} only. /K can be a dictionary or an array, and the next level
-     * can also be a dictionary. See file 054080.pdf in PDFBOX-4417 and read "Entries in the
-     * structure tree root" in the PDF specification.
-     */
-    @Deprecated
-    public COSArray getKArray()
-    {
-        COSBase k = this.getCOSObject().getDictionaryObject(COSName.K);
-        if (k instanceof COSDictionary kdict)
-        {
-            k = kdict.getDictionaryObject(COSName.K);
-            if (k instanceof COSArray)
-            {
-                return (COSArray) k;
-            }
-        }
-        else if (k instanceof COSArray)
-        {
-            return (COSArray) k;
-        }
-        return null;
-    }
-
-    /**
-     * Returns the K entry.
-     *
      * @return the K entry
      */
     public COSBase getK()
@@ -95,69 +61,50 @@ public class PDStructureTreeRoot extends PDStructureNode
         return this.getCOSObject().getDictionaryObject(COSName.K);
     }
 
-    /**
-     * Sets the K entry.
-     *
-     * @param k the K value
-     */
     public void setK(COSBase k)
     {
         this.getCOSObject().setItem(COSName.K, k);
     }
 
     /**
-     * Returns the ID tree.
-     *
      * @return the ID tree
      */
     public PDNameTreeNode<PDStructureElement> getIDTree()
     {
-        COSBase base = this.getCOSObject().getDictionaryObject(COSName.ID_TREE);
-        if (base instanceof COSDictionary)
+        COSDictionary idTree = this.getCOSObject()
+                .getDictionaryObject(COSName.ID_TREE, COSDictionary.class);
+        if (nonNull(idTree))
         {
-            return new PDStructureElementNameTreeNode((COSDictionary) base);
+            return new PDStructureElementNameTreeNode(idTree);
         }
         return null;
     }
 
-    /**
-     * Sets the ID tree.
-     *
-     * @param idTree the ID tree
-     */
     public void setIDTree(PDNameTreeNode<PDStructureElement> idTree)
     {
         this.getCOSObject().setItem(COSName.ID_TREE, idTree);
     }
 
     /**
-     * Returns the parent tree.
-     *
      * @return the parent tree
      */
     public PDNumberTreeNode getParentTree()
     {
-        COSBase base = getCOSObject().getDictionaryObject(COSName.PARENT_TREE);
-        if (base instanceof COSDictionary)
+        COSDictionary parentTree = getCOSObject().getDictionaryObject(COSName.PARENT_TREE,
+                COSDictionary.class);
+        if (nonNull(parentTree))
         {
-            return new PDNumberTreeNode((COSDictionary) base, PDParentTreeValue.class);
+            return new PDNumberTreeNode(parentTree, PDParentTreeValue.class);
         }
         return null;
     }
 
-    /**
-     * Sets the parent tree.
-     *
-     * @param parentTree the parent tree
-     */
     public void setParentTree(PDNumberTreeNode parentTree)
     {
         this.getCOSObject().setItem(COSName.PARENT_TREE, parentTree);
     }
 
     /**
-     * Returns the next key in the parent tree.
-     *
      * @return the next key in the parent tree
      */
     public int getParentTreeNextKey()
@@ -165,11 +112,6 @@ public class PDStructureTreeRoot extends PDStructureNode
         return this.getCOSObject().getInt(COSName.PARENT_TREE_NEXT_KEY);
     }
 
-    /**
-     * Sets the next key in the parent tree.
-     *
-     * @param parentTreeNextkey the next key in the parent tree.
-     */
     public void setParentTreeNextKey(int parentTreeNextkey)
     {
         this.getCOSObject().setInt(COSName.PARENT_TREE_NEXT_KEY, parentTreeNextkey);
@@ -188,11 +130,23 @@ public class PDStructureTreeRoot extends PDStructureNode
      */
     public void setRoleMap(Map<String, String> roleMap)
     {
-        getCOSObject().setItem(COSName.COLORANTS, ofNullable(roleMap).map(c -> {
+        getCOSObject().setItem(COSName.ROLE_MAP, ofNullable(roleMap).map(c -> {
             COSDictionary dictionary = new COSDictionary();
             c.forEach(dictionary::setName);
             return dictionary;
         }).orElse(null));
+    }
+
+    @Override
+    public PDAbstractStructureNode getParent()
+    {
+        return null;
+    }
+
+    @Override
+    public void setParent(PDAbstractStructureNode parent)
+    {
+        throw new UnsupportedOperationException("Cannot set parent on a root node");
     }
 
 }
