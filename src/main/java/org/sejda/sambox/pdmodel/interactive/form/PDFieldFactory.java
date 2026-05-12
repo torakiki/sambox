@@ -112,7 +112,7 @@ public final class PDFieldFactory
             if (field.containsKey(COSName.KIDS))
             {
                 COSArray kids = field.getCOSArray(COSName.KIDS);
-                if (kids != null)
+                if (kids != null && !kids.isEmpty())
                 {
                     COSBase kidCOSObject = kids.get(0).getCOSObject();
                     if (kidCOSObject instanceof COSDictionary)
