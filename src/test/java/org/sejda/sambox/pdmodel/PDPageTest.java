@@ -27,6 +27,7 @@ import java.awt.geom.Point2D;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Objects;
 
 import org.junit.Test;
 import org.sejda.io.SeekableSources;
@@ -42,6 +43,8 @@ import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.font.PDType0Font;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationLink;
+import org.sejda.sambox.pdmodel.interactive.form.PDField;
+import org.sejda.sambox.pdmodel.interactive.form.PDRadioButton;
 
 /**
  * @author Andrea Vacondio
@@ -271,6 +274,16 @@ public class PDPageTest
                 new COSArray(COSInteger.ZERO, COSInteger.ZERO, COSInteger.get(500), COSName.AFTER));
         assertEquals(new PDRectangle(new COSArray(COSInteger.ZERO, COSInteger.ZERO,
                 COSInteger.get(500), COSInteger.ZERO)), page.getTrimBox());
+    }
+    
+    @Test
+    public void missingFfFlagsOnField() throws IOException {
+        try(PDDocument doc = PDFParser.parse(SeekableSources.onTempFileSeekableSourceFrom(
+                Objects.requireNonNull(PDPageTest.class.getResourceAsStream("/sambox/forms-radio-buttons-missing-flags.pdf"))))) {
+            
+            PDField field = doc.getDocumentCatalog().getAcroForm().getField("radioBtn");
+            assertTrue(field instanceof PDRadioButton);
+        }
     }
 
 }

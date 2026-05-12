@@ -21,8 +21,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import org.sejda.sambox.cos.COSDictionary;
-import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.cos.*;
 import org.sejda.sambox.util.ObjectIdUtils;
 
 /**
@@ -107,9 +106,26 @@ public final class PDFieldFactory
             PDNonTerminalField parent)
     {
         int flags = field.getInt(COSName.FF, 0);
-        // BJL: I have found that the radio flag bit is not always set
-        // and that sometimes there is just a kids dictionary.
-        // so, if there is a kids dictionary then it must be a radio button group.
+        // SAMBOX specific: check kids for /Ff flags, if missing on field, to correctly detect malformed radio buttons
+        if (!field.containsKey(COSName.FF))
+        {
+            if (field.containsKey(COSName.KIDS))
+            {
+                COSArray kids = field.getCOSArray(COSName.KIDS);
+                if (kids != null)
+                {
+                    COSBase kidCOSObject = kids.get(0).getCOSObject();
+                    if (kidCOSObject instanceof COSDictionary)
+                    {
+                        COSDictionary kidDict = (COSDictionary) kidCOSObject;
+                        if (kidDict.containsKey(COSName.FF))
+                        {
+                            flags = kidDict.getInt(COSName.FF, 0);
+                        }
+                    }
+                }
+            }
+        }
         if ((flags & PDButton.FLAG_RADIO) != 0)
         {
             return new PDRadioButton(form, field, parent);
