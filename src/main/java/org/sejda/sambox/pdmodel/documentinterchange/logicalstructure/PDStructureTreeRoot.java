@@ -20,6 +20,10 @@ import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 
 import java.util.Map;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
@@ -38,7 +42,7 @@ import org.sejda.sambox.pdmodel.common.PDNumberTreeNode;
 public class PDStructureTreeRoot extends PDAbstractStructureNode
 {
 
-    private static final String TYPE = "StructTreeRoot";
+    public static final String TYPE = "StructTreeRoot";
 
     public PDStructureTreeRoot()
     {
@@ -135,6 +139,26 @@ public class PDStructureTreeRoot extends PDAbstractStructureNode
             c.forEach(dictionary::setName);
             return dictionary;
         }).orElse(null));
+    }
+
+    /**
+     * @return an {@link Iterable} over all {@link StructureElement}s in this tree in pre-order
+     * depth-first order, excluding the root itself
+     */
+    public Iterable<StructureElement> elements()
+    {
+        return () -> new PDStructureTreeIterator(this);
+    }
+
+    /**
+     * @return a sequential {@link Stream} over all {@link StructureElement}s in this tree in
+     * pre-order depth-first order, excluding the root itself
+     */
+    public Stream<StructureElement> stream()
+    {
+        return StreamSupport.stream(
+                Spliterators.spliteratorUnknownSize(new PDStructureTreeIterator(this),
+                        Spliterator.ORDERED | Spliterator.NONNULL), false);
     }
 
     @Override
