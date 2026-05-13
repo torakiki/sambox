@@ -19,7 +19,6 @@
  */
 package org.sejda.sambox.pdmodel.documentinterchange.logicalstructure;
 
-import static java.util.Objects.nonNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -28,18 +27,12 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
-import org.sejda.sambox.input.PDFParser;
 
 /**
  * Unit tests for appendKid, insertBefore and removeKid in PDAbstractStructureNode.
@@ -480,37 +473,5 @@ class PDAbstractStructureNodeTest
         var structureElements = root.stream().filter(PDStructureElement.class::isInstance).toList();
         assertEquals(1, structureElements.size());
         assertSame(elem.getCOSObject(), structureElements.getFirst().getCOSObject());
-    }
-
-    @Test
-    void test() throws IOException
-    {
-        Files.list(Path.of("/home/torakiki/Scaricati/delete/PDFUA-Reference-Files_1-1_2024_02"))
-                .forEach(path -> {
-                    try (var document = PDFParser.parse(SeekableSources.seekableSourceFrom(path)))
-                    {
-                        System.out.println(path);
-                        var root = document.getDocumentCatalog().getStructureTreeRoot();
-                        if (nonNull(root))
-                        {
-                            root.stream().forEach(structureElement -> {
-                                if (structureElement instanceof PDObjectReference ref)
-                                {
-                                    var object = ref.getReferencedObject();
-                                    if (nonNull(object) && COSName.ANNOT.equals(
-                                            object.getCOSName(COSName.TYPE)))
-                                    {
-                                        System.out.println(object.getNameAsString(COSName.SUBTYPE));
-                                    }
-                                }
-                            });
-                        }
-                    }
-                    catch (IOException e)
-                    {
-                        System.err.println(e.getMessage());
-                    }
-                });
-
     }
 }
