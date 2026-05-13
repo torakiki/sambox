@@ -84,8 +84,7 @@ public class PDStructureElement extends PDAbstractStructureNode
     @Override
     public PDAbstractStructureNode getParent()
     {
-        COSDictionary parent = this.getCOSObject()
-                .getDictionaryObject(COSName.P, COSDictionary.class);
+        var parent = this.getCOSObject().getDictionaryObject(COSName.P, COSDictionary.class);
         if (nonNull(parent))
         {
             return PDAbstractStructureNode.create(parent);
@@ -516,7 +515,6 @@ public class PDStructureElement extends PDAbstractStructureNode
             this.appendKid(new PDMarkedContentIdentifier(COSInteger.get(markedContent.getMCID())));
         }
     }
-
 
     /**
      * @return the structure tree root

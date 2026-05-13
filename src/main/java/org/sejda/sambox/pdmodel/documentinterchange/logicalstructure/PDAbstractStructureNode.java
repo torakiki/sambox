@@ -54,6 +54,10 @@ public abstract class PDAbstractStructureNode extends PDDictionaryWrapper
     public List<StructureElement> getKids()
     {
         COSBase k = this.getCOSObject().getDictionaryObject(COSName.K);
+        if (k == null)
+        {
+            return List.of();
+        }
         if (k instanceof COSArray array)
         {
             return array.stream().map(this::createKid).filter(Objects::nonNull).toList();
@@ -128,7 +132,7 @@ public abstract class PDAbstractStructureNode extends PDDictionaryWrapper
      *
      * @return <code>true</code> if the kid was removed, <code>false</code> otherwise
      */
-    protected boolean removeKid(StructureElement element)
+    public boolean removeKid(StructureElement element)
     {
         if (nonNull(element))
         {
@@ -166,16 +170,17 @@ public abstract class PDAbstractStructureNode extends PDDictionaryWrapper
     public static PDAbstractStructureNode create(COSDictionary node)
     {
         String type = node.getNameAsString(COSName.TYPE);
-        if ("StructTreeRoot".equals(type))
+        if (PDStructureTreeRoot.TYPE.equals(type))
         {
             return new PDStructureTreeRoot(node);
         }
-        if ((type == null) || "StructElem".equals(type))
+        if ((type == null) || PDStructureElement.TYPE.equals(type))
         {
             return new PDStructureElement(node);
         }
         throw new IllegalArgumentException(
-                "Dictionary must not include a Type entry with a value that is neither StructTreeRoot nor StructElem.");
+                "Invalid structure type, expected " + PDStructureTreeRoot.TYPE + " or "
+                        + PDStructureElement.TYPE + " but was " + type);
     }
 
     /**
