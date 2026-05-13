@@ -28,6 +28,8 @@ import org.sejda.sambox.pdmodel.PDDocument;
  *
  * @author Ben Litchfield
  */
+@Deprecated(forRemoval = true)
+//old not used class
 public class PDObjectStream extends PDStream
 {
 

@@ -25,12 +25,14 @@ import org.sejda.sambox.cos.COSName;
  * @author Johannes Koch
  *
  */
+@Deprecated(forRemoval = true)
+//old not used class
 public class PDTypedDictionaryWrapper extends PDDictionaryWrapper
 {
 
     /**
      * Creates a new instance with a given type.
-     * 
+     *
      * @param type the type (Type)
      */
     public PDTypedDictionaryWrapper(String type)
@@ -41,7 +43,7 @@ public class PDTypedDictionaryWrapper extends PDDictionaryWrapper
 
     /**
      * Creates a new instance with a given COS dictionary.
-     * 
+     *
      * @param dictionary the dictionary
      */
     public PDTypedDictionaryWrapper(COSDictionary dictionary)
@@ -49,10 +51,9 @@ public class PDTypedDictionaryWrapper extends PDDictionaryWrapper
         super(dictionary);
     }
 
-
     /**
      * Gets the type.
-     * 
+     *
      * @return the type
      */
     public String getType()
