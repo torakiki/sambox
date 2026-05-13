@@ -18,13 +18,10 @@ package org.sejda.sambox.pdmodel.interactive.documentnavigation.outline;
  * limitations under the License.
  */
 
-import java.util.ArrayDeque;
+import static java.util.Objects.nonNull;
+
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.NoSuchElementException;
-import java.util.Queue;
-
-import static java.util.Objects.nonNull;
 
 /**
  * An iterator over the whole outline tree
@@ -34,7 +31,6 @@ import static java.util.Objects.nonNull;
 public class PDOutlineTreeIterator implements Iterator<PDOutlineItem>
 {
     private final LinkedHashSet<PDOutlineItem> elements = new LinkedHashSet<>();
-    private final Queue<PDOutlineItem> queue = new ArrayDeque<>();
 
     public PDOutlineTreeIterator(PDDocumentOutline outline)
     {
@@ -49,16 +45,11 @@ public class PDOutlineTreeIterator implements Iterator<PDOutlineItem>
 
         for (PDOutlineItem item : children)
         {
-            if (!elements.contains(item))
+            if (elements.add(item))
             {
                 if (item.hasChildren())
                 {
-                    elements.add(item);
                     enqueueChildren(item.children());
-                }
-                else
-                {
-                    elements.add(item);
                 }
             }
         }
@@ -73,9 +64,7 @@ public class PDOutlineTreeIterator implements Iterator<PDOutlineItem>
     @Override
     public PDOutlineItem next()
     {
-        PDOutlineItem next = elements.stream().findFirst().orElseThrow(NoSuchElementException::new);
-        elements.remove(next);
-        return next;
+        return elements.removeFirst();
     }
 
     @Override
