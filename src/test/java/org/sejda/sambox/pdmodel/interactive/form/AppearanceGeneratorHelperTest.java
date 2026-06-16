@@ -114,6 +114,18 @@ public class AppearanceGeneratorHelperTest
         helper.setAppearanceValue("Some text");
     }
 
+    @Test
+    public void testCalculateFontSizeWithNonPrintableChars() throws IOException
+    {
+        PDTextField field = multilineTextField();
+        // faux multiline, content rectangle not tall enough
+        field.getWidgets().get(0).setRectangle(new PDRectangle(2, 2, 517, 10));
+        field.setDefaultAppearance("Helvetica 0 Tf 0 g");
+        
+        AppearanceGeneratorHelper helper = new AppearanceGeneratorHelper(field);
+        helper.setAppearanceValue("This isnt multiple lines\r");
+    }
+
     private PDTextField multilineTextField()
     {
         PDTextField tf = textField();

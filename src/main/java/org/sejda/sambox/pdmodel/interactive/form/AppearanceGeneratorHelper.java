@@ -988,7 +988,7 @@ public class AppearanceGeneratorHelper
         }
 
         // fit width
-        float width = font.getStringWidth(value) * font.getFontMatrix().getScaleX();
+        float width = font.getStringWidth(stripNonPrintableChars(value)) * font.getFontMatrix().getScaleX();
         float widthBasedFontSize = contentRect.getWidth() / width * xScalingFactor;
 
         // fit height
@@ -997,6 +997,12 @@ public class AppearanceGeneratorHelper
         float heightBasedFontSize = contentRect.getHeight() / height * yScalingFactor;
 
         return Math.min(heightBasedFontSize, widthBasedFontSize);
+    }
+    
+    private String stripNonPrintableChars(String s)
+    {
+        // TODO: add more non printable chars
+        return s.replaceAll("\\u000D", ""); // carriage return \r
     }
 
     /*
