@@ -17,6 +17,7 @@
 
 package org.sejda.sambox.cos;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
@@ -107,5 +108,65 @@ public class PDFDocEncodingTest
             COSString cs2 = COSString.parseLiteral(cs1.getString());
             assertEquals(cs1.getString(), cs2.getString());
         }
+    }
+
+    /**
+     * 0xAD (SOFT HYPHEN) must decode to U+00AD, not U+0000. ISO 32000-1 leaves it undefined, but
+     * other producers treat it as its ISO-8859-1 value; decoding it to a
+     * NUL control character corrupts text strings such as form field names.
+     */
+    @Test
+    public void softHyphenDecodesToU00AD()
+    {
+        assertEquals("\u00AD", PDFDocEncoding.toString(new byte[] { (byte) 0xAD }));
+    }
+
+    @Test
+    public void softHyphenEncodesTo0xAD()
+    {
+        assertArrayEquals(new byte[] { (byte) 0xAD }, PDFDocEncoding.getBytes("\u00AD"));
+    }
+
+    @Test
+    public void softHyphenRoundTrips()
+    {
+        byte[] bytes = { (byte) 0xAD };
+        assertArrayEquals(bytes, PDFDocEncoding.getBytes(PDFDocEncoding.toString(bytes)));
+    }
+
+    /**
+     * Reproduces the real-world failure: a German field name with two soft hyphens and an
+     * a-umlaut, stored as PDFDocEncoding, survives a literal round-trip via COSString and is
+     * stored single-byte (not UTF-16BE).
+     */
+    @Test
+    public void fieldNameWithSoftHyphensRoundTrips()
+    {
+        String fieldName = "Test\u00ADbesch\u00E4test adas Test\u00ADdsadas";
+        COSString cosString = COSString.parseLiteral(fieldName);
+        assertEquals(fieldName, cosString.getString());
+        // representable in PDFDocEncoding, so single-byte; UTF-16BE would be 2*len + 2 (BOM)
+        assertEquals(fieldName.length(), cosString.getBytes().length);
+    }
+
+    /**
+     * Bytes genuinely undefined in PDFDocEncoding (0x7F, 0x9F) must decode to the replacement
+     * character, never to a silent U+0000.
+     */
+    @Test
+    public void undefinedBytesDecodeToReplacementCharacter()
+    {
+        assertEquals("\uFFFD", PDFDocEncoding.toString(new byte[] { (byte) 0x7F }));
+        assertEquals("\uFFFD", PDFDocEncoding.toString(new byte[] { (byte) 0x9F }));
+    }
+
+    /**
+     * Code 0x00 is a legitimate mapping to U+0000 and must not be clobbered by the
+     * replacement-character pre-fill.
+     */
+    @Test
+    public void nulByteStillDecodesToU0000()
+    {
+        assertEquals("\u0000", PDFDocEncoding.toString(new byte[] { 0x00 }));
     }
 }

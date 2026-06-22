@@ -49,10 +49,6 @@ final class PDFDocEncoding
             {
                 continue;
             }
-            if (i == 0xAD)
-            {
-                continue;
-            }
 
             set(i, (char) i);
         }
