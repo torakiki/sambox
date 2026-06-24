@@ -15,6 +15,7 @@ import java.util.Collections;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class AppearanceGeneratorHelperTest
 {
@@ -117,13 +118,52 @@ public class AppearanceGeneratorHelperTest
     @Test
     public void testCalculateFontSizeWithNonPrintableChars() throws IOException
     {
-        PDTextField field = multilineTextField();
-        // faux multiline, content rectangle not tall enough
-        field.getWidgets().get(0).setRectangle(new PDRectangle(2, 2, 517, 10));
-        field.setDefaultAppearance("Helvetica 0 Tf 0 g");
+        PDTextField field = multilineTextFieldFaux();
         
         AppearanceGeneratorHelper helper = new AppearanceGeneratorHelper(field);
         helper.setAppearanceValue("This isnt multiple lines\r");
+
+        assertNotNull(field.getWidgets().get(0).getNormalAppearanceStream());
+    }
+
+    @Test
+    public void testCalculateFontSizeWithExoticWhiteSpace() throws IOException
+    {
+        PDTextField field = multilineTextFieldFaux();
+
+        AppearanceGeneratorHelper helper = new AppearanceGeneratorHelper(field);
+        helper.setAppearanceValue("This is\u2002whitespace");
+
+        assertNotNull(field.getWidgets().get(0).getNormalAppearanceStream());
+    }
+
+    @Test
+    public void testComboBoxAppearanceWithExoticWhiteSpace() throws IOException
+    {
+        PDComboBox field = comboBox();
+
+        // U+2002 (en space) has no glyph in Helvetica / WinAnsiEncoding. Before it is
+        // normalized to a regular space, generating the combo box appearance threw
+        // IllegalArgumentException from PDFont.encode (reached via getStringWidth in
+        // calculateFontSize, and via showText in the rendering path).
+        //
+        // setValue drives the exact path from the original crash report:
+        // PDChoice.setValue -> applyChange -> constructAppearances -> setAppearanceValue
+        field.setValue("Option\u2002One");
+
+        // appearance generation must complete and produce a stream, not silently skip
+        assertNotNull(field.getWidgets().get(0).getNormalAppearanceStream());
+    }
+
+    private PDComboBox comboBox()
+    {
+        PDDocument doc = new PDDocument();
+        doc.addPage(new PDPage());
+        PDAcroForm form = new PDAcroForm(doc);
+        PDComboBox cb = new PDComboBox(form);
+        cb.setDefaultAppearance("/Helvetica 10.00 Tf 0 g");
+        cb.getWidgets().get(0).setRectangle(new PDRectangle(2, 2, 100, 20));
+        return cb;
     }
 
     private PDTextField multilineTextField()
@@ -131,6 +171,15 @@ public class AppearanceGeneratorHelperTest
         PDTextField tf = textField();
         tf.setMultiline(true);
         return tf;
+    }
+    
+    private PDTextField multilineTextFieldFaux()
+    {
+        PDTextField field = multilineTextField();
+        // faux multiline, content rectangle not tall enough
+        field.getWidgets().get(0).setRectangle(new PDRectangle(2, 2, 517, 10));
+        field.setDefaultAppearance("Helvetica 0 Tf 0 g");
+        return field;
     }
 
     private PDTextField textField()
