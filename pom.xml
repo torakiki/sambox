@@ -60,7 +60,7 @@
         <xmpbox.version>3.0.7</xmpbox.version>
         <sejda.commons.version>3.0.1</sejda.commons.version>
         <sejda.io.version>5.0.0.M1</sejda.io.version>
-        <slf4j.version>2.0.17</slf4j.version>
+        <slf4j.version>2.0.18</slf4j.version>
         <diffutils.version>4.16</diffutils.version>
         <mockito.version>5.23.0</mockito.version>
         <tinylog.version>2.7.0</tinylog.version>
@@ -171,7 +171,7 @@
                     <plugin>
                         <groupId>org.sonatype.central</groupId>
                         <artifactId>central-publishing-maven-plugin</artifactId>
-                        <version>0.10.0</version>
+                        <version>0.11.0</version>
                         <extensions>true</extensions>
                         <configuration>
                             <publishingServerId>central</publishingServerId>
