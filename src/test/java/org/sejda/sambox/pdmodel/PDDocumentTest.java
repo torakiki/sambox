@@ -316,8 +316,7 @@ public class PDDocumentTest
                 var basicSchema = meta.getXMPBasicSchema();
                 assertNotNull(basicSchema);
                 assertNotNull(basicSchema.getMetadataDate());
-                assertNotNull(basicSchema.getIdentifiers());
-                assertEquals(1, basicSchema.getIdentifiers().size());
+                assertNull(basicSchema.getIdentifiers());
                 var adobeSchema = meta.getAdobePDFSchema();
                 assertNotNull(adobeSchema);
                 assertEquals(SpecVersionUtils.V1_7, adobeSchema.getPDFVersion());

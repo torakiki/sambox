@@ -26,7 +26,6 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.util.GregorianCalendar;
-import java.util.UUID;
 
 import org.apache.xmpbox.XMPMetadata;
 import org.apache.xmpbox.schema.AdobePDFSchema;
@@ -83,7 +82,6 @@ public class DefaultDocumentXmpMetadataProvider implements DocumentXmpMetadataPr
 
         XMPBasicSchema basicSchema = ofNullable(metadata.getXMPBasicSchema()).orElseGet(
                 metadata::createAndAddXMPBasicSchema);
-        basicSchema.addIdentifier(UUID.randomUUID().toString());
         basicSchema.setMetadataDate(new GregorianCalendar());
         ofNullable(documentInformation.getCreator()).ifPresent(basicSchema::setCreatorTool);
         ofNullable(documentInformation.getModificationDate()).ifPresent(modDate -> {
