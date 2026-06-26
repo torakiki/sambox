@@ -26,6 +26,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -33,6 +34,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
@@ -55,6 +57,7 @@ import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.output.PreSaveCOSVisitor;
 import org.sejda.sambox.output.WriteOption;
 import org.sejda.sambox.pdmodel.PDDocument.OnClose;
+import org.sejda.sambox.pdmodel.common.PDMetadata;
 import org.sejda.sambox.util.SpecVersionUtils;
 
 public class PDDocumentTest
@@ -453,6 +456,113 @@ public class PDDocumentTest
         {
             assertNull(
                     outputDoc.getDocumentCatalog().getCOSObject().getCOSName(COSName.PAGE_LAYOUT));
+        }
+    }
+
+    @Test
+    @DisplayName("UPSERT_DOCUMENT_METADATA_STREAM sets xmp:CreateDate from info dict when XMP has none")
+    public void upsertSetsCreationDateWhenXmpHasNone(@TempDir Path tmp) throws Exception
+    {
+        var creationDate = Instant.parse("2021-06-15T10:30:00Z");
+        var output = Files.createTempFile(tmp, "", ".pdf").toFile();
+        try (var document = new PDDocument())
+        {
+            document.addPage(new PDPage());
+            document.getDocumentInformation().setCreationDate(creationDate);
+            document.writeTo(output, WriteOption.UPSERT_DOCUMENT_METADATA_STREAM);
+        }
+        try (var outputDoc = PDFParser.parse(SeekableSources.seekableSourceFrom(output)))
+        {
+            try (var metadata = outputDoc.getDocumentCatalog().getCOSObject()
+                    .getDictionaryObject(COSName.METADATA, COSStream.class))
+            {
+                assertNotNull(metadata);
+                var parser = new DomXmpParser();
+                parser.setStrictParsing(false);
+                var xmp = parser.parse(metadata.getUnfilteredStream());
+                assertEquals(creationDate, xmp.getXMPBasicSchema().getCreateDate().toInstant());
+            }
+        }
+    }
+
+    @Test
+    @DisplayName("UPSERT_DOCUMENT_METADATA_STREAM keeps consistent xmp:CreateDate and info dict in sync")
+    public void upsertKeepsConsistentCreationDatesInSync(@TempDir Path tmp) throws Exception
+    {
+        var creationDate = Instant.parse("2021-06-15T10:30:00Z");
+        var xmpXml = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <x:xmpmeta xmlns:x="adobe:ns:meta/">
+                  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+                    <rdf:Description rdf:about=""
+                        xmlns:xmp="http://ns.adobe.com/xap/1.0/">
+                      <xmp:CreateDate>2021-06-15T10:30:00Z</xmp:CreateDate>
+                    </rdf:Description>
+                  </rdf:RDF>
+                </x:xmpmeta>
+                """;
+        var output = Files.createTempFile(tmp, "", ".pdf").toFile();
+        try (var document = new PDDocument())
+        {
+            document.addPage(new PDPage());
+            document.getDocumentInformation().setCreationDate(creationDate);
+            document.getDocumentCatalog().setMetadata(new PDMetadata(
+                    new ByteArrayInputStream(xmpXml.getBytes(StandardCharsets.UTF_8))));
+            document.writeTo(output, WriteOption.UPSERT_DOCUMENT_METADATA_STREAM);
+        }
+        try (var outputDoc = PDFParser.parse(SeekableSources.seekableSourceFrom(output)))
+        {
+            assertEquals(creationDate,
+                    outputDoc.getDocumentInformation().getCreationDate().toInstant());
+            try (var metadata = outputDoc.getDocumentCatalog().getCOSObject()
+                    .getDictionaryObject(COSName.METADATA, COSStream.class))
+            {
+                var parser = new DomXmpParser();
+                parser.setStrictParsing(false);
+                var xmp = parser.parse(metadata.getUnfilteredStream());
+                assertEquals(creationDate, xmp.getXMPBasicSchema().getCreateDate().toInstant());
+            }
+        }
+    }
+
+    @Test
+    @DisplayName("UPSERT_DOCUMENT_METADATA_STREAM leaves inconsistent xmp:CreateDate and info dict unchanged per ISO 32000-2")
+    public void upsertLeavesInconsistentCreationDatesUnchanged(@TempDir Path tmp) throws Exception
+    {
+        var infoDictCreationDate = Instant.parse("2020-01-01T00:00:00Z");
+        var xmpCreationDate = Instant.parse("2019-01-01T00:00:00Z");
+        var xmpXml = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <x:xmpmeta xmlns:x="adobe:ns:meta/">
+                  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+                    <rdf:Description rdf:about=""
+                        xmlns:xmp="http://ns.adobe.com/xap/1.0/">
+                      <xmp:CreateDate>2019-01-01T00:00:00Z</xmp:CreateDate>
+                    </rdf:Description>
+                  </rdf:RDF>
+                </x:xmpmeta>
+                """;
+        var output = Files.createTempFile(tmp, "", ".pdf").toFile();
+        try (var document = new PDDocument())
+        {
+            document.addPage(new PDPage());
+            document.getDocumentInformation().setCreationDate(infoDictCreationDate);
+            document.getDocumentCatalog().setMetadata(new PDMetadata(
+                    new ByteArrayInputStream(xmpXml.getBytes(StandardCharsets.UTF_8))));
+            document.writeTo(output, WriteOption.UPSERT_DOCUMENT_METADATA_STREAM);
+        }
+        try (var outputDoc = PDFParser.parse(SeekableSources.seekableSourceFrom(output)))
+        {
+            assertEquals(infoDictCreationDate,
+                    outputDoc.getDocumentInformation().getCreationDate().toInstant());
+            try (var metadata = outputDoc.getDocumentCatalog().getCOSObject()
+                    .getDictionaryObject(COSName.METADATA, COSStream.class))
+            {
+                var parser = new DomXmpParser();
+                parser.setStrictParsing(false);
+                var xmp = parser.parse(metadata.getUnfilteredStream());
+                assertEquals(xmpCreationDate, xmp.getXMPBasicSchema().getCreateDate().toInstant());
+            }
         }
     }
 

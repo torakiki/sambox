@@ -18,6 +18,7 @@ package org.sejda.sambox.pdmodel.xmp;
  * limitations under the License.
  */
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 
@@ -90,8 +91,14 @@ public class DefaultDocumentXmpMetadataProvider implements DocumentXmpMetadataPr
             documentInformation.setModificationDate(modDate.toInstant());
         });
         ofNullable(documentInformation.getCreationDate()).ifPresent(creationDate -> {
-            basicSchema.setCreateDate(creationDate);
-            documentInformation.setCreationDate(creationDate.toInstant());
+            var existingXmpCreateDate = basicSchema.getCreateDate();
+            // Per ISO 32000-2 §14.3.4: if both already contain inconsistent creation dates, leave them unchanged.
+            if (isNull(existingXmpCreateDate) || existingXmpCreateDate.toInstant()
+                    .equals(creationDate.toInstant()))
+            {
+                basicSchema.setCreateDate(creationDate);
+                documentInformation.setCreationDate(creationDate.toInstant());
+            }
         });
 
         DublinCoreSchema dcSchema = ofNullable(metadata.getDublinCoreSchema()).orElseGet(
