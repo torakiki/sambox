@@ -457,7 +457,6 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
                 }
 
             }
-
         }
         setItem(COSName.FILTER, filters);
         IOUtils.closeQuietly(existing);
@@ -546,14 +545,13 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
                     }
                 }
                 //something changed
-                if (newParams.size() != array.size())
+                if (newFilters.size() != array.size())
                 {
                     setFilters(newFilters.isEmpty() ? null : newFilters);
                     removeItems(COSName.DECODE_PARMS, COSName.DP);
                     if (!newParams.isEmpty() && newParams.stream()
                             .anyMatch(i -> !(i instanceof COSNull)))
                     {
-                        
                         setItem(COSName.DECODE_PARMS, newParams);
                     }
                     return true;

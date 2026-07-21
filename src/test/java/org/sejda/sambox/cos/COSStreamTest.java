@@ -289,6 +289,20 @@ public class COSStreamTest
     }
 
     @Test
+    @DisplayName("removeCompression returns false for a filter array without compression filters and no DecodeParms")
+    public void testRemoveCompressionNoCompressionFilterArrayNoDecodeParms() throws IOException
+    {
+        byte[] testString = "No compression array test".getBytes(StandardCharsets.US_ASCII);
+        COSStream stream = createStream(testString,
+                new COSArray(COSName.ASCII85_DECODE, COSName.ASCII_HEX_DECODE));
+        assertNull(stream.getDictionaryObject(COSName.DECODE_PARMS, COSName.DP));
+        var result = stream.removeCompression();
+        assertFalse(result);
+        assertTrue(stream.hasFilter(COSName.ASCII85_DECODE));
+        assertTrue(stream.hasFilter(COSName.ASCII_HEX_DECODE));
+    }
+
+    @Test
     @DisplayName("removeCompression removes DecodeParms when single filter with DecodeParms")
     public void testRemoveCompressionRemovesDecodeParms() throws IOException
     {
