@@ -460,6 +460,45 @@ public class COSStreamTest
         assertEquals(1, remainingParms.size());
     }
 
+    @Test
+    @DisplayName("removeCompression does nothing when the array also contains JBIG2Decode")
+    public void testRemoveCompressionLeavesJBIG2Untouched() throws IOException
+    {
+        byte[] testString = "JBIG2 test data".getBytes(StandardCharsets.US_ASCII);
+        COSStream stream = createStream(testString,
+                new COSArray(COSName.FLATE_DECODE, COSName.JBIG2_DECODE));
+        var result = stream.removeCompression();
+        assertFalse(result);
+        assertTrue(stream.hasFilter(COSName.FLATE_DECODE));
+        assertTrue(stream.hasFilter(COSName.JBIG2_DECODE));
+    }
+
+    @Test
+    @DisplayName("removeCompression does nothing when the array also contains DCTDecode")
+    public void testRemoveCompressionLeavesDCTUntouched() throws IOException
+    {
+        byte[] testString = "DCT test data".getBytes(StandardCharsets.US_ASCII);
+        COSStream stream = createStream(testString,
+                new COSArray(COSName.LZW_DECODE, COSName.DCT_DECODE));
+        var result = stream.removeCompression();
+        assertFalse(result);
+        assertTrue(stream.hasFilter(COSName.LZW_DECODE));
+        assertTrue(stream.hasFilter(COSName.DCT_DECODE));
+    }
+
+    @Test
+    @DisplayName("removeCompression does nothing when the array also contains JPXDecode")
+    public void testRemoveCompressionLeavesJPXUntouched() throws IOException
+    {
+        byte[] testString = "JPX test data".getBytes(StandardCharsets.US_ASCII);
+        COSStream stream = createStream(testString,
+                new COSArray(COSName.FLATE_DECODE, COSName.JPX_DECODE));
+        var result = stream.removeCompression();
+        assertFalse(result);
+        assertTrue(stream.hasFilter(COSName.FLATE_DECODE));
+        assertTrue(stream.hasFilter(COSName.JPX_DECODE));
+    }
+
     private static byte[] encodeData(byte[] original, COSName filter) throws IOException
     {
         Filter encodingFilter = FilterFactory.INSTANCE.getFilter(filter);

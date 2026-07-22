@@ -56,6 +56,10 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
             COSName.ASCII_HEX_DECODE_ABBREVIATION, COSName.ASCII85_DECODE,
             COSName.ASCII85_DECODE_ABBREVIATION);
 
+    // filters whose Filter#encode is not implemented: their stream can be decoded but not re-encoded
+    private static final Set<COSName> DECODE_ONLY = Set.of(COSName.JBIG2_DECODE, COSName.DCT_DECODE,
+            COSName.DCT_DECODE_ABBREVIATION, COSName.JPX_DECODE);
+
     private static final Logger LOG = LoggerFactory.getLogger(COSStream.class);
 
     private LazySeekableSourceViewHolder existing;
@@ -506,10 +510,31 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
         return COSName.FLATE_DECODE.equals(filter) || COSName.LZW_DECODE.equals(filter);
     }
 
+    private static boolean isDecodeOnly(COSName filter)
+    {
+        return isNull(filter) || DECODE_ONLY.contains(filter);
+    }
+
+    private static boolean containsDecodeOnlyFilter(COSArray filters)
+    {
+        for (int i = 0; i < filters.size(); i++)
+        {
+            if (isDecodeOnly(filters.getObject(i, COSName.class)))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Removes all compression filters (FlateDecode and LZWDecode) from the current filter list.
      * When a filter is part of an array, the corresponding DecodeParms/DP entry at the same index
-     * is also removed.
+     * is also removed. Does nothing and returns false if the filter array contains a filter whose
+     * encoding is not implemented (JBIG2Decode, DCTDecode, JPXDecode), since removing another
+     * filter from the array would require that filter to be re-encoded later. This is very unlikely
+     * since it doesn't make much sense to apply compression to an already compressed image format,
+     * but it's allowed by the spec.
      *
      * @return true if at least one compression filter was present and was removed
      */
@@ -524,7 +549,7 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
                 setFilters(null);
                 return true;
             }
-            if (filters instanceof COSArray array)
+            if (filters instanceof COSArray array && !containsDecodeOnlyFilter(array))
             {
                 var newFilters = new COSArray();
                 var params = getDictionaryObject(COSName.DECODE_PARMS, COSName.DP, COSArray.class);
