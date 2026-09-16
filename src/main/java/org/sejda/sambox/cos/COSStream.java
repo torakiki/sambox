@@ -58,7 +58,7 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
 
     // filters whose Filter#encode is not implemented: their stream can be decoded but not re-encoded
     private static final Set<COSName> DECODE_ONLY = Set.of(COSName.JBIG2_DECODE, COSName.DCT_DECODE,
-            COSName.DCT_DECODE_ABBREVIATION, COSName.JPX_DECODE);
+            COSName.DCT_DECODE_ABBREVIATION, COSName.JPX_DECODE, COSName.BROTLI_DECODE);
 
     private static final Logger LOG = LoggerFactory.getLogger(COSStream.class);
 
@@ -531,7 +531,7 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
      * Removes all compression filters (FlateDecode and LZWDecode) from the current filter list.
      * When a filter is part of an array, the corresponding DecodeParms/DP entry at the same index
      * is also removed. Does nothing and returns false if the filter array contains a filter whose
-     * encoding is not implemented (JBIG2Decode, DCTDecode, JPXDecode), since removing another
+     * encoding is not implemented (JBIG2Decode, DCTDecode, JPXDecode, BrotliDecode), since removing another
      * filter from the array would require that filter to be re-encoded later. This is very unlikely
      * since it doesn't make much sense to apply compression to an already compressed image format,
      * but it's allowed by the spec.

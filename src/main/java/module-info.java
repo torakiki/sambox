@@ -22,6 +22,7 @@ module org.sejda.sambox {
     requires org.bouncycastle.util;
     requires org.sejda.commons;
     requires org.slf4j;
+    requires static dec;
 
     requires transitive java.desktop;
     requires transitive java.xml;

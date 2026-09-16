@@ -49,6 +49,7 @@ public final class FilterFactory
         Filter crypt = new CryptFilter();
         Filter jpx = new JPXFilter();
         Filter jbig2 = new JBIG2Filter();
+        Filter brotli = new BrotliFilter();
 
         filters.put(COSName.FLATE_DECODE, flate);
         filters.put(COSName.FLATE_DECODE_ABBREVIATION, flate);
@@ -67,6 +68,7 @@ public final class FilterFactory
         filters.put(COSName.CRYPT, crypt);
         filters.put(COSName.JPX_DECODE, jpx);
         filters.put(COSName.JBIG2_DECODE, jbig2);
+        filters.put(COSName.BROTLI_DECODE, brotli);
     }
 
     /**

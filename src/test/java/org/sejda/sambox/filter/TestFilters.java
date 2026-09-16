@@ -94,7 +94,8 @@ public class TestFilters extends TestCase
                 {
                     // Skip filters that don't currently support roundtripping
                     if (filter instanceof DCTFilter || filter instanceof CCITTFaxFilter
-                            || filter instanceof JPXFilter || filter instanceof JBIG2Filter)
+                            || filter instanceof JPXFilter || filter instanceof JBIG2Filter
+                            || filter instanceof BrotliFilter)
                     {
                         continue;
                     }

@@ -95,6 +95,7 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName BORDER = newCommonInstance("Border");
     public static final COSName BOUNDS = newCommonInstance("Bounds");
     public static final COSName BPC = newCommonInstance("BPC");
+    public static final COSName BROTLI_DECODE = newCommonInstance("BrotliDecode");
     public static final COSName BS = newCommonInstance("BS");
     public static final COSName BTN = newCommonInstance("Btn");
     public static final COSName BYTERANGE = newCommonInstance("ByteRange");

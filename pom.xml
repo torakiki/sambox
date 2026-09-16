@@ -5,7 +5,7 @@
     <artifactId>sambox</artifactId>
     <packaging>jar</packaging>
     <name>sambox</name>
-    <version>v4.0.0.M8-SNAPSHOT</version>
+    <version>4.0.0.M8-SNAPSHOT</version>
     <url>https://github.com/torakiki/sambox</url>
 
     <description>
@@ -70,6 +70,7 @@
         <jbig2imageio.version>3.0.5</jbig2imageio.version>
         <equalsverifier.version>4.5</equalsverifier.version>
         <jai-imageio-core.version>1.4.0</jai-imageio-core.version>
+        <brotli.dec.version>0.1.2</brotli.dec.version>
     </properties>
 
     <repositories>
@@ -1660,6 +1661,12 @@
             <artifactId>bcprov-jdk18on</artifactId>
             <optional>true</optional>
             <version>${bouncycastle.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.brotli</groupId>
+            <artifactId>dec</artifactId>
+            <optional>true</optional>
+            <version>${brotli.dec.version}</version>
         </dependency>
         <dependency>
             <groupId>com.github.jai-imageio</groupId>
