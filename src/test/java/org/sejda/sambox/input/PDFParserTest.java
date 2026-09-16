@@ -551,4 +551,17 @@ public class PDFParserTest
             //nothing to do, just don't blow up
         }
     }
+
+    @Test
+    public void brotli() throws IOException
+    {
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/brotli_enc_contentstream.pdf"))))
+        {
+            assertNotNull(doc);
+            assertTrue(doc.isOpen());
+            assertFalse(doc.hasParseErrors());
+            assertNotNull(doc.getPage(0).getContents());
+        }
+    }
 }
