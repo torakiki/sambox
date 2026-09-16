@@ -291,8 +291,10 @@
                     </excludes>
                 </configuration>
             </plugin>
-            <!-- PDFBOX-3974: download test files from JIRA and keep them in repository
-                cache -->
+            <!-- Test files mirrored from https://github.com/torakiki/sambox-test-assets,
+                pinned by commit SHA. Previously downloaded live from JIRA and other sources on
+                every build, which caused CI timeouts from JIRA throttling repeated automated
+                downloads. -->
             <plugin>
                 <groupId>com.googlecode.maven-download-plugin</groupId>
                 <artifactId>download-maven-plugin</artifactId>
@@ -309,7 +311,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
-                            <url>https://issues.apache.org/jira/secure/attachment/12481683/1.pdf
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12481683/1.pdf -->
+                            <url>
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/PDFBOX-1031-1.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <outputFileName>PDFBOX-1031-1.pdf</outputFileName>
@@ -325,7 +329,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
-                            <url>https://issues.apache.org/jira/secure/attachment/12481684/2.pdf
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12481684/2.pdf -->
+                            <url>
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/PDFBOX-1031-2.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <outputFileName>PDFBOX-1031-2.pdf</outputFileName>
@@ -341,8 +347,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12486525/1_testfile1.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12486525/1_testfile1.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/PDFBOX-1065-1.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <outputFileName>PDFBOX-1065-1.pdf</outputFileName>
@@ -358,8 +365,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12486526/2_testfile1.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12486526/2_testfile1.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/PDFBOX-1065-2.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <outputFileName>PDFBOX-1065-2.pdf</outputFileName>
@@ -375,7 +383,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
-                            <url>https://issues.apache.org/jira/secure/attachment/12490774/a.pdf
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12490774/a.pdf -->
+                            <url>
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/PDFBOX-1100-1.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <outputFileName>PDFBOX-1100-1.pdf</outputFileName>
@@ -391,7 +401,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
-                            <url>https://issues.apache.org/jira/secure/attachment/12490775/b.pdf
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12490775/b.pdf -->
+                            <url>
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/PDFBOX-1100-2.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <outputFileName>PDFBOX-1100-2.pdf</outputFileName>
@@ -407,8 +419,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12784025/PDFBOX-3208-L33MUTT2SVCWGCS6UIYL5TH3PNPXHIS6.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12784025/PDFBOX-3208-L33MUTT2SVCWGCS6UIYL5TH3PNPXHIS6.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/PDFBOX-3208-L33MUTT2SVCWGCS6UIYL5TH3PNPXHIS6.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <sha512>
@@ -423,7 +436,10 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
-                            <url>http://www.igs.at/downloads/PDFBOX_LCMS_Error_13.pdf</url>
+                            <!-- originally: http://www.igs.at/downloads/PDFBOX_LCMS_Error_13.pdf -->
+                            <url>
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/PDFBOX_LCMS_Error_13.pdf
+                            </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <sha512>
                                 3955041f4daded93206998b8aab54818f671a7c2df1bf5179d8e419c00075eebd02cbcee72c3e73ad4a7ed75d312d93c59f7f015775e22481fbcdef76f8081d0
@@ -437,8 +453,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12848122/SF1199AEG%20%28Complete%29.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12848122/SF1199AEG%20%28Complete%29.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/PDFBOX-3656.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <outputFileName>PDFBOX-3656.pdf</outputFileName>
@@ -454,8 +471,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12852207/test.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12852207/test.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/PDFBOX-3682.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <outputFileName>PDFBOX-3682.pdf</outputFileName>
@@ -471,8 +489,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12854913/966635-p12.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12854913/966635-p12.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/PDFBOX-3703-966635-p12.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <outputFileName>PDFBOX-3703-966635-p12.pdf</outputFileName>
@@ -488,8 +507,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://raw.githubusercontent.com/jondot/dotfiles/master/.fonts/calibri.ttf -->
                             <url>
-                                https://raw.githubusercontent.com/jondot/dotfiles/master/.fonts/calibri.ttf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/fonts/PDFBOX-3747-calibri.ttf
                             </url>
                             <outputDirectory>${project.build.directory}/fonts</outputDirectory>
                             <outputFileName>PDFBOX-3747-calibri.ttf</outputFileName>
@@ -505,8 +525,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12888957/079977.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12888957/079977.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/PDFBOX-3940-079977.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <outputFileName>PDFBOX-3940-079977.pdf</outputFileName>
@@ -522,8 +543,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12867102/PDFBOX-3783-72GLBIGUC6LB46ELZFBARRJTLN4RBSQM.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12867102/PDFBOX-3783-72GLBIGUC6LB46ELZFBARRJTLN4RBSQM.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/PDFBOX-3783-72GLBIGUC6LB46ELZFBARRJTLN4RBSQM.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <sha512>
@@ -538,8 +560,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12867113/202097.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12867113/202097.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/PDFBOX-3785-202097.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <outputFileName>PDFBOX-3785-202097.pdf</outputFileName>
@@ -555,8 +578,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12890031/670064.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12890031/670064.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/PDFBOX-3947-670064.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <outputFileName>PDFBOX-3947-670064.pdf</outputFileName>
@@ -572,8 +596,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12890034/EUWO6SQS5TM4VGOMRD3FLXZHU35V2CP2.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12890034/EUWO6SQS5TM4VGOMRD3FLXZHU35V2CP2.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/PDFBOX-3948-EUWO6SQS5TM4VGOMRD3FLXZHU35V2CP2.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <outputFileName>PDFBOX-3948-EUWO6SQS5TM4VGOMRD3FLXZHU35V2CP2.pdf
@@ -590,8 +615,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12890037/MKFYUGZWS3OPXLLVU2Z4LWCTVA5WNOGF.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12890037/MKFYUGZWS3OPXLLVU2Z4LWCTVA5WNOGF.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/PDFBOX-3949-MKFYUGZWS3OPXLLVU2Z4LWCTVA5WNOGF.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <outputFileName>PDFBOX-3949-MKFYUGZWS3OPXLLVU2Z4LWCTVA5WNOGF.pdf
@@ -608,8 +634,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12890042/23EGDHXSBBYQLKYOKGZUOVYVNE675PRD.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12890042/23EGDHXSBBYQLKYOKGZUOVYVNE675PRD.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/PDFBOX-3950-23EGDHXSBBYQLKYOKGZUOVYVNE675PRD.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <outputFileName>PDFBOX-3950-23EGDHXSBBYQLKYOKGZUOVYVNE675PRD.pdf
@@ -626,8 +653,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12890047/FIHUZWDDL2VGPOE34N6YHWSIGSH5LVGZ.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12890047/FIHUZWDDL2VGPOE34N6YHWSIGSH5LVGZ.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/PDFBOX-3951-FIHUZWDDL2VGPOE34N6YHWSIGSH5LVGZ.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <outputFileName>PDFBOX-3951-FIHUZWDDL2VGPOE34N6YHWSIGSH5LVGZ.pdf
@@ -644,8 +672,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12892097/c687766d68ac766be3f02aaec5e0d713_2.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12892097/c687766d68ac766be3f02aaec5e0d713_2.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/PDFBOX-3964-c687766d68ac766be3f02aaec5e0d713_2.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <outputFileName>PDFBOX-3964-c687766d68ac766be3f02aaec5e0d713_2.pdf
@@ -662,8 +691,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12893582/63NGFQRI44HQNPIPEJH5W2TBM6DJZWMI.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12893582/63NGFQRI44HQNPIPEJH5W2TBM6DJZWMI.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/PDFBOX-3977-63NGFQRI44HQNPIPEJH5W2TBM6DJZWMI.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <outputFileName>PDFBOX-3977-63NGFQRI44HQNPIPEJH5W2TBM6DJZWMI.pdf
@@ -680,8 +710,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12867433/genko_oc_shiryo1.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12867433/genko_oc_shiryo1.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/genko_oc_shiryo1.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <sha512>
@@ -696,8 +727,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12896905/GeneralForbearance.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12896905/GeneralForbearance.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/PDFBOX-3999-GeneralForbearance.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <outputFileName>PDFBOX-3999-GeneralForbearance.pdf</outputFileName>
@@ -713,8 +745,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12899008/selection.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12899008/selection.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/PDFBOX-4022-selection.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <outputFileName>PDFBOX-4022-selection.pdf</outputFileName>
@@ -730,8 +763,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://mirrors.dotsrc.org/osdn/ipafonts/51867/ipag00303.zip -->
                             <url>
-                                https://mirrors.dotsrc.org/osdn/ipafonts/51867/ipag00303.zip
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/fonts/ipag00303.zip
                             </url>
                             <outputDirectory>${project.build.directory}/fonts</outputDirectory>
                             <outputFileName>ipag00303.zip</outputFileName>
@@ -748,8 +782,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://mirrors.dotsrc.org/osdn/ipafonts/51867/ipagp00303.zip -->
                             <url>
-                                https://mirrors.dotsrc.org/osdn/ipafonts/51867/ipagp00303.zip
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/fonts/ipagp00303.zip
                             </url>
                             <outputDirectory>${project.build.directory}/fonts</outputDirectory>
                             <outputFileName>ipagp00303.zip</outputFileName>
@@ -766,8 +801,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12911053/n019003l.pfb -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12911053/n019003l.pfb
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/fonts/n019003l.pfb
                             </url>
                             <outputDirectory>${project.build.directory}/fonts</outputDirectory>
                             <outputFileName>n019003l.pfb</outputFileName>
@@ -783,8 +819,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12919726/sample.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12919726/sample.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/PDFBOX-4197.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <outputFileName>PDFBOX-4197.pdf</outputFileName>
@@ -800,8 +837,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12949710/032163.jpg -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12949710/032163.jpg
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/imgs/PDFBOX-4184-032163.jpg
                             </url>
                             <!-- 032163.jpg is from http://downloads.digitalcorpora.org/corpora/files/govdocs1/zipfiles/032.zip -->
                             <outputDirectory>${project.build.directory}/imgs</outputDirectory>
@@ -818,8 +856,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12929821/16bit.png -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12929821/16bit.png
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/imgs/PDFBOX-4184-16bit.png
                             </url>
                             <!-- originally from https://github.com/danfickle/openhtmltopdf/issues/173
                                 see "blurred" image link https://user-images.githubusercontent.com/29379074/36145630-f304cd0e-10d7-11e8-942c-66eb8040be70.png -->
@@ -837,8 +876,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12938094/Quelldatei.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12938094/Quelldatei.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/PDFBOX-4308.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <outputFileName>PDFBOX-4308.pdf</outputFileName>
@@ -854,8 +894,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12943502/ArrayIndexOutOfBoundsException%20COSParser -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12943502/ArrayIndexOutOfBoundsException%20COSParser
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/PDFBOX-4338.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <outputFileName>PDFBOX-4338.pdf</outputFileName>
@@ -871,8 +912,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12943503/NullPointerException%20COSParser -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12943503/NullPointerException%20COSParser
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/PDFBOX-4339.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <outputFileName>PDFBOX-4339.pdf</outputFileName>
@@ -888,8 +930,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12952086/form.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12952086/form.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/PDFBOX-4408.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <outputFileName>PDFBOX-4408.pdf</outputFileName>
@@ -905,8 +948,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12953423/000314.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12953423/000314.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/PDFBOX-4418-000314.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <outputFileName>PDFBOX-4418-000314.pdf</outputFileName>
@@ -922,8 +966,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12953421/000671.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12953421/000671.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/PDFBOX-4418-000671.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <outputFileName>PDFBOX-4418-000671.pdf</outputFileName>
@@ -939,8 +984,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12953866/000746.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12953866/000746.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/PDFBOX-4423-000746.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <outputFileName>PDFBOX-4423-000746.pdf</outputFileName>
@@ -956,8 +1002,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12966453/cryptfilter.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12966453/cryptfilter.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/PDFBOX-4517-cryptfilter.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <outputFileName>PDFBOX-4517-cryptfilter.pdf</outputFileName>
@@ -973,8 +1020,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12914331/WXMDXCYRWFDCMOSFQJ5OAJIAFXYRZ5OA.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12914331/WXMDXCYRWFDCMOSFQJ5OAJIAFXYRZ5OA.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/PDFBOX-4153-WXMDXCYRWFDCMOSFQJ5OAJIAFXYRZ5OA.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <outputFileName>PDFBOX-4153-WXMDXCYRWFDCMOSFQJ5OAJIAFXYRZ5OA.pdf
@@ -991,8 +1039,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12742551/Testformular1.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12742551/Testformular1.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/Testformular1.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <sha512>
@@ -1007,8 +1056,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12425859/TestFax_56972.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12425859/TestFax_56972.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/TestFax_56972.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <sha512>
@@ -1023,8 +1073,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12682897/FormI-9-English.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12682897/FormI-9-English.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/FormI-9-English.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <sha512>
@@ -1039,8 +1090,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12678455/testPDF_acroForm.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12678455/testPDF_acroForm.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/testPDF_acroForm.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <sha512>
@@ -1055,8 +1107,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12689788/test.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12689788/test.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/test-2586.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <sha512>
@@ -1072,8 +1125,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12792007/hidden_fields.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12792007/hidden_fields.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/hidden_fields.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <sha512>
@@ -1088,8 +1142,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12770263/mypdf.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12770263/mypdf.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/mypdf.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <sha512>
@@ -1104,8 +1159,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12816014/Signed-Document-1.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12816014/Signed-Document-1.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/Signed-Document-1.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <sha512>
@@ -1120,8 +1176,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12816016/Signed-Document-2.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12816016/Signed-Document-2.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/Signed-Document-2.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <sha512>
@@ -1136,8 +1193,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12821307/Signed-Document-3.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12821307/Signed-Document-3.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/Signed-Document-3.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <sha512>
@@ -1152,8 +1210,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12821308/Signed-Document-4.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12821308/Signed-Document-4.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/Signed-Document-4.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <sha512>
@@ -1168,8 +1227,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12839977/OpenOfficeForm.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12839977/OpenOfficeForm.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/OpenOfficeForm.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <sha512>
@@ -1184,8 +1244,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12840280/OpenOfficeForm_filled.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12840280/OpenOfficeForm_filled.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/OpenOfficeForm_filled.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <sha512>
@@ -1200,8 +1261,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12976553/PDFBOX-4157-filled.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12976553/PDFBOX-4157-filled.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/PDFBOX-4157-filled.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <sha512>
@@ -1216,8 +1278,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12976452/resetboundingbox-filled.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12976452/resetboundingbox-filled.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/resetboundingbox-filled.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <sha512>
@@ -1232,8 +1295,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12976552/PDFBOX-4172-filled.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12976552/PDFBOX-4172-filled.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/PDFBOX-4172-filled.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <sha512>
@@ -1248,8 +1312,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12994791/flatten.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12994791/flatten.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/flatten.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <sha512>
@@ -1264,8 +1329,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12986337/stenotypeTest-3_rotate_no_flatten.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12986337/stenotypeTest-3_rotate_no_flatten.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/stenotypeTest-3_rotate_no_flatten.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <sha512>
@@ -1280,8 +1346,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/13005793/f1040sb%20test.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/13005793/f1040sb%20test.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/f1040sb%20test.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <sha512>
@@ -1296,8 +1363,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/13011410/PDFBOX-4955.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/13011410/PDFBOX-4955.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/PDFBOX-4955.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <sha512>
@@ -1312,8 +1380,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/13013354/POPPLER-806.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/13013354/POPPLER-806.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/POPPLER-806.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <sha512>
@@ -1328,8 +1397,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/13013384/POPPLER-806-acrobat.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/13013384/POPPLER-806-acrobat.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/POPPLER-806-acrobat.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <sha512>
@@ -1344,8 +1414,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12881055/merge-test.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12881055/merge-test.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/merge-test.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <sha512>
@@ -1360,8 +1431,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/13014447/merge-test-na-acrobat.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/13014447/merge-test-na-acrobat.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/merge-test-na-acrobat.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <sha512>
@@ -1376,8 +1448,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/13016993/poppler-14433-0.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/13016993/poppler-14433-0.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/poppler-14433-0.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <sha512>
@@ -1394,8 +1467,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/13016941/REDHAT-1301016-0.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/13016941/REDHAT-1301016-0.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/REDHAT-1301016-0.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <sha512>
@@ -1410,8 +1484,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12908175/AML1.PDF -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12908175/AML1.PDF
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/AML1.PDF
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <sha512>
@@ -1426,8 +1501,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/13016992/PDFBOX-3891-5.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/13016992/PDFBOX-3891-5.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/PDFBOX-3891-5.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <sha512>
@@ -1442,8 +1518,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12848122/SF1199AEG%20(Complete).pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12848122/SF1199AEG%20(Complete).pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/SF1199AEG.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <outputFileName>SF1199AEG.pdf</outputFileName>
@@ -1459,8 +1536,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/13016994/PDFBOX-4131-0.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/13016994/PDFBOX-4131-0.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/PDFBOX-4131-0.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <sha512>
@@ -1475,8 +1553,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12866226/D1790B.PDF -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12866226/D1790B.PDF
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/D1790B.PDF
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <sha512>
@@ -1491,8 +1570,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/13017227/stringwidth.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/13017227/stringwidth.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/stringwidth.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <sha512>
@@ -1507,8 +1587,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/13002695/13._Korona_szallo_vegzes_13.09.26.eredeti.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/13002695/13._Korona_szallo_vegzes_13.09.26.eredeti.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/PDFBOX-4831.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <outputFileName>PDFBOX-4831.pdf</outputFileName>
@@ -1524,8 +1605,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/13047577/PDFBOX-5484.ttf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/13047577/PDFBOX-5484.ttf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/fonts/PDFBOX-5484.ttf
                             </url>
                             <outputDirectory>${project.build.directory}/fonts</outputDirectory>
                             <outputFileName>PDFBOX-5484.ttf</outputFileName>
@@ -1541,8 +1623,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/13061409/incorrect_password.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/13061409/incorrect_password.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/PDFBOX-5639.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <outputFileName>PDFBOX-5639.pdf</outputFileName>
@@ -1558,8 +1641,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/12962991/NeS1078.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/12962991/NeS1078.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/PDFBOX-4490.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <outputFileName>PDFBOX-4490.pdf</outputFileName>
@@ -1575,8 +1659,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/13025718/lotus.jpg -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/13025718/lotus.jpg
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/imgs/PDFBOX-5196-lotus.jpg
                             </url>
                             <outputDirectory>${project.build.directory}/imgs</outputDirectory>
                             <outputFileName>PDFBOX-5196-lotus.jpg</outputFileName>
@@ -1592,8 +1677,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <!-- originally: https://issues.apache.org/jira/secure/attachment/13065529/source.pdf -->
                             <url>
-                                https://issues.apache.org/jira/secure/attachment/13065529/source.pdf
+                                https://raw.githubusercontent.com/torakiki/sambox-test-assets/9a516b8df8a1344e5b1cb7ae079e502a5547082a/pdfs/PDFBOX-5742.pdf
                             </url>
                             <outputDirectory>${project.build.directory}/pdfs</outputDirectory>
                             <outputFileName>PDFBOX-5742.pdf</outputFileName>
