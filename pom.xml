@@ -56,8 +56,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.javadoc.failOnError>false</maven.javadoc.failOnError>
         <bouncycastle.version>1.84</bouncycastle.version>
-        <fontbox.version>2.0.36</fontbox.version>
-        <xmpbox.version>3.0.7</xmpbox.version>
+        <fontbox.version>2.0.37</fontbox.version>
+        <xmpbox.version>3.0.8</xmpbox.version>
         <sejda.commons.version>3.0.1</sejda.commons.version>
         <sejda.io.version>5.0.0.M1</sejda.io.version>
         <slf4j.version>2.0.18</slf4j.version>
