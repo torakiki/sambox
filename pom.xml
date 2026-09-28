@@ -5,7 +5,7 @@
     <artifactId>sambox</artifactId>
     <packaging>jar</packaging>
     <name>sambox</name>
-    <version>4.0.0.M8</version>
+    <version>4.0.0.M9-SNAPSHOT</version>
     <url>https://github.com/torakiki/sambox</url>
 
     <description>
