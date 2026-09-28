@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xpacket begin='' id='W5M0MpCehiHzreSzNTczkc9d' bytes='1361'?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+>
+    <rdf:Description xmlns="http://ns.adobe.com/pdf/1.3/" xmlns:pdf="http://ns.adobe.com/pdf/1.3/"
+                     about="">
+        <pdf:CreationDate>2002-12-17T16:40:13Z</pdf:CreationDate>
+        <pdf:ModDate>2002-12-18T21:07:02+09:00</pdf:ModDate>
+        <pdf:Producer>Acrobat Distiller 5.0.5 (Windows)</pdf:Producer>
+        <pdf:Author>Chuck Norris</pdf:Author>
+        <pdf:Creator>FrameMaker 6.0</pdf:Creator>
+        <pdf:Title>This is the title</pdf:Title>
+    </rdf:Description>
+    <rdf:Description xmlns="http://ns.adobe.com/xap/1.0/" xmlns:xap="http://ns.adobe.com/xap/1.0/"
+                     about="">
+        <xap:CreateDate>2002-12-17T16:40:13Z</xap:CreateDate>
+        <xap:ModifyDate>2002-12-18T21:07:02+09:00</xap:ModifyDate>
+        <xap:Author>Chuck Norris</xap:Author>
+        <xap:MetadataDate>2002-12-18T21:07:02+09:00</xap:MetadataDate>
+        <xap:Title>
+            <rdf:Alt>
+                <rdf:li xml:lang="x-default">This is the title</rdf:li>
+            </rdf:Alt>
+        </xap:Title>
+    </rdf:Description>
+    <rdf:Description xmlns="http://purl.org/dc/elements/1.1/"
+                     xmlns:dc="http://purl.org/dc/elements/1.1/" about="">
+        <dc:creator>Chuck Norris</dc:creator>
+        <dc:title>This is the title</dc:title>
+        <dc:description>This is the description</dc:description>
+    </rdf:Description>
+</rdf:RDF><?xpacket end='r'?>

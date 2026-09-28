@@ -26,11 +26,14 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.util.GregorianCalendar;
+import java.util.function.Consumer;
 
 import org.apache.xmpbox.XMPMetadata;
 import org.apache.xmpbox.schema.AdobePDFSchema;
 import org.apache.xmpbox.schema.DublinCoreSchema;
 import org.apache.xmpbox.schema.XMPBasicSchema;
+import org.apache.xmpbox.schema.XMPSchema;
+import org.apache.xmpbox.type.AbstractSimpleProperty;
 import org.apache.xmpbox.xml.DomXmpParser;
 import org.apache.xmpbox.xml.XmpParsingException;
 import org.apache.xmpbox.xml.XmpSerializer;
@@ -102,12 +105,35 @@ public class DefaultDocumentXmpMetadataProvider implements DocumentXmpMetadataPr
         DublinCoreSchema dcSchema = ofNullable(metadata.getDublinCoreSchema()).orElseGet(
                 metadata::createAndAddDublinCoreSchema);
         dcSchema.setFormat("application/pdf");
+        sanitizeValues(dcSchema);
         ofNullable(documentInformation.getTitle()).ifPresent(dcSchema::setTitle);
         ofNullable(documentInformation.getSubject()).ifPresent(dcSchema::setDescription);
         ofNullable(documentInformation.getAuthor()).filter(
                         a -> ofNullable(dcSchema.getCreators()).map(l -> !l.contains(a)).orElse(true))
                 .ifPresent(dcSchema::addCreator);
         return metadata;
+    }
+
+    /**
+     * Malformed XMP can have array properties written as simple values (e.g.
+     * {@code <dc:creator>Name</dc:creator>}), which the lenient parser accepts. We replace the
+     * simple value with an array containing it.
+     */
+    private static void sanitizeValues(DublinCoreSchema dcSchema)
+    {
+        simpleToArrayProperty(dcSchema, DublinCoreSchema.CREATOR, dcSchema::addCreator);
+        simpleToArrayProperty(dcSchema, DublinCoreSchema.TITLE, dcSchema::setTitle);
+        simpleToArrayProperty(dcSchema, DublinCoreSchema.DESCRIPTION, dcSchema::setDescription);
+    }
+
+    private static void simpleToArrayProperty(XMPSchema schema, String name,
+            Consumer<String> arrayValueSetter)
+    {
+        if (schema.getAbstractProperty(name) instanceof AbstractSimpleProperty simple)
+        {
+            schema.getContainer().removeProperty(simple);
+            arrayValueSetter.accept(simple.getStringValue());
+        }
     }
 
     private XMPMetadata getOrCreateXmpMetadata(PDDocument document)
