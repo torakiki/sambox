@@ -55,20 +55,20 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.javadoc.failOnError>false</maven.javadoc.failOnError>
-        <bouncycastle.version>1.84</bouncycastle.version>
+        <bouncycastle.version>1.86</bouncycastle.version>
         <fontbox.version>2.0.37</fontbox.version>
         <xmpbox.version>3.0.8</xmpbox.version>
         <sejda.commons.version>3.0.1</sejda.commons.version>
         <sejda.io.version>5.0.0.M1</sejda.io.version>
-        <slf4j.version>2.0.18</slf4j.version>
+        <slf4j.version>2.0.19</slf4j.version>
         <diffutils.version>4.17</diffutils.version>
         <mockito.version>5.23.0</mockito.version>
-        <tinylog.version>2.7.0</tinylog.version>
-        <archunit.version>1.4.2</archunit.version>
+        <tinylog.version>2.8.0</tinylog.version>
+        <archunit.version>1.5.0</archunit.version>
         <hamcrest.version>3.0</hamcrest.version>
         <junit.version>5.14.4</junit.version>
         <jbig2imageio.version>3.0.5</jbig2imageio.version>
-        <equalsverifier.version>4.5</equalsverifier.version>
+        <equalsverifier.version>4.5.2</equalsverifier.version>
         <jai-imageio-core.version>1.4.0</jai-imageio-core.version>
         <brotli.dec.version>0.1.2</brotli.dec.version>
     </properties>
