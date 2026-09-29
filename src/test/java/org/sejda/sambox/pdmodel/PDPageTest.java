@@ -17,10 +17,12 @@
 package org.sejda.sambox.pdmodel;
 
 import static java.util.Objects.nonNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static java.util.Objects.requireNonNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.sejda.sambox.cos.COSDictionary.of;
 
 import java.awt.Point;
@@ -30,7 +32,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Objects;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
@@ -152,6 +154,153 @@ public class PDPageTest
         assertEquals(page.getCropBox(), mediaBoxRect);
     }
 
+    /**
+     * Matches pdf.js 6.4 dev (91041fb) and PDFium (425098b)
+     */
+    @Test
+    public void cropBoxZeroWidth()
+    {
+        assertCropBoxFallsBackToMediaBox(toArray(100, 100, 100, 500));
+    }
+
+    /**
+     * Matches pdf.js 6.4 dev (91041fb) and PDFium (425098b)
+     */
+    @Test
+    public void cropBoxZeroHeight()
+    {
+        assertCropBoxFallsBackToMediaBox(toArray(100, 100, 200, 100));
+    }
+
+    /**
+     * Matches pdf.js 6.4 dev (91041fb) and PDFium (425098b)
+     */
+    @Test
+    public void cropBoxNonNumericElementResultingInZeroWidth()
+    {
+        assertCropBoxFallsBackToMediaBox(
+                new COSArray(COSInteger.ZERO, COSInteger.ZERO, COSName.getPDFName("Foo"),
+                        COSInteger.get(500)));
+    }
+
+    /**
+     * Matches pdf.js 6.4 dev (91041fb) and PDFium (425098b)
+     */
+    @Test
+    public void cropBoxNullElementsOnly()
+    {
+        assertCropBoxFallsBackToMediaBox(
+                new COSArray(COSNull.NULL, COSNull.NULL, COSNull.NULL, COSNull.NULL));
+    }
+
+    /**
+     * Matches pdf.js 6.4 dev (91041fb) and PDFium (425098b)
+     */
+    @Test
+    public void cropBoxTooShort()
+    {
+        assertCropBoxFallsBackToMediaBox(
+                new COSArray(COSInteger.ZERO, COSInteger.ZERO, COSInteger.get(200)));
+    }
+
+    /**
+     * Matches pdf.js 6.4 dev (91041fb), PDFium (425098b) returns an empty page instead
+     */
+    @Test
+    public void cropBoxOutsideMediaBox()
+    {
+        assertCropBoxFallsBackToMediaBox(toArray(400, 0, 500, 500));
+    }
+
+    /**
+     * Matches pdf.js 6.4 dev (91041fb), PDFium (425098b) returns an empty page instead
+     */
+    @Test
+    public void cropBoxTouchingMediaBoxEdge()
+    {
+        assertCropBoxFallsBackToMediaBox(toArray(287, 0, 400, 500));
+    }
+
+    /**
+     * Matches pdf.js 6.4 dev (91041fb) and PDFium (425098b)
+     */
+    @Test
+    public void cropBoxInvertedCoordinates()
+    {
+        PDPage page = new PDPage();
+        page.setMediaBox(new PDRectangle(toArray(0, 0, 287, 831)));
+        page.getCOSObject().setItem(COSName.CROP_BOX, toArray(200, 500, 10, 20));
+        assertEquals(new PDRectangle(toArray(10, 20, 200, 500)), page.getCropBox());
+    }
+
+    /**
+     * Matches pdf.js 6.4 dev (91041fb) and PDFium (425098b)
+     */
+    @Test
+    public void cropBoxIndirectNumbers() throws IOException
+    {
+        assertEquals(new PDRectangle(toArray(0, 0, 200, 300)),
+                cropBoxOf("cropbox-indirect-numbers.pdf"));
+    }
+
+    /**
+     * Matches pdf.js 6.4 dev (91041fb) and PDFium (425098b)
+     */
+    @Test
+    public void cropBoxIndirectZeros() throws IOException
+    {
+        assertEquals(new PDRectangle(toArray(0, 0, 287, 831)),
+                cropBoxOf("cropbox-indirect-zeros.pdf"));
+    }
+
+    /**
+     * Matches pdf.js 6.4 dev (91041fb) and PDFium (425098b)
+     */
+    @Test
+    public void cropBoxIndirectRefToMissingObject() throws IOException
+    {
+        assertEquals(new PDRectangle(toArray(0, 0, 287, 831)),
+                cropBoxOf("cropbox-missing-object-element.pdf"));
+    }
+
+    /**
+     * Matches PDFium (425098b), pdf.js 6.4 dev (91041fb) falls back to the MediaBox instead
+     */
+    @Test
+    public void cropBoxDanglingRefFallsBackToInherited() throws IOException
+    {
+        assertEquals(new PDRectangle(toArray(10, 10, 100, 100)),
+                cropBoxOf("cropbox-dangling-ref.pdf"));
+    }
+
+    /**
+     * Matches pdf.js 6.4 dev (91041fb) and PDFium (425098b)
+     */
+    @Test
+    public void cropBoxInvalidShadowsInherited() throws IOException
+    {
+        assertEquals(new PDRectangle(toArray(0, 0, 287, 831)),
+                cropBoxOf("cropbox-invalid-shadows-inherited.pdf"));
+    }
+
+    private static PDRectangle cropBoxOf(String resource) throws IOException
+    {
+        try (var doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                requireNonNull(PDPageTest.class.getResourceAsStream("/sambox/" + resource)))))
+        {
+            return doc.getPage(0).getCropBox();
+        }
+    }
+
+    private void assertCropBoxFallsBackToMediaBox(COSArray cropBox)
+    {
+        PDPage page = new PDPage();
+        PDRectangle mediaBoxRect = new PDRectangle(toArray(0, 0, 287, 831));
+        page.setMediaBox(mediaBoxRect);
+        page.getCOSObject().setItem(COSName.CROP_BOX, cropBox);
+        assertEquals(mediaBoxRect, page.getCropBox());
+    }
+
     @Test
     public void cropBoxCoordinatesToDraw()
     {
@@ -222,7 +371,7 @@ public class PDPageTest
         }
 
         PDDocument read = PDFParser.parse(SeekableSources.seekableSourceFrom(tempFile));
-        assertFalse("", read.getPage(0).getContentStreams().hasNext());
+        assertFalse(read.getPage(0).getContentStreams().hasNext());
     }
 
     @Test
@@ -287,7 +436,7 @@ public class PDPageTest
         {
 
             PDField field = doc.getDocumentCatalog().getAcroForm().getField("radioBtn");
-            assertTrue(field instanceof PDRadioButton);
+            assertInstanceOf(PDRadioButton.class, field);
         }
     }
 

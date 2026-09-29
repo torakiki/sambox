@@ -346,16 +346,22 @@ public class PDPage implements COSObjectable, PDContentStream
     /**
      * A rectangle, expressed in default user space units, defining the visible region of default
      * user space. When the page is displayed or printed, its contents are to be clipped (cropped)
-     * to this rectangle.
+     * to this rectangle. The crop box is clipped to the media box and, if the result has a zero or negative width or height, the
+     * media box is returned instead.
      */
     public PDRectangle getCropBox()
     {
         try
         {
             COSBase base = PDPageTree.getInheritableAttribute(page, COSName.CROP_BOX);
-            if (base instanceof COSArray array && !isNullEmptyOrOnlyZeros(array))
+            if (base instanceof COSArray array)
             {
-                return clipToMediaBox(new PDRectangle(array));
+                var cropBox = clipToMediaBox(new PDRectangle(array));
+                if (cropBox.getWidth() > 0 && cropBox.getHeight() > 0)
+                {
+                    return cropBox;
+                }
+                LOG.warn("Empty or invalid CropBox {}, falling back to the MediaBox", array);
             }
         }
         catch (Exception ex)
@@ -364,32 +370,6 @@ public class PDPage implements COSObjectable, PDContentStream
         }
 
         return getMediaBox();
-    }
-
-    private boolean isNullEmptyOrOnlyZeros(COSArray array)
-    {
-        if (array == null || array.isEmpty())
-        {
-            return true;
-        }
-
-        for (int i = 0; i < array.size(); i++)
-        {
-            COSBase element = array.get(i);
-            if (element instanceof COSNumber)
-            {
-                if (((COSNumber) element).floatValue() != 0)
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                // Non-numeric element found
-                return false;
-            }
-        }
-        return true;
     }
 
     public PDRectangle getCropBoxRaw()

@@ -1,0 +1,56 @@
+%PDF-1.7
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 /CropBox [10 10 100 100] >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 287 831] /CropBox 99 0 R /Contents 7 0 R /Resources << /Font << /F1 8 0 R >> >> >>
+endobj
+4 0 obj
+200
+endobj
+5 0 obj
+300
+endobj
+6 0 obj
+0
+endobj
+7 0 obj
+<< /Length 547 >>
+stream
+0.9 0.9 0.9 rg 0 0 287 831 re f
+1 0.55 0.55 rg 10 10 90 90 re f
+0 g
+BT /F1 7 Tf 14 55.0 Td (Parent CropBox) Tj ET
+0 g
+BT /F1 11 Tf 10 805 Td (cropbox-dangling-ref.pdf) Tj ET
+BT /F1 9 Tf 10 789 Td (MediaBox: [0 0 287 831]) Tj ET
+BT /F1 9 Tf 10 775 Td (Page CropBox: 99 0 R) Tj ET
+BT /F1 9 Tf 10 761 Td (Parent CropBox: [10 10 100 100]) Tj ET
+BT /F1 9 Tf 10 747 Td (Expected:) Tj ET
+BT /F1 9 Tf 10 733 Td (pdf.js: whole page) Tj ET
+BT /F1 9 Tf 10 719 Td (PDFium, SAMBox: red area only) Tj ET
+BT /F1 9 Tf 10 705 Td ((object 99 does not exist)) Tj ET
+endstream
+endobj
+8 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 9
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000140 00000 n 
+0000000282 00000 n 
+0000000301 00000 n 
+0000000320 00000 n 
+0000000337 00000 n 
+0000000934 00000 n 
+trailer
+<< /Size 9 /Root 1 0 R >>
+startxref
+1004
+%%EOF
