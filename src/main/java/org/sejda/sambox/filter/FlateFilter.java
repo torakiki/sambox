@@ -16,11 +16,6 @@
  */
 package org.sejda.sambox.filter;
 
-import org.sejda.commons.util.IOUtils;
-import org.sejda.sambox.cos.COSDictionary;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -28,6 +23,11 @@ import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.Inflater;
+
+import org.sejda.commons.util.IOUtils;
+import org.sejda.sambox.cos.COSDictionary;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Decompresses data encoded using the zlib/deflate compression method, reproducing the original
@@ -68,8 +68,7 @@ final class FlateFilter extends Filter
     {
         byte[] buf = new byte[2048];
         // skip zlib header
-        in.read();
-        in.read();
+        in.readNBytes(2);
         int read = in.read(buf);
         if (read > 0)
         {
