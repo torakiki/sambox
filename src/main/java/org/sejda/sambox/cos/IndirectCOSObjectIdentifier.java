@@ -20,7 +20,7 @@ import static org.sejda.commons.util.RequireUtils.requireNotBlank;
 import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
 
 /**
- * Represent and indirect object identifier (as defined by chap. 7.3.10 of PDF 32000-1:2008 spec) with an additional
+ * Represent and indirect object identifier (as defined by chap. 7.3.10 of PDF 32000-1:2008 spec) with additional
  * information to identify the document this object belongs to.
  * 
  * @author Andrea Vacondio
