@@ -70,7 +70,7 @@ class AsyncPDFBodyObjectsWriter implements PDFBodyObjectsWriter
             {
                 executionException.set(e);
             }
-            catch (Exception e)
+            catch (Throwable e)
             {
                 executionException.set(new IOException(e));
             }

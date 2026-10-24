@@ -79,6 +79,14 @@ public class AsyncPDFBodyObjectsWriterTest
     }
 
     @Test
+    public void asyncErrorIsProcessed() throws IOException
+    {
+        doThrow(StackOverflowError.class).when(writer).writeObjectIfNotWritten(any());
+        victim.writeObject(mock(IndirectCOSObjectReference.class));
+        assertThrows(IOException.class, () -> victim.onWriteCompletion());
+    }
+
+    @Test
     public void closeWaitsForTheObjectBeingWritten() throws Exception
     {
         // close is called while an object is being written and must return only once the writing is done
