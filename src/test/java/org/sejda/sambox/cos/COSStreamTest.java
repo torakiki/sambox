@@ -37,6 +37,10 @@ import org.sejda.sambox.filter.FilterFactory;
 
 public class COSStreamTest
 {
+    // two rows [1,2,3] and [4,5,6] encoded with the PNG Up predictor: each row is prefixed by the
+    // predictor type (2) and holds the difference with the previous row
+    private static final byte[] PREDICTED = { 2, 1, 2, 3, 2, 3, 3, 3 };
+    private static final byte[] PREDICTOR_DECODED = { 1, 2, 3, 4, 5, 6 };
 
     /**
      * Tests encoding of a stream without any filter applied.
@@ -318,6 +322,45 @@ public class COSStreamTest
     }
 
     @Test
+    @DisplayName("removeCompression decodes the stream using the DecodeParms before removing them")
+    public void testRemoveCompressionDecodesWithPredictor() throws IOException
+    {
+        var stream = createPredictedStream(COSName.FLATE_DECODE, COSName.DECODE_PARMS,
+                predictorParms(), encodeData(PREDICTED, COSName.FLATE_DECODE));
+        assertTrue(stream.removeCompression());
+        assertNull(stream.getItem(COSName.FILTER));
+        assertNull(stream.getDictionaryObject(COSName.DECODE_PARMS, COSName.DP));
+        validateDecoded(stream, PREDICTOR_DECODED);
+    }
+
+    @Test
+    @DisplayName("removeCompression decodes the stream using the DP before removing it")
+    public void testRemoveCompressionDecodesWithPredictorInDP() throws IOException
+    {
+        var stream = createPredictedStream(COSName.FLATE_DECODE, COSName.DP, predictorParms(),
+                encodeData(PREDICTED, COSName.FLATE_DECODE));
+        assertTrue(stream.removeCompression());
+        assertNull(stream.getItem(COSName.FILTER));
+        assertNull(stream.getDictionaryObject(COSName.DECODE_PARMS, COSName.DP));
+        validateDecoded(stream, PREDICTOR_DECODED);
+    }
+
+    @Test
+    @DisplayName("removeCompression decodes a filter array using the DecodeParms before replacing them")
+    public void testRemoveCompressionArrayDecodesWithPredictor() throws IOException
+    {
+        var stream = createPredictedStream(
+                new COSArray(COSName.ASCII_HEX_DECODE, COSName.FLATE_DECODE), COSName.DECODE_PARMS,
+                new COSArray(COSNull.NULL, predictorParms()),
+                encodeData(encodeData(PREDICTED, COSName.FLATE_DECODE), COSName.ASCII_HEX_DECODE));
+        assertTrue(stream.removeCompression());
+        assertFalse(stream.hasFilter(COSName.FLATE_DECODE));
+        assertTrue(stream.hasFilter(COSName.ASCII_HEX_DECODE));
+        assertNull(stream.getDictionaryObject(COSName.DECODE_PARMS, COSName.DP));
+        validateDecoded(stream, PREDICTOR_DECODED);
+    }
+
+    @Test
     @DisplayName("removeCompression removes correct DecodeParms index from array")
     public void testRemoveCompressionRemovesDecodeParmsArrayIndex() throws IOException
     {
@@ -505,6 +548,27 @@ public class COSStreamTest
         ByteArrayOutputStream encoded = new ByteArrayOutputStream();
         encodingFilter.encode(new ByteArrayInputStream(original), encoded, new COSDictionary());
         return encoded.toByteArray();
+    }
+
+    private static COSDictionary predictorParms()
+    {
+        var parms = new COSDictionary();
+        parms.setInt(COSName.PREDICTOR, 12);
+        parms.setInt(COSName.COLUMNS, 3);
+        return parms;
+    }
+
+    private static COSStream createPredictedStream(COSBase filters, COSName parmsKey, COSBase parms,
+            byte[] encoded) throws IOException
+    {
+        var stream = new COSStream();
+        stream.setItem(COSName.FILTER, filters);
+        stream.setItem(parmsKey, parms);
+        try (var output = stream.createFilteredStream())
+        {
+            output.write(encoded);
+        }
+        return stream;
     }
 
     private static COSStream createStream(byte[] testString, COSBase filters) throws IOException

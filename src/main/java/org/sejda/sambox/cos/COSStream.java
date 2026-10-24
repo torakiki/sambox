@@ -545,8 +545,8 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
         {
             if (filters instanceof COSName name && isCompressionFilter(name))
             {
-                removeItems(COSName.DECODE_PARMS, COSName.DP);
                 setFilters(null);
+                removeItems(COSName.DECODE_PARMS, COSName.DP);
                 return true;
             }
             if (filters instanceof COSArray array && !containsDecodeOnlyFilter(array))
