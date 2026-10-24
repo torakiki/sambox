@@ -16,14 +16,21 @@
  */
 package org.sejda.sambox.output;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.sejda.sambox.cos.IndirectCOSObjectReference;
 
 /**
@@ -36,33 +43,71 @@ public class AsyncPDFBodyObjectsWriterTest
     private IndirectObjectsWriter writer;
     private AsyncPDFBodyObjectsWriter victim;
 
-    @Before
+    @BeforeEach
     public void setUp()
     {
         writer = mock(IndirectObjectsWriter.class);
         victim = new AsyncPDFBodyObjectsWriter(writer);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void nullConstructor()
+    @AfterEach
+    public void tearDown()
     {
-        new AsyncPDFBodyObjectsWriter(null);
+        victim.close();
     }
 
-    @Test(expected = IOException.class)
+    @Test
+    public void nullConstructor()
+    {
+        assertThrows(IllegalArgumentException.class, () -> new AsyncPDFBodyObjectsWriter(null));
+    }
+
+    @Test
     public void asyncIOExceptionIsProcessed() throws IOException
     {
         doThrow(IOException.class).when(writer).writeObjectIfNotWritten(any());
         victim.writeObject(mock(IndirectCOSObjectReference.class));
-        victim.onWriteCompletion();
+        assertThrows(IOException.class, () -> victim.onWriteCompletion());
     }
 
-    @Test(expected = IOException.class)
+    @Test
     public void asyncExceptionIsProcessed() throws IOException
     {
         doThrow(RuntimeException.class).when(writer).writeObjectIfNotWritten(any());
         victim.writeObject(mock(IndirectCOSObjectReference.class));
-        victim.onWriteCompletion();
+        assertThrows(IOException.class, () -> victim.onWriteCompletion());
     }
 
+    @Test
+    public void closeWaitsForTheObjectBeingWritten() throws Exception
+    {
+        // close is called while an object is being written and must return only once the writing is done
+        var writing = new CountDownLatch(1);
+        var written = new AtomicBoolean();
+        doAnswer(i -> {
+            writing.countDown();
+            Thread.sleep(200);
+            written.set(true);
+            return null;
+        }).when(writer).writeObjectIfNotWritten(any());
+        victim.writeObject(mock(IndirectCOSObjectReference.class));
+        writing.await();
+        victim.close();
+        assertTrue(written.get());
+    }
+
+    @Test
+    public void writeObjectAfterCloseFails()
+    {
+        victim.close();
+        assertThrows(IllegalStateException.class,
+                () -> victim.writeObject(mock(IndirectCOSObjectReference.class)));
+    }
+
+    @Test
+    public void closeTwice()
+    {
+        victim.close();
+        assertDoesNotThrow(victim::close);
+    }
 }

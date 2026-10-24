@@ -16,7 +16,9 @@
  */
 package org.sejda.sambox.output;
 
+import static java.util.Objects.nonNull;
 import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
+import static org.sejda.commons.util.RequireUtils.requireState;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
@@ -44,6 +46,7 @@ class AsyncPDFBodyObjectsWriter implements PDFBodyObjectsWriter
             target -> new Thread(null, target, "pdf-writer-thread", 0));
     private final AtomicReference<IOException> executionException = new AtomicReference<>();
     private final IndirectObjectsWriter writer;
+    private volatile boolean closed;
 
     AsyncPDFBodyObjectsWriter(IndirectObjectsWriter writer)
     {
@@ -58,7 +61,7 @@ class AsyncPDFBodyObjectsWriter implements PDFBodyObjectsWriter
         executor.execute(() -> {
             try
             {
-                if (executionException.get() == null)
+                if (!closed && executionException.get() == null)
                 {
                     writer.writeObjectIfNotWritten(ref);
                 }
@@ -76,10 +79,10 @@ class AsyncPDFBodyObjectsWriter implements PDFBodyObjectsWriter
 
     private void assertCanSubmitAsyncTask() throws IOException
     {
-        IOException previous = executionException.get();
-        if (previous != null)
+        requireState(!closed, "The writer is closed");
+        var previous = executionException.get();
+        if (nonNull(previous))
         {
-            executor.shutdownNow();
             throw previous;
         }
     }
@@ -111,9 +114,14 @@ class AsyncPDFBodyObjectsWriter implements PDFBodyObjectsWriter
 
     }
 
+    /**
+     * Discards the objects not yet written and waits for the one being written, if any, so that
+     * nothing is written once this method returns and the underlying writer can be safely closed.
+     */
     @Override
     public void close()
     {
-        executor.shutdown();
+        closed = true;
+        executor.close();
     }
 }
