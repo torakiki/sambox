@@ -23,7 +23,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
@@ -42,6 +46,7 @@ import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.COSObjectKey;
 import org.sejda.sambox.cos.COSStream;
+import org.sejda.sambox.pdmodel.encryption.SecurityHandler;
 import org.sejda.sambox.xref.CompressedXrefEntry;
 import org.sejda.sambox.xref.XrefEntry;
 
@@ -83,6 +88,22 @@ public class LazyIndirectObjectsProviderTest
         COSBase dictionary = victim.get(new COSObjectKey(4, 0));
         assertThat(dictionary, is(instanceOf(COSDictionary.class)));
         assertNotNull(((COSDictionary) dictionary).getItem(COSName.ANNOTS));
+    }
+
+    @Test
+    public void endobjIsReadBeforeDecrypting() throws IOException
+    {
+        // decrypting can parse other objects (e.g. resolving the page /Contents) moving the parser
+        parser = spy(new COSParser(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/simple_test.pdf")), victim));
+        victim.initializeWith(parser);
+        new XrefParser(parser).parse();
+        var handler = mock(SecurityHandler.class);
+        victim.initializeWith(handler);
+        victim.get(new COSObjectKey(4, 0));
+        var inOrder = inOrder(parser, handler);
+        inOrder.verify(parser).skipTokenIfValue(BaseCOSParser.ENDOBJ);
+        inOrder.verify(handler).decrypt(any(), eq(4L), eq(0L));
     }
 
     @Test

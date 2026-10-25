@@ -360,31 +360,31 @@ public abstract class SecurityHandler
     public void decrypt(COSBase obj, long objNum, long genNum) throws IOException
     {
         // PDFBOX-4477: only cache strings and streams, this improves speed and memory footprint
-        if (obj instanceof COSString)
+        if (obj instanceof COSString string)
         {
             if (objects.contains(obj))
             {
                 return;
             }
             objects.add(obj);
-            decryptString((COSString) obj, objNum, genNum);
+            decryptString(string, objNum, genNum);
         }
-        else if (obj instanceof COSStream)
+        else if (obj instanceof COSStream stream)
         {
             if (objects.contains(obj))
             {
                 return;
             }
             objects.add(obj);
-            decryptStream((COSStream) obj, objNum, genNum);
+            decryptStream(stream, objNum, genNum);
         }
-        else if (obj instanceof COSDictionary)
+        else if (obj instanceof COSDictionary dictionary)
         {
-            decryptDictionary((COSDictionary) obj, objNum, genNum);
+            decryptDictionary(dictionary, objNum, genNum);
         }
-        else if (obj instanceof COSArray)
+        else if (obj instanceof COSArray array)
         {
-            decryptArray((COSArray) obj, objNum, genNum);
+            decryptArray(array, objNum, genNum);
         }
     }
 

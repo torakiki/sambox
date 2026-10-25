@@ -203,15 +203,16 @@ class LazyIndirectObjectsProvider implements IndirectObjectsProvider
                         LOG.warn("Found double 'endstream' token for {}", xrefEntry);
                     }
                 }
+                if (!parser.skipTokenIfValue(ENDOBJ))
+                {
+                    LOG.warn("Missing 'endobj' token for {}", xrefEntry);
+                }
+                // decrypting can parse other objects, moving the parser, so it's done after endobj
                 if (securityHandler != null)
                 {
                     LOG.trace("Decrypting entry {}", xrefEntry);
                     securityHandler.decrypt(found, xrefEntry.getObjectNumber(),
                             xrefEntry.getGenerationNumber());
-                }
-                if (!parser.skipTokenIfValue(ENDOBJ))
-                {
-                    LOG.warn("Missing 'endobj' token for {}", xrefEntry);
                 }
 
                 if (found instanceof ExistingIndirectCOSObject existingIndirectCOSObject)
