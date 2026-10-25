@@ -34,7 +34,17 @@ import org.slf4j.LoggerFactory;
 /**
  * Implementation of a PDFBodyObjectsWriter that asynchronously writes {@link IndirectCOSObjectReference}. Objects are
  * written submitting a task to a single thread executor service.
- * 
+ * <ul>
+ * <li>Objects are written one at a time, in the order they are submitted. This is required since the value of an
+ * indirect /Length is set while writing its stream, which is submitted before it.</li>
+ * <li>Once written, the object is released (see {@link IndirectCOSObjectReference#releaseCOSObject()}).</li>
+ * <li>{@link #onWriteCompletion()} waits for all the submitted objects to be written, it's the only method that
+ * guarantees it.</li>
+ * <li>If writing an object fails, the remaining ones are skipped and the following calls to
+ * {@link #writeObject(IndirectCOSObjectReference)} and {@link #onWriteCompletion()} throw the failure.</li>
+ * <li>{@link #close()} discards the objects not yet written.</li>
+ * </ul>
+ *
  * @author Andrea Vacondio
  *
  */
