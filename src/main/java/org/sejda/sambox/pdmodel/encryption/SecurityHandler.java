@@ -414,7 +414,8 @@ public abstract class SecurityHandler
             {
                 byte[] buf = new byte[10];
                 // PDFBOX-3229 check case where metadata is not encrypted despite /EncryptMetadata missing
-                try (InputStream is = stream.getUnfilteredStream())
+                // we check the raw bytes, decoding them would fail if they are compressed and encrypted
+                try (InputStream is = stream.getFilteredStream())
                 {
                     is.read(buf);
                 }
