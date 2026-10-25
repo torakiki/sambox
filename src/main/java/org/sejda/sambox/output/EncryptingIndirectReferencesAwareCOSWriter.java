@@ -62,9 +62,16 @@ class EncryptingIndirectReferencesAwareCOSWriter extends IndirectReferencesAware
     {
         if (nonNull(context.encryptor()))
         {
-            context.encryptor().visit(value);
-            value.setForceHexForm(true);
+            // the same instance can be written more than once, we encrypt a copy to leave it untouched
+            var encrypted = new COSString(value.getBytes());
+            encrypted.encryptable(value.encryptable());
+            context.encryptor().visit(encrypted);
+            encrypted.setForceHexForm(true);
+            super.visit(encrypted);
         }
-        super.visit(value);
+        else
+        {
+            super.visit(value);
+        }
     }
 }
