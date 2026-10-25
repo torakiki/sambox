@@ -19,6 +19,10 @@ package org.sejda.sambox.encryption;
 import static org.bouncycastle.util.Arrays.concatenate;
 import static org.junit.Assert.assertArrayEquals;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
+import java.util.stream.IntStream;
+
 import org.junit.Test;
 
 /**
@@ -94,5 +98,23 @@ public class Algorithm2BTest
                         49 },
                 new Algorithm2B(u).computeHash(concatenate(ownerBytes, ownerKeySalt, u),
                         ownerBytes));
+    }
+
+    @Test
+    public void concurrentInstances() throws Exception
+    {
+        // every instance is used by a different thread, as when encrypting different documents
+        byte[] password = "Chuck".getBytes();
+        byte[] input = concatenate(password, userValidationSalt);
+        byte[] expected = new Algorithm2B().computeHash(input, password);
+        Callable<byte[]> hash = () -> new Algorithm2B().computeHash(input, password);
+        try (var executor = Executors.newFixedThreadPool(8))
+        {
+            var results = executor.invokeAll(IntStream.range(0, 200).mapToObj(i -> hash).toList());
+            for (var result : results)
+            {
+                assertArrayEquals(expected, result.get());
+            }
+        }
     }
 }

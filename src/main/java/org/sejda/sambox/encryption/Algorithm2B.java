@@ -22,8 +22,7 @@ import static org.bouncycastle.util.Arrays.copyOfRange;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -36,15 +35,10 @@ class Algorithm2B implements Algorithm2AHash
 {
 
     private static final BigInteger THREE = new BigInteger("3");
-    private static final Map<Integer, MessageDigest> HASHES = new HashMap<>();
 
-    static
-    {
-        HASHES.put(0, MessageDigests.sha256());
-        HASHES.put(1, MessageDigests.sha384());
-        HASHES.put(2, MessageDigests.sha512());
-    }
-
+    // MessageDigest is not thread safe, we don't share them between instances
+    private final List<MessageDigest> hashes = List.of(MessageDigests.sha256(),
+            MessageDigests.sha384(), MessageDigests.sha512());
     private final AESEncryptionAlgorithmEngine aes128 = AESEngineNoPadding.cbc();
     private final byte[] u;
 
@@ -61,7 +55,7 @@ class Algorithm2B implements Algorithm2AHash
     @Override
     public byte[] computeHash(byte[] input, byte[] password)
     {
-        byte[] k = copyOf(HASHES.get(0).digest(input), 32);
+        byte[] k = copyOf(hashes.get(0).digest(input), 32);
         byte[] e = new byte[0];
         for (int round = 0; round < 64 || (e[e.length - 1] & 0xFF) > round - 32; round++)
         {
@@ -72,7 +66,7 @@ class Algorithm2B implements Algorithm2AHash
                 k1 = concatenate(k1, k1Element);
             }
             e = aes128.encryptBytes(k1, copyOf(k, 16), copyOfRange(k, 16, 32));
-            k = HASHES.get(new BigInteger(1, copyOf(e, 16)).mod(THREE).intValue()).digest(e);
+            k = hashes.get(new BigInteger(1, copyOf(e, 16)).mod(THREE).intValue()).digest(e);
         }
         return copyOf(k, 32);
     }
