@@ -21,6 +21,7 @@ import static org.sejda.commons.util.RequireUtils.requireNotNullArg;
 import static org.sejda.commons.util.RequireUtils.requireState;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -105,13 +106,20 @@ class AsyncPDFBodyObjectsWriter implements PDFBodyObjectsWriter
         }
         catch (InterruptedException e)
         {
-            throw new IOException(e);
+            Thread.currentThread().interrupt();
+            var interrupted = new InterruptedIOException(
+                    "Interrupted while writing the document body");
+            interrupted.initCause(e);
+            throw interrupted;
         }
         catch (ExecutionException e)
         {
+            if (e.getCause() instanceof IOException cause)
+            {
+                throw cause;
+            }
             throw new IOException(e.getCause());
         }
-
     }
 
     /**

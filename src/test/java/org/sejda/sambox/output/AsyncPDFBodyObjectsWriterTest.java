@@ -17,6 +17,7 @@
 package org.sejda.sambox.output;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -25,6 +26,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -84,6 +86,40 @@ public class AsyncPDFBodyObjectsWriterTest
         doThrow(StackOverflowError.class).when(writer).writeObjectIfNotWritten(any());
         victim.writeObject(mock(IndirectCOSObjectReference.class));
         assertThrows(IOException.class, () -> victim.onWriteCompletion());
+    }
+
+    @Test
+    public void asyncIOExceptionIsRethrownAsIs() throws IOException
+    {
+        // the failure happens while onWriteCompletion is waiting for the writing to complete
+        var failure = new IOException("Failed");
+        doAnswer(i -> {
+            Thread.sleep(200);
+            throw failure;
+        }).when(writer).writeObjectIfNotWritten(any());
+        victim.writeObject(mock(IndirectCOSObjectReference.class));
+        assertSame(failure, assertThrows(IOException.class, () -> victim.onWriteCompletion()));
+    }
+
+    @Test
+    public void interruptedOnWriteCompletion() throws Exception
+    {
+        var release = new CountDownLatch(1);
+        doAnswer(i -> {
+            release.await();
+            return null;
+        }).when(writer).writeObjectIfNotWritten(any());
+        victim.writeObject(mock(IndirectCOSObjectReference.class));
+        Thread.currentThread().interrupt();
+        try
+        {
+            assertThrows(InterruptedIOException.class, () -> victim.onWriteCompletion());
+            assertTrue(Thread.interrupted());
+        }
+        finally
+        {
+            release.countDown();
+        }
     }
 
     @Test
