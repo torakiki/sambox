@@ -25,11 +25,10 @@ import static java.util.stream.Collectors.toCollection;
 import java.awt.geom.GeneralPath;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.fontbox.FontBoxFont;
 import org.sejda.sambox.cos.COSArray;
@@ -60,8 +59,9 @@ public abstract class PDSimpleFont extends PDFont
     protected GlyphList glyphList;
     private Boolean isSymbolic;
     private List<Float> widths;
-    private final Map<Integer, Float> codeToWidth = new HashMap<>();
-    private final Set<Integer> noUnicode = new HashSet<>(); // for logging
+    // standard 14 fonts are singletons and may be accessed concurrently
+    private final Map<Integer, Float> codeToWidth = new ConcurrentHashMap<>();
+    private final Set<Integer> noUnicode = ConcurrentHashMap.newKeySet(); // for logging
 
     /**
      * Constructor for embedding.
@@ -294,10 +294,9 @@ public abstract class PDSimpleFont extends PDFont
         }
 
         // if no value has been produced, there is no way to obtain Unicode for the character.
-        if (LOG.isWarnEnabled() && !noUnicode.contains(code))
+        // we keep track of which warnings have been issued, so we don't log multiple times
+        if (LOG.isWarnEnabled() && noUnicode.add(code))
         {
-            // we keep track of which warnings have been issued, so we don't log multiple times
-            noUnicode.add(code);
             if (name != null)
             {
                 LOG.warn("No Unicode mapping for " + name + " (" + code + ") in font " + getName());
