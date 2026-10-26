@@ -180,11 +180,11 @@ public class PDPage implements COSObjectable, PDContentStream
     public InputStream getContents() throws IOException
     {
         COSBase base = page.getDictionaryObject(COSName.CONTENTS);
-        if (base instanceof COSStream)
+        if (base instanceof COSStream stream)
         {
-            return ((COSStream) base).getUnfilteredStream();
+            return stream.getUnfilteredStream();
         }
-        if (base instanceof COSArray streams && ((COSArray) base).size() > 0)
+        if (base instanceof COSArray streams && !streams.isEmpty())
         {
             byte[] delimiter = new byte[] { '\n' };
             List<InputStream> inputStreams = new ArrayList<>();
@@ -203,18 +203,18 @@ public class PDPage implements COSObjectable, PDContentStream
     }
 
     /**
-     * Returns true if this page has contents.
+     * @return true if this page has contents.
      */
     public boolean hasContents()
     {
         COSBase contents = page.getDictionaryObject(COSName.CONTENTS);
-        if (contents instanceof COSStream)
+        if (contents instanceof COSStream stream)
         {
-            return ((COSStream) contents).size() > 0;
+            return !stream.isEmpty();
         }
-        if (contents instanceof COSArray)
+        if (contents instanceof COSArray array)
         {
-            return ((COSArray) contents).size() > 0;
+            return !array.isEmpty();
         }
         return false;
     }

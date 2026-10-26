@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.pdmodel;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -43,6 +44,7 @@ import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.cos.COSNumber;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.input.PDFParser;
+import org.sejda.sambox.pdmodel.PDPageContentStream.AppendMode;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.font.PDType0Font;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationLink;
@@ -54,6 +56,67 @@ import org.sejda.sambox.pdmodel.interactive.form.PDRadioButton;
  */
 public class PDPageTest
 {
+
+    @Test
+    public void hasUncompressedContents() throws IOException
+    {
+        try (var document = new PDDocument())
+        {
+            var page = new PDPage();
+            document.addPage(page);
+            drawSquare(document, page, AppendMode.OVERWRITE, 0);
+            assertTrue(page.hasContents());
+        }
+    }
+
+    @Test
+    public void hasParsedContents() throws IOException
+    {
+        try (var document = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                PDPageTest.class.getResourceAsStream("/sambox/text_annotation.pdf"))))
+        {
+            assertTrue(document.getPage(0).hasContents());
+        }
+    }
+
+    @Test
+    public void emptyContentStreamIsNoContents()
+    {
+        // like an empty content stream parsed from a file, the dictionary is not empty but there is no data
+        var stream = new COSStream();
+        stream.setInt(COSName.LENGTH, 0);
+        var page = new PDPage();
+        page.getCOSObject().setItem(COSName.CONTENTS, stream);
+        assertFalse(page.hasContents());
+    }
+
+    @Test
+    public void appendToUncompressedContents() throws IOException
+    {
+        try (var document = new PDDocument())
+        {
+            var page = new PDPage();
+            document.addPage(page);
+            drawSquare(document, page, AppendMode.OVERWRITE, 0);
+            drawSquare(document, page, AppendMode.APPEND, 20);
+            assertEquals(2,
+                    page.getCOSObject().getDictionaryObject(COSName.CONTENTS, COSArray.class)
+                            .size());
+            var written = new String(page.getContents().readAllBytes(), ISO_8859_1);
+            assertTrue(written.contains("0 0 10 10 re"));
+            assertTrue(written.contains("20 20 10 10 re"));
+        }
+    }
+
+    private static void drawSquare(PDDocument document, PDPage page, AppendMode mode,
+            float position) throws IOException
+    {
+        try (var contents = new PDPageContentStream(document, page, mode, false))
+        {
+            contents.addRect(position, position, 10, 10);
+            contents.fill();
+        }
+    }
 
     @Test
     public void nullBeads()
