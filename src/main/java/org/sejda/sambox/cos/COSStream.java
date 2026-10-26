@@ -27,7 +27,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UncheckedIOException;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.util.Optional;
@@ -638,11 +637,11 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
         return new MyByteArrayOutputStream(bytes -> this.unfiltered = bytes);
     }
 
-    public boolean isEmpty() throws IOException
+    public boolean isEmpty()
     {
         if (nonNull(existing))
         {
-            return existing.get().size() <= 0;
+            return existing.length <= 0;
         }
         return ofNullable(filtered).map(f -> (f.length <= 0))
                 .orElseGet(() -> ofNullable(unfiltered).map(u -> (u.length <= 0)).orElse(true));
@@ -753,30 +752,21 @@ public class COSStream extends COSDictionary implements Closeable, Encryptable
         public LazySeekableSourceViewHolder(SeekableSource source, long startingPosition,
                 long length)
         {
-            this.supplier = () -> {
-                try
-                {
-                    return Optional.ofNullable(this.sourceRef.get()).filter(SeekableSource::isOpen)
-                            .orElseThrow(() -> new IllegalStateException(
-                                    "The original SeekableSource has been closed"))
-                            .view(startingPosition, length);
-                }
-                catch (IOException e)
-                {
-                    throw new UncheckedIOException(e);
-                }
-            };
+            this.supplier = () -> Optional.ofNullable(this.sourceRef.get())
+                    .filter(SeekableSource::isOpen).orElseThrow(() -> new IllegalStateException(
+                            "The original SeekableSource has been closed"))
+                    .view(startingPosition, length);
             this.sourceRef = new WeakReference<>(source);
             this.length = length;
         }
 
-        SeekableSource get() throws IOException
+        SeekableSource get()
         {
             if (view == null)
             {
                 view = supplier.get();
             }
-            view.position(0);
+            view.reset();
             return view;
         }
 
