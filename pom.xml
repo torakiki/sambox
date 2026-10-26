@@ -59,7 +59,7 @@
         <fontbox.version>2.0.37</fontbox.version>
         <xmpbox.version>3.0.8</xmpbox.version>
         <sejda.commons.version>3.0.1</sejda.commons.version>
-        <sejda.io.version>6.0.0.M1</sejda.io.version>
+        <sejda.io.version>6.0.0.M2</sejda.io.version>
         <slf4j.version>2.0.19</slf4j.version>
         <diffutils.version>4.17</diffutils.version>
         <mockito.version>5.23.0</mockito.version>
