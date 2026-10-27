@@ -90,7 +90,7 @@ public class ContentStreamParser extends SourceReader
      */
     public Object nextParsedToken() throws IOException
     {
-        skipSpaces();
+        skipStrayDelimiters();
         long pos = position();
         COSBase token = cosParser.nextParsedToken();
         if (token != null)
@@ -99,6 +99,26 @@ public class ContentStreamParser extends SourceReader
         }
         position(pos);
         return nextOperator();
+    }
+
+    /**
+     * Skips closing delimiters that don't close anything (e.g. a ')' left by a broken producer),
+     * they are not valid tokens and would otherwise stop the parsing
+     */
+    private void skipStrayDelimiters() throws IOException
+    {
+        skipSpaces();
+        while (isStrayDelimiter(source().peek()))
+        {
+            LOG.warn("Skipping unexpected '{}' at offset {}", (char) source().peek(), position());
+            source().read();
+            skipSpaces();
+        }
+    }
+
+    private static boolean isStrayDelimiter(int c)
+    {
+        return c == ')' || c == ']' || c == '>';
     }
 
     private Object nextOperator() throws IOException
