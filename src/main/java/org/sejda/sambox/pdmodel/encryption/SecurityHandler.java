@@ -47,6 +47,7 @@ import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.cos.COSString;
+import org.sejda.sambox.encryption.SignatureUtils;
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -457,12 +458,7 @@ public abstract class SecurityHandler
             // PDFBOX-2936: avoid orphan /CF dictionaries found in US govt "I-" files
             return;
         }
-        COSBase type = dictionary.getDictionaryObject(COSName.TYPE);
-        boolean isSignature = COSName.SIG.equals(type) || COSName.DOC_TIME_STAMP.equals(type) ||
-                // PDFBOX-4466: /Type is optional, see
-                // https://ec.europa.eu/cefdigital/tracker/browse/DSS-1538
-                (dictionary.getDictionaryObject(COSName.CONTENTS) instanceof COSString
-                        && dictionary.getDictionaryObject(COSName.BYTERANGE) instanceof COSArray);
+        boolean isSignature = SignatureUtils.isSignature(dictionary);
         for (Map.Entry<COSName, COSBase> entry : dictionary.entrySet())
         {
             if (isSignature && COSName.CONTENTS.equals(entry.getKey()))

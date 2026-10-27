@@ -17,11 +17,14 @@
 package org.sejda.sambox.output;
 
 import static java.util.Objects.nonNull;
+import static org.sejda.sambox.encryption.SignatureUtils.isSignature;
 
 import java.io.IOException;
 
 import org.sejda.io.BufferedCountingChannelWriter;
 import org.sejda.io.CountingWritableByteChannel;
+import org.sejda.sambox.cos.COSDictionary;
+import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.cos.COSString;
 
@@ -53,6 +56,19 @@ class EncryptingIndirectReferencesAwareCOSWriter extends IndirectReferencesAware
         if (nonNull(context.encryptor()))
         {
             context.encryptor().visit(value);
+        }
+        super.visit(value);
+    }
+
+    @Override
+    public void visit(COSDictionary value) throws IOException
+    {
+        // getItem first, so we don't load the indirect /Contents of pages and other dictionaries
+        if (nonNull(context.encryptor()) && value.getItem(
+                COSName.CONTENTS) instanceof COSString contents && isSignature(value))
+        {
+            // the signature value is never encrypted (ISO 32000-2 7.6.2)
+            contents.encryptable(false);
         }
         super.visit(value);
     }
