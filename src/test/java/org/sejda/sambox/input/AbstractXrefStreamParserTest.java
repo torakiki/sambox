@@ -122,6 +122,32 @@ public class AbstractXrefStreamParserTest
     }
 
     @Test
+    public void parseNoIndexIgnoresRowsBeyondSize() throws IOException
+    {
+        Set<XrefEntry> found = new HashSet<>();
+        var victim = new AbstractXrefStreamParser(new COSParser(inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/xref_stream_no_index_trailing_row.txt"))))
+        {
+            @Override
+            void onTrailerFound(COSDictionary trailer)
+            {
+                assertNotNull(trailer);
+            }
+
+            @Override
+            void onEntryFound(XrefEntry entry)
+            {
+                assertNotNull(entry);
+                // PDF 32000-1 Table 17: /Index default value is [0 Size], the row after the last object is ignored
+                assertTrue(entry.getObjectNumber() < 10);
+                found.add(entry);
+            }
+        };
+        victim.parse(17);
+        assertEquals(10, found.size());
+    }
+
+    @Test
     public void parseNoW() throws IOException
     {
         var victim = new AbstractXrefStreamParser(new COSParser(inMemorySeekableSourceFrom(

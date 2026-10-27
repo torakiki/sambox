@@ -18,6 +18,7 @@ package org.sejda.sambox.input;
 
 import static java.util.Objects.nonNull;
 import static java.util.stream.LongStream.empty;
+import static java.util.stream.LongStream.range;
 import static java.util.stream.LongStream.rangeClosed;
 import static org.sejda.commons.util.RequireUtils.requireIOCondition;
 
@@ -103,7 +104,8 @@ abstract class AbstractXrefStreamParser
             int size = xrefStream.getInt(COSName.SIZE);
             requireIOCondition(size > 0 && size < MAX_XREF_ENTRIES,
                     "Invalid xref /Size value " + size);
-            objectNumbers = rangeClosed(0, size);
+            // PDF 32000-1 Table 17: /Index default value is [0 Size], objects from 0 to Size - 1.
+            objectNumbers = range(0, size);
         }
         else
         {
