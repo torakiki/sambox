@@ -56,14 +56,9 @@ final class ASCIIHexFilter extends Filter
         int value, firstByte, secondByte;
         try
         {
-            while ((firstByte = encoded.read()) != -1)
+            while ((firstByte = nextNonWhitespace(encoded)) != -1)
             {
-                // always after first char
-                while (isWhitespace(firstByte))
-                {
-                    firstByte = encoded.read();
-                }
-                if (firstByte == -1 || isEOD(firstByte))
+                if (isEOD(firstByte))
                 {
                     break;
                 }
@@ -73,7 +68,7 @@ final class ASCIIHexFilter extends Filter
                     LOG.error("Invalid hex, int: " + firstByte + " char: " + (char) firstByte);
                 }
                 value = REVERSE_HEX[firstByte] * 16;
-                secondByte = encoded.read();
+                secondByte = nextNonWhitespace(encoded);
 
                 if (secondByte == -1 || isEOD(secondByte))
                 {
@@ -95,6 +90,20 @@ final class ASCIIHexFilter extends Filter
         {
             throw new IOException("Illegal character in ASCIIHexFilter", e);
         }
+    }
+
+    /**
+     * ISO 32000-1 7.4.2: all white-space characters shall be ignored, also between the two digits
+     * of a byte
+     */
+    private int nextNonWhitespace(InputStream encoded) throws IOException
+    {
+        int c = encoded.read();
+        while (isWhitespace(c))
+        {
+            c = encoded.read();
+        }
+        return c;
     }
 
     // whitespace
