@@ -21,6 +21,7 @@ package org.sejda.sambox.filter;
 
 import static java.nio.charset.StandardCharsets.US_ASCII;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -43,7 +44,7 @@ public class ASCII85FilterTest
     @Test
     public void decodePartialGroup() throws IOException
     {
-        // ISO 32000-1 7.4.3: a final partial group of n + 1 characters is decoded to n bytes
+        // ISO 32000-2 7.4.3: a final partial group of n + 1 characters is decoded to n bytes
         assertEquals("abcdefghij", decode("@:E_WAS,RgBkd~>"));
     }
 
@@ -58,6 +59,22 @@ public class ASCII85FilterTest
     public void missingEODPartialGroup() throws IOException
     {
         assertEquals("abcdefghij", decode("@:E_WAS,RgBkd"));
+    }
+
+    @Test
+    public void whitespacesAreIgnored() throws IOException
+    {
+        // ISO 32000-2 7.4.3: all white-space characters shall be ignored
+        assertEquals("abcdefghij", decode("@:\tE_W\fAS\0,R g\r\nBkd~>"));
+    }
+
+    @Test
+    public void invalidByteFF()
+    {
+        // ISO 32000-2 7.4.3: characters other than ! through u, z, the ~> EOD marker and white-spaces shall cause an error
+        var encoded = new byte[] { '@', ':', 'E', '_', 'W', (byte) 0xFF, 'S', ',', 'R', 'g', '~',
+                '>' };
+        assertThrows(IOException.class, () -> decode(new ByteArrayInputStream(encoded)));
     }
 
     @Test

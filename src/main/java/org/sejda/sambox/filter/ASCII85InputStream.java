@@ -37,9 +37,6 @@ final class ASCII85InputStream extends FilterInputStream
 
     private static final char TERMINATOR = '~';
     private static final char OFFSET = '!';
-    private static final char NEWLINE = '\n';
-    private static final char RETURN = '\r';
-    private static final char SPACE = ' ';
     private static final char PADDING_U = 'u';
     private static final char Z = 'z';
 
@@ -77,18 +74,15 @@ final class ASCII85InputStream extends FilterInputStream
             index = 0;
             int k;
             byte z;
-            do
+            int c = nextNonWhitespace();
+            if (c == -1)
             {
-                int zz = (byte) in.read();
-                if (zz == -1)
-                {
-                    // missing ~> EOD marker, there's nothing left to decode
-                    eof = true;
-                    n = 0;
-                    return -1;
-                }
-                z = (byte) zz;
-            } while (z == NEWLINE || z == RETURN || z == SPACE);
+                // missing ~> EOD marker, there's nothing left to decode
+                eof = true;
+                n = 0;
+                return -1;
+            }
+            z = (byte) c;
 
             if (z == TERMINATOR)
             {
@@ -107,12 +101,9 @@ final class ASCII85InputStream extends FilterInputStream
                 ascii[0] = z; // may be EOF here....
                 for (k = 1; k < 5; ++k)
                 {
-                    do
-                    {
-                        int zz = (byte) in.read();
-                        // missing ~> EOD marker, the end of data behaves like the EOD and we decode the partial group
-                        z = zz == -1 ? (byte) TERMINATOR : (byte) zz;
-                    } while (z == NEWLINE || z == RETURN || z == SPACE);
+                    c = nextNonWhitespace();
+                    // missing ~> EOD marker, the end of data behaves like the EOD and we decode the partial group
+                    z = c == -1 ? (byte) TERMINATOR : (byte) c;
                     ascii[k] = z;
                     if (z == TERMINATOR)
                     {
@@ -161,6 +152,30 @@ final class ASCII85InputStream extends FilterInputStream
             }
         }
         return b[index++] & 0xFF;
+    }
+
+    /**
+     * ISO 32000-2 7.4.3: all white-space characters shall be ignored
+     *
+     * @return the next byte that is not a white-space or -1 at the end of the data
+     */
+    private int nextNonWhitespace() throws IOException
+    {
+        int c = in.read();
+        while (isWhitespace(c))
+        {
+            c = in.read();
+        }
+        return c;
+    }
+
+    /**
+     * @return true if the given byte is a white-space character as defined in ISO 32000-2 7.2.3,
+     * Table 1
+     */
+    private static boolean isWhitespace(int c)
+    {
+        return c == 0 || c == 9 || c == 10 || c == 12 || c == 13 || c == 32;
     }
 
     /**
