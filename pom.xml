@@ -60,11 +60,11 @@
         <xmpbox.version>3.0.8</xmpbox.version>
         <sejda.commons.version>3.0.1</sejda.commons.version>
         <sejda.io.version>6.0.0.M2</sejda.io.version>
-        <slf4j.version>2.0.19</slf4j.version>
+        <slf4j.version>2.0.20</slf4j.version>
         <diffutils.version>4.17</diffutils.version>
-        <mockito.version>5.23.0</mockito.version>
-        <tinylog.version>2.8.0</tinylog.version>
-        <archunit.version>1.5.0</archunit.version>
+        <mockito.version>5.24.0</mockito.version>
+        <tinylog.version>2.8.1</tinylog.version>
+        <archunit.version>1.5.1</archunit.version>
         <hamcrest.version>3.0</hamcrest.version>
         <junit.version>5.14.4</junit.version>
         <jbig2imageio.version>3.0.5</jbig2imageio.version>
