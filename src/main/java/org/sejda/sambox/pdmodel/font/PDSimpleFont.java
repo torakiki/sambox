@@ -494,7 +494,7 @@ public abstract class PDSimpleFont extends PDFont
             if (nonNull(value))
             {
                 this.widths = value.stream().map(COSBase::getCOSObject)
-                        .filter(e -> e instanceof COSNumber).map(n -> ((COSNumber) n).floatValue())
+                        .map(e -> e instanceof COSNumber n ? n.floatValue() : 0f)
                         .collect(toCollection(ArrayList::new));
             }
             else
