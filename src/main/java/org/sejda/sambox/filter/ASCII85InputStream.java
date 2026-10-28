@@ -82,7 +82,9 @@ final class ASCII85InputStream extends FilterInputStream
                 int zz = (byte) in.read();
                 if (zz == -1)
                 {
+                    // missing ~> EOD marker, there's nothing left to decode
                     eof = true;
+                    n = 0;
                     return -1;
                 }
                 z = (byte) zz;
@@ -108,12 +110,8 @@ final class ASCII85InputStream extends FilterInputStream
                     do
                     {
                         int zz = (byte) in.read();
-                        if (zz == -1)
-                        {
-                            eof = true;
-                            return -1;
-                        }
-                        z = (byte) zz;
+                        // missing ~> EOD marker, the end of data behaves like the EOD and we decode the partial group
+                        z = zz == -1 ? (byte) TERMINATOR : (byte) zz;
                     } while (z == NEWLINE || z == RETURN || z == SPACE);
                     ascii[k] = z;
                     if (z == TERMINATOR)
