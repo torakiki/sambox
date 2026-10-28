@@ -134,13 +134,10 @@ final class ASCII85InputStream extends FilterInputStream
                 for (k = 0; k < 5; ++k)
                 {
                     z = (byte) (ascii[k] - OFFSET);
-                    if (z < 0 || z > 93)
+                    // ISO 32000-2 7.4.3: only the characters ! through u (z is handled above) are valid in a group
+                    if (z < 0 || z > PADDING_U - OFFSET)
                     {
-                        n = 0;
-                        eof = true;
-                        ascii = null;
-                        b = null;
-                        throw new IOException("Invalid data in Ascii85 stream");
+                        throw invalidData();
                     }
                     t = (t * 85L) + z;
                 }
@@ -152,6 +149,20 @@ final class ASCII85InputStream extends FilterInputStream
             }
         }
         return b[index++] & 0xFF;
+    }
+
+    /**
+     * Stops the decoding
+     *
+     * @return the exception to throw for invalid data
+     */
+    private IOException invalidData()
+    {
+        n = 0;
+        eof = true;
+        ascii = null;
+        b = null;
+        return new IOException("Invalid data in Ascii85 stream");
     }
 
     /**

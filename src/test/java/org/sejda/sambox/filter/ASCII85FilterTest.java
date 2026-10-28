@@ -27,6 +27,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.sejda.sambox.cos.COSDictionary;
@@ -75,6 +76,23 @@ public class ASCII85FilterTest
         var encoded = new byte[] { '@', ':', 'E', '_', 'W', (byte) 0xFF, 'S', ',', 'R', 'g', '~',
                 '>' };
         assertThrows(IOException.class, () -> decode(new ByteArrayInputStream(encoded)));
+    }
+
+    @Test
+    public void invalidCharactersAfterU()
+    {
+        // ISO 32000-2 7.4.3: the encoding uses the characters ! through u, any other character shall cause an error
+        for (var invalid : List.of("v", "w", "x", "y", "{", "|", "}"))
+        {
+            assertThrows(IOException.class, () -> decode("@:E" + invalid + "W~>"), invalid);
+        }
+    }
+
+    @Test
+    public void zInsideGroup()
+    {
+        // ISO 32000-2 7.4.3: a z character in the middle of a group shall never occur
+        assertThrows(IOException.class, () -> decode("@:zE_~>"));
     }
 
     @Test
