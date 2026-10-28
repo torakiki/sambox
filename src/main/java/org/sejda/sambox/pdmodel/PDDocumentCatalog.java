@@ -343,8 +343,9 @@ public class PDDocumentCatalog implements COSObjectable
         var intents = root.getDictionaryObject(COSName.OUTPUT_INTENTS, COSArray.class);
         if (nonNull(intents))
         {
-            return intents.stream().filter(e -> e instanceof COSDictionary)
-                    .map(e -> (COSDictionary) e).map(PDOutputIntent::new).toList();
+            return intents.stream().map(COSBase::getCOSObject)
+                    .filter(COSDictionary.class::isInstance).map(COSDictionary.class::cast)
+                    .map(PDOutputIntent::new).collect(toCollection(ArrayList::new));
         }
         return new ArrayList<>();
     }

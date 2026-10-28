@@ -16,19 +16,21 @@
  */
 package org.sejda.sambox.pdmodel;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.sejda.commons.util.IOUtils;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSArray;
+import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.cos.IndirectCOSObjectReference;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.graphics.color.PDOutputIntent;
 import org.sejda.sambox.pdmodel.interactive.documentnavigation.destination.PDNamedDestination;
@@ -107,7 +109,25 @@ public class TestPDDocumentCatalogTest
     }
     
     @Test
-    public void testParsingInvalidNamesArray_KeyWithMissingValue() throws IOException {
+    public void indirectOutputIntents() throws IOException
+    {
+        try (PDDocument doc = new PDDocument())
+        {
+            PDDocumentCatalog catalog = doc.getDocumentCatalog();
+            COSDictionary intent = new COSDictionary();
+            intent.setString(COSName.OUTPUT_CONDITION_IDENTIFIER, "sRGB IEC61966-2.1");
+            catalog.getCOSObject().setItem(COSName.OUTPUT_INTENTS,
+                    new COSArray(new IndirectCOSObjectReference(10, 0, intent)));
+
+            List<PDOutputIntent> outputIntents = catalog.getOutputIntents();
+            assertEquals(1, outputIntents.size());
+            assertEquals("sRGB IEC61966-2.1", outputIntents.get(0).getOutputConditionIdentifier());
+        }
+    }
+
+    @Test
+    public void parsingInvalidNamesArrayKeyWithMissingValue() throws IOException
+    {
         PDDocument broken = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
                 getClass().getResourceAsStream("document_catalog_invalid_names_array.pdf")));
         broken.getDocumentCatalog().findNamedDestinationPage(new PDNamedDestination("PAGE_1"));
