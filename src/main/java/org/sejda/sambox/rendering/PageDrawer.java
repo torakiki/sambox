@@ -1526,9 +1526,16 @@ public class PageDrawer extends PDFGraphicsStreamEngine
             annotation.constructAppearances();
         }
 
+        PDRectangle rect = annotation.getRectangle();
+        if (rect == null)
+        {
+            // an annotation without /Rect has nowhere to be drawn
+            LOG.warn("Annotation {} has no /Rect, skipping", annotation.getSubtype());
+            return;
+        }
+
         if (annotation.isNoRotate() && getCurrentPage().getRotation() != 0)
         {
-            PDRectangle rect = annotation.getRectangle();
             AffineTransform savedTransform = graphics.getTransform();
             // "The upper-left corner of the annotation remains at the same point in
             // default user space; the annotation pivots around that point."
