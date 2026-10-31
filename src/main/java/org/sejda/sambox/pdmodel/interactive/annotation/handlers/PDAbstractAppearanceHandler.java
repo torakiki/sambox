@@ -33,6 +33,8 @@ import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationSquareCircle;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceDictionary;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceEntry;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Generic handler to generate the fields appearance.
@@ -65,9 +67,17 @@ public abstract class PDAbstractAppearanceHandler implements PDAppearanceHandler
         this.annotation = annotation;
     }
 
+    private static final Logger LOG = LoggerFactory.getLogger(PDAbstractAppearanceHandler.class);
+
     @Override
     public void generateAppearanceStreams()
     {
+        if (getRectangle() == null)
+        {
+            LOG.warn("Annotation {} has no /Rect, skipping appearance stream generation",
+                    annotation.getSubtype());
+            return;
+        }
         generateNormalAppearance();
         generateRolloverAppearance();
         generateDownAppearance();
