@@ -43,6 +43,8 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class PDAbstractAppearanceHandler implements PDAppearanceHandler
 {
+    private static final Logger LOG = LoggerFactory.getLogger(PDAbstractAppearanceHandler.class);
+
     private final PDAnnotation annotation;
 
     /**
@@ -66,8 +68,6 @@ public abstract class PDAbstractAppearanceHandler implements PDAppearanceHandler
     {
         this.annotation = annotation;
     }
-
-    private static final Logger LOG = LoggerFactory.getLogger(PDAbstractAppearanceHandler.class);
 
     @Override
     public void generateAppearanceStreams()

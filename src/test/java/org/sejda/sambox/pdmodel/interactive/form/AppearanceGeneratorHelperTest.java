@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.Collections;
 
 import org.junit.Test;
+import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSString;
 import org.sejda.sambox.pdmodel.PDDocument;
@@ -152,6 +153,21 @@ public class AppearanceGeneratorHelperTest
         field.setValue("Option\u2002One");
 
         // appearance generation must complete and produce a stream, not silently skip
+        assertNotNull(field.getWidgets().get(0).getNormalAppearanceStream());
+    }
+
+    @Test
+    public void fontWithoutName() throws IOException
+    {
+        PDTextField field = textField();
+        field.getWidgets().get(0).setRectangle(new PDRectangle(2, 2, 100, 20));
+        COSDictionary fontDictionary = new COSDictionary();
+        fontDictionary.setItem(COSName.TYPE, COSName.FONT);
+        fontDictionary.setItem(COSName.SUBTYPE, COSName.TYPE1);
+        field.setAppearanceOverrideFont(new PDType1Font(fontDictionary));
+
+        new AppearanceGeneratorHelper(field).setAppearanceValue("Some text");
+
         assertNotNull(field.getWidgets().get(0).getNormalAppearanceStream());
     }
 

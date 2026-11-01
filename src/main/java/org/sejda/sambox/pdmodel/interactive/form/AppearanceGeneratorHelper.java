@@ -543,10 +543,11 @@ public class AppearanceGeneratorHelper
                 () -> ofNullable(defaultAppearance.getFont())).orElse(PDType1Font.HELVETICA());
 
         requireNotNullArg(font, "font is null, check whether /DA entry is incomplete or incorrect");
-        if (font.getName() != null && font.getName().contains("+"))
+        var fontName = font.getName();
+        if (fontName != null && fontName.contains("+"))
         {
             LOG.warn("Font '" + defaultAppearance.getFontName().getName() + "' of field '"
-                    + field.getFullyQualifiedName() + "' contains subsetted font '" + font.getName()
+                    + field.getFullyQualifiedName() + "' contains subsetted font '" + fontName
                     + "'");
             LOG.warn("This may bring trouble with PDField.setValue(), PDAcroForm.flatten() or "
                     + "PDAcroForm.refreshAppearances()");
