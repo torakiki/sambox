@@ -61,7 +61,7 @@
         <slf4j.version>2.0.17</slf4j.version>
         <diffutils.version>4.12</diffutils.version>
         <mockito.version>5.18.0</mockito.version>
-        <tinylog.version>2.7.0</tinylog.version>
+        <tinylog.version>2.8.1</tinylog.version>
         <archunit.version>1.4.1</archunit.version>
         <hamcrest.version>3.0</hamcrest.version>
         <junit.version>5.13.3</junit.version>
