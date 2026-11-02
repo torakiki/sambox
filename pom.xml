@@ -65,7 +65,7 @@
         <archunit.version>1.4.1</archunit.version>
         <hamcrest.version>3.0</hamcrest.version>
         <junit.version>5.13.3</junit.version>
-        <jbig2imageio.version>3.0.4</jbig2imageio.version>
+        <jbig2imageio.version>3.0.5</jbig2imageio.version>
         <equalsverifier.version>4.0.4</equalsverifier.version>
         <jai-imageio-core.version>1.4.0</jai-imageio-core.version>
     </properties>
