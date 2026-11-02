@@ -51,7 +51,7 @@ public final class PDDeviceNAttributes extends PDDictionaryWrapper
      */
     public PDDeviceNAttributes(COSDictionary attributes)
     {
-        super(attributes);
+        super(attributes == null ? new COSDictionary() : attributes);
     }
 
     /**

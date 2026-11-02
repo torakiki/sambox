@@ -35,6 +35,8 @@ import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSNull;
 import org.sejda.sambox.pdmodel.common.function.PDFunction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * DeviceN colour spaces may contain an arbitrary number of colour components. DeviceN represents a
@@ -47,6 +49,8 @@ import org.sejda.sambox.pdmodel.common.function.PDFunction;
  */
 public class PDDeviceN extends PDSpecialColorSpace
 {
+    private static final Logger LOG = LoggerFactory.getLogger(PDDeviceN.class);
+    
     // array indexes
     private static final int COLORANT_NAMES = 1;
     private static final int ALTERNATE_CS = 2;
@@ -92,8 +96,15 @@ public class PDDeviceN extends PDSpecialColorSpace
 
         if (array.size() > DEVICEN_ATTRIBUTES)
         {
-            attributes = new PDDeviceNAttributes(
-                    (COSDictionary) array.getObject(DEVICEN_ATTRIBUTES));
+            COSBase base = array.getObject(DEVICEN_ATTRIBUTES);
+            if (base instanceof COSDictionary attributesDict)
+            {
+                attributes = new PDDeviceNAttributes(attributesDict);
+            }
+            else if (base != null)
+            {
+                LOG.warn("DeviceN attributes ignored, expected a dictionary but got {}", base);
+            }
         }
         List<String> colorantNames = getColorantNames();
         initColorConversionCache(colorantNames);
