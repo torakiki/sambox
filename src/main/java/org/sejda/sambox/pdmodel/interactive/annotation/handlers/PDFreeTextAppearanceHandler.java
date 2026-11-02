@@ -320,6 +320,10 @@ public class PDFreeTextAppearanceHandler extends PDAbstractAppearanceHandler
             if (pathsArray.length > 0)
             {
                 PDRectangle rect = getRectangle();
+                if (rect == null)
+                {
+                    return;
+                }
 
                 // Adjust rectangle
                 // important to do this after the rectangle has been painted, because the

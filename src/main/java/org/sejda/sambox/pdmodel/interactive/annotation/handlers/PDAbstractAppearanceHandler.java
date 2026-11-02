@@ -209,6 +209,11 @@ public abstract class PDAbstractAppearanceHandler implements PDAppearanceHandler
      */
     PDRectangle getPaddedRectangle(PDRectangle rectangle, float padding)
     {
+        if (rectangle == null)
+        {
+            return null;
+        }
+        
         return new PDRectangle(rectangle.getLowerLeftX() + padding,
                 rectangle.getLowerLeftY() + padding, rectangle.getWidth() - 2 * padding,
                 rectangle.getHeight() - 2 * padding);
@@ -227,7 +232,7 @@ public abstract class PDAbstractAppearanceHandler implements PDAppearanceHandler
      */
     PDRectangle addRectDifferences(PDRectangle rectangle, float[] differences)
     {
-        if (differences == null || differences.length != 4)
+        if (rectangle == null || differences == null || differences.length != 4)
         {
             return rectangle;
         }
@@ -251,7 +256,7 @@ public abstract class PDAbstractAppearanceHandler implements PDAppearanceHandler
      */
     PDRectangle applyRectDifferences(PDRectangle rectangle, float[] differences)
     {
-        if (differences == null || differences.length != 4)
+        if (rectangle == null || differences == null || differences.length != 4)
         {
             return rectangle;
         }

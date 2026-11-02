@@ -2,8 +2,10 @@ package org.sejda.sambox.rendering;
 
 import org.junit.Test;
 import org.sejda.io.SeekableSources;
+import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.PDDocument;
+import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationMarkup;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -11,6 +13,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
+
+import static org.junit.Assert.assertNull;
 
 public class PDFRendererTest {
 
@@ -71,5 +75,15 @@ public class PDFRendererTest {
             File expected = new File(this.getClass().getResource("/sambox/text-image-rendering_no_images.jpg").getFile());
             ImageCompareUtils.assertSameContents(expected, actual);
         }
+    }
+
+    @Test
+    public void freeTextWithoutRectDoesNotThrow()
+    {
+        PDAnnotationMarkup annotation = new PDAnnotationMarkup();
+        annotation.getCOSObject().setName(COSName.SUBTYPE, PDAnnotationMarkup.SUB_TYPE_FREETEXT);
+        annotation.setContents("hello");
+        annotation.constructAppearances();
+        assertNull(annotation.getNormalAppearanceStream());
     }
 }

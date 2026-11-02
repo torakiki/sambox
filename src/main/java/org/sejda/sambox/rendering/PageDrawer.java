@@ -1487,6 +1487,12 @@ public class PageDrawer extends PDFGraphicsStreamEngine
     @Override
     public void showAnnotation(PDAnnotation annotation) throws IOException
     {
+        if (annotation.getRectangle() == null)
+        {
+            LOG.debug("Skipping {} annotation without /Rect", annotation.getSubtype());
+            return;
+        }
+        
         lastClips = null;
         int deviceType = -1;
         GraphicsConfiguration graphicsConfiguration = graphics.getDeviceConfiguration();
