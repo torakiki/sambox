@@ -237,6 +237,12 @@ public final class PDAcroForm extends PDDictionaryWrapper
         {
             return false;
         }
+        // ISO 32000-2 12.5.2, Table 166: /Rect is required and defines the location of the annotation on the page
+        if (isNull(annotation.getRectangle()))
+        {
+            LOG.warn("Missing or invalid required /Rect on annotation, it won't be flattened");
+            return false;
+        }
         PDAppearanceStream normalAppearanceStream = annotation.getNormalAppearanceStream();
         if (normalAppearanceStream == null)
         {

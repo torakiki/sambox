@@ -134,6 +134,32 @@ public class PDAcroFormTest
         }
     }
 
+    /*
+     * Same as above but remove the required /Rect from the widget annotations (ISO 32000-2 12.5.2, Table 166). Without a
+     * position on the page the widgets are not drawn but still removed
+     */
+    @Test
+    public void testFlattenWidgetNoRect() throws IOException
+    {
+        try (PDDocument doc = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream(
+                        "/org/sejda/sambox/pdmodel/interactive/form/AlignmentTests.pdf"))))
+        {
+            PDAcroForm acroForm = doc.getDocumentCatalog().getAcroForm();
+            for (PDField field : acroForm.getFieldTree())
+            {
+                for (PDAnnotationWidget widget : field.getWidgets())
+                {
+                    widget.getCOSObject().removeItem(COSName.RECT);
+                }
+            }
+            acroForm.flatten();
+            // 36 non widget annotations shall not be flattened
+            assertEquals(36, doc.getPage(0).getAnnotations().size());
+            assertTrue(acroForm.getFields().isEmpty());
+        }
+    }
+
     @Test
     public void testFlattenSpecificFieldsOnly() throws IOException
     {
