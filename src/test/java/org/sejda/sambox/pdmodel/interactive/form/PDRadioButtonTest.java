@@ -26,8 +26,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.sejda.sambox.cos.COSDictionary.of;
 
 import java.io.ByteArrayOutputStream;
@@ -36,8 +36,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
-import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSDictionary;
@@ -53,7 +52,7 @@ import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceStream;
 /**
  * This will test the functionality of Radio Buttons in PDFBox.
  */
-public class TestRadioButtons
+public class PDRadioButtonTest
 {
 
     /**
@@ -245,8 +244,8 @@ public class TestRadioButtons
 
             //SAMBox specific. This is different from PDFBox because we allow to set by options (OPT values) or Normal Apperance keys so our exception msg is slightly different
             //see ISO 32000-2:2017 Table 230, I think our approach makes more sense
-            IllegalArgumentException thrown = Assertions.assertThrows(
-                    IllegalArgumentException.class, () -> field.setValue("Invalid"));
+            IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+                    () -> field.setValue("Invalid"));
 
             assertThat(thrown.getMessage(), containsString(
                     "value 'Invalid' is not a valid option for the field Checking/Savings"));
@@ -302,18 +301,10 @@ public class TestRadioButtons
                     "The radio buttons can be selected individually although having the same ON value");
             assertEquals("Off", field.getValue(), "Tnitially no option shall be selected");
 
-            try
-            {
-                field.setValue(6);
-                fail("Expected an IndexOutOfBoundsException to be thrown");
-            }
-            catch (Exception ex)
-            {
-                // compare the messages
-                String expectedMessage = "index '6' is not a valid index for the field Checking/Savings, valid indices are from 0 to 5";
-                String actualMessage = ex.getMessage();
-                assertTrue(actualMessage.contains(expectedMessage));
-            }
+            IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+                    () -> field.setValue(6));
+            assertThat(thrown.getMessage(), containsString(
+                    "index '6' is not a valid index for the field Checking/Savings, valid indices are from 0 to 5"));
 
             assertEquals("Off", field.getValue(), "No option shall be selected");
             assertTrue(field.getSelectedExportValues().isEmpty(), "no export values are selected");
