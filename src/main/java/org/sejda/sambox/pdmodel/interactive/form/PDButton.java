@@ -16,6 +16,7 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
+import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toCollection;
 
 import java.io.IOException;
@@ -23,6 +24,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -475,7 +478,8 @@ public abstract class PDButton extends PDTerminalField
 
     private void updateByValue(String value)
     {
-        getCOSObject().setName(COSName.V, value);
+        var valueName = valueName(value);
+        getCOSObject().setItem(COSName.V, valueName);
         // update the appearance state (AS)
         for (PDAnnotationWidget widget : getWidgets())
         {
@@ -488,17 +492,11 @@ public abstract class PDButton extends PDTerminalField
 
                 if (normalAppearance != null && normalAppearance.isSubDictionary())
                 {
-                    entries = normalAppearance.getSubDictionary().keySet().stream()
-                            .map(COSName::getName).collect(Collectors.toSet());
-
-                    if (entries.contains(value))
-                    {
-                        widget.setAppearanceState(value);
-                    }
-                    else
-                    {
-                        widget.setAppearanceState(COSName.Off.getName());
-                    }
+                    var states = (COSDictionary) normalAppearance.getCOSObject();
+                    entries = states.keySet().stream().map(COSName::getName)
+                            .collect(Collectors.toSet());
+                    // the state as named in this widget, so that its bytes are kept (PDFBOX-6178)
+                    widget.setAppearanceState(states.findKeyByText(value).orElse(COSName.Off));
                 }
             }
 
@@ -513,12 +511,12 @@ public abstract class PDButton extends PDTerminalField
                     if (checkBox.getOnValue().equals(value))
                     {
                         // checkbox is being checked
-                        widget.setAppearanceState(value);
+                        widget.setAppearanceState(valueName);
                     }
                     else
                     {
                         // checkbox being unchecked
-                        widget.setAppearanceState(COSName.Off.getName());
+                        widget.setAppearanceState(COSName.Off);
                     }
                 }
 
@@ -534,6 +532,19 @@ public abstract class PDButton extends PDTerminalField
                 }
             }
         }
+    }
+
+    /**
+     * @return the name of the value as found in the normal appearance of the widgets, so that its
+     * bytes are kept (PDFBOX-6178), or its UTF-8 name
+     */
+    private COSName valueName(String value)
+    {
+        return getWidgets().stream().map(PDAnnotationWidget::getAppearance).filter(Objects::nonNull)
+                .map(PDAppearanceDictionary::getNormalAppearance)
+                .filter(normal -> nonNull(normal) && normal.isSubDictionary())
+                .map(normal -> ((COSDictionary) normal.getCOSObject()).findKeyByText(value))
+                .flatMap(Optional::stream).findFirst().orElseGet(() -> COSName.getPDFName(value));
     }
 
     private void updateByOption(String value) throws IOException

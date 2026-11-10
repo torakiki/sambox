@@ -50,9 +50,12 @@ import org.junit.jupiter.api.io.TempDir;
 import org.sejda.commons.util.IOUtils;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.SAMBox;
+import org.sejda.sambox.contentstream.operator.Operator;
+import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSStream;
+import org.sejda.sambox.input.ContentStreamParser;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.output.PreSaveCOSVisitor;
 import org.sejda.sambox.output.WriteOption;
@@ -596,6 +599,68 @@ public class PDDocumentTest
                     assertFalse(d.containsKey(COSName.METADATA));
                 }
             });
+        }
+    }
+
+    @Test
+    @DisplayName("A resource name that isn't UTF-8 is saved as it is, so the content stream that uses it still finds it")
+    public void saveKeepsResourceNameUsedByContentStream(@TempDir Path tmp) throws IOException
+    {
+        var output = Files.createTempFile(tmp, "", ".pdf").toFile();
+        try (PDDocument document = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/names-as-bytes.pdf"))))
+        {
+            document.writeTo(output);
+        }
+        var saved = Files.readString(output.toPath(), StandardCharsets.ISO_8859_1);
+        assertTrue(saved.contains("/F#E9"));
+        assertFalse(saved.contains("/F#C3#A9"));
+        try (var outputDoc = PDFParser.parse(SeekableSources.seekableSourceFrom(output)))
+        {
+            var page = outputDoc.getPage(0);
+            var tokens = new ContentStreamParser(page).tokens();
+            var fontName = (COSName) tokens.get(
+                    tokens.indexOf(Operator.getOperator(OperatorName.SET_FONT_AND_SIZE)) - 2);
+            assertNotNull(page.getResources().getFont(fontName));
+        }
+    }
+
+    @Test
+    @DisplayName("Keys with the same text but different bytes (Latin-1 /K#E9 and UTF-8 /K#C3#A9) are both saved")
+    public void saveKeepsNamesWithSameText(@TempDir Path tmp) throws IOException
+    {
+        var output = Files.createTempFile(tmp, "", ".pdf").toFile();
+        try (PDDocument document = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/names-as-bytes.pdf"))))
+        {
+            document.writeTo(output);
+        }
+        try (var outputDoc = PDFParser.parse(SeekableSources.seekableSourceFrom(output)))
+        {
+            var catalog = outputDoc.getDocumentCatalog().getCOSObject();
+            assertEquals(1, catalog.getInt(
+                    COSName.getPDFName("K\u00e9".getBytes(StandardCharsets.ISO_8859_1))));
+            assertEquals(2,
+                    catalog.getInt(COSName.getPDFName("K\u00e9".getBytes(StandardCharsets.UTF_8))));
+        }
+    }
+
+    @Test
+    @DisplayName("A name containing a null byte (/m#00nnlich) is saved as it is")
+    public void saveKeepsNamesWithNullByte(@TempDir Path tmp) throws IOException
+    {
+        var output = Files.createTempFile(tmp, "", ".pdf").toFile();
+        try (PDDocument document = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/names-as-bytes.pdf"))))
+        {
+            document.writeTo(output);
+        }
+        assertTrue(Files.readString(output.toPath(), StandardCharsets.ISO_8859_1)
+                .contains("/m#00nnlich"));
+        try (var outputDoc = PDFParser.parse(SeekableSources.seekableSourceFrom(output)))
+        {
+            var name = COSName.getPDFName(new byte[] { 'm', 0, 'n', 'n', 'l', 'i', 'c', 'h' });
+            assertTrue(outputDoc.getDocumentCatalog().getCOSObject().getBoolean(name, false));
         }
     }
 }

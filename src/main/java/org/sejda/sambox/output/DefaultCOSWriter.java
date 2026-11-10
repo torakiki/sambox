@@ -141,7 +141,7 @@ class DefaultCOSWriter implements COSWriter
     public void visit(COSName value) throws IOException
     {
         writer.write(SOLIDUS);
-        byte[] bytes = value.getName().getBytes(StandardCharsets.UTF_8);
+        byte[] bytes = value.getBytes();
         for (int i = 0; i < bytes.length; i++)
         {
             int current = bytes[i] & 0xFF;

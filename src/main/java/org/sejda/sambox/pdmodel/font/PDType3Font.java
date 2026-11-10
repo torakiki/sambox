@@ -116,9 +116,7 @@ public class PDType3Font extends PDSimpleFont
     @Override
     public boolean hasGlyph(String name)
     {
-        return ofNullable(getCharProcs()).map(
-                        d -> nonNull(d.getDictionaryObject(COSName.getPDFName(name), COSStream.class)))
-                .orElse(false);
+        return ofNullable(getCharProcs()).map(d -> nonNull(charProc(d, name))).orElse(false);
     }
 
     @Override
@@ -337,11 +335,20 @@ public class PDType3Font extends PDSimpleFont
         if (nonNull(encoding))
         {
             String name = encoding.getName(code);
-            return ofNullable(getCharProcs()).map(
-                            d -> d.getDictionaryObject(COSName.getPDFName(name), COSStream.class))
+            return ofNullable(getCharProcs()).map(d -> charProc(d, name))
                     .map(s -> new PDType3CharProc(this, s)).orElse(null);
         }
         return null;
+    }
+
+    /**
+     * Glyph names come from the encoding as text, the CharProcs key is found by its text so that
+     * it's found even when its bytes are not a valid UTF-8 sequence (PDFBOX-6178)
+     */
+    private static COSStream charProc(COSDictionary charProcs, String name)
+    {
+        return charProcs.findKeyByText(name)
+                .map(key -> charProcs.getDictionaryObject(key, COSStream.class)).orElse(null);
     }
 
     @Override

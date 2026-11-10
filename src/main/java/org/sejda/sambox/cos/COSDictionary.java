@@ -1010,6 +1010,30 @@ public class COSDictionary extends COSBase
     }
 
     /**
+     * Finds the key whose text, as returned by {@link COSName#getName()}, is the given text. Use it
+     * when you only have the text of a key, like a field value or a glyph name, and you need the
+     * key exactly as the document wrote it.
+     * <p>
+     * A name is defined by its bytes, and the same text can be written with different bytes:
+     * "männlich" is {@code /m#C3#A4nnlich} in UTF-8, while Acrobat writes it in Latin-1 as
+     * {@code /m#E4nnlich}. Both have the text "männlich", but they are different keys. The methods
+     * taking a String, like {@link #getItem(String)}, always look for the UTF-8 key, so they don't
+     * find {@code /m#E4nnlich}; this method does. For example, a radio button set to "männlich"
+     * must select the existing {@code /m#E4nnlich} state of its appearance dictionary, not a new
+     * {@code /m#C3#A4nnlich} one that has no appearance (PDFBOX-6178).
+     * <p>
+     * If the dictionary has both keys, the UTF-8 one is returned.
+     *
+     * @param text the text of the key
+     * @return the key with the given text, or empty if there's none
+     */
+    public Optional<COSName> findKeyByText(String text)
+    {
+        return ofNullable(COSName.getPDFName(text)).filter(this::containsKey)
+                .or(() -> keySet().stream().filter(key -> key.getName().equals(text)).findFirst());
+    }
+
+    /**
      * Adds all of the dictionaries keys/values to this dictionary, but only if they don't already
      * exist. If a key already exists in this dictionary then nothing is changed.
      *

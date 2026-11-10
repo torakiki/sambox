@@ -16,9 +16,13 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -35,6 +39,9 @@ import org.sejda.sambox.pdmodel.graphics.color.PDColor;
 import org.sejda.sambox.pdmodel.graphics.color.PDDeviceRGB;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceCharacteristicsDictionary;
+import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceDictionary;
+import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceEntry;
+import org.sejda.sambox.pdmodel.interactive.annotation.PDAppearanceStream;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDBorderStyleDictionary;
 
 /**
@@ -123,5 +130,46 @@ public class PDCheckBoxTest
             page.getAnnotations().add(widget);
             acroForm.setFields(fields);
         }
+    }
+
+    @Test
+    public void checkBoxLatin1OnState() throws IOException
+    {
+        var latin1 = COSName.getPDFName("Gew\u00e4hlt".getBytes(ISO_8859_1));
+        try (var doc = new PDDocument())
+        {
+            var checkBox = checkBoxWithOnState(doc, latin1);
+            checkBox.check();
+            assertTrue(checkBox.isChecked());
+            assertSame(latin1, checkBox.getCOSObject().getCOSName(COSName.V));
+            assertSame(latin1, checkBox.getCOSObject().getCOSName(COSName.AS));
+        }
+    }
+
+    @Test
+    public void checkBoxUncheck() throws IOException
+    {
+        var latin1 = COSName.getPDFName("Gew\u00e4hlt".getBytes(ISO_8859_1));
+        try (var doc = new PDDocument())
+        {
+            var checkBox = checkBoxWithOnState(doc, latin1);
+            checkBox.check();
+            checkBox.unCheck();
+            assertFalse(checkBox.isChecked());
+            assertSame(COSName.Off, checkBox.getCOSObject().getCOSName(COSName.V));
+            assertSame(COSName.Off, checkBox.getCOSObject().getCOSName(COSName.AS));
+        }
+    }
+
+    private static PDCheckBox checkBoxWithOnState(PDDocument doc, COSName onState)
+    {
+        var checkBox = new PDCheckBox(new PDAcroForm(doc));
+        var normal = new COSDictionary();
+        normal.setItem(COSName.Off, new PDAppearanceStream());
+        normal.setItem(onState, new PDAppearanceStream());
+        var appearance = new PDAppearanceDictionary();
+        appearance.setNormalAppearance(new PDAppearanceEntry(normal));
+        checkBox.getWidgets().getFirst().setAppearance(appearance);
+        return checkBox;
     }
 }

@@ -36,9 +36,6 @@ import static org.sejda.sambox.util.CharUtils.isWhitespace;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.charset.CharacterCodingException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import org.sejda.commons.FastByteArrayOutputStream;
@@ -337,10 +334,10 @@ class SourceReader implements Closeable
     /**
      * Reads a token conforming with PDF Name Objects chap 7.3.5 PDF 32000-1:2008.
      *
-     * @return the generation number being read.
+     * @return the bytes of the name being read, after the expansion of the #xx escape sequences.
      * @throws IOException if an I/O error occurs
      */
-    public String readName() throws IOException
+    public byte[] readName() throws IOException
     {
         skipExpected('/');
         FastByteArrayOutputStream buffer = new FastByteArrayOutputStream();
@@ -377,16 +374,7 @@ class SourceReader implements Closeable
             buffer.write(i);
         }
         unreadIfValid(i);
-        byte[] bytes = buffer.toByteArray();
-        try
-        {
-            StandardCharsets.UTF_8.newDecoder().decode(ByteBuffer.wrap(bytes));
-        }
-        catch (CharacterCodingException e)
-        {
-            return new String(bytes, Charset.forName("Windows-1252"));
-        }
-        return new String(bytes, StandardCharsets.UTF_8);
+        return buffer.toByteArray();
     }
 
     /**

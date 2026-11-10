@@ -16,21 +16,30 @@
  */
 package org.sejda.sambox.cos;
 
+import static java.util.Objects.nonNull;
+
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * A PDF Name object.
+ * A PDF Name object. A name is defined by its bytes (ISO 32000-1 7.3.5), which are kept as they
+ * are, even when they are not a valid UTF-8 sequence, so that the name is written back unchanged
+ * (PDFBOX-4076, PDFBOX-6178).
  *
  * @author Ben Litchfield
  */
 public final class COSName extends COSBase implements Comparable<COSName>
 {
-    private static Map<String, COSName> CUSTOM_NAMES = new ConcurrentHashMap<>(8192);
-    private static Map<String, COSName> COMMON_NAMES = new HashMap<>();
+    // keyed by the ISO-8859-1 decoding of the name bytes, which is lossless (one char per byte)
+    private static final Map<String, COSName> CUSTOM_NAMES = new ConcurrentHashMap<>(8192);
+    private static final Map<String, COSName> COMMON_NAMES = new HashMap<>();
 
     // A
     public static final COSName A = newCommonInstance("A");
@@ -530,7 +539,9 @@ public final class COSName extends COSBase implements Comparable<COSName>
     public static final COSName TRUE_TYPE = newCommonInstance("TrueType");
     public static final COSName TRUSTED_MODE = newCommonInstance("TrustedMode");
     public static final COSName TU = newCommonInstance("TU");
-    /** Acro form field type for text field. */
+    /**
+     * Acro form field type for text field.
+     */
     public static final COSName TX = newCommonInstance("Tx");
     public static final COSName TYPE = newCommonInstance("Type");
     public static final COSName TYPE0 = newCommonInstance("Type0");
@@ -581,55 +592,87 @@ public final class COSName extends COSBase implements Comparable<COSName>
 
     public static final COSName ZA_DB = newCommonInstance("ZaDb");
 
+    private final byte[] bytes;
     private final String name;
+    private final int hash;
 
     /**
      * @param name The name of the object.
-     * @return A COSName with the specified name or null if the specified name is null.
+     * @return A COSName whose bytes are the UTF-8 encoding of the specified name or null if the
+     * specified name is null.
      */
     public static COSName getPDFName(String name)
     {
-        if (name != null)
+        if (nonNull(name))
         {
-            COSName cosName = COMMON_NAMES.get(name);
-            return Objects.requireNonNullElseGet(cosName, () -> getCustom(name));
+            return getPDFName(name.getBytes(StandardCharsets.UTF_8));
         }
         return null;
     }
 
-    private static COSName getCustom(String customName)
+    /**
+     * @param bytes the bytes of the name, after the expansion of the #xx escape sequences
+     * @return A COSName defined by the specified bytes, even when they are not a valid UTF-8
+     * sequence
+     */
+    public static COSName getPDFName(byte[] bytes)
     {
-        COSName cosName = CUSTOM_NAMES.get(customName);
-        if (cosName == null)
+        if (nonNull(bytes))
         {
-            final COSName value = new COSName(customName);
-            cosName = CUSTOM_NAMES.putIfAbsent(customName, value);
-            if (cosName == null)
-            {
-                cosName = value;
-            }
+            var key = new String(bytes, StandardCharsets.ISO_8859_1);
+            return Objects.requireNonNullElseGet(COMMON_NAMES.get(key),
+                    () -> CUSTOM_NAMES.computeIfAbsent(key, k -> new COSName(bytes.clone())));
         }
-        return cosName;
+        return null;
     }
 
     private static COSName newCommonInstance(String commonName)
     {
-        final COSName value = new COSName(commonName);
+        //common names are all ASCII
+        final COSName value = new COSName(commonName.getBytes(StandardCharsets.US_ASCII));
         COMMON_NAMES.put(commonName, value);
         return value;
     }
 
-    private COSName(String name)
+    private COSName(byte[] bytes)
     {
-        this.name = name;
+        this.bytes = bytes;
+        this.name = decode(bytes);
+        this.hash = Arrays.hashCode(bytes);
     }
 
     /**
-     * @return The name of the object.
+     * Names are decoded as UTF-8, as recommended by ISO 32000-1 7.3.5, falling back to ISO-8859-1,
+     * which maps each byte to its own char, when they are not a valid UTF-8 sequence
+     */
+    private static String decode(byte[] bytes)
+    {
+        try
+        {
+            return StandardCharsets.UTF_8.newDecoder().decode(ByteBuffer.wrap(bytes)).toString();
+        }
+        catch (CharacterCodingException e)
+        {
+            return new String(bytes, StandardCharsets.ISO_8859_1);
+        }
+    }
+
+    /**
+     * @return The name of the object decoded as text. Different names can have the same text when
+     * their bytes are not a valid UTF-8 sequence, use {@link #getBytes()} or the COSName itself
+     * when the exact name is needed.
      */
     public String getName()
     {
         return name;
+    }
+
+    /**
+     * @return a copy of the bytes defining this name
+     */
+    public byte[] getBytes()
+    {
+        return bytes.clone();
     }
 
     @Override
@@ -641,19 +684,19 @@ public final class COSName extends COSBase implements Comparable<COSName>
     @Override
     public boolean equals(Object object)
     {
-        return object instanceof COSName && name.equals(((COSName) object).name);
+        return object instanceof COSName other && Arrays.equals(bytes, other.bytes);
     }
 
     @Override
     public int hashCode()
     {
-        return name.hashCode();
+        return hash;
     }
 
     @Override
     public int compareTo(COSName other)
     {
-        return name.compareTo(other.name);
+        return Arrays.compareUnsigned(bytes, other.bytes);
     }
 
     @Override

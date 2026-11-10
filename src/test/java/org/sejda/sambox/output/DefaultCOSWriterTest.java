@@ -157,6 +157,51 @@ public class DefaultCOSWriterTest
     }
 
     @Test
+    public void visitCOSNameNonUtf8() throws Exception
+    {
+        InOrder inOrder = Mockito.inOrder(writer);
+        victim.visit(COSName.getPDFName("m\u00e4".getBytes(StandardCharsets.ISO_8859_1)));
+        inOrder.verify(writer).write((byte) 0x2F);
+        inOrder.verify(writer).write((byte) 0x6D);
+        inOrder.verify(writer).write((byte) 0x23);
+        inOrder.verify(writer).write(AdditionalMatchers.aryEq(new byte[] { 'E', '4' }));
+        inOrder.verifyNoMoreInteractions();
+    }
+
+    @Test
+    public void visitCOSNameNonAsciiTextIsUtf8() throws Exception
+    {
+        InOrder inOrder = Mockito.inOrder(writer);
+        victim.visit(COSName.getPDFName("\u00e9"));
+        inOrder.verify(writer).write((byte) 0x2F);
+        inOrder.verify(writer).write((byte) 0x23);
+        inOrder.verify(writer).write(AdditionalMatchers.aryEq(new byte[] { 'C', '3' }));
+        inOrder.verify(writer).write((byte) 0x23);
+        inOrder.verify(writer).write(AdditionalMatchers.aryEq(new byte[] { 'A', '9' }));
+        inOrder.verifyNoMoreInteractions();
+    }
+
+    @Test
+    public void visitCOSNameNullByte() throws Exception
+    {
+        InOrder inOrder = Mockito.inOrder(writer);
+        victim.visit(COSName.getPDFName(new byte[] { 'm', 0 }));
+        inOrder.verify(writer).write((byte) 0x2F);
+        inOrder.verify(writer).write((byte) 0x6D);
+        inOrder.verify(writer).write((byte) 0x23);
+        inOrder.verify(writer).write(AdditionalMatchers.aryEq(new byte[] { '0', '0' }));
+        inOrder.verifyNoMoreInteractions();
+    }
+
+    @Test
+    public void visitEmptyCOSName() throws Exception
+    {
+        victim.visit(COSName.getPDFName(new byte[0]));
+        verify(writer).write((byte) 0x2F);
+        Mockito.verifyNoMoreInteractions(writer);
+    }
+
+    @Test
     public void visitCOSNull() throws Exception
     {
         victim.visit(COSNull.NULL);

@@ -16,11 +16,15 @@
  */
 package org.sejda.sambox.cos;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Andrea Vacondio
@@ -255,4 +259,40 @@ public class COSDictionaryTest
         assertEquals(COSName.C, victim.getKeyForValue(intValue));
     }
 
+    @Test
+    @DisplayName("Keys with different bytes but the same text (Latin-1 /F#E9 and UTF-8 /F#C3#A9, both \"F\u00e9\") are distinct keys and both entries are kept")
+    public void keepsKeysWithSameText()
+    {
+        var latin1 = COSName.getPDFName("F\u00e9".getBytes(ISO_8859_1));
+        var utf8 = COSName.getPDFName("F\u00e9".getBytes(UTF_8));
+        var victim = COSDictionary.of(latin1, COSInteger.ONE, utf8, COSInteger.TWO);
+        assertEquals(2, victim.size());
+        assertEquals(COSInteger.ONE, victim.getItem(latin1));
+        assertEquals(COSInteger.TWO, victim.getItem(utf8));
+    }
+
+    @Test
+    public void findKeyByTextPrefersUtf8Key()
+    {
+        var latin1 = COSName.getPDFName("F\u00e9".getBytes(ISO_8859_1));
+        var utf8 = COSName.getPDFName("F\u00e9".getBytes(UTF_8));
+        var victim = COSDictionary.of(latin1, COSInteger.ONE, utf8, COSInteger.TWO);
+        assertSame(utf8, victim.findKeyByText("F\u00e9").orElseThrow());
+    }
+
+    @Test
+    public void findKeyByTextFallsBackToNonUtf8Key()
+    {
+        var latin1 = COSName.getPDFName("F\u00e9".getBytes(ISO_8859_1));
+        var victim = COSDictionary.of(latin1, COSInteger.ONE);
+        assertSame(latin1, victim.findKeyByText("F\u00e9").orElseThrow());
+    }
+
+    @Test
+    public void findKeyByTextMissing()
+    {
+        var victim = COSDictionary.of(COSName.A, COSInteger.ONE);
+        assertTrue(victim.findKeyByText("B").isEmpty());
+        assertTrue(victim.findKeyByText(null).isEmpty());
+    }
 }

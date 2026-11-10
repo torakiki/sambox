@@ -16,16 +16,21 @@
  */
 package org.sejda.sambox.pdmodel.interactive.form;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.sejda.sambox.cos.COSDictionary.of;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -313,5 +318,124 @@ public class TestRadioButtons
             assertEquals("Off", field.getValue(), "No option shall be selected");
             assertTrue(field.getSelectedExportValues().isEmpty(), "no export values are selected");
         }
+    }
+
+    @Test
+    public void radioValueMatchesUtf8StateName() throws IOException
+    {
+        var maennlich = COSName.getPDFName("m\u00e4nnlich");
+        var weiblich = COSName.getPDFName("weiblich");
+        try (var doc = new PDDocument())
+        {
+            var radio = new PDRadioButton(new PDAcroForm(doc));
+            radio.setWidgets(List.of(widgetWithStates(maennlich), widgetWithStates(weiblich)));
+            radio.setValue("m\u00e4nnlich");
+            assertSame(maennlich, radio.getCOSObject().getCOSName(COSName.V));
+            assertSame(maennlich, radio.getWidgets().get(0).getCOSObject().getCOSName(COSName.AS));
+            assertSame(COSName.Off,
+                    radio.getWidgets().get(1).getCOSObject().getCOSName(COSName.AS));
+        }
+    }
+
+    @Test
+    public void radioWidgetsWithDifferentlyEncodedStates() throws IOException
+    {
+        var latin1 = COSName.getPDFName("m\u00e4nnlich".getBytes(ISO_8859_1));
+        var utf8 = COSName.getPDFName("m\u00e4nnlich".getBytes(UTF_8));
+        try (var doc = new PDDocument())
+        {
+            var radio = new PDRadioButton(new PDAcroForm(doc));
+            radio.setWidgets(List.of(widgetWithStates(latin1), widgetWithStates(utf8)));
+            radio.setValue("m\u00e4nnlich");
+            assertSame(latin1, radio.getCOSObject().getCOSName(COSName.V));
+            assertSame(latin1, radio.getWidgets().get(0).getCOSObject().getCOSName(COSName.AS));
+            assertSame(utf8, radio.getWidgets().get(1).getCOSObject().getCOSName(COSName.AS));
+        }
+    }
+
+    @Test
+    public void radioWithoutAppearanceValueIsUtf8() throws IOException
+    {
+        try (var doc = new PDDocument())
+        {
+            var radio = new PDRadioButton(new PDAcroForm(doc));
+            radio.setValue("m\u00e4nnlich");
+            assertArrayEquals("m\u00e4nnlich".getBytes(UTF_8),
+                    radio.getCOSObject().getCOSName(COSName.V).getBytes());
+        }
+    }
+
+    @Test
+    public void radioGetValueReturnsText() throws IOException
+    {
+        var latin1 = COSName.getPDFName("m\u00e4nnlich".getBytes(ISO_8859_1));
+        try (var doc = new PDDocument())
+        {
+            var radio = new PDRadioButton(new PDAcroForm(doc));
+            radio.setWidgets(List.of(widgetWithStates(latin1),
+                    widgetWithStates(COSName.getPDFName("weiblich"))));
+            assertTrue(radio.getOnValues().contains("m\u00e4nnlich"));
+            radio.setValue("m\u00e4nnlich");
+            assertEquals("m\u00e4nnlich", radio.getValue());
+        }
+    }
+
+    @Test
+    public void radioWithOptionsKeepsStateNames() throws IOException
+    {
+        var latin1 = COSName.getPDFName("m\u00e4nnlich".getBytes(ISO_8859_1));
+        try (var doc = new PDDocument())
+        {
+            var radio = new PDRadioButton(new PDAcroForm(doc));
+            radio.setWidgets(List.of(widgetWithStates(latin1),
+                    widgetWithStates(COSName.getPDFName("weiblich"))));
+            radio.setExportValues(List.of("m\u00e4nnlich", "weiblich"));
+            radio.setValue("m\u00e4nnlich");
+            assertSame(latin1, radio.getCOSObject().getCOSName(COSName.V));
+            assertSame(latin1, radio.getWidgets().get(0).getCOSObject().getCOSName(COSName.AS));
+        }
+    }
+
+    /**
+     * PDFBOX-6178: Acrobat writes the state "männlich" in Latin-1 as /m#E4nnlich. Setting the value
+     * and saving must keep that name, otherwise /V and /AS point to a state that isn't in the
+     * appearance dictionary.
+     */
+    @Test
+    public void radioKeepsLatin1StateNameOnSave() throws IOException
+    {
+        var out = new ByteArrayOutputStream();
+        try (var document = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(
+                getClass().getResourceAsStream("/sambox/forms-radio-latin1-state-names.pdf"))))
+        {
+            document.getDocumentCatalog().getAcroForm().getField("Geschlecht")
+                    .setValue("m\u00e4nnlich");
+            document.writeTo(out);
+        }
+        var saved = out.toByteArray();
+        assertFalse(new String(saved, ISO_8859_1).contains("#C3#A4"));
+        try (var document = PDFParser.parse(SeekableSources.inMemorySeekableSourceFrom(saved)))
+        {
+            var latin1 = COSName.getPDFName("m\u00e4nnlich".getBytes(ISO_8859_1));
+            var field = (PDRadioButton) document.getDocumentCatalog().getAcroForm()
+                    .getField("Geschlecht");
+            assertEquals(latin1, field.getCOSObject().getCOSName(COSName.V));
+            assertEquals(latin1, field.getWidgets().get(0).getCOSObject().getCOSName(COSName.AS));
+            assertEquals(COSName.Off,
+                    field.getWidgets().get(1).getCOSObject().getCOSName(COSName.AS));
+        }
+    }
+
+    private static PDAnnotationWidget widgetWithStates(COSName onState)
+    {
+        var normal = new COSDictionary();
+        normal.setItem(COSName.Off, new PDAppearanceStream());
+        normal.setItem(onState, new PDAppearanceStream());
+        var appearance = new PDAppearanceDictionary();
+        appearance.setNormalAppearance(new PDAppearanceEntry(normal));
+        var widget = new PDAnnotationWidget();
+        widget.setAppearance(appearance);
+        widget.setAppearanceState(COSName.Off);
+        return widget;
     }
 }

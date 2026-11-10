@@ -16,6 +16,10 @@
  */
 package org.sejda.sambox.input;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static java.nio.charset.StandardCharsets.US_ASCII;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -444,21 +448,22 @@ public class SourceReaderTest
     {
         victim = new SourceReader(
                 inMemorySeekableSourceFrom("/A;Name_With-Various***Characters?".getBytes()));
-        assertEquals("A;Name_With-Various***Characters?", victim.readName());
+        assertArrayEquals("A;Name_With-Various***Characters?".getBytes(US_ASCII),
+                victim.readName());
     }
 
     @Test
     public void readNameNumberSign() throws IOException
     {
         victim = new SourceReader(inMemorySeekableSourceFrom("/Lime#20Green theValue".getBytes()));
-        assertEquals("Lime Green", victim.readName());
+        assertArrayEquals("Lime Green".getBytes(US_ASCII), victim.readName());
     }
 
     @Test
     public void readNameNumberSignNumberSign() throws IOException
     {
         victim = new SourceReader(inMemorySeekableSourceFrom("/The_Key_of_F#23_Minor".getBytes()));
-        assertEquals("The_Key_of_F#_Minor", victim.readName());
+        assertArrayEquals("The_Key_of_F#_Minor".getBytes(US_ASCII), victim.readName());
     }
 
     @Test(expected = IOException.class)
@@ -472,7 +477,7 @@ public class SourceReaderTest
     public void readNameNumberSignForStandardChar() throws IOException
     {
         victim = new SourceReader(inMemorySeekableSourceFrom("/A#42".getBytes()));
-        assertEquals("AB", victim.readName());
+        assertArrayEquals("AB".getBytes(US_ASCII), victim.readName());
     }
 
     @Test(expected = IOException.class)
@@ -493,7 +498,38 @@ public class SourceReaderTest
     public void readNameWorkaroundForNumberSigned() throws IOException
     {
         victim = new SourceReader(inMemorySeekableSourceFrom("/ChuckNorris#3H".getBytes()));
-        assertEquals("ChuckNorris#3H", victim.readName());
+        assertArrayEquals("ChuckNorris#3H".getBytes(US_ASCII), victim.readName());
+    }
+
+    @Test
+    public void readNameNonUtf8Escaped() throws IOException
+    {
+        victim = new SourceReader(inMemorySeekableSourceFrom("/m#E4nnlich".getBytes(US_ASCII)));
+        assertArrayEquals("m\u00e4nnlich".getBytes(ISO_8859_1), victim.readName());
+    }
+
+    @Test
+    public void readNameUtf8Escaped() throws IOException
+    {
+        victim = new SourceReader(inMemorySeekableSourceFrom("/m#C3#A4nnlich".getBytes(US_ASCII)));
+        assertArrayEquals("m\u00e4nnlich".getBytes(UTF_8), victim.readName());
+    }
+
+    @Test
+    public void readNameRawNonAsciiByte() throws IOException
+    {
+        victim = new SourceReader(
+                inMemorySeekableSourceFrom("/F\u00e9 /F#E9".getBytes(ISO_8859_1)));
+        var raw = victim.readName();
+        victim.skipSpaces();
+        assertArrayEquals(raw, victim.readName());
+    }
+
+    @Test
+    public void readNameNullByte() throws IOException
+    {
+        victim = new SourceReader(inMemorySeekableSourceFrom("/m#00nnlich".getBytes(US_ASCII)));
+        assertArrayEquals(new byte[] { 'm', 0, 'n', 'n', 'l', 'i', 'c', 'h' }, victim.readName());
     }
 
     @Test

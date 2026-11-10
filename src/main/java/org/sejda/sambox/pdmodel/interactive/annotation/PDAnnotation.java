@@ -280,6 +280,17 @@ public abstract class PDAnnotation extends PDDictionaryWrapper
     }
 
     /**
+     * This will set the annotations appearance state name.
+     *
+     * @param as The name of the appearance stream, as found in the appearance dictionary, so that
+     *           its bytes are kept
+     */
+    public void setAppearanceState(COSName as)
+    {
+        getCOSObject().setItem(COSName.AS, as);
+    }
+
+    /**
      * This will get the appearance dictionary associated with this annotation. This may return
      * null.
      *
