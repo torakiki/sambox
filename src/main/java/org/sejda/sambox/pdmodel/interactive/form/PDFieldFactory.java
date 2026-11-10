@@ -94,7 +94,7 @@ public final class PDFieldFactory
     private static PDField createChoiceSubType(PDAcroForm form, COSDictionary field,
             PDNonTerminalField parent)
     {
-        int flags = field.getInt(COSName.FF, 0);
+        int flags = PDField.inheritedInt(field, COSName.FF, 0);
         if ((flags & PDChoice.FLAG_COMBO) != 0)
         {
             return new PDComboBox(form, field, parent);
@@ -105,9 +105,9 @@ public final class PDFieldFactory
     private static PDField createButtonSubType(PDAcroForm form, COSDictionary field,
             PDNonTerminalField parent)
     {
-        int flags = field.getInt(COSName.FF, 0);
-        // SAMBOX specific: check kids for /Ff flags, if missing on field, to correctly detect malformed radio buttons
-        if (!field.containsKey(COSName.FF))
+        int flags = PDField.inheritedInt(field, COSName.FF, 0);
+        // SAMBOX specific: check kids for /Ff flags, if missing on the field and its ancestors, to correctly detect malformed radio buttons
+        if (!PDField.definesInherited(field, COSName.FF))
         {
             if (field.containsKey(COSName.KIDS))
             {

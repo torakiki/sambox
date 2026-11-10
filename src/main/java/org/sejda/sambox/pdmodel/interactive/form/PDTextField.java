@@ -65,7 +65,7 @@ public final class PDTextField extends PDVariableText
      */
     public boolean isMultiline()
     {
-        return getCOSObject().getFlag(COSName.FF, FLAG_MULTILINE);
+        return isFieldFlagSet(FLAG_MULTILINE);
     }
 
     /**
@@ -75,7 +75,7 @@ public final class PDTextField extends PDVariableText
      */
     public void setMultiline(boolean multiline)
     {
-        getCOSObject().setFlag(COSName.FF, FLAG_MULTILINE, multiline);
+        setFieldFlag(FLAG_MULTILINE, multiline);
     }
 
     /**
@@ -83,7 +83,7 @@ public final class PDTextField extends PDVariableText
      */
     public boolean isPassword()
     {
-        return getCOSObject().getFlag(COSName.FF, FLAG_PASSWORD);
+        return isFieldFlagSet(FLAG_PASSWORD);
     }
 
     /**
@@ -93,7 +93,7 @@ public final class PDTextField extends PDVariableText
      */
     public void setPassword(boolean password)
     {
-        getCOSObject().setFlag(COSName.FF, FLAG_PASSWORD, password);
+        setFieldFlag(FLAG_PASSWORD, password);
     }
 
     /**
@@ -101,7 +101,7 @@ public final class PDTextField extends PDVariableText
      */
     public boolean isFileSelect()
     {
-        return getCOSObject().getFlag(COSName.FF, FLAG_FILE_SELECT);
+        return isFieldFlagSet(FLAG_FILE_SELECT);
     }
 
     /**
@@ -111,7 +111,7 @@ public final class PDTextField extends PDVariableText
      */
     public void setFileSelect(boolean fileSelect)
     {
-        getCOSObject().setFlag(COSName.FF, FLAG_FILE_SELECT, fileSelect);
+        setFieldFlag(FLAG_FILE_SELECT, fileSelect);
     }
 
     /**
@@ -119,7 +119,7 @@ public final class PDTextField extends PDVariableText
      */
     public boolean doNotSpellCheck()
     {
-        return getCOSObject().getFlag(COSName.FF, FLAG_DO_NOT_SPELL_CHECK);
+        return isFieldFlagSet(FLAG_DO_NOT_SPELL_CHECK);
     }
 
     /**
@@ -129,7 +129,7 @@ public final class PDTextField extends PDVariableText
      */
     public void setDoNotSpellCheck(boolean doNotSpellCheck)
     {
-        getCOSObject().setFlag(COSName.FF, FLAG_DO_NOT_SPELL_CHECK, doNotSpellCheck);
+        setFieldFlag(FLAG_DO_NOT_SPELL_CHECK, doNotSpellCheck);
     }
 
     /**
@@ -137,7 +137,7 @@ public final class PDTextField extends PDVariableText
      */
     public boolean doNotScroll()
     {
-        return getCOSObject().getFlag(COSName.FF, FLAG_DO_NOT_SCROLL);
+        return isFieldFlagSet(FLAG_DO_NOT_SCROLL);
     }
 
     /**
@@ -147,7 +147,7 @@ public final class PDTextField extends PDVariableText
      */
     public void setDoNotScroll(boolean doNotScroll)
     {
-        getCOSObject().setFlag(COSName.FF, FLAG_DO_NOT_SCROLL, doNotScroll);
+        setFieldFlag(FLAG_DO_NOT_SCROLL, doNotScroll);
     }
 
     /**
@@ -155,7 +155,7 @@ public final class PDTextField extends PDVariableText
      */
     public boolean isComb()
     {
-        return getCOSObject().getFlag(COSName.FF, FLAG_COMB);
+        return isFieldFlagSet(FLAG_COMB);
     }
 
     /**
@@ -165,7 +165,7 @@ public final class PDTextField extends PDVariableText
      */
     public void setComb(boolean comb)
     {
-        getCOSObject().setFlag(COSName.FF, FLAG_COMB, comb);
+        setFieldFlag(FLAG_COMB, comb);
     }
 
     /**
@@ -173,7 +173,7 @@ public final class PDTextField extends PDVariableText
      */
     public boolean isRichText()
     {
-        return getCOSObject().getFlag(COSName.FF, FLAG_RICH_TEXT);
+        return isFieldFlagSet(FLAG_RICH_TEXT);
     }
 
     /**
@@ -183,17 +183,18 @@ public final class PDTextField extends PDVariableText
      */
     public void setRichText(boolean richText)
     {
-        getCOSObject().setFlag(COSName.FF, FLAG_RICH_TEXT, richText);
+        setFieldFlag(FLAG_RICH_TEXT, richText);
     }
     
     /**
-     * Returns the maximum number of characters of the text field.
+     * Returns the maximum number of characters of the text field. MaxLen is inheritable: if the
+     * field has no MaxLen of its own, the value of the nearest ancestor defining it applies.
      * 
      * @return the maximum number of characters, returns -1 if the value isn't present
      */
     public int getMaxLen()
     {
-        return getCOSObject().getInt(COSName.MAX_LEN);
+        return inheritedInt(getCOSObject(), COSName.MAX_LEN, -1);
     }
 
     /**
