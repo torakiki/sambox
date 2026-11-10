@@ -30,6 +30,9 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
+import java.util.IdentityHashMap;
+import java.util.Collections;
 import java.util.Map;
 
 import org.sejda.sambox.contentstream.operator.MissingOperandException;
@@ -38,6 +41,7 @@ import org.sejda.sambox.contentstream.operator.OperatorProcessor;
 import org.sejda.sambox.contentstream.operator.state.EmptyGraphicsStackException;
 import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
+import org.sejda.sambox.cos.COSObjectable;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSNumber;
@@ -90,6 +94,8 @@ public abstract class PDFStreamEngine
 
     // used to monitor potentially recursive operations.
     private int level = 0;
+    private final Set<Object> streamsInProgress = Collections.newSetFromMap(
+            new IdentityHashMap<>());
 
     /**
      * Creates a new PDFStreamEngine.
@@ -518,6 +524,30 @@ public abstract class PDFStreamEngine
      * Processes the operators of the given content stream.
      */
     private void processStreamOperators(PDContentStream contentStream) throws IOException
+    {
+        // A content stream may (directly or through other forms, patterns, Type 3 glyphs or
+        // soft masks) use itself. Only the uses that are currently being executed form a
+        // cycle: the same stream used again elsewhere (twice on a page, on another page, from
+        // two different parents) is legitimate and must be executed every time.
+        Object key = contentStream instanceof COSObjectable cosObjectable ?
+                cosObjectable.getCOSObject() :
+                contentStream;
+        if (!streamsInProgress.add(key))
+        {
+            LOG.warn("Content stream is already being processed, skipping recursive use");
+            return;
+        }
+        try
+        {
+            parseAndProcessOperators(contentStream);
+        }
+        finally
+        {
+            streamsInProgress.remove(key);
+        }
+    }
+
+    private void parseAndProcessOperators(PDContentStream contentStream) throws IOException
     {
         List<COSBase> arguments = new ArrayList<>();
         ContentStreamParser parser = new ContentStreamParser(contentStream);
