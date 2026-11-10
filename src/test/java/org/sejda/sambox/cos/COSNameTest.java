@@ -16,17 +16,19 @@
 
 package org.sejda.sambox.cos;
 
-import org.junit.Assert;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
+import org.junit.jupiter.api.Test;
 import org.sejda.io.SeekableSources;
 import org.sejda.sambox.input.PDFParser;
 import org.sejda.sambox.pdmodel.PDDocument;
 import org.sejda.sambox.pdmodel.PDPage;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-
-public class TestCOSName
+public class COSNameTest
 {
     /**
      * PDFBOX-4076: Check that characters outside of US_ASCII are not replaced with "?".
@@ -51,8 +53,8 @@ public class TestCOSName
                 SeekableSources.inMemorySeekableSourceFrom(baos.toByteArray())))
         {
             COSDictionary catalogDict = document.getDocumentCatalog().getCOSObject();
-            Assert.assertTrue(catalogDict.containsKey(special));
-            Assert.assertEquals(special, catalogDict.getString(special));
+            assertTrue(catalogDict.containsKey(special));
+            assertEquals(special, catalogDict.getString(special));
         }
     }
 }
