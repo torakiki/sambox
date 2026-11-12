@@ -238,6 +238,15 @@ public final class PDAcroForm extends PDDictionaryWrapper
         {
             return false;
         }
+
+        // a widget without a valid /Rect cannot be placed on the page
+        PDRectangle rect = annotation.getRectangle();
+        if (rect == null || rect.getWidth() == 0 || rect.getHeight() == 0)
+        {
+            LOG.warn("Skipping annotation with missing or empty /Rect, considering invisible");
+            return false;
+        }
+        
         PDAppearanceStream normalAppearanceStream = annotation.getNormalAppearanceStream();
         if (normalAppearanceStream == null)
         {
