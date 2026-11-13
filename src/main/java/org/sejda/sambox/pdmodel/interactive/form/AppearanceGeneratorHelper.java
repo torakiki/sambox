@@ -1002,7 +1002,9 @@ public class AppearanceGeneratorHelper
     private String stripNonPrintableChars(String s)
     {
         // TODO: add more non printable chars
-        return s.replaceAll("\\u000D", ""); // carriage return \r
+        return s.replaceAll("\\u000D", "") // carriage return \r
+                .replaceAll("\\n", "") // newlines \n
+                ;
     }
     
     private String normalizeWhitespace(String s)
