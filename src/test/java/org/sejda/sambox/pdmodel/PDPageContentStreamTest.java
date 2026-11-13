@@ -16,7 +16,14 @@
  */
 package org.sejda.sambox.pdmodel;
 
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
 import org.sejda.sambox.contentstream.operator.Operator;
 import org.sejda.sambox.contentstream.operator.OperatorName;
 import org.sejda.sambox.cos.COSNumber;
@@ -24,15 +31,10 @@ import org.sejda.sambox.input.ContentStreamParser;
 import org.sejda.sambox.pdmodel.PDPageContentStream.AppendMode;
 import org.sejda.sambox.pdmodel.graphics.state.PDExtendedGraphicsState;
 
-import java.io.IOException;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-
 /**
  * @author Yegor Kozlov
  */
-public class TestPDPageContentStream
+public class PDPageContentStreamTest
 {
     @Test
     public void testSetCmykColors() throws IOException
@@ -183,6 +185,33 @@ public class TestPDPageContentStream
         ContentStreamParser parser = new ContentStreamParser(page);
         List<Object> tokens = parser.tokens();
         assertEquals(0, tokens.size());
+    }
+
+    /**
+     * A number written after a longer one must not carry the longer number's leftover digits, nor
+     * any padding.
+     *
+     * @throws IOException
+     */
+    @Test
+    public void testWritesOnlyTheFormattedNumbers() throws IOException
+    {
+        try (PDDocument doc = new PDDocument())
+        {
+            PDPage page = new PDPage();
+            doc.addPage(page);
+            try (PDPageContentStream contentStream = new PDPageContentStream(doc, page,
+                    AppendMode.OVERWRITE, false))
+            {
+                contentStream.setNonStrokingColor(0.8f, 0.8f, 1f);
+                contentStream.addRect(11, 11, 98.5f, 48);
+            }
+            try (InputStream contents = page.getContents())
+            {
+                assertEquals("0.8 0.8 1 rg\n11 11 98.5 48 re\n",
+                        new String(contents.readAllBytes(), StandardCharsets.US_ASCII));
+            }
+        }
     }
 
     /**

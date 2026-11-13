@@ -58,6 +58,7 @@ import org.sejda.sambox.pdmodel.graphics.shading.PDShading;
 import org.sejda.sambox.pdmodel.graphics.state.PDExtendedGraphicsState;
 import org.sejda.sambox.pdmodel.graphics.state.RenderingMode;
 import org.sejda.sambox.util.Matrix;
+import org.sejda.sambox.util.NumberFormatUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,6 +112,7 @@ public final class PDPageContentStream implements Closeable
 
     // number format
     private final NumberFormat formatDecimal = NumberFormat.getNumberInstance(Locale.US);
+    private final byte[] formatBuffer = new byte[32];
 
     /**
      * Create a new PDPage content stream.
@@ -1631,9 +1633,18 @@ public final class PDPageContentStream implements Closeable
         {
             throw new IllegalArgumentException(real + " is not a finite number");
         }
-        // PDFbox up to 1st Aug has a new fast or fallback way to write things here, which breaks things
-        // temporary reverted to old way of doing things, see if new commits fix this
-        write(formatDecimal.format(real));
+        int byteCount = NumberFormatUtil.formatFloatFast(real,
+                formatDecimal.getMaximumFractionDigits(), formatBuffer);
+
+        if (byteCount == -1)
+        {
+            // Fast formatting failed
+            write(formatDecimal.format(real));
+        }
+        else
+        {
+            writer.writeContent(formatBuffer, 0, byteCount);
+        }
         writer.writeSpace();
     }
 
