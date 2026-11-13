@@ -79,6 +79,14 @@ public class ContentStreamWriterTest
     }
 
     @Test
+    public void writeContentRange() throws Exception
+    {
+        byte[] data = new byte[] { (byte) 0x41, (byte) 0x42, (byte) 0x43 };
+        victim.writeContent(data, 1, 2);
+        verify(writer).write(data, 1, 2);
+    }
+
+    @Test
     public void writeEOL() throws Exception
     {
         victim.writeEOL();

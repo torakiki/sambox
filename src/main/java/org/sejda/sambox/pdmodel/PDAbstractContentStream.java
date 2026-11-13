@@ -1440,7 +1440,7 @@ abstract class PDAbstractContentStream implements Closeable
         }
         else
         {
-            writer.writeContent(formatBuffer);
+            writer.writeContent(formatBuffer, 0, byteCount);
         }
         writer.writeSpace();
     }

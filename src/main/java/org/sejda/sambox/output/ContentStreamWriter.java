@@ -98,6 +98,20 @@ public class ContentStreamWriter extends DefaultCOSWriter
         writer().write(byteArray);
     }
 
+    /**
+     * Writes {@code length} bytes of the given array, starting at {@code offset}, as is as content
+     * of the stream.
+     *
+     * @param byteArray
+     * @param offset
+     * @param length
+     * @throws IOException
+     */
+    public void writeContent(byte[] byteArray, int offset, int length) throws IOException
+    {
+        writer().write(byteArray, offset, length);
+    }
+
     public void writeEOL() throws IOException
     {
         writer().writeEOL();
