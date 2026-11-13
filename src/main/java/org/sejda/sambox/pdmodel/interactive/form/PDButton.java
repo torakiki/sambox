@@ -99,7 +99,7 @@ public abstract class PDButton extends PDTerminalField
      */
     public boolean isPushButton()
     {
-        return getCOSObject().getFlag(COSName.FF, FLAG_PUSHBUTTON);
+        return isFieldFlagSet(FLAG_PUSHBUTTON);
     }
 
     /**
@@ -111,7 +111,7 @@ public abstract class PDButton extends PDTerminalField
     @Deprecated
     public void setPushButton(boolean pushbutton)
     {
-        getCOSObject().setFlag(COSName.FF, FLAG_PUSHBUTTON, pushbutton);
+        setFieldFlag(FLAG_PUSHBUTTON, pushbutton);
         if (pushbutton)
         {
             setRadioButton(false);
@@ -125,7 +125,7 @@ public abstract class PDButton extends PDTerminalField
      */
     public boolean isRadioButton()
     {
-        return getCOSObject().getFlag(COSName.FF, FLAG_RADIO);
+        return isFieldFlagSet(FLAG_RADIO);
     }
 
     /**
@@ -137,7 +137,7 @@ public abstract class PDButton extends PDTerminalField
     @Deprecated
     public void setRadioButton(boolean radiobutton)
     {
-        getCOSObject().setFlag(COSName.FF, FLAG_RADIO, radiobutton);
+        setFieldFlag(FLAG_RADIO, radiobutton);
         if (radiobutton)
         {
             setPushButton(false);
