@@ -1,6 +1,12 @@
 name: build
 
-on: [push]
+on:
+  push:
+  # GitHub evicts caches that are not read for 7 days. A run twice a week
+  # keeps the test-resources cache alive when nobody is pushing.
+  schedule:
+    - cron: '23 4 * * 1,4'
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -23,10 +29,24 @@ jobs:
           java-version: ${{ matrix.java }}
           distribution: 'liberica'
           cache: 'maven'
-      - name: Cache downloaded test resources
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+      # Files fetched by download-maven-plugin. The key changes with pom.xml so a
+      # new cache is written when downloads are added or changed; restore-keys
+      # falls back to the newest older cache so unchanged files never hit the network.
+      - name: Restore downloaded test resources
+        id: test-resources
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: ~/.m2/repository/.cache/download-maven-plugin
-          key: sambox-test-resources-v2026-03-12
+          key: sambox-test-resources-${{ hashFiles('pom.xml') }}
+          restore-keys: |
+            sambox-test-resources-
       - name: Build with Maven
         run: mvn --batch-mode --update-snapshots verify
+      # Saved even when the build fails, so one dead link or a failing test
+      # does not throw away everything that did download.
+      - name: Save downloaded test resources
+        if: ${{ !cancelled() && steps.test-resources.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: ~/.m2/repository/.cache/download-maven-plugin
+          key: ${{ steps.test-resources.outputs.cache-primary-key }}
