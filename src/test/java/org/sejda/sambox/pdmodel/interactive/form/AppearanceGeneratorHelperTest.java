@@ -128,6 +128,22 @@ public class AppearanceGeneratorHelperTest
     }
 
     @Test
+    public void testCalculateFontSizeFauxMultilineWithTrailingNewline() throws IOException
+    {
+        PDTextField field = multilineTextFieldFaux();
+
+        // A trailing line break does not count as a second paragraph (String.split drops
+        // trailing empty strings), so the field is treated as faux multiline and the value
+        // is measured as a single line. The line break has no glyph in Helvetica, which threw
+        // IllegalArgumentException: U+000A ('controlLF') is not available in this font
+        // from PDFont.encode, reached via getStringWidth in calculateFontSize.
+        AppearanceGeneratorHelper helper = new AppearanceGeneratorHelper(field);
+        helper.setAppearanceValue("This isnt multiple lines\n");
+
+        assertNotNull(field.getWidgets().get(0).getNormalAppearanceStream());
+    }
+
+    @Test
     public void testCalculateFontSizeWithExoticWhiteSpace() throws IOException
     {
         PDTextField field = multilineTextFieldFaux();
