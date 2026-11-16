@@ -31,6 +31,7 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.DataFormatException;
 
 import org.sejda.sambox.contentstream.operator.MissingOperandException;
 import org.sejda.sambox.contentstream.operator.Operator;
@@ -920,8 +921,10 @@ public abstract class PDFStreamEngine
         {
             LOG.error(e.getMessage());
         }
-        else if (e instanceof EmptyGraphicsStackException)
+        else if (e instanceof EmptyGraphicsStackException
+                || e.getCause() instanceof DataFormatException)
         {
+            // PDFBOX-5776 a corrupt Flate stream (ex. a malformed inline image) shouldn't stop the whole content stream
             LOG.warn(e.getMessage(), e);
         }
         else if (operator.getName().equals("Do"))
