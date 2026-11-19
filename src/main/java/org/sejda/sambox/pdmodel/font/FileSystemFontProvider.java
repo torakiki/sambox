@@ -644,10 +644,19 @@ public class FileSystemFontProvider extends FontProvider
                 }
 
                 String format;
-                if (ttf instanceof OpenTypeFont && ((OpenTypeFont) ttf).isPostScript())
+                if (ttf instanceof OpenTypeFont otf && otf.isPostScript())
                 {
+                    // ignore fonts with CFF2 outlines (e.g. Apple's SFIndia.ttc): FontBox doesn't
+                    // support them and they have no 'CFF ' table, so getCFF() returns null
+                    if (!otf.isSupportedOTF() || otf.getCFF() == null)
+                    {
+                        LOG.debug("Unsupported OpenType font {} in {}, skipped", ttf.getName(),
+                                file);
+                        fontInfoList.add(new FSIgnored(file, FontFormat.OTF, "*skipunsupported*"));
+                        return;
+                    }
                     format = "OTF";
-                    CFFFont cff = ((OpenTypeFont) ttf).getCFF().getFont();
+                    CFFFont cff = otf.getCFF().getFont();
                     CIDSystemInfo ros = null;
                     if (cff instanceof CFFCIDFont cidFont)
                     {
