@@ -20,7 +20,6 @@ import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSArrayList;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
-import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
 import org.slf4j.Logger;
@@ -66,19 +65,6 @@ public class PDNonTerminalField extends PDField
     PDNonTerminalField(PDAcroForm acroForm, COSDictionary field, PDNonTerminalField parent)
     {
         super(acroForm, field, parent);
-    }
-
-    @Override
-    public int getFieldFlags()
-    {
-        int retval = 0;
-        COSInteger ff = (COSInteger) getCOSObject().getDictionaryObject(COSName.FF);
-        if (ff != null)
-        {
-            retval = ff.intValue();
-        }
-        // There is no need to look up the parent hierarchy within a non terminal field
-        return retval;
     }
 
     /**

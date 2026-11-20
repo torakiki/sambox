@@ -20,12 +20,16 @@ import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
 import org.sejda.sambox.cos.COSName;
+import org.sejda.sambox.cos.COSNumber;
 import org.sejda.sambox.pdmodel.common.PDDictionaryWrapper;
 import org.sejda.sambox.pdmodel.interactive.action.PDFormFieldAdditionalActions;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Set;
 
 import static java.util.Optional.ofNullable;
 import static org.sejda.commons.util.RequireUtils.requireArg;
@@ -138,7 +142,7 @@ public abstract class PDField extends PDDictionaryWrapper
      */
     public void setReadonly(boolean readonly)
     {
-        getCOSObject().setFlag(COSName.FF, FLAG_READ_ONLY, readonly);
+        setFieldFlag(FLAG_READ_ONLY, readonly);
     }
 
     /**
@@ -146,7 +150,7 @@ public abstract class PDField extends PDDictionaryWrapper
      */
     public boolean isReadonly()
     {
-        return getCOSObject().getFlag(COSName.FF, FLAG_READ_ONLY);
+        return isFieldFlagSet(FLAG_READ_ONLY);
     }
 
     /**
@@ -156,7 +160,7 @@ public abstract class PDField extends PDDictionaryWrapper
      */
     public void setRequired(boolean required)
     {
-        getCOSObject().setFlag(COSName.FF, FLAG_REQUIRED, required);
+        setFieldFlag(FLAG_REQUIRED, required);
     }
 
     /**
@@ -164,7 +168,7 @@ public abstract class PDField extends PDDictionaryWrapper
      */
     public boolean isRequired()
     {
-        return getCOSObject().getFlag(COSName.FF, FLAG_REQUIRED);
+        return isFieldFlagSet(FLAG_REQUIRED);
     }
 
     /**
@@ -174,7 +178,7 @@ public abstract class PDField extends PDDictionaryWrapper
      */
     public void setNoExport(boolean noExport)
     {
-        getCOSObject().setFlag(COSName.FF, FLAG_NO_EXPORT, noExport);
+        setFieldFlag(FLAG_NO_EXPORT, noExport);
     }
 
     /**
@@ -182,15 +186,86 @@ public abstract class PDField extends PDDictionaryWrapper
      */
     public boolean isNoExport()
     {
-        return getCOSObject().getFlag(COSName.FF, FLAG_NO_EXPORT);
+        return isFieldFlagSet(FLAG_NO_EXPORT);
     }
 
     /**
-     * This will get the flags for this field.
+     * Returns the field flags (/Ff) in effect for this field. The flags are inheritable: if the
+     * field has no /Ff of its own, the value of the nearest ancestor (walking /Parent) that
+     * defines /Ff applies. If no node defines it, the flags are 0. Inherited values are never
+     * copied onto this field.
      *
      * @return flags The set of flags.
      */
-    public abstract int getFieldFlags();
+    public int getFieldFlags()
+    {
+        return inheritedInt(getCOSObject(), COSName.FF, 0);
+    }
+
+    /**
+     * @param bitFlag the flag bit(s)
+     * @return true if the given bit(s) are set in the flags in effect for this field
+     */
+    protected boolean isFieldFlagSet(int bitFlag)
+    {
+        return (getFieldFlags() & bitFlag) == bitFlag;
+    }
+
+    /**
+     * Sets or clears the given bit(s) for this field. The flags in effect (own or inherited) are
+     * the starting point, so the other inherited bits are kept. The result is stored on this
+     * field only; ancestors and siblings are not changed. Nothing is written when the field has
+     * no /Ff of its own and the requested value is already in effect, so inheritance stays live.
+     *
+     * @param bitFlag the flag bit(s)
+     * @param value   the value the bit(s) should have
+     */
+    protected void setFieldFlag(int bitFlag, boolean value)
+    {
+        int current = getFieldFlags();
+        int updated = value ? current | bitFlag : current & ~bitFlag;
+        if (updated != current || getCOSObject().getDictionaryObject(COSName.FF,
+                COSNumber.class) != null)
+        {
+            getCOSObject().setInt(COSName.FF, updated);
+        }
+    }
+
+    /**
+     * Looks up an inheritable field attribute: the value on the given field dictionary if it
+     * defines one, otherwise on the nearest ancestor reached through /Parent. Unlike
+     * {@link #getInheritableAttribute(COSName)} this does not fall back to the AcroForm
+     * dictionary and does not depend on how the {@link PDField} was obtained.
+     *
+     * @param field the field dictionary to start from
+     * @param key   the inheritable key
+     * @param defaultValue returned when no node in the hierarchy defines a numeric value
+     * @return the inherited integer value or the default
+     */
+    static int inheritedInt(COSDictionary field, COSName key, int defaultValue)
+    {
+        Set<COSDictionary> visited = Collections.newSetFromMap(new IdentityHashMap<>());
+        COSDictionary current = field;
+        while (current != null && visited.add(current))
+        {
+            COSNumber value = current.getDictionaryObject(key, COSNumber.class);
+            if (value != null)
+            {
+                return value.intValue();
+            }
+            current = current.getDictionaryObject(COSName.PARENT, COSDictionary.class);
+        }
+        return defaultValue;
+    }
+
+    /**
+     * @return true if the given field dictionary or one of its ancestors defines a numeric value
+     * for the key
+     */
+    static boolean definesInherited(COSDictionary field, COSName key)
+    {
+        return inheritedInt(field, key, Integer.MIN_VALUE) != Integer.MIN_VALUE;
+    }
 
     /**
      * This will set the flags for this field.
