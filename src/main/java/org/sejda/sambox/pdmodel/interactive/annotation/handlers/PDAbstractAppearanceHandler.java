@@ -17,10 +17,14 @@
 
 package org.sejda.sambox.pdmodel.interactive.annotation.handlers;
 
+import static java.util.Objects.nonNull;
+
 import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.util.Set;
 
+import org.sejda.sambox.cos.COSArray;
+import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.cos.COSStream;
 import org.sejda.sambox.pdmodel.PDAppearanceContentStream;
 import org.sejda.sambox.pdmodel.PDResources;
@@ -91,6 +95,16 @@ public abstract class PDAbstractAppearanceHandler implements PDAppearanceHandler
     PDColor getColor()
     {
         return annotation.getColor();
+    }
+
+    /**
+     * @return true if the annotation has an empty /C array, meaning no colour, transparent (ISO
+     * 32000-2, Table 166)
+     */
+    boolean hasEmptyColor()
+    {
+        var color = annotation.getCOSObject().getDictionaryObject(COSName.C, COSArray.class);
+        return nonNull(color) && color.isEmpty();
     }
 
     PDRectangle getRectangle()

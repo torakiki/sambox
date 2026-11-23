@@ -22,8 +22,6 @@ import static java.util.Objects.nonNull;
 
 import java.io.IOException;
 
-import org.sejda.sambox.cos.COSArray;
-import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.PDAppearanceContentStream;
 import org.sejda.sambox.pdmodel.common.PDRectangle;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotation;
@@ -65,7 +63,7 @@ public class PDFileAttachmentAppearanceHandler extends PDAbstractAppearanceHandl
                 annotation.getNormalAppearanceStream().setBBox(new PDRectangle(size, size));
 
                 // an empty /C array means no colour, transparent (ISO 32000-2, Table 166)
-                if (!hasEmptyColor(annotation))
+                if (!hasEmptyColor())
                 {
                     // icons are filled with the annotation color, black (PDF default) when missing
                     contentStream.setNonStrokingColorOnDemand(getColor());
@@ -77,12 +75,6 @@ public class PDFileAttachmentAppearanceHandler extends PDAbstractAppearanceHandl
                 LOG.error("Unable to generate normal appearance", e);
             }
         }
-    }
-
-    private static boolean hasEmptyColor(PDAnnotation annotation)
-    {
-        var color = annotation.getCOSObject().getDictionaryObject(COSName.C, COSArray.class);
-        return nonNull(color) && color.isEmpty();
     }
 
     private void drawIcon(PDAppearanceContentStream contentStream, String attachmentName)

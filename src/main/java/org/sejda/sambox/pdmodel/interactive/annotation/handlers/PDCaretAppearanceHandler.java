@@ -48,9 +48,6 @@ public class PDCaretAppearanceHandler extends PDAbstractAppearanceHandler
 
         try (PDAppearanceContentStream contentStream = getNormalAppearanceAsContentStream())
         {
-            contentStream.setStrokingColor(getColor());
-            contentStream.setNonStrokingColor(getColor());
-
             setOpacity(contentStream, annotation.getConstantOpacity());
 
             PDRectangle rect = getRectangle();
@@ -78,20 +75,33 @@ public class PDCaretAppearanceHandler extends PDAbstractAppearanceHandler
             }
             pdAppearanceStream.setBBox(bbox);
 
-            float halfX = rect.getWidth() / 2;
-            float halfY = rect.getHeight() / 2;
-            contentStream.moveTo(0, 0);
-            contentStream.curveTo(halfX, 0, halfX, halfY, halfX, rect.getHeight());
-            contentStream.curveTo(halfX, halfY, halfX, 0, rect.getWidth(), 0);
-            contentStream.closePath();
-            contentStream.fill();
-            // Adobe has an additional stroke, but it has no effect
-            // because fill "consumes" the path.
+            // an empty /C array means no colour, transparent (ISO 32000-2, Table 166)
+            if (!hasEmptyColor())
+            {
+                // the caret is filled with the annotation color, black (PDF default) when missing
+                contentStream.setStrokingColorOnDemand(getColor());
+                contentStream.setNonStrokingColorOnDemand(getColor());
+                drawCaret(contentStream, rect);
+            }
         }
         catch (IOException e)
         {
             LOG.error("Error writing to the content stream", e);
         }
+    }
+
+    private static void drawCaret(PDAppearanceContentStream contentStream, PDRectangle rect)
+            throws IOException
+    {
+        float halfX = rect.getWidth() / 2;
+        float halfY = rect.getHeight() / 2;
+        contentStream.moveTo(0, 0);
+        contentStream.curveTo(halfX, 0, halfX, halfY, halfX, rect.getHeight());
+        contentStream.curveTo(halfX, halfY, halfX, 0, rect.getWidth(), 0);
+        contentStream.closePath();
+        contentStream.fill();
+        // Adobe has an additional stroke, but it has no effect
+        // because fill "consumes" the path.
     }
 
     @Override
