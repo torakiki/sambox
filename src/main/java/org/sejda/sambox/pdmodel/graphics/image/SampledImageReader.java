@@ -26,6 +26,7 @@ import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -87,7 +88,7 @@ final class SampledImageReader
         // avoid getting a BufferedImage for the mask to lessen memory footprint.
         // Such masks are always bpc=1 and have no colorspace, but have a decode.
         // (see 8.9.6.2 Stencil Masking)
-        try (ImageInputStream iis = new MemoryCacheImageInputStream(pdImage.createInputStream()))
+        try (ImageInputStream iis = new MemoryCacheImageInputStream(buffered(pdImage)))
         {
             final float[] decode = getDecodeArray(pdImage);
             int value = decode[0] < decode[1] ? 1 : 0;
@@ -238,7 +239,7 @@ final class SampledImageReader
         final float[] decode = getDecodeArray(pdImage);
 
         // read bit stream
-        try (ImageInputStream iis = new MemoryCacheImageInputStream(pdImage.createInputStream()))
+        try (ImageInputStream iis = new MemoryCacheImageInputStream(buffered(pdImage)))
         {
             final int inputWidth = pdImage.getWidth();
             final int scanWidth = pdImage.getWidth();
@@ -449,6 +450,15 @@ final class SampledImageReader
         return pdImage.getColorSpace().toRGBImage(raster);
     }
 
+    /**
+     * MemoryCacheImageInputStream asks the wrapped stream only for the bytes it needs, one at a time when samples are read with
+     * readBits. Streams that are read straight from the document source are slow at that, so we buffer them.
+     */
+    private static InputStream buffered(PDImage pdImage) throws IOException
+    {
+        return new BufferedInputStream(pdImage.createInputStream());
+    }
+
     // slower, general-purpose image conversion from any image format
     private static BufferedImage fromAny(PDImage pdImage, WritableRaster raster, COSArray colorKey)
             throws IOException
@@ -460,7 +470,7 @@ final class SampledImageReader
         final int bitsPerComponent = pdImage.getBitsPerComponent();
         final float[] decode = getDecodeArray(pdImage);
 
-        try (ImageInputStream iis = new MemoryCacheImageInputStream(pdImage.createInputStream()))
+        try (ImageInputStream iis = new MemoryCacheImageInputStream(buffered(pdImage)))
         {
             final float sampleMax = (float) Math.pow(2, bitsPerComponent) - 1f;
             final boolean isIndexed = colorSpace instanceof PDIndexed;
