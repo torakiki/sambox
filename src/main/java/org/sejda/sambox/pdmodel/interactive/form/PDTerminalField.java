@@ -29,7 +29,6 @@ import org.sejda.sambox.cos.COSArray;
 import org.sejda.sambox.cos.COSArrayList;
 import org.sejda.sambox.cos.COSBase;
 import org.sejda.sambox.cos.COSDictionary;
-import org.sejda.sambox.cos.COSInteger;
 import org.sejda.sambox.cos.COSName;
 import org.sejda.sambox.pdmodel.interactive.action.PDFormFieldAdditionalActions;
 import org.sejda.sambox.pdmodel.interactive.annotation.PDAnnotationWidget;
@@ -73,21 +72,6 @@ public abstract class PDTerminalField extends PDField
         getCOSObject().setItem(COSName.AA, actions);
     }
 
-    @Override
-    public int getFieldFlags()
-    {
-        int retval = 0;
-        COSInteger ff = (COSInteger) getCOSObject().getDictionaryObject(COSName.FF);
-        if (ff != null)
-        {
-            retval = ff.intValue();
-        }
-        else if (getParent() != null)
-        {
-            retval = getParent().getFieldFlags();
-        }
-        return retval;
-    }
 
     @Override
     public String getFieldType()

@@ -45,7 +45,7 @@ public final class PDRadioButton extends PDButton
     public PDRadioButton(PDAcroForm acroForm)
     {
         super(acroForm);
-        getCOSObject().setFlag(COSName.FF, FLAG_RADIO, true);
+        setFieldFlag(FLAG_RADIO, true);
     }
 
     /**
@@ -70,7 +70,7 @@ public final class PDRadioButton extends PDButton
      */
     public void setRadiosInUnison(boolean radiosInUnison)
     {
-        getCOSObject().setFlag(COSName.FF, FLAG_RADIOS_IN_UNISON, radiosInUnison);
+        setFieldFlag(FLAG_RADIOS_IN_UNISON, radiosInUnison);
     }
 
     /**
@@ -78,7 +78,7 @@ public final class PDRadioButton extends PDButton
      */
     public boolean isRadiosInUnison()
     {
-        return getCOSObject().getFlag(COSName.FF, FLAG_RADIOS_IN_UNISON);
+        return isFieldFlagSet(FLAG_RADIOS_IN_UNISON);
     }
 
     /**

@@ -269,7 +269,7 @@ public abstract class PDChoice extends PDVariableText
      */
     public boolean isSort()
     {
-        return getCOSObject().getFlag(COSName.FF, FLAG_SORT);
+        return isFieldFlagSet(FLAG_SORT);
     }
 
     /**
@@ -280,7 +280,7 @@ public abstract class PDChoice extends PDVariableText
      */
     public void setSort(boolean sort)
     {
-        getCOSObject().setFlag(COSName.FF, FLAG_SORT, sort);
+        setFieldFlag(FLAG_SORT, sort);
     }
 
     /**
@@ -290,7 +290,7 @@ public abstract class PDChoice extends PDVariableText
      */
     public boolean isMultiSelect()
     {
-        return getCOSObject().getFlag(COSName.FF, FLAG_MULTI_SELECT);
+        return isFieldFlagSet(FLAG_MULTI_SELECT);
     }
 
     /**
@@ -300,7 +300,7 @@ public abstract class PDChoice extends PDVariableText
      */
     public void setMultiSelect(boolean multiSelect)
     {
-        getCOSObject().setFlag(COSName.FF, FLAG_MULTI_SELECT, multiSelect);
+        setFieldFlag(FLAG_MULTI_SELECT, multiSelect);
     }
 
     /**
@@ -310,7 +310,7 @@ public abstract class PDChoice extends PDVariableText
      */
     public boolean isDoNotSpellCheck()
     {
-        return getCOSObject().getFlag(COSName.FF, FLAG_DO_NOT_SPELL_CHECK);
+        return isFieldFlagSet(FLAG_DO_NOT_SPELL_CHECK);
     }
 
     /**
@@ -320,7 +320,7 @@ public abstract class PDChoice extends PDVariableText
      */
     public void setDoNotSpellCheck(boolean doNotSpellCheck)
     {
-        getCOSObject().setFlag(COSName.FF, FLAG_DO_NOT_SPELL_CHECK, doNotSpellCheck);
+        setFieldFlag(FLAG_DO_NOT_SPELL_CHECK, doNotSpellCheck);
     }
 
     /**
@@ -330,7 +330,7 @@ public abstract class PDChoice extends PDVariableText
      */
     public boolean isCommitOnSelChange()
     {
-        return getCOSObject().getFlag(COSName.FF, FLAG_COMMIT_ON_SEL_CHANGE);
+        return isFieldFlagSet(FLAG_COMMIT_ON_SEL_CHANGE);
     }
 
     /**
@@ -340,7 +340,7 @@ public abstract class PDChoice extends PDVariableText
      */
     public void setCommitOnSelChange(boolean commitOnSelChange)
     {
-        getCOSObject().setFlag(COSName.FF, FLAG_COMMIT_ON_SEL_CHANGE, commitOnSelChange);
+        setFieldFlag(FLAG_COMMIT_ON_SEL_CHANGE, commitOnSelChange);
     }
 
     /**
@@ -350,7 +350,7 @@ public abstract class PDChoice extends PDVariableText
      */
     public boolean isCombo()
     {
-        return getCOSObject().getFlag(COSName.FF, FLAG_COMBO);
+        return isFieldFlagSet(FLAG_COMBO);
     }
 
     /**
@@ -360,7 +360,7 @@ public abstract class PDChoice extends PDVariableText
      */
     public void setCombo(boolean combo)
     {
-        getCOSObject().setFlag(COSName.FF, FLAG_COMBO, combo);
+        setFieldFlag(FLAG_COMBO, combo);
     }
 
     /**
